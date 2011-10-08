@@ -1,0 +1,8 @@
+perl unsupervised.pl C:\Docume~1\hongcui\MyDocu~1\RESEARCH\PROJECTS\CharacterMarkup\Unsupervised\FoC\trainingdir-foc492\ plaintext  unsupervised-markup seednouns.txt learntnouns.txt graphml.xml foc492
+
+perl categorizeterms.pl C:\Docume~1\HongCu~1\MyDocu~1\RESEARCH\CharacterMarkup\Unsupervised\FoC\trainingdir-foc492\ foc
+
+
+protege.standford.edu/plugins/owl/dc/protege-dc.owl
+
+ (Geographical-Area AND 1st Vitality) OR (2nd Vitality)

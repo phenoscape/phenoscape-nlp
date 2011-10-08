@@ -1,0 +1,416 @@
+
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+>>>>check phraseclause. about 38 marked with NULL tag." adductor"
+
+>>>> parenttag = [ditto], parenttag of the first clause?
+
+>>>> empty tag and modifier for non-descriptive clauses.
+
+>>>> "no" as modifier. [b] words as modifiers.
+
+>>>> "no" as tags.
+
+>>>> "canals" vs. "canal system"?
+
+
+
+>>>rethink changePos: at this time shell has been seen as a p/s for 420 times:
+
+	change pos of [number] from b to s
+	words related to number to be discounted: 'NUMBER','number' 
+		: change [number(b => s)] role=>
+		: total occurance of [number] =2
+	number plural is  numbers
+	confirmed number plural is *numbers*
+		: new [numbers] pos=p, role =, certaintyu=1
+		: total occurance of [numbers] =1
+		: update [numbers(p)] role: =>, certaintyu=1
+		: total occurance of [numbers] =2
+	Word numbers has singular
+	numbers
+	number
+	The singular is number
+		: update [number(s)] role: =>, certaintyu=2
+		: total occurance of [number] =3
+		: new [one] pos=s, role =, certaintyu=1
+		: total occurance of [one] =1
+	
+	/////////////shell as p/s 420 counts. "s=>b" remarked all related sentence to NULL
+	sentence: smaller medium size shell , globose , anteriorly elongate ;
+	Found [b?[psn]] or  [?b[psn]] pattern
+		:updates on POSs
+	change pos of [shell] from s to b
+	words related to shell to be discounted: 'shell' 
+		: change [shell(s => b)] role=>
+
+	///////////scar as p/s 96 counts
+	sentence: quadripartite dorsal adductor scar large , deeply impressed , commonly on elevated callus ;
+	Found [b?[psn]] or  [?b[psn]] pattern
+		:updates on POSs
+	change pos of [scar] from s to b
+	words related to scar to be discounted: 'scar' 
+
+>>>>>phraseclauses, nn cases cause problems in doit markup
+
+Patterns: Found [b?[psn]] or  [?b[psn]] pattern
+
+		  Found [[psn][psn]+] pattern
+
+sentence: fine dorsal side septa , median septum variably developed ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+change pos of [septa] from p to b
+	: total occurance of [septa] =92
+	: update [side(s)] role: -=>-, certaintyu=28
+	: total occurance of [side] =29
+	: update [sides(p)] role: =>, certaintyu=28
+	: total occurance of [sides] =29
+	:determine the tag: fine dorsal side
+	:mark up 9219 with tag fine dorsal side
+
+sentence: protorthides with teeth ridges continuous with sides of free spondylium normally supported apically by short ridge ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: new [ridges] pos=b, role =, certaintyu=1
+	: total occurance of [ridges] =1
+	: update [teeth(p)] role: -=>-, certaintyu=61
+	: total occurance of [teeth] =62
+	: update [tooth(s)] role: =>, certaintyu=61
+	: total occurance of [tooth] =62
+	:determine the tag: protorthides with teeth
+	:mark up 8293 with tag protorthides with teeth	
+
+sentence: narrow concentric growth lines ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [lines(b)] role: =>, certaintyu=4
+	: total occurance of [lines] =5
+	: update [growth(s)] role: -=>-, certaintyu=12
+	: total occurance of [growth] =13
+growth plural is  growths
+	:determine the tag: narrow concentric growth
+	:mark up 9674 with tag narrow concentric growth
+	
+sentence: secondary shell layer pseudopunctate ;  //////////////good example
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [pseudopunctate(b)] role: =>, certaintyu=2
+	: total occurance of [pseudopunctate] =3
+	: update [layer(s)] role: -=>-, certaintyu=2
+	: total occurance of [layer] =3
+	: update [layers(p)] role: =>, certaintyu=2
+	: total occurance of [layers] =3
+	:determine the tag: secondary shell layer
+	:mark up 5194 with tag secondary shell layer	
+
+sentence: in some specimens septa nearly merged into median septum ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+change pos of [septa] from p to b
+	: total occurance of [septa] =99
+	: update [specimens(p)] role: -=>-, certaintyu=1
+	: total occurance of [specimens] =2
+	: update [specimen(s)] role: =>, certaintyu=1
+	: total occurance of [specimen] =2
+	:determine the tag: in some specimens
+	:tag <in some specimens> starts with a stop word, ignore tagging requrest
+
+sentence: raised submedian muscle scars developed posteriorly ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+change pos of [scars] from p to b
+	: total occurance of [scars] =240
+	: update [muscle(s)] role: -=>-, certaintyu=285
+	: total occurance of [muscle] =286
+	: update [muscles(p)] role: -=>-, certaintyu=285
+	: total occurance of [muscles] =286
+	:determine the tag: raised submedian muscle
+	:mark up 1347 with tag raised submedian muscle
+	
+	sentence: deep corpus cavity ;
+	Found [[psn][psn]+] pattern
+		: new [cavity] pos=b, role =, certaintyu=1
+		: total occurance of [cavity] =1
+		: update [deep(s)] role: -=>-, certaintyu=1
+		: total occurance of [deep] =2
+	deep plural is  deeps
+	new modifier deep added
+		: update [corpus(s)] role: -=>-, certaintyu=3
+		: total occurance of [corpus] =4
+	corpus plural is corpora
+		:determine the tag: deep corpus
+		:mark up 7052 with tag deep corpus
+		
+		
+	///////////// discount cavity: b=>s: remark related sentences?
+		: new [cavities] pos=p, role =-, certaintyu=1
+		: total occurance of [cavities] =1
+	change pos of [cavity] from b to s
+	words related to cavity to be discounted: 'cavity' 
+		: change [cavity(b => s)] role=>
+		: total occurance of [cavity] =30
+	unknownwordbootstrapping: find a [p] cavities
+	
+	///////////pit
+	sentence: elongate cardinal process pit seldom absent ;
+	Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: new [pit] pos=b, role =, certaintyu=1
+	: total occurance of [pit] =1
+	: update [process(s)] role: -=>-, certaintyu=52
+	: total occurance of [process] =53
+	: update [processes(p)] role: =>, certaintyu=52
+	: total occurance of [processes] =53
+	:determine the tag: elongate cardinal process
+	:mark up 1221 with tag elongate cardinal process
+	
+	///////////discount pit
+	: new [pits] pos=p, role =-, certaintyu=1
+	: total occurance of [pits] =1
+	change pos of [pit] from b to s
+	words related to pit to be discounted: 'pit' 
+	: change [pit(b => s)] role=>
+	: total occurance of [pit] =24
+	unknownwordbootstrapping: find a [p] pits
+	
+	////////discount sulcus
+	: new [sulci] pos=p, role =-, certaintyu=1
+	: total occurance of [sulci] =1
+	change pos of [sulcus] from b to s
+	words related to sulcus to be discounted: 'sulcus' 
+	: change [sulcus(b => s)] role=>
+	: total occurance of [sulcus] =29
+	unknownwordbootstrapping: find a [p] sulci
+	
+>>>>>>>>>Found [b?[psn]] or  [?b[psn]] pattern
+
+sentence: may possess one or two pairs of short lateral ridges at posterolateral margin of platform ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [one(s)] role: -=>-, certaintyu=5
+	: total occurance of [one] =6
+	: update [ones(p)] role: =>, certaintyu=5
+	: total occurance of [ones] =6
+	:determine the tag: may possess one
+	:tag <may possess one> starts with a stop word, ignore tagging requrest
+
+sentence: ventral cardinal muscle fields large , thickened , placed posterolaterally ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [fields(p)] role: -=>-, certaintyu=211  ??????????????????? then why not include fields in the tag?
+	: total occurance of [fields] =212
+	: update [muscle(s)] role: -=>-, certaintyu=287
+	: total occurance of [muscle] =288
+	: update [muscles(p)] role: -=>-, certaintyu=287
+	: total occurance of [muscles] =288
+	:determine the tag: ventral cardinal muscle
+	:mark up 6247 with tag ventral cardinal muscle	
+	
+sentence: very upright interarea with small pseudodeltidium , chilidium ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [with(b)] role: =>, certaintyu=1488
+	: total occurance of [with] =1489
+	: update [with(b)] role: =>, certaintyu=1489
+	: total occurance of [with] =1490
+	: update [interarea(s)] role: -=>-, certaintyu=271
+	: total occurance of [interarea] =272
+	: update [interareas(p)] role: -=>-, certaintyu=271
+	: total occurance of [interareas] =272
+	:determine the tag: very upright interarea
+	:tag <very upright interarea> starts with a stop word, ignore tagging requrest ????????????????????????????
+	
+sentence: may possess one or two pairs of short lateral ridges at posterolateral margin of platform ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [one(s)] role: -=>-, certaintyu=9
+	: total occurance of [one] =10
+	: update [ones(p)] role: =>, certaintyu=9
+	: total occurance of [ones] =10
+	:determine the tag: may possess one
+	:tag <may possess one> starts with a stop word, ignore tagging requrest	
+	
+sentence: small siphonate shells ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [shells(p)] role: -=>-, certaintyu=425
+	: total occurance of [shells] =426
+	: update [shell(b)] role: =>, certaintyu=430 ????????????????????????? (b)?
+	: total occurance of [shell] =431
+	:determine the tag: small siphonate shells
+	:mark up 8247 with tag small siphonate shells			
+	
+sentence: intermediate between rafinesquinids , leptostrophiids , hence family position uncertain ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [rafinesquinids(p)] role: -=>-, certaintyu=2
+	: total occurance of [rafinesquinids] =3
+	: update [rafinesquinid(s)] role: =>, certaintyu=2
+	: total occurance of [rafinesquinid] =3
+	:determine the tag: intermediate between rafinesquinids
+	:mark up 3872 with tag intermediate between rafinesquinids	
+
+sentence: semiovate with hingeline straight , long ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [straight(b)] role: =>, certaintyu=3
+	: total occurance of [straight] =4
+	: update [hingeline(s)] role: -=>-, certaintyu=5
+	: total occurance of [hingeline] =6
+hingeline plural is  hingelines
+	:determine the tag: semiovate with hingeline
+	:mark up 7820 with tag semiovate with hingeline
+
+sentence: saccate ventral mantle canal system normally with divergent vascula media , dorsal system digitate or less commonly lemniscate ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:mantle not main role, reset tag to null
+	:determine the tag:
+	
+
+sentence: recurved anterior portions raised in mature individuals ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:portions not main role, reset tag to null
+	:determine the tag:		
+
+>>>>>>>>character subject
+
+sentence: form and ornament variable , costellate to paucicostate or smooth , with asymmetry ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [variable(b)] role: =>, certaintyu=28
+	: total occurance of [variable] =29
+	: update [ornament(s)] role: -=>-, certaintyu=199
+	: total occurance of [ornament] =200
+	: update [ornaments(p)] role: =>, certaintyu=199
+	: total occurance of [ornaments] =200
+	:determine the tag: form and ornament
+	:mark up 6095 with tag form and ornament
+	
+	
+>>>>>>>>genus/order/ names as subject
+
+Lebediorthis (genus name) , erected for specimens from the Lower Ordovician of Siberia ( Gorno Altai ) , was assigned by its author to the Cremnorthidae notwithstanding the absence of a differentiated cardinal process and a high dorsal median septum , which are diagnostic of that family ;	
+
+Linoproductids with thin spines on dorsal corpus ;
+	
+>>>>>>>> non-descriptive sentences:
+
+"nomen dubium ;" latin: doubtful name.
+
+requires revision ;
+
+differs from ...
+
+said to differ from Taeniothaerus by having longer interarea , thicker ventral spines , and ventral diductor scars that enclose adductor scars more closely anteriorly ;
+
+No diagnosis provided for genus or type specimen ;
+
+otherwise like Poikilosakos ;
+
+other specimens simply curving laterally , open anteriorly ;
+
+recent species with dendroid shell punctation ;
+
+Characters as for suborder ;
+
+possibly juvenile of Eosiphonotreta ;
+
+Resembles Chonosteges , but lacks the complex spine , funnel arrangement bordering the corpus cavity ;
+
+Similar to Platystrophia but with a fine costellate ornamentation commonly superimposed on coarsely costate arrangement of Platystrophia ;
+
+closely resembles Marginatia ;
+
+abnormal genus , only ventral valves known ;
+
+No description or diagnosis of genus provided ;
+
+family designation uncertain because dorsal interior unknown , but ventral muscle field typically leptostrophiid in its posterolateral bounding ridges and in its triangularity ;
+
+Liang placed in his new order , the Punctoproductida , with endopunctae but no pseudopunctae , along with the Dipunctellidina ( = Permianellins in the Lyttoniidae ) ;
+
+citations: Dignomia Hall , 1871 a , p ;
+		[ = Pugilus Sarytcheva in Sarytcheva &amp; Sokolskaya , 1952 , p ;
+
+distribution: West Point Formation , middle Silurian , West Point , Port Daniel region , Chaleur Bay , Gasp&#233; Peninsula , Quebec , Canada ;
+
+"Bizarre forms with ventral valve attached to substrate by cementation ;"
+
+
+
+
+
+
+sentence: poorly understood genus ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [genus(s)] role: -=>-, certaintyu=2
+	: total occurance of [genus] =3
+	: update [genera(p)] role: =>, certaintyu=2
+	: total occurance of [genera] =3
+	:determine the tag: poorly understood genus
+	:mark up 6633 with tag poorly understood genus
+
+sentence: genus poorly understood ;
+Found [[psn](b)] pattern
+	: update [poorly(b)] role: =>, certaintyu=63
+	: total occurance of [poorly] =64
+	: update [genus(s)] role: -=>-, certaintyu=3
+	: total occurance of [genus] =4
+	: update [genera(p)] role: =>, certaintyu=3
+	: total occurance of [genera] =4
+	:determine the tag: genus
+	:updates on POSs
+	:mark up 7381 with tag genus
+	
+	
+sentence: otherwise like poikilosakos ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [poikilosakos(p)] role: -=>-, certaintyu=1
+	: total occurance of [poikilosakos] =2
+	: update [poikilosako(s)] role: =>, certaintyu=1
+	: total occurance of [poikilosako] =2
+	:determine the tag: otherwise like poikilosakos
+	:mark up 7245 with tag otherwise like poikilosakos
+	
+	
+sentence: otherwise resembling ancistrocrania but with reduced septum between processes ;
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [but(b)] role: =>, certaintyu=20
+	: total occurance of [but] =21
+	: update [but(b)] role: =>, certaintyu=21
+	: total occurance of [but] =22
+	: update [ancistrocrania(p)] role: -=>-, certaintyu=1
+	: total occurance of [ancistrocrania] =2
+	: update [ancistrocranium(s)] role: =>, certaintyu=1
+	: total occurance of [ancistrocranium] =2
+	:determine the tag: otherwise resembling ancistrocrania
+	:mark up 5743 with tag otherwise resembling ancistrocrania	
+	
+
+=======================================================
+TreatiseH: brochiapods:
+
+====>Unmatched paranthesis in ACROTRETIDA.txt: larval shell small ( less than 0 ;
+
+read Ctenochonetes.txt
+====>Unmatched paranthesis in Ctenochonetes.txt: juveniles spines asymmetrically arranged , then symmetrical in adults ,
+ two spines closest from umbo always lacking on one side ( commonly the left one , fig ;
+
+
+read DISCINOIDEA.txt
+====>Unmatched paranthesis in DISCINOIDEA.txt: larval shell smooth , large ( about 0 ;
+
+
+read Spanodonta.txt
+====>Unmatched paranthesis in Spanodonta.txt: cardinal process not trilobed ( contra williams , 1965 , p ;
+
+
+read Ujukites.txt
+====>Unmatched paranthesis in Ujukites.txt: cardinal process weak , but definitely leptellinid ( i ;

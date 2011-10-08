@@ -1,0 +1,3070 @@
+TM treated as N: main, central, principle: WordNet POS returns na.
+
+modifier	tag	originalsent
+
+	central	central  15–100  bisexual  and  fertile;
+
+	central	central  (or  all)  14–70  bisexual  and  fertile;
+
+	central	central  3–32  functionally  staminate  (not  setting  fruits);
+
+	main	main  marginal  spines  2–15  mm,  often  stout;
+
+	main	main  marginal  spines  often  stout,  5–15  mm;
+
+	main	main  marginal  spines  slender  to  stout,  3–10  mm;
+
+	main	main  marginal  spines  usually  very  slender,  5–12  mm;
+
+	main	main  marginal  spines  often  stout,  5–30  mm;
+
+	main	main  cauline  reduced  distally,  bases  clasping;
+
+	principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally,  widest  at  base,  bases  ±  auriculate-clasping  to  short-decurrent;
+
+	principal	principal  cauline  sessile,  bases  clasping  with  broad,  spiny-margined  auricles,  reduced  distally,  spinier  than  proximal;
+
+	principal	principal  cauline  petiolate  or  sessile,  gradually  reduced  distally,  bases  sometimes  ±  clasping,  not  decurrent;
+
+	principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally,  bases  decurrent  as  spiny  wings  to  5  cm;
+
+	principal	principal  cauline  well  distributed,  proximally  winged-petiolate,  distally  sessile,  not  or  only  slightly  reduced;
+
+	principal	principal  cauline  sessile,  progressively  reduced  distally,  bases  ±  auriculate  to  long-decurrent  as  spiny  wings;
+
+	principal	principal  cauline  sessile,  well  distributed,  gradually  diminished  distally,  bases  sometimes  decurrent  as  spiny  wings  to  2.5  cm  or  clasping;
+
+	principal	principal  cauline  sessile,  progressively  reduced  distally,  bases  clasping  or  short-decurrent  1–2  cm;
+
+	principal	principal  cauline  petiolate,  progressively  reduced  distally,  bases  sometimes  decurrent  as  spiny  wings  to  1  cm;
+
+	principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally,  widest  at  bases,  bases  ±  auriculate-clasping  to  short-decurrent;
+
+	principal	principal  cauline  sessile,  progressively  reduced  distally,  bases  auriculate-clasping  or  shortly  decurrent;
+
+	principal	principal  cauline  proximally  winged-petiolate,  distally  sessile,  well  distributed,  gradually  reduced,  bases  usually  not  decurrent;
+
+	principal	principal  cauline  well  distributed,  proximal  winged-petiolate,  distal  sessile,  bases  auriculate-clasping  or  decurrent  as  a  spiny  wing  1–3  cm;
+
+	principal	principal  cauline  well  distributed,  winged-petiolate  to  sessile,  gradually  reduced,  bases  clasping  with  expanded  auricles;
+
+	principal	principal  cauline  sessile,  progressively  reduced  distally,  bases  clasping  or  ±  decurrent;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced,  bases  narrowed,  sometimes  weakly  clasping;
+
+	principal	principal  cauline  well  distributed,  proximal  winged-petiolate,  mid  and  distal  sessile,  gradually  reduced,  bases  decurrent  as  spiny  wings  1–3  cm;
+
+	principal	principal  cauline  winged-petiolate,  mid  and  distal  becoming  sessile,  well  distributed  or  not,  progressively  reduced  distally,  at  least  distal  decurrent  as  long  spiny  wings;
+
+	principal	principal  cauline  well  distributed,  becoming  sessile,  gradually  reduced  distally,  bases  auriculate-decurrent  with  broad,  spiny-margined  wings  3  cm  or  less;
+
+	principal	principal  cauline  well  distributed,  bases  decurrent  as  linear-lobed  to  spiny  wings  1–3  cm;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced  distally,  proximal  usually  winged-petiolate,  mid  and  distal  sessile,  bases  decurrent  as  spiny  wings  1.5–3.5  cm;
+
+	principal	principal  cauline  decreasing  distally,  proximal  winged-petiolate,  distal  sessile,  bases  decurrent  as  spiny  wings  1–5  cm;
+
+	principal	principal  cauline  well  distributed  ,  little  reduced,  bases  broadly  tapered  to  clasping,  short-decurrent;
+
+	principal	principal  cauline  sessile,  gradually  reduced  distally;
+
+	principal	principal  cauline  winged-petiolate  or  sessile,  not  much  reduced  distally;
+
+	principal	principal  cauline  mostly  in  proximal  1  /  2  ,  winged-petiolate  or  sessile,  bases  narrowed,  sometimes  auriculate;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced,  sometimes  spinier  than  basal;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced,  bases  narrowed,  sometimes  weakly  clasping,  not  decurrent;
+
+	principal	principal  cauline  gradually  winged-petiolate  or  sessile,  reduced  distally,  bases  sometimes  clasping  or  short-decurrent;
+
+	principal	principal  cauline  well  distributed,  only  gradually  reduced,  bases  auriculate-clasping;
+
+	principal	principal  cauline  sessile,  moderately  reduced  distally,  bases  often  auriculate-clasping;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced  distally,  bases  of  proximal  cauline  winged-petiolate  or  sessile,  bases  of  distal  cauline  expanded  and  ±  clasping,  margins  sometimes  spinier  than  those  of  proximal;
+
+	principal	principal  cauline  mostly  in  proximal  1  /  2  ,  winged-petiolate  or  sessile,  bases  narrowed,  auriculate,  veins  often  prominently  raised  on  abaxial  faces;
+
+	principal	principal  cauline  many,  well  distributed,  proximally  ±  winged-petiolate,  distally  sessile,  gradually  reduced,  less  divided,  bases  auriculate-claping  and/or  decurrent  as  spiny  wings  to  2  cm;
+
+	principal	principal  cauline  well  distributed,  proximally  winged-petiolate,  distally  sessile,  gradually  reduced,  bases  auriculate  -  clasping  or  short-decurrent  as  spiny  wings;
+
+	principal	principal  cauline  much  reduced  distally,  sessile,  bases  decurrent  or  not,  as  spiny  wings;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced,  proximal  winged-petiolate,  mid  and  distal  sessile,  bases  clasping  or  short-decurrent;
+
+	principal	principal  cauline  progressively  reduced  distally,  bases  decurrent  as  spiny  wings  1–5  cm,  sometimes  with  expanded  auricles;
+
+	principal	principal  cauline  sessile,  progressively  reduced,  becoming  bractlike  distally,  mid  and  distal  bases  broadly  clasping;
+
+	principal	principal  cauline  well  distributed,  proximally  winged-petiolate,  distally  sessile,  gradually  reduced,  bases  sometimes  short-decurrent;
+
+	principal	principal  larger  cauline  proximally  winged-petiolate,  distally  sessile,  well  distributed,  gradually  reduced,  not  decurrent;
+
+	principal	principal  cauline  well  distributed,  proximal  usually  winged-petiolate,  mid  sessile,  decurrent  as  spiny  wings  1–3  cm;
+
+	principal	principal  cauline  relatively  few  (10–25),  petiolate  or  distal  sessile,  mostly  restricted  to  proximal  1  /  2  of  stems,  progressively  reduced  distally,  bases  tapered,  not  decurrent;
+
+	principal	principal  cauline  well  distributed,  proximally  winged-petiolate,  distally  sessile,  gradually  reduced,  bases  sometimes  short-decurrent  (0–2  cm);
+
+	principal	principal  cauline  sessile,  well  distributed,  often  not  much  reduced  distally,  bases  often  ±  auriculate-clasping;
+
+	principal	principal  cauline  well  distributed,  gradually  reduced,  bases  narrowed,  sometimes  weakly  clasping;
+
+	principal	principal  cauline  sessile,  much  reduced  distally,  bases  decurrent  as  spiny  wings  less  than  5  cm;
+
+	principal	principal  cauline  winged-petiolate  proximally,  mid  and  distal  sessile,  progressively  reduced  distally,  bases  not  or  scarcely  decurrent,  sometimes  distal  weakly  clasping;
+
+	principal	principal  cauline  well  distributed,  proximal  absent  at  flowering,  moderately  reduced  distally,  winged-petiolate  or  sessile  (proximal),  sessile  and  auriculate-clasping  to  slightly  decurrent  0–2  cm;
+
+	principal	principal  cauline  becoming  sessile  and  gradually  reduced  distally,  bases  spiny-lobed,  sometimes  decurrent;
+
+=======================================
+
+total: 985
+
+#major problem: ditto in adjectivesubjects: fixed
+#some cases of tagging problems:
+
+sentid	source	manswer	tanswer	m	t	sentence
+
+3063	318.txt-1		ditto	taprooted  or  with	[perennial]	<M><B>taprooted</B></M>  or  <B>with</B>  <B>branched</B>  <N>caudices</N>  <B>.</B>
+
+152	11.txt-10	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>entire</B>  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>oblong</B>  <B>,</B>  <B>acute</B>  <B>;</B>
+
+649	15.txt-10	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  laciniate  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>lanceolate</B>  <B>,</B>  <B>rounded</B>  to  <B>apiculate</B>  <B>;</B>
+
+986	17.txt-11	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>entire</B>  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>narrowly</B>  <B>triangular</B>  <B>;</B>
+
+1290	19.txt-12	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>entire</B>  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>lanceolate</B>  <B>;</B>
+
+1906	23.txt-11	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>entire</B>  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>lanceolate</B>  <B>;</B>
+
+2820	3.txt-10	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>slightly</B>  fimbriate  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>lanceolate</B>  <B>,</B>  <B>acute</B>  <B>;</B>
+
+5692	5.txt-10	anther  basal	appendage		anther	<N>anther</N>  <M><B>basal</B></M>  <N>appendages</N>  <B>entire</B>  <B>,</B>  <B>elongate</B>  <B>,</B>  <B>rounded</B>  <B>,</B>  <M><B>apical</B></M>  <N>appendages</N>  <B>lanceolate</B>  <B>;</B>
+
+2012	238.txt-2	basal	[leaf]		ditto	<M><B>basal</B></M>  <B>with</B>  <N>petioles</N>  <B>3</B>  <B>–</B>  <B>12</B>  cm  <B>,</B>  <B>narrowly</B>  <B>winged</B>  <B>,</B>  <N>blades</N>  <B>8</B>  <B>–</B>  <B>15</B>  <B>×</B>  <B>1</B>  <B>–</B>  <B>5</B>  cm  <B>;</B>
+
+9111	730.txt-5	basal	[leaf]		ditto	<M><B>basal</B></M>  <M><B>persistent</B></M>  <B>in</B>  <N>rosettes</N>  <B>;</B>
+
+1400	196.txt-11	bisexual  floret	[corolla]		ditto	<B>of</B>  <M><B>bisexual</B></M>  <N>florets</N>  <B>pinkish</B>  <B>,</B>  <B>20</B>  <B>–</B>  <B>25</B>  mm  <B>.</B>
+
+1416	197.txt-12	bisexual  floret	[corolla]		ditto	<B>of</B>  <M><B>bisexual</B></M>  <B>yellowish</B>  <B>,</B>  <B>20</B>  <B>–</B>  <B>30</B>  mm  <B>.</B>
+
+6994	593.txt-6	cauline	[leaf]		ditto	<M><B>cauline</B></M>  <B>similar</B>  or  <B>reduced</B>  to  <N>scales</N>  <B>.</B>
+
+7180	605.txt-6	cauline	[leaf]		ditto	<M><B>cauline</B></M>  <B>foliaceous</B>  or  <B>reduced</B>  to  <M>minute</M>  <N>bracts</N>  <B>distally</B>  <B>.</B>
+
+10868	848.txt-8	central	[floret]		central	<N>central</N>  <B>3</B>  <B>–</B>  <B>32</B>  <B>functionally</B>  <M><B>staminate</B></M>  <B>;</B>
+
+11286	885.txt-8	central	[floret]		central	<N>central</N>  <B>15</B>  <B>–</B>  <B>100</B>  <M><B>bisexual</B></M>  and  <M><B>fertile</B></M>  <B>;</B>
+
+11366	891.txt-8	central	[floret]		central	<N>central</N>  <B>14</B>  <B>–</B>  <B>70</B>  <M><B>bisexual</B></M>  and  <M><B>fertile</B></M>  <B>;</B>
+
+2423	270.txt-5	cypsela  or  palea	unit		cypsela	<N>cypsela</N>  /  <N>palea</N>  <N>units</N>  <B>±</B>  <B>obovate</B>  <B>,</B>  <B>2</B>  <B>.</B>  <B>5</B>  <B>–</B>  <B>4</B>  mm  <B>;</B>
+
+2430	271.txt-5	cypsela  or  palea	unit		cypsela	<N>cypsela</N>  /  <N>palea</N>  <N>units</N>  <B>±</B>  <B>orbiculate</B>  to  <B>ovate</B>  <B>,</B>  <B>3</B>  <B>–</B>  <B>5</B>  mm  <B>;</B>
+
+12347	966.txt-4	disc	[cypsela]		disc	<N>disc</N>  <B>2</B>  <B>.</B>  <B>5</B>  <B>–</B>  <B>3</B>  <B>.</B>  <B>5</B>  mm  <B>.</B>
+
+9189	735.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>0</B>  <B>.</B>
+
+9359	742.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>0</B>  <B>.</B>
+
+9409	746.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+9430	747.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+9449	748.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+9467	749.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+9505	750.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+9524	751.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+9542	752.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+9560	753.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>4</B>  <B>;</B>
+
+9581	754.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+9639	759.txt-14	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>10</B>  <B>;</B>
+
+9761	768.txt-10	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>usually</B>  <B>0</B>  <B>.</B>
+
+9776	769.txt-10	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+9817	772.txt-10	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>4</B>  <B>;</B>
+
+9857	775.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>0</B>  <B>.</B>
+
+9885	777.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+9954	780.txt-15	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>6</B>  <B>(</B>  <B>–</B>  <B>12</B>  <B>)</B>  <B>;</B>
+
+9973	781.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+10002	784.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>(</B>  <B>–</B>  <B>12</B>  <B>)</B>  <B>;</B>
+
+10017	785.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>(</B>  <B>–</B>  <B>10</B>  <B>)</B>  <B>;</B>
+
+10032	786.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>(</B>  <B>–</B>  <B>9</B>  <B>)</B>  <B>;</B>
+
+10047	787.txt-12	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>12</B>  <B>;</B>
+
+10061	788.txt-11	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+10281	800.txt-5	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>6</B>  <B>–</B>  <B>10</B>  <B>(</B>  <B>–</B>  <B>15</B>  <B>)</B>  <B>.</B>
+
+10289	801.txt-5	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>4</B>  <B>(</B>  <B>–</B>  <B>5</B>  <B>)</B>  <B>.</B>
+
+10396	811.txt-2	functionally  staminate	floret	staminate	floret	<B>functionally</B>  <M><B>staminate</B></M>  <N>florets</N>  <B>(</B>  <B>14</B>  <B>–</B>  <B>)</B>  <B>21</B>  <B>–</B>  <B>34</B>  <B>.</B>
+
+10881	849.txt-11	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>15</B>  <B>–</B>  <B>30</B>  <B>;</B>
+
+10914	850.txt-10	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>15</B>  <B>–</B>  <B>30</B>  <B>;</B>
+
+10932	853.txt-10	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>12</B>  <B>–</B>  <B>30</B>  <B>;</B>
+
+10966	857.txt-13	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>8</B>  <B>–</B>  <B>20</B>  <B>;</B>
+
+10979	858.txt-9	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>3</B>  <B>–</B>  <B>6</B>  <B>;</B>
+
+10993	859.txt-10	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>5</B>  <B>–</B>  <B>9</B>  <B>;</B>
+
+11027	860.txt-11	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>22</B>  <B>–</B>  <B>32</B>  <B>;</B>
+
+11042	861.txt-12	functionally  staminate	floret	staminate	[floret]	<B>functionally</B>  <M><B>staminate</B></M>  <B>12</B>  <B>–</B>  <B>25</B>  <B>;</B>
+
+9744	767.txt-15	functionally  staminate  or  bisexual	floret		ditto	<B>functionally</B>  <M><B>staminate</B></M>  or  <M><B>bisexual</B></M>  <N>florets</N>  <B>2</B>  <B>–</B>  <B>5</B>  <B>;</B>
+
+1919	230.txt-8	inner	[phyllary]		ditto	<B>the</B>  <M>inner</M>  <B>with</B>  <N>margins</N>  <B>undulate</B>  <B>,</B>  <B>ciliate</B>  <B>,</B>  <B>with</B>  <B>±</B>  <M>submarginal</M>  <B>dark</B>  <N>stripe</N>  <B>,</B>  cuspidate  <B>.</B>
+
+10174	795.txt-6	inner	phyllary	inner  [outer]	phyllary	<M>inner</M>  <N>phyllaries</N>  <B>progressively</B>  <B>narrower</B>  <B>,</B>  <B>less</B>  <B>hairy</B>  <B>,</B>  <B>more</B>  <B>scarious</B>  <B>.</B>
+
+10187	796.txt-6	inner	phyllary	inner  [outer]	phyllary	<M>inner</M>  <N>phyllaries</N>  <B>similar</B>  <B>,</B>  <B>more</B>  <B>scarious</B>  <B>.</B>
+
+10200	797.txt-6	inner	[phyllary]	inner  [outer]	[phyllary]	<M>inner</M>  <B>similar</B>  <B>,</B>  <B>more</B>  <B>scarious</B>  <B>.</B>
+
+1288	19.txt-10	inner  pistillate_zone	floret	inner	pistillate_zone	<M>inner</M>  <N>pistillate_zone</N>  <N>florets</N>  <B>0</B>  or  <B>3</B>  <B>–</B>  <B>50</B>  <B>in</B>  <B>1</B>  <B>–</B>  <B>2</B>  <B>series</B>  <B>,</B>  <M><B>fertile</B></M>  <B>,</B>  <N>corollas</N>  <B>usually</B>  <B>±</B>  zygomorphic  <B>,</B>  <B>sometimes</B>  <B>reduced</B>  to  <N>tubes</N>  <B>;</B>
+
+8826	71.txt-14	inner  [phyllary]	apex	inner  all  [phyllary]	apex	<N>apices</N>  <B>of</B>  <M>inner</M>  <M><B>all</B></M>  <B>straight</B>  and  <B>entire</B>  or  <M><B>innermost</B></M>  <B>±</B>  <B>flexuous</B>  <B>,</B>  <B>erose</B>  <B>.</B>
+
+9679	761.txt-3	longest  [capitular]  	[leaf]	longest	[parenttag]	<M><B>longest</B></M>  <B>mostly</B>  <B>8</B>  <B>–</B>  <B>15</B>  mm  <B>,</B>  <N>lengths</N>  <B>1</B>  <B>.</B>  <B>5</B>  <B>–</B>  <B>4</B>  <N>times</N>  <N>widths</N>  <B>.</B>
+
+9688	762.txt-3	longest  [capitular]  	[leaf]	longest	[parenttag]	<M><B>longest</B></M>  <B>mostly</B>  <B>14</B>  <B>–</B>  <B>25</B>  mm  <B>,</B>  <N>lengths</N>  <B>3</B>  <B>–</B>  <B>6</B>  <N>times</N>  <N>widths</N>  <B>.</B>
+
+386	131.txt-7	main  cauline	[leaf]		main	<N>main</N>  <M><B>cauline</B></M>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  <B>;</B>
+
+1397	196.txt-8	mid	[phyllary]		ditto	<M>mid</M>  <B>with</B>  <B>(</B>  <B>4</B>  <B>–</B>  <B>)</B>  <B>5</B>  <B>–</B>  <B>7</B>  <B>(</B>  <B>–</B>  <B>8</B>  <B>)</B>  pairs  <B>of</B>  <N>lobes</N>  <B>;</B>
+
+1413	197.txt-9	mid	[phyllary]		ditto	<M>mid</M>  <B>with</B>  <B>(</B>  <B>9</B>  <B>–</B>  <B>)</B>  <B>10</B>  <B>–</B>  <B>13</B>  <B>(</B>  <B>–</B>  <B>15</B>  <B>)</B>  pairs  <B>of</B>  <N>lobes</N>  <B>;</B>
+
+541	141.txt-5	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  <B>few</B>  <B>–</B>  <B>many</B>  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+560	143.txt-5	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  <B>numerous</B>  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+569	144.txt-5	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  stiff  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+587	146.txt-5	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  <B>few</B>  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+597	147.txt-5	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  <B>few</B>  or  no  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+1462	2.txt-12	outer	floret		ditto	<B>(</B>  <B>2</B>  <B>)</B>  <M>outer</M>  <N>florets</N>  <M><B>pistillate</B></M>  and  <M>inner</M>  <M><B>bisexual</B></M>  <B>,</B>  <N>corollas</N>  <B>actinomorphic</B>  <B>;</B>
+
+1463	2.txt-13	outer	floret		ditto	and  <B>(</B>  <B>3</B>  <B>)</B>  <M>outer</M>  <N>florets</N>  <M><B>pistillate</B></M>  <B>,</B>  <N>corollas</N>  <B>usually</B>  zygomorphic  <B>,</B>  <B>sometimes</B>  lacking  <N>limbs</N>  <B>,</B>  <M>inner</M>  <N>florets</N>  <M><B>bisexual</B></M>  or  <B>functionally</B>  <M><B>staminate</B></M>  <B>,</B>  <N>corollas</N>  zygomorphic  or  <B>actinomorphic</B>  <B>;</B>
+
+3467	344.txt-17	outer	[cypsela]		ditto	<M>outer</M>  <B>of</B>  <B>12</B>  <B>–</B>  <B>20</B>  +  <B>,</B>  <M>minute</M>  <N>setae</N>  <B>,</B>  <M>inner</M>  <B>of</B>  <B>60</B>  <B>–</B>  <B>80</B>  +  <B>,</B>  <B>white</B>  <B>,</B>  <B>subequal</B>  <B>,</B>  <B>barbellulate</B>  <N>bristles</N>  <B>in</B>  <B>1</B>  <B>–</B>  <B>2</B>  +  <B>series</B>  <B>.</B>
+
+12098	946.txt-6	outer	[phyllary]		ditto	<M>outer</M>  <B>with</B>  <B>relatively</B>  <B>narrow</B>  <B>scarious</B>  <N>margins</N>  <B>,</B>  <M>inner</M>  <B>with</B>  <B>relatively</B>  <B>broad</B>  <B>,</B>  <B>hyaline</B>  <N>tips</N>  <B>.</B>
+
+9197	735.txt-23	outer	[pappus]	outer  pistillate	[pappus]	<M>outer</M>  <M><B>pistillate</B></M>  <B>0</B>  <B>,</B>  <M>inner</M>  <M><B>pistillate</B></M>  and  <M><B>bisexual</B></M>  <B>of</B>  <B>(</B>  <B>11</B>  <B>–</B>  <B>)</B>  <B>13</B>  <B>–</B>  <B>28</B>  +  <N>bristles</N>  <B>.</B>
+
+9366	742.txt-22	outer	[pappus]	outer  pistillate	[pappus]	<M>outer</M>  <M><B>pistillate</B></M>  <B>0</B>  <B>,</B>  <M>inner</M>  <M><B>pistillate</B></M>  and  <M><B>bisexual</B></M>  <B>of</B>  <B>[</B>  <B>3</B>  <B>–</B>  <B>]</B>  <B>13</B>  <B>–</B>  <B>21</B>  <N>bristles</N>  <B>.</B>
+
+578	145.txt-4	outer	phyllary	outer  [involucre]	phyllary	<M>outer</M>  <N>phyllaries</N>  <B>with</B>  <B>a</B>  <B>few</B>  stiff  <N>lateral</N>  <N>spines</N>  <B>;</B>
+
+11857	930.txt-15	pappus	crown	[cypsela]	crown	<N>pappi</N>  <N>crowns</N>  <B>of</B>  <B>6</B>  <B>–</B>  <B>12</B>  irregular  teeth  <B>.</B>
+
+9909	779.txt-3	petiole	base	[leaf]	base	<N>bases</N>  <B>expanded</B>  <B>,</B>  <B>3_nerved</B>  <B>,</B>  <B>yellowish</B>  <B>tan</B>  <B>,</B>  <B>parchment_like</B>  <B>,</B>  <B>closely</B>  involucral  <B>.</B>
+
+43	100.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  or  <B>short_decurrent</B>  <B>1</B>  <B>–</B>  <B>2</B>  cm  <B>;</B>
+
+62	101.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>auriculate_clasping</B>  or  <B>shortly</B>  <B>decurrent</B>  <B>;</B>
+
+82	104.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <M><B>proximal</B></M>  <B>winged_petiolate</B>  <B>,</B>  <M>distal</M>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>auriculate_clasping</B>  or  <B>decurrent</B>  <B>as</B>  <B>a</B>  <B>spiny</B>  <N>wing</N>  <B>1</B>  <B>–</B>  <B>3</B>  cm  <B>;</B>
+
+109	107.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  decreasing  <B>distally</B>  <B>,</B>  <M><B>proximal</B></M>  <B>winged_petiolate</B>  <B>,</B>  <M>distal</M>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>–</B>  <B>5</B>  cm  <B>;</B>
+
+128	108.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <B>sometimes</B>  spinier  <B>than</B>  <M><B>basal</B></M>  <B>;</B>
+
+164	111.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>mostly</B>  <B>in</B>  <M><B>proximal</B></M>  <B>1</B>  /  <B>2</B>  <B>,</B>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>narrowed</B>  <B>,</B>  auriculate  <B>,</B>  <N>veins</N>  <B>often</B>  <B>prominently</B>  raised  <B>on</B>  <M>abaxial</M>  <N>faces</N>  <B>;</B>
+
+183	114.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>much</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  or  <B>not</B>  <B>,</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>;</B>
+
+248	122.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>much</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>less</B>  <B>than</B>  <B>5</B>  cm  <B>;</B>
+
+269	123.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  <B>with</B>  <B>broad</B>  <B>,</B>  <B>spiny_margined</B>  <N>auricles</N>  <B>,</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  spinier  <B>than</B>  <M><B>proximal</B></M>  <B>;</B>
+
+289	124.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  diminished  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  to  <B>2</B>  <B>.</B>  <B>5</B>  cm  or  <B>clasping</B>  <B>;</B>
+
+368	130.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>;</B>
+
+406	132.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>only</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>auriculate_clasping</B>  <B>;</B>
+
+450	136.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <M><B>proximal</B></M>  <B>winged_petiolate</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  or  <B>short_decurrent</B>  <B>;</B>
+
+470	137.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>short_decurrent</B>  <B>;</B>
+
+489	138.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>short_decurrent</B>  <B>;</B>
+
+508	139.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <M><B>proximal</B></M>  <B>absent</B>  <B>at</B>  <M>flowering</M>  <B>,</B>  <B>moderately</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <B>sessile</B>  and  <B>auriculate_clasping</B>  to  <B>slightly</B>  <B>decurrent</B>  <B>0</B>  <B>–</B>  <B>2</B>  cm  <B>;</B>
+
+608	148.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <M><B>proximal</B></M>  <B>winged_petiolate</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>–</B>  <B>3</B>  cm  <B>;</B>
+
+627	149.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <B>not</B>  <B>much</B>  <B>reduced</B>  <B>distally</B>  <B>;</B>
+
+790	159.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>not</B>  or  <B>only</B>  <B>slightly</B>  <B>reduced</B>  <B>;</B>
+
+816	160.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>petiolate</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  to  <B>1</B>  cm  <B>;</B>
+
+852	162.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>winged_petiolate</B>  to  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  <B>with</B>  <B>expanded</B>  <N>auricles</N>  <B>;</B>
+
+872	163.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>becoming</B>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>auriculate_decurrent</B>  <B>with</B>  <B>broad</B>  <B>,</B>  <B>spiny_margined</B>  <N>wings</N>  <B>3</B>  cm  or  <B>less</B>  <B>;</B>
+
+944	168.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>many</B>  <B>,</B>  <B>well</B>  distributed  <B>,</B>  <B>proximally</B>  <B>±</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <B>less</B>  <B>divided</B>  <B>,</B>  <N>bases</N>  <B>auriculate_claping</B>  and  /  or  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  to  <B>2</B>  cm  <B>;</B>
+
+5985	52.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>winged_petiolate</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <B>becoming</B>  <B>sessile</B>  <B>,</B>  <B>well</B>  distributed  or  <B>not</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <B>at</B>  least  <M>distal</M>  <B>decurrent</B>  <B>as</B>  <B>long</B>  <B>spiny</B>  <N>wings</N>  <B>;</B>
+
+6510	56.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>little</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>broadly</B>  <B>tapered</B>  to  <B>clasping</B>  <B>,</B>  <B>short_decurrent</B>  <B>;</B>
+
+6644	57.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>narrowed</B>  <B>,</B>  <B>sometimes</B>  <B>weakly</B>  <B>clasping</B>  <B>;</B>
+
+6787	58.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>narrowed</B>  <B>,</B>  <B>sometimes</B>  <B>weakly</B>  <B>clasping</B>  <B>,</B>  <B>not</B>  <B>decurrent</B>  <B>;</B>
+
+6933	59.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>petiolate</B>  or  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>±</B>  <B>clasping</B>  <B>,</B>  <B>not</B>  <B>decurrent</B>  <B>;</B>
+
+7253	61.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>clasping</B>  or  <B>±</B>  <B>decurrent</B>  <B>;</B>
+
+7401	62.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>well</B>  distributed  <B>,</B>  <B>often</B>  <B>not</B>  <B>much</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>often</B>  <B>±</B>  <B>auriculate_clasping</B>  <B>;</B>
+
+8086	66.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>moderately</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>often</B>  <B>auriculate_clasping</B>  <B>;</B>
+
+8542	69.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>narrowed</B>  <B>,</B>  <B>sometimes</B>  <B>weakly</B>  <B>clasping</B>  <B>;</B>
+
+8678	70.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>relatively</B>  <B>few</B>  <B>(</B>  <B>10</B>  <B>–</B>  <B>25</B>  <B>)</B>  <B>,</B>  <B>petiolate</B>  or  <M>distal</M>  <B>sessile</B>  <B>,</B>  <B>mostly</B>  restricted  to  <M><B>proximal</B></M>  <B>1</B>  /  <B>2</B>  <B>of</B>  <N>stems</N>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>tapered</B>  <B>,</B>  <B>not</B>  <B>decurrent</B>  <B>;</B>
+
+8956	72.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>becoming</B>  <B>sessile</B>  and  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>spiny_lobed</B>  <B>,</B>  <B>sometimes</B>  <B>decurrent</B>  <B>;</B>
+
+9289	74.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>usually</B>  <B>not</B>  <B>decurrent</B>  <B>;</B>
+
+9480	75.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>becoming</B>  <B>sessile</B>  and  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <B>widest</B>  <B>at</B>  <N>base</N>  <B>,</B>  <N>bases</N>  <B>±</B>  <B>auriculate_clasping</B>  to  <B>short_decurrent</B>  <B>;</B>
+
+9654	76.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <N>bases</N>  <B>auriculate_clasping</B>  or  <B>short_decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>;</B>
+
+9789	77.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>becoming</B>  <B>sessile</B>  and  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <B>widest</B>  <B>at</B>  <N>bases</N>  <B>,</B>  <N>bases</N>  <B>±</B>  <B>auriculate_clasping</B>  to  <B>short_decurrent</B>  <B>;</B>
+
+9926	78.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>–</B>  <B>5</B>  cm  <B>,</B>  <B>sometimes</B>  <B>with</B>  <B>expanded</B>  <N>auricles</N>  <B>;</B>
+
+10088	79.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>linear_lobed</B>  to  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>–</B>  <B>3</B>  cm  <B>;</B>
+
+10263	80.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>±</B>  auriculate  to  <B>long_decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>;</B>
+
+10656	83.txt-6	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>of</B>  <M><B>proximal</B></M>  <M><B>cauline</B></M>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>of</B>  <M>distal</M>  <M><B>cauline</B></M>  <B>expanded</B>  and  <B>±</B>  <B>clasping</B>  <B>,</B>  <N>margins</N>  <B>sometimes</B>  spinier  <B>than</B>  <B>those</B>  <B>of</B>  <M><B>proximal</B></M>  <B>;</B>
+
+10773	84.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>becoming</B>  <B>sessile</B>  and  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  to  <B>5</B>  cm  <B>;</B>
+
+10891	85.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>gradually</B>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>sometimes</B>  <B>clasping</B>  or  <B>short_decurrent</B>  <B>;</B>
+
+11003	86.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>winged_petiolate</B>  <B>proximally</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <N>bases</N>  <B>not</B>  or  <B>scarcely</B>  <B>decurrent</B>  <B>,</B>  <B>sometimes</B>  <M>distal</M>  <B>weakly</B>  <B>clasping</B>  <B>;</B>
+
+11115	87.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>distally</B>  <B>,</B>  <M><B>proximal</B></M>  <B>usually</B>  <B>winged_petiolate</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>.</B>  <B>5</B>  <B>–</B>  <B>3</B>  <B>.</B>  <B>5</B>  cm  <B>;</B>
+
+11491	90.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>well</B>  distributed  <B>,</B>  <M><B>proximal</B></M>  <B>usually</B>  <B>winged_petiolate</B>  <B>,</B>  <M>mid</M>  <B>sessile</B>  <B>,</B>  <B>decurrent</B>  <B>as</B>  <B>spiny</B>  <N>wings</N>  <B>1</B>  <B>–</B>  <B>3</B>  cm  <B>;</B>
+
+11988	94.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>sessile</B>  <B>,</B>  <B>progressively</B>  <B>reduced</B>  <B>,</B>  <B>becoming</B>  <B>bractlike</B>  <B>distally</B>  <B>,</B>  <M>mid</M>  and  <M>distal</M>  <N>bases</N>  <B>broadly</B>  <B>clasping</B>  <B>;</B>
+
+12149	95.txt-7	principal  cauline	[leaf]		principal	<N>principal</N>  <M><B>cauline</B></M>  <B>mostly</B>  <B>in</B>  <M><B>proximal</B></M>  <B>1</B>  /  <B>2</B>  <B>,</B>  <B>winged_petiolate</B>  or  <B>sessile</B>  <B>,</B>  <N>bases</N>  <B>narrowed</B>  <B>,</B>  <B>sometimes</B>  auriculate  <B>;</B>
+
+6112	53.txt-7	principal  larger  cauline	[leaf]		principal	<N>principal</N>  larger  <M><B>cauline</B></M>  <B>proximally</B>  <B>winged_petiolate</B>  <B>,</B>  <B>distally</B>  <B>sessile</B>  <B>,</B>  <B>well</B>  distributed  <B>,</B>  <B>gradually</B>  <B>reduced</B>  <B>,</B>  <B>not</B>  <B>decurrent</B>  <B>;</B>
+
+10313	803.txt-5	ray  or  pistillate	corolla		ditto	<M>ray</M>  or  <M><B>pistillate</B></M>  <N>corollas</N>  <B>:</B>
+
+9474	75.txt-1	runner	root		ditto	<B>deeply</B>  seated  <M>runner</M>  <N>roots</N>  <B>that</B>  produce  <B>adventitious</B>  <N>buds</N>  <B>.</B>
+
+9435	747.txt-17	staminate	[pappus]		ditto	<M><B>staminate</B></M>  <B>of</B>  <B>1</B>  <B>–</B>  <B>5</B>  <B>(</B>  <B>–</B>  <B>6</B>  <B>)</B>  smooth  to  <B>barbellulate</B>  <N>bristles</N>  <B>1</B>  <B>.</B>  <B>3</B>  <B>–</B>  <B>1</B>  <B>.</B>  <B>9</B>  mm  <B>.</B>
+
+9454	748.txt-17	staminate	[pappus]		ditto	<M><B>staminate</B></M>  <B>of</B>  <B>(</B>  <B>5</B>  <B>–</B>  <B>)</B>  <B>6</B>  <B>–</B>  <B>12</B>  <B>(</B>  <B>–</B>  <B>13</B>  <B>)</B>  <B>barbellate</B>  <N>bristles</N>  <B>1</B>  <B>.</B>  <B>4</B>  <B>–</B>  <B>1</B>  <B>.</B>  <B>8</B>  mm  <B>.</B>
+
+9472	749.txt-17	staminate	[pappus]		ditto	<M><B>staminate</B></M>  <B>of</B>  <B>(</B>  <B>1</B>  <B>–</B>  <B>)</B>  <B>3</B>  <B>–</B>  <B>8</B>  <B>barbellate</B>  <N>bristles</N>  <B>0</B>  <B>.</B>  <B>9</B>  <B>–</B>  <B>1</B>  <B>.</B>  <B>3</B>  mm  <B>.</B>
+
+9510	750.txt-17	staminate	[pappus]		ditto	<M><B>staminate</B></M>  <B>of</B>  <B>2</B>  <B>–</B>  <B>5</B>  <B>(</B>  <B>–</B>  <B>10</B>  <B>)</B>  smooth  to  <B>barbellulate</B>  <N>bristles</N>  <B>1</B>  <B>.</B>  <B>1</B>  <B>–</B>  <B>2</B>  mm  <B>.</B>
+
+9599	755.txt-10	staminate	[pappus]		ditto	<M><B>staminate</B></M>  <B>of</B>  <B>1</B>  <B>–</B>  <B>5</B>  <B>,</B>  <B>±</B>  <B>barbellulate</B>  <N>bristles</N>  <B>1</B>  <B>.</B>  <B>7</B>  <B>–</B>  <B>2</B>  mm  <B>.</B>
+
+1364	194.txt-7	sterile  [floret]  corolla	lobe	corolla	lobe	<N>corolla</N>  <N>lobes</N>  <B>of</B>  <M><B>sterile</B></M>  <B>10</B>  <B>–</B>  <B>15</B>  mm  <B>,</B>  <B>spreading</B>  <B>;</B>
+
+1273	189.txt-15	style	branch	[floret]	branch	<N>styles</N>  <N>branches</N>  <B>:</B>
+
+304	125.txt-2	[leaf  blade]  main  marginal	spine		main	<N>main</N>  <M>marginal</M>  <N>spines</N>  <B>2</B>  <B>–</B>  <B>15</B>  mm  <B>,</B>  <B>often</B>  <B>stout</B>  <B>;</B>
+
+313	126.txt-2	[leaf  blade]  main  marginal	spine		main	<N>main</N>  <M>marginal</M>  <N>spines</N>  <B>often</B>  <B>stout</B>  <B>,</B>  <B>5</B>  <B>–</B>  <B>15</B>  mm  <B>;</B>
+
+322	127.txt-2	[leaf  blade]  main  marginal	spine		main	<N>main</N>  <M>marginal</M>  <N>spines</N>  <B>slender</B>  to  <B>stout</B>  <B>,</B>  <B>3</B>  <B>–</B>  <B>10</B>  mm  <B>;</B>
+
+330	128.txt-2	[leaf  blade]  main  marginal	spine		main	<N>main</N>  <M>marginal</M>  <N>spines</N>  <B>usually</B>  <B>very</B>  <B>slender</B>  <B>,</B>  <B>5</B>  <B>–</B>  <B>12</B>  mm  <B>;</B>
+
+339	129.txt-2	[leaf  blade]  main  marginal	spine		main	<N>main</N>  <M>marginal</M>  <N>spines</N>  <B>often</B>  <B>stout</B>  <B>,</B>  <B>5</B>  <B>–</B>  <B>30</B>  mm  <B>;</B>
+
+
+
+
+
+
+
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+total: 1149 unmatched modifiers.
+
+
+###################################################################################
+########  <[BM]>[<[BM]>]?[,in] => ditto in adjectivesubject         ##################
+1. in adjectivesubject: [mb][mb][,in] could be mb or bb (ditto): 
+
+	e.g. basal and proximal cauline, bisexual, should be ditto.
+	??735.txt-23, 742.txt-22: "outer pistillate 0", should it be (outer/[pappus]) or (outer pistillate/[pappus])
+
+
+2. check markup: 
+################################################################################
+###### in addmodifier, tagsentwmt, prevent the inclusin of stop and -ly word ###
+	[stopwords:]
+		827,829.txt-16: (NUMBER/lateral), check NUMBER in m cases
+		230.txt-8: remove "the" from modifier.
+		891.txt-7: remove "usually" from modifier.
+		71.txt-14: remove "all" from modifier "inner all"
+		
+#################################################################################
+#### redo character, use sentence pattern to decide tag                       ###		
+	[character:]
+		785,786, 787.txt-4: (petiole/length)
+		499.txt-3, 781.txt-5, 784.txt-5, 788.txt-5, 959.txt-2, 960.txt-2: (xyz/abc length)
+##################################################################################
+##### revisted OF pattern to include bq in modifier   ############################	
+	[OF:]
+		788.txt-8: "receptacles OF adjacent heads"
+		149.txt-14, 150.txt-13, 160.txt-14: "apcies of mid and inner" (mid[phyllary]/apex)
+		196.txt-10, 197.txt-11: "corollas of neutral florets"
+		175.txt-7, 180.txt-9: "tips of outer and mid phyllaries" (outer[phyllary]/tip)
+		349, 350, 351, 352, 353, 354, 355, 356, 357, 357.txt-2: "blades of undivided cauline leafes". missed "undivided" in m.
+		
+#############  in pronouncharactersubject[proposition subject] ####################
+#############   todo ##############################################################		
+		196.txt-11, 197.txt-12: "of bisexual" => (bisexual floret/[corolla])
+	[others:]	
+		71.txt-1, 80.txt-1: sprouts v, mistaken as pl,  ########new sub verbending 
+		117.txt-5:
+		2.txt-12, -13: "(2)" "and (3)"
+		547.txt-1: (probably taprooted/[parenttag])
+		182.txt-1: (stout/taproot) should be taproot.
+		930.txt-15: ([cypsela]/crown) "pappi crowns".
+		11,15.txt-10, 7 cases etc.:"anther basal appendages" (/anther) ########revised [psn]b pattern in doit
+		576.txt-4: ([calyculus]/margin) "margins of bractlets"
+		761, 762.txt-2: (/leaf) "capitular leaves"
+		605.txt-6, 593.txt-6: (cauline foliaceous or reduced to munute/bracts) ################## fix and/or
+		190.txt-2: (cauline[blade]/blade)	
+		19.txt-10: change to (inner pistillate_zone/floret)
+		778.txt-4: change to (leaf or petiole/base)
+		131.txt-7: change from (/main) to (main cauline/[leaf])
+		779.txt-3: change to (petiole/base)?
+		100.txt-6 and 40 other cases: "principal cauline ... sessile" (principal). answer is (principal cauline/[leaf])	
+		760, 763, 764, 765, 766.txt-2 and other cases: "proximal internode lengths...". answer is (proximal/internode)
+		194.txt-7: change to (sterile [floret] corolla/lobe)?
+		189.txt-15: "styles branches".
+		125, 126, 127, 128, 129.txt-2: (/main)"main marginal spines"
+
+3. [andor]: taprooted a Type M? 
+	270,271.txt-5: "cypsela / palea) units"
+	108.txt-1: "deeply taprooted", should be ditto.
+	100.txt-1 and 94 other clauses: "^taprooted", "^tap_rooted", or "^usually taprooted", marked as (usually?
+taprooted/[andor], or taprooted/[annual|biennial|perennial|parenttag|etc]) should be ditto.
+
+4. correct benchmark errors: 
+
+
+	##################################corrected:
+	83.txt-7 => (distalmost cauline/[leaf])
+	54.txt-1 => (fibrous/root)
+	743.txt-1, 745.txt-1, 768,769,772,773,774.txt-4 =>(largest/[leaf])
+	782,783.txt-4=>(longest/[head])
+	747,748, 749, 750, 751, 752, 753.txt-8; 773,774.txt-9; 785,786,787.txt-11=>(longest/[palea])
+	761,762.txt-3 =>(longest/[parenttag])
+	574.txt-10=>(longer/[bristile])
+	272.txt-9=>(longer/[penduncle]): removed the from m.
+	930.txt-15=>(pappus/crown)
+	88,89.txt-1=>(adaxial leaf/face)
+	599.txt-4 =>(cauline[leaf]/[blade])
+	457.txt-3 => (/distal stem and ...)
+	305.txt-12=>(outer/[cypsela])
+	17,23.txt-10=>(inner/[floret])
+	166.txt-8=>([phyllary] marginal/spine)
+	149.txt-14, 150.txt-13, 160.txt-14=>(mid and inner [phyllary]/apex)
+	972.txt-15=>(pappus/crown)
+	760, 763, 764, 765, 766.txt-2 => (proximal/internode)
+	363.txt-4=>(proximalmost/[leaf])
+	124.txt-1=>(/taprooted caudex or runner root)
+	163.txt-1=>(woody taprooted/caudex)
+	94.txt-3=>([stem]/branch)
+	60.txt-6, 167.txt-8 => (mid and distal cauline/[leaf])
+	736, 737, 738, 739, 740, 741.txt-13; 743,745.txt-10 => (outer[pistillate]/[floret])
+	485.txt-4 => (proximal [cauline]/[leaf])
+	
+	
+5. common substructure: corollas, laminae, branch
+	400+ cases of ([floret]/corolla): in answer m=""
+	
+	missed: body
+	111, 114, 122, 123, 124, 131.txt-13: answer (outer and mid [phyllary]/body), 
+	similar cases: 63, 64, 65.txt-7, 76,78.txt-13. Many others.
+	
+	missed: bract, rib, scar, disc, tip, bristle, wing, portion
+
+
+6. level: 
+	#####################changed answers to cauline/[leaf]
+	24 cases: (192, 206.txt-4, 273.txt-3, 274, 338.txt-6, 551,552,553,561, 562, 564, 565, 566, 567, 568.txt-4, 594.txt-5, 595, 596, 599.txt-4, 600.txt-5, 861.txt-5)
+	markup: (cauline/[leaf])
+	answer: (cauline [leaf]/[blade])
+	
+	##################changed answers to cauline [leaf blade]/base
+	125, 126, 127, 128,129.txt-3; 
+	markup: cauline [blade]/base
+	answer: cauline[leaf]/base
+
+7. Type modifier: 
+	central: 848,885, 891.txt-8:
+	markup: central
+	answer: central/[floret]	
+
+	disc: 966.txt-4
+	markup: disc
+	answer: disc/[cypsela]
+
+
+9. phrase clauses:
+	
+	75.txt-1: "runner roots" answer (runner/root), markup (/root)
+
+############################################################################
+#### parent tag = parent modifier + parent tag #############################
+#### need to fix order problem ??              #############################
+
+10. parent tags:
+	184, 185, 186.txt-3; 165, 166.txt-2; 164, 165, 166.txt-1: 
+
+parent tag is [basal leaf] or [leaf].  the the later 5 cases, 
+
+should the order ([basal leaf] distal/face) or (distal [leaf]/face)
+
+	978.txt-5, 164.txt-3, 165,166.txt-4: [cauline leaf] vs 
+
+[leaf], and order issue too.
+
+	496, 497, 499, 500.txt-1: [leaf blade] or [blade].
+	13.txt-4: order issue.
+
+	in answer "[leaf/phyllary] abaxial/face", mark up "abaxial 
+
+[leaf/phyllary]/face".
+
+
+11. if a modifer is a common substructure, apply or not parent tag?
+
+	in answer m="[leaf] blade", markup: m="blade". t=base, 
+
+margin, etc. 
+
+====================================================================
+Level problem:
+
+192.txt-2		leaf	Leaves:
+
+192.txt-3	basal  [leaf]	blade	basal  blades  oblong,  10–25  cm,  margins  pinnately  lobed;
+
+192.txt-4	cauline  [leaf]	[blade]	cauline  linear  to  lanceolate,  smaller  distally,  dentate  to  pinnately  dissected.
+
+206.txt-2		leaf	Leaves  ±  loosely  gray-tomentose;
+
+206.txt-3	basal  leaf	blade	basal  leaf  blades  linear-lanceolate,  3–10  cm,  margins  entire  or  with  remote  linear  lobes,  apices  acute;
+
+206.txt-4	cauline  [leaf]	[blade]	cauline  linear,  usually  not  much  smaller  except  among  heads,  usually  entire.
+
+273.txt-1		leaf	Leaves:
+
+273.txt-2	basal  [leaf]	blade	blades  of  basal  5–35+  ×  1–8(–12+)  cm;
+
+273.txt-3	cauline  [leaf]	[blade]	cauline  similar,  smaller,  narrower,  distal  mostly  linear.
+
+274.txt-4		ditto	petiolate  (at  least  basal,  petioles  ±  winged);
+
+274.txt-5	basal  [leaf]	blade	basal  blades  mostly  elliptic,  ovate,  or  lanceolate  to  linear,  or  spatulate  to  oblanceolate,  often  lyrate  or  runcinate,  margins  entire,  dentate,  serrate,  toothed,  or  pinnately  lobed,  lobes  sometimes  toothed;
+
+274.txt-6	cauline  [leaf]	[blade]	cauline  usually  present,  lobed  or  entire,  usually  reduced  in  size  and  lobing  distally.
+
+338.txt-4		ditto	petiolate  or  sessile;
+
+338.txt-5	basal  [leaf]	blade	basal  blades  oblanceolate,  lyrate-pinnately  lobed  (lateral  lobes  relatively  wide,  terminals  relatively  large);
+
+338.txt-6	cauline  [leaf]	[blade]	cauline  relatively  few,  reduced.
+
+551.txt-2		leaf	Leaves  withered  at  flowering  (glabrous)  ;
+
+551.txt-3	basal  [leaf]	blade	basal  blades  linear  to  oblanceolate,  runcinate  ,  3–10  cm,  margins  pinnately  lobed  ;
+
+551.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike  .
+
+552.txt-2		leaf	Leaves  withered  at  flowering  (glabrous  or  puberulent);
+
+552.txt-3	basal  [leaf]	blade	basal  blades  linear  to  oblanceolate,  runcinate,  3–10  cm,  margins  pinnately  lobed  ;
+
+552.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike.
+
+553.txt-2		leaf	Leaves  withered  at  flowering;
+
+553.txt-3	basal  [leaf]	blade	basal  blades  linear  to  oblanceolate,  runcinate,  3–10  cm,  margins  pinnately  lobed;
+
+553.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike  .
+
+561.txt-2		leaf	Leaves  withered  at  flowering;
+
+561.txt-3	basal  [leaf]	blade	basal  blades  oblanceolate  to  spatulate,  5–7  cm,  margins  entire  to  pinnately  lobed  (faces  glabrous);
+
+561.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike.
+
+562.txt-2		leaf	Leaves  withered  at  flowering;
+
+562.txt-3	basal  [leaf]	blade	basal  blades  oblanceolate,  6–10  cm,  margins  entire  or  toothed  (teeth  minute,  faces  glabrous);
+
+562.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike.
+
+564.txt-2		leaf	Leaves  withered  at  flowering;
+
+564.txt-3	basal  [leaf]	blade	basal  blades  linear-lanceolate,  runcinate,  3–7  cm,  margins  pinnately  lobed  (faces  glabrous);
+
+564.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced  and  bractlike.
+
+565.txt-2		leaf	Leaves  usually  withered  at  flowering;
+
+565.txt-3	basal  [leaf]	blade	basal  blades  narrowly  lanceolate,  markedly  runcinate,  3–7  cm,  margins  pinnately  lobed  (faces  glabrous  or  weakly  scabrous-puberulent)  ;
+
+565.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike  .
+
+566.txt-2		leaf	Leaves  withered  at  flowering;
+
+566.txt-3	basal  [leaf]	blade	basal  blades  linear  to  filiform,  5–8  cm,  margins  entire  or  toothed  (teeth  remote,  faces  glabrous)  ;
+
+566.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike  .
+
+567.txt-2		leaf	Leaves  green  at  flowering  (at  least  on  plants  of  spring  and  early  summer,  frequently  absent  in  plants  of  late  summer);
+
+567.txt-3	basal  [leaf]	blade	basal  blades  oblanceolate  to  spatulate,  runcinate,  4–7  cm,  margins  pinnately  lobed  (faces  glabrous  or  sparsely  puberulent)  ;
+
+567.txt-4	cauline  [leaf]	[blade]	cauline  reduced,  scalelike  on  plants  of  spring  and  early  summer,  linear  and  threadlike  (to  3  cm)  on  plants  of  late  summer.
+
+568.txt-2		leaf	Leaves  withered  at  flowering;
+
+568.txt-3	basal  [leaf]	blade	basal  blades  oblanceolate  to  spatulate,  runcinate,  3–10  cm,  margins  pinnately  lobed  (faces  usually  glabrous,  rarely  tomentose);
+
+568.txt-4	cauline  [leaf]	[blade]	cauline  much  reduced,  bractlike.
+
+594.txt-3		leaf	Leaves  (basal  not  forming  rosettes,  cauline  present  at  flowering);
+
+594.txt-4	basal  [leaf]	blade	basal  blades  linear  to  subulate  ,  5–150  ×  1–6  mm,  margins  entire;
+
+594.txt-5	cauline  [leaf]	[blade]	cauline  similar,  sometimes  reduced  to  scales  distally.
+
+595.txt-2		leaf	Leaves:
+
+595.txt-3	proximal  [leaf]	blade	proximal  blades  linear  ,  50–150  ×  1–3  mm,  ±  lax  (margins  entire  or  rarely  laciniately-lobed);
+
+595.txt-4	cauline  [leaf]	[blade]	cauline  similar,  reduced  to  scales  distally.
+
+596.txt-2		leaf	Leaves:
+
+596.txt-3	proximal  [leaf]	blade	proximal  blades  narrowly  lanceolate  to  linear,  40–100  ×  2–6  mm,  ±  lax,  glabrous;
+
+596.txt-4	cauline  [leaf]	[blade]	cauline  not  reduced  to  scales  (mostly  10+  mm).
+
+599.txt-2		leaf	Leaves:
+
+599.txt-3	proximal  [leaf]	blade	proximal  blades  linear-acicular,  5–30  ×  2–4  mm,  stiff,  spreading;
+
+599.txt-4	cauline  [leaf]	[blade]	cauline  reduced  distally,  not  scalelike.
+
+600.txt-3		leaf	Leaves  (basal  not  in  rosettes,  absent  at  flowering);
+
+600.txt-4	proximal  [leaf]	blade	proximal  blades  linear,  5–30(–60)  ×  1–2(–4)  mm,  margins  entire,  apices  acute,  faces  glabrous;
+
+600.txt-5	cauline  [leaf]	[blade]	cauline  reduced  to  subulate  scales.
+
+861.txt-3	[leaf]	blade	blades  broadly  lanceolate,  faces  woolly-hairy;
+
+861.txt-4	proximalmost  [leaf]	blade	proximalmost  blades  3–8  ×  2–6  cm,  2–3-pinnatifid,  lobes  linear  (to  2  mm  wide);
+
+861.txt-5	cauline  [leaf]	[blade]	cauline  somewhat  reduced,  2–3  ×  0.8–1.2  cm;
+
+====================================================================
+source	manswer	tanswer	m	t	sentence
+
+235.txt-2		ditto	basal  and  cauline	[leaf]	basal  and  cauline  ,  obovate  ,  5  –  20  cm  ×  10  –  45  mm  ,  margins  usually  entire  to  undulate  ,  sometimes  dentate  ,  lyrate  ,  or  pinnately  lobed  ;
+
+284.txt-3		ditto	basal  and  cauline	[leaf]	basal  and  cauline  ;
+
+187.txt-3		ditto	basal  and  proximal  cauline	[leaf]	basal  and  proximal  cauline  ;
+
+214.txt-3		ditto	basal  and  proximal  cauline	[leaf]	basal  and  proximal  cauline  ,  petiolate  ,  blades  oblanceolate  or  elliptic  ,  5  –  25  cm  ,  margins  entire  or  shallowly  dentate  to  irregularly  pinnately  lobed  ;
+
+920.txt-9		ditto	bisexual	[floret]	bisexual  ,  sometimes  functionally  staminate  ,  (  15  –  )  20  –  35  ;
+
+582.txt-7		ditto	cauline	[leaf]	cauline  ,  narrowly  oblanceolate  to  linear  ,  mostly  entire  .
+
+71.txt-1		crown	crown	sprout	crown  sprouts  from  cluster  of  fibrous  roots  ,  these  often  tuberous_thickened  .
+
+80.txt-1		crown	crown	sprout	crown  sprouts  or  runner  roots  producing  adventitious  buds  .
+
+108.txt-1		ditto	deeply  taprooted	[andor]	deeply  taprooted  .
+
+55.txt-7		ditto	distal	[leaf]	distal  ,  oblong  or  linear  ,  the  uppermost  reduced  to  linear  bracts  .
+
+83.txt-7		distalmost	distalmost  cauline	[leaf]	distalmost  cauline  becoming  bractlike  ,  often  unlobed  or  less  deeply  divided  than  proximal  .
+
+54.txt-1		root	fibrous	root	clusters  of  fibrous  roots  .
+
+117.txt-5		ditto	imbricate  to  subequal    outer  and  mid  [phyllary]	apex	imbricate  to  subequal  ,  outer  and  mid  apices  ±  spreading  ,  straight  ,  usually  1  –  2  cm  ×  usually  1  –  2  mm  .
+
+743.txt-1		ditto	largest	[leaf]	largest  oblong  to  lanceolate  ,  widest  in  proximal  2  /  3  ,  15  –  25  (  –  30  )  ×  2  –  3  (  –  4  )  mm  ,  ±  undulate  ;
+
+745.txt-1		ditto	largest	[leaf]	largest  oblanceolate  to  narrowly  spatulate  ,  widest  in  distal  1  /  3  ,  (  10  –  )  15  –  20  ×  3  –  5  mm  ,  ±  plane  ;
+
+768.txt-4		ditto	largest	[leaf]	largest  10  –  18  ×  2  –  3  mm  ;
+
+769.txt-4		ditto	largest	[leaf]	largest  7  –  13  ×  2  –  4  mm  ;
+
+772.txt-4		ditto	largest	[leaf]	largest  7  –  15  ×  2  –  4  mm  ;
+
+773.txt-4		ditto	largest	[leaf]	largest  9  –  15  ×  2  –  4  mm  ;
+
+774.txt-4		ditto	largest	[leaf]	largest  7  –  11  ×  2  –  3  mm  ;
+
+782.txt-4		ditto	longest	[head]	longest  3  .  6  –  4  .  5  mm  .
+
+783.txt-4		ditto	longest	[head]	longest  3  –  3  .  7  mm  .
+
+747.txt-8		ditto	longest	[palea]	longest  1  .  8  –  4  .  5  mm  ,  winged  proximally  and  distally  ;
+
+748.txt-8		ditto	longest	[palea]	longest  2  .  5  –  3  .  5  mm  ,  winged  proximally  and  distally  ;
+
+749.txt-8		ditto	longest	[palea]	longest  1  .  9  –  3  .  1  mm  ,  winged  distally  ;
+
+750.txt-8		ditto	longest	[palea]	longest  3  .  4  –  4  .  5  mm  ,  winged  distally  ;
+
+751.txt-8		ditto	longest	[palea]	longest  3  .  4  –  4  .  2  mm  ,  winged  distally  ;
+
+752.txt-8		ditto	longest	[palea]	longest  2  .  8  –  3  .  3  mm  ,  winged  distally  ;
+
+753.txt-8		ditto	longest	[palea]	longest  2  –  2  .  7  mm  ,  winged  distally  ;
+
+773.txt-9		ditto	longest	[palea]	longest  3  .  3  –  4  mm  .
+
+774.txt-9		ditto	longest	[palea]	longest  2  .  5  –  3  .  2  mm  .
+
+785.txt-11		ditto	longest	[palea]	longest  2  .  5  –  3  .  2  mm  .
+
+786.txt-11		ditto	longest	[palea]	longest  1  .  6  –  2  mm  .
+
+787.txt-11		ditto	longest	[palea]	longest  1  .  9  –  2  .  4  mm  .
+
+761.txt-3		ditto	longest	[parenttag]	longest  mostly  8  –  15  mm  ,  lengths  1  .  5  –  4  times  widths  .
+
+762.txt-3		ditto	longest	[parenttag]	longest  mostly  14  –  25  mm  ,  lengths  3  –  6  times  widths  .
+
+827.txt-16		ditto	NUMBER	lateral	2  lateral  ,  1  adaxial  ,  faces  finely  striate  ,  glabrous  ;
+
+829.txt-16		ditto	NUMBER	lateral	2  lateral  ,  1  adaxial  ,  faces  finely  striate  ,  glabrous  ;
+
+785.txt-4		petiole	petiole	length	petiole  lengths  mostly  0  –  0  .  8  times  blade  lengths  ;
+
+786.txt-4		petiole	petiole	length	petiole  lengths  mostly  0  .  5  –  1  .  5  times  blade  lengths  ;
+
+787.txt-4		petiole	petiole	length	petiole  lengths  0  –  0  .  8  times  blade  lengths  ;
+
+547.txt-1		ditto	probably  taprooted	[parenttag]	probably  taprooted  .
+
+182.txt-1		taproot	stout	taproot	stout  taproots  ;
+
+100.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+101.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+104.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+107.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+111.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+132.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+136.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+137.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+150.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+159.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+269.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+344.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+348.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+376.txt-1		ditto	taprooted	[andor]	taprooted  ,  rhizomatous  ,  or  stoloniferous  .
+
+439.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+454.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+464.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+578.txt-1		ditto	taprooted	[andor]	taprooted  ,  fibrous_rooted  ,  or  with  rhizomes  bearing  globose  tubers  .
+
+682.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+683.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+685.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+687.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+691.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+692.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+695.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+697.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+698.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+699.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+700.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+706.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+707.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+73.txt-1		ditto	taprooted	[andor]	taprooted  .
+
+853.txt-1		ditto	taprooted	[andor]	taprooted  ,  caudices  branched  .
+
+193.txt-1		ditto	taprooted	[annual]	taprooted  ,  not  spiny  .
+
+338.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+340.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+384.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+386.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+431.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+441.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+443.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+457.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+460.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+462.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+492.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+533.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+537.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+538.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+539.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+540.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+541.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+544.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+571.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+575.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+582.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+583.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+584.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+585.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+590.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+693.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+694.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+721.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+723.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+724.txt-1		ditto	taprooted	[annual]	taprooted  .
+
+732.txt-1		ditto	taprooted	[annual]	taprooted  ;
+
+122.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+123.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+139.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+162.txt-1		ditto	taprooted	[biennial]	taprooted  with  simple  or  branched  caudices  .
+
+448.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+701.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+72.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+94.txt-1		ditto	taprooted	[biennial]	taprooted  .
+
+702.txt-1		ditto	taprooted	[cypsela]	taprooted  .
+
+807.txt-1		ditto	taprooted	[parenttag]	tap_rooted  .
+
+138.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+272.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+334.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+336.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+359.txt-1		ditto	taprooted	[perennial]	taprooted  ,  often  producing  offshoots  connected  by  slender  rhizomes  .
+
+388.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+517.txt-1		ditto	taprooted	[perennial]	taprooted  ,  with  caudices  often  multicipital  .
+
+524.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+525.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+530.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+531.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+532.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+684.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+686.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+696.txt-1		ditto	taprooted	[perennial]	taprooted  .
+
+77.txt-1		ditto	taprooted	[perennial]	tap_rooted  .
+
+850.txt-1		ditto	taprooted	[perennial]	taprooted  ,  caudices  branched  .
+
+86.txt-1		ditto	taprooted	[perennial]	taprooted  with  deep_seated  root  sprouts  .
+
+574.txt-10		ditto	the  longer	[bristle]	the  longer  7  –  11  mm  ,  shorter  5  –  7  mm  .
+
+272.txt-9		ditto	the  longer	[peduncle]	the  longer  often  slightly  inflated  distally  ,  not  bracteate  .
+
+274.txt-1		ditto	usually  taprooted	[andor]	usually  taprooted  ,  sometimes  rhizomatous  .
+
+374.txt-1		ditto	usually  taprooted	[andor]	usually  taprooted  .
+
+708.txt-1		ditto	usually  taprooted	[annual]	usually  taprooted  ,  sometimes  fibrous_rooted  .
+
+714.txt-1		ditto	usually  taprooted	[annual]	usually  taprooted  ,  rarely  fibrous_rooted  .
+
+722.txt-1		ditto	usually  taprooted	[annual]	usually  taprooted  ,  sometimes  fibrous_rooted  .
+
+803.txt-6		lamina	[corolla]	lamina	laminae  ca  .  0  .  5  mm  or  none  .
+
+930.txt-15		crown	[cypsela]	crown	pappi  crowns  of  6  –  12  irregular  teeth  .
+
+10.txt-9		corolla	[floret]	corolla	corollas  lavender_pink  ,  6  –  12  mm  .
+
+11.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  zygomorphic  ;
+
+15.txt-9		corolla	[floret]	corolla	corollas  whitish  ,  actinomorphic  ;
+
+170.txt-10		corolla	[floret]	corolla	corollas  pink  to  purple  ,  tubes  slender  ,  distally  bent  ,  abruptly  expanded  into  short  throats  ,  lobes  linear  ;
+
+172.txt-10		corolla	[floret]	corolla	corollas  white  to  blue  or  purple  ,  tubes  slender  ,  abruptly  expanded  to  throats  ,  lobes  linear  ;
+
+173.txt-11		corolla	[floret]	corolla	corollas  usually  pale  lavender_blue  to  dark  purple  ,  11  –  13  mm  ;
+
+174.txt-11		corolla	[floret]	corolla	corollas  light  purple  ,  goblet_shaped  ,  9  –  11  mm  ;
+
+175.txt-10		corolla	[floret]	corolla	corollas  purple  ,  11  –  15  m  ,  tubes  6  –  7  .  5  mm  ,  throats  2  –  2  .  5  mm  ,  lobes  3  –  5  .
+
+179.txt-11		corolla	[floret]	corolla	corollas  purple  ,  8  –  11  mm  ,  tubes  4  –  6  mm  ,  throats  1  .  5  –  2  mm  ,  lobes  3  –  3  .  5  mm  ;
+
+18.txt-6		corolla	[floret]	corolla	corollas  soon  falling  ,  0  .  5  –  1  .  2  mm  .
+
+18.txt-8		corolla	[floret]	corolla	corollas  tardily  falling  ,  1  –  2  .  3  mm  .
+
+180.txt-12		corolla	[floret]	corolla	corollas  purple  ,  10  –  12  mm  ,  tubes  4  .  5  –  6  mm  ,  throats  1  .  5  –  2  mm  ,  lobes  3  .  5  –  4  mm  ;
+
+182.txt-12		corolla	[floret]	corolla	corollas  pink  or  pale  purple  ,  ca  .  17  mm  ;
+
+183.txt-12		corolla	[floret]	corolla	corollas  pink  to  ±  purple  ,  glabrous  or  glandular_puberulent  ,  tubes  elongate  ,  throats  campanulate  ,  lobes  narrowly  triangular  ,  ±  equal  ;
+
+184.txt-9		corolla	[floret]	corolla	corollas  purple  ,  9  –  14  mm  ,  glabrous  .
+
+185.txt-9		corolla	[floret]	corolla	corollas  rose_purple  ,  ,  9  –  13  mm  ,  limb  minutely  glandular  .
+
+186.txt-9		corolla	[floret]	corolla	corollas  purple  ,  pink  ,  or  white  ,  7  .  5  –  12  mm  ,  glabrous  or  limb  glandular_puberulent  .
+
+187.txt-11		corolla	[floret]	corolla	corollas  blue  ,  pink  ,  or  white  ,  tubes  very  slender  ,  usually  bent  distally  ,  throats  abruptly  expanded  ,  lobes  linear  ;
+
+189.txt-11		corolla	[floret]	corolla	corollas  white  to  pink  ,  purple  ,  or  yellow  ;
+
+193.txt-13		corolla	[floret]	corolla	corollas  pink  to  purple  ,  ,  spreading  ,  lobes  (  5  –  6  )  ,  linear  ;
+
+195.txt-11		corolla	[floret]	corolla	corollas  pink  to  purple  ,  ±  zygomorphic  ,  elongate  and  expanded  ;
+
+198.txt-10		corolla	[floret]	corolla	corollas  purple  ,  ±  bilateral  ,  tubes  slender  ,  gradually  expanded  into  narrowly  funnelform  throats  ,  lobes  linear  ;
+
+199.txt-9		corolla	[floret]	corolla	corollas  ca  .  14  mm  ,  tube  with  branched  hairs  .
+
+200.txt-10		corolla	[floret]	corolla	corollas  yellow  to  red  or  ±  purple  ,  tubes  very  slender  ,  throats  gradually  or  abruptly  expanded  ,  ±  cylindric  or  short_campanulate  ,  lobes  linear  ;
+
+206.txt-10		corolla	[floret]	corolla	corollas  blue  ,  those  of  sterile  florets  raylike  ,  enlarged  ,  20  –  25  mm  ,  those  of  fertile  florets  10  –  15  mm  .
+
+208.txt-13		corolla	[floret]	corolla	corollas  purple  ,  ca  .  20  mm  ;
+
+209.txt-10		corolla	[floret]	corolla	corollas  yellow  ;
+
+210.txt-10		corolla	[floret]	corolla	corollas  reddish  purple  ,  those  of  sterile  florets  35  –  40  mm  ,  often  conspicuously  enlarged  ,  those  of  fertile  florets  20  –  25  mm  .
+
+211.txt-12		corolla	[floret]	corolla	corollas  purple  ,  those  of  sterile  florets  ±  expanded  ,  exceeding  corollas  of  fertile  florets  ,  those  of  fertile  florets  15  –  18  mm  .
+
+213.txt-12		corolla	[floret]	corolla	corollas  purple  ,  those  of  sterile  florets  ±  expanded  and  exceeding  corollas  of  fertile  florets  ,  those  of  fertile  florets  15  –  18  mm  .
+
+214.txt-12		corolla	[floret]	corolla	corollas  purple  ,  those  of  sterile  florets  ±  expanded  and  exceeding  corollas  of  fertile  florets  ,  those  of  fertile  florets  15  –  18  mm  .
+
+215.txt-12		corolla	[floret]	corolla	corollas  pink  or  purple  ,  those  of  sterile  much  expanded  and  exceeding  corollas  of  fertile  florets  ,  those  of  fertile  20  –  25  mm  .
+
+217.txt-10		corolla	[floret]	corolla	corollas  pink  to  purple  ,  those  of  sterile  florets  15  –  25  mm  ,  slender  or  somewhat  enlarged  ,  those  of  fertile  florets  12  –  15  mm  .
+
+218.txt-12		corolla	[floret]	corolla	corollas  cream  white  ,  those  of  sterile  florets  12  –  13  mm  ,  slender  ,  inconspicuous  ,  those  of  fertile  florets  12  –  13  mm  .
+
+220.txt-11		corolla	[floret]	corolla	corollas  pink  or  pale  purple  ,  those  of  sterile  florets  very  slender  ,  3  -  lobed  ,  linear  ,  not  exceeding  disc  corollas  ,  those  of  fertile  florets  7  –  9  mm  .
+
+221.txt-13		corolla	[floret]	corolla	corollas  purple  ,  all  ±  equal  ,  15  –  24  mm  ;
+
+222.txt-13		corolla	[floret]	corolla	corollas  white  ,  pink  ,  or  pale  purple  ,  those  of  sterile  florets  slender  ,  15  –  20  mm  ,  those  of  fertile  florets  15  –  20  mm  .
+
+223.txt-7		corolla	[floret]	corolla	corollas  yellow  ,  those  of  sterile  florets  linear  ,  3  -  lobed  ,  not  exceeding  disc  corollas  ,  very  slender  ,  those  of  disc  florets  19  –  24  mm  .
+
+224.txt-11		corolla	[floret]	corolla	corollas  pink_purple  ,  those  of  sterile  florets  25  –  30  mm  ,  enlarged  ,  raylike  ,  those  of  fertile  florets  ±  20  mm  .
+
+225.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  those  of  sterile  florets  10  –  12  mm  ,  slender  ,  inconspicuous  ,  those  of  fertile  florets  10  –  12  mm  .
+
+226.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  all  ±  equal  ,  13  –  20  mm  ;
+
+227.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  all  ±  equal  ,  25  –  35  mm  ;
+
+228.txt-10		corolla	[floret]	corolla	corollas  mostly  white  ,  yellow  ,  orange  ,  blue  ,  red  ,  or  purple  .
+
+228.txt-12		corolla	[floret]	corolla	corollas  yellow  or  dark  brown  to  purple  ,  actinomorphic  ,  lobes  [  4  –  ]  5  ,  narrowly  triangular  or  lanceolate  to  deltate  ;
+
+229.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  orange  ,  or  red  to  maroon  ,  laminae  5  -  veined  ,  4  -  toothed  .
+
+229.txt-11		corolla	[floret]	corolla	corollas  yellow  to  orange  .
+
+231.txt-9		corolla	[floret]	corolla	corollas  adaxially  yellow  or  ±  bluish  ,  laminae  4  -  veined  ,  3  -  toothed  .
+
+231.txt-11		corolla	[floret]	corolla	corollas  yellow  or  purplish  to  brownish  .
+
+232.txt-9		corolla	[floret]	corolla	corollas  yellow  proximally  ,  bluish  distally  .
+
+233.txt-9		corolla	[floret]	corolla	corollas  white  ,  cream  ,  yellow  ,  orange  ,  pink  ,  purple  ,  violet  ,  or  blue  ,  laminae  4  -  veined  ,  3  -  toothed  .
+
+233.txt-11		corolla	[floret]	corolla	corollas  yellow  or  brown  to  violet  or  purple  .
+
+236.txt-11		corolla	[floret]	corolla	corollas  white  ,  ochroleucous  ,  or  pink  to  cyanic  ;
+
+237.txt-11		corolla	[floret]	corolla	corollas  usually  blue  to  purplish  blue  ,  tubes  longer  than  funnelform  throats  ,  lobes  5  ,  lance_linear  .
+
+239.txt-9		corolla	[floret]	corolla	corollas  white  or  pink  to  purple  ,  tubes  longer  than  abruptly  funnelform  throats  ,  lobes  5  ,  lance_linear  ,  unequal  .
+
+244.txt-9		corolla	[floret]	corolla	corollas  white  or  pink  to  purple  ,  tubes  longer  than  abruptly  funnelform  throats  ,  lobes  5  ,  lance_linear  ,  unequal  .
+
+246.txt-8		corolla	[floret]	corolla	corollas  lavender  to  pink  or  purplish  ,  tubes  longer  than  funnelform  throats  ,  lobes  5  ,  lance_linear  ,  ±  equal  .
+
+248.txt-8		corolla	[floret]	corolla	corollas  usually  lavender  to  purplish  ,  tubes  longer  than  funnelform  throats  ,  lobes  5  ,  lance_linear  ,  ±  equal  .
+
+25.txt-11		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  ochroleucous  or  cyanic  .
+
+25.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  cyanic  ,  or  white  ,  usually  actinomorphic  ,  lobes  5  ,  usually  narrowly  triangular  to  ±  linear  ,  seldom  deltate  ;
+
+250.txt-8		corolla	[floret]	corolla	corollas  usually  purplish  or  pink  ,  tubes  longer  than  funnelform  throats  ,  lobes  5  ,  lance_linear  ,  ±  equal  .
+
+26.txt-11		corolla	[floret]	corolla	corollas  yellow  to  maroon  ,  tubular_funnelform  ,  lobes  triangular  ;
+
+268.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  to  orange  ,  sometimes  cyanic  or  white  ;
+
+269.txt-14		corolla	[floret]	corolla	corollas  yellow  .
+
+272.txt-15		corolla	[floret]	corolla	corollas  usually  blue  ,  sometimes  pink  or  white  .
+
+274.txt-14		corolla	[floret]	corolla	corollas  usually  yellow  or  orange  ,  sometimes  white  ,  pink  ,  or  reddish  .
+
+275.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  10  –  18  mm  .
+
+276.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  10  –  18  mm  .
+
+277.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  16  –  20  mm  .
+
+281.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  18  –  20  mm  .
+
+282.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  12  –  18  mm  .
+
+283.txt-10		corolla	[floret]	corolla	corollas  light  yellow  ,  greenish  abaxially  ,  10  –  11  mm  .
+
+284.txt-11		corolla	[floret]	corolla	corollas  deep  yellow  ,  8  –  12  mm  .
+
+285.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  6  –  8  mm  .
+
+286.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  9  –  16  mm  .
+
+287.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  14  –  30  mm  .
+
+288.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  13  –  22  mm  .
+
+29.txt-11		corolla	[floret]	corolla	corollas  white  to  greenish  ,  blue_gray  ,  blue  ,  or  purple  ,  tubes  elongate  ,  throats  very  short  ,  lobes  linear  ;
+
+293.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  16  –  21  mm  .
+
+294.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  purple_tinged  abaxially  ,  9  –  12  mm  .
+
+296.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  10  –  11  mm  .
+
+297.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  18  –  22  mm  .
+
+3.txt-9		corolla	[floret]	corolla	corollas  reddish  purple  to  greenish  white  ,  actinomorphic  ;
+
+302.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  15  –  18  mm  .
+
+303.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  15  –  20  mm  .
+
+304.txt-10		corolla	[floret]	corolla	corollas  light  yellow  ,  5  –  12  mm  .
+
+305.txt-10		corolla	[floret]	corolla	corollas  pink  or  white  ,  16  –  17  mm  .
+
+306.txt-10		corolla	[floret]	corolla	corollas  golden  yellow  ,  9  –  18  mm  .
+
+314.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  reddish  abaxially  ,  8  –  10  mm  .
+
+315.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  10  –  13  mm  .
+
+316.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  6  –  15  mm  .
+
+317.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  deep  purplish  red  abaxially  ,  7  mm  .
+
+318.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  greenish  ,  rarely  cream  or  pale  pink  ,  often  purplish_or  gray_striped  abaxially  .
+
+319.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  15  –  22  ×  1  .  7  –  2  mm  .
+
+320.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  13  –  17  ×  1  –  1  .  3  mm  .
+
+321.txt-10		corolla	[floret]	corolla	corollas  sulphur  yellow  ,  outer  with  abaxial  purplish  or  grayish  stripe  ,  12  –  16  ×  1  –  1  .  5  mm  .
+
+322.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  outer  abaxially  gray_striped  ,  13  –  14  ×  1  .  4  –  2  .  2  mm  .
+
+323.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  15  –  22  ×  1  .  1  –  1  .  7  mm  .
+
+324.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  drying  cream  to  whitish  ,  10  –  22  ×  1  –  2  .  8  mm  .
+
+325.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  14  –  25  ×  0  .  8  –  1  .  5  +  mm  .
+
+326.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  outer  abaxially  striped  pale  purplish  ,  9  –  10  ×  1  .  5  –  2  .
+
+327.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  outer  grayish_purplish  striped  abaxially  ,  19  –  25  ×  1  .  3  –  2  .  3  mm  .
+
+328.txt-10		corolla	[floret]	corolla	corollas  cream_colored  to  white  or  pink_tinged  distally  ,  outer  pinkish_striped  abaxially  ,  15  –  20  ×  1  .  2  –  3  mm  .
+
+329.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  sometimes  drying  pinkish  ,  outer  abaxially  gray  to  purple  striped  ,  10  –  12  ×  2  –  3  .  1  mm  .
+
+330.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  7  .  5  –  8  .  8  ×  1  .  3  –  2  mm  .
+
+331.txt-10		corolla	[floret]	corolla	corollas  dark  yellow  ,  15  –  20  ×  1  –  3  mm  .
+
+332.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  outer  11  –  14  ×  1  .  5  –  2  .  4  mm  .
+
+333.txt-10		corolla	[floret]	corolla	corollas  pink  purplish  to  pinkish  cream  ,  outer  13  –  14  ×  2  .  4  –  2  .  6  mm  .
+
+334.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+336.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+338.txt-14		corolla	[floret]	corolla	corollas  yellow  .
+
+34.txt-10		corolla	[floret]	corolla	corollas  white  or  purple  ,  actinomorphic  or  weakly  zygmorphic  ,  tubes  slender  ,  throats  cylindric  or  narrowly  goblet_shaped  ,  lobes  linear  ;
+
+340.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  abaxially  purplish  .
+
+341.txt-7		corolla	[floret]	corolla	corollas  mostly  4  .  5  –  6  .  5  mm  ;
+
+342.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+344.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+346.txt-13		corolla	[floret]	corolla	corollas  usually  bluish  .
+
+348.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  bluish  ,  or  whitish  .
+
+349.txt-7		corolla	[floret]	corolla	corollas  bluish  or  whitish  ,  sometimes  yellowish  ,  seldom  deliquescent  .
+
+350.txt-7		corolla	[floret]	corolla	corollas  bluish  or  whitish  ,  seldom  deliquescent  .
+
+351.txt-7		corolla	[floret]	corolla	corollas  bluish  or  yellowish  ,  usually  deliquescent  .
+
+352.txt-7		corolla	[floret]	corolla	corollas  bluish  to  purplish  ,  usually  deliquescent  .
+
+353.txt-7		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  drying  bluish  ,  usually  deliquescent  .
+
+354.txt-7		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  bluish  ,  usually  deliquescent  .
+
+355.txt-7		corolla	[floret]	corolla	corollas  yellow  ,  usually  deliquescent  .
+
+356.txt-7		corolla	[floret]	corolla	corollas  yellow  ,  usually  deliquescent  .
+
+357.txt-7		corolla	[floret]	corolla	corollas  yellow  ,  usually  deliquescent  .
+
+358.txt-7		corolla	[floret]	corolla	corollas  yellow  ,  usually  deliquescent  .
+
+359.txt-14		corolla	[floret]	corolla	corollas  usually  creamy  white  ,  pink  ,  or  lavender  ,  rarely  yellow  or  red  .
+
+360.txt-13		corolla	[floret]	corolla	corollas  white  to  purplish  ,  9  –  16  mm  .
+
+361.txt-13		corolla	[floret]	corolla	corollas  whitish  to  pale  pink  ,  lavender  or  red  ,  9  –  15  mm  .
+
+362.txt-13		corolla	[floret]	corolla	corollas  pale  yellow  to  greenish  yellow  ,  7  –  15  mm  .
+
+363.txt-13		corolla	[floret]	corolla	corollas  pale  yellow  to  creamy  white  ,  9  –  17  mm  .
+
+364.txt-13		corolla	[floret]	corolla	corollas  usually  pinkish  ,  sometimes  lavender  or  white  ,  11  –  17  mm  .
+
+365.txt-14		corolla	[floret]	corolla	corollas  white  to  yellowish  white  ,  13  –  16  mm  .
+
+366.txt-13		corolla	[floret]	corolla	corollas  white  ,  7  –  13  mm  .
+
+367.txt-13		corolla	[floret]	corolla	corollas  white  to  creamy  ,  11  .  5  –  13  .  5  mm  .
+
+368.txt-13		corolla	[floret]	corolla	corollas  usually  white  ,  sometimes  yellow  ,  9  –  15  mm  .
+
+369.txt-14		corolla	[floret]	corolla	corollas  usually  pinkish  ,  sometimes  white  or  lavender  ,  7  –  13  mm  .
+
+370.txt-14		corolla	[floret]	corolla	corollas  greenish  yellow  ,  8  –  10  mm  .
+
+371.txt-13		corolla	[floret]	corolla	corollas  white  ,  9  –  15  mm  .
+
+372.txt-14		corolla	[floret]	corolla	corollas  usually  yellow  to  pale  yellow  ,  9  –  15  mm  .
+
+373.txt-13		corolla	[floret]	corolla	corollas  pale  yellow  ,  9  –  15  mm  .
+
+374.txt-13		corolla	[floret]	corolla	corollas  yellow  to  ochroleucous  .
+
+376.txt-13		corolla	[floret]	corolla	corollas  yellow  to  orange  .
+
+384.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+386.txt-13		corolla	[floret]	corolla	corollas  mostly  yellow  .
+
+388.txt-13		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  white  or  ochroleucous  ,  sometimes  tinged  with  cyan  or  red  ,  rarely  orange  .
+
+389.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  13  +  mm  .
+
+39.txt-12		corolla	[floret]	corolla	corollas  white  ,  blue  ,  or  purple  ,  tubes  very  slender  ,  throats  abruptly  expanded  ,  cylindric  ,  lobes  linear  ;
+
+390.txt-12		corolla	[floret]	corolla	corollas  orange  ,  10  –  14  +  mm  .
+
+391.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  6  –  10  +  mm  .
+
+392.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  +  mm  .
+
+393.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  12  +  mm  .
+
+394.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  6  –  9  mm  .
+
+395.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  .  5  –  10  mm  .
+
+396.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  ca  .  7  mm  .
+
+397.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  9  +  mm  .
+
+398.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  10  –  12  +  mm  .
+
+399.txt-12		corolla	[floret]	corolla	corollas  pale  yellow  to  ochroleucous  ,  7  –  13  +  mm  .
+
+400.txt-12		corolla	[floret]	corolla	corollas  whitish  to  pinkish  ,  ca  .  8  mm  .
+
+401.txt-12		corolla	[floret]	corolla	corollas  whitish  to  pale  yellow  ,  8  –  9  mm  .
+
+402.txt-12		corolla	[floret]	corolla	corollas  ochroleucous  ,  ca  .  8  mm  .
+
+403.txt-12		corolla	[floret]	corolla	corollas  ochroleucous  to  yellow  ,  5  –  8  mm  .
+
+404.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  10  –  18  mm  .
+
+405.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  5  –  8  mm  .
+
+406.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  9  –  11  mm  .
+
+407.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  ca  .  10  mm  .
+
+408.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  10  –  12  mm  .
+
+409.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  7  –  12  mm  .
+
+410.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  7  –  9  mm  .
+
+411.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  10  mm  .
+
+412.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  9  –  11  mm  .
+
+413.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  12  –  13  (  –  16  )  mm  .
+
+414.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  13  –  18  mm  .
+
+415.txt-12		corolla	[floret]	corolla	corollas  yellow  .
+
+416.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  12  –  15  mm  .
+
+417.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  5  –  6  mm  .
+
+418.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  9  –  10  mm  .
+
+419.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  9  mm  .
+
+420.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  7  –  11  mm  .
+
+421.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  ca  .  12  mm  .
+
+422.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  6  –  9  mm  .
+
+423.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  10  mm  .
+
+424.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  8  –  10  +  mm  .
+
+425.txt-13		corolla	[floret]	corolla	corollas  yellow  to  orange  .
+
+426.txt-10		corolla	[floret]	corolla	corollas  deep  yellow  ,  13  –  16  mm  .
+
+427.txt-10		corolla	[floret]	corolla	corollas  bright  yellow  or  outermost  orange  or  reddish  ,  12  –  15  mm  .
+
+428.txt-10		corolla	[floret]	corolla	corollas  bright  yellow  to  grayish  yellow  ,  8  –  15  mm  .
+
+43.txt-10		corolla	[floret]	corolla	corollas  white  to  pink  or  purple  ,  ±  bilateral  ,  tubes  long  ,  slender  ,  throats  short  ,  campanulate  ,  abruptly  expanded  from  tubes  ,  lobes  linear  ;
+
+431.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  striped  abaxially  with  red  .
+
+433.txt-14		corolla	[floret]	corolla	corollas  usually  yellow  or  orange  ,  sometimes  grayish  green  or  reddish  abaxially  ,  rarely  white  ,  .
+
+434.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  5  –  7  mm  ,  equaling  phyllaries  at  flowering  .
+
+435.txt-10		corolla	[floret]	corolla	corollas  white  to  yellowish  ,  5  –  8  mm  ,  ±  equaling  phyllaries  at  flowering  .
+
+437.txt-9		corolla	[floret]	corolla	corollas  white  ,  5  –  7  mm  ,  not  surpassing  phyllaries  at  flowering  .
+
+438.txt-9		corolla	[floret]	corolla	corollas  bright  yellow  or  grayish  green  .
+
+439.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+441.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+443.txt-13		corolla	[floret]	corolla	corollas  yellow  .
+
+445.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  often  reddish  abaxially  .
+
+448.txt-13		corolla	[floret]	corolla	corollas  yellow  or  purple  .
+
+449.txt-6		corolla	[floret]	corolla	corollas  yellow  .
+
+450.txt-6		corolla	[floret]	corolla	corollas  yellow  .
+
+451.txt-6		corolla	[floret]	corolla	corollas  yellow  .
+
+452.txt-6		corolla	[floret]	corolla	corollas  purple  .
+
+453.txt-6		corolla	[floret]	corolla	corollas  each  proximally  yellow  and  distally  purple  or  brownish  purple  .
+
+454.txt-13		corolla	[floret]	corolla	corollas  whitish  to  yellow  or  purplish  .
+
+457.txt-16		corolla	[floret]	corolla	corollas  white  or  yellow  .
+
+460.txt-14		corolla	[floret]	corolla	corollas  white  ,  sometimes  tipped  with  rose  or  purple  .
+
+461.txt-5		corolla	[floret]	corolla	corollas  8  –  20  mm  ,  inner  with  bases  yellow  or  purple  ,  much  shorter  than  outer  .
+
+462.txt-13		corolla	[floret]	corolla	corollas  cream  to  bright  yellow  .
+
+464.txt-14		corolla	[floret]	corolla	corollas  yellow  or  white  .
+
+465.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  to  pale  yellow  ,  sometimes  white  ,  16  –  20  mm  ;
+
+466.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  4  –  7  .  4  mm  ;
+
+467.txt-10		corolla	[floret]	corolla	corollas  usually  pale  yellow  ,  sometimes  white  ,  8  –  12  mm  ;
+
+468.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  6  –  14  mm  ;
+
+469.txt-10		corolla	[floret]	corolla	corollas  white  or  yellow  ,  7  –  15  mm  ;
+
+470.txt-10		corolla	[floret]	corolla	corollas  light  to  medium  yellow  ,  5  –  17  mm  ;
+
+475.txt-10		corolla	[floret]	corolla	corollas  usually  pale  yellow  ,  sometimes  white  ,  15  –  23  +  mm  ;
+
+476.txt-10		corolla	[floret]	corolla	corollas  medium  yellow  ,  11  –  20  mm  ;
+
+477.txt-10		corolla	[floret]	corolla	corollas  medium  yellow  ,  4  –  8  mm  ;
+
+478.txt-10		corolla	[floret]	corolla	corollas  medium  yellow  ,  7  –  11  mm  ;
+
+479.txt-10		corolla	[floret]	corolla	corollas  white  ,  5  –  8  mm  ;
+
+480.txt-10		corolla	[floret]	corolla	corollas  white  ,  13  –  20  mm  ;
+
+486.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  4  –  9  mm  ;
+
+487.txt-9		corolla	[floret]	corolla	corollas  lemon  yellow  ,  10  –  14  (  –  16  )  mm  ;
+
+488.txt-10		corolla	[floret]	corolla	corollas  white  or  pale  yellow  ,  6  –  10  +  mm  ;
+
+489.txt-10		corolla	[floret]	corolla	corollas  light  yellow  ,  12  –  19  mm  ;
+
+490.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  white  ,  6  –  7  mm  ;
+
+491.txt-10		corolla	[floret]	corolla	corollas  medium  yellow  ,  14  –  20  mm  ;
+
+492.txt-13		corolla	[floret]	corolla	corollas  pale  yellow  ,  usually  reddish  abaxially  .
+
+494.txt-14		corolla	[floret]	corolla	corollas  yellow  ,  or  orange  ,  pink  ,  red  ,  or  purple  .
+
+495.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  tubes  4  –  18  mm  ,  ligules  6  –  24  ×  2  –  5  mm  ;
+
+498.txt-11		corolla	[floret]	corolla	corollas  usually  orange  ,  sometimes  yellow  ,  pink  ,  red  ,  purple  ,  or  white  ,  tubes  (  4  –  )  7  –  9  mm  ,  ligules  4  –  12  ×  1  –  3  mm  ;
+
+5.txt-9		corolla	[floret]	corolla	corollas  pink  to  lavender  or  white  ,  zygomorphic  ;
+
+501.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  (  4  –  )  6  –  15  mm  ,  ligules  10  –  20  ×  2  –  4  mm  ;
+
+502.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  tubes  4  –  10  mm  ,  ligules  5  –  11  ×  2  –  4  mm  ;
+
+503.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  4  –  7  (  –  10  )  mm  ,  ligules  3  –  7  ×  ca  .  1  mm  ;
+
+506.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  tubes  8  –  20  mm  ,  ligules  6  –  15  ×  1  .  5  –  2  .  5  mm  ;
+
+507.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  tubes  2  –  5  .  5  mm  ,  ligules  3  –  16  ×  1  –  3  mm  ;
+
+51.txt-9		corolla	[floret]	corolla	corollas  white  to  pink  ,  red  ,  yellow  or  purple  ,  ±  bilateral  ,  tubes  long  ,  slender  ,  distally  bent  ,  throats  short  ,  abruptly  expanded  ,  cylindric  ,  lobes  linear  ;
+
+511.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  tubes  3  –  6  mm  ,  ligules  6  –  16  ×  2  –  3  mm  ;
+
+512.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  1  –  5  mm  ,  ligules  2  –  15  ×  1  –  3  mm  ;
+
+513.txt-8		corolla	[floret]	corolla	corollas  ±  equaling  phyllaries  at  flowering  ,  tubes  1  –  4  mm  ,  ligules  2  –  6  ×  1  –  2  mm  ;
+
+514.txt-8		corolla	[floret]	corolla	corollas  much  surpassing  phyllaries  at  flowering  ,  tubes  2  –  5  mm  ,  ligules  10  –  15  ×  2  –  3  mm  ;
+
+515.txt-5		corolla	[floret]	corolla	corollas  ±  equaling  phyllaries  at  flowering  ,  tubes  2  –  3  mm  ,  ligules  2  –  3  ×  0  .  8  –  1  .  5  mm  ;
+
+516.txt-10		corolla	[floret]	corolla	corollas  orange  or  yellow  ,  tubes  8  –  10  mm  ,  ligules  6  –  8  (  –  12  )  ×  1  –  3  mm  ;
+
+517.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  often  reddish  abaxially  .
+
+522.txt-13		corolla	[floret]	corolla	corollas  yellow  to  orange  or  white  ,  outer  often  purplish  abaxially  .
+
+523.txt-12		corolla	[floret]	corolla	corollas  yellow_orange  ,  surpassing  phyllaries  by  5  +  mm  .
+
+524.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  surpassing  phyllaries  by  5  +  mm  .
+
+525.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  surpassing  phyllaries  by  5  +  mm  .
+
+530.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  surpassing  phyllaries  by  5  +  mm  .
+
+531.txt-13		corolla	[floret]	corolla	corollas  yellow_orange  ,  surpassing  phyllaries  by  5  +  mm  .
+
+532.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  surpassing  phyllaries  by  5  +  mm  .
+
+533.txt-12		corolla	[floret]	corolla	corollas  yellow  or  white  ,  equaling  or  surpassing  phyllaries  by  1  –  3  mm  .
+
+537.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  equaling  or  surpassing  phyllaries  by  1  –  3  mm  .
+
+538.txt-13		corolla	[floret]	corolla	corollas  yellow  or  white  ,  equaling  or  surpassing  phyllaries  by  1  –  3  mm  .
+
+539.txt-13		corolla	[floret]	corolla	corollas  yellow  or  orange  ,  equaling  or  surpassing  phyllaries  by  1  –  3  mm  .
+
+540.txt-13		corolla	[floret]	corolla	corollas  yellow  or  orange  ,  equaling  or  surpassing  phyllaries  by  1  –  2  mm  .
+
+541.txt-13		corolla	[floret]	corolla	corollas  yellow  or  white  ,  outer  often  purplish  abaxially  .
+
+542.txt-3		corolla	[floret]	corolla	corollas  yellow  .
+
+543.txt-3		corolla	[floret]	corolla	corollas  yellow  or  white  .
+
+544.txt-12		corolla	[floret]	corolla	corollas  white  ,  sometimes  with  rose  or  purplish  veins  abaxially  .
+
+547.txt-13		corolla	[floret]	corolla	corollas  rosy  to  purplish  .
+
+549.txt-13		corolla	[floret]	corolla	corollas  usually  pink  or  lavender  ,  sometimes  white  .
+
+571.txt-13		corolla	[floret]	corolla	corollas  pink  or  white  .
+
+573.txt-14		corolla	[floret]	corolla	corollas  pink  or  lavender  .
+
+575.txt-13		corolla	[floret]	corolla	corollas  white  to  pale  yellow  ,  becoming  pink_purple  .
+
+576.txt-7		corolla	[floret]	corolla	corollas  white  to  cream  ,  aging  pink  or  purple  ,  ligules  4  –  10  mm  ,  equaling  or  scarcely  exserted  beyond  involucres  .
+
+577.txt-7		corolla	[floret]	corolla	corollas  cream  to  pale  yellow  ,  aging  pink  or  purple  ,  ligules  15  –  25  mm  ,  exserted  10  –  20  mm  beyond  involucres  .
+
+578.txt-14		corolla	[floret]	corolla	corollas  yellow  to  orange  .
+
+579.txt-11		corolla	[floret]	corolla	corollas  yellow  to  yellow_orange  ,  abaxially  often  purplish_tinged  ,  15  –  25  mm  .
+
+580.txt-12		corolla	[floret]	corolla	corollas  orange  or  yellow_orange  ,  15  –  25  mm  .
+
+581.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  15  –  25  mm  .
+
+582.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  often  purplish  abaxially  ,  5  –  12  mm  .
+
+583.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  5  –  9  mm  .
+
+584.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  4  –  7  mm  .
+
+585.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  2  –  11  mm  .
+
+588.txt-14		corolla	[floret]	corolla	corollas  pale  lavender  to  white  .
+
+590.txt-13		corolla	[floret]	corolla	corollas  pale  purple  or  lavender  ,  with  white_tips  .
+
+592.txt-13		corolla	[floret]	corolla	corollas  usually  pink  to  lavender  or  purple  ,  rarely  white  .
+
+593.txt-12		corolla	[floret]	corolla	corollas  pink  to  lavender  or  blue  ,  30  –  40  mm  ,  ligules  4  –  6  mm  wide  .
+
+594.txt-11		corolla	[floret]	corolla	corollas  20  –  40  mm  ,  lavender  ,  pink  ,  purple  ,  rose  ,  or  white  ,  ligules  5  –  10  mm  wide  .
+
+595.txt-8		corolla	[floret]	corolla	corollas  pink  to  lavender  .
+
+596.txt-9		corolla	[floret]	corolla	corollas  pale  pink  to  white  .
+
+597.txt-9		corolla	[floret]	corolla	corollas  purple  to  lavender  or  white  .
+
+598.txt-9		corolla	[floret]	corolla	corollas  lavender  ,  rose  ,  or  white  .
+
+6.txt-9		corolla	[floret]	corolla	corollas  pink  or  lavender_pink  ,  12  –  22  mm  .
+
+600.txt-11		corolla	[floret]	corolla	corollas  usually  light  pink  to  lavender  ,  rarely  white  ,  18  –  20  mm  ,  ligules  3  –  4  mm  wide  .
+
+601.txt-11		corolla	[floret]	corolla	corollas  lavender  ,  12  –  16  mm  ,  ligules  5  –  6  mm  wide  .
+
+602.txt-10		corolla	[floret]	corolla	corollas  usually  pink  ,  purple  ,  or  lavender  ,  rarely  white  ,  35  –  40  mm  ,  ligules  5  –  6  mm  wide  .
+
+603.txt-12		corolla	[floret]	corolla	corollas  yellow  .
+
+605.txt-14		corolla	[floret]	corolla	corollas  pink  ,  purple  ,  lavender  ,  or  nearly  white  .
+
+606.txt-8		corolla	[floret]	corolla	corollas  pink  ,  6  –  8  mm  .
+
+607.txt-8		corolla	[floret]	corolla	corollas  pale  pink  abaxially  ,  white  to  yellow  adaxially  ,  15  –  18  mm  .
+
+608.txt-13		corolla	[floret]	corolla	corollas  yellow  to  whitish  .
+
+613.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  to  orange  and  /  or  cyanic  to  white  .
+
+613.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  orange  ,  or  cyanic  ,  lobes  5  ,  ±  deltate  ;
+
+614.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  laminae  ±  ovate  to  elliptic  or  linear  .
+
+614.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  tubes  shorter  than  ±  campanulate  throats  .
+
+616.txt-9		corolla	[floret]	corolla	corollas  usually  yellow  to  orange  or  white  ,  sometimes  purplish  abaxially  and  /  or  at  bases  or  apices  ,  laminae  oblong_elliptic  to  oblanceolate  .
+
+616.txt-11		corolla	[floret]	corolla	corollas  whitish  or  yellow  ,  red  ,  or  purplish  ,  tubes  much  shorter  than  ±  campanulate  throats  .
+
+617.txt-6		corolla	[floret]	corolla	corollas  yellow  to  orange  ,  usually  purplish  distally  ,  4  –  5  mm  .
+
+618.txt-6		corolla	[floret]	corolla	corollas  whitish  to  yellowish  ,  usually  bluish  to  purplish  distally  ,  4  –  6  mm  .
+
+619.txt-9		corolla	[floret]	corolla	corollas  yellow  to  orange  ,  laminae  linear  to  oblanceolate  .
+
+619.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  reddish  ,  or  purplish  ,  tubes  shorter  than  ±  campanulate  throats  .
+
+620.txt-6		corolla	[floret]	corolla	corollas  2  .  5  –  4  mm  .
+
+621.txt-6		corolla	[floret]	corolla	corollas  (  4  –  )  5  –  6  +  mm  .
+
+622.txt-9		corolla	[floret]	corolla	corollas  whitish  to  purplish  or  yellow  to  orange  ,  laminae  ±  oblong_elliptic  to  oblanceolate  .
+
+622.txt-11		corolla	[floret]	corolla	corollas  yellow  or  purplish  ,  tubes  shorter  than  the  ±  campanulate  throats  .
+
+623.txt-5		corolla	[floret]	corolla	corollas  abaxially  usually  violet  to  blue  or  purplish  ,  sometimes  cream  to  pink  or  salmon  ,  adaxially  whitish  to  blue  or  purplish  ,  laminae  (  15  –  )  20  –  45  +  mm  .
+
+623.txt-7		corolla	[floret]	corolla	corollas  ±  purplish  ,  3  .  5  –  4  .  5  mm  .
+
+624.txt-5		corolla	[floret]	corolla	corollas  yellow  to  orange  ,  laminae  4  –  8  (  –  15  +  )  mm  .
+
+624.txt-7		corolla	[floret]	corolla	corollas  yellow  to  orange  ,  3  –  4  mm  .
+
+625.txt-11		corolla	[floret]	corolla	corollas  yellow  or  purplish  to  whitish  ,  sometimes  red_tipped  .
+
+625.txt-13		corolla	[floret]	corolla	corollas  yellow  or  purplish  ,  sometimes  red_tipped  ,  usually  actinomorphic  ,  lobes  usually  (  4  –  )  5  ,  usually  ±  deltate  ,  rarely  lance_ovate  to  lanceolate  ;
+
+680.txt-11		corolla	[floret]	corolla	corollas  yellowish  .
+
+680.txt-13		corolla	[floret]	corolla	corollas  yellowish  .
+
+7.txt-9		corolla	[floret]	corolla	corollas  lavender_pink  or  white  ,  10  –  17  mm  .
+
+702.txt-12		corolla	[floret]	corolla	corollas  yellowish  .
+
+702.txt-14		corolla	[floret]	corolla	corollas  usually  yellowish  .
+
+704.txt-11		corolla	[floret]	corolla	corollas  yellowish  .
+
+704.txt-13		corolla	[floret]	corolla	corollas  yellowish  .
+
+706.txt-12		corolla	[floret]	corolla	corollas  yellow  .
+
+706.txt-14		corolla	[floret]	corolla	corollas  yellow  .
+
+708.txt-12		corolla	[floret]	corolla	corollas  purplish  or  whitish  .
+
+708.txt-14		corolla	[floret]	corolla	corollas  purplish  or  whitish  .
+
+712.txt-12		corolla	[floret]	corolla	corollas  all  yellow  or  purplish_tipped  .
+
+712.txt-14		corolla	[floret]	corolla	corollas  all  yellow  or  distally  purplish  .
+
+713.txt-10		corolla	[floret]	corolla	all  corollas  usually  purplish  distally  .
+
+714.txt-10		corolla	[floret]	corolla	all  corollas  usually  purplish  distally  .
+
+715.txt-9		corolla	[floret]	corolla	all  corollas  yellowish  distally  .
+
+716.txt-9		corolla	[floret]	corolla	all  corollas  brownish  yellow  to  purple  distally  .
+
+717.txt-9		corolla	[floret]	corolla	all  corollas  purple_to  yellow_brown  distally  .
+
+718.txt-9		corolla	[floret]	corolla	all  corollas  usually  yellowish  ,  sometimes  purplish  distally  .
+
+719.txt-9		corolla	[floret]	corolla	all  corollas  usually  purplish  distally  .
+
+720.txt-9		corolla	[floret]	corolla	all  corollas  purple  distally  .
+
+721.txt-9		corolla	[floret]	corolla	all  corollas  usually  purple  distally  .
+
+722.txt-9		corolla	[floret]	corolla	all  corollas  purplish  distally  .
+
+723.txt-9		corolla	[floret]	corolla	all  corollas  usually  purplish  distally  .
+
+724.txt-9		corolla	[floret]	corolla	all  corollas  yellowish  .
+
+725.txt-11		corolla	[floret]	corolla	corollas  purplish  or  whitish  .
+
+725.txt-13		corolla	[floret]	corolla	corollas  purplish  or  whitish  ,  distally  purplish  or  reddish  .
+
+729.txt-11		corolla	[floret]	corolla	corollas  purple  or  distally  purplish  .
+
+729.txt-13		corolla	[floret]	corolla	corollas  purple  or  distally  purplish  .
+
+733.txt-11		corolla	[floret]	corolla	corollas  whitish  to  purplish  .
+
+733.txt-13		corolla	[floret]	corolla	corollas  white  to  purplish  .
+
+736.txt-15		corolla	[floret]	corolla	corollas  2  .  3  –  3  mm  ,  lobes  mostly  4  ,  reddish  to  purplish  .
+
+737.txt-15		corolla	[floret]	corolla	corollas  1  .  9  –  2  .  8  mm  ,  lobes  mostly  4  ,  bright  reddish  to  purplish  .
+
+738.txt-15		corolla	[floret]	corolla	corollas  1  .  3  –  2  mm  ,  lobes  mostly  5  ,  yellowish  to  brownish  .
+
+739.txt-15		corolla	[floret]	corolla	corollas  1  .  2  –  1  .  7  mm  ,  lobes  mostly  5  ,  brownish  to  yellowish  .
+
+740.txt-15		corolla	[floret]	corolla	corollas  1  .  6  –  2  .  1  mm  ,  lobes  mostly  4  ,  brownish  to  yellowish  .
+
+741.txt-15		corolla	[floret]	corolla	corollas  2  .  2  –  3  mm  ,  lobes  mostly  4  ,  brownish  to  yellowish  .
+
+747.txt-14		corolla	[floret]	corolla	corollas  1  –  1  .  8  mm  .
+
+748.txt-14		corolla	[floret]	corolla	corollas  1  –  1  .  6  mm  .
+
+749.txt-14		corolla	[floret]	corolla	corollas  0  .  9  –  1  .  4  mm  .
+
+750.txt-14		corolla	[floret]	corolla	corollas  1  .  2  –  1  .  9  mm  .
+
+751.txt-14		corolla	[floret]	corolla	corollas  1  .  1  –  2  .  3  mm  .
+
+752.txt-14		corolla	[floret]	corolla	corollas  1  .  1  –  1  .  7  mm  .
+
+753.txt-14		corolla	[floret]	corolla	corollas  0  .  8  –  1  .  1  mm  .
+
+768.txt-12		corolla	[floret]	corolla	corollas  protruding  from  heads  ,  ±  zygomorphic  ,  0  .  5  –  0  .  9  mm  ,  glabrous  ,  lobes  unequal  .
+
+769.txt-12		corolla	[floret]	corolla	corollas  hidden  in  heads  ,  actinomorphic  ,  1  .  8  –  2  .  5  mm  ,  often  ±  spreading_arachnoid  ,  lobes  equal  .
+
+772.txt-12		corolla	[floret]	corolla	corollas  hidden  in  heads  ,  actinomorphic  ,  1  .  4  –  2  mm  ,  glabrous  ,  lobes  equal  .
+
+781.txt-13		corolla	[floret]	corolla	corollas  0  .  8  –  1  .  1  mm  .
+
+784.txt-13		corolla	[floret]	corolla	corollas  0  .  6  –  1  mm  .
+
+785.txt-13		corolla	[floret]	corolla	corollas  0  .  7  –  1  mm  .
+
+786.txt-13		corolla	[floret]	corolla	corollas  0  .  6  –  0  .  8  mm  .
+
+787.txt-13		corolla	[floret]	corolla	corollas  0  .  7  –  1  mm  .
+
+788.txt-12		corolla	[floret]	corolla	corollas  1  .  1  –  1  .  6  mm  .
+
+789.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  reddish  .
+
+789.txt-12		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  reddish  ,  not  2  -  lipped  ,  lobes  (  4  –  )  5  ,  usually  ±  deltate  ;
+
+790.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  laminae  1  .  5  –  2  +  mm  .
+
+790.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  lobes  5  .
+
+791.txt-6		corolla	[floret]	corolla	corollas  2  –  3  mm  .
+
+792.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  aging  reddish  ,  laminae  2  –  7  mm  .
+
+792.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  aging  reddish  ,  lobes  4  –  5  .
+
+793.txt-7		corolla	[floret]	corolla	corollas  3  –  4  mm  .
+
+794.txt-9		corolla	[floret]	corolla	corollas  yellow  ,  laminae  10  –  30  +  mm  .
+
+794.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  lobes  5  .
+
+798.txt-11		corolla	[floret]	corolla	corollas  usually  pink  to  purplish  ,  sometimes  whitish  or  ochroleucous  ,  rarely  yellowish  .
+
+798.txt-13		corolla	[floret]	corolla	corollas  usually  pink  to  purplish  ,  sometimes  whitish  or  ochroleucous  ,  rarely  yellowish  ,  not  2  -  lipped  ,  lobes  (  4  –  )  5  ,  deltate  ;
+
+799.txt-12		corolla	[floret]	corolla	corollas  yellowish  .
+
+799.txt-14		corolla	[floret]	corolla	corollas  yellowish  ,  lobes  5  .
+
+8.txt-9		corolla	[floret]	corolla	corollas  lavender_pink  ,  7  –  12  mm  .
+
+802.txt-11		corolla	[floret]	corolla	corollas  whitish  .
+
+802.txt-13		corolla	[floret]	corolla	corollas  whitish  ,  lobes  (  4  –  )  5  .
+
+804.txt-11		corolla	[floret]	corolla	corollas  creamy  white  ,  whitish  ,  yellowish  ,  pinkish  ,  lavender  ,  purplish  ,  or  rosy  .
+
+804.txt-13		corolla	[floret]	corolla	corollas  creamy  white  ,  whitish  ,  yellowish  ,  pinkish  ,  lavender  ,  purplish  ,  or  rosy  ,  lobes  (  4  –  )  5  .
+
+816.txt-10		corolla	[floret]	corolla	corollas  usually  yellow  or  white  ,  sometimes  reddish  to  cyanic  .
+
+816.txt-12		corolla	[floret]	corolla	corollas  usually  present  ,  usually  yellow  ,  sometimes  ochroleucous  or  reddish  to  cyanic  ,  sometimes  lacking  .
+
+816.txt-14		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  ochroleucous  or  reddish  to  cyanic  ;
+
+817.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  narrowly  funnelform  to  campanulate  ,  lobes  (  4  –  )  5  ,  ±  deltate  .
+
+819.txt-8		corolla	[floret]	corolla	corollas  white  ,  laminae  2  –  8  (  –  12  )  mm  .
+
+822.txt-12		corolla	[floret]	corolla	corollas  usually  white  ,  sometimes  pale  yellow  to  pink  or  purple  ,  laminae  orbiculate  to  suborbiculate  .
+
+822.txt-14		corolla	[floret]	corolla	corollas  white  to  grayish  or  yellowish  ,  tubes  ±  flattened  ,  throats  ±  campanulate  ,  lobes  5  ,  ±  deltate  .
+
+823.txt-9		corolla	[floret]	corolla	corollas  white  or  light  pink  to  deep  purple  ,  laminae  1  .  5  –  3  ×  1  .  5  –  3  mm  .
+
+823.txt-11		corolla	[floret]	corolla	corollas  white  to  grayish  white  ,  2  –  4  .  5  mm  .
+
+824.txt-9		corolla	[floret]	corolla	corollas  white  ,  laminae  1  –  1  .  5  ×  2  –  2  .  5  mm  .
+
+824.txt-11		corolla	[floret]	corolla	corollas  grayish  white  ,  1  .  5  –  2  .  5  mm  .
+
+825.txt-9		corolla	[floret]	corolla	corollas  white  ,  laminae  suborbiculate  ,  4  –  5  ×  4  –  5  mm  .
+
+825.txt-11		corolla	[floret]	corolla	corollas  grayish  white  ,  ca  .  3  mm  .
+
+826.txt-9		corolla	[floret]	corolla	corollas  white  ,  laminae  1  –  3  ×  2  –  3  mm  .
+
+826.txt-11		corolla	[floret]	corolla	corollas  grayish  or  yellowish  white  ,  2  –  3  mm  .
+
+827.txt-12		corolla	[floret]	corolla	corollas  orange  ,  yellow  ,  or  white  with  yellow  bases  ,  laminae  ±  oblong  .
+
+827.txt-14		corolla	[floret]	corolla	corollas  orange  or  yellow  ,  tubes  ±  cylindric  ,  throats  campanulate  to  funnelform  ,  lobes  5  ,  deltate  .
+
+829.txt-12		corolla	[floret]	corolla	corollas  white  ,  laminae  oblong  .
+
+829.txt-14		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  funnelform  ,  lobes  5  ,  deltate  .
+
+832.txt-13		corolla	[floret]	corolla	corollas  pale  to  bright  or  deep  yellow  ,  tubes  often  compressed  ,  throats  ±  funnelform  ,  lobes  5  ,  lance_ovate  .
+
+834.txt-12		corolla	[floret]	corolla	corollas  pale  yellow  ,  tubes  ±  cylindric  ,  throats  campanulate  ,  lobes  5  ,  ±  deltate  .
+
+836.txt-12		corolla	[floret]	corolla	corollas  usually  bright  yellow  ,  tubes  ±  cylindric  ,  throats  ±  campanulate  ,  lobes  5  ,  ±  deltate  .
+
+847.txt-12		corolla	[floret]	corolla	corollas  usually  pale  yellow  ,  rarely  red  ,  tubes  ±  cylindric  ,  throats  subglobose  or  funnelform  ,  lobes  5  ,  ±  deltate  .
+
+848.txt-9		corolla	[floret]	corolla	corollas  subglobose  .
+
+849.txt-12		corolla	[floret]	corolla	corollas  purplish  red  ,  1  .  5  –  2  mm  ,  hairy  .
+
+850.txt-11		corolla	[floret]	corolla	corollas  yellow_orange  or  deep  red  ,  2  .  2  –  3  .  5  .
+
+853.txt-11		corolla	[floret]	corolla	corollas  pale  yellow  ,  sparsely  hairy  or  glabrous  .
+
+857.txt-14		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  .  8  –  2  mm  ,  eglandular  or  sparsely  glandular  .
+
+858.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  –  1  .  5  mm  ,  glabrous  .
+
+859.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  usually  red_tinged  ,  2  –  3  mm  ,  glabrous  .
+
+860.txt-12		corolla	[floret]	corolla	corollas  pale  yellow  ,  2  .  2  –  4  .  5  mm  ,  glandular  .
+
+861.txt-13		corolla	[floret]	corolla	corollas  pale  yellow  ,  ca  .  2  mm  ,  glabrous  .
+
+862.txt-9		corolla	[floret]	corolla	corollas  funnelform  .
+
+863.txt-9		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  ,  glabrous  .
+
+867.txt-11		corolla	[floret]	corolla	corollas  1  –  1  .  5  mm  .
+
+868.txt-9		corolla	[floret]	corolla	corollas  2  –  3  mm  ,  resinous  .
+
+872.txt-9		corolla	[floret]	corolla	corollas  2  –  3  mm  ,  glabrous  .
+
+873.txt-9		corolla	[floret]	corolla	corollas  2  .  5  –  3  mm  ,  glandular  .
+
+874.txt-9		corolla	[floret]	corolla	corollas  yellowish  red  to  red  ,  2  –  2  .  8  mm  .
+
+875.txt-9		corolla	[floret]	corolla	corollas  2  .  5  –  3  .  5  mm  .
+
+876.txt-9		corolla	[floret]	corolla	corollas  2  .  5  –  3  .  5  ,  glabrous  .
+
+877.txt-9		corolla	[floret]	corolla	corollas  1  .  5  –  2  .  5  mm  ,  glabrous  .
+
+882.txt-9		corolla	[floret]	corolla	corollas  2  –  2  .  5  mm  ,  glandular  .
+
+885.txt-9		corolla	[floret]	corolla	corollas  funnelform  .
+
+886.txt-10		corolla	[floret]	corolla	corollas  1  –  2  mm  ,  glandular  .
+
+887.txt-10		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  ,  glabrous  .
+
+888.txt-11		corolla	[floret]	corolla	corollas  ,  2  –  3  mm  ,  mostly  glabrous  .
+
+889.txt-10		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  ,  glabrous  or  glandular  .
+
+890.txt-10		corolla	[floret]	corolla	corollas  1  .  5  –  2  .  5  mm  ,  hairy  .
+
+891.txt-9		corolla	[floret]	corolla	corollas  funnelform  .
+
+892.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  0  .  5  –  1  mm  ,  glandular  .
+
+893.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  2  –  2  .  5  mm  ,  glabrous  or  glandular  .
+
+894.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  0  .  5  –  1  mm  ,  glabrous  .
+
+895.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  ca  .  2  mm  ,  glabrous  .
+
+896.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  0  .  8  –  1  .  2  mm  ,  glabrous  .
+
+897.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  –  2  mm  ,  glandular_pubescent  .
+
+898.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  –  1  .  5  mm  ,  glabrous  ,  sometimes  glandular  .
+
+899.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  1  .  5  –  2  mm  ,  glabrous  .
+
+9.txt-9		corolla	[floret]	corolla	corollas  pink  or  purple  ,  9  –  20  mm  .
+
+900.txt-10		corolla	[floret]	corolla	corollas  mostly  yellow  ,  sometimes  red_tinged  ,  1  –  2  mm  ,  glabrous  or  glabrate  .
+
+901.txt-10		corolla	[floret]	corolla	corollas  yellow  or  reddish  black  ,  2  –  3  mm  ,  sometimes  glandular  .
+
+904.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  2  –  2  .  5  mm  ,  glabrous  or  sparsely  pilose  .
+
+905.txt-10		corolla	[floret]	corolla	corollas  yellowish  or  yellow  to  reddish_tinged  ,  1  –  2  mm  ,  hairy  .
+
+908.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  –  2  mm  ,  sparsely  glandular  .
+
+909.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  red_tinged  ,  1  .  5  –  2  .  8  mm  ,  glabrous  .
+
+910.txt-8		corolla	[floret]	corolla	corollas  1  .  9  –  2  .  8  mm  .
+
+911.txt-8		corolla	[floret]	corolla	corollas  1  –  1  .  5  mm  .
+
+912.txt-8		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  .
+
+913.txt-8		corolla	[floret]	corolla	corollas  yellow  ,  sometimes  red_tinged  ,  1  .  5  –  2  mm  .
+
+914.txt-8		corolla	[floret]	corolla	corollas  ca  .  1  .  5  mm  .
+
+915.txt-9		corolla	[floret]	corolla	corollas  2  mm  .
+
+916.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  1  –  1  .  5  mm  ,  glandular  .
+
+917.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  .  2  –  1  .  5  mm  ,  glandular  .
+
+919.txt-10		corolla	[floret]	corolla	corollas  yellow  or  red_tinged  ,  1  .  5  –  2  .  5  (  –  3  .  5  )  mm  ,  long_hairy  .
+
+920.txt-10		corolla	[floret]	corolla	corollas  bright  yellow  ,  1  .  3  –  2  .  2  mm  ,  glandular  .
+
+921.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  .  5  –  2  .  2  mm  ,  resinous_glandular  .
+
+922.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  ca  .  2  mm  ,  glandular  .
+
+923.txt-12		corolla	[floret]	corolla	corollas  pale  yellow  ,  0  .  2  –  0  .  3  mm  ,  sometimes  gland_dotted  .
+
+924.txt-10		corolla	[floret]	corolla	corollas  yellow  or  tan  ,  1  .  5  –  2  ,  glandular  .
+
+925.txt-10		corolla	[floret]	corolla	corollas  pale  yellow  ,  1  .  5  –  2  mm  ,  sparsely  glandular  .
+
+926.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  3  .  2  –  4  mm  ,  glabrous  or  sparsely  hairy  .
+
+927.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  1  .  5  –  3  mm  ,  glabrous  .
+
+928.txt-10		corolla	[floret]	corolla	corollas  yellow  ,  1  .  5  –  3  mm  ,  glabrous  .
+
+929.txt-10		corolla	[floret]	corolla	corollas  yellowish  to  reddish  brown  ,  1  .  5  –  3  mm  ,  glabrous  .
+
+930.txt-11		corolla	[floret]	corolla	corollas  white  ,  laminae  obovate  .
+
+930.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  campanulate  ,  lobes  5  ,  deltate  .
+
+932.txt-11		corolla	[floret]	corolla	corollas  white  ,  laminae  lance_elliptic  or  elliptic  to  oblong  or  oblong_lanceolate  .
+
+932.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  broadly  cylindric  ,  throats  campanulate  ,  lobes  5  ,  deltate  .
+
+936.txt-12		corolla	[floret]	corolla	corollas  usually  white  ,  rarely  yellow  or  pink  ,  laminae  mostly  oblong  .
+
+936.txt-14		corolla	[floret]	corolla	corollas  usually  yellow  ,  rarely  pink  ,  tubes  ±  cylindric  ,  throats  funnelform  ,  lobes  5  ,  ±  triangular  .
+
+937.txt-8		corolla	[floret]	corolla	corollas  white  ,  rarely  tinged  with  pink  ,  laminae  5  –  15  mm  .
+
+938.txt-8		corolla	[floret]	corolla	corollas  white  ,  laminae  5  –  15  +  mm  .
+
+939.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  lobes  4  ,  triangular  .
+
+941.txt-11		corolla	[floret]	corolla	corollas  white  ,  laminae  elliptic_ovate  .
+
+941.txt-13		corolla	[floret]	corolla	corollas  yellow  to  greenish  yellow  or  yellowish  green  ,  tubes  ±  dilated  ,  throats  urceolate  to  campanulate  ,  lobes  4  –  5  ,  deltate  .
+
+942.txt-12		corolla	[floret]	corolla	corollas  greenish  yellow  ,  1  .  1  –  1  .  3  mm  ,  lobes  4  (  –  5  )  .
+
+943.txt-12		corolla	[floret]	corolla	corollas  greenish  yellow  ,  1  .  2  –  1  .  7  mm  ,  lobes  4  .
+
+944.txt-10		corolla	[floret]	corolla	corollas  white  ,  tubes  narrowly  winged  ,  laminae  soon  deflexed  ,  7  –  8  .  5  ×  2  .  4  –  3  .  3  mm  .
+
+944.txt-13		corolla	[floret]	corolla	corollas  yellow  to  greenish  yellow  ,  1  .  6  –  1  .  8  mm  ,  lobes  5  .
+
+945.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  abruptly  dilated  ,  lobes  5  ,  triangular  .
+
+947.txt-12		corolla	[floret]	corolla	corollas  ochroleucous  or  yellow  ,  tubes  ±  cylindric  ,  throats  abruptly  ampliate  ,  lobes  (  3  –  )  4  ,  ±  deltate  .
+
+950.txt-12		corolla	[floret]	corolla	corollas  yellowish  or  whitish  ,  tubes  ±  cylindric  ,  throats  campanulate  to  funnelform  ,  lobes  (  2  –  )  4  ,  ±  deltate  .
+
+951.txt-7		corolla	[floret]	corolla	corollas  1  .  5  –  2  .  5  mm  .
+
+952.txt-7		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  .
+
+953.txt-6		corolla	[floret]	corolla	corollas  1  .  5  –  2  mm  .
+
+954.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  laminae  oblong  .
+
+954.txt-14		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  compressed  ,  throats  funnelform  ,  lobes  5  ,  deltate  .
+
+956.txt-10		corolla	[floret]	corolla	corollas  white  ,  laminae  mostly  oblong  .
+
+956.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  cylindric  ,  throats  narrowly  campanulate  ,  lobes  5  ,  deltate  .
+
+957.txt-6		corolla	[floret]	corolla	corollas  (  4  –  )  10  –  13  (  –  20  )  mm  .
+
+961.txt-11		corolla	[floret]	corolla	corollas  yellow  ,  laminae  ±  linear  .
+
+961.txt-13		corolla	[floret]	corolla	corollas  proximally  ochroleucous  ,  distally  yellow  ,  tubes  cylindric  ,  throats  funnelform  ,  lobes  5  ,  deltate  .
+
+963.txt-11		corolla	[floret]	corolla	corollas  usually  white  ,  sometimes  yellow  or  pink  ,  laminae  ±  ovate  to  linear  .
+
+963.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  campanulate  ,  lobes  5  ,  deltate  .
+
+965.txt-11		corolla	[floret]	corolla	corollas  proximally  white  or  red  to  purple  ,  distally  yellow  or  white  ,  laminae  ±  linear  .
+
+965.txt-13		corolla	[floret]	corolla	corollas  proximally  ochroleucous  ,  distally  red  to  purple  ,  tubes  cylindric  ,  throats  funnelform  ,  lobes  5  ,  deltate  .
+
+967.txt-11		corolla	[floret]	corolla	corollas  mostly  white  ,  laminae  oblong  to  ovate  .
+
+967.txt-13		corolla	[floret]	corolla	corollas  ±  yellow  ,  tubes  ±  cylindric  ,  throats  ±  campanulate  ,  lobes  (  2  –  )  5  ,  deltate  .
+
+969.txt-11		corolla	[floret]	corolla	corollas  mostly  yellow  ,  sometimes  paler  distally  ,  laminae  linear  ,  oblong  ,  or  ovate  .
+
+969.txt-13		corolla	[floret]	corolla	corollas  ±  yellow  ,  tubes  ±  cylindric  ,  throats  funnelform  ,  lobes  5  ,  narrowly  deltate  .
+
+972.txt-11		corolla	[floret]	corolla	corollas  white  ,  laminae  ±  ovate  to  linear  .
+
+972.txt-13		corolla	[floret]	corolla	corollas  yellow  ,  tubes  cylindric  ,  throats  ±  campanulate  ,  lobes  5  ,  deltate  .
+
+974.txt-11		corolla	[floret]	corolla	corollas  usually  white  ,  sometimes  reddish  ,  laminae  ±  ovate  to  linear  .
+
+974.txt-13		corolla	[floret]	corolla	corollas  usually  yellow  ,  sometimes  reddish  ,  tubes  ±  cylindric  ,  throats  campanulate  ,  lobes  5  ,  deltate  .
+
+976.txt-10		corolla	[floret]	corolla	corollas  white  ,  laminae  ovate  to  linear  .
+
+976.txt-12		corolla	[floret]	corolla	corollas  yellow  ,  tubes  ±  cylindric  ,  throats  campanulate  ,  lobes  5  ,  deltate  .
+
+831.txt-9		lamina	[floret]	lamina	laminae  7  –  10  +  mm  .
+
+977.txt-9		lamina	[floret]	lamina	laminae  12  –  20  (  –  35  +  )  mm  .
+
+978.txt-9		lamina	[floret]	lamina	laminae  20  –  30  (  –  40  +  )  mm  .
+
+499.txt-3		ditto	[peduncle]	length	lengths  mostly  shorter  than  leaves  at  flowering  ,  glabrate  ,  or  apically  villous  .
+
+781.txt-5		ditto	[petiole]	length	lengths  0  .  9  –  1  .  5  times  blade  lengths  ,  bases  thickened  ,  cartilaginous  to  ±  indurate  ;
+
+784.txt-5		ditto	[petiole]	length	lengths  0  –  1  .  5  times  blade  lengths  ,  bases  scarcely  thickened  ,  pliant  to  somewhat  cartilaginous  ;
+
+788.txt-5		ditto	[petiole]	length	lengths  2  –  3  times  blade  lengths  ,  bases  thickened  ,  indurate  ;
+
+67.txt-1		branch	[plant]	branch	branches  3  –  5  +  ,  long  .
+
+104.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  to  spreading  .
+
+107.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  to  spreading  .
+
+108.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+111.txt-3		branch	[stem]	branch	branches  0  –  10  +  ,  usually  arising  in  distal  1  /  2  ,  ascending  ,  usually  reaching  a  ±  common  height  .
+
+114.txt-3		branch	[stem]	branch	branches  few  –  many  ,  usually  from  above  mid  or  near  base  in  compact  ,  moundlike  dwarf  plants  ,  ascending  to  spreading  .
+
+122.txt-3		branch	[stem]	branch	branches  few  –  many  ,  usually  from  above  middle  ,  ascending  .
+
+123.txt-3		branch	[stem]	branch	branches  ±  fleshy  ,  usually  much  branched  proximally  ,  spreading  to  ascending  .
+
+124.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+130.txt-3		branch	[stem]	branch	branches  0  –  few  ,  distal  ,  ascending  .
+
+131.txt-3		branch	[stem]	branch	branches  0  –  several  ,  stiffly  ascending  .
+
+132.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+136.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+137.txt-3		branch	[stem]	branch	branches  on  distal  stems  0  –  many  ,  short  ,  ascending  .
+
+138.txt-3		branch	[stem]	branch	branches  on  distal  stems  0  –  many  ,  short  ,  ascending  .
+
+139.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  ,  often  nodding  at  tips  .
+
+149.txt-3		branch	[stem]	branch	branches  usually  short  ,  stout  ,  ascending  .
+
+160.txt-3		branch	[stem]	branch	branches  0  or  few  ,  ascending  .
+
+162.txt-3		branch	[stem]	branch	branches  0  –  several  ,  inclined  to  ascending  ,  stiff  .
+
+163.txt-3		branch	[stem]	branch	branches  several  to  many  ,  spreading  .
+
+167.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  .
+
+168.txt-3		branch	[stem]	branch	branches  on  distal  stems  several  ,  ascending  .
+
+169.txt-3		branch	[stem]	branch	branches  several  to  many  ,  stiffly  ascending  ,  distally  nodding  .
+
+193.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  .
+
+53.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+54.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  ,  .
+
+548.txt-1		branch	[stem]	branch	branches  to  1  cm  thick  ,  fleshy  ,  studded  with  persistent  petiole  bases  proximally  .
+
+55.txt-3		branch	[stem]	branch	branches  0  or  few  ,  ascending  .
+
+56.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  .
+
+57.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  .
+
+574.txt-1		branch	[stem]	branch	branches  4  –  8  cm  .
+
+58.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  .
+
+59.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  .
+
+60.txt-3		branch	[stem]	branch	branches  0  –  few  from  above  middle  ,  ascending  .
+
+61.txt-3		branch	[stem]	branch	branches  0  –  5  (  –  10  )  ,  stiffly  ascending  .
+
+62.txt-3		branch	[stem]	branch	branches  0  –  many  ,  spreading  to  ascending  ,  short  ,  stout  .
+
+66.txt-3		branch	[stem]	branch	branches  0  –  few  ,  distal  ,  ascending  .
+
+69.txt-3		branch	[stem]	branch	branches  few  ,  ascending  .
+
+70.txt-3		branch	[stem]	branch	branches  few  ,  usually  distal  ,  ascending  .
+
+71.txt-3		branch	[stem]	branch	branches  0  –  few  in  distal  1  /  3  ,  ascending  .
+
+72.txt-3		branch	[stem]	branch	branches  few  –  many  ,  ascending  .
+
+73.txt-3		branch	[stem]	branch	branches  0  –  many  ,  usually  restricted  to  distal  part  ,  ascending  .
+
+736.txt-2		branch	[stem]	branch	branches  leafy  between  proximal  forks  ,  remaining  grayish  to  whitish  ,  lanuginose  to  sericeous  .
+
+737.txt-2		branch	[stem]	branch	branches  leafy  between  proximal  forks  ,  remaining  grayish  to  greenish  ,  arachnoid_sericeous  .
+
+738.txt-2		branch	[stem]	branch	branches  ±  leafy  between  proximal  forks  ,  remaining  grayish  to  whitish  ,  lanuginose  .
+
+739.txt-2		branch	[stem]	branch	branches  usually  leafless  between  proximal  forks  ,  becoming  purplish  to  black  ,  glabrescent  .
+
+74.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  .
+
+740.txt-2		branch	[stem]	branch	branches  leafy  between  proximal  forks  ,  remaining  grayish  ,  arachnoid_sericeous  .
+
+741.txt-2		branch	[stem]	branch	branches  ±  leafy  between  proximal  forks  ,  remaining  grayish  to  greenish  ,  arachnoid_sericeous  .
+
+75.txt-3		branch	[stem]	branch	branches  0  –  few  ,  usually  above  middle  ,  ascending  .
+
+76.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  .
+
+768.txt-2		branch	[stem]	branch	branches  proximal  or  none  .
+
+769.txt-2		branch	[stem]	branch	branches  proximal  and  distal  ,  rarely  none  .
+
+77.txt-3		branch	[stem]	branch	branches  few  to  many  ,  ascending  .
+
+772.txt-2		branch	[stem]	branch	branches  proximal  and  distal  ,  rarely  none  .
+
+773.txt-2		branch	[stem]	branch	branches  ±  equal  ,  distal  mostly  spreading  to  ascending  .
+
+774.txt-2		branch	[stem]	branch	branches  equal  to  unequal  ,  distal  strictly  ascending  to  erect  .
+
+778.txt-2		branch	[stem]	branch	branches  mostly  distal  .
+
+78.txt-3		branch	[stem]	branch	branches  0  or  few  ,  usually  above  middle  in  distal  1  /  2  ,  ascending  .
+
+781.txt-2		branch	[stem]	branch	branches  0  or  proximal  .
+
+784.txt-2		branch	[stem]	branch	branches  usually  0  ,  sometimes  proximal  and  /  or  distal  .
+
+785.txt-2		branch	[stem]	branch	branches  usually  0  .
+
+786.txt-2		branch	[stem]	branch	branches  proximal  and  /  or  distal  .
+
+787.txt-2		branch	[stem]	branch	branches  0  .
+
+788.txt-2		branch	[stem]	branch	branches  0  or  proximal  .
+
+79.txt-3		branch	[stem]	branch	branches  0  to  several  ,  ascending  to  spreading  .
+
+80.txt-3		branch	[stem]	branch	branches  0  or  few  ,  usually  in  distal  1  /  2  ,  ascending  .
+
+83.txt-3		branch	[stem]	branch	branches  0  –  many  ,  ascending  .
+
+84.txt-3		branch	[stem]	branch	branches  few  ,  above  middle  ,  ascending  .
+
+85.txt-3		branch	[stem]	branch	branches  0  –  4  ,  ascending  .
+
+86.txt-3		branch	[stem]	branch	branches  0  –  few  ,  ascending  .
+
+87.txt-3		branch	[stem]	branch	branches  0  –  5  +  ,  usually  in  distal  1  /  2  ,  ascending  .
+
+90.txt-3		branch	[stem]	branch	branches  0  –  10  +  ,  slender  ,  usually  arising  in  distal  1  /  2  ,  ascending  .
+
+95.txt-3		branch	[stem]	branch	branches  0  –  10  +  ,  slender  ,  usually  arising  in  distal  1  /  2  ,  ascending  .
+
+99.txt-3		branch	[stem]	branch	branches  many  ,  usually  restricted  to  distal  part  of  stem  ,  ascending  .
+
+88.txt-1	abaxial  leaf	face	adaxial  leaf	face	adaxial  leaf  faces  gray_to  white_tomentose  .
+
+89.txt-1	abaxial  leaf	face	adaxial  leaf	face	adaxial  leaf  faces  glabrous  to  thinly  gray_tomentose  .
+
+788.txt-8	adjacent  head	receptacle		receptacle	receptacles  of  adjacent  heads  proximally  connate  ,  0  .  4  –  0  .  7  ×  0  .  5  –  0  .  7  mm  .
+
+11.txt-10	anther  basal	appendage		anther	anther  basal  appendages  entire  ,  apical  appendages  oblong  ,  acute  ;
+
+15.txt-10	anther  basal	appendage		anther	anther  basal  appendages  laciniate  ,  apical  appendages  lanceolate  ,  rounded  to  apiculate  ;
+
+17.txt-11	anther  basal	appendage		anther	anther  basal  appendages  entire  ,  apical  appendages  narrowly  triangular  ;
+
+19.txt-12	anther  basal	appendage		anther	anther  basal  appendages  entire  ,  apical  appendages  lanceolate  ;
+
+23.txt-11	anther  basal	appendage		anther	anther  basal  appendages  entire  ,  apical  appendages  lanceolate  ;
+
+3.txt-10	anther  basal	appendage		anther	anther  basal  appendages  slightly  fimbriate  ,  apical  appendages  lanceolate  ,  acute  ;
+
+5.txt-10	anther  basal	appendage		anther	anther  basal  appendages  entire  ,  elongate  ,  rounded  ,  apical  appendages  lanceolate  ;
+
+196.txt-11	bisexual  floret	[corolla]		ditto	of  bisexual  florets  pinkish  ,  20  –  25  mm  .
+
+197.txt-12	bisexual  floret	[corolla]		ditto	of  bisexual  yellowish  ,  20  –  30  mm  .
+
+576.txt-4	bractlet	margin	[calyculus]	margin	margins  of  bractlets  crustose_dentate  ±  throughout  .
+
+761.txt-2	capitular	leaf		leaf	capitular  leaves  :
+
+762.txt-2	capitular	leaf		leaf	capitular  leaves  :
+
+605.txt-6	cauline	[leaf]	cauline  foliaceous  or  reduced  to  minute	bract	cauline  foliaceous  or  reduced  to  minute  bracts  distally  .
+
+593.txt-6	cauline	[leaf]	cauline  similar  or  reduced  to	scale	cauline  similar  or  reduced  to  scales  .
+
+606.txt-3	cauline  [leaf]	[blade]	cauline	[blade]	cauline  progressively  reduced  to  linear  bracts  .
+
+192.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  linear  to  lanceolate  ,  smaller  distally  ,  dentate  to  pinnately  dissected  .
+
+206.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  linear  ,  usually  not  much  smaller  except  among  heads  ,  usually  entire  .
+
+273.txt-3	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  similar  ,  smaller  ,  narrower  ,  distal  mostly  linear  .
+
+274.txt-6	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  usually  present  ,  lobed  or  entire  ,  usually  reduced  in  size  and  lobing  distally  .
+
+338.txt-6	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  relatively  few  ,  reduced  .
+
+551.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+552.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+553.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+561.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+562.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+564.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  and  bractlike  .
+
+565.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+566.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+567.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  reduced  ,  scalelike  on  plants  of  spring  and  early  summer  ,  linear  and  threadlike  on  plants  of  late  summer  .
+
+568.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  much  reduced  ,  bractlike  .
+
+594.txt-5	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  similar  ,  sometimes  reduced  to  scales  distally  .
+
+595.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  similar  ,  reduced  to  scales  distally  .
+
+596.txt-4	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  not  reduced  to  scales  .
+
+599.txt-4	cauline  [leaf]	blade	cauline	[leaf]	cauline  reduced  distally  ,  not  scalelike  .
+
+600.txt-5	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  reduced  to  subulate  scales  .
+
+861.txt-5	cauline  [leaf]	[blade]	cauline	[leaf]	cauline  somewhat  reduced  ,  2  –  3  ×  0  .  8  –  1  .  2  cm  ;
+
+125.txt-3	cauline  [leaf]	base	cauline  [blade]	base	cauline  bases  narrowed  ,  truncate  or  clasping  ,  but  not  or  only  slightly  decurrent  .
+
+126.txt-3	cauline  [leaf]	base	cauline  [blade]	base	cauline  bases  usually  narrowed  ,  not  decurrent  .
+
+127.txt-3	cauline  [leaf]	base	cauline  [blade]	base	cauline  bases  narrowed  to  truncate  or  clasping  or  decurrent  as  spiny  wings  to  30  mm  .
+
+128.txt-3	cauline  [leaf]	base	cauline  [blade]	base	cauline  bases  usually  decurrent  as  spiny  wings  to  30  mm  .
+
+129.txt-3	cauline  [leaf]	base	cauline  [blade]	base	cauline  bases  narrowed  to  truncate  or  ±  clasping  ,  but  not  or  only  slightly  decurrent  .
+
+190.txt-2	cauline  [leaf]	blade	cauline  [blade]	blade	cauline  blades  linear  to  lanceolate  ,  margins  dentate  to  pinnately  dissected  into  linear_lanceolate  segments  .
+
+848.txt-8	central	[floret]		central	central  3  –  32  functionally  staminate  ;
+
+885.txt-8	central	[floret]		central	central  15  –  100  bisexual  and  fertile  ;
+
+891.txt-8	central	[floret]		central	central  14  –  70  bisexual  and  fertile  ;
+
+270.txt-5	cypsela  or  palea	unit		cypsela	cypsela  /  palea  units  ±  obovate  ,  2  .  5  –  4  mm  ;
+
+271.txt-5	cypsela  or  palea	unit		cypsela	cypsela  /  palea  units  ±  orbiculate  to  ovate  ,  3  –  5  mm  ;
+
+966.txt-4	disc	[cypsela]		disc	disc  2  .  5  –  3  .  5  mm  .
+
+457.txt-3	distal	stem  and  branch  and  involucre		distal  stem  and  branch  and  involucre	distal  stems  ,  branches  ,  and  involucres  conspicuously  dotted  with  short  ,  stipitate  ,  flat_topped  glands  that  resemble  tacks  .
+
+20.txt-6	inner	floret	inner  [floret]	floret	inner  florets  bisexual  ,  fertile  .
+
+21.txt-6	inner	floret	inner  [floret]	floret	inner  florets  bisexual  ,  fertile  .
+
+22.txt-6	inner	floret	inner  [floret]	floret	inner  florets  functionally  staminate  .
+
+795.txt-6	inner	phyllary	inner  [phyllary]	phyllary	inner  phyllaries  progressively  narrower  ,  less  hairy  ,  more  scarious  .
+
+796.txt-6	inner	phyllary	inner  [phyllary]	phyllary	inner  phyllaries  similar  ,  more  scarious  .
+
+305.txt-12	inner	[cypsela]	outer	[cypsela]	outer  curved  ,  8  –  9  mm  ,  coarsely  beaked  ,  inner  straight  ,  12  –  21  mm  ,  finely  beaked  ,  ribs  10  ;
+
+230.txt-8	inner	[phyllary]	the  inner	[phyllary]	the  inner  with  margins  undulate  ,  ciliate  ,  with  ±  submarginal  dark  stripe  ,  cuspidate  .
+
+17.txt-10	inner	[floret]	[floret]  inner  NUMBER	floret	inner  2  –  10  florets  functionally  staminate  ,  corollas  white  or  ochroleucous  ,  actinomorphic  ;
+
+23.txt-10	inner	[floret]	[floret]  inner  NUMBER	floret	inner  6  –  20  +  florets  bisexual  ,  fertile  ,  corollas  usually  whitish  ;
+
+19.txt-10	inner  pistillate_zone	floret	inner	pistillate_zone	inner  pistillate_zone  florets  0  or  3  –  50  in  1  –  2  series  ,  fertile  ,  corollas  usually  ±  zygomorphic  ,  sometimes  reduced  to  tubes  ;
+
+71.txt-14	inner  [phyllary]	apex	inner  all  [phyllary]	apex	apices  of  inner  all  straight  and  entire  or  innermost  ±  flexuous  ,  erose  .
+
+19.txt-11	innermost	floret	innermost  [floret]	floret	innermost  florets  usually  bisexual  and  fertile  ,  sometimes  functionally  staminate  ,  15  –  40  ,  corollas  whitish  to  pinkish  ,  usually  zygomorphic  ,  sometimes  nearly  actinomorphic  ;
+
+208.txt-9	innermost	phyllary	innermost  [phyllary]	phyllary	innermost  phyllaries  sometimes  unappendaged  .
+
+778.txt-4	leaf  or  petiole	base	[leaf]	base	bases  ±  attenuate  ,  1  -  nerved  ,  greenish  ,  herbaceous  ,  scarcely  involucral  .
+
+131.txt-7	main  cauline	[leaf]		main	main  cauline  reduced  distally  ,  bases  clasping  ;
+
+166.txt-8	marginal	spine	[phyllary]  marginal	spine	marginal  spines  usually  absent  .
+
+60.txt-6	mid  and  distal  cauline	[leaf]	mid  and  distal	[leaf]	mid  and  distal  nearly  uniform  in  size  or  gradually  reduced  ,  bases  clasping  ;
+
+167.txt-8	mid  cauline	[leaf]	mid	[leaf]	mid  sessile  ,  much  reduced  ,  less  deeply  lobed  ,  bases  clasping  ,  short_decurrent  0  –  2  cm  ;
+
+149.txt-14	middle  and  inner  [phyllary]	apex	mid  [phyllary]	apex	apices  of  mid  and  inner  narrowed  and  scabrid_denticulate  ,  innermost  spineless  ,  with  expanded  ,  flexuous  ,  erose_denticulate  tips  .
+
+150.txt-13	middle  and  inner  [phyllary]	apex	mid  [phyllary]	apex	apices  of  mid  and  inner  narrowed  and  scabro_denticulate  or  with  expanded  ,  erose_dentate  tips  ,  spineless  or  tipped  with  flattened  spines  .
+
+160.txt-14	middle  and  inner  [phyllary]	apex	mid  [phyllary]	apex	apices  of  mid  and  inner  narrowed  and  scabrido_denticulate  or  with  expanded  ,  spinuloso_serrate  or_dentate  tips  ,  spineless  or  spine_tipped  .
+
+66.txt-13	middle  and  inner  [phyllary]	apex	middle  [phyllary]	apex	apices  of  middle  and  inner  narrowed  and  scabrid_denticulate  ,  innermost  spineless  ,  tapered  and  entire  or  with  expanded  ,  erose_denticulate  ,  flexuous  tips  .
+
+196.txt-10	neutral  floret	corolla	floret	corolla	corollas  of  neutral  florets  pink_purple  ,  35  –  50  mm  ,  enlarged  ,  raylike  ;
+
+197.txt-11	neutral  floret	corolla	floret	corolla	corollas  of  neutral  florets  pink  to  purple  ,  30  –  70  mm  ,  enlarged  ,  raylike  ;
+
+2.txt-12	outer	floret		ditto	(  2  )  outer  florets  pistillate  and  inner  bisexual  ,  corollas  actinomorphic  ;
+
+2.txt-13	outer	floret		ditto	and  (  3  )  outer  florets  pistillate  ,  corollas  usually  zygomorphic  ,  sometimes  lacking  limbs  ,  inner  florets  bisexual  or  functionally  staminate  ,  corollas  zygomorphic  or  actinomorphic  ;
+
+735.txt-23	outer	[pappus]	outer  pistillate	[pappus]	outer  pistillate  0  ,  inner  pistillate  and  bisexual  of  (  11  –  )  13  –  28  +  bristles  .
+
+742.txt-22	outer	[pappus]	outer  pistillate	[pappus]	outer  pistillate  0  ,  inner  pistillate  and  bisexual  of  [  3  –  ]  13  –  21  bristles  .
+
+145.txt-4	outer	phyllary	outer  [involucre]	phyllary	outer  phyllaries  with  a  few  stiff  lateral  spines  ;
+
+177.txt-7	outer	phyllary	outer  [phyllary]	phyllary	outer  phyllaries  usually  2  –  4  times  longer  than  wide  .
+
+17.txt-9	outer	floret	[floret]  outer  NUMBER	floret	outer  3  –  7  florets  pistillate  ,  corollas  white  or  ochroleucous  ,  obscurely  zygomorphic  ;
+
+175.txt-7	outer  and  mid  phyllary	tip	outer  [phyllary]	tip	tips  of  outer  and  mid  phyllaries  acute  .
+
+180.txt-9	outer  and  mid  phyllary	tip	outer  [phyllary]	tip	tips  of  outer  and  mid  phyllaries  ±  rounded  .
+
+111.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  loosely  spreading  to  ascending  or  appressed  ,  apices  subappressed  to  ascending  or  spreading  ,  flat  ,  spines  ascending  to  spreading  ,  fine  ,  2  –  4  mm  ;
+
+114.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  appressed  ,  entire  ,  apices  deflexed  to  spreading  or  ascending  ,  short_triangular  to  elongate  ,  linear_acicular  ,  spines  spreading  to  reflexed  ,  1  –  10  +  mm  ;
+
+122.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  appressed  ,  entire  or  minutely  spinulose  ,  apices  deflexed  to  spreading  or  ascending  ,  long  ,  flat  ,  spines  spreading  to  reflexed  ,  4  –  15  mm  ;
+
+123.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  appressed  ,  spiny_ciliate  ,  apices  long_spreading  to  ascending  long_acuminate  ,  spines  straight  ,  stout  ,  5  –  15  mm  ;
+
+124.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  appressed  ,  short  ,  entire  ,  apices  spreading  to  ascending  ,  inconspicuous  to  long  ,  narrow  ,  entire  or  minutely  ciliolate  ,  spines  erect  to  reflexed  to  ascending  ,  slender  to  stout  ,  cylindric  or  basally  flattened  ,  1  –  30  mm  ;
+
+131.txt-13	outer  and  mid  [phyllary]	body	outer  and  mid	body	outer  and  mid  bodies  short  ,  appressed  ,  entire  or  spinulose_ciliate  ,  apices  long_spreading  to  ascending  ,  entire  or  spinulose_ciliate  or  rarely  with  expanded  ,  fringed  appendages  ,  spines  straight  ,  weak  ,  1  –  3  mm  ;
+
+63.txt-7	outer  and  middle  [phyllary]	body	outer  and  middle	body	outer  and  middle  bodies  scabridulous  or  minutely  spinulose  ,  marginal  spinules  usually  1  mm  or  shorter  .
+
+64.txt-7	outer  and  middle  [phyllary]	body	outer  and  middle	body	outer  and  middle  bodies  scabridulous  or  minutely  spinulose  ,  marginal  spinules  usually  1  mm  or  shorter  .
+
+65.txt-7	outer  and  middle  [phyllary]	body	outer  and  middle	body	outer  and  middle  bodies  densely  scabridulous  ,  marginal  spinules  0  .  1  –  0  .  5  mm  .
+
+76.txt-13	outer  and  middle  [phyllary]	body	outer  and  middle	body	outer  and  middle  bodies  appressed  ,  entire  ,  apices  entire  or  finely  serrulate  ,  spines  ascending  ,  slender  ,  1  –  3  mm  ;
+
+78.txt-13	outer  and  middle  [phyllary]	body	outer  [phyllary]	body	bodies  of  outer  and  middle  appressed  ,  acute  ,  spines  ascending  to  spreading  ,  2  –  4  (  –  8  )  mm  ;
+
+577.txt-4	outer  bractlet	margin	[calyculus]	margin	margins  of  outer  bractlets  crustose_toothed  mostly  near  apices  .
+
+736.txt-13	outer  pistillate	floret	outer	[floret]	outer  2  –  4  (  –  6  )  epappose  ,  inner  15  –  20  pappose  .
+
+737.txt-13	outer  [pistillate]	[floret]	outer	[floret]	outer  7  –  13  epappose  ,  inner  14  –  35  pappose  .
+
+738.txt-13	outer  [pistillate]	[floret]	outer	[floret]	outer  7  –  13  epappose  ,  inner  (  4  –  )  10  –  21  pappose  .
+
+739.txt-13	outer  [pistillate]	[floret]	outer	[floret]	outer  9  –  13  (  –  17  )  epappose  ,  inner  (  0  –  )  1  –  2  pappose  .
+
+740.txt-13	outer  [pistillate]	[floret]	outer	[floret]	outer  8  –  12  epappose  ,  inner  18  –  30  +  pappose  .
+
+741.txt-13	outer  [pistillate]	[floret]	outer	[floret]	outer  9  –  12  epappose  ,  inner  8  –  14  (  –  30  )  pappose  .
+
+743.txt-10	outer  [pistillate]	[floret]	outer	[floret]	outer  ±  (  10  –  )  15  epappose  ,  inner  10  –  20  +  pappose  .
+
+745.txt-10	outer  [pistillate]	[floret]	outer	[floret]	outer  (  15  –  )  20  –  25  epappose  ,  inner  2  –  7  pappose  .
+
+972.txt-15	pappi	crown	pappus	crown	pappi  crowns  of  scales  .
+
+891.txt-7	peripheral	[floret]	usually  peripheral	[floret]	usually  peripheral  3  –  20  pistillate  and  fertile  ;
+
+779.txt-3	petiole	base	[leaf]	base	bases  expanded  ,  3  -  nerved  ,  yellowish  tan  ,  parchment_like  ,  closely  involucral  .
+
+626.txt-15	pistillate	corolla	pistillate  [floret]	corolla	pistillate  corollas  white  ,  yellow  ,  or  red  ,  narrowly  tubular  to  filiform  .
+
+100.txt-6	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  progressively  reduced  distally  ,  bases  clasping  or  short_decurrent  1  –  2  cm  ;
+
+101.txt-6	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  progressively  reduced  distally  ,  bases  auriculate_clasping  or  shortly  decurrent  ;
+
+104.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximal  winged_petiolate  ,  distal  sessile  ,  bases  auriculate_clasping  or  decurrent  as  a  spiny  wing  1  –  3  cm  ;
+
+107.txt-7	principal  cauline	[leaf]		principal	principal  cauline  decreasing  distally  ,  proximal  winged_petiolate  ,  distal  sessile  ,  bases  decurrent  as  spiny  wings  1  –  5  cm  ;
+
+108.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  ,  sometimes  spinier  than  basal  ;
+
+111.txt-7	principal  cauline	[leaf]		principal	principal  cauline  mostly  in  proximal  1  /  2  ,  winged_petiolate  or  sessile  ,  bases  narrowed  ,  auriculate  ,  veins  often  prominently  raised  on  abaxial  faces  ;
+
+114.txt-7	principal  cauline	[leaf]		principal	principal  cauline  much  reduced  distally  ,  sessile  ,  bases  decurrent  or  not  ,  as  spiny  wings  ;
+
+122.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  much  reduced  distally  ,  bases  decurrent  as  spiny  wings  less  than  5  cm  ;
+
+123.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  bases  clasping  with  broad  ,  spiny_margined  auricles  ,  reduced  distally  ,  spinier  than  proximal  ;
+
+124.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  well  distributed  ,  gradually  diminished  distally  ,  bases  sometimes  decurrent  as  spiny  wings  to  2  .  5  cm  or  clasping  ;
+
+130.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  gradually  reduced  distally  ;
+
+132.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  only  gradually  reduced  ,  bases  auriculate_clasping  ;
+
+136.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  ,  proximal  winged_petiolate  ,  mid  and  distal  sessile  ,  bases  clasping  or  short_decurrent  ;
+
+137.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximally  winged_petiolate  ,  distally  sessile  ,  gradually  reduced  ,  bases  sometimes  short_decurrent  ;
+
+138.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximally  winged_petiolate  ,  distally  sessile  ,  gradually  reduced  ,  bases  sometimes  short_decurrent  ;
+
+139.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximal  absent  at  flowering  ,  moderately  reduced  distally  ,  winged_petiolate  or  sessile  ,  sessile  and  auriculate_clasping  to  slightly  decurrent  0  –  2  cm  ;
+
+148.txt-6	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximal  winged_petiolate  ,  mid  and  distal  sessile  ,  gradually  reduced  ,  bases  decurrent  as  spiny  wings  1  –  3  cm  ;
+
+149.txt-7	principal  cauline	[leaf]		principal	principal  cauline  winged_petiolate  or  sessile  ,  not  much  reduced  distally  ;
+
+159.txt-6	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximally  winged_petiolate  ,  distally  sessile  ,  not  or  only  slightly  reduced  ;
+
+160.txt-7	principal  cauline	[leaf]		principal	principal  cauline  petiolate  ,  progressively  reduced  distally  ,  bases  sometimes  decurrent  as  spiny  wings  to  1  cm  ;
+
+162.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  winged_petiolate  to  sessile  ,  gradually  reduced  ,  bases  clasping  with  expanded  auricles  ;
+
+163.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  becoming  sessile  ,  gradually  reduced  distally  ,  bases  auriculate_decurrent  with  broad  ,  spiny_margined  wings  3  cm  or  less  ;
+
+168.txt-7	principal  cauline	[leaf]		principal	principal  cauline  many  ,  well  distributed  ,  proximally  ±  winged_petiolate  ,  distally  sessile  ,  gradually  reduced  ,  less  divided  ,  bases  auriculate_claping  and  /  or  decurrent  as  spiny  wings  to  2  cm  ;
+
+52.txt-6	principal  cauline	[leaf]		principal	principal  cauline  winged_petiolate  ,  mid  and  distal  becoming  sessile  ,  well  distributed  or  not  ,  progressively  reduced  distally  ,  at  least  distal  decurrent  as  long  spiny  wings  ;
+
+56.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  little  reduced  ,  bases  broadly  tapered  to  clasping  ,  short_decurrent  ;
+
+57.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  ,  bases  narrowed  ,  sometimes  weakly  clasping  ;
+
+58.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  ,  bases  narrowed  ,  sometimes  weakly  clasping  ,  not  decurrent  ;
+
+59.txt-6	principal  cauline	[leaf]		principal	principal  cauline  petiolate  or  sessile  ,  gradually  reduced  distally  ,  bases  sometimes  ±  clasping  ,  not  decurrent  ;
+
+61.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  progressively  reduced  distally  ,  bases  clasping  or  ±  decurrent  ;
+
+62.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  well  distributed  ,  often  not  much  reduced  distally  ,  bases  often  ±  auriculate_clasping  ;
+
+66.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  moderately  reduced  distally  ,  bases  often  auriculate_clasping  ;
+
+69.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  ,  bases  narrowed  ,  sometimes  weakly  clasping  ;
+
+70.txt-7	principal  cauline	[leaf]		principal	principal  cauline  relatively  few  (  10  –  25  )  ,  petiolate  or  distal  sessile  ,  mostly  restricted  to  proximal  1  /  2  of  stems  ,  progressively  reduced  distally  ,  bases  tapered  ,  not  decurrent  ;
+
+72.txt-7	principal  cauline	[leaf]		principal	principal  cauline  becoming  sessile  and  gradually  reduced  distally  ,  bases  spiny_lobed  ,  sometimes  decurrent  ;
+
+74.txt-7	principal  cauline	[leaf]		principal	principal  cauline  proximally  winged_petiolate  ,  distally  sessile  ,  well  distributed  ,  gradually  reduced  ,  bases  usually  not  decurrent  ;
+
+75.txt-7	principal  cauline	[leaf]		principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally  ,  widest  at  base  ,  bases  ±  auriculate_clasping  to  short_decurrent  ;
+
+76.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximally  winged_petiolate  ,  distally  sessile  ,  gradually  reduced  ,  bases  auriculate_clasping  or  short_decurrent  as  spiny  wings  ;
+
+77.txt-7	principal  cauline	[leaf]		principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally  ,  widest  at  bases  ,  bases  ±  auriculate_clasping  to  short_decurrent  ;
+
+78.txt-7	principal  cauline	[leaf]		principal	principal  cauline  progressively  reduced  distally  ,  bases  decurrent  as  spiny  wings  1  –  5  cm  ,  sometimes  with  expanded  auricles  ;
+
+79.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  bases  decurrent  as  linear_lobed  to  spiny  wings  1  –  3  cm  ;
+
+80.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  progressively  reduced  distally  ,  bases  ±  auriculate  to  long_decurrent  as  spiny  wings  ;
+
+83.txt-6	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  distally  ,  bases  of  proximal  cauline  winged_petiolate  or  sessile  ,  bases  of  distal  cauline  expanded  and  ±  clasping  ,  margins  sometimes  spinier  than  those  of  proximal  ;
+
+84.txt-7	principal  cauline	[leaf]		principal	principal  cauline  becoming  sessile  and  progressively  reduced  distally  ,  bases  decurrent  as  spiny  wings  to  5  cm  ;
+
+85.txt-7	principal  cauline	[leaf]		principal	principal  cauline  gradually  winged_petiolate  or  sessile  ,  reduced  distally  ,  bases  sometimes  clasping  or  short_decurrent  ;
+
+86.txt-7	principal  cauline	[leaf]		principal	principal  cauline  winged_petiolate  proximally  ,  mid  and  distal  sessile  ,  progressively  reduced  distally  ,  bases  not  or  scarcely  decurrent  ,  sometimes  distal  weakly  clasping  ;
+
+87.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  gradually  reduced  distally  ,  proximal  usually  winged_petiolate  ,  mid  and  distal  sessile  ,  bases  decurrent  as  spiny  wings  1  .  5  –  3  .  5  cm  ;
+
+90.txt-7	principal  cauline	[leaf]		principal	principal  cauline  well  distributed  ,  proximal  usually  winged_petiolate  ,  mid  sessile  ,  decurrent  as  spiny  wings  1  –  3  cm  ;
+
+94.txt-7	principal  cauline	[leaf]		principal	principal  cauline  sessile  ,  progressively  reduced  ,  becoming  bractlike  distally  ,  mid  and  distal  bases  broadly  clasping  ;
+
+95.txt-7	principal  cauline	[leaf]		principal	principal  cauline  mostly  in  proximal  1  /  2  ,  winged_petiolate  or  sessile  ,  bases  narrowed  ,  sometimes  auriculate  ;
+
+53.txt-7	principal  larger  cauline	[leaf]		principal	principal  larger  cauline  proximally  winged_petiolate  ,  distally  sessile  ,  well  distributed  ,  gradually  reduced  ,  not  decurrent  ;
+
+760.txt-2	proximal	[internode]		ditto	proximal  internode  lengths  mostly  0  .  5  –  1  .  5  (  –  2  )  times  leaf  lengths  .
+
+763.txt-2	proximal	[internode]		ditto	proximal  internode  lengths  mostly  0  .  5  –  1  .  5  (  –  2  )  times  leaf  lengths  .
+
+764.txt-2	proximal	[internode]		ditto	proximal  internode  lengths  mostly  0  .  5  –  1  .  5  (  –  2  )  times  leaf  lengths  .
+
+765.txt-2	proximal	[internode]		ditto	proximal  internode  lengths  mostly  1  –  2  (  –  3  )  times  leaf  lengths  .
+
+766.txt-2	proximal	[internode]		ditto	proximal  internode  lengths  (  2  –  )  3  –  6  times  leaf  lengths  .
+
+485.txt-4	proximal  [cauline]	[leaf]	proximal	[leaf]	proximal  not  pinnately  lobed  ;
+
+205.txt-4	proximal  [leaf]  blade	margin	proximal  blade	margin	proximal  blade  margins  often  ±  deeply  lobed  ,  ,  distal  ±  smaller  ,  often  entire  ,  faces  glabrous  or  ±  tomentose  ,  sometimes  also  villous  ,  strigose  ,  or  puberulent  ,  often  glandular_punctate  .
+
+363.txt-4	proximalmost  leaf	[leaf]	proximalmost	[leaf]	proximalmost  usually  withered  by  flowering  ;
+
+959.txt-2	resin	gland		resin  gland  length	resin  gland  lengths  often  much  more  than  twice  widths  .
+
+960.txt-2	resin	gland		resin  gland  length	resin  gland  lengths  usually  little  more  than  twice  widths  .
+
+75.txt-1	runner	root		ditto	deeply  seated  runner  roots  that  produce  adventitious  buds  .
+
+55.txt-1	runner	root		root	runner  roots  .
+
+626.txt-14	staminate	corolla	staminate  [floret]	corolla	staminate  corollas  white  ,  yellow  ,  or  red  ,  narrowly  funnelform  or  tubular  ;
+
+221.txt-14	sterile	corolla	sterile  [floret]	corolla	sterile  corollas  slender  .
+
+208.txt-11	sterile	floret	sterile  [floret]	floret	sterile  florets  10  –  20  ,  corollas  blue  ,  2  .  5  –  4  .  5  cm  ,  corolla  tube  elongate  .
+
+226.txt-13	sterile	floret	sterile  [floret]	floret	sterile  florets  slender  ,  inconspicuous  .
+
+194.txt-7	sterile  [floret]  corolla	lobe	corolla	lobe	corolla  lobes  of  sterile  10  –  15  mm  ,  spreading  ;
+
+189.txt-15	style	branch	[floret]	branch	styles  branches  :
+
+124.txt-1	taprooted	caudex		taprooted  caudex  or  runner  root	taprooted  caudices  or  runner  roots  .
+
+349.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  ovate  to  lanceolate  ,  margins  entire  or  denticulate  ,  midribs  sometimes  sparsely  piloso_setose  .
+
+350.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  oblong  ,  ovate  ,  or  elliptic  ,  margins  entire  or  denticulate  ,  midribs  sometimes  sparsely  pilose  .
+
+351.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  oblong  ,  obovate  ,  or  lanceolate  to  spatulate  or  lance_linear  ,  margins  entire  or  denticulate  ,  midribs  sometimes  sparsely  pilose  .
+
+352.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  spatulate  to  lance_linear  ,  margins  entire  or  denticulate  ,  midribs  sometimes  setose  .
+
+353.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  ±  ovate  ,  margins  denticu_late  ,  midribs  usually  piloso_setose  .
+
+354.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  obovate  or  oblanceolate  to  spatulate  ,  margins  denticulate  ,  midribs  usually  piloso_setose  .
+
+355.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  obovate  to  spatulate  ,  margins  denticulate  ,  midribs  usually  prickly_setose  .
+
+356.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  ±  linear  to  filiform  ,  margins  entire  or  denticulate  ,  midribs  usually  prickly_setose  .
+
+357.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  usually  ±  oblong  ,  sometimes  ob_ovate  to  lanceolate  ,  margins  denticulate  ,  usually  prickly  ,  midribs  usually  prickly_setose  ,  rarely  smooth  .
+
+358.txt-2	undivided  cauline  leaf	blade	cauline  leaf	blade	blades  of  undivided  cauline  leaves  ovate  to  orbiculate  ,  margins  entire  or  denticulate  ,  seldom  prickly  ,  midribs  rarely  prickly_setose  .
+
+163.txt-1	woody  tap_rooted	ditto	woody  taprooted	caudex	woody  tap_rooted  caudices  with  numerous  coarse  ,  fibrous  lateral  roots  ,  sometimes  forming  new  rosettes  from  root  sprouts  .
+
+184.txt-3	[basal  leaf]	blade	[leaf]	blade	blades  25  –  80  ×  20  –  70  cm  ,  coarsely  dentate  to  subentire  ,  abaxially  thinly  gray_tomentose  ,  adaxially  green  ,  sparsely  short_hairy  to  nearly  glabrous  .
+
+185.txt-3	[basal  leaf]	blade	[leaf]	blade	blades  30  –  40  ×  16  –  28  cm  ,  coarsely  dentate  to  subentire  ,  abaxially  white_tomentose  ,  adaxially  green  ,  sparsely  short_hairy  .
+
+186.txt-3	[basal  leaf]	blade	[leaf]	blade	blades  30  –  60  ×  15  –  35  cm  ,  coarsely  dentate  to  subentire  ,  abaxially  ±  thinly  gray_tomentose  ,  adaxially  green  ,  sparsely  short_hairy  .
+
+165.txt-2	[basal  leaf]  distal	face	distal  [leaf]	face	distal  faces  more  densely  glandular  than  tomentose  .
+
+166.txt-2	[basal  leaf]  distal	face	distal  [leaf]	face	distal  faces  more  densely  glandular  than  tomentose  .
+
+164.txt-1	[basal  leaf]  longer	spine	longer  [leaf]	spine	longer  spines  4  –  15  mm  ,  distal  faces  equally  glandular  and  tomentose  .
+
+165.txt-1	[basal  leaf]  longer	spine	longer  [leaf]	spine	longer  spines  4  –  6  mm  ;
+
+166.txt-1	[basal  leaf]  longer	spine	longer  [leaf]	spine	longer  spines  5  –  9  mm  ;
+
+775.txt-13	[bisexual  palea]	body		body	bodies  broadly  lanceoloid  to  oblanceoloid  .
+
+440.txt-3	[calyculus]	bract		bract	bracts  9  –  15  +  ×  3  –  5  +  mm  ,  margins  and  tips  bristly_ciliate  .
+
+978.txt-5	[cauline  leaf]	blade	[leaf]	blade	blades  oblanceolate  to  lanceolate  or  linear  ,  50  –  120  +  ×  8  –  22  +  mm  ,  margins  of  mid_stem  leaves  usually  entire  proximally  ,  regularly  serrate  distally  .
+
+164.txt-3	[cauline  leaf]  longer	spine	longer  [leaf]	spine	longer  spines  10  –  18  mm  .
+
+166.txt-4	[cauline  leaf]  longer	spine	longer  [leaf]	spine	longer  spines  4  –  7  mm  .
+
+165.txt-4	[cauline  leaf]longer	spine	longer  [leaf]	spine	longer  spines  8  –  12  mm  .
+
+335.txt-6	[cypsela]	body		body	bodies  3  –  4  mm  ,  beaks  5  –  6  mm  ,  ribs  with  antrorse  tubercles  distally  ;
+
+344.txt-15	[cypsela]	body		body	bodies  blackish  to  reddish  ,  compressed  ,  obovoid  to  lanceoloid  ,  beaks  whitish  ,  stout  ,  ribs  5  –  7  on  each  face  ,  faces  scabrellous  ;
+
+345.txt-6	[cypsela]	body		body	bodies  2  .  5  –  3  mm  ,  beaks  0  .  5  –  1  mm  ;
+
+347.txt-3	[cypsela]	body		body	bodies  4  –  5  +  mm  ,  beaks  0  –  1  mm  ;
+
+349.txt-9	[cypsela]	body		body	bodies  brown  ,  ±  compressed_ellipsoid  ,  4  –  5  +  mm  ,  beaks  ±  stout  ,  0  .  1  –  0  .  5  +  mm  ,  faces  (  4  –  )  5  –  6  -  nerved  ;
+
+350.txt-9	[cypsela]	body		body	bodies  brown  ,  ±  compressed_lanceoloid  to_fusiform  ,  4  –  5  mm  ,  beaks  ±  stout  ,  0  .  1  –  0  .  5  (  –  1  )  mm  ,  faces  5  –  6  -  nerved  ;
+
+351.txt-9	[cypsela]	body		body	bodies  brown  ,  ±  flattened  ,  elliptic  ,  5  –  6  mm  ,  beaks  ±  filiform  ,  1  –  3  mm  ,  faces  1  (  –  3  )  _nerved  ;
+
+352.txt-9	[cypsela]	body		body	bodies  brown  ,  ±  flattened  ,  elliptic  ,  5  –  6  mm  ,  beaks  ±  filiform  ,  2  –  4  mm  ,  faces  1  (  –  3  )  _nerved  ;
+
+353.txt-9	[cypsela]	body		body	bodies  brown  ,  ±  flattened  ,  elliptic  ,  4  .  5  –  5  +  mm  ,  beaks  ±  filiform  ,  2  .  5  –  3  .  5  mm  ,  faces  1  (  –  3  )  _nerved  ;
+
+354.txt-9	[cypsela]	body		body	bodies  brown  to  blackish  ,  ±  flattened  ,  elliptic  ,  4  .  5  –  5  +  mm  ,  beaks  ±  filiform  ,  2  .  5  –  4  .  5  mm  ,  faces  1  (  –  3  )  _nerved  ;
+
+355.txt-9	[cypsela]	body		body	bodies  purplish  to  blackish  ,  ±  flattened  ,  ±  elliptic  ,  3  .  5  –  4  mm  ,  beaks  ±  filiform  ,  2  .  5  –  3  .  5  mm  ,  faces  5  –  7  -  nerved  ;
+
+356.txt-9	[cypsela]	body		body	bodies  pale  brown  ,  ±  flattened  ,  elliptic  to  oblanceolate  ,  2  .  5  –  3  .  5  mm  ,  beaks  ±  filiform  ,  (  2  –  )  5  –  6  mm  ,  faces  5  –  7  -  nerved  ;
+
+357.txt-9	[cypsela]	body		body	bodies  pale  grayish  to  tan  ,  ±  flattened  ,  oblanceolate  ,  2  .  5  –  3  .  5  mm  ,  beaks  ±  filiform  ,  2  .  5  –  4  mm  ,  faces  (  3  –  )  5  –  9  -  nerved  ;
+
+358.txt-9	[cypsela]	body		body	bodies  pale  grayish  to  whitish  or  tan  ,  ±  flattened  ,  obovate  ,  3  –  4  mm  ,  beaks  ±  filiform  ,  3  –  5  mm  ,  faces  5  –  9  -  nerved  ;
+
+434.txt-11	[cypsela]	body		body	bodies  golden  brown  ,  fusiform  ,  8  –  10  mm  ,  muricate  ,  ribs  4  –  5  ;
+
+435.txt-12	[cypsela]	body		body	bodies  dark  brown  ,  10  -  nerved  ,  8  –  10  mm  ,  beaks  3  –  4  mm  ;
+
+437.txt-11	[cypsela]	body		body	bodies  brown  ,  fusiform  ,  7  –  8  mm  ,  10  -  nerved  ,  muricate_roughened  ;
+
+438.txt-11	[cypsela]	body		body	bodies  golden  brown  ,  fusiform  ,  6  –  10  mm  ,  ribs  10  –  12  ,  muricate  ;
+
+440.txt-6	[cypsela]	body		body	bodies  2  .  5  –  3  mm  ,  beaks  2  .  5  –  5  mm  ;
+
+499.txt-8	[cypsela]	body		body	bodies  ±  abruptly  contracted  to  beaks  ,  ribs  often  more  strongly  ridged  distally  than  proximally  ,  mostly  hirsutellous  .
+
+500.txt-7	[cypsela]	body		body	bodies  ±  gradually  tapered  to  beaks  ,  ribs  ±  weakly  and  uniformly  ridged  .
+
+502.txt-14	[cypsela]	body		body	bodies  fusiform  ,  6  –  9  mm  ,  beaks  1  –  3  mm  ,  lengths  to  1  /  2  times  bodies  ;
+
+507.txt-13	[cypsela]	body		body	bodies  fusiform  to  obconic  ,  3  –  5  mm  ,  beaks  (  1  –  )  3  –  8  mm  ,  lengths  mostly  1  –  2  times  bodies  ;
+
+511.txt-14	[cypsela]	body		body	bodies  fusiform  to  narrowly  conic  ,  3  –  5  mm  ,  beaks  6  –  10  mm  ,  lengths  1  –  3  times  bodies  ,  ribs  flattened  ,  ridged  ,  or  subalate  ,  straight  or  slightly  undulate  ;
+
+609.txt-11	[cypsela]	body		body	bodies  stramineous  ,  4  –  5  mm  ,  beaks  6  –  7  mm  ;
+
+610.txt-11	[cypsela]	body		body	bodies  reddish  brown  ,  4  –  5  mm  ,  beaks  7  –  9  mm  ;
+
+611.txt-11	[cypsela]	body		body	bodies  stramineous  ,  3  –  4  mm  ,  beaks  6  –  7  mm  ;
+
+612.txt-11	[cypsela]	body		body	bodies  reddish  brown  ,  4  –  6  mm  ,  beaks  8  –  10  mm  ;
+
+951.txt-9	[cypsela]	body		body	bodies  ±  obovate  to  lanceolate  ,  (  1  .  5  –  )  2  .  5  –  3  +  mm  ,  usually  winged  ,  faces  glabrous  or  ±  scabrellous  to  hirtellous  ;
+
+952.txt-9	[cypsela]	body		body	bodies  oblanceolate  to  cuneate_oblong  ,  1  .  5  –  2  +  mm  ,  wings  transversely  rugulose  or  ribbed  on  proximal  2  /  3  ,  shoulders  not  spinose  laterally  ,  faces  distally  villous  to  pilose  ,  sometimes  glabrescent  ;
+
+953.txt-8	[cypsela]	body		body	bodies  oblanceolate  to  oblong_cuneate  ,  1  .  8  –  2  .  2  mm  ,  wings  transversely  rugulose  or  ribbed  on  proximal  9  /  10  ,  shoulders  ±  spinose  laterally  ,  faces  distally  villous  to  pilose  or  arachnose  ;
+
+495.txt-14	[cypsela]	rib		rib	ribs  flattened  to  ridged  ,  glabrous  ,  or  distally  scabrous  ;
+
+498.txt-14	[cypsela]	rib		rib	ribs  strongly  ridged  ,  straight  ,  glabrous  or  scabrous  ;
+
+502.txt-15	[cypsela]	rib		rib	ribs  ridged  to  flattened  ,  straight  ;
+
+503.txt-15	[cypsela]	rib		rib	ribs  ridged  to  subalate  ,  rarely  nerviform  ,  straight  ,  ±  glabrous  ;
+
+506.txt-14	[cypsela]	rib		rib	ribs  strongly  ridged  ,  straight  ,  often  minutely  cinereous_pannose  ;
+
+513.txt-12	[cypsela]	rib		rib	ribs  flattened  to  alate  ,  or  0  ,  straight  to  strongly  undulate  ,  not  diminishing  proximally  .
+
+516.txt-13	[cypsela]	rib		rib	ribs  broadly  ridged  ,  straight  ;
+
+822.txt-16	[cypsela]	rib		rib	ribs  usually  2  ,  lateral  ,  faces  glabrous  .
+
+961.txt-17	[cypsela]	rib		rib	ribs  0  ,  faces  glabrous  ;
+
+965.txt-17	[cypsela]	rib		rib	ribs  0  ,  faces  glabrous  ;
+
+969.txt-17	[cypsela]	rib		rib	ribs  usually  10  ,  faces  glabrous  ,  sometimes  gland_dotted  between  ribs  ;
+
+195.txt-17	[cypsela]  basal  attachment	scar	basal  attachment	scar	basal  attachment  scars  oblique  ,  obovoid  or  ±  barrel_shaped  ,  ±  compressed  ,  weakly  ribbed  ,  glabrous  or  puberulent  with  2  -  celled  hairs  ;
+
+942.txt-10	[floret]	disc		disc	discs  hemispheric  to  broadly  ovoid  ,  4  –  7  (  –  11  )  ×  4  –  7  .  5  (  –  10  )  mm  .
+
+943.txt-10	[floret]	disc		disc	discs  ovoid  to  hemispheric  ,  5  .  5  –  12  .  5  ×  6  –  14  mm  .
+
+944.txt-11	[floret]	disc		disc	discs  obovoid  or  spheroid  to  ovoid  ,  5  –  7  ×  5  –  9  .  5  mm  .
+
+215.txt-10	[inner  phyllary]	tip		tip	tips  erect  ,  ovate  or  orbiculate  ,  irregularly  dentate  or  lobed  .
+
+735.txt-13	[innermost  palea]	body		body	bodies  lanceolate  to  ovate  .
+
+742.txt-13	[innermost  palea]	body		body	bodies  lanceolate  to  ovate  .
+
+496.txt-1	[leaf  blade]	margin	[blade]	margin	margins  ±  straight  ,  usually  entire  to  dentate  ,  sometimes  irregularly  so  ,  faces  glabrous  and  glaucous  ,  sometimes  sparsely  hairy  .
+
+497.txt-1	[leaf  blade]	margin	[blade]	margin	margins  often  undulate  ,  usually  entire  ,  sometimes  lobed  ,  faces  usually  puberulent  to  densely  villous  ,  sometimes  glabrous  ,  rarely  glaucous  .
+
+499.txt-1	[leaf  blade]	margin	[blade]	margin	margins  entire  ,  dentate  ,  or  laciniately  pinnatifid  ,  faces  glabrous  or  sparsely  villous  ,  mostly  not  glaucous  .
+
+500.txt-1	[leaf  blade]	margin	[blade]	margin	margins  usually  dentate  to  laciniately  pinnatifid  ,  rarely  entire  ,  faces  mostly  glabrous  and  often  glaucous  .
+
+13.txt-4	[leaf  blade]  abaxial  	face	abaxial  [blade]	face	abaxial  faces  glandular_puberulent  and  sparsely  strigose  ,  adaxial  faces  glandular  and  strigose  to  pilose  ;
+
+125.txt-2	[leaf  blade]  main  marginal	spine		main	main  marginal  spines  2  –  15  mm  ,  often  stout  ;
+
+126.txt-2	[leaf  blade]  main  marginal	spine		main	main  marginal  spines  often  stout  ,  5  –  15  mm  ;
+
+127.txt-2	[leaf  blade]  main  marginal	spine		main	main  marginal  spines  slender  to  stout  ,  3  –  10  mm  ;
+
+128.txt-2	[leaf  blade]  main  marginal	spine		main	main  marginal  spines  usually  very  slender  ,  5  –  12  mm  ;
+
+129.txt-2	[leaf  blade]  main  marginal	spine		main	main  marginal  spines  often  stout  ,  5  –  30  mm  ;
+
+14.txt-4	[leaf]	margin  and  some_times  abaxial  midvein		margin  and  sometimes  abaxial  midvein	margins  and  some_times  abaxial  midveins  with  glandless  and  glandular  hairs  ,  otherwise  glabrous  ;
+
+94.txt-3	[leaf]	branch	[stem]	branch	branches  few  to  many  ,  often  arising  from  proximal  nodes  ,  ascending  .
+
+30.txt-5	[leaf]  abaxial	face	abaxial  [leaf]	face	abaxial  faces  densely  gray_or  white_tomentose  ,  adaxial  faces  green  ,  glandular_scabrous  .
+
+31.txt-5	[leaf]  abaxial	face	abaxial  [leaf]	face	abaxial  faces  white_tomentose  ,  adaxial  green  ,  glabrous  to  sparsely  strigose  .
+
+915.txt-3	[leaf]  abaxial	face	abaxial  [leaf]	face	abaxial  faces  tomentose  or  glabrate  .
+
+45.txt-7	[leaf]  adaxial	face	adaxial  [leaf]	face	adaxial  faces  sparsely  hairy  or  glabrate  .
+
+46.txt-6	[leaf]  adaxial	face	adaxial  [leaf]	face	adaxial  faces  sparsely  hairy  or  glabrate  .
+
+34.txt-4	[leaf]  blade	base	blade	base	blade  bases  narrowing  ,  margins  pinnately  lobed  or  divided  and  dentate  ,  teeth  and  lobes  tipped  with  stout  spines  .
+
+172.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  dentate  to  pinnately  lobed  ,  faces  glabrous  to  densely  tomentose  ,  glandular  or  eglandular  .
+
+183.txt-6	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  dentate  ,  faces  abaxially  resin_gland_dotted  ,  adaxially  often  tomentose  .
+
+187.txt-5	[leaf]  blade	margin	blade	margin	blade  margins  coarsely  dentate  or  1  –  2  -  pinnately  lobed  ,  margins  of  mid  and  distal  cauline  dentate  or  entire  ,  faces  loosely  tomentose  or  glabrate  ,  puberulent  and  resin_gland_dotted  .
+
+189.txt-5	[leaf]  blade	margin	blade	margin	blade  margins  dentate  or  ±  lobed  or  entire  to  lobed  .
+
+191.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  ±  lobed  or  dentate  or  lobed  ,  sparsely  hirsute  or  glabrous  .
+
+193.txt-6	[leaf]  blade	margin	blade	margin	blade  margins  entire  to  dentate  or  pinnately  divided  ,  faces  villous  ,  minutely  glandular  .
+
+195.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  dentate  ,  faces  puberulent  ,  minutely  glandular_punctate  .
+
+198.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  toothed  to  pinnately  divided  or  1  –  2  -  pinnately  divided  .
+
+200.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  dentate  to  pinnately  lobed  ,  ±  spiny  ,  faces  glabrous  or  ±  glandlar  and  /  or  ±  tomentose  .
+
+26.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  dentate  to  pinnately  lobed  ,  ±  spiny  ,  faces  ±  tomentose  or  glabrate  .
+
+29.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  dentate  to  pinnately  1  –  3  -  pinnately  lobed  or  divided  ,  lobes  and  teeth  spiny  ,  faces  ±  tomentose  ,  sometimes  glandular  .
+
+39.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  1  –  3  -  pinnately  lobed  or  divided  ,  sometimes  essentially  compound  ,  spineless  or  with  slender  to  very  stout  marginal  spines  ,  cauline  progressively  smaller  and  less  divided  distally  ,  distalmost  bractlike  ,  abaxial  faces  pilose  to  densely  gray_tomentose  ,  adaxial  glabrous  or  thinly  tomentose  ,  sometimes  glandular  .
+
+43.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  spiny  dentate  ,  often  1  –  2  -  pinnately  lobed  ,  faces  glabrous  or  hairy  ,  eglandular  .
+
+625.txt-4	[leaf]  blade	margin	blade	margin	blade  margins  usually  entire  ,  rarely  denticulate  .
+
+790.txt-3	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  ±  dentate  to  serrate  .
+
+792.txt-3	[leaf]  blade	margin	blade	margin	blade  margins  entire  or  dentate  .
+
+794.txt-3	[leaf]  blade	margin	blade	margin	blade  margins  usually  serrate  to  dentate  ,  sometimes  entire  .
+
+16.txt-6	[pappus]	bristle		bristle	bristles  unequal  ,  longest  5  –  6  mm  .
+
+572.txt-7	[pappus]  longest	bristle	longest	bristle	longest  bristles  2  –  3  mm  .
+
+196.txt-7	[phyllary]	body		body	bodies  pale  green  ,  broadly  elliptic  to  linear  ,  apices  with  appendages  erect  to  spreading  ,  whitish  to  stramineous  ,  fringed  with  9  –  15  slender  spinelike  teeth  2  –  3  mm  ,  teeth  not  conspicuously  ciliate  ;
+
+197.txt-8	[phyllary]	body		body	bodies  stramineous  to  greenish  ,  ovate  to  oblong  ,  appendages  erect  to  spreading  ,  ±  brown  ,  fringed  with  15  –  25  slender  ,  ciliate  ,  spinelike  teeth  2  –  4  mm  ;
+
+206.txt-8	[phyllary]	body		body	bodies  green  ,  ovate  to  oblong  ,  tomentose  or  becoming  glabrous  ,  margins  and  erect  appendages  white  to  dark  brown  or  black  ,  scarious  ,  fringed  with  slender  teeth  ±  1  mm  .
+
+207.txt-8	[phyllary]	body		body	bodies  green  ,  ovate  to  oblong  ,  glabrous  ,  margins  and  erect  appendages  silvery  white  to  brown  ,  scarious  ,  fringed  with  slender  teeth  1  .  5  –  2  mm  .
+
+209.txt-8	[phyllary]	body		body	bodies  pale  green  or  stramineous  ,  ovate  or  broadly  lanceolate  ,  glabrous  ,  appendages  erect  to  spreading  ,  brown  ,  scarious  ,  abruptly  expanded  ,  1  –  2  cm  wide  ,  ±  covering  phyllary  bodies  ,  lacerate  fringed  ,  sometimes  tipped  by  weak  spines  1  –  2  mm  ,  glabrous  .
+
+210.txt-8	[phyllary]	body		body	bodies  dark  green  ,  ovate  to  oblong_lanceolate  ,  glabrous  or  finely  arachnoid  ,  margins  and  erect  appendages  black  ,  ±  fringed  distally  with  slender  teeth  ,  inner  phyllaries  with  brownish  scarious  ,  expanded  ,  erose  dissected  appendages  .
+
+217.txt-8	[phyllary]	body		body	bodies  pale  green  or  pink  tinged  ,  ovate  to  oblong  ,  with  several  prominent  parallel  veins  ,  glabrous  or  finely  tomentose  ,  erect  appendages  decurrent  on  distal  phyllary  margins  ,  dark  brown  or  black  ,  scarious  ,  fringed  with  slender  teeth  .
+
+831.txt-6	[phyllary]	margin  and  apex		margin  and  apex	margins  and  apices  greenish  or  lacking  pigment  ,  abaxial  faces  ±  villous  .
+
+345.txt-4	[phyllary]  abaxial	face	abaxial  [phyllary]	face	abaxial  faces  glabrous  .
+
+530.txt-9	[phyllary]  abaxial	face	abaxial  [phyllary]	face	abaxial  faces  glabrous  or  scurfy_puberulent  ;
+
+955.txt-2	[phyllary]  abaxial	face	abaxial  [phyllary]	face	abaxial  faces  sericeous  to  arachnose  ,  margins  often  ciliolate  .
+
+141.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  slender  to  stout  .
+
+142.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  stout  .
+
+143.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  stout  .
+
+144.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  slender  .
+
+146.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  slender  .
+
+147.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  stout  .
+
+164.txt-6	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  3  –  6  mm  ;
+
+165.txt-7	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  1  –  2  mm  ;
+
+166.txt-7	[phyllary]  apical	spine	apical  [phyllary]	spine	apical  spines  2  –  3  mm  ;
+
+432.txt-4	[phyllary]  free	portion	free	portion	free  portions  lance_linear  ,  abaxial  faces  setose  or  ±  glabrate  .
+
+735.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  lanceolate  to  ovate  or  boat_shaped  ,  ±  saccate  most  of  lengths  ;
+
+736.txt-9	[pistillate  palea]	body		body	bodies  ±  cartilaginous  ,  ±  terete  ;
+
+737.txt-9	[pistillate  palea]	body		body	bodies  ±  cartilaginous  ,  ±  terete  ;
+
+738.txt-9	[pistillate  palea]	body		body	bodies  chartaceous  ,  ±  terete  ;
+
+739.txt-9	[pistillate  palea]	body		body	bodies  cartilaginous  ,  obcompressed  ;
+
+740.txt-9	[pistillate  palea]	body		body	bodies  ±  bony  ,  ±  terete  ;
+
+741.txt-9	[pistillate  palea]	body		body	bodies  ±  bony  ,  ±  terete  ;
+
+742.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  lanceolate  to  ovate  ,  open  to  ±  folded  ;
+
+746.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  ±  ovate  or  boat_shaped  ,  saccate  most  of  lengths  ;
+
+747.txt-10	[pistillate  palea]	body		body	bodies  chartaceous  ;
+
+748.txt-10	[pistillate  palea]	body		body	bodies  chartaceous  ;
+
+749.txt-10	[pistillate  palea]	body		body	bodies  chartaceous  ;
+
+750.txt-10	[pistillate  palea]	body		body	bodies  chartaceous  ;
+
+751.txt-10	[pistillate  palea]	body		body	bodies  cartilaginous  ;
+
+752.txt-10	[pistillate  palea]	body		body	bodies  cartilaginous  ;
+
+753.txt-10	[pistillate  palea]	body		body	bodies  cartilaginous  ;
+
+754.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  obovoid  ,  saccate  most  of  lengths  ;
+
+755.txt-5	[pistillate  palea]	body		body	bodies  somewhat  galeate  ,  mainly  chartaceous  ,  cartilaginous  medially  ,  ±  lanuginose  .
+
+756.txt-5	[pistillate  palea]	body		body	bodies  galeate  ,  cartilaginous  to  bony  throughout  ,  sericeous  to  lanuginose  .
+
+759.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  obovoid  to  ±  cylindric  ,  saccate  most  of  lengths  ;
+
+767.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  oblanceolate  to  oblong  ,  flat  to  concave  most  of  lengths  ;
+
+775.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  obovate  to  oblanceolate  ,  open  most  of  lengths  ;
+
+777.txt-10	[pistillate  palea]	body		body	bodies  with  3  nerves  ,  ±  boat_shaped  to  ovoid  ,  saccate  most  of  lengths  ;
+
+780.txt-10	[pistillate  palea]	body		body	bodies  with  5  +  nerves  ,  obovate  to  oblanceolate  ,  not  gibbous  ,  flat  to  concave  or  loosely  folded  most  of  lengths  ;
+
+735.txt-11	[pistillate  palea]	wing		wing	wings  erect  to  incurved  .
+
+736.txt-10	[pistillate  palea]	wing		wing	wings  obscured  by  indument  .
+
+737.txt-10	[pistillate  palea]	wing		wing	wings  prominent  .
+
+738.txt-10	[pistillate  palea]	wing		wing	wings  prominent  .
+
+739.txt-10	[pistillate  palea]	wing		wing	wings  prominent  .
+
+740.txt-10	[pistillate  palea]	wing		wing	wings  prominent  .
+
+741.txt-10	[pistillate  palea]	wing		wing	wings  prominent  .
+
+742.txt-11	[pistillate  palea]	wing		wing	wings  erect  to  recurved  .
+
+743.txt-7	[pistillate  palea]	wing		wing	wings  yellowish  tinged  reddish  ,  apices  erect  .
+
+745.txt-7	[pistillate  palea]	wing		wing	wings  uniformly  yellowish  ,  apices  recurved  .
+
+746.txt-11	[pistillate  palea]	wing		wing	wings  ±  erect  .
+
+747.txt-9	[pistillate  palea]	wing		wing	wings  broadly  ovate  ,  widest  in  proximal  1  /  3  of  palea  lengths  ;
+
+748.txt-9	[pistillate  palea]	wing		wing	wings  elliptic  to  slightly  obovate  ,  widest  in  median  1  /  3  of  palea  lengths  ;
+
+749.txt-9	[pistillate  palea]	wing		wing	wings  ±  elliptic  ,  widest  in  distal  1  /  3  of  palea  lengths  ;
+
+750.txt-9	[pistillate  palea]	wing		wing	wings  elliptic  to  ovate  ,  widest  in  distal  1  /  3  of  palea  lengths  ;
+
+751.txt-9	[pistillate  palea]	wing		wing	wings  elliptic  to  ovate  ,  widest  in  distal  1  /  3  of  palea  lengths  ;
+
+752.txt-9	[pistillate  palea]	wing		wing	wings  oblanceolate  to  oblacrimate  ,  widest  in  distal  1  /  3  of  palea  lengths  ;
+
+753.txt-9	[pistillate  palea]	wing		wing	wings  oblanceolate  to  oblacrimate  ,  widest  in  distal  1  /  3  of  palea  lengths  ;
+
+754.txt-11	[pistillate  palea]	wing		wing	wings  ±  erect  or  inflexed  .
+
+755.txt-4	[pistillate  palea]	wing		wing	wings  prominent  ,  not  wither_ing  ,  subapical  ,  inflexed  ,  ±  obovate  ,  plane  to  concave  ;
+
+756.txt-4	[pistillate  palea]	wing		wing	wings  obscure  ,  withering  ,  lateral  ,  ±  erect  ,  narrowly  oblanceolate  ,  involute  ;
+
+759.txt-11	[pistillate  palea]	wing		wing	wings  inflexed  .
+
+761.txt-7	[pistillate  palea]	wing		wing	wings  supramedian  to  subapical  .
+
+762.txt-7	[pistillate  palea]	wing		wing	wings  ±  median  .
+
+767.txt-11	[pistillate  palea]	wing		wing	wings  0  .
+
+775.txt-11	[pistillate  palea]	wing		wing	wings  incurved  .
+
+777.txt-11	[pistillate  palea]	wing		wing	wings  erect  or  incurved  .
+
+778.txt-9	[pistillate  palea]	wing		wing	wings  prominent  ,  erect  ,  ovate  ,  ±  plane  .
+
+779.txt-8	[pistillate  palea]	wing		wing	wings  obscure  ,  incurved  ,  lanceolate  ,  ±  involute  .
+
+780.txt-11	[pistillate  palea]	wing		wing	wings  0  .
+
+208.txt-8	[principal  phyllary]	body		body	bodies  greenish  ,  ovate  to  lanceolate  ,  scarious_margined  ,  appendages  appressed  ,  brown  to  black  ,  unarmed  ,  decurrent  on  phyllary  margins  ,  pectinate_fringed  ,  puberulent  ;
+
+211.txt-8	[principal  phyllary]	body		body	bodies  lanceolate  to  ovate  ,  loosely  tomentose  or  glabrous  ,  usually  concealed  by  expanded  appendages  ,  appendages  usually  light  brown  ,  erect  ,  overlapping  ,  ±  concave  ,  usually  roundish  ,  margins  pale  ,  broad  ,  entire  to  coarsely  dentate  ,  membranous  .
+
+213.txt-8	[principal  phyllary]	body		body	bodies  lanceolate  to  ovate  ,  loosely  tomentose  or  glabrous  ,  usually  concealed  by  expanded  appendages  ,  appendages  erect  ,  overlapping  ,  light  to  dark  brown  ,  flat  or  ±  concave  ,  margins  varying  from  coarsely  dentate  to  pectinately  dissected  into  ±  wiry  lobes  .
+
+214.txt-8	[principal  phyllary]	body		body	bodies  lanceolate  to  ovate  ,  loosely  tomentose  or  glabrous  ,  usually  not  fully  covered  by  narrow  appendages  ,  these  erect  ,  overlapping  ,  dark  brown  to  black  ,  flat  ,  margins  pectinately  dissected  into  6  –  8  pairs  of  wiry  lobes  .
+
+215.txt-8	[principal  phyllary]	body		body	bodies  lanceolate  to  ovate  ,  loosely  tomentose  or  glabrous  ,  appendages  brown  or  blackish  ,  lanceolate  to  ovate  ,  ±  covering  bodies  of  adjacent  phyllaries  ,  tips  often  recurved  ,  elongate  ,  featherlike  ,  pectinately  dissected  into  long  ,  filiform  lobes  .
+
+218.txt-9	[principal  phyllary]	body		body	bodies  pale  green  ,  ovate  to  lanceolate  ,  glabrous  or  finely  tomentose  ,  with  a  few  prominent  parallel  veins  ,  margins  and  erect  appendages  fringed  with  slender  stramineous  spines  ,  each  phyllary  tipped  by  spine  1  –  3  mm  .
+
+220.txt-8	[principal  phyllary]	body		body	bodies  pale  green  or  stramineous  ,  ovate  to  lanceolate  ,  sometimes  purple_tinged  ,  glabrous  or  finely  tomentose  ,  sparsely  resin_gland_dotted  ,  margins  scarious  ,  appendages  spreading  ,  fringed  with  slender  stramineous  spines  ,  each  tipped  by  spreading  to  reflexed  spine  1  –  3  mm  .
+
+221.txt-9	[principal  phyllary]	body		body	bodies  greenish  or  stramineous  ,  ovate  ,  scarious_margined  ,  appendages  stramineous  ,  spiny  fringed  at  base  ,  each  tipped  by  a  stout  spreading  spine  10  –  25  mm  .
+
+222.txt-9	[principal  phyllary]	body		body	bodies  greenish  or  stramineous  ,  ovate  ,  scarious  –  margined  ,  appendages  stramineous  ,  spiny  –  fringed  at  base  ,  each  tipped  by  stout  spreading  spine  (  0  .  5  –  )  1  –  3  cm  .
+
+224.txt-8	[principal  phyllary]	body		body	bodies  greenish  ,  ovate  ,  scarious_margined  ,  appendages  stramineous  to  brown  ,  scarious  ,  fringed  with  slender  teeth  ,  tipped  by  slender  spines  1  –  5  mm  .
+
+225.txt-8	[principal  phyllary]	body		body	bodies  ±  stramineous  ,  ovate  ,  appendages  purplish  ,  spiny_fringed  at  base  ,  each  tipped  by  slender  spine  5  –  10  mm  .
+
+226.txt-8	[principal  phyllary]	body		body	bodies  pale  green  ,  ovate  ,  appendages  stramineous  to  brown  ,  each  with  palmately  radiating  cluster  of  spines  ,  and  stout  central  spine  10  –  25  mm  .
+
+227.txt-8	[principal  phyllary]	body		body	bodies  greenish  or  stramineous  ,  ovate  to  elliptic  ,  glabrous  ,  appendages  spreading  to  reflexed  ,  brown  to  blackish  purple  ,  each  with  palmately  radiating  cluster  of  spines  ,  central  spine  stout  ,  1  –  2  .  5  cm  ,  base  dark  brown  to  black  ,  distally  stramineous  .
+
+767.txt-13	[staminate  or  bisexual  palea]	body		body	bodies  ±  spatulate  .
+
+746.txt-13	[staminate  palea]	body		body	bodies  linear_lanceolate  to  oblanceolate  .
+
+754.txt-13	[staminate  palea]	body		body	bodies  linear_lanceolate  to  oblanceolate  .
+
+777.txt-13	[staminate  palea]	body		body	bodies  lanceolate  or  spatulate  .
+
+780.txt-13	[staminate  palea]	body		body	bodies  obovate  .
+
+778.txt-11	[staminate  palea]	apex	[palea]	apex	apices  uncinate  ,  terete  ,  acuminate  ,  cartilaginous  ,  spinose  .
+
+779.txt-10	[staminate  palea]	apex	[palea]	apex	apices  incurved  ,  ±  involute  ,  obtuse  to  rounded  ,  apiculate  ,  shortly  scarious  ,  not  spinose  .
+
+781.txt-11	[staminate  palea]	apex	[palea]	apex	apices  ±  erect  .
+
+784.txt-11	[staminate  palea]	apex	[palea]	apex	apices  spreading  .
+
+36.txt-2	[stem]	wing		wing	wings  to  15  mm  wide  .
+
+37.txt-2	[stem]	wing		wing	wings  0  .  5  –  2  cm  wide  .
+
+38.txt-2	[stem]	wing		wing	wings  0  .  5  –  2  cm  wide  .
+
+47.txt-2	[stem]  wing	tooth		wing	teeth  of  wings  to  10  mm  ,  wing  spines  2  –  10  mm  .
+
+49.txt-2	[stem]  wing	tooth		wing	teeth  of  wings  to  10  mm  ,  wing  spines  to  20  mm  .
+
+50.txt-2	[stem]  wing	tooth		wing	teeth  of  wings  to  25  mm  ,  wing  spines  to  15  mm  .
+
+170.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  slightly  swollen  subterminal  nodes  ,  distally  cylindric  ,  distinct  portions  minute  .
+
+172.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  subterminal  nodes  ,  distinct  portions  oblong  to  linear  ,  short_papillate  .
+
+183.txt-15	[style  branch]  fused	portion	fused	portion	fused  portions  distally  hairy_ringed  ,  distinct  portions  oblong  ,  acute  or  obtuse  .
+
+187.txt-14	[style  branch]  fused	portion	fused	portion	fused  portions  with  slightly  swollen  basal  nodes  minutely  hairy  ,  distally  papillate  ,  distinct  portions  very  short  ,  apices  triangular  .
+
+189.txt-16	[style  branch]  fused	portion	fused	portion	fused  portions  with  basal  nodes  minutely  hairy  ,  distinct  portions  minute  .
+
+191.txt-14	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  nodes  ,  distinct  portions  minute  .
+
+193.txt-17	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  nodes  ,  distinct  portions  short  ,  linear  .
+
+195.txt-15	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  nodes  ,  distinct  portions  minute  .
+
+198.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  puberulent  nodes  ,  distinct  portions  very  short  ,  triangular  .
+
+200.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  slightly  swollen  basal  nodes  minutely  hairy  ,  distally  minutely  papillate  ,  distinct  portions  very  short  .
+
+205.txt-14	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  nodes  ,  distinct  portions  minute  .
+
+26.txt-14	[style  branch]  fused	portion	fused	portion	fused  portions  ca  .  0  .  5  mm  ,  with  basal  nodes  glabrous  or  minutely  hairy  ,  distally  puberulent  ,  distinct  portions  tapered  ,  not  or  scarcely  separating  .
+
+29.txt-14	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  rings  ,  distinct  portions  divergent  ,  linear_oblong  .
+
+34.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  minutely  hairy  nodes  ,  long  ,  cylindric  ,  minutely  papillate  ,  distinct  portions  minute  .
+
+39.txt-15	[style  branch]  fused	portion	fused	portion	fused  portions  long  ,  cylindric  ,  minutely  papillate  ,  distinct  portions  minute  .
+
+43.txt-13	[style  branch]  fused	portion	fused	portion	fused  portions  with  slightly  ,  minutely  puberulent  ,  swollen  basal  nodes  ,  distally  papillate  or  glabrous  ,  distinct  portions  very  short  .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

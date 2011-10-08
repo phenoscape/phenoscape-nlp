@@ -1,0 +1,6 @@
+use strict;
+
+$word = "leaves";
+print "p" if($word =~ /es$/ || $word =~ /s$/);
+
+

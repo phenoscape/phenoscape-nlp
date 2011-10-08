@@ -1,0 +1,227 @@
+FNAv19, test24:
+
+select sentid, modifier, tag, sentence from sentence where sentid in (832, 8516, 9170, 3152, 10954, 11365, 11359, 9111, 991, 10954, 6335, 4991, 2454, 1416, 6734, 1608, 362, 1154, 7395) ;
+select sentid, modifier, tag, sentence from sentence where sentid in (991, 1416, 6734, 7395, 9170, 11365);
+
+2. common substructure: florets, phyllaries???!
+ in commonsubstructure: use modifier [apical [phyllaries]], tag <spines> to tag sentence 901: <M><B>apical</B></M> <N>spines</N> <B>1</B> <B>–</B> <B>2</B> mm <B>;</B> 
+
+ in commonsubstructure: use modifier [[phyllaries] marginal], tag <spines> to tag sentence 902: <M>marginal</M> <N>spines</N> <B>often</B> <B>present</B> <B>.</B> 
+
+
+ in commonsubstructure: use modifier [outer [phyllaries]], tag <phyllaries> to tag sentence 1099: <M>outer</M> <N>phyllaries</N> <B>usually</B> <B>2</B> <B>–</B> <B>4</B> <N>times</N> <M><B>longer</B></M> <B>than</B> wide <B>.</B>
+ 
+
+=========
+
+
+
+1. In Of[C3: follow by numbers]: no change to [<N>corollas</N> <B>of</B> <M><B>fertile</B></M> <B>13</B> <B>–</B> <B>14</B> mm <B>,</B> <N>tubes</N> <B>5</B> <B>–</B> <B>6</B> mm <B>,</B> <N>throats</N> <B>2</B> <B>–</B> <B>4</B> mm <B>,</B> <N>lobes</N> <B>5</B> <B>–</B> <B>6</B> mm <B>.</B>]
+	In Of[C3: follow by numbers]: no change to [<N>blades</N> <B>of</B> <M><B>basal</B></M> <B>5</B> <B>–</B> <B>35</B> + <B>×</B> <B>1</B> <B>–</B> <B>8</B> <B>(</B> <B>–</B> <B>12</B> + <B>)</B> cm <B>;</B>]
+
+	In Of[C3: follow by numbers]: no change to [<N>pappi</N> <B>of</B> <B>2</B> <B>series</B> <B>of</B> <N>awns</N> <B>,</B> <M>outer</M> <B>9</B> <B>–</B> <B>10</B> mm <B>,</B> smooth <B>or</B> <B>±</B> <B>roughened</B> <B>,</B> <M>inner</M> <B>2</B> <B>–</B> <B>5</B> mm <B>,</B> <B>roughened</B> <B>with</B> <B>short</B> <B>spreading</B> <N>hairs</N> <B>.</B>]
+	In Of[C3: follow by numbers]: no change to [<N>florets</N> <B>of</B> <B>1</B> <B>,</B> <B>2</B> <B>,</B> <B>or</B> <B>3</B> + <N>kinds</N> <B>in</B> <B>a</B> <N>head</N> <B>:</B>]
+
+
+	In Of[C2:s1=corollas s2=florets subs=florets]: no change to [<N>corollas</N> of neutral <N>florets</N> <B>pink</B>-<B>purple</B> <B>(</B><B>rarely</B> <B>white</B><B>)</B><B>,</B> <B>35</B><B>–</B><B>50</B> mm<B>,</B> enlarged<B>,</B> <B>raylike</B><B>;</B>]
+
+
+	In Of[C2:s1=pappi s2=[cypselae] subs=cypselae]: no change to [<N>pappi</N> of <M>outer</M> <B>series</B> of <B>unequal</B> stiff <N>bristles</N> <B>2</B><B>–</B><B>8</B> mm<B>,</B> <M>inner</M> <B>series</B> of <B>slender</B> <N>scales</N> <B>ca</B><B>.</B> <B>1</B><B>.</B><B>5</B> mm<B>.</B>]
+
+
+
+3. phraseclause: 
+
+ in phraseclause: use modifier [or with], tag <caudices> to tag sentence 6019: <M><B>taprooted</B></M> <B>or</B> <B>with</B> <N>caudices</N> <B>.</B>
+ 
+ in Ditto: for: <B>stout</B> <B>,</B> <B>branched</B> <N>caudices</N> <B>.</B>
+ 
+
+===================================
+checked: <N> </N> at adjectivesubject round 2.
+check: "" in pos table: b
+
+check: 0. adjective subjects mark up: 11365: <B>usually</B> <M>peripheral</M> <B>3</B> <B>–</B> <B>20</B> <M><B>pistillate</B></M> and <M>fertile</M> <B>;</B>
+	update [3] pos: b
+	 in adjectivesubject: use modifier [usually peripheral], tag <[florets]> to tag sentence 11365: <B>–</B> <B>20</B> <M><B>pistillate</B></M> and <M>fertile</M> <B>;</B> 
+	find a modifier [F]: usually 
+	update [;] pos: b
+
+adjective subjects mark up: 11359: <M><B>usually</B></M> <B>fibrous_rooted</B> <B>,</B> <B>sometimes</B> <M><B>taprooted</B></M> <B>,</B> <N>caudices</N> <B>sometimes</B> <M><B>woody</B></M> <B>,</B> <N>rhizomes</N> <B>sometimes</B> <B>present</B> <B>.</B>
+	update [fibrous_rooted] pos: b
+ 	in adjectivesubject: use modifier [usually], tag <[annuals or biennials or perennials]> to tag sentence 11359: <B>,</B> <B>sometimes</B> <M><B>taprooted</B></M> <B>,</B> <N>caudices</N> <B>sometimes</B> <M><B>woody</B></M> <B>,</B> <N>rhizomes</N> <B>sometimes</B> <B>present</B> <B>.</B> 
+	update [,] pos: b
+
+check: 1. adjective subjects mark up: 9111: <M><B>basal</B></M> <M><B>persistent</B></M> <B>in</B> <N>rosettes</N> <B>;</B>
+	update [in] pos: b
+ 	in adjectivesubject: use modifier [basal persistent], tag <[leaves]> to tag sentence 9111: <N>rosettes</N> <B>;</B>
+
+check sentid: 991 tag.
+
+check: 2. [R2]: in remainnulltag: use modifier [], tag <caudices> to tag sentence 10954: <B>rhizomatous</B> <B>,</B> <N>caudices</N><N> </N>coarse <B>.</B> 	
+
+check: [made change in [psn][psn] pattern doit markup]3. "basal leaf blades" markup problem: in doit, takes only the minimal tag, leaving out modifier, basal
+	m=leaf t=face; in answer m=abaxial leaf [sentence: abaxial leaf faces ....]
+	
+3.5 sentence: ligules surpassing phyllaries by 15 – 20 mm . :know later that <N>ligules</N>
+Found [b?[psn]] or  [?b[psn]] pattern
+	:mark up 6335 with tag ligules surpassing phyllaries
+	
+4. Check: of didn't get processed. Add substructure table. Use "A of # B" to collect sub/structure relationships
+	"blades of basal" markup problem: didn't processed in Of, as basal is a M.
+	"of bisexual yellowish"
+	"margins of bractlets" Of problem.
+	"corollas of disc florets" Of problem
+
+5. Common substructures: bases|branches|crowns|florets|lengths|scars
+ 
+6. level problem: m=[blade] cauline tag=base; in answer m=cauline [leaf]
+ 
+ditto
+	checked: ditto		appearing	appearing  ball_like  on  slender  ,  sometimes  nodding  peduncles  . 
+	checked: [leaf]	cauline	appearing	cauline  appearing  unequal  and  opposite  proximal  to  distal  peduncles  ,  petiolate  or  sessile  ,  blades  oblanceolate  to  linear  ,  gradually  reduced  ,  bases  ±  clasping  ,  margins  entire  or  dentate  . 
+	??ditto		branching	branching  unknown  . 
+	ditto		caudex	rhizomatous  ,  caudices  coarse  . 
+	ditto		colonial	colonial  from  deep_seated  creeping  roots  producing  adventitious  buds  . 
+	ditto		petiole	sessile  or  petioles  ±  broadly  winged  ; 
+	ditto		tap	tap  rooted  . 
+
+check: phraseclause:
+	caudex		ditto	stout  ,  branched  caudices  . 
+
+clusterstring:
+	[head]		cluster	clusters  subtended  by  bractlike  leaves  .
+================================================================================================
+Dec 24:
+test_24 compared to v19-benchmark:
+
+done: redo the pattern in phraseclause 
+done: getparentsentencetag: look for Capitalized clause or small case clause ends with ":", ex. pappi:
+
+
+===============
+create table comparetobenchmark
+select fnav19_benchmark.sentence.source as source,
+	fnav19_benchmark.sentence.sentence as sentence,
+	fnav19_benchmark.sentence.modifier as manswer,
+	fnav19_benchmark.sentence.tag as tanswer,
+	benchmark_learningcurve_test_24.sentence.modifier as m,
+	benchmark_learningcurve_test_24.sentence.tag as t
+from fnav19_benchmark.sentence, benchmark_learningcurve_test_24.sentence
+where benchmark_learningcurve_test_24.sentence.source = fnav19_benchmark.sentence.source;
+
+
+select manswer, m, t, sentence from comparetobenchmark where manswer !=m and tanswer =t order by manswer, m, t;
+select tanswer, m, t, sentence from comparetobenchmark where manswer =m and tanswer !=t order by manswer, m, t;
+================
+Errors in benchmarks:
+corrected: 208.txt-4: [leaf] => leaf
+corrected: 305.txt-12	[cypsela]; 
+corrected: 344.txt-17	[cypsela];
+corrected: 963.txt-15/16	[cypsela];
+corrected: 969.txt-15/16	[cypsela];
+
+checked!: tag = 2n =>chromosome
+
+=================
+modifiers differ and tags same (862 clauses):
+
+
+checked!: repeat organ name in modifier and tag: m=[phyllary] outer and middle; tag=[phyllary]
+checked!: repeat organ name in modifier: m = [phyllary] inner [phyllary]
+4. extra modifier: 
+	check: common substructure: if modifier is a structure, don't look up parent structure
+		m=[stem] tag=branch; in answer m=""
+		checked! m=[corolla] style tag=tip; in answer m=style
+		checked! m=[floret] style tag=branch; in answer m=style
+		checked! m=[floret] anther tag=base; in answer m=anther
+		checked! m=[involucre] mid phyllary tag=spine; in answer m=mid phyllary
+	
+	type modifier problem:
+		fibrous (root)
+		stout (taproot)
+	
+	checked!: each/all/individual =>""
+	
+	checked! ?? "pappi crowns..." markup problem
+	?? "basal persistent" markup problem
+	?? "basal leaf blades" markup problem
+	?? "blades of basal" markup problem
+	?? "of bisexual yellowish"
+	?? "margins of bractlets" Of problem.
+	?? "corollas of disc florets" Of problem
+
+5. order and level:
+	check: common structure, switched order for type modifier.
+		checked: m=[blade] cauline tag=base; in answer m=cauline [leaf]
+		m=[blade] main marginal tag=spine; in answer m=[leaf blade] main marginal
+		m=[leaf] basal tag=blade; in answer m=basal [leaf]
+	??level
+		
+6. missing modifier:
+	check: cf [5. order] m=abaxial tag=face; in answer m=[leaf blade] abaxial
+	is body a commonsubstructure?
+		m=outer and mid tag=body; in answer m=outer and mid [phyllary]
+	
+	gather words for tag:
+		m=leaf t=face; in answer m=abaxial leaf [sentence: abaxial leaf faces ....]
+		m=head t=receptacle; in answer m=adjacent head [sentence: receptacles of adjacent heads....]
+ 		checked! m="" t=leaf; in answer m="capitular" [sentence: capituarl leaves:]
+		checked! m=bisexual t=floret; in answer m="functionally staminate or bisexual"
+=================
+tags differ:
+
+sentence: ligules surpassing phyllaries by 15 – 20 mm .
+Found [b?[psn]] or  [?b[psn]] pattern
+	:updates on POSs
+	: update [by(b)] role: =>, certaintyu=3
+	: total occurance of [by] =3
+	: update [by(b)] role: =>, certaintyu=4
+	: total occurance of [by] =4
+	: update [phyllaries(p)] role: -=>-, certaintyu=412
+	: total occurance of [phyllaries] =412
+	: update [phyllary(s)] role: =>, certaintyu=412
+	: total occurance of [phyllary] =412
+	:determine the tag: ligules surpassing phyllaries
+	:mark up 6335 with tag ligules surpassing phyllaries
+
+checked: and/or
+	annual  or  biennial  or  perennial		annual	annuals  ,  biennials  ,  perennials  ,  subshrubs  ,  shrubs  ,  vines  ,  or  trees  . 
+	root  or  rhizome		root	roots  or  rhizomes  fleshy  ; 
+	style  and  style  branch		style	styles  and  style_branches  yellow  . 
+	taproot  and  root		taproot	taproots  and  often  a  cluster  of  coarse  fibrous  roots  ,  roots  without  tuberlike  enlargements  . 
+	taproot  and  root		taproot	taproots  and  often  cluster  of  coarse  fibrous  roots  ,  roots  without  tuberlike  enlargements  . 
+	taproot  and  root		taproot	taproots  and  clusters  of  coarse  fibrous  roots  that  often  have  tuberlike  thickenings  . 
+	stem  and  branch  and  involucre	distal	stem	distal  stems  ,  branches  ,  and  involucres  conspicuously  dotted  with  short  ,  stipitate  ,  flat_topped  glands  that  resemble  tacks  . 
+	blade  or  lobe	leaf	blade	leaf  blades  or  lobes  orbiculate  to  linear  ,  1  –  5  (  –  20  )  ×  1  –  5  (  –  20  )  mm  . 
+
+ditto
+	checked: ditto		appearing	appearing  ball_like  on  slender  ,  sometimes  nodding  peduncles  . 
+	checked: [leaf]	cauline	appearing	cauline  appearing  unequal  and  opposite  proximal  to  distal  peduncles  ,  petiolate  or  sessile  ,  blades  oblanceolate  to  linear  ,  gradually  reduced  ,  bases  ±  clasping  ,  margins  entire  or  dentate  . 
+	??ditto		branching	branching  unknown  . 
+	ditto		caudex	rhizomatous  ,  caudices  coarse  . 
+	ditto		colonial	colonial  from  deep_seated  creeping  roots  producing  adventitious  buds  . 
+	ditto		petiole	sessile  or  petioles  ±  broadly  winged  ; 
+	ditto		tap	tap  rooted  . 
+
+check: phraseclause:
+	caudex		ditto	stout  ,  branched  caudices  . 
+
+clusterstring:
+	[head]		cluster	clusters  subtended  by  bractlike  leaves  . 
+
+checked:
+	2n		ditto	2n  =  22  ,  44  . 
+	2n		ditto	2n  =  22 
+	2n		ditto	2n  =  18  . 
+
+checked: parentsentencetag:
+	disc	inner	[cypsela]	inner  compressed_prismatic  ; 
+	disc	inner	[cypsela]	inner  compressed_prismatic  to  columnar  ; 
+	
+	checked:#remove tag from new <b>
+		tagged words in pos table
+	checked: #pos = "N"/"B"
+		[floret]	outer	<B>pistillate	outer  pistillate  ,  corollas  creamy  white  ,  rarely  purple  tinged  ,  laminae  0  .  2  –  0  .  3  mm  wide  ; 
+	[floret]	outer	[cypsela]	outer  curved  ,  8  –  9  mm  ,  coarsely  beaked  ,  inner  straight  ,  12  –  21  mm  ,  finely  beaked  ,  ribs  10  ; 
+	[pappus]	outer	[cypsela]	outer  of  12  –  20  +  ,  minute  setae  ,  inner  of  60  –  80  +  ,  white  ,  subequal  ,  barbellulate  bristles  in  1  –  2  +  series  .
