@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jaxen-core.jar"/>
+	<classpathentry kind="lib" path="lib/jaxen-jdom.jar"/>
+	<classpathentry kind="lib" path="lib/jdom.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.0.8-bin.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.core.commands_3.5.0.I20090525-2000.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.core.runtime_3.5.0.v20090525.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.equinox.common_3.5.0.v20090520-1800.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.equinox.registry_3.4.100.v20090520-1800.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.jface_3.5.0.I20090525-2000.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.jface.text_3.5.0.v20090602.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.osgi_3.5.0.v20090520.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.swt.win32.win32.x86_3.5.0.v3550b.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.text_3.5.0.v20090513-2000.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.ui.forms_3.4.0.v20090526.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.ui.workbench_3.5.0.I20090603-2000.jar"/>
+	<classpathentry kind="lib" path="lib/saxpath.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="baseline.jar"/>
+	<classpathentry kind="lib" path="formattedtext-1.0.0.jar" sourcepath="formattedtext-1.0.0-src.zip"/>
+	<classpathentry kind="lib" path="lib/ant.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-1.4.3.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-parser.jar"/>
+	<classpathentry kind="lib" path="lib/prefuse.jar"/>
+	<classpathentry kind="lib" path="radiogroup-0.1.0.jar" sourcepath="radiogroup-0.1.0-src.zip"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding_1.2.0.M20090819-0800.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/org.eclipse.core.databinding_1.2.0.M20090819-0800.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.beans_1.2.0.I20090525-2000.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/org.eclipse.core.databinding.beans_1.2.0.I20090525-2000.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.observable_1.2.0.M20090902-0800.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/org.eclipse.core.databinding.observable_1.2.0.M20090902-0800.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.property_1.2.0.M20090819-0800.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/org.eclipse.core.databinding.property_1.2.0.M20090819-0800.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.jface.databinding_1.3.1.M20090826-0800.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/org.eclipse.jface.databinding_1.3.1.M20090826-0800.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/com.ibm.icu_4.0.1.v20090822.jar" sourcepath="C:/eclipse-jee-galileo-SR1-win32/eclipse/plugins/com.ibm.icu_4.0.1.v20090822.jar"/>
+	<classpathentry kind="con" path="org.dyno.visual.swing.VS_LIBRARY/layoutext"/>
+	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
+	<classpathentry kind="lib" path="lib/HtmlXmlUtil.jar"/>
+	<classpathentry kind="lib" path="lib/swt-grouplayout.jar"/>
+	<classpathentry kind="lib" path="lib/jung-3d-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-3d-demos-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-algorithms-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-graph-impl-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-io-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-jai-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-jai-samples-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-samples-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jung-visualization-2.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/Hong Updates/workspace/parsing-gui/lib/jsoup-1.6.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/annotationEvaluations"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
