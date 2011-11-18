@@ -895,17 +895,17 @@ public class MainFormDbAccessor {
 		}
 	}
 	
-	public void createWordRoleTable(){
+	public void createHeuristicTermsTable(){
 		//Connection conn = null;
 		Statement stmt = null ;
 		String tablePrefix = MainForm.dataPrefixCombo.getText();
 		try {
 			//conn = DriverManager.getConnection(url);
 			stmt = conn.createStatement();
-			stmt.execute("drop table if exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE"));
-			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+ " (word varchar(50), semanticrole varchar(2), primary key(word, semanticrole))");			
+			stmt.execute("drop table if exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS"));
+			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS")+ " (word varchar(50), type varchar(20), primary key(word))");			
 		} catch (SQLException exe){
-			LOGGER.error("Exception in RemoveDescriptorData", exe);
+			LOGGER.error("Exception in MainFormDbAccessor", exe);
 			exe.printStackTrace();
 		} finally {
 			try{
@@ -917,7 +917,38 @@ public class MainFormDbAccessor {
 			//	conn.close();
 			//}		
 			}catch(Exception e){
-				LOGGER.error("Exception in RemoveDescriptorData", e);
+				LOGGER.error("Exception in MainFormDbAccessor", e);
+				e.printStackTrace();
+			}
+			
+		}
+
+		
+	}
+	
+	public void createWordRoleTable(){
+		//Connection conn = null;
+		Statement stmt = null ;
+		String tablePrefix = MainForm.dataPrefixCombo.getText();
+		try {
+			//conn = DriverManager.getConnection(url);
+			stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE"));
+			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+ " (word varchar(50), semanticrole varchar(2), primary key(word, semanticrole))");			
+		} catch (SQLException exe){
+			LOGGER.error("Exception in MainFormDbAccessor", exe);
+			exe.printStackTrace();
+		} finally {
+			try{
+			if (stmt != null) {
+				stmt.close();
+			}
+			
+			//if (conn != null) {
+			//	conn.close();
+			//}		
+			}catch(Exception e){
+				LOGGER.error("Exception in MainFormDbAccessor", e);
 				e.printStackTrace();
 			}
 			

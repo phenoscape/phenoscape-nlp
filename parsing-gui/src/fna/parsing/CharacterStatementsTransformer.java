@@ -27,13 +27,8 @@ import fna.db.*;
 /**
  * @author hongcui
  * 	
- * Markup OCRed text (type3)
- * Identify and mark up morphological descriptions only
- * call paragraphExtraction/bootstrapDescriptionExtraction.pl
- *
- * input: source files, with or without seeds description. The source files must contain cleaned paragraphs, not raw OCRed text pieces. Use OCRedText to process OCRed raw text before run this program.
- * output: prefix_paragraphs and prefix_sentence, prefix_wordpos tables etc by unsupervisedClauseMarkupBenchmarked.pl
- * 
+ * transform NeXML chars/states to a suitable format for CharaParser
+ * expect 1 NeXML file per PDF paper (original pub) in source folder 
  */
 @SuppressWarnings("unchecked")
 public class CharacterStatementsTransformer extends Thread {
@@ -109,6 +104,7 @@ public class CharacterStatementsTransformer extends Thread {
 	 */
 	private void outputTo(File desfolder, File chafolder, File trafolder, File file) {
 		try{
+			String fname = file.getName();
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(file);
 			Element root = doc.getRootElement();
@@ -116,25 +112,31 @@ public class CharacterStatementsTransformer extends Thread {
 			//copy to trafolder
 			XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
 			out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(trafolder, file.getName()))));
-			//get <description> to put in desfolder
-			List<Element> descs = XPath.selectNodes(root, "//description");
-			Iterator<Element> it = descs.iterator();
-			while(it.hasNext()){
-				Element desc = it.next();
-				String fname = desc.getAttributeValue("id");
-				String content = desc.getTextNormalize().trim();
-				content = content.replaceFirst("[,;\\.]+$", ";");
-				write2file(desfolder, fname+".txt", content);
+			//get <state> to put in desfolder
+			List<Element> allstates = XPath.selectNodes(root, "//format/states");
+			Iterator<Element> its = allstates.iterator();
+			while(its.hasNext()){
+				Element states = its.next();
+				String statesid = states.getAttributeValue("id");
+				List<Element> stateels = XPath.selectNodes(states, ".//state");
+				Iterator<Element> it = stateels.iterator();
+				while(it.hasNext()){
+					Element state = it.next();
+					String stateid = state.getAttributeValue("id");
+					String content = state.getAttributeValue("label").trim();
+					content = content.replaceFirst("[,;\\.]+$", ";");
+					write2file(desfolder, fname+"_"+statesid+"_"+stateid+".txt", content);
+				}
 			}
 			//get <character> to put in chafolder
-			List<Element> chars = XPath.selectNodes(root, "//character");
-			it = chars.iterator();
+			List<Element> chars = XPath.selectNodes(root, "//format/char");
+			Iterator<Element> it = chars.iterator();
 			while(it.hasNext()){
 				Element cha = it.next();
-				String fname = cha.getAttributeValue("id");
-				String content = cha.getTextNormalize().trim();
+				String statesid = cha.getAttributeValue("states");
+				String content = cha.getAttributeValue("label").trim();
 				content = content.replaceFirst("[,;\\.]+$", ";");
-				write2file(chafolder, fname+".txt", content);
+				write2file(chafolder, fname+"_"+statesid+".txt", content);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -178,6 +180,7 @@ public class CharacterStatementsTransformer extends Thread {
 	
 	public void run () {
 		listener.setProgressBarVisible(true);
+		System.out.println("compiled");
 		output2Target();
 		listener.setProgressBarVisible(false);
 	}

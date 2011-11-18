@@ -41,7 +41,7 @@ public class Type2Transformer extends Thread {
 	// this is the dataprfix from general tab
 	private String dataprefix = null;
 	private ProcessListener listener;
-	protected static final Logger LOGGER = Logger.getLogger(Type3Transformer.class);
+	protected static final Logger LOGGER = Logger.getLogger(CharacterStatementsTransformer.class);
 	/**
 	 * @param listener
 	 * @param dataprefix

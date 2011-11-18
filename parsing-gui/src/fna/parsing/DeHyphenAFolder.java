@@ -125,7 +125,36 @@ public class DeHyphenAFolder {
         	boolean has = false;
         	int problemcount = 0;
 	        try {
-	            File[] flist = folder.listFiles();
+	            File[] flist = folder.listFiles();//description folder
+	            for(int i= 0; i < flist.length; i++){
+	                BufferedReader reader = new BufferedReader(new FileReader(flist[i]));
+	                String line = null; 
+	                StringBuffer sb = new StringBuffer();
+	                while ((line = reader.readLine()) != null) {
+	                    line = line.replaceAll(System.getProperty("line.separator"), " ");
+	                    sb.append(line);
+	                }
+	                reader.close();
+	                String text = sb.toString();
+	                //check for unmatched brackets
+	                if(hasUnmatchedBrackets(text)){
+	                	has = true;
+	                	vd.showPerlMessage((++problemcount)+": "+flist[i].getAbsolutePath()+" contains unmatched brackets in \""+text+"\"\n");
+	                }
+	                //check for missing spaces between text and numbers: 
+	                if(text.matches(".*[a-zA-Z]\\d.*") || text.matches(".*\\d[a-zA-Z].*")){
+	                	//has =true; //ant descriptions contain "Mf4"
+	                 	//vd.showPerlMessage((++problemcount)+": "+flist[i].getAbsolutePath()+" misses a space between a word and a number in \""+text+"\"\n");      	       
+	                }
+	                //check for (?)
+	                if(text.matches(".*?\\(\\s*\\?\\s*\\).*")){
+	                	has =true;
+	                 	vd.showPerlMessage((++problemcount)+": "+flist[i].getAbsolutePath()+" contains expression (?) in \""+text+"\"\n");  
+	                 	vd.showPerlMessage("Change (?) to an text expression such as (not certain)");
+	                }
+	            }
+	            File cfolder = new File(folder.getParentFile(), "characters");
+	            flist = cfolder.listFiles();//description folder
 	            for(int i= 0; i < flist.length; i++){
 	                BufferedReader reader = new BufferedReader(new FileReader(flist[i]));
 	                String line = null; 

@@ -78,9 +78,8 @@ public class VolumeMarkupDbAccessor {
     	PreparedStatement stmt = null;
     	ResultSet rs = null;
 		try {
-
 			String sql = "select distinct tag as structure from "+this.tablePrefix+"_sentence where tag != 'unknown' and tag is not null and tag not like '% %' " +
-			"union select plural as structure from "+this.tablePrefix+"_singularplural"+","+ this.tablePrefix+"_sentence where singular=tag "+
+			"union select distinct plural as structure from "+this.tablePrefix+"_singularplural"+","+ this.tablePrefix+"_sentence where singular=tag "+
 			"order by structure"; 		
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
@@ -138,7 +137,7 @@ public class VolumeMarkupDbAccessor {
 	 	try {
 			
 			String sql = "select dhword from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+
-			" where inbrackets=0 and dhword not like '%\\_%' and " +
+			" where count>=3 and inbrackets=0 and dhword not like '%\\_%' and " +
 			" dhword not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where saved_flag='red') and" +
 			" dhword not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+") order by dhword";
 			stmt = conn.prepareStatement(sql);
@@ -327,10 +326,7 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 		
 		return words;
 	}
-    public static void main(String[] args)throws Exception {
-		// TODO Auto-generated method stub
-		//System.out.println(DriverManager.getConnection(url));
-	}
+
 
 	public ArrayList<ArrayList> getUnSavedDescriptorWords() throws SQLException {
 		
@@ -369,5 +365,34 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 		wordsAndFlag.add(words);
 		wordsAndFlag.add(flag);
 		return wordsAndFlag;
+	}
+	
+	
+	public void insertIntoHeuristicsTerms(String term, String type){
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("insert into "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS")+"(term, type) values ('"+term+"','"+type+"')");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public ArrayList<String> retrieveOriginalSentences(){
+		ArrayList<String> originals = new ArrayList<String>();
+		try{
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select originalsent from "+tablePrefix+"_"+ApplicationUtilities.getProperty("SENTENCTTABLE"));
+			while(rs.next()){
+				originals.add(rs.getString("originalsent"));
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return originals;
+	}
+	
+    public static void main(String[] args)throws Exception {
+		// TODO Auto-generated method stub
+		//System.out.println(DriverManager.getConnection(url));
 	}
 }

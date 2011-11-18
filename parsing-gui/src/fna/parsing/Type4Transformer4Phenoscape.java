@@ -17,7 +17,7 @@ import org.jdom.xpath.XPath;
 
 /**
  * @author Hong Updates
- *
+ *transform NeXML files
  */
 public class Type4Transformer4Phenoscape extends Type4Transformer {
 
@@ -36,9 +36,12 @@ public class Type4Transformer4Phenoscape extends Type4Transformer {
 
 
 	/* do one thing: 
-	 * take out description element and save them in a seperate folder.
+	 * take out description element and save them in a separate folder.
 	 * make sure the file names are mapped to numbers
 	 * 
+	 */
+	/**
+	 * @param files: NeXML files, one for each PDF source file
 	 */
 	@Override
 	protected void transformXML(File[] files) {

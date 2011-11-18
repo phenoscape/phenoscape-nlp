@@ -82,10 +82,31 @@ public class VolumeMarkup {
 		}
 		
 		//update();
+		heuristicTermSorting(); //collect ACRONYMS and Proper Names etc.
 		
 
 	}
-	
+	/**
+	 * this method gather ACRONYMS and Proper Names and other easily identifiable terms and save them in 
+	 * tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS") table:
+	 * Acronyms: a word with more than one capitalized letter
+	 * Proper Names: a capitalized word that this not the first word in a sentence
+	 * Noun/Structure: (a|an|the|that|this|those|these|some|any) word $ 
+	 */
+	private void heuristicTermSorting() {
+		VolumeMarkupDbAccessor vmDba = new VolumeMarkupDbAccessor(this.dataPrefix, this.glossarytable);
+		ArrayList<String> originals = vmDba.retrieveOriginalSentences();
+		for(String original: originals){
+			String[] tokens = original.split("\\s+");
+		}
+		
+		try{	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+
 	/*public void update() throws ParsingException{
 		listener.clear();
 		
