@@ -39,24 +39,30 @@ public class CharacterStatementsTransformer extends Thread {
 	//File target = new File(Registry.TargetDirectory);
 	//File target = new File("Z:\\WorkFeb2008\\WordNov2009\\Description_Extraction\\extractionSource\\Plain_text_transformed");
 	private File target = new File(Registry.TargetDirectory);
-	private XMLOutputter outputter = null;
-	private String markupMode = "plain";
-	private String dataprefix = null;
+
 	protected static final Logger LOGGER = Logger.getLogger(CharacterStatementsTransformer.class);
 	private String seedfilename = "seeds";
 	private ProcessListener listener;
 	private Text perlLog;
-	private String glossarytable;
+	private XMLOutputter outputter;
+	private XPath xpathstates;
+	private XPath xpathstate;
+	private XPath xpathchar;
 	
 	CharacterStatementsTransformer(ProcessListener listener, Display display, 
-			Text perllog, String dataprefix,String glossarytable, ArrayList seeds){
+			Text perllog, ArrayList seeds){
 		//super(listener, display, perllog, dataprefix);
+		try{
+			xpathstates = XPath.newInstance("//x:format/x:states");
+			xpathstate = XPath.newInstance(".//x:state");
+			xpathchar = XPath.newInstance("//x:format/x:char");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 		this.seeds = seeds;
 		this.listener = listener;
 		this.perlLog = perllog;
 		//this.markupMode = "plain";
-		this.dataprefix = dataprefix;
-		this.glossarytable=glossarytable;
 		outputter = new XMLOutputter(Format.getPrettyFormat());
 		File target = new File(Registry.TargetDirectory);
 		Utilities.resetFolder(target, "descriptions");
@@ -69,8 +75,9 @@ public class CharacterStatementsTransformer extends Thread {
 	
 	/**
 	 * create folders:
-	 * descriptions for to-be-annotated morph description segments
-	 * transformed for entire documents (tags: <document><nonMorph></nonMorph><treatment></treatment></document>)
+	 * descriptions for state label atttributes
+	 * characters for char elements
+	 * transformed for entire NeXML documents 
 	 */
 	private void output2Target() {
 		File des = createFolderIn(target, "descriptions");
@@ -89,11 +96,6 @@ public class CharacterStatementsTransformer extends Thread {
 		}
 		
 		listener.progress(60);
-		//dehypen descriptions folder: may be a redundant step
-		//DeHyphenAFolder dhf = new DeHyphenAFolder(listener,target.getAbsolutePath(),"descriptions", 
-		//		ApplicationUtilities.getProperty("database.name"), perlLog,  dataprefix,this.glossarytable, null);
-		//dhf.dehyphen();
-
 	}
 	/**
 	 * Copy file to trafolder
@@ -108,17 +110,15 @@ public class CharacterStatementsTransformer extends Thread {
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(file);
 			Element root = doc.getRootElement();
-			root.detach();
-			//copy to trafolder
-			XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
-			out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(trafolder, file.getName()))));
 			//get <state> to put in desfolder
-			List<Element> allstates = XPath.selectNodes(root, "//format/states");
+		    xpathstates.addNamespace("x", root.getNamespaceURI()); //this is how to handle default namespace
+			List<Element> allstates = xpathstates.selectNodes(doc);
 			Iterator<Element> its = allstates.iterator();
 			while(its.hasNext()){
 				Element states = its.next();
 				String statesid = states.getAttributeValue("id");
-				List<Element> stateels = XPath.selectNodes(states, ".//state");
+				xpathstate.addNamespace("x", root.getNamespaceURI());
+				List<Element> stateels = xpathstate.selectNodes(states);
 				Iterator<Element> it = stateels.iterator();
 				while(it.hasNext()){
 					Element state = it.next();
@@ -129,7 +129,8 @@ public class CharacterStatementsTransformer extends Thread {
 				}
 			}
 			//get <character> to put in chafolder
-			List<Element> chars = XPath.selectNodes(root, "//format/char");
+			xpathchar.addNamespace("x", root.getNamespaceURI());
+			List<Element> chars = xpathchar.selectNodes(root);
 			Iterator<Element> it = chars.iterator();
 			while(it.hasNext()){
 				Element cha = it.next();
@@ -138,6 +139,11 @@ public class CharacterStatementsTransformer extends Thread {
 				content = content.replaceFirst("[,;\\.]+$", ";");
 				write2file(chafolder, fname+"_"+statesid+".txt", content);
 			}
+			
+			root.detach();
+			//copy to trafolder
+			outputter.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(trafolder, file.getName()))));
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -174,7 +180,7 @@ public class CharacterStatementsTransformer extends Thread {
 	 */
 	public static void main(String[] args) {
 		//save to-be-annotated files to source folder 
-		CharacterStatementsTransformer tpm = new CharacterStatementsTransformer(null, null, null, "bhl_2vs","", null);
+		CharacterStatementsTransformer tpm = new CharacterStatementsTransformer(null, null, null, null);
 		tpm.output2Target();
 	}
 	

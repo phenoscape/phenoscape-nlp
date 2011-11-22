@@ -3227,9 +3227,13 @@ public class MainForm {
 			new ProcessListener(transformationTable, transformationProgressBar, 
 					shell.getDisplay());
 		/* Need to clarify perlLog, and seeds new arraylist from Dr Hong*/ 
-		CharacterStatementsTransformer preMarkUp = 
+		/*CharacterStatementsTransformer preMarkUp = 
 			new CharacterStatementsTransformer(listener, shell.getDisplay(), 
 					null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
+		*/
+		CharacterStatementsTransformer preMarkUp = 
+			new CharacterStatementsTransformer(listener, shell.getDisplay(), 
+					null, new ArrayList());
 		preMarkUp.start();
 	}
 	
