@@ -262,6 +262,42 @@ public class VolumeFinalizer extends Thread {
         }
     }
 	
+	/**
+	 * files with a description size = 0 will not get written to final copy. they need to be copied from transformed folder to final folder
+	 */
+	public static void copyFilesWithoutDescriptions2FinalFolder() {
+		File source = null;
+		File target = null;
+		File description = null;
+		if(!standalone)  source = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty("TRANSFORMED"));
+		if(standalone)  source = new File(standalonefolder+"\\target\\transformed"); 
+		if(!standalone)  target = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty("FINAL"));
+		if(standalone)  target = new File(standalonefolder+"\\target\\final");
+		if(!standalone)  description = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty("DESCRIPTIONS"));
+		if(standalone)  description = new File(standalonefolder+"\\target\\descriptions");
+		//find in description files have a size of zero
+		ArrayList<String> files4copy = new ArrayList<String>();
+		File[] des = description.listFiles();
+		for(File df: des){
+			if(df.length()==0){
+				files4copy.add(df.getName());
+			}
+		}
+		//for each file in files4copy, copy from transformed to final
+		try{
+			SAXBuilder builder = new SAXBuilder();
+			for(String f: files4copy){
+				f = f.replaceFirst("txt$", "xml");
+				Document trans = builder.build(new File(source, f));
+				Element root = trans.getRootElement();
+				root.detach();
+				ParsingUtil.outputXML(root, new File(target, f) ,null);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
     protected void resetOutputMessage() {
 		display.syncExec(new Runnable() {
 			public void run() {

@@ -50,7 +50,7 @@ public class StateMatrix {
 			stmt.execute("drop table if exists "+tableprefix+"_term_category");
 			stmt.execute("create table if not exists "+tableprefix+"_term_category (term varchar(100), category varchar(200))");
 			//noneqterms must not be refreshed
-			stmt.execute("create table if not exists "+tableprefix+"_noneqterms (term varchar(100) not null primary key, source varchar(200))");
+			//stmt.execute("create table if not exists "+tableprefix+"_noneqterms (term varchar(100) not null, source varchar(200))");
 			stmt.close();
 		}catch(Exception e){
 			e.printStackTrace();
