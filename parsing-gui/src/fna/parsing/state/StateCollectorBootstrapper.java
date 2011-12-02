@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+
 /**
  * @author hongcui
  *
@@ -23,8 +26,8 @@ public class StateCollectorBootstrapper extends StateCollectorTest {
 	/**
 	 * @param database
 	 */
-	public StateCollectorBootstrapper(Connection conn, String tableprefix, boolean filtered, String glosstable) {
-		super(conn, tableprefix, filtered, glosstable);
+	public StateCollectorBootstrapper(Connection conn, String tableprefix, boolean filtered, String glosstable, Display display, StyledText charLog) {
+		super(conn, tableprefix, filtered, glosstable, display, charLog);
 		this.segments = new Hashtable<String, String>(); 
 		this.states = new HashSet<String>();
 		
@@ -35,8 +38,8 @@ public class StateCollectorBootstrapper extends StateCollectorTest {
 	 * @param knownstates
 	 */
 	public StateCollectorBootstrapper(Connection conn, String tableprefix,
-			ArrayList<String> knownstates, boolean filtered, String glosstable) {
-		super(conn,tableprefix, knownstates, filtered, glosstable);
+			ArrayList<String> knownstates, boolean filtered, String glosstable, Display display, StyledText charLog) {
+		super(conn,tableprefix, knownstates, filtered, glosstable, display, charLog);
 		this.segments = new Hashtable<String, String>(); 
 		this.states = new HashSet<String>();
 		

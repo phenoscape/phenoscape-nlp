@@ -363,7 +363,7 @@ public class Utilities {
 				w = ws[ws.length-1];
 			}
 			ch = lookup(w, conn, characterhash, glosstable, wc, prefix);
-			if(ch == null && wc.indexOf('-')>0){//pani_culiform
+			if(ch == null && wc.indexOf('-')>0+0){//pani_culiform
 				ch = lookup(wc.replaceAll("-", ""), conn, characterhash, glosstable, wc, prefix);
 			}
 		}

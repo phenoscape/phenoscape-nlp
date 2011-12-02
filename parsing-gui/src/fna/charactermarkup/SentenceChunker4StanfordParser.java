@@ -123,7 +123,7 @@ public class SentenceChunker4StanfordParser {
 		}
 	}
 
-	public ChunkedSentence chunkIt(){
+	public ChunkedSentence chunkIt() throws Exception{
 		//ArrayList<Relation> results = new ArrayList<Relation>();
 		//check to see if the tree used the POS tag provided by markedsent, if not, return empty list.
 		//if(POSMatch()){
@@ -174,9 +174,7 @@ public class SentenceChunker4StanfordParser {
 					extractFromlVBs(lVBs);
 					
 				}while(VBs.size() > 0);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+			
 		//}
 		collapseThatClause();//that, which
 		collapseWhereClause();//where
@@ -184,6 +182,10 @@ public class SentenceChunker4StanfordParser {
 		
 		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.tableprefix,this.conn, this.glosstable);
 		return cs;
+			}catch(Exception e){
+				e.printStackTrace();
+				throw e;
+			}
 	}
 	
 	/**
@@ -661,8 +663,8 @@ end procedure
 					String name = ((Element)c).getName();
 					if(name.startsWith("NN")){//TODO: consider also CD(3) and PRP (them): no, let ChunkedSentence fix those cases
 						Element p = ((Element)c).getParentElement();
-						//return allText(p);
-						return checkAgainstMarkedSent(allText(p), lastIdIn(p));
+						return allText(p);
+						//return checkAgainstMarkedSent(allText(p), lastIdIn(p));
 					}
 					if(name.startsWith("NP") && ((Element)c).getAttributeValue("text") != null){//already collapsed NPs
 						return ((Element)c).getAttributeValue("text");

@@ -109,7 +109,6 @@ public class ApplicationUtilities {
 			messageBox.setMessage(message);
 			messageBox.setText(messageHeader);
 			returnVal = messageBox.open();	 
-			//System.out.println(".....-----------"+returnVal);
 		} catch (Exception exe) {
 			LOGGER.error("couldn't open file in ApplicationUtilities:showPopUpWindow", exe);
 			exe.printStackTrace();

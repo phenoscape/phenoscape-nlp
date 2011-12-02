@@ -31,39 +31,33 @@ import fna.db.*;
  * expect 1 NeXML file per PDF paper (original pub) in source folder 
  */
 @SuppressWarnings("unchecked")
-public class CharacterStatementsTransformer extends Thread {
-	private ArrayList<String> seeds = new ArrayList<String>();
+public abstract class CharacterStatementsTransformer extends Thread {
+	protected ArrayList<String> seeds = new ArrayList<String>();
 	//private File source =new File(Registry.SourceDirectory); //a folder of text documents to be annotated
 	//private File source = new File("Z:\\WorkFeb2008\\WordNov2009\\Description_Extraction\\extractionSource\\Plain_text");
-	private File source = new File(Registry.SourceDirectory);
+	protected File source = new File(Registry.SourceDirectory);
 	//File target = new File(Registry.TargetDirectory);
 	//File target = new File("Z:\\WorkFeb2008\\WordNov2009\\Description_Extraction\\extractionSource\\Plain_text_transformed");
-	private File target = new File(Registry.TargetDirectory);
+	protected File target = new File(Registry.TargetDirectory);
 
 	protected static final Logger LOGGER = Logger.getLogger(CharacterStatementsTransformer.class);
-	private String seedfilename = "seeds";
-	private ProcessListener listener;
-	private Text perlLog;
-	private XMLOutputter outputter;
-	private XPath xpathstates;
-	private XPath xpathstate;
-	private XPath xpathchar;
+	protected String seedfilename = "seeds";
+	protected ProcessListener listener;
+	protected Text perlLog;
+	protected XMLOutputter outputter;
+	//protected String prefix;
+	//protected String glossarytable;
+
 	
 	CharacterStatementsTransformer(ProcessListener listener, Display display, 
-			Text perllog, ArrayList seeds){
-		//super(listener, display, perllog, dataprefix);
-		try{
-			xpathstates = XPath.newInstance("//x:format/x:states");
-			xpathstate = XPath.newInstance(".//x:state");
-			xpathchar = XPath.newInstance("//x:format/x:char");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
+			Text perllog, ArrayList seeds/*, String prefix, String glossarytable*/){
 		this.seeds = seeds;
 		this.listener = listener;
 		this.perlLog = perllog;
-		//this.markupMode = "plain";
-		outputter = new XMLOutputter(Format.getPrettyFormat());
+		//this.prefix = prefix;
+		//this.glossarytable = glossarytable;
+		this.outputter = new XMLOutputter(Format.getPrettyFormat());
+		setXPaths();
 		File target = new File(Registry.TargetDirectory);
 		Utilities.resetFolder(target, "descriptions");
 		Utilities.resetFolder(target, "transformed");
@@ -73,9 +67,10 @@ public class CharacterStatementsTransformer extends Thread {
 		Utilities.resetFolder(target, "co-occurrence");
 	}	
 	
+	protected abstract void setXPaths();
 	/**
 	 * create folders:
-	 * descriptions for state label atttributes
+	 * descriptions for state label attributes
 	 * characters for char elements
 	 * transformed for entire NeXML documents 
 	 */
@@ -94,63 +89,12 @@ public class CharacterStatementsTransformer extends Thread {
 			listener.info((i+1) + "", fname.replaceAll("\\..*$", "")+".xml");
 			listener.progress((90* i)/files.length);
 		}
-		
 		listener.progress(60);
 	}
-	/**
-	 * Copy file to trafolder
-	 * take <description> elements from file and output them to desfolder. 
-	 * take <character> elements from file and output them to charfolder. 
-	 * @param folder
-	 * @param fname
-	 */
-	private void outputTo(File desfolder, File chafolder, File trafolder, File file) {
-		try{
-			String fname = file.getName();
-			SAXBuilder builder = new SAXBuilder();
-			Document doc = builder.build(file);
-			Element root = doc.getRootElement();
-			//get <state> to put in desfolder
-		    xpathstates.addNamespace("x", root.getNamespaceURI()); //this is how to handle default namespace
-			List<Element> allstates = xpathstates.selectNodes(doc);
-			Iterator<Element> its = allstates.iterator();
-			while(its.hasNext()){
-				Element states = its.next();
-				String statesid = states.getAttributeValue("id");
-				xpathstate.addNamespace("x", root.getNamespaceURI());
-				List<Element> stateels = xpathstate.selectNodes(states);
-				Iterator<Element> it = stateels.iterator();
-				while(it.hasNext()){
-					Element state = it.next();
-					String stateid = state.getAttributeValue("id");
-					String content = state.getAttributeValue("label").trim();
-					content = content.replaceFirst("[,;\\.]+$", ";");
-					write2file(desfolder, fname+"_"+statesid+"_"+stateid+".txt", content);
-				}
-			}
-			//get <character> to put in chafolder
-			xpathchar.addNamespace("x", root.getNamespaceURI());
-			List<Element> chars = xpathchar.selectNodes(root);
-			Iterator<Element> it = chars.iterator();
-			while(it.hasNext()){
-				Element cha = it.next();
-				String statesid = cha.getAttributeValue("states");
-				String content = cha.getAttributeValue("label").trim();
-				content = content.replaceFirst("[,;\\.]+$", ";");
-				write2file(chafolder, fname+"_"+statesid+".txt", content);
-			}
-			
-			root.detach();
-			//copy to trafolder
-			outputter.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(trafolder, file.getName()))));
 
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+	protected abstract void outputTo(File desfolder, File chafolder, File trafolder, File file); 
 
-	}
-
-	private void write2file(File desfolder, String fname, String text) {
+	protected void write2file(File desfolder, String fname, String text) {
 		try{
 			BufferedWriter out = new BufferedWriter(
 					new FileWriter(new File(desfolder, fname)));
@@ -175,15 +119,8 @@ public class CharacterStatementsTransformer extends Thread {
 		return nfile;
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		//save to-be-annotated files to source folder 
-		CharacterStatementsTransformer tpm = new CharacterStatementsTransformer(null, null, null, null);
-		tpm.output2Target();
-	}
 	
+
 	public void run () {
 		listener.setProgressBarVisible(true);
 		System.out.println("compiled");

@@ -100,9 +100,7 @@ public class VolumeDehyphenizer extends Thread {
     		vm.markup();
     		listener.setProgressBarVisible(false);
     	}
-		//loadStructureTab(); //done in markup already
-		//loadDescriptorTab();
-		//loadOthersTab();
+
     }
     
     /*private void loadOthersTab() {

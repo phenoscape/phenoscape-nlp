@@ -1523,7 +1523,7 @@ public class CharacterAnnotatorChunked {
 	}
 
 	private void addAttribute(Element e, String attribute, String value) {
-		value = value.replaceAll("(\\w+\\[|\\]|\\{|\\}|\\(|\\))", "").replaceAll("\\s+;\\s+", ";").trim();
+		value = value.replaceAll("(\\w+\\[|\\]|\\{|\\}|\\(|\\))", "").replaceAll("\\s+;\\s+", ";").replaceAll("\\[", "").trim();
 		if(value.indexOf("LRB-")>0) value = NumericalHandler.originalNumForm(value);
 		value = value.replaceAll("\\b("+this.notInModifier+")\\b", "").trim();
 		if(this.evaluation && attribute.startsWith("constraint_")) attribute="constraint"; 
@@ -1595,13 +1595,13 @@ public class CharacterAnnotatorChunked {
 		String[] twoparts  = new String[2];
 		object = object.replaceFirst("^o\\[", "").replaceFirst("\\]$", "").replaceAll("<", "(").replaceAll(">", ")");
 		String part2 = "";
-		//if(object.indexOf("(")>=0){
+		if(object.indexOf("(")>=0){
 			part2 = object.substring(object.indexOf("(")).trim();
-		//}else if(object.lastIndexOf(" ")>=0){
-		//	part2 = object.substring(object.lastIndexOf(" ")).trim();
-		//}else{
-		//	part2 = object;
-		//}
+		}else if(object.lastIndexOf(" ")>=0){
+			part2 = object.substring(object.lastIndexOf(" ")).trim();
+		}else{
+			part2 = object;
+		}
 		String part1 = object.replace(part2, "").trim();
 		if(part1.length()>0){
 			//part 1 may still have modifiers of the first organ in part 2
@@ -1854,13 +1854,13 @@ public class CharacterAnnotatorChunked {
 					}
 					w = w.replaceAll("(\\{|\\})", "");
 					chara = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, glosstable, tableprefix);
-					
+					if(chara==null && w.matches("no")){
+						chara = "presence";
+					}
 					if(chara==null && Utilities.isAdv(w, ChunkedSentence.adverbs, ChunkedSentence.notadverbs)){//TODO: can be made more efficient, since sometimes character is already given
 						modifiers +=w+" ";
 					}else if(w.matches(".*?\\d.*") && !w.matches(".*?[a-z].*")){//TODO: 2 times =>2-times?
-
 						results = this.annotateNumericals(w, "count", modifiers, parents, false);
-						//annotateCount(parents, w, modifiers);
 						modifiers = "";
 					}else{
 						//String chara = MyPOSTagger.characterhash.get(w);
@@ -1991,6 +1991,7 @@ public class CharacterAnnotatorChunked {
 		String sw = Utilities.toSingular(w);
 		try{
 			Statement stmt = conn.createStatement();
+			//Nov 30th 2011. Considered to use glossary, term_category, wordroles to replace sentence markup evidence. For some collections (e.g. phenotype test) sentence markup is not reliable
 			ResultSet rs = stmt.executeQuery("select * from "+this.tableprefix+"_sentence where tag = '"+w+"' or tag='"+sw+"'");
 			if(rs.next()){
 				return "parent_organ";

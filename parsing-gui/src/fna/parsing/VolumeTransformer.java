@@ -345,7 +345,7 @@ public class VolumeTransformer extends Thread {
 			
 			HabitatParser4FNA hpf = new HabitatParser4FNA(dataPrefix);
 			hpf.parse();
-			VolumeFinalizer vf = new VolumeFinalizer(listener, null, this.conn,null);//display output files to listener here.
+			VolumeFinalizer vf = new VolumeFinalizer(listener,null, null, this.conn,null, null);//display output files to listener here.
 			vf.replaceWithAnnotated(hpf, "/treatment/habitat", "TRANSFORMED", true);
 		} catch (Exception e) {
 			LOGGER.error("VolumeTransformer : transform - error in parsing", e);

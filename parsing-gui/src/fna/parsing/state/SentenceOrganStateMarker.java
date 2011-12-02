@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+
 import fna.charactermarkup.ChunkedSentence;
 import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
@@ -42,12 +45,16 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	private String ignoredstrings = "if at all|at all|as well";
+	private String ignoredstrings = "if at all|at all|as well (?!as)";
 	//private ArrayList<String> order = new ArrayList<String>();
+	private Display display;
+	private StyledText charLog;
 	/**
 	 * 
 	 */
-	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn) {
+	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn, Display display, StyledText charLog) {
+		this.display = display;
+		this.charLog = charLog;
 		this.tableprefix = tableprefix;
 		this.conn = conn;
 		this.glosstable = glosstable;
@@ -84,7 +91,7 @@ public class SentenceOrganStateMarker {
 					if(osent.indexOf(dittos.trim())<0) osent =osent.trim() +" "+ dittos.trim(); //put a check here so dittos are not added multiple times when the user runs the Parser mutiple times on one document collection
 					dittos = "";
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
+					text = text.replaceAll("(?<!"+ChunkedSentence.stop+")[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
 					text = text.replaceAll("&#176;", "°");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = rs.getString("modifier")+"##"+tag+"##"+text;
@@ -145,6 +152,7 @@ public class SentenceOrganStateMarker {
 		if(this.marked){
 			loadMarked();
 		}else{
+			this.showOutputMessage("System is preparing the sentences...");
 			//Iterator<String> it = order.iterator();
 			//while(it.hasNext()){				
 			Enumeration<String> en = sentences.keys();
@@ -160,6 +168,7 @@ public class SentenceOrganStateMarker {
 					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+")\\b", "");
 					taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
+				
 				System.out.println(taggedsent);
 				sentences.put(source, taggedsent);
 				try{
@@ -221,6 +230,7 @@ public class SentenceOrganStateMarker {
 	 * @return
 	 */
 	private String fixInner(String source, String taggedsent, String tag) {
+		this.showOutputMessage("System is rewriting some sentences...");
 		String fixed = "";
 		String copysent = taggedsent;
 		boolean needfix = false;
@@ -504,6 +514,22 @@ public class SentenceOrganStateMarker {
 		}
 		return colors.toString().replaceFirst("\\|$", "");
 	}
+	
+    private void resetOutputMessage() {
+		display.syncExec(new Runnable() {
+			public void run() {
+				charLog.setText("");
+			}
+		});
+	}
+    
+	private void showOutputMessage(final String message) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				charLog.append(message+"\n");
+			}
+		});
+	}
 
 	/**
 	 * @param args
@@ -530,7 +556,7 @@ public class SentenceOrganStateMarker {
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav5", "fnaglossaryfixed", true);
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav5", "fnaglossaryfixed", true, null, null);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 		sosm.markSentences();

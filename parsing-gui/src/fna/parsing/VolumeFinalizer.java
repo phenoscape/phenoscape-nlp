@@ -15,6 +15,8 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 
 import org.jdom.Comment;
 
@@ -42,12 +44,16 @@ public class VolumeFinalizer extends Thread {
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
     private static boolean standalone = false;
     private static String standalonefolder = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source";
+    private Text finalLog;
+    private Display display;
     
-    public VolumeFinalizer(ProcessListener listener, String dataPrefix, Connection conn, String glossaryPrefix) {
+    public VolumeFinalizer(ProcessListener listener, Text finalLog, String dataPrefix, Connection conn, String glossaryPrefix, Display display) {
         /*glossary = Registry.ConfigurationDirectory + "FNAGloss.txt"; // TODO
         */
         if(!standalone) this.listener = listener;
-        this.dataPrefix = dataPrefix;
+    	if(!standalone) this.finalLog = finalLog;
+    	if(!standalone) this.display = display;
+    	this.dataPrefix = dataPrefix;
         this.conn = conn;
         this.glossaryPrefix = glossaryPrefix;
     }
@@ -55,32 +61,39 @@ public class VolumeFinalizer extends Thread {
 
 	
 	public void run () {
-		if(!standalone) listener.setProgressBarVisible(true);
-		outputFinal();
-
-
-        //check for errors
-        File fileList= null;
-        if(!standalone) fileList = new File(Registry.TargetDirectory+"\\final\\");
-        if(standalone) fileList = new File(this.standalonefolder+"\\final\\");
-        if(fileList.list().length==0)
-        {
-            //show error popup
-            //statusOfMarkUp[6] = false;
-            ApplicationUtilities.showPopUpWindow("Error executing step 7", "Error",SWT.ERROR);
-            
+		//if(!standalone) listener.setProgressBarVisible(true);
+		try{
+			outputFinal();
+		}catch(Exception e){
+			this.showOutputMessage(e.toString());
+			e.printStackTrace();
+		}
+        //check for final result errors
+        File finalFileList= null;
+        File transformedFileList = null;
+        if(!standalone){
+        	finalFileList = new File(Registry.TargetDirectory+"\\final\\");
+        	transformedFileList = new File(Registry.TargetDirectory+"\\transformed\\");
         }
-        if(!standalone) listener.setProgressBarVisible(false);
-
-
-
+        if(standalone){
+        	finalFileList = new File(this.standalonefolder+"\\final\\");
+        	transformedFileList = new File(this.standalonefolder+"\\transformed\\");
+        }
+        if(finalFileList.list().length != transformedFileList.list().length)
+        {
+            //this.popupMessage("No file is output");
+    		if(!standalone) this.showOutputMessage("System terminates with errors. Annotated files are not completed.");
+        }
+        //if(!standalone) listener.setProgressBarVisible(false);
     }
     /**
      * stanford parser
      * @throws ParsingException
      */
-    public void outputFinal() throws ParsingException {
-    	if(!standalone)  listener.progress(10);
+    public void outputFinal() throws Exception {
+    	//if(!standalone)  listener.progress(10);
+    	if(!standalone) this.showOutputMessage("System is starting finalization step [could take hours]...");
+    	
 		//updateGlossary(); //active this later 4/2011
 		
 		String posedfile = Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
@@ -93,16 +106,17 @@ public class VolumeFinalizer extends Thread {
 		String postable = "wordpos4parser";
 		*/
 		String glosstable = this.glossaryPrefix;
-		//don't need to rerun them--they were ran at step 5-6, unknown removal and character curation
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, this.dataPrefix, this.glossaryPrefix, true);
-		//sosm.markSentences();
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, this.dataPrefix,glosstable, false);
+		if(!standalone) this.showOutputMessage("System is POS-tagging sentences...");
 		sp.POSTagging();
-		if(!standalone) listener.progress(50);
+		//if(!standalone) listener.progress(50);
+		if(!standalone) this.showOutputMessage("System is syntactic-parsing sentences...");		
 		sp.parsing();
-		if(!standalone) listener.progress(80);
+		//if(!standalone) listener.progress(80);
+		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
-		if(!standalone) listener.progress(100);
+		//if(!standalone) listener.progress(100);
+
 	}
 	
 	
@@ -165,7 +179,7 @@ public class VolumeFinalizer extends Thread {
 			SAXBuilder builder = new SAXBuilder();
 			System.out.println("finalizing "+fileindex);
 			
-			if(!standalone) listener.progress(40+(order*60/total));
+			//if(!standalone) listener.progress(40+(order*60/total));
 			File file = new File(source, fileindex + ".xml");
 			Document doc = builder.build(file);
 			
@@ -203,8 +217,9 @@ public class VolumeFinalizer extends Thread {
 		try {
 			SAXBuilder builder = new SAXBuilder();
 			for (int count = 1; count <= total; count++) {
+				if(!standalone) this.showOutputMessage("System is finalizing "+count+"...");
 				System.out.println("finalizing "+count);
-				if(!standalone) listener.progress(40+(count*60/total));
+				//if(!standalone) listener.progress(40+(count*60/total));
 				File file = new File(source, count + ".xml");
 				Document doc = builder.build(file);
 				Element root = doc.getRootElement();	
@@ -246,6 +261,30 @@ public class VolumeFinalizer extends Thread {
             throw new ParsingException("Failed to output the final result.", e);
         }
     }
+	
+    protected void resetOutputMessage() {
+		display.syncExec(new Runnable() {
+			public void run() {
+				finalLog.setText("");
+			}
+		});
+	}
+    
+	protected void showOutputMessage(final String message) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				finalLog.append(message+"\n");
+			}
+		});
+	}
+	 
+	protected void popupMessage(final String message){
+		display.syncExec(new Runnable() {
+			public void run() {
+				ApplicationUtilities.showPopUpWindow(message, "Error",SWT.ERROR);
+			}
+		});
+	}
     
     public static void main (String [] args) {
         String database="annotationevaluation";
@@ -261,7 +300,7 @@ public class VolumeFinalizer extends Thread {
         }catch(Exception e){
             e.printStackTrace();
         }
-        VolumeFinalizer vf = new VolumeFinalizer(null, "fnav19", conn, "fnaglossaryfixed");
-        vf.start();
+        //VolumeFinalizer vf = new VolumeFinalizer(null, "fnav19", conn, "fnaglossaryfixed");
+        //vf.start();
     }
 }

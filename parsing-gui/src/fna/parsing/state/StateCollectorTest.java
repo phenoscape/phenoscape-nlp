@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 /**
  * DO NOT treat a list of states, such as imbricate, lanceolate or ovate because it is common for an author to enumerate different characters in a list
  * Treat only states connected by or/to, such as /{elliptic} to {oblong}/ or {ovate}, {glabrous} or /{villous} to {tomentose}/, clasping or short_decurrent,  
@@ -24,25 +28,26 @@ import java.util.regex.Pattern;
 public class StateCollectorTest extends StateCollector {
 	private boolean filtered = false;
 	private Hashtable<String, Boolean> checkedtermpairs = new Hashtable<String, Boolean>();
+
 		
-	public StateCollectorTest(Connection conn, String tableprefix, boolean filtered, String glosstable) {
-		super(conn, tableprefix, glosstable);
+	public StateCollectorTest(Connection conn, String tableprefix, boolean filtered, String glosstable, Display display, StyledText charLog) {
+		super(conn, tableprefix, glosstable, display, charLog);
 		//statematrix.save2MySQL(database, "termsuser", "termspassword");
-		this.filtered = filtered;
-		
+		this.filtered = filtered;		
 	}
 	
-	public StateCollectorTest(Connection conn, String tableprefix, ArrayList<String> knownstates, boolean filtered, String glosstable) {
-		super(conn, tableprefix, knownstates, glosstable);
+	public StateCollectorTest(Connection conn, String tableprefix, ArrayList<String> knownstates, boolean filtered, String glosstable, Display display, StyledText charLog) {
+		super(conn, tableprefix, knownstates, glosstable, display, charLog);
 		this.filtered = filtered;
-		
 	}
 
 	public void saveStates(){
+		this.showOutputMessage("System is saving character state terms to database ...");
 		statematrix.save2MySQL(this.conn, this.tableprefix, "termsuser", "termspassword");
 	}
 	
 	public int grouping4GraphML(){
+		this.showOutputMessage("System is grouping character state terms ...");
 		statematrix.Grouping();
 		int countXMLFiles = statematrix.output2GraphML();
 		return countXMLFiles;
@@ -80,6 +85,7 @@ public class StateCollectorTest extends StateCollector {
 				matched = split(matched, endofseg).replaceAll("-c-", "-");
 				if(matched.length() > 0 && ! mstring.matches(".*?(ed|ing)}.*? to .*")){ //ignore "reduced to", but take "reduced or"
 					add2matrix(matched, source);
+					//this.showOutputMessage("\t====::"+matched);
 					System.out.println("\t====::"+matched); //deal with two "to"/"or" in one match: {distalmost} {linear} to {narrowly} {elliptic} , {bractlike} , {spinulose} to {irregularly} {dentate} or {shallowly} {lobed} .
 				}
 				m1 = p1.matcher(sent);
@@ -97,6 +103,7 @@ public class StateCollectorTest extends StateCollector {
 		String[] terms = conjunction.split("\\s+(to|or)\\s+");
 		String csv = "";
 		int count = 0;
+		//this.showOutputMessage("########### from :"+conjunction);
 		System.out.println("########### from :"+conjunction);
 		
 		int size = terms.length;
@@ -151,6 +158,7 @@ public class StateCollectorTest extends StateCollector {
 			WordNetWrapper wnw1 = new WordNetWrapper(word);
 			WordNetWrapper wnw2 = new WordNetWrapper(word+"e");
 			if(wnw1.isAdj() || wnw2.isAdv()){
+				//this.showOutputMessage(wordc + " is an adv");
 				System.out.println(wordc + " is an adv");
 				return true;
 			}
@@ -159,6 +167,7 @@ public class StateCollectorTest extends StateCollector {
 		WordNetWrapper wnw = new WordNetWrapper(wordc);
 		//if(wnw.isAdv() && !wnw.isAdj()){
 		if(wnw.mostlikelyPOS() !=null && wnw.mostlikelyPOS().compareTo("adv") == 0){
+			//this.showOutputMessage(word + " is an adv");
 			System.out.println(word + " is an adv");
 			return true;
 		}
@@ -219,6 +228,8 @@ public class StateCollectorTest extends StateCollector {
 		}		
 		return true;
 	}
+	
+
 
 	/**
 	 * @param args
@@ -243,7 +254,7 @@ public class StateCollectorTest extends StateCollector {
 		}catch(Exception e){
 			e.printStackTrace();
 		}	
-		StateCollectorTest sct = new StateCollectorTest(conn, "fnav19", false, "fnaglossaryfixed"); /*using learned semanticroles only*/
+		StateCollectorTest sct = new StateCollectorTest(conn, "fnav19", false, "fnaglossaryfixed", null, null); /*using learned semanticroles only*/
 		sct.collect();
 		sct.saveStates();
 		sct.grouping4GraphML();
