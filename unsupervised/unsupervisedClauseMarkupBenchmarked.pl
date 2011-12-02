@@ -733,7 +733,7 @@ sub addheuristicsnouns{
 	my @result = characterHeuristics();
 	my $rnouns = $result[0];
 	my $rdescriptors = $result[1];
-	my @nouns = @$rnouns;
+	my @rnouns = @$rnouns;
 	my @descriptors = @$rdescriptors;
 	addDescriptors(@descriptors);
 #	print "nouns\n";
@@ -744,7 +744,7 @@ sub addheuristicsnouns{
 #	foreach my $d (@descriptors){
 #		print "$d\t";
 #	}
-	@nouns = (@nouns, @nouns);
+	@nouns = (@nouns, @rnouns);
 	#"adhere[s] adheres[p] angle[s] angles[p] attach[s] attaches[p] base[s] bases[p] cell[s] cells[p] depression[s] depressions[p] direction[s] directions[p] ellipsoid[s] ellipsoids[p] eyespot[s] eyespots[p] face[s] faces[p] flagellum[s] flagella[p] flange[s] flanges[p] forward[s] forwards[p] globule[s] globules[p] groove[s] grooves[p] insert[s] inserts[p] jerk[s] jerks[p] length[s] lengths[p] lie[s] lies[p] line[s] lines[p] lobe[s] lobes[p] margin[s] margins[p] measure[s] meet[s] meets[p] membrane[s] membranes[p] narrow[s] narrows[p] notch[s] notches[p] observation[s] observations[p] plastid[s] plastids[p] pore[s] pores[p] pyrenoid[s] pyrenoids[p] quarter[s] quarters[p] ridge[s] ridges[p] rod[s] rods[p] row[s] rows[p] sample[s] samples[p] sediment[s] sediments[p] side[s] sides[p] size[s] sizes[p] third[s] thirds[p] vacuole[s] vacuoles[p] valve[s] valves[p] width[s] widths[p]"
 	my $pn = ""; #previous n
 	foreach my $n (@nouns){#convert to hash
