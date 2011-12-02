@@ -167,8 +167,8 @@ my $debug = 0; #debug learning process
 my $debugp = 0; #debug pattern
 my $debugnouns = 0; #debug heuristic nouns for phenoscape
 
-#my $kb = "fnaknowledgebase";
-my $kb = "phenoscape";
+my $kb = "fnaknowledgebase";
+#my $kb = "phenoscape";
 
 my $taglength = 150;
 
@@ -5882,13 +5882,14 @@ sub getCharsSents{
 		push(@all, $info);
 	}
 	
-	opendir(CIN, "$cdir") || die "$!: $cdir\n";#characters
-	while(defined ($file=readdir(CIN))){
-		if($file !~ /\w/){next;}
-		$text = ReadFile::readfile("$cdir$file");
-		my $info = $file."##character##".$text;
-		push(@all, $info);
-	}
+#	characters have been copied to descriptions folder in CharacterStatementsTransformer.java 
+#	opendir(CIN, "$cdir") || die "$!: $cdir\n";#characters
+#	while(defined ($file=readdir(CIN))){
+#		if($file !~ /\w/){next;}
+#		$text = ReadFile::readfile("$cdir$file");
+#		my $info = $file."##character##".$text;
+#		push(@all, $info);
+#	}
 	@all = sort byseg @all;
 	return @all;
 }
@@ -5938,17 +5939,18 @@ foreach my $info (@allsents){
 	$text = $info[2];
 	$text =~ s#["']##g;
 	$text =~ s#\s*-\s*to\s+# to #g; #4/7/09 plano - to
-	$text =~ s#[-\s]+shaped#-shaped#g; #5/30/09
-	$text =~ s#<i>#[[[i]]]#g; #hide <i>
-	$text =~ s#</i>#[[[/i]]]#g; #hide </i>
-	$text =~ s#<.*?>##g; #remove html tags
-	$text =~ s#<# less than #g; #remove <
-	$text =~ s#># greater than #g; #remove >
-	$text =~ s#\[\[\[i\]\]\]#<i>#g; #unhide <i>
-	$text =~ s#\[\[\[/i\]\]\]#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
+	$text =~ s#[-_]+shaped#-shaped#g; #5/30/09
+	#$text =~ s#<i>#[[[i]]]#g; #hide <i> #not useful for NeXML files
+	#$text =~ s#</i>#[[[/i]]]#g; #hide </i>
+	#$text =~ s#<.*?>##g; #remove html tags
+	#$text =~ s#<# less than #g; #remove <
+	#$text =~ s#># greater than #g; #remove >
+	$text =~ s#&lt;i&gt;#<i>#g; #unhide <i>
+	$text =~ s#&lt;/i&gt;#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
 	$text =~ s#^\s*\d+[a-z].\s*##; #remove 2a. (key marks)
 	$original = $text;
   	$text =~ s/&[;#\w\d]+;/ /g; #remove HTML entities
+  	$text =~ s# & # and #g;
   	$text = hideBrackets($text);#implemented in DeHyphenAFolder.java
   	$text =~ s#_#-#g;   #_ to -
   	$text =~ s#\s+([:;\.])#\1#g;     #absent ; => absent;
