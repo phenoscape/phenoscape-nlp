@@ -12,14 +12,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import oboaccessor.OBO2DB;
+
 import org.semanticweb.owlapi.model.OWLClass;
 
 import owlaccessor.OWLAccessorImpl;
 
 /**
  * @author Hong Updates
- * This class output extracted terms and their mapping PATO concepts to a table, including source info
- *TAO: http://purl.obolibrary.org/obo/tao.owl
+ * This class output extracted terms and their mapping PATO concepts to a table, including source info.
+ * 
+ * 11/23: rewrite to accommodate OBO format
+ * 
+ * 
+ * TAO: http://purl.obolibrary.org/obo/tao.owl
+ * VAO(Vertebrate Anatomy Ontology): https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/skeletal/obo/vertebrate_anatomy.obo
+ * AAO(Amniote Anatomy Ontology): https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo
  */
 public class TermOutputer {
 	private Connection conn;
@@ -27,19 +35,26 @@ public class TermOutputer {
 	private String password = "root";
 	private String entitytable = "entity";
 	private String qualitytable = "quality";
-	private OWLAccessorImpl patoapi = null;
-	private OWLAccessorImpl taoapi = null;
+	private ArrayList<String> entityOntosPath =null;
+	private ArrayList<String> qualityOntosPath =null;
+	private String glosstable = null;
+	private String sourceprefix = null;
+
 	
 	/**
 	 * 
 	 */
-	public TermOutputer(String database, String tableprefix) {
-		this.entitytable = tableprefix+"_"+entitytable;
-		this.qualitytable = tableprefix+"_"+qualitytable;
-		String PATOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/pato.owl";
-		String TAOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
-		this.patoapi = new OWLAccessorImpl(new File(PATOURL));
-		this.taoapi = new OWLAccessorImpl(new File(TAOURL));
+	public TermOutputer(String database, String outputtableprefix, ArrayList<String> eOntoPaths, ArrayList<String> qOntoPaths, String glosstable, String sourceprefix) {
+		this.entitytable = outputtableprefix+"_"+entitytable;
+		this.qualitytable = outputtableprefix+"_"+qualitytable;
+		this.entityOntosPath = eOntoPaths;
+		this.qualityOntosPath = qOntoPaths;
+		this.glosstable = glosstable;
+		this.sourceprefix = sourceprefix;
+		//String PATOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/pato.owl";
+		//String TAOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
+		//this.patoapi = new OWLAccessorImpl(new File(PATOURL));
+		//this.taoapi = new OWLAccessorImpl(new File(TAOURL));
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -64,24 +79,24 @@ public class TermOutputer {
 	}
 	
 	
-	private void outputTerms(ArrayList<String> entities, String outtable) {
+	private void outputTerms(ArrayList<String> entities, String type) {
 		Iterator<String> it = entities.iterator();
-		String outtableo = outtable;
+		String outtableo = type;
 		try{
 			Statement stmt = conn.createStatement();
 			ResultSet rs = null;
 			while(it.hasNext()){
 				String term = it.next();
-				outtable = outtableo;
-				String[] ontoidinfo = findID(term);
+				type = outtableo;
+				String[] ontoidinfo = findID(term, type);
 				String ontoid = "";
 				String ontolabel = "";
 				if(ontoidinfo !=null){
-					outtable = ontoidinfo[0];
+					type = ontoidinfo[0];
 					ontoid = ontoidinfo[1];
 					ontolabel = ontoidinfo[2];
 				}
-				rs = stmt.executeQuery("select distinct pdf, charnumber, characterr, sentence from fish_original where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
+				rs = stmt.executeQuery("select distinct pdf, charnumber, characterr, sentence from "+this.sourceprefix+"_original where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)' or characterr rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
 				String sourcelist = "sourcelist|"; //this is so that the first source is not to match "()".
 				String source = "";
 				String sentence = "";
@@ -92,7 +107,8 @@ public class TermOutputer {
 						sourcelist +=rs.getString("pdf")+":"+rs.getString("charnumber")+"|";						
 						character = rs.getString("characterr");
 						sentence = rs.getString("sentence");
-						addrecord(term, ontoid, ontolabel, source.toString(), character, sentence, outtable);
+						type = type.replaceFirst(";+$", "");
+						addrecord(term, ontoid, ontolabel, source.toString(), character, sentence, type);
 					}
 				}
 			}
@@ -110,32 +126,32 @@ public class TermOutputer {
 			sentence = sentence.replaceAll("\"", "\\\\\"");
 			character = character.replaceAll("\"", "\\\\\"");
 			String q = "insert into "+outtable+"(term, ontoid, ontolabel, characterr, characterstate, source) values (\""+term+"\",\""+ontoid+"\",\""+ontolabel+"\",\""+character+"\",\""+sentence+"\",\""+source+"\")";
-			//System.out.println(q);
+			System.out.println(q);
 			stmt.execute(q);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
-	private String[] findID(String term) {
+	private String[] findID(String term, String type) {
 		String qualityid = "";
 		String entityid = "";
 		String qualitylabel = "";
 		String entitylabel="";
 		try{
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select qualityontoid from fish_original where qualitylabel='"+term+"'");
+			ResultSet rs = stmt.executeQuery("select qualityontoid from "+this.sourceprefix+"_original where qualitylabel='"+term+"'");
 			if(rs.next()){
 				qualityid = rs.getString("qualityontoid");			
 				qualitylabel = term;
 			}
-			rs = stmt.executeQuery("select entityontoid from fish_original where entitylabel='"+term+"'");
+			rs = stmt.executeQuery("select entityontoid from "+this.sourceprefix+"_original where entitylabel='"+term+"'");
 			if(rs.next()){
 				entityid = rs.getString("entityontoid");
 				entitylabel = term;
 			}
 			if((entityid+qualityid).trim().length()==0){
-				return searchOntologies(term);
+				return searchOntologies(term, type);
 			}else if(entityid.length()>0){
 				return new String[]{this.entitytable, entityid, entitylabel};
 			}else if(qualityid.length()>0){
@@ -146,21 +162,67 @@ public class TermOutputer {
 		}
 		return null;
 	}
-
+		
 	/**
 	 * use OWL API
 	 * @param term
 	 * @return
 	 */
-	private String[] searchOntologies(String term) {
-
-		String[] patoresult = searchOntology(term, patoapi, this.qualitytable);
-		String[] taoresult = searchOntology(term, taoapi, this.entitytable);
+	private String[] searchOntologies(String term, String type) {
+		//search quality ontologies
+		String[] results = new String[]{"", "", ""};
+		boolean added = false;
+		if(type.compareTo(this.qualitytable)==0){
+			for(String qonto: this.qualityOntosPath){
+				if(qonto.endsWith(".owl")){
+					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(qonto));
+					String[] result = searchOWLOntology(term, owlapi, type);
+					if(result!=null){
+						added = true;
+						results = add(results, result);
+					}
+				}else if(qonto.endsWith(".obo")){
+					String[] result = searchOBOOntology(term, qonto, type);
+					if(result!=null){
+						added = true;
+						results = add(results, result);
+					}
+				}
+			}
+		}else if(type.compareTo(this.entitytable)==0){
+			for(String eonto: this.entityOntosPath){
+				if(eonto.endsWith(".owl")){
+					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(eonto));
+					String[] result = searchOWLOntology(term, owlapi, type);
+					if(result!=null){
+						added = true;
+						results = add(results, result);
+					}
+				}else if(eonto.endsWith(".obo")){
+					String[] result = searchOBOOntology(term, eonto, type);
+					if(result!=null){
+						added = true;
+						results = add(results, result);
+					}
+				}
+			}
+		}
+		if(added){
+			return results;
+		}else{
+			return null;
+		}
+		/*String[] patoresult = searchOntology(term, this.qualitytable);
+		String[] taoresult = searchOntology(term, this.entitytable);
 
 		if(patoresult==null && taoresult!=null) return taoresult;
 		if(patoresult!=null && taoresult==null) return patoresult;
-		if(patoresult!=null && taoresult!=null) return taoresult;
-			/*{//merge
+		if(patoresult!=null && taoresult!=null) return taoresult;*/
+			
+		
+		
+		
+		/*{//merge
 			String[] results = new String[patoresult.length + taoresult.length];
 			int i; int j;
 			for(i=0, j=0; i<patoresult.length; i++, j++){
@@ -171,24 +233,57 @@ public class TermOutputer {
 			}
 			return results;
 		}*/
-		return null;
+		
 	}
 
-	private String[] searchOntology(String term, OWLAccessorImpl owlapi, String type) {
+	private String[] searchOBOOntology(String term, String ontofile, String type) {
+		String [] result = new String[3];
+		int i = ontofile.lastIndexOf("/");
+		int j = ontofile.lastIndexOf("\\");
+		i = i>j? i:j;
+		String ontoname = ontofile.substring(i+1).replaceFirst("\\.obo", "");
+		OBO2DB o2d = new OBO2DB("obo", ontofile ,ontoname);
+		String[] match = o2d.getID(term);
+		if(match !=null){
+			result[0] = type;
+			result[1] = match[0]; //id
+			result[2] = match[1]; //label
+		}else{
+			result = null;
+		}
+		return result;
+	}
+
+	private String[] add(String[] results, String[] result) {
+		if(result == null) return results;
+		int start = 1;
+		if(results[0].length()==0 && results[1].length()==0 && results[2].length()==0 ){//initialization
+			start =0;
+		}
+		for(int i = start; i < 3; i++){
+			results[i] += result[i]+";";
+		}
+		return results;
+	}
+
+	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
+		String[] result = null;
 		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();
-		String[] result = null;
+		
+		//exact match first
 		while(it.hasNext()){
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");
+				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
 				result[2] = label;
 				return result;
 			}
 		}
+		//otherwise, append all possible matches
 		it = matches.iterator();
 		result = new String[]{"", "", ""};
 		while(it.hasNext()){
@@ -212,9 +307,10 @@ public class TermOutputer {
 	private ArrayList<String> getQterms() {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets.pheno_fish_allwords where "+
-			"word in (select term from markedupdatasets.antglossaryfixed where category !='structure') or "+
-			"word in (select word from markedupdatasets.pheno_fish_wordroles p where semanticrole ='c')";
+			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_allwords where "+
+			"word in (select term from markedupdatasets."+this.glosstable+" where category !='structure') or "+
+			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
+			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category !='structure')";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
@@ -229,9 +325,10 @@ public class TermOutputer {
 	private ArrayList<String> getEterms() {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets.pheno_fish_allwords where "+
-			"word in (select term from markedupdatasets.antglossaryfixed where category ='structure') or "+
-			"word in (select word from markedupdatasets.pheno_fish_wordroles p where semanticrole in ('os', 'op'))";
+			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_allwords where "+
+			"word in (select term from markedupdatasets."+this.glosstable+" where category ='structure') or "+
+			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
+			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category ='structure')";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
@@ -247,7 +344,16 @@ public class TermOutputer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TermOutputer to = new TermOutputer("phenoscape", "pheno_fish_rel_syn");
+		String database = "phenoscape";
+		String outputtableprefix = "pheno_archosaur";
+		ArrayList<String> eOntoPaths = new ArrayList<String>();
+		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
+		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
+		ArrayList<String> qOntoPaths = new ArrayList<String>();
+		qOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl");
+		String glosstable = "fishglossaryfixed";
+		String sourceprefix = "pheno_archosaur";
+		TermOutputer to = new TermOutputer(database, outputtableprefix, eOntoPaths, qOntoPaths, glosstable, sourceprefix);
 		to.output();
 		
 	}

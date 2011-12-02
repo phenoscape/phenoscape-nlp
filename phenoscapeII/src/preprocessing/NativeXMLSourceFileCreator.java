@@ -26,24 +26,21 @@ import org.jdom.output.XMLOutputter;
  *This class reads character statements from database, 
  *output 1 XML file containing character statements
  *<treatment><character><description> 
- *The XML file will be used as Type 3 source file for CharaParser 
+ *The XML file will be used as Type 3 source file for CharaParser and its transformer is CharacterStatementsTransformer4NativeXML
  */
-public class SourceXMLFileCreator {
+public class NativeXMLSourceFileCreator {
 	private File output;
 	private Connection conn;
-	private String database;
 	private String sourcetable;
-	private String tableprefix;
-	private static String username="phenoscape";
-	private static String password="pheno!scape";
+	private static String username="root";
+	private static String password="root";
 	private static String nonEnglish="Bockmann 1998|Di Dario 1999|Shibatta 1998";
-	private static StringBuffer text = new StringBuffer();
 	
 
 	/**
 	 * constructor
 	 */
-	public SourceXMLFileCreator(String tablename, String outputdir, String database, String tableprefix) {
+	public NativeXMLSourceFileCreator(String tablename, String outputdir, String database, String tableprefix) {
 		this.output = new File(outputdir);		
 		if(output.exists()){
 			File[] all = this.output.listFiles();
@@ -51,9 +48,7 @@ public class SourceXMLFileCreator {
 				all[i].delete();
 			}
 		}
-		
-		this.database = database;
-		this.tableprefix = tableprefix;
+		//the sourcetable must have:source (pdf_charnumber), pdf, charnumber, characterr, sentence columns
 		this.sourcetable = tableprefix+"_"+tablename;
 		try{
 			if(conn == null){
@@ -66,8 +61,9 @@ public class SourceXMLFileCreator {
 		}
 	}
 
-	public void outputXMLFiles(){
+	public void outputXMLFile(){
 		try{			
+			String srcf = output.getName();
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select distinct source from "+this.sourcetable);
 			Element root = new Element("treatment"); //save all in one file to reduce I/O overhead for subsequent process
@@ -83,7 +79,7 @@ public class SourceXMLFileCreator {
 				while(rs1.next()){//one character + n sentences
 					if(!ch){
 						Element chara = new Element("character");
-						chara.setAttribute("id", src.trim().replaceAll("\\s+", "_"));
+						chara.setAttribute("pid", srcf+".txtp"+src.trim().replaceAll("\\s+", "_")); //this is how ids in each tag should be set: sourcefilename+".txtp"+additionalID
 						chara.setText(rs1.getString("characterr").trim());
 						root.addContent(chara);
 						ch = true;
@@ -91,7 +87,7 @@ public class SourceXMLFileCreator {
 					String sent = rs1.getString("sentence").trim();
 					//sent = sent.matches("[\\.;]$")? sent : sent+";"; 
 					Element descr = new Element("description");
-					descr.setAttribute("id", src.trim().replaceAll("\\s+", "_")+"_s"+(count++));
+					descr.setAttribute("pid", srcf+".txtp"+src.trim().replaceAll("\\s+", "_")+"_s"+(count++));
 					descr.setText(sent);
 					root.addContent(descr);
 				}
@@ -171,12 +167,22 @@ public class SourceXMLFileCreator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//the sourcetable must have:source(pdf_charnumber), pdf, charnumber, characterr, sentence columns
+		
+		/*String output = "Z:\\DATA\\phenoscape\\subcontract\\core-fish\\fish\\source";
+		String tableprefix = "fish";*/
+		/*String output = "Z:\\DATA\\phenoscape\\subcontract\\archosaur\\source";
+		String tableprefix = "archosaur";
+		
 		String source = "original";
-		String output = "Z:\\DATA\\phenoscape\\subcontract\\core-fish\\fish\\source";
-		String database = "phenoscape";
-		String tableprefix = "fish";
-		SourceXMLFileCreator sfc = new SourceXMLFileCreator(source, output, database, tableprefix);
-		sfc.outputXMLFiles();
+		String database = "phenoscape";*/
+		String output = "Z:\\DATA\\phenotype\\source";
+		String tableprefix = "phenotype";
+		
+		String source = "test";
+		String database = "markedupdatasets";
+		NativeXMLSourceFileCreator sfc = new NativeXMLSourceFileCreator(source, output, database, tableprefix);
+		sfc.outputXMLFile();
 	}
 
 }

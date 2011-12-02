@@ -45,7 +45,7 @@ public class OBO2DB {
 				}
 			}
 			if(!exist){
-				stmt.execute("create table if not exists "+this.ontoname+"(ontoid varchar(100) NOT NULL, term varchar(100), termstatus varchar(20))");
+				stmt.execute("create table if not exists "+this.ontoname+" (ontoid varchar(100) NOT NULL, term varchar(100), termstatus varchar(20))");
 				stmt.execute("delete from "+this.ontoname);
 				stmt.close();
 				export2DB();
@@ -99,16 +99,17 @@ public class OBO2DB {
 	 */
 	public String[] getID(String term) {
 		try{
-			String[] result = new String[2];
+			String[] result = new String[]{"", ""};
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select ontoid, term, from "+this.ontoname+" where term =\""+term+"\"");
+			String q = "select ontoid, term from "+this.ontoname+" where term =\""+term+"\"";
+			ResultSet rs = stmt.executeQuery(q);
 			if(rs.next()){
 				result[0] = rs.getString("ontoid");
 				result[1] = rs.getString("term");
 				return result;
 			}
-			
-			rs = stmt.executeQuery("select ontoid, term, from "+this.ontoname+" where term like \"%"+term+"%\"");
+			q = "select ontoid, term from "+this.ontoname+" where term like \"%"+term+"%\"";
+			rs = stmt.executeQuery(q);
 			if(rs.next()){
 				result[0] += rs.getString("ontoid")+";";
 				result[1] += rs.getString("term")+";";
@@ -148,10 +149,10 @@ public class OBO2DB {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo";
-		OBO2DB o2d = new OBO2DB("obo", file ,"vertebrate_anatomy");
-		file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo";
-		o2d = new OBO2DB("obo", file ,"amniote_draft");	
+		//String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo";
+		//OBO2DB o2d = new OBO2DB("obo", file ,"vertebrate_anatomy");
+		String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo";
+		OBO2DB o2d = new OBO2DB("obo", file ,"amniote_draft");	
 	}
 
 
