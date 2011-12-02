@@ -35,8 +35,8 @@ public class POSTagger4StanfordParser {
 	private boolean printList = false;
 	private String tableprefix = null;
 	private String glosstable = null;
-	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)");
-	
+	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
+	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
 
 	/**
 	 * 
@@ -112,6 +112,7 @@ public class POSTagger4StanfordParser {
 				String strcp2 = str;
 				
 				String strnum = null;
+				/*
 				//if(str.indexOf("}×")>0){//{cm}×
 				if(str.indexOf("×")>0){
 					containsArea = true;
@@ -119,6 +120,7 @@ public class POSTagger4StanfordParser {
 					str = area[0]; //with complete info
 					strnum = area[1]; //contain only numbers
 				}
+				*/
 		           
 		        //deal with (3) as bullet
 				Pattern pattern1  = Pattern.compile("^(and )?([(\\[]\\s*\\d+\\s*[)\\]]|\\d+.)\\s+(.*)"); //( 1 ), [ 2 ], 12.
@@ -129,13 +131,26 @@ public class POSTagger4StanfordParser {
 				if(str.indexOf("±")>=0){
 					str = str.replaceAll("±(?!~[a-z])","{moreorless}").replaceAll("±(?!\\s+\\d)","moreorless");
 				}
-				if(str.matches(".*?\\bin\\s+[a-z_<>{} -]+\\s+[<{]?view[}>]?\\b.*")){//ants: "in full-face view"
+				/*to match {more} or {less}*/
+				if(str.matches(".*?\\b[{<]*more[}>]*\\s+or\\s+[{<]*less[}>]*\\b?.*")){
+					str = str.replaceAll("[{<]*more[}>]*\\s+or\\s+[{<]*less[}>]*", "{moreorless}");
+				}
+				//if(str.matches(".*?\\bin\\s+[a-z_<>{} -]+\\s+[<{]?view[}>]?\\b.*")){//ants: "in full-face view"
+				if(str.matches(".*?\\bin\\s+[a-z_<>{} -]*\\s*[<{]?(view|profile)[}>]?\\b.*")){
 					Matcher vm = viewptn.matcher(str);
 					while(vm.matches()){
 						str = vm.group(1)+" {"+vm.group(2).replaceAll("[<>{}]", "").replaceAll("\\s+", "-")+"} "+vm.group(3); 
 						vm = viewptn.matcher(str);
 					}
 				}
+				
+				if(str.indexOf("×")>0){
+					containsArea = true;
+					String[] area = normalizeArea(str);
+					str = area[0]; //with complete info
+					strnum = area[1]; //like str but with numerical expression normalized
+				}
+
 
 				str = handleBrackets(str);
 				stmt.execute("update "+this.tableprefix+"_markedsentence set rmarkedsent ='"+str+"' where source='"+src+"'");	
@@ -181,9 +196,14 @@ public class POSTagger4StanfordParser {
 		       		   }
 	        	   }
 	       		   
-	        	   if(word.matches("in-.*?-view")){
+	        	   //if(word.matches("in-.*?-view")){
+	        	   if(word.matches("in-.*?(-view|profile)")){
 	        		   sb.append(word+"/RB ");
-	        	   }else if(word.endsWith("ly") && word.indexOf("~") <0){ //character list is not RB
+	        	   }
+	        	   //if(word.matches("in-profile")){
+        		   //sb.append(word+"/RB ");
+        	   //}
+	        	   else if(word.endsWith("ly") && word.indexOf("~") <0){ //character list is not RB
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("becoming")==0 || word.compareTo("about")==0){
 	        		   sb.append(word+"/RB ");

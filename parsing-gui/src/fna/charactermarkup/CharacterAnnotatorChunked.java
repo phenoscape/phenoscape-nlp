@@ -111,9 +111,16 @@ public class CharacterAnnotatorChunked {
 		if(!this.evaluation) this.statement.addContent(text);
 		String subject= cs.getSubjectText();
 		if(subject==null && cs.getPointer()==0){
-			this.nosubject = true;
+			Chunk ck = cs.nextChunk();
+			cs.resetPointer();
+			if(ck instanceof ChunkPrep){	//check if the first chunk is a preposition chunk. If so make the subjects and the latest elements from the previous sentence empty.
+				//write code to make the latestelements nil
+				this.latestelements = new ArrayList<Element>();
+			}
+
 			annotateByChunk(cs, false);
-		}else if(subject.equals("measurements")){
+		}//end mohan code
+		else if(subject.equals("measurements")){
 			this.annotatedMeasurements(this.text);
 		}else if(!subject.equals("ignore")){
 			if(subject.equals("ditto")){
@@ -1187,8 +1194,9 @@ public class CharacterAnnotatorChunked {
 		//String object  = ckstring.substring(ckstring.lastIndexOf("o[")).replaceFirst("\\]+$", "")+"]";	
 		int objectindex = ckstring.indexOf("]", ckstring.indexOf("p[")+1);
 		String pp = ckstring.substring(ckstring.indexOf("p["), objectindex).replaceAll("(\\w\\[|])", "");
-		String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\w\\[|])", "")+"]";
-		
+		String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\b\\w\\[)|]", "")+"]";
+		//String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\b\\w\\[|])", "")+"]";
+		//String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\[|])", "")+"]";
 		//TODO: r[p[in] o[outline]] or r[p[with] o[irregular ventral profile]]
 		if(characterPrep(ckstring)){
 			return;		
@@ -1207,8 +1215,29 @@ public class CharacterAnnotatorChunked {
 		boolean lastIsStruct = false;
 		boolean lastIsChara = false;
 		boolean lastIsComma = false;
+		//mohan code to get the original subject if the subject is empty Store the chunk into the modifier
+		
+		if(this.latestelements.size()==0)
+		{
+			String content = ck.toString().replaceAll(" ","-");
+			//String structure = "m[" +content+"]";
+			String structure = content.replaceAll("]-o\\[", "-").replaceAll("[{()}]", "");
+			if(cs.unassignedmodifier == null){
+				cs.unassignedmodifier = structure;
+			}else{
+				cs.unassignedmodifier += structure;
+			}
+				
+			return;
+		}
+		
+		//end mohan code
+		
 		Element lastelement = this.latestelements.get(this.latestelements.size()-1);
-		if(lastelement.getName().compareTo("structure") == 0){//lastest element is a structure
+		
+		
+		
+		if(lastelement.getName().compareTo("structure") == 0){//latest element is a structure
 			lastIsStruct = true;
 		}else if(lastelement.getName().compareTo("character") == 0){
 			lastIsChara = true;
@@ -1642,6 +1671,13 @@ public class CharacterAnnotatorChunked {
 		ArrayList<Element> results = new ArrayList<Element>();	
 		//String[] organs = listofstructures.replaceAll(" (and|or|plus) ", " , ").split("\\)\\s*,\\s*"); //TODO: flower and leaf blades???
 		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); //TODO: flower and leaf blades???		
+		//mohan 28/10/2011. If the first organ is a preposition then join the preposition with the following organ
+		for(int i = 0; i<organs.length; i++){
+		if(organs[i].matches("\\{r\\[p\\[.*\\]\\]\\}\\s+\\{.*\\}\\s+.*"))
+		{
+			organs[i] = organs[i].replaceAll("\\]\\]\\}\\s\\{", "]]}-{");
+		}
+		}
 		String[] sharedcharacters = null;
 		for(int i = 0; i<organs.length; i++){
 			String[] organ = organs[i].trim().split("\\s+");
@@ -1684,7 +1720,14 @@ public class CharacterAnnotatorChunked {
 			String constraint = "";//plain
 			for(;j >=0; j--){
 				if(terminate) break;
+				
 				String w = organ[j].replaceAll("(\\w+\\[|\\]|\\{\\(|\\)\\}|\\(\\{|\\}\\))", "");
+				//mohan code to make w keep all the tags for a preposition chunk
+				if(organ[j].matches("\\{?r\\[p\\[.*"))
+				{
+					w = organ[j];
+				}
+				//end mohan code//
 				if(w.equals(",")){
 					distribute = true;
 					continue;
@@ -1985,6 +2028,13 @@ public class CharacterAnnotatorChunked {
 	//if w has been seen used as a modifier to organ o
 	private String constraintType(String w, String o) {
 		String result = null;
+		
+		//mohan code to make w keep all the tags for a preposition chunk
+		if(w.matches("\\{?r\\[p\\[.*"))//for cases such as "with the head in full face view, the midpoint blah blah....", "r[p[with head] {in-fullface-view}]" is treated as a "condition" constraint
+		{
+			return "condition";
+		}
+		//mohan code ends.
 		w = w.replaceAll("\\W", "");
 		String ch = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, this.glosstable, tableprefix);
 		if(ch!=null && ch.matches(".*?_?(position|insertion|structure_type)_?.*") && w.compareTo("low")!=0) return "type";

@@ -55,7 +55,8 @@ public class ChunkedSentence {
 	public static final String basecounts="each|every|per";
 	public static final String clusters="cluster|clusters|involucre|involucres|rosette|rosettes|pair|pairs|series|ornament|ornamentation|array|arrays";
 	public static final String prepositions = "above|across|after|along|among|amongst|around|as|at|before|beneath|between|beyond|by|for|from|in|into|near|of|off|on|onto|out|outside|over|than|throughout|to|toward|towards|up|upward|with|without";
-	public static final String stop = "a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|during|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|under|up|upward|was|were|what|when|where|whereas|which|why|with|within|without|would";
+	public static final String stop = "a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|was|were|what|when|where|which|why|with|within|without|would";
+	public static final String skip = "and|becoming|if|or|that|these|this|those|to|what|when|where|which|why|not|throughout";
 	public static Hashtable<String, String> eqcharacters = new Hashtable<String, String>();
 	private boolean inSegment = false;
 	private boolean rightAfterSubject = false;
@@ -374,6 +375,14 @@ public class ChunkedSentence {
 		int i = last-1;
 		for(;i >=this.pointer; i--){
 			String t = this.chunkedtokens.get(i);
+			/*preventing "the" from blocking the organ following ",the" to being matched as a subject organ- mohan 10/19/2011*/
+			if(t.matches("the|a|an")){
+				if(i!=0){
+					i=i-1;
+					t = this.chunkedtokens.get(i);
+				}
+			}			
+			/*end mohan*/
 			if(t.matches("\\{\\w+\\}") || t.contains("~list~")){
 				chunk = t+" "+chunk;
 				foundm = true;
@@ -389,7 +398,7 @@ public class ChunkedSentence {
 		if(subjecto || i==-1){ 
 			chunk = "z["+chunk.trim().replaceAll("<", "(").replaceAll(">", ")")+"]";
 		}else{
-			chunk = "u["+chunk.trim().replaceFirst("<", "o[(").replaceFirst(">$", ")]").replaceAll("<", "(").replaceAll(">", ")")+"]";
+			chunk = "u["+chunk.trim().replaceFirst("[<(]", "o[(").replaceFirst("[)>]$", ")]").replaceAll("<", "(").replaceAll(">", ")").replaceAll("[{}]", "")+"]";//<leaf><blade> => u[o[(leaf)(blade)]]
 		}
 		
 		//reset from i+2 to last
@@ -1023,7 +1032,11 @@ public class ChunkedSentence {
 	public int getPointer(){
 		return this.pointer;
 	}
-	
+	//mohan code to reset the pointer
+	public void resetPointer(){
+		this.pointer=0;
+	}
+	//end mohan code
 	public void setInSegment(boolean yes){
 		this.inSegment = yes;
 	}
@@ -1295,6 +1308,12 @@ public class ChunkedSentence {
 		int i = 0;
 		for(i = this.pointer; i<this.chunkedtokens.size(); i++){
 			token = this.chunkedtokens.get(i);
+			/* if one of the tokens match those in the stop list but not in skip list, skip it and get the next token- mohan 10/19/2011*/
+			if(token.matches("("+stop+")") && !token.matches("("+skip+")")){
+				i=i+1;
+				token = this.chunkedtokens.get(i);
+			}
+			/*end mohan 10/19/2011*/
 			token = token.matches(".*?\\d.*")? NumericalHandler.originalNumForm(token):token;
 			if(token.length()==0){
 				continue;
@@ -1379,7 +1398,7 @@ public class ChunkedSentence {
 
 			
 			//add to a state chunk until a) a preposition b) a punct mark or c)another state is encountered
-			if(role.compareTo("<") !=0+0 && true){
+			if(role.compareTo("<") !=0 && true){
 				if(Utilities.isAdv(token, adverbs, notadverbs)){
 					scs = scs.trim().length()>0? scs.trim()+ "] m["+token+" " : "m["+token;
 				}else if(token.matches(".*[,;:\\.\\[].*") || token.matches("\\b("+ChunkedSentence.prepositions+"|or|and)\\b") || token.compareTo("-LRB-/-LRB-")==0){
@@ -2050,9 +2069,39 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 					cs.skipLead(mt.split("\\s+"));*/
 			}else if(senttag.compareTo("ditto")==0){
 				if(sentsrc.endsWith("0")){
-					this.subjecttext ="(whole_organism)";//starting sentence in a treatment, without an explicit subject.
+					this.subjecttext ="(whole_organism)";//it is a starting sentence in a treatment, without an explicit subject.
 				}else{
 					this.subjecttext ="ditto";
+					//mohan code :10/28/2011. If the subject is ditto and the first chunk is a preposition chunk make the subject empty so that it can search within the same sentence for the subject.
+					int j=0;
+					String text1 = "";
+					for(j=0;j<this.chunkedtokens.size();j++)
+					{
+					text1 = "";
+					text1 += this.chunkedtokens.get(j);//gets the first token to check if its a preposition
+					if(text1.compareTo("")!=0)
+					{
+						break;
+					}
+					}if(text1.matches("r\\[p\\[.*\\]")){
+						int i=0;
+						for(i=0;i<this.chunkedtokens.size();i++)
+						{
+							String text2="";
+							text2+=this.chunkedtokens.get(i);
+							if(text2.matches("(\\<.*\\>)"))
+							{
+								this.subjecttext =null;
+								break;
+							}
+							/*else
+							{
+								this.subjecttext="ditto";
+							}*/
+						}
+						
+					}
+					//End of mohan//
 				}
 			}
 		}else{

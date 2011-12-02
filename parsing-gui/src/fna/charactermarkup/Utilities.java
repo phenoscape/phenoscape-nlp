@@ -294,7 +294,10 @@ public class Utilities {
 	
 	public static boolean isAdv(String word, ArrayList<String> adverbs, ArrayList<String> notadverbs) {
 		word = word.replaceAll("[<>{}\\]\\[()\\d+-]", "").trim();
-		if(word.matches("(not|at-least|throughout|much)")){
+		if(word.matches("(not|at-?least|throughout|much)")){
+			return true;
+		}
+		if(word.matches("in.*?(profile|view)")){//covers in-dorsal-view, in-profile
 			return true;
 		}
 		if(word.compareTo("moreorless")==0){
@@ -363,7 +366,7 @@ public class Utilities {
 				w = ws[ws.length-1];
 			}
 			ch = lookup(w, conn, characterhash, glosstable, wc, prefix);
-			if(ch == null && wc.indexOf('-')>0+0){//pani_culiform
+			if(ch == null && wc.indexOf('-')>0){//pani_culiform
 				ch = lookup(wc.replaceAll("-", ""), conn, characterhash, glosstable, wc, prefix);
 			}
 		}

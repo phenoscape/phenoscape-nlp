@@ -308,6 +308,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			e.printStackTrace();
 			throw e;
         }
+    	if(finalize) VolumeFinalizer.copyFilesWithoutDescriptions2FinalFolder();
     }
 
 	public static String normalizeSpacesRoundNumbers(String sent) {
@@ -374,6 +375,9 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		/*if(sent.indexOf(" -{")>=0){//1–2-{pinnately} or -{palmately} {lobed} => {1–2-pinnately-or-palmately} {lobed}
 			sent = sent.replaceAll("\\s+or\\s+-\\{", "-or-").replaceAll("\\s+to\\s+-\\{", "-to-").replaceAll("\\s+-\\{", "-{");
 		}*/
+		//mohan code 11/9/2011 to replace (?) by nothing
+		sent = sent.replaceAll("\\(\\s*\\?\\s*\\)","");
+		//end mohan code
 		return sent;
 	}
 	
