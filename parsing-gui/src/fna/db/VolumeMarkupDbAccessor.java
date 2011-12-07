@@ -104,7 +104,7 @@ public class VolumeMarkupDbAccessor {
 				String tag = rs.getString("structure");
 				populateCurationList(tagList, tag); //select tags for curation
 			}
-			sql = "select distinct word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos in ('p', 's') and saved_flag !='red' "+
+			sql = "select distinct word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos in ('p', 's', 'n') and saved_flag !='red' "+
 			filter3+" order by word";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();

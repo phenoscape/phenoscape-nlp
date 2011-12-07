@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -626,7 +627,7 @@ public class MainForm {
 					int option_chosen =getType(type); 
 					mainDb.savePrefixData(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim(),option_chosen);
 					mainDb.loadStatusOfMarkUp(statusOfMarkUp, combo.getText());
-					mainDb.createNonEQTable();
+					//mainDb.createNonEQTable();
 				} catch (Exception exe) {
 					exe.printStackTrace();
 					LOGGER.error("Error saving dataprefix", exe);
@@ -1354,9 +1355,11 @@ public class MainForm {
 		startMarkupButton_1.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent e) {
-				termRoleMatrix4structures.setVisible(false);
-				termRoleMatrix4characters.setVisible(false);
-				termRoleMatrix4others.setVisible(false);
+				if(!termRoleMatrix4structures.isDisposed()){
+					termRoleMatrix4structures.setVisible(false);
+					termRoleMatrix4characters.setVisible(false);
+					termRoleMatrix4others.setVisible(false);
+				}
 				startMarkup();
 				try {
 					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.five.name"), combo.getText(), true);
@@ -2091,7 +2094,7 @@ public class MainForm {
 			public void mouseDoubleClick(MouseEvent event) {
 				try {
 					String filePath = Registry.TargetDirectory + 
-					ApplicationUtilities.getProperty("DEHYPHENED")+ "\\";
+					ApplicationUtilities.getProperty("DESCRIPTIONS")+ "\\";
 					String fileName = contextTable.getSelection()[0].getText(0).trim();
 					fileName = fileName.substring(0, fileName.indexOf("-"));
 					filePath += fileName;
@@ -2806,8 +2809,8 @@ public class MainForm {
 						categorizedterms = null;
 						
 						mainDb.recordNonEQTerms(noneqs);//noneq
-						mainDb.saveTermRole(structures, Registry.MARKUP_ROLE_B); //descriptor
-						mainDb.saveTermRole(characters, Registry.MARKUP_ROLE_O); //descriptor
+						mainDb.saveTermRole(structures, Registry.MARKUP_ROLE_O); //structures
+						mainDb.saveTermRole(characters, Registry.MARKUP_ROLE_B); //descriptors
 						
 						//set sentences to unknown
 						ArrayList<String> nonStructureTerms = new ArrayList<String>();
@@ -2818,7 +2821,6 @@ public class MainForm {
 						e.printStackTrace();
 					}
 					//remove
-					//termRoleMatrix.setVisible(false);
 					termRoleMatrix4others.dispose();
 					termRoleMatrix4structures.dispose();
 					termRoleMatrix4characters.dispose();
@@ -3242,22 +3244,22 @@ public class MainForm {
 	        
         File cooccur = new File(targetPath+"/co-occurrence");
         File descriptions = new File(targetPath+"/descriptions");
-        File desc_dehyphened = new File(targetPath+"/descriptions-dehyphened");
-        File extracted = new File(targetPath+"/extracted");
-        File extractedword = new File(targetPath+"/extractedword");
+        //File desc_dehyphened = new File(targetPath+"/descriptions-dehyphened");
+        //File extracted = new File(targetPath+"/extracted");
+        //File extractedword = new File(targetPath+"/extractedword");
         File final_dir = new File(targetPath+"/final");
         File habitats = new File(targetPath+"/habitats");
-        File markedup = new File(targetPath+"/markedup");
+        //File markedup = new File(targetPath+"/markedup");
         File transformed = new File(targetPath+"/transformed");
 	        
         cooccur.mkdir();
         descriptions.mkdir();
-        desc_dehyphened.mkdir();
-        extracted.mkdir();
-        extractedword.mkdir();
+        //desc_dehyphened.mkdir();
+        //extracted.mkdir();
+        //extractedword.mkdir();
         final_dir.mkdir();
         habitats.mkdir();
-        markedup.mkdir();
+        //markedup.mkdir();
         transformed.mkdir();
 
         configurationText.setText(confFldr.getAbsolutePath());
@@ -3299,13 +3301,17 @@ public class MainForm {
 			new ProcessListener(transformationTable, transformationProgressBar, 
 					shell.getDisplay());
 		/* Need to clarify perlLog, and seeds new arraylist from Dr Hong*/ 
-		/*CharacterStatementsTransformer preMarkUp = 
-			new CharacterStatementsTransformer(listener, shell.getDisplay(), 
-					null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
-		*/
+		//CharacterStatementsTransformer preMarkUp = 
+		//	new CharacterStatementsTransformer(listener, shell.getDisplay(), 
+		//			null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
+		
+		//CharacterStatementsTransformer preMarkUp = 
+		//	new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
+		//			null, new ArrayList());
+		
 		CharacterStatementsTransformer preMarkUp = 
-			new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
-					null, new ArrayList());
+				new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
+						null, new ArrayList());
 		preMarkUp.start();
 	}
 	
@@ -3425,6 +3431,7 @@ public class MainForm {
 	private void startMarkup() {
 
 		mainDb.createWordRoleTable();//roles are: op for plural organ names, os for singular, c for character, v for verb
+		mainDb.createNonEQTable();
 		String workdir = Registry.TargetDirectory;
 		//if there is a characters folder,add the files in characters folder to descriptions folder
 		mergeCharDescFolders(new File(workdir));
@@ -4492,81 +4499,99 @@ public class MainForm {
 			return 0;
 	}
 	
-	/**loading structure/descriptor terms for curation**/
 
-	/*protected void loadTermCurationTabs(){
-		//loadFindStructureTable();
-		//loadFindDescriptorTable();
-		//loadFindMoreStructureTable();
-		//loadFindMoreDescriptorTable();
-		createSubtab(markupNReviewTabFolder, "structures");
-		createSubtab(markupNReviewTabFolder, "characters");
-		createSubtab(markupNReviewTabFolder, "others");
-	}*/
-	protected int loadFindStructureTable() {
-		//ArrayList <String> words = new ArrayList<String>();
-		findStructureTable.removeAll();
-		int count = 0;
-		try {
-			ArrayList<String> words = fetchStructureTerms();			
-
-			if (words != null) {
-				for (String word : words){
-					count++;
-					TableItem item = new TableItem(findStructureTable, SWT.NONE);
-					item.setText(new String [] {count+"", word});
-				}
-			}					
-		} catch (Exception exe){
-			LOGGER.error("unable to load findStructure subtab in Markup : MainForm", exe);
-			exe.printStackTrace();
-		}
-		return count;
-	}
-
+	
+	/**
+	 * this procedure seems to be slow and only a handful of terms are filtered.
+	 * 1. search db for candidate structure terms
+	 * 2. apply heuristic rules to filter the terms
+	 * 		2.1 pos = v|adv
+	 * 		2.2 does not ...
+	 * 		2.3 by [means] of
+	 * 3. filtered terms are not displayed and they will not be saved to wordroles table as "os" or "op".
+	 * 4. terms filtered by 2.1.adv or 2.3 will be saved in NONEQTERMSTABLE
+	 * 5. cache results to reduce cost
+	 * @return filtered candidate structure words
+	 */
 	private ArrayList<String> fetchStructureTerms(){
 		ArrayList <String> words = new ArrayList<String>();
+		ArrayList <String> filteredwords = new ArrayList<String>();
+		ArrayList <String> noneqwords = new ArrayList<String>();
 		try{
-			VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim());
+			if(conn == null){
+				Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			}
+			String prefix = dataPrefixCombo.getText().replaceAll("-", "_").trim();
+			VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(prefix,glossaryPrefixCombo.getText().trim());
 			words = vmdb.structureTags4Curation(words);
+			for(String word: words){
+				if(Utilities.mustBeVerb(word, this.conn, prefix) || Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
+					if(Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
+						noneqwords.add(word);
+					}					
+					continue;
+				}
+				filteredwords.add(word);
+			}
+			mainDb.recordNonEQTerms(noneqwords);
+			words = null;
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return words;
+		conn = null;
+		return filteredwords;
 	}
 
-	/*protected void loadOthersTable() {
-		showOtherTerms();
-	}*/
-
-	protected int loadFindDescriptorTable() {
-		// TODO Auto-generated method stub
-		//ArrayList <String> words = null;
-		findDescriptorTable.removeAll();
-		int count = 0;
-		try {
-			ArrayList<String> words = fetchCharacterTerms();
-			if (words != null) {
-				for (String word : words){
-					count++;
-					TableItem item = new TableItem(findDescriptorTable, SWT.NONE);
-					item.setText(new String [] {count+"", word});
-				}
-			}
-			
-		} catch (Exception exe){
-			LOGGER.error("unable to load findDescriptor subtab in Markup : MainForm", exe);
-			exe.printStackTrace();
-		}
-		return count;
-	
-	}
-
+	/**
+	 * 1. search db for candidate character terms
+	 * 2. apply heuristic rules to filter the terms
+	 * 		2.1 pos = adv
+	 * 		2.2 by [means] of
+	 * 3. filtered terms are not displayed and they will not be saved to wordroles table as "os" or "op".
+	 * 4. terms filtered by 2.1.adv or 2.2 will be saved in NONEQTERMSTABLE
+	 * 5. cache results to reduce cost
+	 * @return filtered candidate character words
+	 */
 	private ArrayList<String> fetchCharacterTerms(){
-		ArrayList <String> words = null;
+		ArrayList <String> words = new ArrayList<String>();;
+		ArrayList <String> filteredwords = new ArrayList<String>();
+		ArrayList <String> noneqwords = new ArrayList<String>();
+		try{
+			if(conn == null){
+				Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			}
+			String prefix = dataPrefixCombo.getText().replaceAll("-", "_").trim();
+			VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(prefix, glossaryPrefixCombo.getText().trim());
+			words = (ArrayList<String>)vmdb.descriptorTerms4Curation();
+			for(String word: words){
+				if(Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
+					noneqwords.add(word);
+					continue;
+				}
+				filteredwords.add(word);
+			}
+			mainDb.recordNonEQTerms(noneqwords);
+			words = null;
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		conn = null;
+		return filteredwords;	}
+	
+	private ArrayList<String> fetchContentTerms() {
+		ArrayList<String> words = new ArrayList<String>();
 		try{
 			VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim());
-			words = (ArrayList<String>)vmdb.descriptorTerms4Curation();
+			if(inistructureterms==null || inistructureterms.size()==0){
+				inistructureterms = vmdb.structureTags4Curation(new ArrayList<String>());
+			}
+			if(inicharacterterms==null || inicharacterterms.size()==0){
+				inicharacterterms = vmdb.descriptorTerms4Curation();
+			}
+			words=(ArrayList<String>)vmdb.contentTerms4Curation(words, inistructureterms, inicharacterterms);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -4698,22 +4723,67 @@ public class MainForm {
 		}
 	}
 
-	private ArrayList<String> fetchContentTerms() {
-		ArrayList<String> words = new ArrayList<String>();
-		try{
-			VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim());
-			if(inistructureterms==null || inistructureterms.size()==0){
-				inistructureterms = vmdb.structureTags4Curation(new ArrayList<String>());
-			}
-			if(inicharacterterms==null || inicharacterterms.size()==0){
-				inicharacterterms = vmdb.descriptorTerms4Curation();
-			}
-			words=(ArrayList<String>)vmdb.contentTerms4Curation(words, inistructureterms, inicharacterterms);
-		}catch(Exception e){
-			e.printStackTrace();
+
+	
+	/**loading structure/descriptor terms for curation**/
+
+	/*protected void loadTermCurationTabs(){
+		//loadFindStructureTable();
+		//loadFindDescriptorTable();
+		//loadFindMoreStructureTable();
+		//loadFindMoreDescriptorTable();
+		createSubtab(markupNReviewTabFolder, "structures");
+		createSubtab(markupNReviewTabFolder, "characters");
+		createSubtab(markupNReviewTabFolder, "others");
+	}*/
+	/*protected int loadFindStructureTable() {
+		//ArrayList <String> words = new ArrayList<String>();
+		findStructureTable.removeAll();
+		int count = 0;
+		try {
+			ArrayList<String> words = fetchStructureTerms();			
+
+			if (words != null) {
+				for (String word : words){
+					count++;
+					TableItem item = new TableItem(findStructureTable, SWT.NONE);
+					item.setText(new String [] {count+"", word});
+				}
+			}					
+		} catch (Exception exe){
+			LOGGER.error("unable to load findStructure subtab in Markup : MainForm", exe);
+			exe.printStackTrace();
 		}
-		return words;
-	}
+		return count;
+	}*/
+	/*protected void loadOthersTable() {
+		showOtherTerms();
+	}*/
+
+	/*protected int loadFindDescriptorTable() {
+		// TODO Auto-generated method stub
+		//ArrayList <String> words = null;
+		findDescriptorTable.removeAll();
+		int count = 0;
+		try {
+			ArrayList<String> words = fetchCharacterTerms();
+			if (words != null) {
+				for (String word : words){
+					count++;
+					TableItem item = new TableItem(findDescriptorTable, SWT.NONE);
+					item.setText(new String [] {count+"", word});
+				}
+			}
+			
+		} catch (Exception exe){
+			LOGGER.error("unable to load findDescriptor subtab in Markup : MainForm", exe);
+			exe.printStackTrace();
+		}
+		return count;
+	
+	}*/
+
+
 	
 	/*protected int loadFindMoreStructureTable() {
 		ArrayList <String> words = new ArrayList<String>();

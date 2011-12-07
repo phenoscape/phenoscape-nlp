@@ -74,10 +74,11 @@ public class MainFormDbAccessor {
 	}
 	
 	public void createNonEQTable(){
-		//noneqterms must not be refreshed
+		//noneqterms table is refreshed for each data collection
 		try{
 			Statement stmt = conn.createStatement();
-			stmt.execute("create table if not exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+" (term varchar(100) not null primary key, source varchar(200))");
+			stmt.execute("drop table if exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE"));
+			stmt.execute("create table if not exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+" (term varchar(100) not null, source varchar(200))");
 			stmt.close();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -887,7 +888,6 @@ public class MainFormDbAccessor {
 		String tablePrefix = MainForm.dataPrefixCombo.getText();
 		try {
 			Statement stmt = conn.createStatement();
-			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+" (term varchar(100) not null, source varchar(200))");			
 			//set flag in pos table
 			pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red' where pos=? and word=?");
 			for (String word : words) {
@@ -989,7 +989,7 @@ public class MainFormDbAccessor {
 			//Class.forName(driverPath);
 			//conn = DriverManager.getConnection(url);
 			String tablePrefix = MainForm.dataPrefixCombo.getText();
-			String sql = "select source,sentence from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"'  or tag = '"+word+"'";
+			String sql = "select source,originalsent from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"'  or tag = '"+word+"'";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			context.cut();
@@ -998,7 +998,7 @@ public class MainFormDbAccessor {
 			while (rs.next()) { //collect sentences
 				count++;
 				String src = rs.getString("source");
-				String sentence = rs.getString("sentence");
+				String sentence = rs.getString("originalsent");
 				text += count+": "+sentence+" ["+src+"] \r\n";
 				//System.out.println(src+"::"+sentence+" \r\n");
 				//context.append(src+"::"+sentence+" \r\n");

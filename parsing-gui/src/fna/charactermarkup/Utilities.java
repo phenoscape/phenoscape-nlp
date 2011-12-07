@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 
+import fna.parsing.ApplicationUtilities;
 import fna.parsing.state.StateCollector;
 import fna.parsing.state.WordNetWrapper;
 import java.util.ArrayList;
@@ -27,9 +28,66 @@ public class Utilities {
 	
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
+	public static ArrayList<String> sureVerbs = new ArrayList<String>();
+	public static ArrayList<String> sureAdvs = new ArrayList<String>();
+	public static ArrayList<String> partOfPrepPhrase = new ArrayList<String>();
 	public static boolean debug = false;
 	//special cases
-
+	/**
+	 * pos is "verb" only or after "does not"
+	 * @param word
+	 * @param conn
+	 * @return
+	 */
+	public static boolean mustBeVerb(String word, Connection conn, String prefix){
+		if(sureVerbs.contains(word)) return true;
+		WordNetWrapper wnw = new WordNetWrapper(word);
+		if(!wnw.isAdj() && !wnw.isAdv() && !wnw.isN() && wnw.isV()){
+			sureVerbs.add(word);
+			return true;
+		}
+		try{
+			Statement stmt = conn.createStatement();
+			String q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+					"where originalsent like '%does not "+word+"%'";
+			ResultSet rs = stmt.executeQuery(q);
+			if(rs.next()){
+				sureVerbs.add(word);
+				return true;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+	
+	public static boolean mustBeAdv(String word){
+		if(sureAdvs.contains(word)) return true;
+		WordNetWrapper wnw = new WordNetWrapper(word);
+		if(!wnw.isAdj() && wnw.isAdv() && !wnw.isN() && !wnw.isV()){
+			sureAdvs.add(word);
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean partOfPrepPhrase(String word, Connection conn, String prefix){
+		if(partOfPrepPhrase.contains(word)) return true;
+		try{
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+					"where originalsent rlike ' ("+ChunkedSentence.prepositions+") "+word+" ("+ChunkedSentence.prepositions+")'");
+			if(rs.next()){
+				partOfPrepPhrase.add(word);
+				return true;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	public static boolean isPlural(String t) {
 		t = t.replaceAll("\\W", "");
 		if(t.matches("\\b(series|species|fruit)\\b")){
