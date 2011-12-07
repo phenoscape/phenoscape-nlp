@@ -167,8 +167,8 @@ my $debug = 0; #debug learning process
 my $debugp = 0; #debug pattern
 my $debugnouns = 0; #debug heuristic nouns for phenoscape
 
-my $kb = "fnaknowledgebase";
-#my $kb = "phenoscape";
+#my $kb = "fnaknowledgebase";
+my $kb = "phenoscape";
 
 my $taglength = 150;
 
@@ -200,7 +200,7 @@ my $SUFFIX ="er|est|fid|form|ish|less|like|ly|merous|most|shaped"; # 3_nerved, )
 my $FORBIDDEN ="to|and|or|nor"; #words in this list can not be treated as boundaries "to|a|b" etc.
 my $PRONOUN ="all|each|every|some|few|individual|both|other";
 my $CHARACTER ="lengths|length|lengthed|width|widths|widthed|heights|height|character|characters|distribution|distributions|outline|outlines|profile|profiles|feature|features|form|forms|mechanism|mechanisms|nature|natures|shape|shapes|shaped|size|sizes|sized";#remove growth, for growth line. check 207, 3971
-my $PREPOSITION ="above|across|after|along|around|as|at|before|beneath|between|beyond|by|for|from|in|into|near|of|off|on|onto|out|outside|over|than|throughout|toward|towards|up|upward|with|without";
+my $PREPOSITION ="above|across|after|along|around|as|at|before|below|beneath|between|beyond|by|during|for|from|in|into|near|of|off|on|onto|out|outside|over|than|throught|throughout|toward|towards|up|upward|with|without";
 my $TAGS = "";
 my $PLENDINGS = "[^aeiou]ies|i|ia|(x|ch|sh)es|ves|ices|ae|s";
 my $CLUSTERSTRINGS = "group|groups|clusters|cluster|arrays|array|series|fascicles|fascicle|pairs|pair|rows|number|numbers|\\d+";
@@ -714,13 +714,21 @@ sub addclusterstrings{
 
 sub addDescriptors{
 	my @descriptors = @_;
-
 	print "descriptors :\n@descriptors\n" if $debug;
-
 	for (@descriptors){
 		my $w = $_;
 		if($w =~/\b(?:$FORBIDDEN)\b/){next;}
-		update($w, "b", "*", "wordpos", 0);
+		update($w, "b", "", "wordpos", 1);
+	}
+}
+
+sub addNouns{
+	my @nouns = @_;
+	print "character heuristic nouns :\n@nouns\n" if $debug;
+	for (@nouns){
+		my $w = $_;
+		if($w =~/\b(?:$FORBIDDEN)\b/){next;}
+		update($w, "n", "", "wordpos", 1);
 	}
 }
 
@@ -736,6 +744,7 @@ sub addheuristicsnouns{
 	my @rnouns = @$rnouns;
 	my @descriptors = @$rdescriptors;
 	addDescriptors(@descriptors);
+	addNouns(@rnouns);
 #	print "nouns\n";
 #	foreach my $n (@nouns){
 #		print "$n\t";
@@ -744,7 +753,7 @@ sub addheuristicsnouns{
 #	foreach my $d (@descriptors){
 #		print "$d\t";
 #	}
-	@nouns = (@nouns, @rnouns);
+
 	#"adhere[s] adheres[p] angle[s] angles[p] attach[s] attaches[p] base[s] bases[p] cell[s] cells[p] depression[s] depressions[p] direction[s] directions[p] ellipsoid[s] ellipsoids[p] eyespot[s] eyespots[p] face[s] faces[p] flagellum[s] flagella[p] flange[s] flanges[p] forward[s] forwards[p] globule[s] globules[p] groove[s] grooves[p] insert[s] inserts[p] jerk[s] jerks[p] length[s] lengths[p] lie[s] lies[p] line[s] lines[p] lobe[s] lobes[p] margin[s] margins[p] measure[s] meet[s] meets[p] membrane[s] membranes[p] narrow[s] narrows[p] notch[s] notches[p] observation[s] observations[p] plastid[s] plastids[p] pore[s] pores[p] pyrenoid[s] pyrenoids[p] quarter[s] quarters[p] ridge[s] ridges[p] rod[s] rods[p] row[s] rows[p] sample[s] samples[p] sediment[s] sediments[p] side[s] sides[p] size[s] sizes[p] third[s] thirds[p] vacuole[s] vacuoles[p] valve[s] valves[p] width[s] widths[p]"
 	my $pn = ""; #previous n
 	foreach my $n (@nouns){#convert to hash
@@ -786,7 +795,8 @@ sub addheuristicsnouns{
 ## 0.5 Meckle#s cartilage
 ## 1. single term characters are nouns                                      ##
 ## 2. end of sentence nouns (a|an|the|some|any|this|that|those|these) noun$ ##
-## 3. proper nouns and acronyms                                             ##
+## 3. proper nouns and acronyms     
+## 4. non-stop/prep followed by a number: epibranchial 4                    ##
 ## descriptor heuristics                                                    ##
 ## 1. single term descriptions are descriptors                              ##   
 ## 2. (is|are) red: isDescriptor 
@@ -798,72 +808,104 @@ sub characterHeuristics{
 	
 	while(($source, $sentence, $originalsent) = $sth->fetchrow_array()){
 		$originalsent = trim($originalsent);
-		print "$source\n";
+		print "$source\n" if $debugnouns;
 		#noun rule 0: taxon names
-		if($originalsent =~ /<i>\s*(.*)\s*<\/i>/){
-			my $t = $1;
-			$taxonnames{$t} = 1;
-			my @ts = split(/\s+/, $t);
-			foreach $t (@ts){
+		if($originalsent =~ /<i>/){
+			my $copy = $originalsent;
+			while($copy =~ /(.*?)<i>\s*([^<]*)\s*<\/i>(.*)/){
+				my $t = $2;
+				$copy = $3;
+				$t =~ tr/A-Z/a-z/;
 				$taxonnames{$t} = 1;
-				if($debugnouns) {print "[noun:$t] $originalsent\n";}
+				my @ts = split(/\s+/, $t);
+				foreach $t (@ts){
+					$taxonnames{$t} = 1;
+					if($debugnouns) {print "[noun0:$t] $originalsent\n";}
+				}
 			}
-			$sentence =~ s#</?i>##g;
+			$sentence =~ s#<\s*/?\s*i\s*>##g;
+			$originalsent =~ s#<\s*/?\s*i\s*>##g;
 			updateSentence($source, $sentence);
 		}
 		
 		#noun rule 0.5
 		if($originalsent =~ /\b(\W+#s)\b/){ #Meckel's save Meckel, Meckels, and Meckel's
 			my $t = $1;
+			$t =~ tr/A-Z/a-z/;
 			$nouns{$t} = 1;
-			if($debugnouns) {print "[noun:$t] $originalsent\n";}
+			if($debugnouns) {print "[noun05:$t] $originalsent\n";}
 			$t =~ s/#//;
 			$nouns{$t} = 1;
-			if($debugnouns) {print "[noun:$t] $originalsent\n";}
+			if($debugnouns) {print "[noun05:$t] $originalsent\n";}
 	   		$t =~ s/s$//;
 			$nouns{$t} = 1;
-			if($debugnouns) {print "[noun:$t] $originalsent\n";}
+			if($debugnouns) {print "[noun05:$t] $originalsent\n";}
 			$sentence =~ s/#//g;
 			updateSentence($source, $sentence);			
 		}
 
 		#noun rule 2
-		if($originalsent =~ /\b(a|an|the|some|any|this) +(\w+)$/){
-			my $t = $2;
+		my $cp = $originalsent;
+		while($cp =~ /(.*?)\b(a|an|the|some|any|this|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth) +(\w+)\s*($|\(|\[|{|\b($PREPOSITION)\b)(.*)/){
+			my $t = $3;
+			$cp = $5;
+			my $prep = $4;
+			if($prep =~/\w/ && $t =~/\b(length|width|presence|\w+tion)\b/){next;}
 			$t =~ tr/A-Z/a-z/;
 			$nouns{$t} = 1;
-			if($debugnouns){ print "[noun:$t] $originalsent\n";}
+			if($debugnouns){ print "[noun2:$t] $originalsent\n";}
 		}	
 		#noun rule 3
-		$originalsent =~ s#-#aaa#g;
-		$originalsent =~ s#[[:punct:]]##g; #keep "-"
-		$originalsent =~ s#aaa#-#g;
-		@tokens = split(/\s+/, $originalsent);
-		if($source !~ /_s\d/){#sources without _s1 are character statements
-			$tokens[0]=""; #ignore the first word in character statements--this is normally capitalized
-		}	
-		foreach my $t (@tokens){
-			if($t =~ /[A-Z].+/ and $t!~/-\w+ed$/){#proper nouns and acronyms, S-shaped
-				if($t=~/^[A-Z0-9]+$/){
-					$anouns{$t} =1;
-				}else{
-					$pnouns{$t} =1;
-				}			
-				$t =~ tr/A-Z/a-z/;
-				$nouns{$t}=1;
-				if($debugnouns) {print "[noun:$t] $originalsent\n";}
-			}
-		}			
-		#noun rule 1: #sources without _s1 are character statements
-		if($source !~ /_s\d/ and $originalsent !~ /\s/){#single word
+		$cp = $originalsent; #may be like very wide  (In Dianema  Hoplosternum  some Cha...)
+		my @segs = split(/[()\[\]\{\}]/, $cp);
+		foreach my $cp (@segs){
+			$cp =~ s#-#aaa#g;
+			$cp =~ s#[[:punct:]]##g; #keep "-"
+			$cp =~ s#aaa#-#g;
+			@tokens = split(/\s+/, $cp);
+			#if($source !~ /\.xml_\S+_/){#sources without 2 _ are character statements
+				$tokens[0]=""; #ignore the first word in character statements--this is normally capitalized
+			#}	
+			foreach my $t (@tokens){
+				if($t =~ /[A-Z].+/ and $t!~/-\w+ed$/){#proper nouns and acronyms, S-shaped
+					if($t=~/^[A-Z0-9]+$/){
+						$t =~ tr/A-Z/a-z/;
+						$anouns{$t} =1;
+					}else{
+						$t =~ tr/A-Z/a-z/;
+						$pnouns{$t} =1;
+					}			
+					$nouns{$t}=1;
+					if($debugnouns) {print "[noun3:$t] $originalsent\n";}
+				}
+			}			
+		}
+		#noun rule 1: #sources with 1 _ are character statements, 2 _ are descriptions
+		if($source !~ /\.xml_\S+_/ and $originalsent !~ /\s/){#single word
 			if(!isDescriptor($originalsent)){
 				$originalsent =~ tr/A-Z/a-z/;
 				$nouns{$originalsent}=1;
-				if($debugnouns) {print "[noun:$originalsent] $originalsent\n";}
+				if($debugnouns) {print "[noun1:$originalsent] $originalsent\n";}
 			}
 		}	
+		#noun rule 4: epibranchial 4
+		$cp = $originalsent;
+		while($cp =~ /(.*?)\s(\w+)\s+\d+(.*)/){
+			my $t = $2;
+			$cp = $3;
+			if($t !~ /\b($PREPOSITION|$stop)\b/){
+				$t =~ tr/A-Z/a-z/;
+				$nouns{$t} = 1;
+				if($debugnouns){ print "[noun4:$t] $originalsent\n";}
+			}
+		}	
+		#remove puncts for descriptor rules
+		$originalsent =~ s#-#aaa#g;
+		$originalsent =~ s#[[:punct:]]##g; #keep "-"
+		$originalsent =~ s#aaa#-#g;
+		
 		#descriptor rule 1:
-		if($source =~ /_s\d/ and $originalsent !~ /\s/){#single word
+		if($source =~ /\.xml_\S+_/ and $originalsent !~ /\s/){#single word
 			if(grep(/^$originalsent$/, keys(%nouns)) < 1){
 				$originalsent =~ tr/A-Z/a-z/;
 				$descriptors{$originalsent}=1;
@@ -899,6 +941,7 @@ sub characterHeuristics{
 		add2Table($taxon, "taxonnames");
 	}
 	
+	push(@nouns, @anouns, @pnouns, keys(%taxonnames));
 	return (\@nouns, \@descriptors);
 } 
 
@@ -941,7 +984,9 @@ sub isDescriptor{
 		return 0;
 	}
 	my ($sth, $count);
-	$sth = $dbh->prepare("select count(*) from ".$prefix."_sentence where originalsent rlike ' (is|are|was|were|be|being) ".$term." '");
+	my $q = "select count(*) from ".$prefix."_sentence where originalsent rlike ' (is|are|was|were|be|being) ".$term." '";
+	#print $q."\n";
+	$sth = $dbh->prepare($q);
 	$sth->execute() or print STDOUT "$sth->errstr\n";
 	while(($count) = $sth->fetchrow_array()){
 		if($count>=1){
@@ -5970,11 +6015,11 @@ foreach my $info (@allsents){
 		#may have fewer than $N words
 		if(!/\w+/){next;}
 		push(@validindex, $i);
-		s#\[DOT\]#.#g;
-		s#\[QST\]#?#g;
-		s#\[SQL\]#;#g;
-		s#\[QLN\]#:#g;
-		s#\[EXM\]#!#g;
+		s#\[\s*DOT\s*\]#.#g;
+		s#\[\s*QST\s*\]#?#g;
+		s#\[\s*SQL\s*\]#;#g;
+		s#\[\s*QLN\s*\]#:#g;
+		s#\[\s*EXM\s*\]#!#g;
 		push(@sentcopy, $_);
 
 		#remove bracketed text from sentence (keep those in originalsent);
@@ -6100,7 +6145,7 @@ sub populateunknownwordstable{
 		if($word !~ /\w/ || $word=~/ous$/){
 			$word = "\\".$word if $word eq "'";
 			$word = "\\".$word if $word eq "\\";
-			print $word."\n";
+			#print $word."\n";
 			#my $sth = $dbh->prepare("insert into ".$prefix."_unknownwords values ('$word', '$word')");
 			#$sth->execute() or print STDOUT $sth->errstr."\n";
 			insertintounknown($word, $word);
