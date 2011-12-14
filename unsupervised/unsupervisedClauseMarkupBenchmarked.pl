@@ -578,23 +578,23 @@ $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_wordpos');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_wordpos (word varchar(200) not null, pos varchar(2) not null, role varchar(5), certaintyu int, certaintyl int, saved_flag varchar(20) default "", primary key (word, pos)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_wordpos (word varchar(200) not null, pos varchar(2) not null, role varchar(5), certaintyu int, certaintyl int, saved_flag varchar(20) default "", savedid varchar(40), primary key (word, pos)) engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
-$del = $dbh->prepare('drop table if exists '.$prefix.'_acronyms');
+$del = $dbh->prepare('drop table if exists '.$prefix.'_heuristicnouns');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_acronyms (word varchar(200) not null, primary key (word)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_heuristicnouns (word varchar(200) not null, type varchar(20))');
 $create->execute() or print STDOUT "$create->errstr\n";
 
-$del = $dbh->prepare('drop table if exists '.$prefix.'_propernouns');
-$del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_propernouns (word varchar(200) not null, primary key (word)) engine=innodb');
-$create->execute() or print STDOUT "$create->errstr\n";
-
-$del = $dbh->prepare('drop table if exists '.$prefix.'_taxonnames');
-$del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_taxonnames (word varchar(200) not null, primary key (word)) engine=innodb');
-$create->execute() or print STDOUT "$create->errstr\n";
+#$del = $dbh->prepare('drop table if exists '.$prefix.'_propernouns');
+#$del->execute() or print STDOUT "$del->errstr\n";
+#$create = $dbh->prepare('create table if not exists '.$prefix.'_propernouns (word varchar(200) not null, primary key (word)) engine=innodb');
+#$create->execute() or print STDOUT "$create->errstr\n";
+#
+#$del = $dbh->prepare('drop table if exists '.$prefix.'_taxonnames');
+#$del->execute() or print STDOUT "$del->errstr\n";
+#$create = $dbh->prepare('create table if not exists '.$prefix.'_taxonnames (word varchar(200) not null, primary key (word)) engine=innodb');
+#$create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_sentInFile');
 $del->execute() or print STDOUT "$del->errstr\n";
@@ -930,6 +930,9 @@ sub characterHeuristics{
 	my @pnouns = keys(%pnouns); 
 	@anouns = filterDescriptors(\@anouns, \@descriptors);
 	@pnouns = filterDescriptors(\@pnouns, \@descriptors);
+	foreach my $noun (@nouns){
+		add2Table($noun, "organ");
+	}
 	foreach my $anoun (@anouns){
 		add2Table($anoun, "acronyms");
 	}
@@ -967,9 +970,9 @@ sub filterDescriptors{
 
 
 sub add2Table{
-	my($term, $table) = @_;
+	my($term, $type) = @_;
 	my ($sth);
-	$sth = $dbh->prepare('insert into '.$prefix.'_'.$table.' (word) values ("'.$term.'")');
+	$sth = $dbh->prepare('insert into '.$prefix.'_heuristicnouns (word, type) values ("'.$term.'","'.$type.'")');
 	$sth->execute() or print STDOUT "$sth->errstr\n";
 }
 
