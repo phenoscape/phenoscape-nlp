@@ -319,7 +319,7 @@ public class VolumeMarkupDbAccessor {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select * from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where word='"+w+"' and semanticrole='"+role+"'");
 			if(!rs.next()){
-				stmt.execute("insert into "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" values ('"+w+"','"+role+"')");
+				stmt.execute("insert into "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+"(word, semanticrole) values ('"+w+"','"+role+"')");
 			}
 		} catch (SQLException exe) {
 			LOGGER.error("Error in adding a word to wordroles table" +

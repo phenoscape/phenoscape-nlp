@@ -37,6 +37,9 @@ public class POSTagger4StanfordParser {
 	private String glosstable = null;
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
 	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
+	private String countp = "more|fewer|less|\\d+";
+	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
+	private Pattern positionptn = Pattern.compile("(<(\\S+?)> \\d+(?: and \\d+)?)");
 
 	/**
 	 * 
@@ -81,6 +84,9 @@ public class POSTagger4StanfordParser {
 			if(!scp.equals(str)){
 				System.out.println();
 			}
+			this.chunkedtokens = new ArrayList<String>(Arrays.asList(str.split("\\s+")));
+			str = normalizePositionList(str);
+			str = normalizeCountList(str);
 			lookupCharacters(str);//populate charactertokens
 	        if(this.charactertokensReversed.contains("color") || this.charactertokensReversed.contains("coloration")){
 	        	str = normalizeColorPatterns();
@@ -253,7 +259,91 @@ public class POSTagger4StanfordParser {
 		//return "";
 	}
 		
-		
+	/** 	
+	 * @param str: {upper} {pharyngeal} <tooth> <plates> 4 and 5
+	 * @return: {upper} {pharyngeal} <tooth> <plates_4_and_5>
+	 */
+	private String normalizePositionList(String str) {
+		Matcher m = positionptn.matcher(str);
+		while(m.find()){
+			int start = m.start(1);
+			int end = m.end(1);
+			String position = m.group(1);
+			String organ = m.group(2);
+			if(!isPosition(organ, position)) continue;
+			String rposition = position.replaceFirst(">", "").replaceAll("\\s+", "_")+">";
+			//synchronise this.chunkedtokens
+			//split by single space to get an accurate count to elements that would be in chunkedtokens
+			int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
+			this.chunkedtokens.set(index, rposition);
+			int num = position.split("\\s+").length;
+			for(int i = index+1; i < index+num; i++){
+				this.chunkedtokens.set(i, "");
+			}
+			//resemble the str from chunkedtokens, counting all empty elements, so the str and chunkedtokens are in synch.
+			str = "";
+			for(String t: this.chunkedtokens){
+				str +=t+" ";
+			}
+			m = positionptn.matcher(str);
+		}
+		return str.replaceAll("\\s+", " ").trim();
+	}
+
+
+	/**
+	 * tooth 5 means the fifth tooth, 5 is position (true)
+	 * teeth 5 means 5 teeth, 5 is count(false)
+	 * teeth 2 and 3 means the second and third teeth, 2 and 3 are position(true)
+	 * tooth 1 ??? treated as position (true) for the time being
+	 * @param organ: teeth
+	 * @param position: <teeth> 4 and 5
+	 * @return
+	 */
+	private boolean isPosition(String organ, String position) {
+		boolean multiplepositions = false;
+		boolean pluralorgan = false;
+		position = position.replace("<"+organ+">", "").trim();
+		if(position.contains(" ")){
+			multiplepositions = true;
+		}		
+		if(Utilities.isPlural(organ)){
+			pluralorgan = true;
+		}
+		if(pluralorgan && !multiplepositions) return false;
+		return true;
+	}
+
+	/**
+	 * replace "one or two" with {count~list~one~or~two} in the string
+	 * update this.chunkedTokens	
+	 * @param str
+	 */
+		private String normalizeCountList(String str) {
+			Matcher m = this.countptn.matcher(str);
+			while(m.find()){
+				int start = m.start(1);
+				int end = m.end(1);
+				String count = m.group(1).trim();
+				String rcount = "{count~list~"+count.replaceAll(" ","~").replaceAll("[{}]", "")+"}";
+				//synchronise this.chunkedtokens
+				//split by single space to get an accurate count to elements that would be in chunkedtokens
+				int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
+				this.chunkedtokens.set(index, rcount);
+				int num = count.split("\\s+").length;
+				for(int i = index+1; i < index+num; i++){
+					this.chunkedtokens.set(i, "");
+				}
+				//resemble the str from chunkedtokens, counting all empty elements, so the str and chunkedtokens are in synch.
+				str = "";
+				for(String t: this.chunkedtokens){
+					str +=t+" ";
+				}
+				m = this.countptn.matcher(str);
+			}
+			return str.replaceAll("\\s+", " ").trim();
+		}
+
 /**remove all bracketed text such as "leaves large (or small as in abc)"
  * do not remove brackets that are part of numerical expression : 2-6 (-10)
  * @param str: "leaves large (or small as in abc)"
@@ -385,7 +475,6 @@ public class POSTagger4StanfordParser {
 		if(str.trim().length() ==0){
 			return;
 		}
-		this.chunkedtokens = new ArrayList<String>(Arrays.asList(str.split("\\s+")));
 		this.charactertokensReversed = new ArrayList<String>();
 		boolean save = false;
 		boolean ambiguous = false;
@@ -485,7 +574,7 @@ public class POSTagger4StanfordParser {
 	 * color or color to color
 	 * 
 	 * {color-blue-to-red}
-	 * 
+	 * @return updated string
 	 */
 	private String normalizeCharacterLists(){
 		//charactertokens.toString

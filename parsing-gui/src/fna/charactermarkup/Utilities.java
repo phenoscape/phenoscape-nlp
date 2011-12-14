@@ -31,19 +31,29 @@ public class Utilities {
 	public static ArrayList<String> sureVerbs = new ArrayList<String>();
 	public static ArrayList<String> sureAdvs = new ArrayList<String>();
 	public static ArrayList<String> partOfPrepPhrase = new ArrayList<String>();
+	public static ArrayList<String> notSureVerbs = new ArrayList<String>();
+	public static ArrayList<String> notSureAdvs = new ArrayList<String>();
+	public static ArrayList<String> notPartOfPrepPhrase = new ArrayList<String>();
 	public static boolean debug = false;
+	public static boolean debugPOS = true;
 	//special cases
 	/**
-	 * pos is "verb" only or after "does not"
+	 * word must be a verb if
+	 * 1. its pos is "verb" only, or
+	 * 2. "does not" word
+	 * 3. has "verb" pos and seen patterns (word "a/the", or word prep <organ>) and not seen pattern (word \w+ly$). 
 	 * @param word
 	 * @param conn
 	 * @return
 	 */
 	public static boolean mustBeVerb(String word, Connection conn, String prefix){
 		if(sureVerbs.contains(word)) return true;
+		if(notSureVerbs.contains(word)) return false;
 		WordNetWrapper wnw = new WordNetWrapper(word);
-		if(!wnw.isAdj() && !wnw.isAdv() && !wnw.isN() && wnw.isV()){
+		boolean v = wnw.isV();
+		if(!wnw.isAdj() && !wnw.isAdv() && !wnw.isN() && v){
 			sureVerbs.add(word);
+			if(debugPOS) System.out.println(word+" is sureVerb");
 			return true;
 		}
 		try{
@@ -53,38 +63,120 @@ public class Utilities {
 			ResultSet rs = stmt.executeQuery(q);
 			if(rs.next()){
 				sureVerbs.add(word);
+				if(debugPOS) System.out.println(word+" is sureVerb");
+				return true;
+			}
+			if(v){
+				q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("HEURISTICNOUNS")+" " +
+						"where word = '"+word+"'";
+				rs = stmt.executeQuery(q);
+				if(rs.next()){
+					notSureVerbs.add(word);
+					return false;
+				}
+				
+				q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+						"where sentence rlike '(^| )"+word+" +[-a-z_]+ly$'";
+				rs = stmt.executeQuery(q);
+				if(rs.next()){
+					notSureVerbs.add(word);
+					return false;
+				}
+				
+				q = "select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+						"where sentence rlike '(^| )"+word+" (a|an|the) '";
+				rs = stmt.executeQuery(q);
+				if(rs.next()){
+					sureVerbs.add(word);
+					if(debugPOS) System.out.println(word+" is sureVerb");
+					return true;
+				}
+				
+				if(word.endsWith("ed") || word.endsWith("ing")){
+					q = "select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+							"where sentence rlike '(^| )"+word+" '";
+					rs = stmt.executeQuery(q);
+					while(rs.next()){
+						String sent = rs.getString("sentence");
+						String preps = ChunkedSentence.prepositions;
+						Pattern p = Pattern.compile("\\b"+word+"\\b(?: (?:"+preps+")) +(\\S+)");
+						Matcher m = p.matcher(sent);
+						while(m.find()){
+							String term = m.group(1);
+							if(term.matches("(a|an|the|some|any|this|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)")){
+								sureVerbs.add(word);
+								if(debugPOS) System.out.println(word+" is sureVerb");
+								return true;
+							}else if(isOrgan(term, conn, prefix)){
+								sureVerbs.add(word);
+								if(debugPOS) System.out.println(word+" is sureVerb");
+								return true;
+							}
+						}		
+					}
+				}
+			}			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		notSureVerbs.add(word);
+		return false;
+	}
+	
+	private static boolean isOrgan(String term, Connection conn, String tablePrefix) {
+		try{
+			Statement stmt = conn.createStatement();
+			String wordrolesable = tablePrefix+ "_"+ApplicationUtilities.getProperty("WORDROLESTABLE");		
+			ResultSet rs = stmt.executeQuery("select word from "+wordrolesable+" where semanticrole in ('os', 'op') and word='"+term+"'");		
+			if(rs.next()){
+				if(debugPOS) System.out.println(term+" is an organ");
 				return true;
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		return false;
 	}
-	
+
 	public static boolean mustBeAdv(String word){
 		if(sureAdvs.contains(word)) return true;
+		if(notSureAdvs.contains(word)) return false;
 		WordNetWrapper wnw = new WordNetWrapper(word);
 		if(!wnw.isAdj() && wnw.isAdv() && !wnw.isN() && !wnw.isV()){
 			sureAdvs.add(word);
+			if(debugPOS) System.out.println(word+" is sureAdv");
 			return true;
 		}
+		notSureAdvs.add(word);
 		return false;
 	}
 	
 	public static boolean partOfPrepPhrase(String word, Connection conn, String prefix){
 		if(partOfPrepPhrase.contains(word)) return true;
+		if(notPartOfPrepPhrase.contains(word)) return true;
+		if(isOrgan(word, conn, prefix)){
+			notPartOfPrepPhrase.add(word);
+			return false;
+		}
 		try{
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+			ResultSet rs = stmt.executeQuery("select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
 					"where originalsent rlike ' ("+ChunkedSentence.prepositions+") "+word+" ("+ChunkedSentence.prepositions+")'");
-			if(rs.next()){
-				partOfPrepPhrase.add(word);
-				return true;
+			boolean select = true;
+			boolean exist = false;
+			while(rs.next()){
+				exist = true;
+				if(rs.getString("sentence").matches(".*?\\bfrom "+word+" to\\b.*")) select = false;
 			}
+			if(exist && select){
+				partOfPrepPhrase.add(word);
+				if(debugPOS) System.out.println(word+" is partOfPrepPhrase");
+				return true;
+			}			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		notPartOfPrepPhrase.add(word);
 		return false;
 	}
 	
@@ -536,6 +628,9 @@ public class Utilities {
 	}
 	
 	public static String threeingSentence(String str) {
+		//hide the numbers in count list: {count~list~9~or~less~} <fin> <rays>
+		ArrayList<String> lists = new ArrayList<String>();
+		str = hideLists(str, lists);		
 		//threeing
 		str = str.replaceAll("(?<=\\d)-(?=\\{)", " - "); //this is need to keep "-" in 5-{merous} after 3ed (3-{merous} and not 3 {merous}) 
 		//Pattern pattern3 = Pattern.compile("[\\d]+[\\-\\–]+[\\d]+");
@@ -585,7 +680,59 @@ public class Utilities {
          
          //2-or-{3-lobed} => {2-or-3-lobed}
          str = str.replaceAll("(?<=-(to|or)-)\\{", "").replaceAll("[^\\{]\\b(?=3-(to|or)-3\\S+\\})", " {");
-		return str;
+		
+         //unhide count list
+         str = unCountLists(str, lists);
+         return str;
+	}
+
+	/**
+	 * hide lists such as
+	 * {upper} {pharyngeal} <tooth> <plates_4_and_5>
+	 * count~list~2~to~4
+	 * so the numbers will not be turned into 3.
+	 * @param str
+	 * @param countlists
+	 * @return
+	 */
+	private static String hideLists(String str,
+			ArrayList<String> lists) {
+		if(str.contains("count~list~") || str.matches(".*?<\\S+_\\d.*")){
+			String newstr = "";
+			String[] tokens = str.split("\\s+");
+			int count = 0;
+			for(String t: tokens){
+				if(t.indexOf("count~list~")>=0 || t.matches("<\\S+_\\d.*")){
+					newstr +="# ";
+					lists.add(t);
+					count++;
+				}else{
+					newstr +=t+" ";
+				}
+			}			
+			return newstr.trim();
+		}else{
+			return str;
+		}
+	}
+
+	private static String unCountLists(String str, ArrayList<String> lists) {
+		if(str.contains("#")){
+			String newstr = "";
+			String[] tokens = str.split("\\s+");
+			int count = 0;
+			for(String t: tokens){
+				if(t.contains("#")){
+					newstr += lists.get(count)+" ";
+					count++;
+				}else{
+					newstr +=t+" ";
+				}
+			}
+			return newstr.trim();
+		}else{
+			return str;
+		}
 	}
 
 	public static void main(String[] argv){
