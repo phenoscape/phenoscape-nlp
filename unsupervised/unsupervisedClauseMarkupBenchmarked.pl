@@ -405,7 +405,7 @@ if ($lm eq "plain"){
 
 print stdout "::::::::::::::::::::::::Final step: normalize tag and modifiers: \n";
 normalizetags(); ##normalization is the last step : turn all tags and modifiers to singular form, remove <NBM> tags from sentence
-prepareWordPos4Parser(); #12/15/10
+prepareTables4Parser();
 #resolvesentencetags(); #for future
 
 
@@ -436,12 +436,12 @@ print stdout "Done:\n";
 #2. special words added
 ##################################################################################################
 
-sub prepareWordPos4Parser{
+sub prepareTables4Parser{
 	my $toremove = $PRONOUN."|".$CHARACTER."|".$NUMBERS."|".$CLUSTERSTRINGS."|".$PREPOSITION."|".$stop;
 	$toremove =~ s#\|#","#g;
 	$toremove = "\"".$toremove."\"";
 	
-	my $stmt2 ="update ".$prefix."_wordpos set saved_flag='red' where word in (".$toremove.") or word not rlike '[a-z]' or word not in (select dhword from ".$prefix."_allwords)";
+	my $stmt2 ="update ".$prefix."_wordpos set saved_flag='red' where word in (".$toremove.") or word not rlike '[a-z]' or word not in (select word from ".$prefix."_unknownwords)";
 	my $sth2 = $dbh->prepare($stmt2);
 	$sth2->execute() or die $sth2->errstr."\n";
 	
@@ -452,7 +452,7 @@ sub prepareWordPos4Parser{
 	while(my $word = $sth2->fetchrow_array()){
 		my $nword = $word;
 		$nword =~ s#ly$##;
-		my $sth3 = $dbh->prepare("select count(*) from ".$prefix."_allwords where word='".$nword."'");
+		my $sth3 = $dbh->prepare("select count(*) from ".$prefix."_unknownwords where word='".$nword."'");
 		$sth3->execute() or die $sth3->errstr."\n";
 		my $t = $sth3->fetchrow_array();
 		if($t=~/\w/){
@@ -5926,10 +5926,10 @@ sub getCharsSents{
 	while(defined ($file=readdir(DIN))){
 		if($file !~ /\w/){next;}
 		$text = ReadFile::readfile("$dir$file");
-		my $info = $file."##description##".$text;
+		my $type = type($file);
+		my $info = $file."##".$type."##".$text;
 		push(@all, $info);
-	}
-	
+	}		
 #	characters have been copied to descriptions folder in CharacterStatementsTransformer.java 
 #	opendir(CIN, "$cdir") || die "$!: $cdir\n";#characters
 #	while(defined ($file=readdir(CIN))){
@@ -5940,6 +5940,17 @@ sub getCharsSents{
 #	}
 	@all = sort byseg @all;
 	return @all;
+}
+
+#determine if a file contains a character statement or a character state(description) statement
+sub type{
+	my $file = shift;
+	#character: Armbruster_2004.xml_0a1e6749-13fc-47be-bc7f-8184fc9c26ad.txt
+	#character state: Armbruster_2004.xml_0a1e6749-13fc-47be-bc7f-8184fc9c26ad_4a99e866-54d9-4875-8b5e-385427db1245.txt
+	$file =~ s#.*\.xml_##; #remove pdf.xml
+	$file =~ s#[^_]##g; #remove all non_ charaters
+	if(length($file)==1){ return "description";}
+	return "character";
 }
 
 #####number, space, letter order
