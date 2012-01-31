@@ -52,6 +52,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private POSTagger4StanfordParser tagger = null;
 	private String tableprefix = null;
 	private String glosstable = null;
+	static public Hashtable<String, String> characters = new Hashtable<String, String>();
+	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
 	private boolean printProgress = true;
@@ -94,20 +96,22 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			//ResultSet rs = stmt.executeQuery("select * from newsegments");
 			//stmt.execute("alter table markedsentence add rmarkedsent text");
 
-			ResultSet rs = stmt.executeQuery("select source, markedsent from "+this.tableprefix+"_markedsentence order by sentid");// order by (source+0) ");////sort as numbers
+			ResultSet rs = stmt.executeQuery("select source, markedsent, type from "+this.tableprefix+"_markedsentence order by sentid");// order by (source+0) ");////sort as numbers
 			//ResultSet rs = stmt.executeQuery("select source, sentence from "+this.tableprefix+"_sentence order by sentid");// order by (source+0) ");////sort as numbers
 			int count = 1;
 			while(rs.next()){
 				String src = rs.getString(1);
 				String str = rs.getString(2);
+				String type = rs.getString(3);
 				//TODO: may need to fix "_"
 				//if(src.compareTo("56.txt-7")!=0) continue;
-				str = tagger.POSTag(str, src);
+				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
 	       		count++;
 	       		
 			}
+			//getherCharacters();
 			stmt2.close();
 			rs.close();
 			out.close();
@@ -116,6 +120,28 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			throw e;
 		}
 	}
+
+	/**
+	 * done in POSTagger4StanfordParser
+	 * from character sentences, collect characters such as position, shape, size, etc from rmarkedsent
+	 * @return
+	 */
+	/*private void getherCharacters() {
+		try{
+			Statement stmt = conn.createStatement();
+			String q = "SELECT markedsent FROM "+this.tableprefix+"_markedsentence p where type='character' and markedsent like '%} of %'";
+			ResultSet rs = stmt.executeQuery(q);
+			while(rs.next()){
+				String markedsent = rs.getString("markedsent");
+				Matcher m = this.charptn.matcher(markedsent);
+				if(m.find()){
+					this.characters.add(m.group(1));
+				}				
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+	}*/
 
 	/**
 	 * direct the parsed result to the text file parsedfile
@@ -294,6 +320,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		sent = sent.replaceAll("(?<=\\d)\\s*/\\s*(?=\\d)", "/");
 		sent = sent.replaceAll("(?<=\\d)\\s+(?=\\d)", "-"); //bhl: two numbers connected by a space
 		sent = sent.replaceAll("at least", "at-least");
+		sent = sent.replaceAll("<?\\{?\\btwice\\b\\}?>?", "2 times");
+		sent = sent.replaceAll("<?\\{?\\bthrice\\b\\}?>?", "3 times");
 		sent = sent.replaceAll("2\\s*n\\s*=", "2n=");
 		sent = sent.replaceAll("2\\s*x\\s*=", "2x=");
 		sent = sent.replaceAll("n\\s*=", "n=");
@@ -360,8 +388,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	}
 	
 	public static String ratio2number(String sent){
-		String small = "\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b";
-		String big = "\\b(?:half|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)s?\\b";
+		String small = "<?\\{?\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
+		String big = "<?\\{?\\b(?:half|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)s?\\b\\}?>?";
 		//ratio
 		Pattern ptn = Pattern.compile("(.*?)("+small+"\\s*-?_?\\s*"+big+")(.*)");
 		Matcher m = ptn.matcher(sent);
@@ -372,7 +400,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			m = ptn.matcher(sent);
 		}
 		//number
-		small = "\\b(?:two|three|four|five|six|seven|eight|nine)\\b";
+		small = "<?\\{?\\b(?:two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
 		ptn = Pattern.compile("(.*?)("+small+")(.*)");
 		m = ptn.matcher(sent);
 		while(m.matches()){
@@ -386,36 +414,36 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	}
 
 	public static String toNumber(String ratio){
-		ratio = ratio.replaceAll("\\btwo\\b", "2");
-		ratio = ratio.replaceAll("\\bthree\\b", "3");
-		ratio = ratio.replaceAll("\\bfour\\b", "4");
-		ratio = ratio.replaceAll("\\bfive\\b", "5");
-		ratio = ratio.replaceAll("\\bsix\\b", "6");
-		ratio = ratio.replaceAll("\\bseven\\b", "7");
-		ratio = ratio.replaceAll("\\beight\\b", "8");
-		ratio = ratio.replaceAll("\\bnine\\b", "9");
+		ratio = ratio.replaceAll("<?\\{?\\btwo\\b\\}?>?", "2");
+		ratio = ratio.replaceAll("<?\\{?\\bthree\\b\\}?>?", "3");
+		ratio = ratio.replaceAll("<?\\{?\\bfour\\b\\}?>?", "4");
+		ratio = ratio.replaceAll("<?\\{?\\bfive\\b\\}?>?", "5");
+		ratio = ratio.replaceAll("<?\\{?\\bsix\\b\\}?>?", "6");
+		ratio = ratio.replaceAll("<?\\{?\\bseven\\b\\}?>?", "7");
+		ratio = ratio.replaceAll("<?\\{?\\beight\\b\\}?>?", "8");
+		ratio = ratio.replaceAll("<?\\{?\\bnine\\b\\}?>?", "9");
 		return ratio;
 	}
 	
 	public static String toRatio(String ratio){
-		ratio = ratio.replaceAll("\\bone\\b", "1/");
-		ratio = ratio.replaceAll("\\btwo\\b", "2/");
-		ratio = ratio.replaceAll("\\bthree\\b", "3/");
-		ratio = ratio.replaceAll("\\bfour\\b", "4/");
-		ratio = ratio.replaceAll("\\bfive\\b", "5/");
-		ratio = ratio.replaceAll("\\bsix\\b", "6/");
-		ratio = ratio.replaceAll("\\bseven\\b", "7/");
-		ratio = ratio.replaceAll("\\beight\\b", "8/");
-		ratio = ratio.replaceAll("\\bnine\\b", "9/");
-		ratio = ratio.replaceAll("\\bhalf\\b", "2");
-		ratio = ratio.replaceAll("\\bthirds?\\b", "3");
-		ratio = ratio.replaceAll("\\bfourths?\\b", "4");
-		ratio = ratio.replaceAll("\\bfifths?\\b", "5");
-		ratio = ratio.replaceAll("\\bsixthths?\\b", "6");
-		ratio = ratio.replaceAll("\\bsevenths?\\b", "7");
-		ratio = ratio.replaceAll("\\beighths?\\b", "8");
-		ratio = ratio.replaceAll("\\bninths?\\b", "9");
-		ratio = ratio.replaceAll("\\btenths?\\b", "10");
+		ratio = ratio.replaceAll("<?\\{?\\bone\\b\\}?>?", "1/");
+		ratio = ratio.replaceAll("<?\\{?\\btwo\\b\\}?>?", "2/");
+		ratio = ratio.replaceAll("<?\\{?\\bthree\\b\\}?>?", "3/");
+		ratio = ratio.replaceAll("<?\\{?\\bfour\\b\\}?>?", "4/");
+		ratio = ratio.replaceAll("<?\\{?\\bfive\\b\\}?>?", "5/");
+		ratio = ratio.replaceAll("<?\\{?\\bsix\\b\\}?>?", "6/");
+		ratio = ratio.replaceAll("<?\\{?\\bseven\\b\\}?>?", "7/");
+		ratio = ratio.replaceAll("<?\\{?\\beight\\b\\}?>?", "8/");
+		ratio = ratio.replaceAll("<?\\{?\\bnine\\b\\}?>?", "9/");
+		ratio = ratio.replaceAll("<?\\{?\\bhalf\\b\\}?>?", "2");
+		ratio = ratio.replaceAll("<?\\{?\\bthirds?\\b\\}?>?", "3");
+		ratio = ratio.replaceAll("<?\\{?\\bfourths?\\b\\}?>?", "4");
+		ratio = ratio.replaceAll("<?\\{?\\bfifths?\\b\\}?>?", "5");
+		ratio = ratio.replaceAll("<?\\{?\\bsixthths?\\b\\}?>?", "6");
+		ratio = ratio.replaceAll("<?\\{?\\bsevenths?\\b\\}?>?", "7");
+		ratio = ratio.replaceAll("<?\\{?\\beighths?\\b\\}?>?", "8");
+		ratio = ratio.replaceAll("<?\\{?\\bninths?\\b\\}?>?", "9");
+		ratio = ratio.replaceAll("<?\\{?\\btenths?\\b\\}?>?", "10");
 		ratio = ratio.replaceAll("-", "").replaceAll("\\s", "");
 		return ratio;
 	}
@@ -506,9 +534,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\plaziantfirst\\target\\plazi_ant_first_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\plaziantfirst\\target\\plazi_ant_first_parsedsentences.txt";
 		
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_parsedsentences.txt";
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_parsedsentences.txt";
 		
+		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
+		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
 		String database = "markedupdatasets";
@@ -517,10 +548,11 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "plazi_ant_first", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
+		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
 
-		//sp.POSTagging();
-		//sp.parsing();
+		sp.POSTagging();
+		sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);

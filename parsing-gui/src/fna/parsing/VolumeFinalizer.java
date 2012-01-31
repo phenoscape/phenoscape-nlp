@@ -95,9 +95,9 @@ public class VolumeFinalizer extends Thread {
 		String glosstable = this.glossaryPrefix;
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, this.dataPrefix,glosstable, false);
 		if(!standalone) this.showOutputMessage("System is POS-tagging sentences...");
-		//sp.POSTagging();
+		sp.POSTagging();
 		if(!standalone) this.showOutputMessage("System is syntactic-parsing sentences...");		
-		//sp.parsing();
+		sp.parsing();
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
 
@@ -146,7 +146,7 @@ public class VolumeFinalizer extends Thread {
 	public static Element createCharacterHolder(String thisCharaID) {
 		String pdf = thisCharaID.replaceFirst("\\.xml.*", "");
 		String cid = thisCharaID.replaceFirst(".*\\.xml_", ""); 
-		Element root = new Element("character");
+		Element root = new Element("character_unit");
 		root.setAttribute("source_pdf", pdf);
 		root.setAttribute("character_id", cid);
 		return root;

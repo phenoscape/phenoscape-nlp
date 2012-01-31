@@ -39,7 +39,11 @@ public class POSTagger4StanfordParser {
 	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
 	private String countp = "more|fewer|less|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
-	private Pattern positionptn = Pattern.compile("(<(\\S+?)> \\d+(?: and \\d+)?)");
+	private String romandigits = "i|v|x"; 
+	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?)?)");
+	private ArrayList<String> prepphrases = new ArrayList<String>();
+	private String positions = "equal|subequal"; //initialized with two values that are not positions for convenience
+	private Pattern positionptn2;
 
 	/**
 	 * 
@@ -48,6 +52,22 @@ public class POSTagger4StanfordParser {
 		this.conn = conn;
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
+		try{
+			Statement stmt = this.conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select distinct phrase from "+tableprefix+"_prepphrases");
+			while(rs.next()){
+				prepphrases.add(rs.getString("phrase"));
+			}
+			
+			rs= stmt.executeQuery("select distinct term from "+tableprefix+"_term_category where category='position' union select distinct term from "+this.glosstable+" where category='position'");
+			while(rs.next()){
+				positions += rs.getString(1)+"|";
+			}
+			positions = positions.replaceFirst("\\|$", "");
+			positionptn2 = Pattern.compile("(.*?)([<{]?\\b(?:"+this.positions+")\\b[}>]?\\s+to)(\\b.*)");			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -57,7 +77,7 @@ public class POSTagger4StanfordParser {
 			  * str is markedsent
 
 	 */
-		protected String POSTag(String str, String src) throws Exception{
+		protected String POSTag(String str, String src, String type) throws Exception{
 			boolean containsArea = false;
 			String strcp = str;
 			str = StanfordParser.normalizeSpacesRoundNumbers(str);
@@ -108,9 +128,7 @@ public class POSTagger4StanfordParser {
 	        	str = str.replaceAll("(?<=[a-z])/(?=[a-z])", "-");
 	        }
 	        
-	        
 	        //10-20(-38) {cm}×6-10 {mm} 
-	        
 	        
 			try{
 				Statement stmt = conn.createStatement();
@@ -143,13 +161,32 @@ public class POSTagger4StanfordParser {
 				}
 				//if(str.matches(".*?\\bin\\s+[a-z_<>{} -]+\\s+[<{]?view[}>]?\\b.*")){//ants: "in full-face view"
 				if(str.matches(".*?\\bin\\s+[a-z_<>{} -]*\\s*[<{]?(view|profile)[}>]?\\b.*")){
-					Matcher vm = viewptn.matcher(str);
-					while(vm.matches()){
-						str = vm.group(1)+" {"+vm.group(2).replaceAll("[<>{}]", "").replaceAll("\\s+", "-")+"} "+vm.group(3); 
-						vm = viewptn.matcher(str);
+					m = viewptn.matcher(str);
+					while(m.matches()){
+						str = m.group(1)+" {"+m.group(2).replaceAll("[<>{}]", "").replaceAll("\\s+", "-")+"} "+m.group(3); 
+						m = viewptn.matcher(str);
 					}
 				}
 				
+				//make a prepphrase (e.g. in relation to) a single token
+				Iterator<String> it = prepphrases.iterator();
+				while(it.hasNext()){
+					String phrase = "\\{?\\<?"+it.next().trim().replaceAll(" ", "\\\\>?\\\\}? \\\\{?\\\\<?")+"\\>?\\}?";
+					Pattern p = Pattern.compile("(.*?)(\\b"+phrase+"\\b)(.*)");
+					m = p.matcher(str);
+					while(m.matches()){
+						str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+						m = p.matcher(str);
+					}					
+				}		
+				
+				//make a position to [anterior to] a single token
+				m = this.positionptn2.matcher(str);
+				while(m.matches()){
+					str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+					m = this.positionptn2.matcher(str);
+				}
+										
 				if(str.indexOf("×")>0){
 					containsArea = true;
 					String[] area = normalizeArea(str);
@@ -157,9 +194,15 @@ public class POSTagger4StanfordParser {
 					strnum = area[1]; //like str but with numerical expression normalized
 				}
 
-
 				str = handleBrackets(str);
-				stmt.execute("update "+this.tableprefix+"_markedsentence set rmarkedsent ='"+str+"' where source='"+src+"'");	
+				if(type.compareTo("character")==0){
+					String temp = str;
+					str = str.replaceFirst("^[^<]*\\}? of ", "").trim();
+					String ch = temp.replace(str, "").replace("\\s+of\\s+", "").replaceAll("[{}]", "").trim();
+					StanfordParser.characters.put(ch, "1"); //to keep only the unique characters
+				}
+				
+				stmt.execute("update "+this.tableprefix+"_markedsentence set rmarkedsent ='"+str.replaceAll("-PPP", "")+"' where source='"+src+"'");	
 				
 				if(containsArea){
 					str = strnum;
@@ -209,7 +252,9 @@ public class POSTagger4StanfordParser {
 	        	   //if(word.matches("in-profile")){
         		   //sb.append(word+"/RB ");
         	   //}
-	        	   else if(word.endsWith("ly") && word.indexOf("~") <0){ //character list is not RB
+	        	   else if(word.endsWith("-PPP")){//prepphrase in_association_with
+	        		   sb.append(word.replaceFirst("-PPP", "")+"/IN ");
+	        	   }else if(word.endsWith("ly") && word.indexOf("~") <0){ //character list is not RB
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("becoming")==0 || word.compareTo("about")==0){
 	        		   sb.append(word+"/RB ");
@@ -271,7 +316,7 @@ public class POSTagger4StanfordParser {
 			String position = m.group(1);
 			String organ = m.group(2);
 			if(!isPosition(organ, position)) continue;
-			String rposition = position.replaceFirst(">", "").replaceAll("\\s+", "_")+">";
+			String rposition = "<"+position.replaceAll("[<>]", "").replaceAll("\\s+", "_")+">";
 			//synchronise this.chunkedtokens
 			//split by single space to get an accurate count to elements that would be in chunkedtokens
 			int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
@@ -304,7 +349,7 @@ public class POSTagger4StanfordParser {
 		boolean multiplepositions = false;
 		boolean pluralorgan = false;
 		position = position.replace("<"+organ+">", "").trim();
-		if(position.contains(" ")){
+		if(position.contains(" ") || position.contains("-")){
 			multiplepositions = true;
 		}		
 		if(Utilities.isPlural(organ)){
@@ -710,7 +755,7 @@ public class POSTagger4StanfordParser {
 		String src = "157.txt-1";
 		String str = "laminae 6 17 cm . long , 2 - 7 cm . broad , lanceolate to narrowly oblong or elliptic_oblong , abruptly and narrowly acuminate , obtuse to acute at the base , margin entire , the lamina drying stiffly chartaceous to subcoriaceous , smooth on both surfaces , essentially glabrous and the midvein prominent above , glabrous to sparsely puberulent beneath , the 8 to 18 pairs of major secondary veins prominent beneath and usually loop_connected near the margin , microscopic globose_capitate or oblongoid_capitate hairs usually present on the lower surface , clear or orange distally .";
 		try{
-		System.out.println(tagger.POSTag(str, src));
+		System.out.println(tagger.POSTag(str, src, "description")); //type is one of "character" and "description"
 		}catch(Exception e){
 			e.printStackTrace();
 		}

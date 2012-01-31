@@ -25,23 +25,70 @@ import java.util.regex.*;
 @SuppressWarnings({ "unused" })
 public class Utilities {
 	public static String or = "_or_";
-	
+	private static String selectivepreps = ChunkedSentence.prepositions.replaceFirst("\\|of\\|", "|");
+	private static Pattern prepphraseptn = Pattern.compile(".*?((?:^| )in \\w+ (?:"+selectivepreps+")\\b)(.*)");
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
 	public static ArrayList<String> sureVerbs = new ArrayList<String>();
 	public static ArrayList<String> sureAdvs = new ArrayList<String>();
 	public static ArrayList<String> partOfPrepPhrase = new ArrayList<String>();
+	//public static ArrayList<String> prepPhrases = new ArrayList<String>();
 	public static ArrayList<String> notSureVerbs = new ArrayList<String>();
 	public static ArrayList<String> notSureAdvs = new ArrayList<String>();
 	public static ArrayList<String> notPartOfPrepPhrase = new ArrayList<String>();
 	public static boolean debug = false;
 	public static boolean debugPOS = true;
-	//special cases
+	
+	static{
+		//check cache
+		singulars.put("axis", "axis");
+		singulars.put("axes", "axis");
+		singulars.put("bases", "base");
+		singulars.put("boss", "boss");
+		singulars.put("buttress", "buttress");
+		singulars.put("callus", "callus");
+		singulars.put("frons", "frons");
+		singulars.put("grooves", "groove");
+		singulars.put("interstices", "interstice");
+		singulars.put("lens", "len");
+		singulars.put("media", "media");
+		singulars.put("midnerves", "midnerve");
+		singulars.put("process", "process");
+		singulars.put("series", "series");
+		singulars.put("species", "species");
+		singulars.put("teeth", "tooth");
+		singulars.put("valves", "valve");
+		singulars.put("i", "i"); //could add more roman digits
+		singulars.put("ii", "ii");
+		singulars.put("iii", "iii");
+		
+		plurals.put("axis", "axes");
+		plurals.put("base", "bases");		
+		plurals.put("groove", "grooves");
+		plurals.put("interstice", "interstices");
+		plurals.put("len", "lens");
+		plurals.put("media", "media");
+		plurals.put("midnerve", "midnerves");
+		plurals.put("tooth", "teeth");
+		plurals.put("valve", "valves");
+		plurals.put("boss", "bosses");
+		plurals.put("buttress", "buttresses");
+		plurals.put("callus", "calluses");
+		plurals.put("frons", "fronses");
+		plurals.put("process", "processes");
+		plurals.put("series", "series");
+		plurals.put("species", "species");
+		plurals.put("i", "i"); //could add more roman digits
+		plurals.put("ii", "ii");
+		plurals.put("iii", "iii");
+	}
+	
 	/**
 	 * word must be a verb if
 	 * 1. its pos is "verb" only, or
 	 * 2. "does not" word
-	 * 3. has "verb" pos and seen patterns (word "a/the", or word prep <organ>) and not seen pattern (word \w+ly$). 
+	 * 3. has "verb" pos and seen patterns (word "a/the", or word prep <organ>) and not seen pattern (word \w+ly$).
+	 * 4. -ed, -ing 
 	 * @param word
 	 * @param conn
 	 * @return
@@ -51,7 +98,8 @@ public class Utilities {
 		if(notSureVerbs.contains(word)) return false;
 		WordNetWrapper wnw = new WordNetWrapper(word);
 		boolean v = wnw.isV();
-		if(!wnw.isAdj() && !wnw.isAdv() && !wnw.isN() && v){
+		//wordnet contains verb sense only
+		if(!wnw.isAdj() && !wnw.isAdv() && !wnw.isN() && v && !word.endsWith("ing")){
 			sureVerbs.add(word);
 			if(debugPOS) System.out.println(word+" is sureVerb");
 			return true;
@@ -83,6 +131,14 @@ public class Utilities {
 					return false;
 				}
 				
+				q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+						"where sentence rlike '(^| )(a|an|the) "+word+"( |$)'";
+				rs = stmt.executeQuery(q);
+				if(rs.next()){
+					notSureVerbs.add(word);
+					return false;
+				}
+				
 				q = "select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
 						"where sentence rlike '(^| )"+word+" (a|an|the) '";
 				rs = stmt.executeQuery(q);
@@ -98,8 +154,8 @@ public class Utilities {
 					rs = stmt.executeQuery(q);
 					while(rs.next()){
 						String sent = rs.getString("sentence");
-						String preps = ChunkedSentence.prepositions;
-						Pattern p = Pattern.compile("\\b"+word+"\\b(?: (?:"+preps+")) +(\\S+)");
+						
+						Pattern p = Pattern.compile("\\b"+word+"\\b(?: (?:"+selectivepreps+")) +(\\S+)");
 						Matcher m = p.matcher(sent);
 						while(m.find()){
 							String term = m.group(1);
@@ -160,19 +216,26 @@ public class Utilities {
 		}
 		try{
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
-					"where originalsent rlike ' ("+ChunkedSentence.prepositions+") "+word+" ("+ChunkedSentence.prepositions+")'");
-			boolean select = true;
+			String sql = "select sentence from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
+					"where originalsent rlike '(^| )in "+word+" ("+selectivepreps+")( |$)'";
+			ResultSet rs = stmt.executeQuery(sql);
+			boolean select = true;//add other rules in the future
 			boolean exist = false;
 			while(rs.next()){
 				exist = true;
-				if(rs.getString("sentence").matches(".*?\\bfrom "+word+" to\\b.*")) select = false;
-			}
-			if(exist && select){
 				partOfPrepPhrase.add(word);
 				if(debugPOS) System.out.println(word+" is partOfPrepPhrase");
+				Matcher m = prepphraseptn.matcher(rs.getString("sentence"));
+				while(m.matches()){					
+					add2table(m.group(1).trim(), conn, prefix);
+					m = prepphraseptn.matcher(m.group(2));
+				}
 				return true;
-			}			
+			}
+			/*if(exist && select){
+
+				return true;
+			}	*/		
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -180,6 +243,16 @@ public class Utilities {
 		return false;
 	}
 	
+	private static void add2table(String phrase, Connection conn, String prefix) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("create table if not exists "+prefix+"_prepphrases (phrase varchar(100))");
+			stmt.execute("insert into "+prefix+"_prepphrases values ('"+phrase+"')");
+		}catch(Exception e){
+			e.printStackTrace();
+		}		
+	}
+
 	public static boolean isPlural(String t) {
 		t = t.replaceAll("\\W", "");
 		if(t.matches("\\b(series|species|fruit)\\b")){
@@ -194,41 +267,6 @@ public class Utilities {
 	public static String toSingular(String word){
 		String s = "";
 		word = word.toLowerCase().replaceAll("\\W", "");
-		//check cache
-		singulars.put("axis", "axis");
-		singulars.put("axes", "axis");
-		singulars.put("bases", "base");
-		singulars.put("boss", "boss");
-		singulars.put("buttress", "buttress");
-		singulars.put("callus", "callus");
-		singulars.put("frons", "frons");
-		singulars.put("grooves", "groove");
-		singulars.put("interstices", "interstice");
-		singulars.put("lens", "len");
-		singulars.put("media", "media");
-		singulars.put("midnerves", "midnerve");
-		singulars.put("process", "process");
-		singulars.put("series", "series");
-		singulars.put("species", "species");
-		singulars.put("teeth", "tooth");
-		singulars.put("valves", "valve");
-		
-		plurals.put("axis", "axes");
-		plurals.put("base", "bases");		
-		plurals.put("groove", "grooves");
-		plurals.put("interstice", "interstices");
-		plurals.put("len", "lens");
-		plurals.put("media", "media");
-		plurals.put("midnerve", "midnerves");
-		plurals.put("tooth", "teeth");
-		plurals.put("valve", "valves");
-		plurals.put("boss", "bosses");
-		plurals.put("buttress", "buttresses");
-		plurals.put("callus", "calluses");
-		plurals.put("frons", "fronses");
-		plurals.put("process", "processes");
-		plurals.put("series", "series");
-		plurals.put("species", "species");
 
 		s = singulars.get(word);
 		if(s!=null) return s;
