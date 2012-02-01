@@ -1,6 +1,3 @@
-/**
- * 
- */
 package owlaccessor;
 
 import java.io.File;
@@ -18,10 +15,13 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 //import org.semanticweb.owlapi.util.SimpleIRIMapper;
 /**
+ * This class includes implemented methods being used to retrieve meaning of and 
+ * relationships among terms in PATO using OWL API. Keywords, synonyms, 
+ * and parents of a term could be retrieved by giving the term.
+ *  
  * @author Zilong Chang, Hong Cui
- * 
+ *
  */
-
 public class OWLAccessorImpl implements OWLAccessor {
 
 	private OWLOntologyManager manager;
@@ -85,11 +85,6 @@ public class OWLAccessorImpl implements OWLAccessor {
 		 }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see owlaccessor.OWLAccessor#retrieveConcept(java.lang.String)
-	 */
 	@Override
 	public List<OWLClass> retrieveConcept(String con) {
 		con = con.trim();
@@ -136,6 +131,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return false;
 	}
 
+	/**
+	 * Remove the non-readable or non-meaningful characters in the 
+	 * retrieval from OWL API, and return the refined output. 
+	 */
 	public String getRefinedOutput(String origin) {
 		// Annotation(<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>
 		// W)
@@ -150,23 +149,28 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return origin.replaceAll("\\^\\^xsd:string", "").replaceAll("\"", "").replaceAll("\\.", "");
 	}
 
-	@Override
-	public List<OWLClass> getAncestors(OWLClass c) {
-		List<OWLClass> result = new ArrayList<OWLClass>();
-		this.getAncestorsHelper(c, result);
-		return result;
-	}
+	/**
+	 * Recursively return all the ancestors of a term. 
+	 */
+//	public Set<String> getAncestors(OWLClass c) {
+//		Set<String> result = new HashSet<String>();
+//		this.getAncestorsHelper(c, result);
+//		return result;
+//	}
 
-	private void getAncestorsHelper(OWLClass c, List<OWLClass> l) {
-		for (OWLClassExpression p : c.getSuperClasses(ont)) {
-			if (!p.isAnonymous()) {
-				l.add(p.asOWLClass());
-				this.getAncestorsHelper(p.asOWLClass(), l);
-			}
-		}
-	}
+//	private void getAncestorsHelper(OWLClass c, Set<String> s) {
+//		if(c.gets)
+//		for (OWLClassExpression p : c.getSuperClasses(ont)) {
+//			if (!p.isAnonymous()) {
+//				l.add(p.asOWLClass());
+//				this.getAncestorsHelper(p.asOWLClass(), l);
+//			}
+//		}
+//	}
 
-	@Override
+	/**
+	 * Return the parents of a term. 
+	 */
 	public List<OWLClass> getParents(OWLClass c) {
 		List<OWLClass> parent = new ArrayList<OWLClass>();
 		for (OWLClassExpression ce : c.getSuperClasses(ont)) {
@@ -176,6 +180,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return parent;
 	}
 
+	/**
+	 * Return the exact synonyms of a term represented by an OWLClass object. 
+	 */
 	public Set<OWLAnnotation> getExactSynonyms(OWLClass c) {
 		return c.getAnnotations(
 				ont,
@@ -183,13 +190,20 @@ public class OWLAccessorImpl implements OWLAccessor {
 						.create("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym")));
 	}
 
+	/**
+	 * Return the related synonyms of a term represented by an OWLClass object. 
+	 */
 	public Set<OWLAnnotation> getRelatedSynonyms(OWLClass c) {
 		return c.getAnnotations(
 				ont,
 				df.getOWLAnnotationProperty(IRI
 						.create("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym")));
 	}
-
+	
+	
+	/**
+	 * Return the labels of a term represented by an OWLClass object. 
+	 */
 	public Set<OWLAnnotation> getLabels(OWLClass c) {
 		return c.getAnnotations(ont, df
 				.getOWLAnnotationProperty(OWLRDFVocabulary.RDFS_LABEL.getIRI()));
@@ -228,5 +242,25 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public Set<OWLClass> getAllClasses() {
 		// TODO Auto-generated method stub
 		return ont.getClassesInSignature();
+	}
+
+	@Override
+	public Set<String> getAllOffSprings(OWLClass c){
+		Set<String> r = new HashSet<String>();
+		for (OWLClassExpression ch : c.getSubClasses(ont)){
+			r.add(this.getLabel(ch.asOWLClass()));
+			r.addAll(this.getAllOffSprings(ch.asOWLClass()));
+		}
+		return r;
+	}
+
+	@Override
+	public OWLClass getClassByLabel(String l) {
+		for(OWLClass c : this.getAllClasses()){
+			if(this.getLabel(c).trim().toLowerCase().equals(l.trim().toLowerCase())){
+				return c;
+			}
+		}
+		return null;
 	}
 }

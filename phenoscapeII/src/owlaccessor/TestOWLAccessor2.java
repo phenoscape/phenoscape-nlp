@@ -1,5 +1,7 @@
 package owlaccessor;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -34,14 +36,28 @@ public class TestOWLAccessor2 {
 //		DBMigrater dbm = new DBMigrater();
 //		//dbm.migrateRelations();
 //	}
-
-	
+//
+//	@Test
+//	public void testGetAllOffSprings(){
+//		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+//		
+//		
+//		for(String c :a.getAllOffSprings(a.getClassByLabel("shape"))){
+//			System.out.println(c);
+//		}
+//		System.out.println(a.getAllOffSprings(a.getClassByLabel("shape")).size());
+//	}
+//	
 	@Test
 	public void testRetriveConcept(){
 		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
 		
 		List<OWLClass> l =  a.retrieveConcept("dslfhsfhaskhskaf");
 		
-		System.out.println(l.size());	
+		System.out.println(l.size());
+		
+		
+		
 	}
+
 }

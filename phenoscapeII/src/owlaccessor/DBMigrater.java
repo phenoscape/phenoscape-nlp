@@ -7,7 +7,14 @@ import java.util.Set;
 import org.semanticweb.owlapi.model.OWLClass;
 
 
-
+/**
+ * This class extract relationships among and keywords of all terms in PATO
+ * to two database tables named patorelations and patokeywords in database
+ * phenoscpae. These two tables will be used in future mapping of concepts to
+ * PATO terms
+ * @author Zilong Chang
+ * 
+ * */
 public class DBMigrater {
 
 	/**
@@ -31,12 +38,12 @@ public class DBMigrater {
 				OWLAccessor oa = new OWLAccessorImpl(new File(path));
 				for (OWLClass c : oa.getAllClasses()){
 					String label = oa.getLabel(c);
-					for (String p : oa.getParentsLabels(c)){
+					for (String p : oa.getAllOffSprings(c)){
 						stmt.executeUpdate("INSERT INTO patorelations(term, relative, relation) VALUES('"
-								+label.trim().replaceAll("'", "''")
-								+"','"
 								+p.trim().replaceAll("'", "''")
-								+"','pr')");	
+								+"','"
+								+label.trim().replaceAll("'", "''")
+								+"','ac')");	
 					}
 					
 					for (String syn : oa.getSynonymLabels(c)){
@@ -100,8 +107,8 @@ public class DBMigrater {
 	
 	public static void main(String[] args) {
 		DBMigrater dbm = new DBMigrater();
-		dbm.migrateKeyWords();
-		//dbm.migrateRelations();
+		//dbm.migrateKeyWords();
+		dbm.migrateRelations();
 		System.out.println("DONE!");
 
 	}
