@@ -1197,7 +1197,7 @@ public class ChunkedSentence {
 				/*wcount += (this.chunkedtokens.get(i)+" a").replaceAll(",", "or").replaceAll("\\b(or )+", "or ")
 				.replaceFirst("^.*?~list~", "").replaceAll("~", " ")
 				.trim().split("\\s+").length-1;*/
-				wcount ++;
+				if(this.chunkedtokens.get(i).trim().length()>0) wcount ++;
 				//if(this.chunkedtokens.get(i).matches(".*?\\b"+tobeskipped[sl-1]+".*") && wcount>=sl){
 				if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+".*") && wcount>=sl){//try to match <phyllaries> to phyllary, "segement I", i is 1-character long
 					if(wcount==sl){

@@ -434,7 +434,7 @@ end procedure
 		WordNetWrapper wnw = new WordNetWrapper(theverb);
 		
 		if(!sureverb && (theverb.length()<2 || theverb.matches("\\b(\\w+ly|ca)\\b") 
-		   ||wnw.mostlikelyPOS()== null || wnw.mostlikelyPOS().compareTo("verb") !=0)){ //text of V is not a word, e.g. "x"
+		   /*||wnw.mostlikelyPOS()== null || wnw.mostlikelyPOS().compareTo("verb") !=0*/)){ //text of V is not a word, e.g. "x"
 			collapseElement(VP, "", "");
 			return;
 		}

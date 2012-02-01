@@ -759,7 +759,8 @@ public class CharacterAnnotatorChunked {
 			String character) {
 		ArrayList<Element> chars = new ArrayList<Element>();
 		Element chara = new Element("character");
-		chara.setAttribute(character, chunktext.trim());
+		chara.setAttribute("name", character);//"size"
+		chara.setAttribute("value", chunktext.trim());//"2 times" [the length of organ a] as constraint annotated elsewhere.
 		chars.add(chara);
 		return chars;
 	}
