@@ -5,10 +5,10 @@
 	<classpathentry kind="lib" path="owlapi/owlapi-bin.jar"/>
 	<classpathentry kind="lib" path="owlapi/owlapi-src.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/parsing-gui/lib/jdom.jar"/>
-	<classpathentry kind="lib" path="/parsing-gui/lib/mysql-connector-java-5.0.8-bin.jar"/>
-	<classpathentry kind="lib" path="/parsing-gui/lib/jaxen-core.jar"/>
-	<classpathentry kind="lib" path="/parsing-gui/lib/jaxen-jdom.jar"/>
-	<classpathentry kind="lib" path="/parsing-gui/lib/saxpath.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Zilong Chang/workspace/parsing-gui/lib/jdom.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Zilong Chang/workspace/parsing-gui/lib/mysql-connector-java-5.0.8-bin.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Zilong Chang/workspace/parsing-gui/lib/jaxen-core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Zilong Chang/workspace/parsing-gui/lib/jaxen-jdom.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Zilong Chang/workspace/parsing-gui/lib/saxpath.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
