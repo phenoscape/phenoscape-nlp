@@ -109,7 +109,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		return result;
 	}

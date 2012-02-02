@@ -29,6 +29,7 @@ public class XML2EQ {
 	private String username = "root";
 	private String password = "root";
 	private String positionprep = "in|on";
+	private int count = 0;
 	/**
 	 * 
 	 */
@@ -42,7 +43,7 @@ public class XML2EQ {
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
 				stmt.execute("drop table if exists "+ outputtable);
-				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), description text, entity varchar(200), entityid varchar(20), quality varchar(200), qualityid varchar(20), qualitymodifier varchar(200), qualitymodifierid varchar(20), entitylocator varchar(200), entitylocatorid varchar(20))");
+				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, entity varchar(200), entityid varchar(20), quality varchar(200), qualityid varchar(20), qualitymodifier varchar(200), qualitymodifierid varchar(20), entitylocator varchar(200), entitylocatorid varchar(20))");
 				}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -61,7 +62,8 @@ public class XML2EQ {
 				List<Element> characterstatements = XPath.selectNodes(root, ".//statement[@statement_type='character']");
 				List<Element> statestatements = XPath.selectNodes(root, ".//statement[@statement_type='character_state']");				
 				System.out.println();
-				System.out.println(src);				
+				System.out.println("["+count+"]"+src);
+				count++;
 				outputEQs4CharacterUnit(characterstatements, statestatements, src, root); //the set of statements related to a character (one of the statement is the character itself)				
 			}
 		}catch(Exception e){
@@ -278,9 +280,9 @@ public class XML2EQ {
 		}
 	}
 
-	private void addEQStatement(String src, String text, String entity, String entityid, String quality, String qualityid, String qualitymodifier, String qualitymodifierid, String entitylocator, String entitylocatorid) {
-		String q = "insert into "+this.outputtable+" (source, description, entity, entityid, quality, qualityid, qualitymodifier, qualitymodifierid, entitylocator, entitylocatorid) values " +
-				"('"+src+"','"+text+"','"+ entity+"','"+ entityid+"','"+ quality+"','"+ qualityid+"','"+qualitymodifier+"','"+ qualitymodifierid+"','"+ entitylocator+"','"+ entitylocatorid+"')";
+	private void addEQStatement(String src, String characterid, String stateid, String text, String entity, String entityid, String quality, String qualityid, String qualitymodifier, String qualitymodifierid, String entitylocator, String entitylocatorid) {
+		String q = "insert into "+this.outputtable+" (source, characterid, stateid, description, entity, entityid, quality, qualityid, qualitymodifier, qualitymodifierid, entitylocator, entitylocatorid) values " +
+				"('"+src+"','"+characterid+"','"+stateid+"','"+text+"','"+ entity+"','"+ entityid+"','"+ quality+"','"+ qualityid+"','"+qualitymodifier+"','"+ qualitymodifierid+"','"+ entitylocator+"','"+ entitylocatorid+"')";
 		try{
 			Statement stmt = conn.createStatement();
 			stmt.execute(q);
@@ -310,6 +312,9 @@ public class XML2EQ {
 	 */
 	@SuppressWarnings("unchecked")
 	private void outputEQs4Structure(String src, Element root, String text, Element struct, Hashtable<String, String> relations) {
+		Hashtable<String, String> srcids = getStateId(root, struct);
+		String characterid = srcids.get("characterid");
+		String stateid = srcids.get("stateid");
 		String structid = struct.getAttributeValue("id");
 		String[] rels = null;
 		String arelation = relations.get(structid);
@@ -364,7 +369,7 @@ public class XML2EQ {
 							//do nothing
 						}else if(r.matches("(without).*")){							
 							//output absent as Q for toid
-							addEQStatement(src, text, toname,"", "absent", "", "", "", "", ""); //without entity locators, which are treated in relation processing 
+							addEQStatement(src, characterid, stateid, text, toname,"", "absent", "", "", "", "", ""); //without entity locators, which are treated in relation processing 
 						}else{
 							qualitymodifier +=toname+";";
 						}
@@ -372,7 +377,7 @@ public class XML2EQ {
 					entitylocator = entitylocator.replaceFirst(";$", "");
 					qualitymodifier = qualitymodifier.replaceFirst(";$", "");
 				}
-				addEQStatement(src, text, structname,"", quality, "", qualitymodifier, "", entitylocator, ""); //without entity locators, which are treated in relation processing 
+				addEQStatement(src, characterid, stateid, text, structname,"", quality, "", qualitymodifier, "", entitylocator, ""); //without entity locators, which are treated in relation processing 
 			}
 			if(!hascharacter && rels != null){
 				//this is the case where the structure's character information is expressed in the relations (it has no character elements, but is involved in some relations)
@@ -382,7 +387,11 @@ public class XML2EQ {
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
 						String quality = rel.replace(toid, "").replaceAll("[()]", "").trim();
 						String qualitymodifier = this.getStructureName(root, toid);		
-						addEQStatement(src, text, structname,"", quality, "", qualitymodifier, "", "", ""); //without entity locators, which are treated in relation processing 
+						addEQStatement(src, characterid, stateid, text, structname,"", quality, "", qualitymodifier, "", "", ""); //without entity locators, which are treated in relation processing 
+					}else{
+						String toid = rel.replaceFirst(".*?\\)", "").trim();
+						String entitylocator = this.getStructureName(root, toid);		
+						addEQStatement(src, characterid, stateid, text, structname,"", "", "", "", "", entitylocator, ""); //without entity locators, which are treated in relation processing 
 					}
 				}
 			}
@@ -391,6 +400,23 @@ public class XML2EQ {
 		}
 		
 	}
+
+	/**
+	 * find the <statement> parent of the struct from the root
+	 * return character id and state id
+	 * @param root
+	 * @param struct
+	 * @return characterid and stateid
+	 */
+	private Hashtable<String, String> getStateId(Element root, Element struct) {
+		Hashtable<String, String> srcids = new Hashtable<String, String>();
+		Element statement = struct.getParentElement();
+		srcids.put("characterid", statement.getAttributeValue("character_id"));
+		String stateid = statement.getAttribute("state_id")==null? "" : statement.getAttributeValue("state_id");
+		srcids.put("stateid", stateid);		
+		return srcids;
+	}
+
 
 	/**
 	 * @param args
