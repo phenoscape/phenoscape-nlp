@@ -52,9 +52,11 @@ public class TestOWLAccessor2 {
 	public void testRetriveConcept(){
 		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/tao.owl");
 		
-		List<OWLClass> l =  a.retrieveConcept("dslfhsfhaskhskaf");
+		List<OWLClass> l =  a.retrieveConcept("tooth");
 		
 		System.out.println(l.size());
+		
+		System.out.println(a.getID(a.getClassByLabel("tooth")));
 		
 	}
 	

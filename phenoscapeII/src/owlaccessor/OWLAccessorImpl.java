@@ -23,7 +23,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  * parents of a term could be retrieved by giving the term.
  * 
  * TAO: http://berkeleybop.org/ontologies/tao.owl PATO:
- * http://purl.obolibrary.org/obo/pato.owl
+ * PATO: http://purl.obolibrary.org/obo/pato.owl
  * 
  * @author Zilong Chang, Hong Cui
  * 
@@ -105,7 +105,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 					if (syn && !label.contains(con)) {
 						//System.out.println("syn+:" + con);
 					}
-					break;
+					//break;
 				}
 			}
 		} catch (Exception e) {
