@@ -25,21 +25,21 @@ public class DBMigrater {
 	
 	private String path = "C:/Users/Zilong Chang/Documents/WORK/Ontology/pato.owl";
 	
-	private String dburl = "jdbc:mysql://localhost:3306/phenoscape";
+	private String dburl = "jdbc:mysql://localhost:3306/";
 	private String uname= "termsuser";
 	private String upw = "termspassword";
 	
-	public void migrateRelations(){
+	public void migrateRelations(String dbName, String tabName){
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
-				con = DriverManager.getConnection(dburl, uname, upw);
+				con = DriverManager.getConnection(dburl+dbName, uname, upw);
 				stmt = con.createStatement();
 				OWLAccessor oa = new OWLAccessorImpl(new File(path));
 				for (OWLClass c : oa.getAllClasses()){
 					String label = oa.getLabel(c);
 					for (String p : oa.getAllOffSprings(c)){
-						stmt.executeUpdate("INSERT INTO patorelations(term, relative, relation) VALUES('"
+						stmt.executeUpdate("INSERT INTO "+tabName+"(term, relative, relation) VALUES('"
 								+p.trim().replaceAll("'", "''")
 								+"','"
 								+label.trim().replaceAll("'", "''")
@@ -47,7 +47,7 @@ public class DBMigrater {
 					}
 					
 					for (String syn : oa.getSynonymLabels(c)){
-						stmt.executeUpdate("INSERT INTO patorelations(term, relative, relation) VALUES('"
+						stmt.executeUpdate("INSERT INTO "+tabName+"(term, relative, relation) VALUES('"
 								+label.trim().replaceAll("'", "''")
 								+"','"
 								+syn.trim().replaceAll("'", "''")
@@ -67,11 +67,11 @@ public class DBMigrater {
 		
 	}
 	
-	public void migrateKeyWords(){
+	public void migrateKeyWords(String dbName, String tabName){
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
-				con = DriverManager.getConnection(dburl, uname, upw);
+				con = DriverManager.getConnection(dburl+dbName, uname, upw);
 				stmt = con.createStatement();
 				OWLAccessor oa = new OWLAccessorImpl(new File(path));
 				for (OWLClass c : oa.getAllClasses()){
@@ -81,7 +81,7 @@ public class DBMigrater {
 						for (String s : kw){
 							try{
 								stmt.executeUpdate(
-										"INSERT INTO patokeywords(term, keyword) VALUES('"
+										"INSERT INTO "+tabName+"(term, keyword) VALUES('"
 										+label.trim().replaceAll("'", "''")+"','"+
 										s.trim().replaceAll("'", "''")+"')");
 						
@@ -108,7 +108,7 @@ public class DBMigrater {
 	public static void main(String[] args) {
 		DBMigrater dbm = new DBMigrater();
 		//dbm.migrateKeyWords();
-		dbm.migrateRelations();
+		//dbm.migrateRelations();
 		System.out.println("DONE!");
 
 	}
