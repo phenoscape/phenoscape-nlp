@@ -14,6 +14,9 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 //import org.semanticweb.owlapi.util.SimpleIRIMapper;
+
+//this message is for testing purpose
+
 /**
  * This class includes implemented methods being used to retrieve meaning of and 
  * relationships among terms in PATO using OWL API. Keywords, synonyms, 
