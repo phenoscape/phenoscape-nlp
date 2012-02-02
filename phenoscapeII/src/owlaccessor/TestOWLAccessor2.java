@@ -50,14 +50,20 @@ public class TestOWLAccessor2 {
 //	
 	@Test
 	public void testRetriveConcept(){
-		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/tao.owl");
 		
 		List<OWLClass> l =  a.retrieveConcept("dslfhsfhaskhskaf");
 		
 		System.out.println(l.size());
 		
+	}
+	
+	@Test
+	public void testGetID(){
+		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		List<OWLClass> l =  a.retrieveConcept("shape");
 		
-		
+		System.out.println("("+a.getLabel(l.get(0))+", "+a.getID(l.get(0))+")");//output the (term, id) pair. 
 	}
 
 }
