@@ -21,8 +21,7 @@ public class DBMigrater {
 	 * @param args
 	 */
 	private Connection con;
-	private Statement stmt;
-	
+		
 	private String path = "C:/Users/Zilong Chang/Documents/WORK/Ontology/pato.owl";
 	
 	private String dburl = "jdbc:mysql://localhost:3306/";
@@ -34,7 +33,12 @@ public class DBMigrater {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
 				con = DriverManager.getConnection(dburl+dbName, uname, upw);
-				stmt = con.createStatement();
+				
+				//Drop table if exists
+				Statement stmt0 = con.createStatement();
+				stmt0.executeUpdate("DROP TABLE IF EXISTS "+tabName);
+				
+				Statement stmt = con.createStatement();
 				OWLAccessor oa = new OWLAccessorImpl(new File(path));
 				for (OWLClass c : oa.getAllClasses()){
 					String label = oa.getLabel(c);
@@ -72,7 +76,12 @@ public class DBMigrater {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
 				con = DriverManager.getConnection(dburl+dbName, uname, upw);
-				stmt = con.createStatement();
+				
+				//Drop table if exists
+				Statement stmt0 = con.createStatement();
+				stmt0.executeUpdate("DROP TABLE IF EXISTS "+tabName);
+				
+				Statement stmt = con.createStatement();
 				OWLAccessor oa = new OWLAccessorImpl(new File(path));
 				for (OWLClass c : oa.getAllClasses()){
 					Set<String> kw =oa.getKeywords(c);
@@ -106,7 +115,7 @@ public class DBMigrater {
 	}
 	
 	public static void main(String[] args) {
-		DBMigrater dbm = new DBMigrater();
+		//DBMigrater dbm = new DBMigrater();
 		//dbm.migrateKeyWords();
 		//dbm.migrateRelations();
 		System.out.println("DONE!");
