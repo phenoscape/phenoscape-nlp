@@ -49,6 +49,8 @@ public class StateMatrix {
 			stmt.execute("create table if not exists "+tableprefix+"_group_decisions (groupId int, category varchar(200), primary key(groupId))");
 			stmt.execute("drop table if exists "+tableprefix+"_term_category");
 			stmt.execute("create table if not exists "+tableprefix+"_term_category (term varchar(100), category varchar(200))");
+			//noneqterms must not be refreshed
+			//stmt.execute("create table if not exists "+tableprefix+"_noneqterms (term varchar(100) not null, source varchar(200))");
 			stmt.close();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -357,8 +359,13 @@ public class StateMatrix {
 			Statement stmt = conn.createStatement();
 			String q = "select word from "+this.tableprefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+
 					" where semanticrole ='c' and" +
-					" mid(word, locate('_', word)+1) not in (select distinct term from " +this.glossarytable+") and"+
-					" word not in ("+cooccurTerms.toString().replaceFirst(",$", "").replaceAll(",+", ",").trim()+")";
+					" mid(word, locate('_', word)+1) not in (select distinct term from " +this.glossarytable+")";
+					
+			String coocur = cooccurTerms.toString().replaceFirst(",$", "").replaceAll(",+", ",").trim();
+			if(coocur.length()>0){
+					q += " and word not in ("+coocur+")";
+			}
+			System.out.println(q);
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String freeterm = rs.getString("word");

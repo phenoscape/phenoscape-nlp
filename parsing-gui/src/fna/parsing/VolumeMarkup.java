@@ -53,19 +53,16 @@ public class VolumeMarkup {
 	public void incrementProgressBar(int progress) {
 		listener.progress(progress);
 	}
+	/**
+	 * call perl 
+	 * @throws ParsingException
+	 */
 	public void markup() throws ParsingException {
-		// call unsupervised.pl [descriptions are save in
-		// docs/output/descriptions]
 		String workdir = Registry.TargetDirectory;
-		String todofoldername = ApplicationUtilities.getProperty("DEHYPHENED");
+		//String todofoldername = ApplicationUtilities.getProperty("DEHYPHENED");
+		String todofoldername = ApplicationUtilities.getProperty("DESCRIPTIONS");
 		String savefoldername = ApplicationUtilities.getProperty("MARKEDUP");
 		String databasenameprefix = ApplicationUtilities.getProperty("database.name");
-
-//		String com = "perl " + ApplicationUtilities.getProperty("UNSUPERVISED") +workdir
-//		+ " " + todofoldername + " " + savefoldername
-//		+ " seednouns.txt learntnouns.txt graphml.xml "
-//		+ databasenameprefix;
-		
 		String com = "perl " + ApplicationUtilities.getProperty("UNSUPERVISED") +"\""+workdir
 		+ todofoldername + "\" "+ databasenameprefix+" "+this.markupMode +" "+dataPrefix.trim();
 		
@@ -81,50 +78,9 @@ public class VolumeMarkup {
 			throw new ParsingException("Failed to run the unsupervised.pl.", e);
 		}
 		
-		//update();
-		heuristicTermSorting(); //collect ACRONYMS and Proper Names etc.
-		
-
-	}
-	/**
-	 * this method gather ACRONYMS and Proper Names and other easily identifiable terms and save them in 
-	 * tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS") table:
-	 * Acronyms: a word with more than one capitalized letter
-	 * Proper Names: a capitalized word that this not the first word in a sentence
-	 * Noun/Structure: (a|an|the|that|this|those|these|some|any) word $ 
-	 */
-	private void heuristicTermSorting() {
-		VolumeMarkupDbAccessor vmDba = new VolumeMarkupDbAccessor(this.dataPrefix, this.glossarytable);
-		ArrayList<String> originals = vmDba.retrieveOriginalSentences();
-		for(String original: originals){
-			String[] tokens = original.split("\\s+");
-		}
-		
-		try{	
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
 	}
 
-	/*public void update() throws ParsingException{
-		listener.clear();
-		
-		List<String> tagList = new ArrayList<String>();
-		VolumeMarkupDbAccessor vmDba = new VolumeMarkupDbAccessor(this.dataPrefix, this.glossarytable);
-		try {
-			vmDba.structureTags4Curation(tagList);
-		} catch (Exception e) {
-			LOGGER.error("Couldn't perform database operation in VolumeMarkup:update", e);
-			e.printStackTrace();
-			throw new ParsingException("Failed to execute the statement.", e);
-		}
-		
-		// fill in the table
-		for (int i = 1; i < tagList.size(); i++) {
-			listener.info("" + i, tagList.get(i));
-		}
-	}*/
+
 	//Perl would hang on any MySQL warnings or errors
 	protected void runCommand(String com) throws IOException,
 			InterruptedException {

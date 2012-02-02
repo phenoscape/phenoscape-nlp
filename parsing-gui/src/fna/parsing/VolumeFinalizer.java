@@ -15,6 +15,8 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 
 import org.jdom.Comment;
 
@@ -40,14 +42,16 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = false;
+    private static boolean standalone = true;
     private static String standalonefolder = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source";
+    private Text finalLog;
+    private Display display;
     
-    public VolumeFinalizer(ProcessListener listener, String dataPrefix, Connection conn, String glossaryPrefix) {
-        /*glossary = Registry.ConfigurationDirectory + "FNAGloss.txt"; // TODO
-        */
+    public VolumeFinalizer(ProcessListener listener, Text finalLog, String dataPrefix, Connection conn, String glossaryPrefix, Display display) {
         if(!standalone) this.listener = listener;
-        this.dataPrefix = dataPrefix;
+    	if(!standalone) this.finalLog = finalLog;
+    	if(!standalone) this.display = display;
+    	this.dataPrefix = dataPrefix;
         this.conn = conn;
         this.glossaryPrefix = glossaryPrefix;
     }
@@ -55,132 +59,50 @@ public class VolumeFinalizer extends Thread {
 
 	
 	public void run () {
-		if(!standalone) listener.setProgressBarVisible(true);
-		outputFinal();
-
-
-        //check for errors
-        File fileList= null;
-        if(!standalone) fileList = new File(Registry.TargetDirectory+"\\final\\");
-        if(standalone) fileList = new File(this.standalonefolder+"\\final\\");
-        if(fileList.list().length==0)
-        {
-            //show error popup
-            //statusOfMarkUp[6] = false;
-            ApplicationUtilities.showPopUpWindow("Error executing step 7", "Error",SWT.ERROR);
-            
+		try{
+			outputFinal();
+		}catch(Exception e){
+			this.showOutputMessage(e.toString());
+			e.printStackTrace();
+		}
+        //check for final result errors
+        File finalFileList= null;
+        File transformedFileList = null;
+        if(!standalone){
+        	finalFileList = new File(Registry.TargetDirectory+"\\final\\");
+        	transformedFileList = new File(Registry.TargetDirectory+"\\transformed\\");
         }
-        if(!standalone) listener.setProgressBarVisible(false);
-
-
-
+        if(standalone){
+        	finalFileList = new File(this.standalonefolder+"\\final\\");
+        	transformedFileList = new File(this.standalonefolder+"\\transformed\\");
+        }
+        if(finalFileList.list().length != transformedFileList.list().length)
+        {
+    		if(!standalone) this.showOutputMessage("System terminates with errors. Annotated files are not completed.");
+        }
     }
+	
     /**
      * stanford parser
      * @throws ParsingException
      */
-    public void outputFinal() throws ParsingException {
-    	if(!standalone)  listener.progress(10);
-		//updateGlossary(); //active this later 4/2011
+    public void outputFinal() throws Exception {
+    	if(!standalone) this.showOutputMessage("System is starting finalization step [could take hours]...");
 		
 		String posedfile = Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
 		String parsedfile =Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
 		String database = ApplicationUtilities.getProperty("database.name");
-		/*
-		String posedfile = "FNAv19posedsentences.txt";		
-		String parsedfile = "FNAv19parsedsentences.txt";
-		String database = "annotationevaluation";
-		String postable = "wordpos4parser";
-		*/
 		String glosstable = this.glossaryPrefix;
-		//don't need to rerun them--they were ran at step 5-6, unknown removal and character curation
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, this.dataPrefix, this.glossaryPrefix, true);
-		//sosm.markSentences();
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, this.dataPrefix,glosstable, false);
+		if(!standalone) this.showOutputMessage("System is POS-tagging sentences...");
 		sp.POSTagging();
-		if(!standalone) listener.progress(50);
+		if(!standalone) this.showOutputMessage("System is syntactic-parsing sentences...");		
 		sp.parsing();
-		if(!standalone) listener.progress(80);
+		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
-		if(!standalone) listener.progress(100);
-	}
-	
-	
-	/**
-	 * add new character/state to glossary
-	 */
-	private void updateGlossary() {
-		try{
-			Statement stmt = conn.createStatement();
-			String q ="select distinct term, decision from "+this.dataPrefix+"_group_decisions as t1, "+this.dataPrefix+"_grouped_terms as t2 where term not in (select term from fnaglossary) and t1.groupId=t2.groupId";
-			ResultSet rs = stmt.executeQuery(q);
-			Statement stmt1 = conn.createStatement();
-			while(rs.next()){				
-				String q1 = "insert into fnaglossary (term, category, status) values ('"+rs.getString("term")+"', '"+rs.getString("decision")+"', 'learned')";
-				stmt1.execute(q1);
-			}
-			stmt1.close();
-			rs.close();
-			stmt.close();						
-		}catch(Exception e){
-			e.printStackTrace();
-		}		
-	}
-	/**
-	 * 2010
-	 * @param adescription: character-annotated
-	 * @param baseroot:root element of the base XML
-	 * @param xpath
-	 */
-	public static void replaceWithAnnotated(Element adescription, Element baseroot, String xpath) {
-        try {
-            //get the element index of the unannotated counterpart     
-            Element description = (Element) XPath.selectSingleNode(
-                    baseroot, xpath);    
-            int index=-1;
-            Element parent = description;
-            if(description!=null){
-             parent= description.getParentElement();
-             index= parent.indexOf(description);
-            }
-            // replace
-            if (index >= 0) {
-                //System.out.println(fileindex+".xml has "+xpath+" element replaced");
-                parent.setContent(index, adescription);
-            }
-            baseroot.detach();
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("VolumeFinalizer : Failed to output the final result.", e);
-            throw new ParsingException("Failed to output the final result.", e);
-        }
-    }
 
-	public static Element getBaseRoot(String fileindex, int order){
-		File source = null;
-		if(!standalone)  source = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty("TRANSFORMED"));	
-		if(standalone)  source = new File(standalonefolder+"\\target\\transformed"); 
-		int total = source.listFiles().length;
-		try {
-			SAXBuilder builder = new SAXBuilder();
-			System.out.println("finalizing "+fileindex);
-			
-			if(!standalone) listener.progress(40+(order*60/total));
-			File file = new File(source, fileindex + ".xml");
-			Document doc = builder.build(file);
-			
-			Element root = doc.getRootElement();
-			root.detach();
-			return root;
-		}catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("VolumeFinalizer : Failed to output the final result.", e);
-			throw new ParsingException("Failed to output the final result.", e);
-		}
 	}
 
-
-	
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {
 		File target = null;
 		if(!standalone) target = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty(targetstring));
@@ -192,61 +114,45 @@ public class VolumeFinalizer extends Thread {
 		if(!standalone) listener.info("" + fileindex, result.getPath(), "");//TODO: test 3/19/10 
 	}
 
-	public void replaceWithAnnotated(Learn2Parse cl, String xpath, String targetstring, boolean flatten) {
-		File source = null;
-		File target = null;
-		if(!standalone)  source = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty("TRANSFORMED"));
-		if(standalone)  source = new File(standalonefolder+"\\target\\transformed"); 
-		int total = source.listFiles().length;
-		if(!standalone)  target = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty(targetstring));
-		if(standalone)  target = new File(standalonefolder+"\\target\\final");
-		try {
-			SAXBuilder builder = new SAXBuilder();
-			for (int count = 1; count <= total; count++) {
-				System.out.println("finalizing "+count);
-				if(!standalone) listener.progress(40+(count*60/total));
-				File file = new File(source, count + ".xml");
-				Document doc = builder.build(file);
-				Element root = doc.getRootElement();	
-				//create xml from annotated text 2008 version
-				ArrayList<String> elementstrs = (ArrayList<String>)cl.getMarkedDescription(count + ".txt");	
-				Iterator<String> it = elementstrs.iterator();
-				ArrayList<Element> content = new ArrayList<Element>();
-				while(it.hasNext()){
-					String descXML =(String)it.next();
-					if (descXML != null && !descXML.equals("")) {
-						doc = builder.build(new ByteArrayInputStream(
-								descXML.getBytes("UTF-8")));
-						Element descript = doc.getRootElement(); // marked-up
-						descript.detach();
-						content.add(descript);
-					}
-				}
-				//get the element index of the unannotated counterpart 	
-				Element description = (Element) XPath.selectSingleNode(
-						root, xpath);			
-				int index = root.indexOf(description);
-				
-				// replace
-				if (index >= 0) {
-					System.out.println(count+".xml has "+xpath+" element replaced");
-					root.setContent(index, content);
-				}
-				
-				root.detach();
-				
-				File result = new File(target, count + ".xml");
-				ParsingUtil.outputXML(root, result, null);
 
-				if(!standalone) listener.info("" + count, result.getPath(), "");//TODO: test 3/19/10 
+    protected void resetOutputMessage() {
+		display.syncExec(new Runnable() {
+			public void run() {
+				finalLog.setText("");
 			}
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.error("VolumeFinalizer : Failed to output the final result.", e);
-            throw new ParsingException("Failed to output the final result.", e);
-        }
-    }
+		});
+	}
     
+	protected void showOutputMessage(final String message) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				finalLog.append(message+"\n");
+			}
+		});
+	}
+	 
+	protected void popupMessage(final String message){
+		display.syncExec(new Runnable() {
+			public void run() {
+				ApplicationUtilities.showPopUpWindow(message, "Error",SWT.ERROR);
+			}
+		});
+	}
+	/**
+	 * create an XML file named with thisCharaID
+	 * @param thisCharaID:Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6
+	 * @return
+	 */
+	public static Element createCharacterHolder(String thisCharaID) {
+		String pdf = thisCharaID.replaceFirst("\\.xml.*", "");
+		String cid = thisCharaID.replaceFirst(".*\\.xml_", ""); 
+		Element root = new Element("character_unit");
+		root.setAttribute("source_pdf", pdf);
+		root.setAttribute("character_id", cid);
+		return root;
+	}
+	
+	
     public static void main (String [] args) {
         String database="annotationevaluation";
         String username="root";
@@ -261,7 +167,14 @@ public class VolumeFinalizer extends Thread {
         }catch(Exception e){
             e.printStackTrace();
         }
-        VolumeFinalizer vf = new VolumeFinalizer(null, "fnav19", conn, "fnaglossaryfixed");
-        vf.start();
+        //VolumeFinalizer vf = new VolumeFinalizer(null, "fnav19", conn, "fnaglossaryfixed");
+        //vf.start();
     }
+
+
+
+
+
+
+
 }

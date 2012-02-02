@@ -10,14 +10,9 @@ my $test = $dbh->prepare('use treatiseh_benchmark')
 or die $dbh->errstr."\n";
 $test->execute();
 
-<<<<<<< .mine
-#$dir = "C:\\Treatise\\TreatiseH-dehyphened-copy\\";
-$dir = "X:\\data\\foc\\vol5-numbered\\";
-=======
 #$dir = "C:\\Treatise\\TreatiseH-dehyphened-copy\\";
 $dir = "X:\\data\\foc\\vol5-numbered\\";
 
->>>>>>> .r210
 opendir(IN, "$dir") || die "$!: $dir\n";
 $count = 1;
 

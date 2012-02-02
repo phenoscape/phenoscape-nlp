@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+
 /**
  * first run dehypenizer, then run unsupervised.pl, 
  * run on untagged sentences/originalsent
@@ -85,19 +88,23 @@ public class StateCollector  {
 	protected String tableprefix = null;
 	protected String glosstable = null;
 	//protected String organnames = null;
+    protected Display display;
+    protected StyledText charLog;
 	
 	protected boolean marked = false;
 	
-	StateCollector(Connection conn, String tableprefix, String glosstable){
+	StateCollector(Connection conn, String tableprefix, String glosstable, Display display, StyledText charLog){
 		this.statematrix = new StateMatrix(conn, tableprefix,glosstable);
 		this.tableprefix = tableprefix;
 		this.conn = conn;
 		this.glosstable = glosstable;
 		//this.database = database;
 		//collect(database);
+		this.display = display;
+		this.charLog = charLog;
 	}
 	
-	StateCollector(Connection conn, String tableprefix, ArrayList<String> knownstates, String glosstable){
+	StateCollector(Connection conn, String tableprefix, ArrayList<String> knownstates, String glosstable, Display display, StyledText charLog){
 		if(knownstates!=null){
 			StateImporter si = new StateImporter(knownstates);
 			this.statematrix = new StateMatrix(conn, tableprefix, si.getStates(),glosstable);
@@ -107,6 +114,8 @@ public class StateCollector  {
 		this.glosstable = glosstable;
 		//this.database = database;
 		//collect(database);
+		this.display = display;
+		this.charLog = charLog;
 	}
 	
 	public void collect(){
@@ -125,7 +134,7 @@ public class StateCollector  {
 			e.printStackTrace();
 		}
 		
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(this.conn, this.tableprefix, this.glosstable, true);//tag organ names
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(this.conn, this.tableprefix, this.glosstable, true, display, charLog);//tag organ names
 		this.sentences = sosm.markSentences();
 		parseSentences();//create StateGroups 
 		//System.out.println(statematrix.toString());
@@ -139,6 +148,7 @@ public class StateCollector  {
 	 */
 	protected void parseSentences(){
 		Enumeration<String> en = sentences.keys();
+		this.showOutputMessage("System is parsing sentences for character terms ...");
 		while(en.hasMoreElements()){
 			String source = en.nextElement();
 			String taggedsent = (String)sentences.get(source);
@@ -459,7 +469,21 @@ public class StateCollector  {
 	}
 
 	
-
+    protected void resetOutputMessage() {
+		display.syncExec(new Runnable() {
+			public void run() {
+				charLog.setText("");
+			}
+		});
+	}
+    
+	protected void showOutputMessage(final String message) {
+		display.syncExec(new Runnable() {
+			public void run() {
+				charLog.append(message+"\n");
+			}
+		});
+	}
 	
 	/**
 	 * @param args
@@ -479,8 +503,8 @@ public class StateCollector  {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		StateCollector sc = new StateCollector(conn, "fnav19", "fnaglossaryfixed");
-		sc.collect();
+		//StateCollector sc = new StateCollector(conn, "fnav19", "fnaglossaryfixed");
+		//sc.collect();
 	}
 
 }

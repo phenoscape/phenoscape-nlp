@@ -46,7 +46,6 @@
 	<classpathentry kind="lib" path="lib/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/htmlparser.jar"/>
 	<classpathentry kind="lib" path="C:/Documents and Settings/Hong Updates/workspace/parsing-gui/lib/jsoup-1.6.1.jar" sourcepath="C:/Documents and Settings/Hong Updates/workspace/parsing-gui/lib/jsoup-1.6.1.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/annotationEvaluations"/>
 	<classpathentry kind="lib" path="lib/baseline.jar"/>
 	<classpathentry kind="lib" path="lib/formattedtext-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>

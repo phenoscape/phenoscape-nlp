@@ -29,7 +29,7 @@ public class Tree2XML {
         this.test = test.replaceAll("\\(\\s*\\)", "");
     }
     
-    public Document xml(){
+    public Document xml() throws Exception{
         if(test==null || test.trim().length()==0){
             return null;
         }
@@ -61,24 +61,28 @@ public class Tree2XML {
             m = p.matcher(xml);
         }
         */
-        String xml = format(test);
-        //System.out.println(xml);
-		Document doc =null;
+        String xml = "";
 		try {
-		     SAXBuilder builder = new SAXBuilder();
-		     ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-		     doc = builder.build(bais);
-		    } catch (Exception e) {
-		      e.printStackTrace();
-		      System.out.print("Problem parsing the xml: \n" + xml+"\n"+e.toString());
+	         xml = format(test);
+	        //System.out.println(xml);
+			Document doc =null;
+			SAXBuilder builder = new SAXBuilder();
+			ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+			doc = builder.build(bais);
+			return doc;
+		} catch (Exception e) {
+	      e.printStackTrace();
+	      System.out.print("Problem parsing the xml: \n" + xml+"\n"+e.toString());
+	      throw e;
 		}
-		return doc;
+		//return doc;
     }
     
     /*
      * @param parsed: (NP (JJ subulate) (NNS enations))
      */
-    private String format(String parsed){
+    private String format(String parsed) throws Exception{
+    	try{
     	int count = 0;
     	StringBuffer xml = new StringBuffer();
     	parsed = parsed.replaceAll("\\)", ") ").replaceAll("\\s+", " ").trim();//(NP (JJ subulate) (NNS enations) )
@@ -111,6 +115,10 @@ public class Tree2XML {
     		System.exit(2);
     	}
        	return xml.toString();
+    	}catch (Exception e){
+    		e.printStackTrace();
+    		throw e;
+    	}
     }
     /**
      * <NN Heads/> will become

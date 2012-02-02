@@ -31,46 +31,48 @@ import fna.db.*;
  * expect 1 NeXML file per PDF paper (original pub) in source folder 
  */
 @SuppressWarnings("unchecked")
-public class CharacterStatementsTransformer extends Thread {
-	private ArrayList<String> seeds = new ArrayList<String>();
+public abstract class CharacterStatementsTransformer extends Thread {
+	protected ArrayList<String> seeds = new ArrayList<String>();
 	//private File source =new File(Registry.SourceDirectory); //a folder of text documents to be annotated
 	//private File source = new File("Z:\\WorkFeb2008\\WordNov2009\\Description_Extraction\\extractionSource\\Plain_text");
-	private File source = new File(Registry.SourceDirectory);
+	protected File source = new File(Registry.SourceDirectory);
 	//File target = new File(Registry.TargetDirectory);
 	//File target = new File("Z:\\WorkFeb2008\\WordNov2009\\Description_Extraction\\extractionSource\\Plain_text_transformed");
-	private File target = new File(Registry.TargetDirectory);
-	private XMLOutputter outputter = null;
-	private String markupMode = "plain";
-	private String dataprefix = null;
+	protected File target = new File(Registry.TargetDirectory);
+
 	protected static final Logger LOGGER = Logger.getLogger(CharacterStatementsTransformer.class);
-	private String seedfilename = "seeds";
-	private ProcessListener listener;
-	private Text perlLog;
-	private String glossarytable;
+	protected String seedfilename = "seeds";
+	protected ProcessListener listener;
+	protected Text perlLog;
+	protected XMLOutputter outputter;
+	//protected String prefix;
+	//protected String glossarytable;
+
 	
 	CharacterStatementsTransformer(ProcessListener listener, Display display, 
-			Text perllog, String dataprefix,String glossarytable, ArrayList seeds){
-		//super(listener, display, perllog, dataprefix);
+			Text perllog, ArrayList seeds/*, String prefix, String glossarytable*/){
 		this.seeds = seeds;
 		this.listener = listener;
 		this.perlLog = perllog;
-		//this.markupMode = "plain";
-		this.dataprefix = dataprefix;
-		this.glossarytable=glossarytable;
-		outputter = new XMLOutputter(Format.getPrettyFormat());
+		//this.prefix = prefix;
+		//this.glossarytable = glossarytable;
+		this.outputter = new XMLOutputter(Format.getPrettyFormat());
+		setXPaths();
 		File target = new File(Registry.TargetDirectory);
 		Utilities.resetFolder(target, "descriptions");
 		Utilities.resetFolder(target, "transformed");
-		Utilities.resetFolder(target, "descriptions-dehyphened");
+		//Utilities.resetFolder(target, "descriptions-dehyphened");
 		Utilities.resetFolder(target, "markedup");
 		Utilities.resetFolder(target, "final");
 		Utilities.resetFolder(target, "co-occurrence");
 	}	
 	
+	protected abstract void setXPaths();
 	/**
 	 * create folders:
-	 * descriptions for to-be-annotated morph description segments
-	 * transformed for entire documents (tags: <document><nonMorph></nonMorph><treatment></treatment></document>)
+	 * descriptions for state label attributes
+	 * characters for char elements
+	 * transformed for entire NeXML documents 
 	 */
 	private void output2Target() {
 		File des = createFolderIn(target, "descriptions");
@@ -87,64 +89,12 @@ public class CharacterStatementsTransformer extends Thread {
 			listener.info((i+1) + "", fname.replaceAll("\\..*$", "")+".xml");
 			listener.progress((90* i)/files.length);
 		}
-		
 		listener.progress(60);
-		//dehypen descriptions folder: may be a redundant step
-		//DeHyphenAFolder dhf = new DeHyphenAFolder(listener,target.getAbsolutePath(),"descriptions", 
-		//		ApplicationUtilities.getProperty("database.name"), perlLog,  dataprefix,this.glossarytable, null);
-		//dhf.dehyphen();
-
-	}
-	/**
-	 * Copy file to trafolder
-	 * take <description> elements from file and output them to desfolder. 
-	 * take <character> elements from file and output them to charfolder. 
-	 * @param folder
-	 * @param fname
-	 */
-	private void outputTo(File desfolder, File chafolder, File trafolder, File file) {
-		try{
-			String fname = file.getName();
-			SAXBuilder builder = new SAXBuilder();
-			Document doc = builder.build(file);
-			Element root = doc.getRootElement();
-			root.detach();
-			//copy to trafolder
-			XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
-			out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(trafolder, file.getName()))));
-			//get <state> to put in desfolder
-			List<Element> allstates = XPath.selectNodes(root, "//format/states");
-			Iterator<Element> its = allstates.iterator();
-			while(its.hasNext()){
-				Element states = its.next();
-				String statesid = states.getAttributeValue("id");
-				List<Element> stateels = XPath.selectNodes(states, ".//state");
-				Iterator<Element> it = stateels.iterator();
-				while(it.hasNext()){
-					Element state = it.next();
-					String stateid = state.getAttributeValue("id");
-					String content = state.getAttributeValue("label").trim();
-					content = content.replaceFirst("[,;\\.]+$", ";");
-					write2file(desfolder, fname+"_"+statesid+"_"+stateid+".txt", content);
-				}
-			}
-			//get <character> to put in chafolder
-			List<Element> chars = XPath.selectNodes(root, "//format/char");
-			Iterator<Element> it = chars.iterator();
-			while(it.hasNext()){
-				Element cha = it.next();
-				String statesid = cha.getAttributeValue("states");
-				String content = cha.getAttributeValue("label").trim();
-				content = content.replaceFirst("[,;\\.]+$", ";");
-				write2file(chafolder, fname+"_"+statesid+".txt", content);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-
 	}
 
-	private void write2file(File desfolder, String fname, String text) {
+	protected abstract void outputTo(File desfolder, File chafolder, File trafolder, File file); 
+
+	protected void write2file(File desfolder, String fname, String text) {
 		try{
 			BufferedWriter out = new BufferedWriter(
 					new FileWriter(new File(desfolder, fname)));
@@ -169,15 +119,8 @@ public class CharacterStatementsTransformer extends Thread {
 		return nfile;
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		//save to-be-annotated files to source folder 
-		CharacterStatementsTransformer tpm = new CharacterStatementsTransformer(null, null, null, "bhl_2vs","", null);
-		tpm.output2Target();
-	}
 	
+
 	public void run () {
 		listener.setProgressBarVisible(true);
 		System.out.println("compiled");

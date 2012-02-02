@@ -44,7 +44,6 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	static protected String database = null;
 	static protected String username = "root";
 	static protected String password = "root";
-	//protected int count = 0;
 	static private int allchunks = 0;
 	static private int discoveredchunks = 0;
 	private File posedfile = null;
@@ -53,9 +52,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private POSTagger4StanfordParser tagger = null;
 	private String tableprefix = null;
 	private String glosstable = null;
-	//private SentenceOrganStateMarker sosm = null;
-	//private Hashtable sentmapping = new Hashtable();
-	private boolean finalize = true;
+	static public Hashtable<String, String> characters = new Hashtable<String, String>();
+	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
 	private boolean printProgress = true;
@@ -88,7 +86,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		tagger = new POSTagger4StanfordParser(conn, this.tableprefix, glosstable);
 	}
 	
-	public void POSTagging(){
+	public void POSTagging() throws Exception{
 		try{
   			Statement stmt = conn.createStatement();
 			Statement stmt2 = conn.createStatement();
@@ -98,32 +96,57 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			//ResultSet rs = stmt.executeQuery("select * from newsegments");
 			//stmt.execute("alter table markedsentence add rmarkedsent text");
 
-			ResultSet rs = stmt.executeQuery("select source, markedsent from "+this.tableprefix+"_markedsentence order by sentid");// order by (source+0) ");////sort as numbers
+			ResultSet rs = stmt.executeQuery("select source, markedsent, type from "+this.tableprefix+"_markedsentence order by sentid");// order by (source+0) ");////sort as numbers
 			//ResultSet rs = stmt.executeQuery("select source, sentence from "+this.tableprefix+"_sentence order by sentid");// order by (source+0) ");////sort as numbers
 			int count = 1;
 			while(rs.next()){
 				String src = rs.getString(1);
 				String str = rs.getString(2);
+				String type = rs.getString(3);
 				//TODO: may need to fix "_"
 				//if(src.compareTo("56.txt-7")!=0) continue;
-				str = tagger.POSTag(str, src);
+				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
 	       		count++;
 	       		
 			}
+			//getherCharacters();
 			stmt2.close();
 			rs.close();
 			out.close();
 		}catch(Exception e){
 			e.printStackTrace();
+			throw e;
 		}
 	}
 
 	/**
+	 * done in POSTagger4StanfordParser
+	 * from character sentences, collect characters such as position, shape, size, etc from rmarkedsent
+	 * @return
+	 */
+	/*private void getherCharacters() {
+		try{
+			Statement stmt = conn.createStatement();
+			String q = "SELECT markedsent FROM "+this.tableprefix+"_markedsentence p where type='character' and markedsent like '%} of %'";
+			ResultSet rs = stmt.executeQuery(q);
+			while(rs.next()){
+				String markedsent = rs.getString("markedsent");
+				Matcher m = this.charptn.matcher(markedsent);
+				if(m.find()){
+					this.characters.add(m.group(1));
+				}				
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+	}*/
+
+	/**
 	 * direct the parsed result to the text file parsedfile
 	 */
-	public void parsing(){
+	public void parsing() throws Exception{
 		PrintStream out = null;
 		Pattern ptn = Pattern.compile("^Parsing \\[sent\\. (\\d+) len\\. \\d+\\]:");
 	  	try{
@@ -166,7 +189,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			//format
             if(headings.size() != trees.size()){
             	System.err.println("Error reading parsing results");
-            	System.exit(2);
+            	throw new Exception("Parsing error. System terminates.");
             }
             StringBuffer sb = new StringBuffer();
             for(int i = 0; i<headings.size(); i++){
@@ -179,26 +202,27 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             pw.close();			
 	  	}catch(Exception e){
 	  		e.printStackTrace();
+	  		throw e;
 	  	}
 	  	//out.close();
 	}
 	
-	
-	public void extracting(){
+    //String test="(ROOT  (S (NP      (NP (NN body) (NN ovoid))      (, ,)      (NP        (NP (CD 2-4))        (PP (IN x)          (NP            (NP (CD 1-1.5) (NN mm))            (, ,)            (ADJP (RB not) (JJ winged)))))      (, ,))    (VP (VBZ woolly))    (. .)))";
+    // test="(ROOT  (NP    (NP      (NP (NNP Ray))      (ADJP (JJ laminae)        (NP (CD 6))))    (: -)    (NP      (NP        (NP (CD 7) (NNS x))        (NP (CD 2/CD-32) (NN mm)))      (, ,)      (PP (IN with)        (NP (CD 2))))    (: -)    (NP      (NP (CD 5) (NNS hairs))      (PP (IN inside)        (NP          (NP (NN opening))          (PP (IN of)            (NP (NN tube))))))    (. .)))";
+    // test="(S (NP (NP (NN margins) (UCP (NP (JJ entire)) (, ,) (ADJP (JJ dentate)) (, ,) (ADJP (RB pinnately) (JJ lobed)) (, ,) (CC or) (NP (JJ pinnatifid) (NN pinnately))) (NN compound)) (, ,) (NP (JJ spiny)) (, ,)) (VP (JJ tipped) (PP (IN with) (NP (NNS tendrils)))) (. .))";
+	/**
+	 * annotate descriptions in XML, based on parse trees
+	 * extract EQ statements from XML
+	 */	
+	public void extracting() throws Exception{
     	try{
-	       //String test="(ROOT  (S (NP      (NP (NN body) (NN ovoid))      (, ,)      (NP        (NP (CD 2-4))        (PP (IN x)          (NP            (NP (CD 1-1.5) (NN mm))            (, ,)            (ADJP (RB not) (JJ winged)))))      (, ,))    (VP (VBZ woolly))    (. .)))";
-	       // test="(ROOT  (NP    (NP      (NP (NNP Ray))      (ADJP (JJ laminae)        (NP (CD 6))))    (: -)    (NP      (NP        (NP (CD 7) (NNS x))        (NP (CD 2/CD-32) (NN mm)))      (, ,)      (PP (IN with)        (NP (CD 2))))    (: -)    (NP      (NP (CD 5) (NNS hairs))      (PP (IN inside)        (NP          (NP (NN opening))          (PP (IN of)            (NP (NN tube))))))    (. .)))";
-	       // test="(S (NP (NP (NN margins) (UCP (NP (JJ entire)) (, ,) (ADJP (JJ dentate)) (, ,) (ADJP (RB pinnately) (JJ lobed)) (, ,) (CC or) (NP (JJ pinnatifid) (NN pinnately))) (NN compound)) (, ,) (NP (JJ spiny)) (, ,)) (VP (JJ tipped) (PP (IN with) (NP (NNS tendrils)))) (. .))";
 	        FileInputStream istream = new FileInputStream(this.parsedfile); 
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(istream));
 			String line = "";
 			String text = "";
 			int i = 0;
 			Statement stmt = conn.createStatement();
-
 			ResultSet rs = stmt.executeQuery("select source, rmarkedsent from "+this.tableprefix+"_markedsentence order by sentid");//(source+0)"); //+0 so sort as numbers
-			//ResultSet rs = stmt.executeQuery("select source, sentence from "+this.tableprefix+"_sentence order by sentid");//(source+0)"); //+0 so sort as numbers
-
 			Pattern ptn = Pattern.compile("^Parsing \\[sent\\. (\\d+) len\\. \\d+\\]:(.*)");
 			Matcher m = null;
 			Tree2XML t2x = null;
@@ -207,12 +231,10 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			SentenceChunker4StanfordParser ex = null;
 			Element statement = null;
 			ChunkedSentence cs = null;
-			String pdescID ="";
-			int order = 0;
-			//int pfileindex = 0;
-			String pfileindex = "";
-			Element baseroot = null;
+			String pCharaID ="";
+			Element charaRoot = null;
 			Element description = new Element("description");
+			//read parse tree line by line
 			while ((line = stdInput.readLine())!=null){
 				if(line.startsWith("Loading") || line.startsWith("X:") || line.startsWith("Parsing file")|| line.startsWith("Parsed") ){continue;}
 				if(line.trim().length()>1){
@@ -223,27 +245,17 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 						text += line.replace(System.getProperty("line.separator"), ""); 
 					}
 				}else{
-					//if(i != 359 && i !=484 && i!=517 && i!=549 && i != 1264 && i!=1515 && i!=1613 && i !=1782 && i !=2501 && i !=2793 && i!=4798 && i!=9243 && i!=10993 && i!=12449 && text.startsWith("(ROOT")){
-					//if(i !=2793 && text.startsWith("(ROOT")){//FNAv19 865[162.txt-0], 310, 1638 (SentenceOrganStateMarkup); 5262[466.txt-14]
-					if(/*194.txt-5*&&*/ text.startsWith("(ROOT")){//treatiseh
-					//if(/*i != 2468 && i != 3237 &&i != 9555 && i != 9504 &&*/ i !=2018 && i !=2793 && text.startsWith("(ROOT")){//bhl	
-					text = text.replaceAll("(?<=[A-Z])\\$ ", "S ");
-					t2x = new Tree2XML(text);
-					doc = t2x.xml();
-					//Document doccp = (Document)doc.clone();
-					if(rs.relative(i)){
-						String sent = rs.getString(2);
-						String src = rs.getString(1);
-						String thisdescID = src.replaceFirst("-\\d+$", "");//1.txtp436_1.txt-0's descriptionID is 1.txtp436_1.txt
-						//int thisfileindex = Integer.parseInt(src.replaceFirst("\\.txt.*$", ""));
-						String thisfileindex = src.replaceFirst("\\.txt.*$", "");
-						if(finalize){
-							if(baseroot ==null){
-								order++;
-								baseroot = VolumeFinalizer.getBaseRoot(thisfileindex, order);
-							}
-						}
-						//sent = this.normalizeSpacesRoundNumbers(sent);
+					
+					if(text.startsWith("(ROOT")){
+						//collect a parse tree
+						text = text.replaceAll("(?<=[A-Z])\\$ ", "S ");
+						t2x = new Tree2XML(text);
+						//parse tree converted to XML so it is easily accessible
+						doc = t2x.xml();
+						if(rs.relative(i)){
+							//1. annotate a sentence in XML format
+							String sent = rs.getString(2);
+							String src = rs.getString(1);
 							if(!sent.matches(".*? [;\\.]\\s*$")){//at 30x. => at 30x. .
 								sent = sent+" .";
 							}
@@ -252,59 +264,54 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 							sent = sent.replaceAll("<\\{?diams\\}?>", "diams");
 							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, this.tableprefix, conn, glosstable);
 							cs = ex.chunkIt();
-							//System.out.print("["+src+"]:");
 							if(this.printSent){
 								System.out.println();
 								System.out.println(i+"["+src+"]: "+cs.toString());
-
 							}
-							statement = cac.annotate(src, src, cs); //src: 100.txt-18
-							if(finalize){
-								if(thisdescID.compareTo(pdescID)!=0){
-									if(description.getChildren().size()!=0){ //not empty
-										//plug description in XML document
-										//write the XML to final
-										//call MainForm to display
-										//VolumeFinalizer.replaceWithAnnotated(description, count, "/treatment/description", "FINAL", false);
-										
-										placeDescription(description, pdescID, baseroot);
-										cac.reset();
-										description = new Element("description");
-										if(this.printProgress){
-											System.out.println(pfileindex+".xml written");
-										}
+							statement = cac.annotate(src, src, cs); 
+							
+							//2. collect character and associated character states/descriptions annotations for EQ generation
+							//character src: Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6.txt-0
+							//associated description/character state src is : Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6_ae45e0c9-0753-4dff-ab3c-de1860a0c81e.txt-0
+							String thisCharaID = src.replaceFirst("(?<!xml)_[^_]*$", "").replaceFirst("\\.txt.*", "");
+							//all will have thisCharaID: Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6
+													
+							if(charaRoot ==null){
+								charaRoot = VolumeFinalizer.createCharacterHolder(thisCharaID);//create an file to hold character and its associated states information in one file
+							}
+							
+							if(thisCharaID.compareTo(pCharaID)!=0){//comes to a new character
+								if(description.getChildren().size()!=0){ //not empty
+									//add description to character file
+									//placeDescription(description, pCharaID, charaDoc);
+									charaRoot.addContent(description);
+									VolumeFinalizer.outputFinalXML(charaRoot, pCharaID, "FINAL");
+									if(this.printProgress){
+										System.out.println(pCharaID+".xml written");
 									}
-								}
-								
-								//if(thisfileindex != pfileindex){
-								if(thisfileindex.compareTo(pfileindex) !=0){
-									//if(pfileindex !=0){
-									if(pfileindex.length() !=0){
-										order++;
-										VolumeFinalizer.outputFinalXML(baseroot, pfileindex, "FINAL");
-										baseroot = VolumeFinalizer.getBaseRoot(thisfileindex, order);
-									}								
+									//prepare for a new character
+									charaRoot = VolumeFinalizer.createCharacterHolder(thisCharaID);
+									cac.reset();
+									description = new Element("description");									
 								}
 							}
+							
 							description.addContent(statement);
-							pdescID = thisdescID;
-							pfileindex = thisfileindex;
-						
-						rs.relative(i*-1); //reset the pointer
-					}
+							pCharaID = thisCharaID;
+							rs.relative(i*-1); //reset the pointer to fetch the next sentence
+						}
 					}
 					text = "";
 					i = 0;
 				}
 			}
-			if(finalize){
-				placeDescription(description, pdescID, baseroot);
-				VolumeFinalizer.outputFinalXML(baseroot, pfileindex, "FINAL");		
-			}
+			//don't forget the last description
+			charaRoot.addContent(description);
+			VolumeFinalizer.outputFinalXML(charaRoot, pCharaID, "FINAL");		
 			rs.close();
     	}catch (Exception e){
-    		//System.err.println(e);
 			e.printStackTrace();
+			throw e;
         }
     }
 
@@ -313,13 +320,15 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		sent = sent.replaceAll("(?<=\\d)\\s*/\\s*(?=\\d)", "/");
 		sent = sent.replaceAll("(?<=\\d)\\s+(?=\\d)", "-"); //bhl: two numbers connected by a space
 		sent = sent.replaceAll("at least", "at-least");
+		sent = sent.replaceAll("<?\\{?\\btwice\\b\\}?>?", "2 times");
+		sent = sent.replaceAll("<?\\{?\\bthrice\\b\\}?>?", "3 times");
 		sent = sent.replaceAll("2\\s*n\\s*=", "2n=");
 		sent = sent.replaceAll("2\\s*x\\s*=", "2x=");
 		sent = sent.replaceAll("n\\s*=", "n=");
 		sent = sent.replaceAll("x\\s*=", "x=");
 
 		//sent = sent.replaceAll("[–—-]", "-").replaceAll(",", " , ").replaceAll(";", " ; ").replaceAll(":", " : ").replaceAll("\\.", " . ").replaceAll("\\[", " [ ").replaceAll("\\]", " ] ").replaceAll("\\(", " ( ").replaceAll("\\)", " ) ").replaceAll("\\s+", " ").trim();
-		sent = sent.replaceAll("[–—-]", "-").replaceAll(",", " , ").replaceAll(";", " ; ").replaceAll(":", " : ").replaceAll("\\.", " . ").replaceAll("\\s+", " ").trim();
+		sent = sent.replaceAll("[~–—-]", "-").replaceAll(",", " , ").replaceAll(";", " ; ").replaceAll(":", " : ").replaceAll("\\.", " . ").replaceAll("\\s+", " ").trim();
 		sent = sent.replaceAll("(?<=\\d) (?=\\?)", ""); //deals especially x=[9 ? , 13] 12, 19 cases
 		sent = sent.replaceAll("(?<=\\?) (?=,)", "");
 		if(sent.matches(".*?[nx]=.*")){
@@ -334,15 +343,15 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//sent = sent.replaceAll("(?<=[\\d])\\s+[–—-]\\s+(?=[\\d])", "-"); // 1 - 2 => 1-2
 		
 		//4-25 [ -60 ] => 4-25[-60]: this works only because "(text)" have already been removed from sentence in perl program
-		sent = sent.replaceAll("\\(\\s+(?=[\\d\\+\\-])", "("). //"( 4" => "(4"
-		replaceAll("(?<=[\\d\\+\\-])\\s+\\(", "("). //" 4 (" => "4("
-		replaceAll("\\)\\s+(?=[\\d\\+\\-])", ")"). //") 4" => ")4"
-		replaceAll("(?<=[\\d\\+\\-])\\s+\\)", ")"); //"4 )" => "4)"
+		sent = sent.replaceAll("\\(\\s+(?=[\\d\\+\\-%])", "("). //"( 4" => "(4"
+		replaceAll("(?<=[\\d\\+\\-%])\\s+\\(", "("). //" 4 (" => "4("
+		replaceAll("\\)\\s+(?=[\\d\\+\\-%])", ")"). //") 4" => ")4"
+		replaceAll("(?<=[\\d\\+\\-%])\\s+\\)", ")"); //"4 )" => "4)"
 		
-		sent = sent.replaceAll("\\[\\s+(?=[\\d\\+\\-])", "["). //"[ 4" => "[4"
-		replaceAll("(?<=[\\d\\+\\-])\\s+\\[", "["). //" 4 [" => "4["
-		replaceAll("\\]\\s+(?=[\\d\\+\\-])", "]"). //"] 4" => "]4"
-		replaceAll("(?<=[\\d\\+\\-])\\s+\\]", "]"); //"4 ]" => "4]"
+		sent = sent.replaceAll("\\[\\s+(?=[\\d\\+\\-%])", "["). //"[ 4" => "[4"
+		replaceAll("(?<=[\\d\\+\\-%])\\s+\\[", "["). //" 4 [" => "4["
+		replaceAll("\\]\\s+(?=[\\d\\+\\-%])", "]"). //"] 4" => "]4"
+		replaceAll("(?<=[\\d\\+\\-%])\\s+\\]", "]"); //"4 ]" => "4]"
 		
 		/*Pattern p = Pattern.compile("(.*?)(\\d*)\\s+\\[\\s+([ –—+\\d\\.,?×/-]+)\\s+\\]\\s+(\\d*)(.*)");  //4-25 [ -60 ] => 4-25[-60]. ? is for chromosome count
 		Matcher m = p.matcher(sent);
@@ -372,12 +381,15 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		/*if(sent.indexOf(" -{")>=0){//1–2-{pinnately} or -{palmately} {lobed} => {1–2-pinnately-or-palmately} {lobed}
 			sent = sent.replaceAll("\\s+or\\s+-\\{", "-or-").replaceAll("\\s+to\\s+-\\{", "-to-").replaceAll("\\s+-\\{", "-{");
 		}*/
+		//mohan code 11/9/2011 to replace (?) by nothing
+		sent = sent.replaceAll("\\(\\s*\\?\\s*\\)","");
+		//end mohan code
 		return sent;
 	}
 	
 	public static String ratio2number(String sent){
-		String small = "\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b";
-		String big = "\\b(?:half|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)s?\\b";
+		String small = "<?\\{?\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
+		String big = "<?\\{?\\b(?:half|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)s?\\b\\}?>?";
 		//ratio
 		Pattern ptn = Pattern.compile("(.*?)("+small+"\\s*-?_?\\s*"+big+")(.*)");
 		Matcher m = ptn.matcher(sent);
@@ -388,7 +400,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			m = ptn.matcher(sent);
 		}
 		//number
-		small = "\\b(?:two|three|four|five|six|seven|eight|nine)\\b";
+		small = "<?\\{?\\b(?:two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
 		ptn = Pattern.compile("(.*?)("+small+")(.*)");
 		m = ptn.matcher(sent);
 		while(m.matches()){
@@ -402,65 +414,44 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	}
 
 	public static String toNumber(String ratio){
-		ratio = ratio.replaceAll("\\btwo\\b", "2");
-		ratio = ratio.replaceAll("\\bthree\\b", "3");
-		ratio = ratio.replaceAll("\\bfour\\b", "4");
-		ratio = ratio.replaceAll("\\bfive\\b", "5");
-		ratio = ratio.replaceAll("\\bsix\\b", "6");
-		ratio = ratio.replaceAll("\\bseven\\b", "7");
-		ratio = ratio.replaceAll("\\beight\\b", "8");
-		ratio = ratio.replaceAll("\\bnine\\b", "9");
+		ratio = ratio.replaceAll("<?\\{?\\btwo\\b\\}?>?", "2");
+		ratio = ratio.replaceAll("<?\\{?\\bthree\\b\\}?>?", "3");
+		ratio = ratio.replaceAll("<?\\{?\\bfour\\b\\}?>?", "4");
+		ratio = ratio.replaceAll("<?\\{?\\bfive\\b\\}?>?", "5");
+		ratio = ratio.replaceAll("<?\\{?\\bsix\\b\\}?>?", "6");
+		ratio = ratio.replaceAll("<?\\{?\\bseven\\b\\}?>?", "7");
+		ratio = ratio.replaceAll("<?\\{?\\beight\\b\\}?>?", "8");
+		ratio = ratio.replaceAll("<?\\{?\\bnine\\b\\}?>?", "9");
 		return ratio;
 	}
 	
 	public static String toRatio(String ratio){
-		ratio = ratio.replaceAll("\\bone\\b", "1/");
-		ratio = ratio.replaceAll("\\btwo\\b", "2/");
-		ratio = ratio.replaceAll("\\bthree\\b", "3/");
-		ratio = ratio.replaceAll("\\bfour\\b", "4/");
-		ratio = ratio.replaceAll("\\bfive\\b", "5/");
-		ratio = ratio.replaceAll("\\bsix\\b", "6/");
-		ratio = ratio.replaceAll("\\bseven\\b", "7/");
-		ratio = ratio.replaceAll("\\beight\\b", "8/");
-		ratio = ratio.replaceAll("\\bnine\\b", "9/");
-		ratio = ratio.replaceAll("\\bhalf\\b", "2");
-		ratio = ratio.replaceAll("\\bthirds?\\b", "3");
-		ratio = ratio.replaceAll("\\bfourths?\\b", "4");
-		ratio = ratio.replaceAll("\\bfifths?\\b", "5");
-		ratio = ratio.replaceAll("\\bsixthths?\\b", "6");
-		ratio = ratio.replaceAll("\\bsevenths?\\b", "7");
-		ratio = ratio.replaceAll("\\beighths?\\b", "8");
-		ratio = ratio.replaceAll("\\bninths?\\b", "9");
-		ratio = ratio.replaceAll("\\btenths?\\b", "10");
+		ratio = ratio.replaceAll("<?\\{?\\bone\\b\\}?>?", "1/");
+		ratio = ratio.replaceAll("<?\\{?\\btwo\\b\\}?>?", "2/");
+		ratio = ratio.replaceAll("<?\\{?\\bthree\\b\\}?>?", "3/");
+		ratio = ratio.replaceAll("<?\\{?\\bfour\\b\\}?>?", "4/");
+		ratio = ratio.replaceAll("<?\\{?\\bfive\\b\\}?>?", "5/");
+		ratio = ratio.replaceAll("<?\\{?\\bsix\\b\\}?>?", "6/");
+		ratio = ratio.replaceAll("<?\\{?\\bseven\\b\\}?>?", "7/");
+		ratio = ratio.replaceAll("<?\\{?\\beight\\b\\}?>?", "8/");
+		ratio = ratio.replaceAll("<?\\{?\\bnine\\b\\}?>?", "9/");
+		ratio = ratio.replaceAll("<?\\{?\\bhalf\\b\\}?>?", "2");
+		ratio = ratio.replaceAll("<?\\{?\\bthirds?\\b\\}?>?", "3");
+		ratio = ratio.replaceAll("<?\\{?\\bfourths?\\b\\}?>?", "4");
+		ratio = ratio.replaceAll("<?\\{?\\bfifths?\\b\\}?>?", "5");
+		ratio = ratio.replaceAll("<?\\{?\\bsixthths?\\b\\}?>?", "6");
+		ratio = ratio.replaceAll("<?\\{?\\bsevenths?\\b\\}?>?", "7");
+		ratio = ratio.replaceAll("<?\\{?\\beighths?\\b\\}?>?", "8");
+		ratio = ratio.replaceAll("<?\\{?\\bninths?\\b\\}?>?", "9");
+		ratio = ratio.replaceAll("<?\\{?\\btenths?\\b\\}?>?", "10");
 		ratio = ratio.replaceAll("-", "").replaceAll("\\s", "");
 		return ratio;
 	}
 
+	
 	/**
-	 * depending on the type of descriptionID, call different replaceWithAnnotated methods in VolumeFinalizer
-	 * @param description
-	 * @param dID: may be 1.txt or 1.txtp436_1.txt
+	 * needed for java class structure, not used though
 	 */
-	
-	private void placeDescription(Element description, String dID, Element baseroot) {
-		/*validate description, incomplete
-		SAXBuilder builder = new SAXBuilder("org.apache.xerces.parsers.SAXParser", true);
-		builder.setFeature("http://apache.org/xml/features/validation/schema", true);
-		builder.setProperty(
-				  "http://apache.org/xml/properties/schema/external-schemaLocation",
-				  "http://biosemantics.googlecode.com/svn/trunk/characterStatements/ characterAnnotationSchema.xsd");
-		builder.build(description);*/
-		
-		if(dID.indexOf(".txtp")>=0){
-			String pid = dID.replaceFirst("\\.txt$", "");
-			VolumeFinalizer.replaceWithAnnotated(description, baseroot, ".//description[@pid=\""+pid+"\"]");			
-		}else{
-			VolumeFinalizer.replaceWithAnnotated(description, baseroot, ".//description");
-		}
-		
-	}
-	
-	
 	public ArrayList<String> getMarkedDescription(String source){
 		return null;
 	}
@@ -473,6 +464,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		try{
 		//String text=", ( 2 – ) 2 . 5 – 3 . 5 ( – 4 ) × ( 1 . 5 – ) 2 – 3 ( – 4 ) {cm} ";
 		//String text="blades ± obovate , [ 0 ] ( 1 – ) 2 – 3 - pinnately lobed , ultimate margins dentate , ";
 		//String text="cypselae 9 – 18 mm , bodies terete or narrowly conic to obconic , 5 – 9 mm , beaks 3 – 10 mm , lengths ( 1 / 2 – ) 2 times bodies ;";
@@ -500,8 +492,9 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//System.out.println(StanfordParser.ratio2number(text));
 		//String text="<pollen> 70-100% 3-{porate} , {mean} 25 um .";
 		//String text="x = [ 9 ? , 13 , 15 ] 17 , 18 , 19 .";
-		String text="<stamens> 2 ( – 3 ) [ – 6 ] , {exserted} ";
-		System.out.println(StanfordParser.normalizeSpacesRoundNumbers(text));
+		//String text="<stamens> 2 ( – 3 ) [ – 6 ] , {exserted} ";
+		//String text="{reduced} {basipetal} <{auxin}> transport in <roots> ( ~ 35 % ) and a {small} decrease in {shoot}-to-<{root}> transport consistent with a {partial} {loss} {of} the redirective <{auxin}> sink in the <{root}> ;";
+		//System.out.println(StanfordParser.normalizeSpacesRoundNumbers(text));
 		
 		
 		//String database = "phenoscape";
@@ -540,20 +533,31 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String parsedfile="C:\\temp\\DEMO\\demo-folders\\taxonX-ants_description\\target\\taxon_ants_parsedsentences.txt";
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\plaziantfirst\\target\\plazi_ant_first_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\plaziantfirst\\target\\plazi_ant_first_parsedsentences.txt";
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_parsedsentences.txt";
 		
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_parsedsentences.txt";
+		
+		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
+		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
 		String database = "markedupdatasets";
 		
 
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "plazi_ant_first", "antglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
+		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
+		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
 
 		//sp.POSTagging();
 		//sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 }

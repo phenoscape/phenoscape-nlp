@@ -20,11 +20,15 @@ public class SourceAdder {
 	private String username="root";
 	private String password="root";
 	private String srcprefix;
+	private String termcolumn;
+	private String mode;
 	
-	public SourceAdder(String termtable, String sentencetable, String termdatabase){
+	public SourceAdder(String termtable, String termcolumn, String mode,  String sentencetable, String termdatabase){
 		this.termtable = termtable;
 		this.sentencetable = sentencetable;
 		this.srcprefix = sentencetable.substring(0, sentencetable.indexOf("."));
+		this.termcolumn = termcolumn;
+		this.mode = mode;
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -39,14 +43,24 @@ public class SourceAdder {
 	public void addSource(){
 		try{
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select structure from "+this.termtable);
+			ResultSet rs = stmt.executeQuery("select "+this.termcolumn+" from "+this.termtable);
 			while(rs.next()){
-				String word = rs.getString("structure");
+				String term = rs.getString(1);
+				String copyterm = term;
+				term = term.replaceAll("\\[.*?\\]", "").replaceAll("-", "_").trim();
 				Statement stmt1 = conn.createStatement();
-				ResultSet rs1 = stmt1.executeQuery("select source, sentence from "+this.sentencetable+" where concat(modifier, \" \",tag) like '% "+word+" %' or  tag like '"+word+" %' or  tag like '% "+word+"' or  tag = '"+word+"'");
+				ResultSet rs1 = null;
+				if(this.mode.compareTo("structure")==0)
+					rs1 = stmt1.executeQuery("select source, sentence from "+this.sentencetable+" where concat(modifier, \" \",tag) like '% "+term+" %' or  tag like '"+term+" %' or  tag like '% "+term+"' or  tag = '"+term+"'");
+				else if (this.mode.compareTo("character")==0){
+					String q = "select source, sentence from "+this.sentencetable+" where sentence like '% "+term+" %' or  sentence like '"+term+" %' or  sentence like '% "+term+"' or  sentence = '"+term+"'";
+					rs1 = stmt1.executeQuery(q);
+					if(!rs1.next())
+						rs1 = stmt1.executeQuery("select source, sentence from "+this.sentencetable+" where sentence like '%"+term+"%'");
+				}
 				if(rs1.next()){
-					System.out.println(word);
-					addSource4Structure(word, rs1.getString("source"), rs1.getString("sentence"));
+					System.out.println(term);
+					addSource4Structure(copyterm, rs1.getString("source"), rs1.getString("sentence"));
 				}
 			}
 		}catch(Exception e){
@@ -54,10 +68,10 @@ public class SourceAdder {
 		}
 	}
 	
-	private void addSource4Structure(String structure, String source, String sentence) {
+	private void addSource4Structure(String term, String source, String sentence) {
 		try{
 			Statement stmt = conn.createStatement();
-			stmt.execute("update "+this.termtable+ " set srcfile='"+srcprefix+"."+source+"', srcsentence='"+sentence+"' where structure='"+structure+"'");
+			stmt.execute("update "+this.termtable+ " set srcfile='"+srcprefix+"."+source+"', srcsentence='"+sentence+"' where "+this.termcolumn+"='"+term+"'");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -68,12 +82,15 @@ public class SourceAdder {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String termtable="anstructure2hao_checked";
-		String sourcetable="plaziant_benchmark.plaziant_nn_sentence";
+		//String termtable="anstructure2hao_checked";
+		//String sourcetable="plaziant_benchmark.plaziant_nn_sentence";
+		String termtable="fna2pato_checked"; //termtable must have columns of srcfile and srcsentence
+		String sourcetable="fnav19_benchmark.sentence";
+		String termcolumn ="term";
+		String mode = "character"; //or "structure"
 		String database="ontologymapping";
-		SourceAdder sa = new SourceAdder(termtable, sourcetable, database);
+		SourceAdder sa = new SourceAdder(termtable, termcolumn, mode, sourcetable, database);
 		sa.addSource();
-
 	}
 
 }

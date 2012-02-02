@@ -3,6 +3,12 @@ package fna.parsing;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import fna.charactermarkup.Utilities;
 
 public class Test{
 	
@@ -43,7 +49,21 @@ public class Test{
 	}
 	
 	public static void main(String[] args) {
-		String dbcmd = "perl ..\\phenoscape-Unsupervised\\test.pl";
-		Test t = new Test(dbcmd);
+		ArrayList<String> prepPhrases = new ArrayList<String>();
+		prepPhrases.add("in relation to");
+		Iterator<String> it = prepPhrases.iterator();
+		String str = "{pectoral} <fins> in <relation> to {first} {pelvic}-<fin> <ray> when {depressed} {parallel} to <body> <axis>";
+		while(it.hasNext()){
+			String phrase = "\\{?\\<?"+it.next().trim().replaceAll(" ", "\\\\>?\\\\}? \\\\{?\\\\<?")+"\\>?\\}?";
+			Pattern p = Pattern.compile("(.*?)(\\b"+phrase+"\\b)(.*)");
+			Matcher m = p.matcher(str);
+			while(m.matches()){
+				str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "_")+"_PPP"+m.group(3);
+				m = p.matcher(str);
+			}					
+		}
+		System.out.println(str);
+		//String dbcmd = "perl ..\\phenoscape-Unsupervised\\test.pl";
+		//Test t = new Test(dbcmd);
 	}
 }

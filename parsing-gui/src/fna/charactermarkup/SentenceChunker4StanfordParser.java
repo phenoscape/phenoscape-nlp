@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdom.Attribute;
@@ -123,7 +124,7 @@ public class SentenceChunker4StanfordParser {
 		}
 	}
 
-	public ChunkedSentence chunkIt(){
+	public ChunkedSentence chunkIt() throws Exception{
 		//ArrayList<Relation> results = new ArrayList<Relation>();
 		//check to see if the tree used the POS tag provided by markedsent, if not, return empty list.
 		//if(POSMatch()){
@@ -174,9 +175,7 @@ public class SentenceChunker4StanfordParser {
 					extractFromlVBs(lVBs);
 					
 				}while(VBs.size() > 0);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+			
 		//}
 		collapseThatClause();//that, which
 		collapseWhereClause();//where
@@ -184,6 +183,10 @@ public class SentenceChunker4StanfordParser {
 		
 		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.tableprefix,this.conn, this.glosstable);
 		return cs;
+			}catch(Exception e){
+				e.printStackTrace();
+				throw e;
+			}
 	}
 	
 	/**
@@ -431,7 +434,7 @@ end procedure
 		WordNetWrapper wnw = new WordNetWrapper(theverb);
 		
 		if(!sureverb && (theverb.length()<2 || theverb.matches("\\b(\\w+ly|ca)\\b") 
-		   ||wnw.mostlikelyPOS()== null || wnw.mostlikelyPOS().compareTo("verb") !=0)){ //text of V is not a word, e.g. "x"
+		   /*||wnw.mostlikelyPOS()== null || wnw.mostlikelyPOS().compareTo("verb") !=0*/)){ //text of V is not a word, e.g. "x"
 			collapseElement(VP, "", "");
 			return;
 		}
@@ -654,15 +657,16 @@ end procedure
 				return e.getAttributeValue("text");
 			}
 			Iterator<Content> it = e.getDescendants();
-			boolean takeit = false;
+			//boolean takeit = false;
+			//String text = ""; collecting all text before the first NP
 			while(it.hasNext()){
 				Content c = it.next();
 				if(c instanceof Element){
 					String name = ((Element)c).getName();
 					if(name.startsWith("NN")){//TODO: consider also CD(3) and PRP (them): no, let ChunkedSentence fix those cases
 						Element p = ((Element)c).getParentElement();
-						//return allText(p);
-						return checkAgainstMarkedSent(allText(p), lastIdIn(p));
+						return allText(p);
+						//return checkAgainstMarkedSent(allText(p), lastIdIn(p));
 					}
 					if(name.startsWith("NP") && ((Element)c).getAttributeValue("text") != null){//already collapsed NPs
 						return ((Element)c).getAttributeValue("text");
@@ -670,6 +674,8 @@ end procedure
 					if(((Element)c).getAttribute("text") != null && ((Element)c).getAttributeValue("text").indexOf(" o[")>=0){
 						return ((Element)c).getAttributeValue("text");
 					}
+					//text += ((Element) c).getAttribute("text")!=null? ((Element) c).getAttributeValue("text"): "" ;
+					//text = text.trim()+" ";
 				}
 			}
 		}catch(Exception ex){
@@ -958,14 +964,16 @@ end procedure
 		if(e == null){
 			return;
 		}
-		chunk = chunk.trim().replaceAll("\\s*\\w\\[\\]\\s*", "").replaceAll("\\s+", " ").trim(); //remove o[]
-		String pattern = chunk.trim().replaceAll("\\w\\[", "(\\\\w\\\\[)*\\\\b").replaceAll("\\]", "\\\\b(\\\\])*");
+		chunk = chunk.trim().replaceAll("\\s*\\w\\[\\]\\s*", "").replaceAll("\\s+", " ").trim(); //remove empty o[]
+		//add .replaceFirst("\\] o\\[", "\\\\] .*? o\\\\[") so the pattern matches anything in btw of prep/verb and its object
+		String pattern = chunk.trim().replaceFirst("\\] o\\[", "](.*?) o[").replaceAll("\\w\\[", "(?:\\\\w\\\\[)*\\\\b").replaceAll("\\]", "\\\\b(?:\\\\])*");
 		
 		// collapsed text is saved to e
 		// keeping other children of e as e's children
 
 		//determine the id for the new chunked element
-		//detach any leaf element encountered along the path
+		//detach any leaf element encountered along the path =>tobedeleted
+		//collecting all text along the path into "text"		
 		String id = "";
 		String chunktext = chunk.length() ==0 ? allText(e) : chunk;//if chunk is "", then collapse all text/child nodes 
 		chunktext = chunktext.trim().replaceAll("(\\w\\[|\\])", "");
@@ -979,7 +987,7 @@ end procedure
 				if(c instanceof Element){
 					if(((Element)c).getAttribute("id") != null){
 						if(id.compareTo("")==0)
-							id = ((Element)c).getAttributeValue("id");	
+							id = ((Element)c).getAttributeValue("id");	//take the starting index to be used for the clasped text
 					}
 					if(((Element)c).getAttribute("text") != null){
 						String t = ((Element)c).getAttributeValue("text");
@@ -1021,8 +1029,24 @@ end procedure
 		}			
 		//format text
 		if(chunk.length()>0){//if chunk is "", then collapse all text/child nodes without inserting symbols 
-			text = text.replaceFirst(pattern, symbol+
-					"["+chunk+"]"); //this replacement may have no effect on text because the chunk does not consist of consecutive words.
+			if(chunk.contains("] o[")){
+				//chunk: v[covered] o[r[p[by] o[l[skin or plates]]]]
+				//text: covered entirely r[p[by] o[l[skin or plates]]]  
+				//after text: b[v[covered] entirely o[r[p[by] o[l[skin or plates]]]]  
+				Pattern p = Pattern.compile(pattern);
+				Matcher m = p.matcher(text.trim());
+				if(m.matches()){
+					String extra = m.group(1).trim();
+					if(extra.length()>0) text = symbol+"["+chunk.replaceFirst("\\] o\\[", "] "+extra+" o[")+"]";
+					else text = symbol+"["+chunk+"]";
+				}
+			}else{//text: even with, chunk: with
+				String chunkstring = chunk.replaceAll("(\\w+\\[|\\])", "");
+				text = text.replaceAll(chunkstring,  symbol+"["+chunk+"]");
+			}
+			//old code			
+			//text = text.replaceFirst(pattern, symbol+
+			//		"["+chunk+"]"); //this replacement may have no effect on text because the chunk does not consist of consecutive words.
 		}
 		//set id and text for e
 		Attribute a = e.getAttribute("text");

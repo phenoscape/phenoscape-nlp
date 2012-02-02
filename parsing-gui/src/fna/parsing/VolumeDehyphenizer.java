@@ -49,60 +49,31 @@ public class VolumeDehyphenizer extends Thread {
     
     public VolumeDehyphenizer(ProcessListener listener, String workdir, 
     		String todofoldername, String database, 
-    		Display display, Text perlLog, String dataPrefix, /*Table descriptorTable,*/ MainForm mainForm) {
+    		Display display, Text perlLog, String dataPrefix,  MainForm mainForm) {
         this.listener = listener;
-        //this.database = database;
         /** Synchronizing UI and background process **/
         this.display = display;
         this.perlLog = perlLog;
         this.dataPrefix = dataPrefix;
-        //this.descriptorTable = descriptorTable;
         this.mainForm = mainForm;
         this.glossaryTableName = mainForm.glossaryPrefixCombo.getText();
         this.vmdb = new VolumeMarkupDbAccessor(dataPrefix, this.glossaryTableName);
         
-        //this.tablename = dataPrefix+"_allwords";
-        
-        /*this.glossary = new Glossary(new File(Registry.ConfigurationDirectory + "FNAGloss.txt"), 
-        		true, this.database, dataPrefix);*/
         this.glossary = new Glossary(this.glossaryTableName);
-        //workdir = workdir.endsWith("/")? workdir : workdir+"/";
-        //folder = new File(workdir+todofoldername);
-        //outfolder = new File(workdir+ApplicationUtilities.getProperty("DEHYPHENED"));
-        //if(!outfolder.exists()){
-        //    outfolder.mkdir();
-        //}
-        
-        /*try{
-            if(conn == null){
-                Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
-                String URL = ApplicationUtilities.getProperty("database.url");
-                conn = DriverManager.getConnection(URL);
-                //createNumTextMixTable();
-                createWordTable();
-            }
-        }catch(Exception e){
-        	LOGGER.error("Database is down! (VolumeDehyphenizer)", e);
-            e.printStackTrace();
-        }*/
-     
-        this.dhf = new DeHyphenAFolder(listener,workdir,todofoldername, database, this,  dataPrefix, this.glossaryTableName, glossary);
+        //dehypen step is not needed for NeXML files
+        //this.dhf = new DeHyphenAFolder(listener,workdir,todofoldername, database, this,  dataPrefix, this.glossaryTableName, glossary);
     }
 
     public void run () {
     	listener.setProgressBarVisible(true);
-    	//System.out.println("Preparing files...");
-    	//showPerlMessage("Preparing files...");
-       	boolean done = dhf.dehyphen();//dhf waits for all unmatched brackets are fixed.
-    	if(done){
+       	//boolean done = dhf.dehyphen();//dhf waits for all unmatched brackets are fixed.
+    	//if(done){
     		VolumeMarkup vm = new VolumeMarkup(listener, display, perlLog, dataPrefix, this.glossaryTableName);
     		resetPerlMessage(); //clean up perlLog box
     		vm.markup();
     		listener.setProgressBarVisible(false);
-    	}
-		//loadStructureTab(); //done in markup already
-		//loadDescriptorTab();
-		//loadOthersTab();
+    	//}
+
     }
     
     /*private void loadOthersTab() {

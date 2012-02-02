@@ -16,6 +16,9 @@
 
 package fna.db;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -57,6 +60,8 @@ public class VolumeMarkupDbAccessor {
     	try {
     			Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
     			conn = DriverManager.getConnection(url);
+    			//createAllWordsTable();
+    			
     	} catch (Exception e) {
     				// TODO Auto-generated catch block
     			LOGGER.error("Couldn't find Class in MainFormDbAccessor" + e);
@@ -65,8 +70,91 @@ public class VolumeMarkupDbAccessor {
     		
 	
     }
-	
     
+    
+//	private void createAllWordsTable(){
+//        try{
+//            Statement stmt = conn.createStatement();
+//            stmt.execute("drop table if exists "+this.tablePrefix+"_allwords");
+//            String query = "create table if not exists "+this.tablePrefix+"_allwords (word varchar(150) unique not null primary key, count int, word varchar(150), inbrackets int default 0)";
+//            stmt.execute(query);	           
+//        }catch(Exception e){
+//        	LOGGER.error("Problem in VolumeDehyphenizer:createWordTable", e);
+//            e.printStackTrace();
+//        }
+//    }
+	
+    /**
+     * check for unmatched brackets too.
+     */
+//    private void fillInWords(){
+//        try {
+//            Statement stmt = conn.createStatement();
+//            ResultSet rs = null;
+//            File sourcefolder = new File(ApplicationUtilities.getProperty("DESCRIPTIONS"));
+//            File[] flist = sourcefolder.listFiles();
+//            int total = flist.length;
+//            for(int i= 0; i < flist.length; i++){
+//                BufferedReader reader = new BufferedReader(new FileReader(flist[i]));
+//                String line = null; 
+//                StringBuffer sb = new StringBuffer();
+//                while ((line = reader.readLine()) != null) {
+//                    line = line.replaceAll(System.getProperty("line.separator"), " ");
+//                    sb.append(line);
+//                }
+//                reader.close();
+//                String text = sb.toString();
+//                text = text.toLowerCase();
+//                text = text.replaceAll("<[^<]+?>", " ");
+//                text = text.replaceAll("\\d", " ");
+//                text = text.replaceAll("\\(", " ( ");
+//                text = text.replaceAll("\\)", " ) ");
+//                text = text.replaceAll("\\[", " [ ");
+//                text = text.replaceAll("\\]", " ] ");
+//                text = text.replaceAll("\\{", " { ");
+//                text = text.replaceAll("\\}", " } ");
+//                text = text.replaceAll("\\s+", " ").trim();
+//                String[] words = text.split("\\s+");
+//                int lround = 0;
+//                int lsquare = 0;
+//                int lcurly = 0;
+//                int inbracket = 0;
+//                for(int j = 0; j < words.length; j++){
+//                    String w = words[j].trim();
+//                    if(w.compareTo("(")==0) lround++;
+//                    else if(w.compareTo(")")==0) lround--;
+//                    else if(w.compareTo("[")==0) lsquare++;
+//                    else if(w.compareTo("]")==0) lsquare--;
+//                    else if(w.compareTo("{")==0) lcurly++;
+//                    else if(w.compareTo("}")==0) lcurly--;
+//                    else{
+//                    	w = w.replaceAll("[^-a-z]", " ").trim();
+//                        if(w.matches(".*?\\w.*")){
+//                        	if(lround+lsquare+lcurly > 0){
+//                        		inbracket = 1;
+//                        	}else{
+//                        		inbracket = 0;
+//                        	}
+//                            int count = 1;
+//                            rs = stmt.executeQuery("select word, count, inbrackets from "+this.tablePrefix+"_allwords where word='"+w+"'");
+//                            if(rs.next()){ //normal word exist
+//                                count += rs.getInt("count");
+//                                inbracket *= rs.getInt("inbrackets");
+//                            }
+//                            stmt.execute("delete from "+this.tablePrefix+"_allwords where word ='"+w+"'");
+//                            stmt.execute("insert into "+this.tablePrefix+"_allwords (word, count, inbrackets) values('"+w+"', "+count+","+inbracket+")");
+//                        }
+//                    }
+//                }
+//                //listener.progress(5+i*45/total);
+//            }
+//            rs.close();
+//            stmt.close();
+//        } catch (Exception e) {
+//        	LOGGER.error("Problem in VolumeDehyphenizer:fillInWords", e);
+//            e.printStackTrace();
+//        }
+//    }
     /**
      * display learned new structures in structures subtab in step 4 (perl markup) for curation.
      * @param tagList
@@ -78,8 +166,25 @@ public class VolumeMarkupDbAccessor {
     	PreparedStatement stmt = null;
     	ResultSet rs = null;
 		try {
+	 		String filter1 = "";
+	 		String filter2 = "";
+	 		String filter3 = "";
+			Statement stmt1 = conn.createStatement();
+			ResultSet rs1 = stmt1.executeQuery("show tables");
+			while(rs1.next()){
+				if(rs1.getString(1).compareToIgnoreCase(ApplicationUtilities.getProperty("NONEQTABLE"))==0){
+					filter1 = " and tag not in (select word from "+ ApplicationUtilities.getProperty("NONEQTABLE")+") ";
+					filter2 = " and plural not in (select word from "+ ApplicationUtilities.getProperty("NONEQTABLE")+") ";
+					filter3 = " and word not in (select word from "+ ApplicationUtilities.getProperty("NONEQTABLE")+") ";
+				}
+			}
+	 		rs1.close();
+	 		stmt1.close();
+
 			String sql = "select distinct tag as structure from "+this.tablePrefix+"_sentence where tag != 'unknown' and tag is not null and tag not like '% %' " +
+			filter1 +
 			"union select distinct plural as structure from "+this.tablePrefix+"_singularplural"+","+ this.tablePrefix+"_sentence where singular=tag "+
+			filter2 +
 			"order by structure"; 		
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
@@ -87,7 +192,9 @@ public class VolumeMarkupDbAccessor {
 				String tag = rs.getString("structure");
 				populateCurationList(tagList, tag); //select tags for curation
 			}
-			sql = "select distinct word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos in ('p', 's') and saved_flag !='red' order by word";
+			sql = "select distinct word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos in ('p', 's', 'n') and saved_flag !='red' "+
+			filter3+/*" and word in (select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+") "+*/
+			" order by word";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
@@ -129,22 +236,34 @@ public class VolumeMarkupDbAccessor {
      * @throws ParsingException
      * @throws SQLException
      */
-    public ArrayList<String> contentTerms4Curation(List <String> curationList) throws  ParsingException, SQLException {
-    	
-    	PreparedStatement stmt = null;
+    public ArrayList<String> contentTerms4Curation(List <String> curationList, ArrayList<String> structures, ArrayList<String> characters) throws  ParsingException, SQLException {
+     	PreparedStatement stmt = null;
     	ResultSet rs = null;
-		 
 	 	try {
-			
-			String sql = "select dhword from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+
-			" where count>=3 and inbrackets=0 and dhword not like '%\\_%' and " +
-			" dhword not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where saved_flag='red') and" +
-			" dhword not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+") order by dhword";
+	 		String filter = "";
+			Statement stmt1 = conn.createStatement();
+			ResultSet rs1 = stmt1.executeQuery("show tables");
+			while(rs1.next()){
+				if(rs1.getString(1).compareToIgnoreCase(ApplicationUtilities.getProperty("NONEQTABLE"))==0){
+					filter = " and word not in (select word from "+ ApplicationUtilities.getProperty("NONEQTABLE")+") ";
+				}
+			}
+	 		rs1.close();
+	 		stmt1.close();
+	 		
+	 		String sql = "select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+
+			//" where count>=3 and inbrackets=0 and word not like '%\\_%' and " +
+			" where word not like '%\\_%' and " +		
+			" word not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where saved_flag='red')"+
+			filter +
+			" and word not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+") order by word";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
-				String word = rs.getString("dhword");
-				populateCurationList(curationList, word);
+				String word = rs.getString("word");
+				if(!structures.contains(word) && !characters.contains(word)){
+					populateCurationList(curationList, word);
+				}
 			}
 			return this.deduplicateSort(curationList);
 		} catch (SQLException sqlexe) {
@@ -199,9 +318,22 @@ public class VolumeMarkupDbAccessor {
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
 		try {
-		
+	 		String filter = "";
+			Statement stmt1 = conn.createStatement();
+			ResultSet rs1 = stmt1.executeQuery("show tables");
+			while(rs1.next()){
+				if(rs1.getString(1).compareToIgnoreCase(ApplicationUtilities.getProperty("NONEQTABLE"))==0){
+					filter = " and word not in (select word from "+ ApplicationUtilities.getProperty("NONEQTABLE")+") ";
+				}
+			}
+	 		rs1.close();
+	 		stmt1.close();
+	 		
+	 		String sql = "select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos=? and saved_flag !='red' "+
+	 				filter/*+" and word in (select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+") "*/+
+                    " order by word";
 			//stmt = conn.prepareStatement("select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos=? and word not in (select distinct term from "+this.glossarytable+")");
-			stmt = conn.prepareStatement("select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos=? and saved_flag !='red' order by word");
+			stmt = conn.prepareStatement(sql);
 			stmt.setString(1, "b");
 			rset = stmt.executeQuery();
 			if (rset != null) {
@@ -277,7 +409,7 @@ public class VolumeMarkupDbAccessor {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select * from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where word='"+w+"' and semanticrole='"+role+"'");
 			if(!rs.next()){
-				stmt.execute("insert into "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" values ('"+w+"','"+role+"')");
+				stmt.execute("insert into "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+"(word, semanticrole) values ('"+w+"','"+role+"')");
 			}
 		} catch (SQLException exe) {
 			LOGGER.error("Error in adding a word to wordroles table" +
@@ -381,7 +513,7 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 		ArrayList<String> originals = new ArrayList<String>();
 		try{
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select originalsent from "+tablePrefix+"_"+ApplicationUtilities.getProperty("SENTENCTTABLE"));
+			ResultSet rs = stmt.executeQuery("select originalsent from "+tablePrefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE"));
 			while(rs.next()){
 				originals.add(rs.getString("originalsent"));
 			}

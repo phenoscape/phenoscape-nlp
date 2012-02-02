@@ -134,16 +134,73 @@ public class Test {
 		result = result.replaceFirst("value", modifiers+" value").replaceAll("\\s+", " ");
 		return result;
 	}
+	
+	private String normalizeCountList(String str) {
+		ArrayList<String> chunkedtokens = new ArrayList<String>(Arrays.asList(str.split("\\s+"))); 	
+		String countp = "one|two|three|four|five|six|seven|eight|nine|ten|more|fewer";
+		Pattern p = Pattern.compile("(\\b(?:"+countp+") (?:or|to) (?:"+countp+")\\b)");
+		Matcher m = p.matcher(str);
+		while(m.find()){
+			int start = m.start(1);
+			int end = m.end(1);
+			String count = m.group(1);
+			String rcount = "{count~list~"+count.replaceAll(" ","~")+"}";
+			//synchronise this.chunkedtokens
+			//split by single space to get an accurate count to elements that would be in chunkedtokens
+			int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
+			chunkedtokens.set(index, rcount);
+			int num = count.split("\\s+").length;
+			for(int i = index+1; i < index+num; i++){
+				chunkedtokens.set(i, "");
+			}
+			//resemble the str from chunkedtokens, counting all empty elements, so the str and chunkedtokens are in synch.
+			str = "";
+			for(String t: chunkedtokens){
+				str +=t+" ";
+			}
+			m = p.matcher(str);
+		}
+		return str.replaceAll("\\s+", " ").trim();
+		
+	}
+	
+	private String normalizeSharedOrganObject(String object) {
+		// TODO Auto-generated method stub
+		if(object.matches(".*?\\b(and|or)\\b.*")){
+			String norm = "";
+			String[] segs = object.split("\\s+");
+			String lastN = segs[segs.length-1].replaceAll("\\]+$", "").trim();
+			for(int i= segs.length-1; i>=0; i--){
+				norm = segs[i]+" "+norm;
+				if(segs[i].matches("(,|and|or)") && !segs[i-1].contains("(")){
+					norm = lastN+" "+norm;
+				}
+				if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
+					lastN = segs[i-1].trim();
+				}
+			}
+			return norm;
+		}
+		
+		return object;
+	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		Test t = new Test();
+		String object = "o[the {frontal} , the (sphenotic) ({spine}) and the (flower)]";
+		object = t.normalizeSharedOrganObject(object);
+		System.out.println(object);
+		//String str = "epural bones two or more present";
+		//str = t.normalizeCountList(str);
+		//System.out.println(str);
 		
-		System.out.println(
+		
+		//System.out.println(
 		//t.addSentmod("{distal} (face)", "distal [basal leaf]")
-		t.combineModifiers("<character name=\"n\" modifier=\"a\" value=\"c\"/>")
-		);
+		//t.combineModifiers("<character name=\"n\" modifier=\"a\" value=\"c\"/>")
+		//);
 		//String text = "that often do not overtop the heads";
 		//t.breakText(text);
 	}

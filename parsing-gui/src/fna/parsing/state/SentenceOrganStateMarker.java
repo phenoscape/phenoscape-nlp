@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+
 import fna.charactermarkup.ChunkedSentence;
 import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
@@ -42,12 +45,16 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	private String ignoredstrings = "if at all|at all|as well";
+	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of|";
 	//private ArrayList<String> order = new ArrayList<String>();
+	private Display display;
+	private StyledText charLog;
 	/**
 	 * 
 	 */
-	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn) {
+	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn, Display display, StyledText charLog) {
+		this.display = display;
+		this.charLog = charLog;
 		this.tableprefix = tableprefix;
 		this.conn = conn;
 		this.glosstable = glosstable;
@@ -55,7 +62,7 @@ public class SentenceOrganStateMarker {
 		try{
 				Statement stmt = conn.createStatement();
 				stmt.execute("drop table if exists "+this.tableprefix+"_markedsentence");
-				stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text)");
+				stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text, type varchar(20))");
 				//stmt.execute("update "+this.tableprefix+"_sentence set charsegment =''");
 				colors = this.colorsFromGloss();
 		}catch(Exception e){
@@ -69,8 +76,23 @@ public class SentenceOrganStateMarker {
 			Statement stmt = conn.createStatement();
 			//ResultSet rs = stmt.executeQuery("select source, tag, originalsent from "+this.tableprefix+"_sentence");
 			ResultSet rs = stmt.executeQuery("select source, modifier, tag, sentence, originalsent from "+this.tableprefix+"_sentence order by sentid desc");
-			String dittos = "";
-			//merge ditto sentences with previous sentences
+			//leave ditto as it is
+			while(rs.next()){//read sent in in reversed order
+				String tag = rs.getString("tag");
+				String sent = rs.getString("sentence").trim();
+				if(sent.length()!=0){
+				String source = rs.getString("source");
+				String osent = rs.getString("originalsent");
+				String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
+				text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
+				text = text.replaceAll("&#176;", "°");
+				text = text.replaceAll("\\bca\\s*\\.", "ca");
+				text = rs.getString("modifier")+"##"+tag+"##"+text;
+				sentences.put(source, text);
+				}
+			}
+			//merge ditto sentences with previous sentences: this had the drawback of attaching nearest organ as the subject of the ditto sentence
+			/*String dittos = "";
 			while(rs.next()){//read sent in in reversed order
 				String tag = rs.getString("tag");
 				String sent = rs.getString("sentence");
@@ -93,7 +115,7 @@ public class SentenceOrganStateMarker {
 					Statement st = conn.createStatement();
 					st.execute("update "+this.tableprefix+"_sentence set originalsent='"+osent+"' where source='"+source+"'");
 				}
-			}
+			}*/
 			//collect adjnouns
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("SELECT distinct modifier FROM "+this.tableprefix+"_sentence s where modifier != \"\" and tag like \"[%\"");
@@ -145,6 +167,7 @@ public class SentenceOrganStateMarker {
 		if(this.marked){
 			loadMarked();
 		}else{
+			this.showOutputMessage("System is preparing the sentences...");
 			//Iterator<String> it = order.iterator();
 			//while(it.hasNext()){				
 			Enumeration<String> en = sentences.keys();
@@ -160,14 +183,16 @@ public class SentenceOrganStateMarker {
 					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+")\\b", "");
 					taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
+				
 				System.out.println(taggedsent);
 				sentences.put(source, taggedsent);
 				try{
 					Statement stmt1 = conn.createStatement();
-					ResultSet rs = stmt1.executeQuery("select sentid from "+this.tableprefix+"_sentence where source='"+source+"'");
+					ResultSet rs = stmt1.executeQuery("select sentid, type from "+this.tableprefix+"_sentence where source='"+source+"'");
 					if(rs.next()){
 						int id = rs.getInt("sentid");
-						stmt1.execute("insert into "+this.tableprefix+"_markedsentence (sentid, source, markedsent) values("+id+",'"+source+"', '"+taggedsent+"')");
+						String type = rs.getString("type");
+						stmt1.execute("insert into "+this.tableprefix+"_markedsentence (sentid, source, markedsent, type) values("+id+",'"+source+"', '"+taggedsent+"', '"+type+"')");
 					}
 				}catch(Exception e){
 					e.printStackTrace();
@@ -221,6 +246,7 @@ public class SentenceOrganStateMarker {
 	 * @return
 	 */
 	private String fixInner(String source, String taggedsent, String tag) {
+		this.showOutputMessage("System is rewriting some sentences...");
 		String fixed = "";
 		String copysent = taggedsent;
 		boolean needfix = false;
@@ -504,6 +530,24 @@ public class SentenceOrganStateMarker {
 		}
 		return colors.toString().replaceFirst("\\|$", "");
 	}
+	
+    private void resetOutputMessage() {
+		if(display==null)return;
+		display.syncExec(new Runnable() {
+			public void run() {
+				if(charLog!=null) charLog.setText("");
+			}
+		});
+	}
+    
+	private void showOutputMessage(final String message) {
+		if(display==null)return;
+		display.syncExec(new Runnable() {
+			public void run() {
+				if(charLog!=null) charLog.append(message+"\n");
+			}
+		});
+	}
 
 	/**
 	 * @param args
@@ -530,7 +574,7 @@ public class SentenceOrganStateMarker {
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav5", "fnaglossaryfixed", true);
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "biocreative_nexml", "fishglossaryfixed", true, null, null);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 		sosm.markSentences();

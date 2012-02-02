@@ -15,6 +15,7 @@
  */
 package fna.db;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,8 +24,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
@@ -70,6 +74,17 @@ public class MainFormDbAccessor {
 		} 
 	}
 	
+	public void createNonEQTable(){
+		//noneqterms table is refreshed for each data collection
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE"));
+			stmt.execute("create table if not exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+" (term varchar(100) not null, source varchar(200), savedid varchar(40))");
+			stmt.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * change pos for these removedtags to 'b' in wordpos table
 	 * @param removedTags
@@ -829,22 +844,24 @@ public class MainFormDbAccessor {
 	 * @param terms
 	 */
 	public void saveTermRole
-		(ArrayList<String> terms, String role)throws SQLException {
+		(ArrayList<String> terms, String role, UUID last, UUID current)throws SQLException {
 		//Connection conn = null;
-		PreparedStatement stmt = null;
+		PreparedStatement pstmt = null;
 		String tablePrefix = MainForm.dataPrefixCombo.getText();
 		try {
 			//conn = DriverManager.getConnection(url);
 			String wordrolesable = tablePrefix+ "_"+ApplicationUtilities.getProperty("WORDROLESTABLE");
-			
-			stmt = conn.prepareStatement("Insert into "+wordrolesable+" (word,semanticrole) values (?,?)");
+			Statement stmt = conn.createStatement();
+			stmt.execute("delete from "+wordrolesable+" where savedid='"+last.toString()+"'");
+			stmt.close();
+			pstmt = conn.prepareStatement("Insert into "+wordrolesable+" (word,semanticrole, savedid) values (?,?, ?)");
 			//stmt = conn.prepareStatement("Update "+postable+" set saved_flag ='green' where word = ?");
 			for (String term : terms) {
-				stmt.setString(1, term);
-				stmt.setString(2, role);	
-			//	stmt.setString(3,"green");
+				pstmt.setString(1, term);
+				pstmt.setString(2, role);	
+				pstmt.setString(3, current.toString());
 				try {
-					stmt.execute();
+					pstmt.execute();
 				} catch (Exception exe) {
 				 if (!exe.getMessage().contains("Duplicate entry")) {
 					 throw exe;
@@ -857,8 +874,8 @@ public class MainFormDbAccessor {
 			exe.printStackTrace();
 		} finally {
 			
-			if (stmt != null) {
-				stmt.close();
+			if (pstmt != null) {
+				pstmt.close();
 			}
 			
 			//if (conn != null) {
@@ -868,17 +885,46 @@ public class MainFormDbAccessor {
 		}		
 	}
 
-	public void removeDescriptorData_markRed(ArrayList<String> words) throws SQLException {
+	public void recordNonEQTerms(ArrayList<String> words, UUID last, UUID current) throws SQLException {
 		//Connection conn = null;
 		PreparedStatement pstmt = null ;
 		String tablePrefix = MainForm.dataPrefixCombo.getText();
 		try {
-			//conn = DriverManager.getConnection(url);
-			pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red' where pos=? and word=?");
+			Statement stmt = conn.createStatement();
+			if(last!=null){
+				//clean up last saved info
+				stmt.execute("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag = '' where savedid='"+last.toString()+"'");
+			}
+			if(current==null){
+			//set flag in pos table
+				//pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red' where pos=? and word=?");
+				pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red' where word=?");
+			}else{
+				//pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red', savedid='"+current.toString()+"' where pos=? and word=?");
+				pstmt = conn.prepareStatement("update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+ " set saved_flag ='red', savedid='"+current.toString()+"' where word=?");
+			}
 			for (String word : words) {
-				pstmt.setString(1, "b");
-				pstmt.setString(2, word);
+				//pstmt.setString(1, "b");
+				//pstmt.setString(2, word);
+				pstmt.setString(1, word);
 				pstmt.addBatch();
+			}
+			pstmt.executeBatch();
+			//insert words in noneqterms table	
+			//clean up last saved info
+			if(last!=null){
+				stmt.execute("delete from "+tablePrefix+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+ " where savedid='"+last.toString()+"'");
+			}
+			if(last!=null){
+				pstmt = conn.prepareStatement("insert into "+tablePrefix+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+ "(term, source, savedid) values(?, ?, ?)");
+			}else{
+				pstmt = conn.prepareStatement("insert into "+tablePrefix+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE")+ "(term, source) values(?, ?)");
+			}
+			for (String word : words) {
+					pstmt.setString(1, word);
+					pstmt.setString(2, tablePrefix);
+					if(current!=null) pstmt.setString(3, current.toString());
+					pstmt.addBatch();
 			}
 			pstmt.executeBatch();
 		} catch (SQLException exe){
@@ -934,7 +980,7 @@ public class MainFormDbAccessor {
 			//conn = DriverManager.getConnection(url);
 			stmt = conn.createStatement();
 			stmt.execute("drop table if exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE"));
-			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+ " (word varchar(50), semanticrole varchar(2), primary key(word, semanticrole))");			
+			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+ " (word varchar(50), semanticrole varchar(2), savedid varchar(40), primary key(word, semanticrole))");			
 		} catch (SQLException exe){
 			LOGGER.error("Exception in MainFormDbAccessor", exe);
 			exe.printStackTrace();
@@ -966,54 +1012,42 @@ public class MainFormDbAccessor {
 			//Class.forName(driverPath);
 			//conn = DriverManager.getConnection(url);
 			String tablePrefix = MainForm.dataPrefixCombo.getText();
-			String sql = "select source,sentence from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"'  or tag = '"+word+"'";
+			String sql = "select source,originalsent from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"'  or tag = '"+word+"'";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			context.cut();
 			String text = "";
+			int count = 0;
 			while (rs.next()) { //collect sentences
+				count++;
 				String src = rs.getString("source");
-				String sentence = rs.getString("sentence");
-				text += src+"::"+sentence+"\r\n";
+				String sentence = rs.getString("originalsent");
+				text += count+": "+sentence+" ["+src+"] \r\n";
 				//System.out.println(src+"::"+sentence+" \r\n");
 				//context.append(src+"::"+sentence+" \r\n");
 			}	
 			//format sentences
 			ArrayList<StyleRange> srs = new ArrayList<StyleRange>();
-			int length = word.length();
-			String placeholder = "";
-			for(int i = 0; i < length; i++){
-				placeholder +="#";
+			String[] tokens = text.split("\\s");
+			int currentindex = 0;
+			for(String token: tokens){
+				if(token.contains(word)){
+					StyleRange sr = new StyleRange();
+					sr.start = currentindex;
+					sr.length = word.length();
+					sr.fontStyle = SWT.BOLD;
+					srs.add(sr);
+				}else if(token.matches("^\\[.*?\\]$")){
+					StyleRange sr = new StyleRange();
+					sr.start = currentindex;
+					sr.length = token.length();
+					sr.foreground = MainForm.grey;
+					srs.add(sr);
+				}
+				currentindex +=token.length() + 1;				
 			}
-			String textcopy = text;
-			while(text.indexOf(word)>=0){
-				int start = text.indexOf(word);
-				text=text.replaceFirst(word, placeholder);
-				StyleRange sr = new StyleRange();
-				sr.start = start;
-				sr.length = length;
-				sr.fontStyle = SWT.BOLD;
-				srs.add(sr);
-			}
-			context.append(textcopy);
+			context.append(text);
 			context.setStyleRanges(srs.toArray(new StyleRange[]{}));
-			
-			
-				/*int start = context.getText().length();
-				StyleRange styleRange = new StyleRange();
-				styleRange.start = start;
-				styleRange.length = sentence.length();
-				context.setStyleRange(styleRange);*/
-				/*contextStyledText.append(sentence + "\r\n");
-				if (Integer.parseInt(sid) == sentid) {
-					StyleRange styleRange = new StyleRange();
-					styleRange.start = start;
-					styleRange.length = sentence.length();
-					styleRange.fontStyle = SWT.BOLD;
-					// styleRange.foreground = display.getSystemColor(SWT.COLOR_BLUE);
-					contextStyledText.setStyleRange(styleRange);
-				}*/
-			//}
 		} catch (SQLException exe) {
 			LOGGER.error("Couldn't execute db query in MainFormDbAccessor:updateContextData", exe);
 			exe.printStackTrace();

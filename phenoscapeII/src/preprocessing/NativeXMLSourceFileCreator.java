@@ -24,26 +24,23 @@ import org.jdom.output.XMLOutputter;
 /**
  * @author Hong Updates
  *This class reads character statements from database, 
- *output XML files, one for each character statement
+ *output 1 XML file containing character statements
  *<treatment><character><description> 
- *The XML files will be used as Type 3 source files for the Parser 
+ *The XML file will be used as Type 3 source file for CharaParser and its transformer is CharacterStatementsTransformer4NativeXML
  */
-public class SourceXMLFileCreator {
+public class NativeXMLSourceFileCreator {
 	private File output;
 	private Connection conn;
-	private String database;
 	private String sourcetable;
-	private String tableprefix;
-	private static String username="phenoscape";
-	private static String password="pheno!scape";
-
-	private static StringBuffer text = new StringBuffer();
+	private static String username="root";
+	private static String password="root";
+	private static String nonEnglish="Bockmann 1998|Di Dario 1999|Shibatta 1998";
 	
 
 	/**
 	 * constructor
 	 */
-	public SourceXMLFileCreator(String tablename, String outputdir, String database, String tableprefix) {
+	public NativeXMLSourceFileCreator(String tablename, String outputdir, String database, String tableprefix) {
 		this.output = new File(outputdir);		
 		if(output.exists()){
 			File[] all = this.output.listFiles();
@@ -51,9 +48,7 @@ public class SourceXMLFileCreator {
 				all[i].delete();
 			}
 		}
-		
-		this.database = database;
-		this.tableprefix = tableprefix;
+		//the sourcetable must have:source (pdf_charnumber), pdf, charnumber, characterr, sentence columns
 		this.sourcetable = tableprefix+"_"+tablename;
 		try{
 			if(conn == null){
@@ -66,41 +61,42 @@ public class SourceXMLFileCreator {
 		}
 	}
 
-	public void outputXMLFiles(){
+	public void outputXMLFile(){
 		try{			
+			String srcf = output.getName();
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select distinct source from "+this.sourcetable);
+			Element root = new Element("treatment"); //save all in one file to reduce I/O overhead for subsequent process
 			while(rs.next()){
 				String src = rs.getString("source");
+				if(src.matches("("+this.nonEnglish+").*")) continue;
 				Statement stmt1 = conn.createStatement();
 				String q = "select distinct characterr, sentence from "+this.sourcetable+" where source='"+src+"'";
 				ResultSet rs1 = stmt1.executeQuery(q);
 				boolean ch = false;
-				Element root = new Element("treatment");
 				StringBuffer sb = new StringBuffer();
+				int count = 1;
 				while(rs1.next()){//one character + n sentences
 					if(!ch){
 						Element chara = new Element("character");
+						chara.setAttribute("pid", srcf+".txtp"+src.trim().replaceAll("\\s+", "_")); //this is how ids in each tag should be set: sourcefilename+".txtp"+additionalID
 						chara.setText(rs1.getString("characterr").trim());
 						root.addContent(chara);
 						ch = true;
 					}
 					String sent = rs1.getString("sentence").trim();
-					sent = sent.matches("[\\.;]$")? sent : sent+";"; 
-					sb.append(sent+" ");
+					//sent = sent.matches("[\\.;]$")? sent : sent+";"; 
+					Element descr = new Element("description");
+					descr.setAttribute("pid", srcf+".txtp"+src.trim().replaceAll("\\s+", "_")+"_s"+(count++));
+					descr.setText(sent);
+					root.addContent(descr);
 				}
-				Element descr = new Element("description");
-				String text = sb.toString().trim();
-				text = text.matches("[\\.;]$")? text : text+"."; 
-				descr.setText(text);
-				root.addContent(descr);
-				root.detach();
-				//output doc
-				XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
-				String filename = src.replaceAll(" ", "")+".xml";
-				out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(this.output, filename))));
-				System.out.println("Write "+filename);
+				System.out.println("Write "+src);				
 			}
+			root.detach();
+			//output doc
+			XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
+			out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(this.output, output.getName()+".xml"))));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -171,12 +167,22 @@ public class SourceXMLFileCreator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//the sourcetable must have:source(pdf_charnumber), pdf, charnumber, characterr, sentence columns
+		
+		/*String output = "Z:\\DATA\\phenoscape\\subcontract\\core-fish\\fish\\source";
+		String tableprefix = "fish";*/
+		/*String output = "Z:\\DATA\\phenoscape\\subcontract\\archosaur\\source";
+		String tableprefix = "archosaur";
+		
 		String source = "original";
-		String output = "Z:\\DATA\\phenoscape\\subcontract\\fish\\source";
-		String database = "phenoscape";
-		String tableprefix = "fish";
-		SourceXMLFileCreator sfc = new SourceXMLFileCreator(source, output, database, tableprefix);
-		sfc.outputXMLFiles();
+		String database = "phenoscape";*/
+		String output = "Z:\\DATA\\phenotype\\source";
+		String tableprefix = "phenotype";
+		
+		String source = "test";
+		String database = "markedupdatasets";
+		NativeXMLSourceFileCreator sfc = new NativeXMLSourceFileCreator(source, output, database, tableprefix);
+		sfc.outputXMLFile();
 	}
 
 }
