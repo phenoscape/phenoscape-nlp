@@ -1,17 +1,14 @@
 package owlaccessor;
 
-import java.io.File;
+//import java.io.File;
 import java.sql.*;
-import java.util.Set;
+import java.util.Calendar;
+//import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
 /**
- * This class extract relationships among and keywords of all terms in PATO to
- * two database tables named patorelations and patokeywords in database
- * phenoscpae. These two tables will be used in future mapping of concepts to
- * PATO terms
- * 
+ * This class extract all terms, their IDs and synonyms in PATO to database. 
  * @author Zilong Chang
  * 
  * */
