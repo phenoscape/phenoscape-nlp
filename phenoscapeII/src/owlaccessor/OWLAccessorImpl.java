@@ -22,7 +22,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  * relationships among terms in PATO using OWL API. Keywords, synonyms, and
  * parents of a term could be retrieved by giving the term.
  * 
- * TAO: http://berkeleybop.org/ontologies/tao.owl PATO:
+ * TAO: http://berkeleybop.org/ontologies/tao.owl
  * PATO: http://purl.obolibrary.org/obo/pato.owl
  * 
  * @author Zilong Chang, Hong Cui
