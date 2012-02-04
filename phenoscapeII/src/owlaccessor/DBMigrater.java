@@ -14,9 +14,6 @@ import org.semanticweb.owlapi.model.OWLClass;
  * */
 public class DBMigrater {
 
-	/**
-	 * @param args
-	 */
 	private Connection con;
 
 	private String url = "http://purl.obolibrary.org/obo/pato.owl";
