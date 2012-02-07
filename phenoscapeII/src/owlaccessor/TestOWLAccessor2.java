@@ -50,9 +50,11 @@ public class TestOWLAccessor2 {
 //	
 	@Test
 	public void testRetriveConcept(){
-		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		
-		List<OWLClass> l =  a.retrieveConcept("dslfhsfhaskhskaf");
+		//http://purl.obolibrary.org/obo/tao.owl
+		//OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		OWLAccessor a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl");
+		//List<OWLClass> l =  a.retrieveConcept("? fth ceratobranchial");
+		List<OWLClass> l =  a.retrieveConcept("round");
 		
 		System.out.println(l.size());
 		

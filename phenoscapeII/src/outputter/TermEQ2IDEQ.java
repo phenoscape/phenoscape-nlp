@@ -111,7 +111,7 @@ public class TermEQ2IDEQ {
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set entityid='"+id+"' where entity='"+entityterm+"'");
 			stmt.execute("update "+this.outputtable+" set entitylocatorid='"+id+"' where entitylocator='"+entityterm+"'");
-			stmt.execute("update "+this.outputtable+" set qualifymodifierid='"+id+"' where qualitymodifier='"+entityterm+"'");			
+			stmt.execute("update "+this.outputtable+" set qualitymodifierid='"+id+"' where qualitymodifier='"+entityterm+"'");			
 		}catch(Exception e){
 			e.printStackTrace();
 		}

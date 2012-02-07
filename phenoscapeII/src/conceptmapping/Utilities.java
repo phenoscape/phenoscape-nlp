@@ -25,13 +25,13 @@ public class Utilities {
 		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
 		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
 		qualityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl");
-
-		/*entityOntoPaths = new ArrayList<String>();
+		 
+		/*
 		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
 		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/skeletal/obo/vertebrate_anatomy.obo");
 		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo");
-		qualityOntoPaths = new ArrayList<String>();
-		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");*/
+		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
+		*/
 	}
 	
 
@@ -49,6 +49,7 @@ public class Utilities {
 			for(String qonto: qualityOntoPaths){
 				if(qonto.endsWith(".owl")){
 					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(qonto));
+					//OWLAccessorImpl owlapi = new OWLAccessorImpl(qonto);
 					String[] result = searchOWLOntology(term, owlapi, type);
 					if(result!=null){
 						added = true;
@@ -66,6 +67,7 @@ public class Utilities {
 			for(String eonto: entityOntoPaths){
 				if(eonto.endsWith(".owl")){
 					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(eonto));
+					//OWLAccessorImpl owlapi = new OWLAccessorImpl(eonto);
 					String[] result = searchOWLOntology(term, owlapi, type);
 					if(result!=null){
 						added = true;

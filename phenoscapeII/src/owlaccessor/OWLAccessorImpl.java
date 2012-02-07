@@ -103,7 +103,6 @@ public class OWLAccessorImpl implements OWLAccessor {
 					if (syn && !label.contains(con)) {
 						System.out.println("syn+:" + con);
 					}
-					break;
 				}
 			}
 		} catch (Exception e) {
@@ -223,7 +222,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 	
 	@Override
 	public String getLabel(OWLClass c) {
-		OWLAnnotation label = (OWLAnnotation) this.getLabels(c).toArray()[0];
+		Object[] labels = this.getLabels(c).toArray();
+		if(labels.length==0) return "";
+		OWLAnnotation label = (OWLAnnotation)labels[0];
 		return this.getRefinedOutput(label.getValue().toString());
 	}
 	
