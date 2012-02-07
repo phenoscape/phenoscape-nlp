@@ -212,8 +212,8 @@ my $bptn = "([,;:\\.]*\$|,*[bm]|(?<=[pon]),*q)"; #grouped #when following a p, a
 my $SEGANDORPTN = "(?:".$mptn."?".$nptn.")"; #((?:[mq],?)*&?(?:m|q(?=p))?)((?:[np],?)*&?[np])
 my $ANDORPTN = "^(?:".$SEGANDORPTN."[,&]+)*".$SEGANDORPTN.$bptn;
 
-my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
-
+#my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
+my $IGNOREPTN ="(IGNOREPTN)"; #disabled
 my $stop = $NounHeuristics::STOP;
 
 #prepare database
@@ -321,6 +321,7 @@ discover("normal");
 my $test = $dbh->prepare('use '.$db)
 or die "Program terminates unexpected due to: ".$dbh->errstr."\n";
 $test->execute() or die $test->errstr."\n";
+
 print stdout "Additional bootstrappings:\n";
 additionalbootstrapping();
 
