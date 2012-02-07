@@ -44,6 +44,8 @@ public class ChunkedSentence {
 	private String text = null;
 	private String sentsrc = null;
 	private String tableprefix = null;
+	public static final String binaryTvalues = "true|yes|usually";
+	public static final String binaryFvalues = "false|no|rarely";
 	public static final String locationpp="near|from";
 	public static final String units= "cm|mm|dm|m|meter|meters|microns|micron|unes|µm|um";
 	public static final String percentage="%|percent";
@@ -58,6 +60,7 @@ public class ChunkedSentence {
 	public static final String prepositions = "above|across|after|along|among|amongst|around|as|at|before|behind|beneath|between|beyond|by|for|from|in|into|near|of|off|on|onto|out|outside|over|than|throughout|to|toward|towards|up|upward|with|without";
 	public static final String stop = "a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|was|were|what|when|where|which|why|with|within|without|would";
 	public static final String skip = "and|becoming|if|or|that|these|this|those|to|what|when|where|which|why|not|throughout";
+	public static final String positionprep = "part_of|in|on|between";
 	public static Hashtable<String, String> eqcharacters = new Hashtable<String, String>();
 	private boolean inSegment = false;
 	private boolean rightAfterSubject = false;
@@ -150,7 +153,8 @@ public class ChunkedSentence {
 			if(treetoken[i].matches("^\\S+~list~\\S+")){//r[p[of] o[{architecture~list~smooth~or~barbellulate~to~plumose} (bristles)]]
 				//String[] parts = treetoken[i].split("~list~");
 				//treetoken[i] = parts[0]+"["+parts[1]+"]"; 
-				treetoken[i] = treetoken[i].replace("~list~", "[{").replaceAll("\\{(?=\\w{2,}\\[)", "").replaceAll("(?<=~[a-z0-9-]{2,40})(\\}| |$)","}]");
+				//treetoken[i] = treetoken[i].replace("~list~", "[{").replaceAll("\\{(?=\\w{2,}\\[)", "").replaceAll("(?<=~[a-z0-9-]{2,40})(\\}| |$)","}]");
+				treetoken[i] = treetoken[i].replace("~list~", "[{").replaceAll("\\{(?=\\w{2,}\\[)", "").replaceAll("(?<=~[a-z0-9-]{1,40})(\\}| |$)","}]");
 			}
 		}		
 		for(i= 0; i<treetoken.length; i++){
@@ -390,7 +394,7 @@ public class ChunkedSentence {
 				}
 			}			
 			/*end mohan*/
-			if(t.matches("\\{\\w+\\}") || t.contains("~list~")){
+			if(t.matches("\\{[\\w-]+\\}")|| t.matches("\\d+") || t.contains("~list~")){
 				chunk = t+" "+chunk;
 				foundm = true;
 			}else if(!foundm && (t.endsWith(">") ||t.endsWith(")") )){ //if m o m o, collect two chunks
@@ -1178,7 +1182,7 @@ public class ChunkedSentence {
 	 * move pointer after lead in chunkedtokens
 	 * @param lead
 	 */
-	public void skipLead(String[] tobeskipped){
+	public int skipLead(String[] tobeskipped){
 		int wcount = 0;
 		if(tobeskipped[tobeskipped.length-1].compareTo("chromosome")==0){
 			for(int i = 0; i<this.chunkedtokens.size(); i++){
@@ -1192,16 +1196,18 @@ public class ChunkedSentence {
 			//do not skip
 		}else{
 			int sl = tobeskipped.length;
+			boolean find = false;
 			for(int i = 0; i<this.chunkedtokens.size(); i++){
 				//chunkedtokens may be a list: shape[{shape~list~planoconvex~to~ventribiconvex~subquadrate~to~subcircular}]
 				/*wcount += (this.chunkedtokens.get(i)+" a").replaceAll(",", "or").replaceAll("\\b(or )+", "or ")
 				.replaceFirst("^.*?~list~", "").replaceAll("~", " ")
 				.trim().split("\\s+").length-1;*/
-				if(this.chunkedtokens.get(i).trim().length()>0) wcount ++;
-				//if(this.chunkedtokens.get(i).matches(".*?\\b"+tobeskipped[sl-1]+".*") && wcount>=sl){
-				if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+".*") && wcount>=sl){//try to match <phyllaries> to phyllary, "segement I", i is 1-character long
+				if(this.chunkedtokens.get(i).trim().length()>0) wcount++;
+				//if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+".*") && wcount>=sl){//try to match <phyllaries> to phyllary, "segement I", i is 1-character long
+				if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+"\\S*") && wcount>=sl){//use \\S* so "leaves" not match b[v[leaves] o[(preopercle)]]
 					if(wcount==sl){
 						this.pointer = i;
+						find = true;
 					}else{
 						//if wcount > sl, then there must be some extra words that have been skipped
 						//put those words in chunkedtokens for process
@@ -1215,12 +1221,16 @@ public class ChunkedSentence {
 							this.chunkedtokens.add(i++, ",");
 						}
 						this.pointer = save;
+						find = true;
 					}
 					break;
 				}
 			}
-			this.pointer++;
+			//this.pointer++;
+			if(find) this.pointer++;
 		}
+		if(this.pointer==0){return -1;}
+		return 1;
 	}
 
 	public boolean hasNext(){
@@ -2180,7 +2190,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 								this.subjecttext=formatSubject(subject.trim(), taggedtext);
 								if(subject.length()>0){
 									//skipLead(subject.replaceAll("[\\[\\]{}()]", "").split("\\s+"));
-									skipLead(subject.split("\\s+"));
+									int skip = skipLead(subject.split("\\s+"));
+									if(skip==-1) this.subjecttext=null; //subject search failed.
 									break;
 								}
 							}else{
@@ -2273,6 +2284,13 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			}else{
 				formatted += t+" ";
 			}
+		}
+		formatted = formatted.trim();
+		//make sure the last word is in (), in case the word was not tagged with<> in taggedtext
+		if(!formatted.endsWith(")")){
+			int lasti = formatted.lastIndexOf(" ")<0 ? 0 : formatted.lastIndexOf(" ");
+			String lastw = formatted.substring(lasti).replaceAll("\\W", "").trim();
+			formatted = formatted.replaceAll(lastw, "("+lastw+")");
 		}
 		return formatted.replaceAll("[{(]and[)}]", "and").replaceAll("[{(]or[)}]", "or").replaceAll("\\{\\}", "").replaceAll("\\s+", " ").trim();
 	}

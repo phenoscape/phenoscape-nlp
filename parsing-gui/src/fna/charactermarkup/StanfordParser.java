@@ -390,22 +390,22 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	public static String ratio2number(String sent){
 		String small = "<?\\{?\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
 		String big = "<?\\{?\\b(?:half|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)s?\\b\\}?>?";
-		//ratio
+		//ratio 2 number
 		Pattern ptn = Pattern.compile("(.*?)("+small+"\\s*-?_?\\s*"+big+")(.*)");
 		Matcher m = ptn.matcher(sent);
 		while(m.matches()){
 			String ratio = m.group(2);
-			ratio = toRatio(ratio);
+			ratio = toRatio(ratio); //one half => 1/2
 			sent = m.group(1)+ratio+m.group(3);
 			m = ptn.matcher(sent);
 		}
-		//number
-		small = "<?\\{?\\b(?:two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
+		//number 2 number
+		small = "<?\\{?\\b(?:one|two|three|four|five|six|seven|eight|nine)\\b\\}?>?";
 		ptn = Pattern.compile("(.*?)("+small+")(.*)");
 		m = ptn.matcher(sent);
 		while(m.matches()){
 			String number = m.group(2);
-			number = toNumber(number);
+			number = toNumber(number); //two =>2
 			sent = m.group(1)+number+m.group(3);
 			m = ptn.matcher(sent);
 		}
@@ -413,16 +413,18 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		return sent;
 	}
 
-	public static String toNumber(String ratio){
-		ratio = ratio.replaceAll("<?\\{?\\btwo\\b\\}?>?", "2");
-		ratio = ratio.replaceAll("<?\\{?\\bthree\\b\\}?>?", "3");
-		ratio = ratio.replaceAll("<?\\{?\\bfour\\b\\}?>?", "4");
-		ratio = ratio.replaceAll("<?\\{?\\bfive\\b\\}?>?", "5");
-		ratio = ratio.replaceAll("<?\\{?\\bsix\\b\\}?>?", "6");
-		ratio = ratio.replaceAll("<?\\{?\\bseven\\b\\}?>?", "7");
-		ratio = ratio.replaceAll("<?\\{?\\beight\\b\\}?>?", "8");
-		ratio = ratio.replaceAll("<?\\{?\\bnine\\b\\}?>?", "9");
-		return ratio;
+	public static String toNumber(String number){
+		number = number.replaceAll("\\s+", " ").trim();
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bone\\b\\}?>?", "1");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\btwo\\b\\}?>?", "2");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bthree\\b\\}?>?", "3");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bfour\\b\\}?>?", "4");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bfive\\b\\}?>?", "5");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bsix\\b\\}?>?", "6");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bseven\\b\\}?>?", "7");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\beight\\b\\}?>?", "8");
+		number = number.replaceAll("(?<!\\bthe\\s)<?\\{?\\bnine\\b\\}?>?", "9");
+		return number;
 	}
 	
 	public static String toRatio(String ratio){

@@ -158,7 +158,7 @@ public class SentenceChunker4StanfordParser {
 						}
 					}
 					extractFromlPPINs(lPPINs);
-				}while (PPINs.size() > 0+0);	
+				}while (PPINs.size() > 0);	
 				
 				//get remaining VBs
 				List<Element> VBs = Vpath.selectNodes(root);
