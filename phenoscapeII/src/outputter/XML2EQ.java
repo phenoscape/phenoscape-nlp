@@ -162,7 +162,7 @@ public class XML2EQ {
 			ArrayList<Hashtable<String, String>> problems = new ArrayList<Hashtable<String,String>>();
 			for(Hashtable<String,String> EQ: allEQs){
 				if(EQ.get("stateid").compareTo(stateid)==0){
-					if(this.related2KeyEntity(EQ.get("entity"))){
+					if(this.related2KeyEntity(EQ.get("entity")) || this.related2KeyEntity(EQ.get("entitylocator"))){
 						problems = new ArrayList<Hashtable<String, String>>(); //passed, reset problems
 						break;
 					}else{
