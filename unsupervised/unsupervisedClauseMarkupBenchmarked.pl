@@ -212,8 +212,8 @@ my $bptn = "([,;:\\.]*\$|,*[bm]|(?<=[pon]),*q)"; #grouped #when following a p, a
 my $SEGANDORPTN = "(?:".$mptn."?".$nptn.")"; #((?:[mq],?)*&?(?:m|q(?=p))?)((?:[np],?)*&?[np])
 my $ANDORPTN = "^(?:".$SEGANDORPTN."[,&]+)*".$SEGANDORPTN.$bptn;
 
-my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
-
+#my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
+my $IGNOREPTN ="(IGNOREPTN)"; #disabled
 my $stop = $NounHeuristics::STOP;
 
 #prepare database
@@ -528,12 +528,12 @@ sub importfromkb{
 	#	$sth2->execute();
 	#}
 
-	$stmt1 = "select distinct structure from ".$kb.".learnedstructures where structure !='' and not isnull(structure)";
+	$stmt1 = "select distinct structure, pos from ".$kb.".learnedstructures where structure !='' and not isnull(structure)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
-	while($w = $sth1->fetchrow_array()){
+	while(my($w, $pos) = $sth1->fetchrow_array()){
 		if($w !~ /\w/ || $w =~/\b(?:$FORBIDDEN)\b/){next;}
-		$stmt2 ="insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values(\"$w\",\"n\",\"\",1,1)";
+		$stmt2 ="insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values('$w','".$pos."','',1,1)";
 		$sth2 = $dbh->prepare($stmt2);
 		$sth2->execute();
 	}
