@@ -4556,12 +4556,14 @@ public class MainForm {
 				if(Utilities.mustBeVerb(word, this.conn, prefix) || Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
 					//if(Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
 						noneqwords.add(word);
+						//sentences with those tags should be marked as unknown for later review
 					//}					
 					continue;
 				}
 				filteredwords.add(word);
 			}
 			mainDb.recordNonEQTerms(noneqwords, null, null);
+			mainDb.setUnknownTags(noneqwords);
 			words = null;
 		}catch(Exception e){
 			e.printStackTrace();
