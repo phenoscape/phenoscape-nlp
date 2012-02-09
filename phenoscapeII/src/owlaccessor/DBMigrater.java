@@ -9,6 +9,8 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 /**
  * This class extract all terms, their IDs and synonyms in PATO to database. 
+ * 
+ * TEST TEST TEST
  * @author Zilong Chang
  * 
  * */
