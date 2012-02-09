@@ -13,9 +13,9 @@ import org.semanticweb.owlapi.model.OWLClass;
  * TEST TEST TEST
  * 
 
- * Hong Test Again
+ * Hong Test Again Again Again
 
- * Will this cause a conflict???????????????????????
+ * Will this cause a conflict
  * 
  * @author Zilong Chang
  * 
