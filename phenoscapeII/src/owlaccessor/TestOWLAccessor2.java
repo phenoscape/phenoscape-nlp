@@ -49,7 +49,7 @@ public class TestOWLAccessor2 {
 //	}
 //	
 	@Test
-	public void testRetriveConcept(){
+	public void testRetriveConcept()
 		//http://purl.obolibrary.org/obo/tao.owl
 		//OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
 		OWLAccessor a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl");
@@ -58,8 +58,16 @@ public class TestOWLAccessor2 {
 		
 		System.out.println(l.size());
 		
+		System.out.println(a.getID(a.getClassByLabel("tooth")));
 		
+	}
+	
+	@Test
+	public void testGetID(){
+		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		List<OWLClass> l =  a.retrieveConcept("shape");
 		
+		System.out.println("("+a.getLabel(l.get(0))+", "+a.getID(l.get(0))+")");//output the (term, id) pair. 
 	}
 
 }

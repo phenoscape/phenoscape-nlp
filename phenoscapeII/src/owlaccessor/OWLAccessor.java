@@ -20,6 +20,7 @@ public interface OWLAccessor {
 	
 	/**
 	 * Retrieve the classes representing exact matched or related terms (synonyms) of the given concept from PATO
+	 * When there is no such a term, return and empty list.
 	 * @param con - the given concept
 	 * @return a list of matched or related terms (synonyms)
 	 */
@@ -53,12 +54,17 @@ public interface OWLAccessor {
 	public List<String> getParentsLabels(OWLClass c);
 	
 	/**
-	 *Retrieve all offsprings of a term. 
+	 *Retrieve all offspring terms of a term. 
 	 */
 	public Set<String> getAllOffSprings(OWLClass c);
 	
 	/**
-	 *Retrieve class by label.
+	 *Retrieve OWLClass by label.
 	 */
 	public OWLClass getClassByLabel(String l);
+	
+	/**
+	 * Retrive ID of an OWLClass
+	 */
+	public String getID(OWLClass c);
 }
