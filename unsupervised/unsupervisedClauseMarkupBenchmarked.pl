@@ -498,7 +498,7 @@ sub importfromkb{
 	}
 
 
-	$stmt1 = "select distinct word from ".$kb.".learnedboundarywords where word !='' and not isnull(word)";
+	$stmt1 = "select distinct word from ".$kb.".learnedboundarywords_ini_pato_singleword where word !='' and not isnull(word)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
 	while($w = $sth1->fetchrow_array()){
@@ -507,8 +507,9 @@ sub importfromkb{
 		$sth2 = $dbh->prepare($stmt2);
 		$sth2->execute();
 	}
-
-	$stmt1 = "select distinct modifier from ".$kb.".learnedmodifiers where modifier !='' and not isnull(modifier)";
+	
+	#modifer table is empty
+	$stmt1 = "select distinct modifier from ".$kb.".learnedmodifiers_initial where modifier !='' and not isnull(modifier)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
 	while($w = $sth1->fetchrow_array()){
@@ -528,7 +529,7 @@ sub importfromkb{
 	#	$sth2->execute();
 	#}
 
-	$stmt1 = "select distinct structure, pos from ".$kb.".learnedstructures where structure !='' and not isnull(structure)";
+	$stmt1 = "select distinct structure, pos from ".$kb.".learnedstructurewords_ini_onto_lastword where structure !='' and not isnull(structure)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
 	while(my($w, $pos) = $sth1->fetchrow_array()){

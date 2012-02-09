@@ -1,6 +1,7 @@
 package owlaccessor;
 
 //import java.io.File;
+import java.io.File;
 import java.sql.*;
 import java.util.Calendar;
 //import java.util.Set;
@@ -8,14 +9,8 @@ import java.util.Calendar;
 import org.semanticweb.owlapi.model.OWLClass;
 
 /**
- * This class extract all terms, their IDs and synonyms in PATO to database. 
+ * This class extracts all terms, their IDs and synonyms from PATO to database. 
  * 
- * TEST TEST TEST
- * 
-
- * Hong Test Again Again Again
-
- * Will this cause a conflict
  * 
  * @author Zilong Chang
  * 
@@ -23,10 +18,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 public class DBMigrater {
 
 	private Connection con;
-
-	private String url = "http://purl.obolibrary.org/obo/pato.owl";
-	// "C:/Users/Zilong Chang/Documents/WORK/Ontology/pato.owl";
-
+	private String url;
 	private String dburl = "jdbc:mysql://localhost:3306/";
 	private String uname = "termsuser";
 	private String upw = "termspassword";
@@ -53,7 +45,7 @@ public class DBMigrater {
 	 * @param dbName Name of the existed database (assume database is already created)
 	 * @param tabName Desirable name of the table to be created
 	 */
-	public void migrate(String dbName, String tabName) {
+	public void migrate(String dbName, String tabName, String ontoURI) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
@@ -72,9 +64,14 @@ public class DBMigrater {
 						+ "synonym varchar(100)" + ")");
 
 				Statement stmt = con.createStatement();
-				
+				this.url = ontoURI;
 				//create the accessor to the pato on web 
-				OWLAccessor oa = new OWLAccessorImpl(url);
+				OWLAccessor oa = null;
+				if(url.startsWith("http")){
+					oa = new OWLAccessorImpl(url);
+				}else{
+					oa = new OWLAccessorImpl(new File(url));
+				}
 				
 				//for each pato term
 				for (OWLClass c : oa.getAllClasses()) {
@@ -115,7 +112,15 @@ public class DBMigrater {
 
 	public static void main(String[] args) {
 		DBMigrater dbm = new DBMigrater();
-		dbm.migrate("tozilong", "test1");
+		//String url = "http://purl.obolibrary.org/obo/pato.owl";
+		//String tname = "ontoPATO";
+		//String url = "http://purl.obolibrary.org/obo/tao.owl";
+		//String tname = "ontoTAO";
+		//String url = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.owl";
+		//String tname = "ontoVAO";		
+		String url = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.owl";
+		String tname = "ontoAMAO";
+		dbm.migrate("phenoscape", tname, url);
 		System.out.println("DONE!");
 
 	}
