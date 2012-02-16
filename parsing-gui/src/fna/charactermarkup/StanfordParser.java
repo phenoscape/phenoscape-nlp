@@ -104,7 +104,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				String str = rs.getString(2);
 				String type = rs.getString(3);
 				//TODO: may need to fix "_"
-				//if(src.compareTo("56.txt-7")!=0) continue;
+				//if(src.compareTo("Sereno_2009.xml_339da433-55ca-40fe-8a24-ca6cde52348e.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
@@ -539,8 +539,11 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_parsedsentences.txt";
 		
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+
+		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_test_posedsentences.txt";
+		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_test_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
@@ -551,8 +554,10 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "plazi_ant_first", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
+		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_test", "fishglossaryfixed", false);
 
+		
 		//sp.POSTagging();
 		//sp.parsing();
 		sp.extracting();

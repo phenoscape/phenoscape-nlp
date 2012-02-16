@@ -416,7 +416,22 @@ public class ChunkedSentence {
 		for(int j = i+1; j <last; j++){
 			this.chunkedtokens.set(j, "");
 		}
-		this.chunkedtokens.set(last, chunk);
+		while(i>=0 && this.chunkedtokens.get(i).length()==0){
+			i--;
+		}
+		//if the previous nonempty chunk ends with a (), then merge this new u[] with the ()
+		if(i>=0 && this.chunkedtokens.get(i).matches(".*\\)\\W*\\]$")){
+			chunk = "("+chunk.replaceAll("(\\w+\\[|\\])", "").replaceAll(" ", ") (")+")";
+			chunk = chunk.replaceAll("\\(+", "(").replaceAll("\\)+", ")");
+			String previous = this.chunkedtokens.get(i);
+			String p1 = previous.substring(0, previous.lastIndexOf(")")+1);
+			previous = previous.replace(p1, p1+" "+chunk);
+		    this.chunkedtokens.set(i, previous);
+		    this.chunkedtokens.set(last, "");
+		}else{
+			//otherwise
+			this.chunkedtokens.set(last, chunk);
+		}
 		if(this.printRecover){
 			System.out.println("nsorgan chunk formed: "+chunk +" for \n"+this.sentid+"["+this.sentsrc+"]"+this.markedsent);
 		}

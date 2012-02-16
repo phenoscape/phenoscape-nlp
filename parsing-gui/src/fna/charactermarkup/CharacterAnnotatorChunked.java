@@ -83,7 +83,9 @@ public class CharacterAnnotatorChunked {
 			}
 			this.lifestyle = lifestyle.replaceFirst("\\|$", "");
 			
-			rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character'");
+			rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
+					"union "+
+					"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
 			while(rs.next()){
 				this.characters += rs.getString(1)+"|";
 			}
@@ -116,11 +118,13 @@ public class CharacterAnnotatorChunked {
 		if(ids.length>1){
 			stateid = ids[1];
 		}
+		boolean isstate = false;
 		this.statement.setAttribute("statement_type", "character");
 		this.statement.setAttribute("character_id", charaid);
 		if(stateid != null){
 			this.statement.setAttribute("statement_type", "character_state");
 			this.statement.setAttribute("state_id", stateid);
+			isstate = true;
 		}
 		this.statement.setAttribute("seg_id", segid);
 		
@@ -134,14 +138,17 @@ public class CharacterAnnotatorChunked {
 		if(subject==null && cs.getPointer()==0){
 			Chunk ck = cs.nextChunk();
 			cs.resetPointer();
+			establishSubject("(whole_organism)");
+			/*if(ck instanceof ChunkVP){	
+				establishSubject("(whole_organism)");
+			}
 			if(ck instanceof ChunkPrep){	//check if the first chunk is a preposition chunk. If so make the subjects and the latest elements from the previous sentence empty.
 				establishSubject("(whole_organism)");
-				//write code to make the latestelements nil
-				//this.latestelements = new ArrayList<Element>();
+
 			}
 			if(ck instanceof ChunkSimpleCharacterState){//setup a "whole_organism" placeholder
 				establishSubject("(whole_organism)");
-			}
+			}*/
 			annotateByChunk(cs, false);
 		}//end mohan code
 		else if(subject.equals("measurements")){
@@ -209,7 +216,10 @@ public class CharacterAnnotatorChunked {
 			if(this.statement.getChildren().size()==1){//holding a <text> element alone
 				String text = this.statement.getChildText("text");
 				if(!text.matches("("+ChunkedSentence.binaryTvalues+"|"+ChunkedSentence.binaryFvalues+")")){//non binary states
-					Element str = new Element("whole_organism"); //whole_organism as a placeholder
+					Element str = new Element("structure"); //whole_organism as a placeholder
+					str.setAttribute("id", this.structid+"");
+					this.structid++;
+					str.setAttribute("name", "whole_organism");					
 					Element ch = new Element("character");
 					ch.setAttribute("name", "unknown"); //TODO: unknown as a placeholder
 					ch.setAttribute("value", text.trim());
@@ -2394,7 +2404,7 @@ public class CharacterAnnotatorChunked {
 		}
 		//mohan code ends.
 		
-		w = w.replaceAll("\\W", "");
+		//w = w.replaceAll("\\W", ""); //don't turn frontal-postorbital to frontalpostorbital
 		String ch = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, this.glosstable, tableprefix);
 		if(ch!=null && ch.matches(".*?_?(position|insertion|structure_type|life_stage|functionality)_?.*") && w.compareTo("low")!=0) return "type";
 		String sw = Utilities.toSingular(w);
