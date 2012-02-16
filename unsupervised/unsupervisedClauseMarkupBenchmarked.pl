@@ -3579,7 +3579,22 @@ sub annotateSent{
 	$o =~ s#\b($NONS)\b##g; #4/20/09
 	$n =~ s#\|+#|#g; #4/20/09
 	$o =~ s#\|+#|#g; #4/20/09
-
+	
+	#make sure |M| is not in $b
+	$z =~ s#\b[ZONMB]\b##g;
+	$o =~ s#\b[ZONMB]\b##g;
+	$n =~ s#\b[ZONMB]\b##g;
+	$m =~ s#\b[ZONMB]\b##g;
+	$b =~ s#\b[ZONMB]\b##g;
+	$b1 =~ s#\b[ZONMB]\b##g;
+	
+	$z =~ s#\|+#|#g; #4/20/09
+	$o =~ s#\|+#|#g; #4/20/09
+	$n =~ s#\|+#|#g; #4/20/09
+	$m =~ s#\|+#|#g; #4/20/09
+	$b =~ s#\|+#|#g; #4/20/09
+	$b1 =~ s#\|+#|#g; #4/20/09
+		
 	$sent =~ s#\b($z)\b#<Z>\1</Z>#g if $z =~ /\w/; #6/02/09
 	$sent =~ s#\b($o)\b#<O>\1</O>#g if $o =~ /\w/;
 	$sent =~ s#\b($n)\b#<N>\1</N>#g if $n =~ /\w/;
