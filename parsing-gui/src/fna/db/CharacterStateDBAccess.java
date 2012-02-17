@@ -54,41 +54,33 @@ public class CharacterStateDBAccess {
 	
 	public void getDecisionCategory(ArrayList<String> decisions) throws SQLException {
 		
-		//Connection conn = null;
+		decisions.add("character");
+		decisions.add("feature");
+		decisions.add("functionality");
+		decisions.add("position");
+	/*
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
-		try {
-			
-				//conn = DriverManager.getConnection(url);
+		try {			
 				String tablePrefix = MainForm.dataPrefixCombo.getText();
-				
-				//String sql = "SELECT distinct category FROM " + tablePrefix+"_character order by category";
 				String sql = "SELECT distinct category FROM "+this.glossarytable+" order by category";
 				stmt = conn.prepareStatement(sql);
 				rset = stmt.executeQuery();
 				while(rset.next()) {
 					decisions.add(rset.getString(1));
-				}
-				
-				
+				}								
 		} catch (Exception exe) {
 			LOGGER.error("Couldn't execute db query in CharacterStateDBAccess:getDecisionCategory", exe);
-			exe.printStackTrace();
-			
+			exe.printStackTrace();			
 		} finally {
 			if (rset != null) {
 				rset.close();
-			}
-			
+			}			
 			if (stmt != null) {
 				stmt.close();
-			}
-			
-			//if (conn != null) {
-			//	conn.close();
-			//}
-			
+			}			
 		}
+		*/
 	}
 	
 	public ArrayList<TermsDataBean> getTerms(String group) throws SQLException {
@@ -118,7 +110,7 @@ public class CharacterStateDBAccess {
 				tbean.setTerm2(rset.getString("cooccurTerm"));
 				tbean.setFrequency(rset.getInt("frequency"));
 				String files = rset.getString("sourceFiles");
-				String [] sourceFiles = files.split(",");
+			String [] sourceFiles = files.split(",");
 				tbean.setSourceFiles(sourceFiles);
 				tbean.setKeep(rset.getString("keep"));
 				coOccurrences.add(tbean);

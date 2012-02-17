@@ -212,8 +212,8 @@ my $bptn = "([,;:\\.]*\$|,*[bm]|(?<=[pon]),*q)"; #grouped #when following a p, a
 my $SEGANDORPTN = "(?:".$mptn."?".$nptn.")"; #((?:[mq],?)*&?(?:m|q(?=p))?)((?:[np],?)*&?[np])
 my $ANDORPTN = "^(?:".$SEGANDORPTN."[,&]+)*".$SEGANDORPTN.$bptn;
 
-my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
-
+#my $IGNOREPTN = "(assignment|resemb[a-z]+|like [A-Z]|similar|differs|differ|revision|genus|family|suborder|species|specimen|order|superfamily|class|known|characters|characteristics|prepared|subphylum|assign[a-z]*|available|nomen dubium|said|topotype|1[5-9][0-9][0-9])";
+my $IGNOREPTN ="(IGNOREPTN)"; #disabled
 my $stop = $NounHeuristics::STOP;
 
 #prepare database
@@ -498,7 +498,7 @@ sub importfromkb{
 	}
 
 
-	$stmt1 = "select distinct word from ".$kb.".learnedboundarywords where word !='' and not isnull(word)";
+	$stmt1 = "select distinct word from ".$kb.".learnedboundarywords_ini_pato_singleword where word !='' and not isnull(word)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
 	while($w = $sth1->fetchrow_array()){
@@ -507,8 +507,9 @@ sub importfromkb{
 		$sth2 = $dbh->prepare($stmt2);
 		$sth2->execute();
 	}
-
-	$stmt1 = "select distinct modifier from ".$kb.".learnedmodifiers where modifier !='' and not isnull(modifier)";
+	
+	#modifer table is empty
+	$stmt1 = "select distinct modifier from ".$kb.".learnedmodifiers_initial where modifier !='' and not isnull(modifier)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
 	while($w = $sth1->fetchrow_array()){
@@ -528,12 +529,12 @@ sub importfromkb{
 	#	$sth2->execute();
 	#}
 
-	$stmt1 = "select distinct structure from ".$kb.".learnedstructures where structure !='' and not isnull(structure)";
+	$stmt1 = "select distinct structure, pos from ".$kb.".learnedstructurewords_ini_onto_lastword where structure !='' and not isnull(structure)";
 	$sth1 = $dbh->prepare($stmt1);
 	$sth1->execute() or die $sth1->errstr."\n";
-	while($w = $sth1->fetchrow_array()){
+	while(my($w, $pos) = $sth1->fetchrow_array()){
 		if($w !~ /\w/ || $w =~/\b(?:$FORBIDDEN)\b/){next;}
-		$stmt2 ="insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values(\"$w\",\"n\",\"\",1,1)";
+		$stmt2 ="insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values('$w','".$pos."','',1,1)";
 		$sth2 = $dbh->prepare($stmt2);
 		$sth2->execute();
 	}
@@ -3578,7 +3579,22 @@ sub annotateSent{
 	$o =~ s#\b($NONS)\b##g; #4/20/09
 	$n =~ s#\|+#|#g; #4/20/09
 	$o =~ s#\|+#|#g; #4/20/09
-
+	
+	#make sure |M| is not in $b
+	$z =~ s#\b[ZONMB]\b##g;
+	$o =~ s#\b[ZONMB]\b##g;
+	$n =~ s#\b[ZONMB]\b##g;
+	$m =~ s#\b[ZONMB]\b##g;
+	$b =~ s#\b[ZONMB]\b##g;
+	$b1 =~ s#\b[ZONMB]\b##g;
+	
+	$z =~ s#\|+#|#g; #4/20/09
+	$o =~ s#\|+#|#g; #4/20/09
+	$n =~ s#\|+#|#g; #4/20/09
+	$m =~ s#\|+#|#g; #4/20/09
+	$b =~ s#\|+#|#g; #4/20/09
+	$b1 =~ s#\|+#|#g; #4/20/09
+		
 	$sent =~ s#\b($z)\b#<Z>\1</Z>#g if $z =~ /\w/; #6/02/09
 	$sent =~ s#\b($o)\b#<O>\1</O>#g if $o =~ /\w/;
 	$sent =~ s#\b($n)\b#<N>\1</N>#g if $n =~ /\w/;

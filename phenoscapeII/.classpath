@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="/parsing-gui/lib/jdom.jar"/>
 	<classpathentry kind="lib" path="/parsing-gui/lib/saxpath.jar"/>
 	<classpathentry kind="lib" path="/parsing-gui/lib/mysql-connector-java-5.0.8-bin.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/parsing-gui"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

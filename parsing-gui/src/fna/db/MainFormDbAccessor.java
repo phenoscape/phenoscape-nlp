@@ -263,32 +263,38 @@ public class MainFormDbAccessor {
 		}
 	}
 	
+	/**
+	 * show a complete character description ( 1 character + n states)
+	 * @param sentid
+	 * @param contextStyledText
+	 * @throws SQLException
+	 * @throws ParsingException
+	 */
 	public void updateContextData(int sentid, StyledText contextStyledText) throws SQLException, ParsingException {
 		
-		//Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		String min = "" + (sentid - 2);
-		String max = "" + (sentid + 2);
-		
+		Statement stmt = conn.createStatement();
+		ResultSet rs = null;		
 		
 		try {
-			//Class.forName(driverPath);
-			//conn = DriverManager.getConnection(url);
 			String tablePrefix = MainForm.dataPrefixCombo.getText();
-			String sql = "select * from "+tablePrefix+"_sentence where sentid > ? and sentid < ?";
-			stmt = conn.prepareStatement(sql);
+			String sql = "select source from "+tablePrefix+"_sentence where sentid ="+sentid;
+			rs = stmt.executeQuery(sql);
+			String characterid="";
+			String source = "";
+			if(rs.next()){
+				source = rs.getString("source");
+				//Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6_ae45e0c9-0753-4dff-ab3c-de1860a0c81e.txt-0
+				characterid = source.replaceFirst("^.*?xml_", "").replaceFirst("_.*$", "");				
+			}
 			
-			stmt.setString(1, min);
-			stmt.setString(2, max);
-			
-			rs = stmt.executeQuery();
+			sql = "select * from "+tablePrefix+"_sentence where source like '%"+characterid+"%'";
+			rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				String sid = rs.getString("sentid");
 				String tag = rs.getString("tag");
 				//String sentence = rs.getString("sentence");
 				String sentence = rs.getString("originalsent");
+				sentence+= "["+source+"]";
 				int start = contextStyledText.getText().length();
 				
 				contextStyledText.append(sentence + "\r\n");

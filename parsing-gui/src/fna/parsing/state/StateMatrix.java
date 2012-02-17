@@ -365,6 +365,8 @@ public class StateMatrix {
 			if(coocur.length()>0){
 					q += " and word not in ("+coocur+")";
 			}
+			
+			q += " order by word";
 			System.out.println(q);
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){

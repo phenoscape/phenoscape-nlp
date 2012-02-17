@@ -104,6 +104,8 @@ public class POSTagger4StanfordParser {
 			if(!scp.equals(str)){
 				System.out.println();
 			}
+			
+			str = str.replaceAll("(?<=> [\\d"+this.romandigits+"]{1,3})-(?=<)", " - "); //<metacarpal> 2-<metacarpal> 1 {length} {ratio}
 			this.chunkedtokens = new ArrayList<String>(Arrays.asList(str.split("\\s+")));
 			str = normalizePositionList(str);
 			str = normalizeCountList(str);
@@ -317,7 +319,7 @@ public class POSTagger4StanfordParser {
 			String organ = m.group(2);
 			if(!isPosition(organ, position)) continue;
 			String rposition = "<"+position.replaceAll("[<>]", "").replaceAll("\\s+", "_")+">";
-			//synchronise this.chunkedtokens
+			//synchronize this.chunkedtokens
 			//split by single space to get an accurate count to elements that would be in chunkedtokens
 			int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
 			this.chunkedtokens.set(index, rposition);

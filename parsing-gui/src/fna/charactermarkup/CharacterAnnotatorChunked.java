@@ -21,6 +21,7 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
 
 
+
 /**
  * @author hongcui
  * fnaglossaryfixed: move verbs such as comprising from the glossary
@@ -82,7 +83,9 @@ public class CharacterAnnotatorChunked {
 			}
 			this.lifestyle = lifestyle.replaceFirst("\\|$", "");
 			
-			rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character'");
+			rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
+					"union "+
+					"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
 			while(rs.next()){
 				this.characters += rs.getString(1)+"|";
 			}
@@ -115,11 +118,13 @@ public class CharacterAnnotatorChunked {
 		if(ids.length>1){
 			stateid = ids[1];
 		}
+		boolean isstate = false;
 		this.statement.setAttribute("statement_type", "character");
 		this.statement.setAttribute("character_id", charaid);
 		if(stateid != null){
 			this.statement.setAttribute("statement_type", "character_state");
 			this.statement.setAttribute("state_id", stateid);
+			isstate = true;
 		}
 		this.statement.setAttribute("seg_id", segid);
 		
@@ -133,11 +138,17 @@ public class CharacterAnnotatorChunked {
 		if(subject==null && cs.getPointer()==0){
 			Chunk ck = cs.nextChunk();
 			cs.resetPointer();
-			if(ck instanceof ChunkPrep){	//check if the first chunk is a preposition chunk. If so make the subjects and the latest elements from the previous sentence empty.
-				//write code to make the latestelements nil
-				this.latestelements = new ArrayList<Element>();
+			establishSubject("(whole_organism)");
+			/*if(ck instanceof ChunkVP){	
+				establishSubject("(whole_organism)");
 			}
+			if(ck instanceof ChunkPrep){	//check if the first chunk is a preposition chunk. If so make the subjects and the latest elements from the previous sentence empty.
+				establishSubject("(whole_organism)");
 
+			}
+			if(ck instanceof ChunkSimpleCharacterState){//setup a "whole_organism" placeholder
+				establishSubject("(whole_organism)");
+			}*/
 			annotateByChunk(cs, false);
 		}//end mohan code
 		else if(subject.equals("measurements")){
@@ -171,7 +182,7 @@ public class CharacterAnnotatorChunked {
 		}
 		return this.statement;
 	}
-	
+
 	/**
 	 * characters such as "orientation", "length" may be used in a character statement as
 	 *     <character name="character" value="orientation" />
@@ -182,6 +193,10 @@ public class CharacterAnnotatorChunked {
 		if(this.statement.getAttribute("state_id")==null){
 			List<Element> chars = XPath.selectNodes(this.statement, ".//character[@name='character']");
 			for(Element chara: chars ){
+				String v = chara.getAttributeValue("value");
+				String text = this.statement.getChild("text").getTextTrim();
+				text = text.replaceAll(v, "["+v+"]");
+				this.statement.getChild("text").setText(text);
 				chara.detach();
 				chara=null;
 			}
@@ -200,10 +215,17 @@ public class CharacterAnnotatorChunked {
 		if(this.statement.getAttribute("state_id")!=null){
 			if(this.statement.getChildren().size()==1){//holding a <text> element alone
 				String text = this.statement.getChildText("text");
-				Element ch = new Element("character");
-				ch.setAttribute("name", "unknown"); //@TODO: unknown as a placeholder
-				ch.setAttribute("value", text.trim());
-				this.addContent(this.statement, ch);				
+				if(!text.matches("("+ChunkedSentence.binaryTvalues+"|"+ChunkedSentence.binaryFvalues+")")){//non binary states
+					Element str = new Element("structure"); //whole_organism as a placeholder
+					str.setAttribute("id", this.structid+"");
+					this.structid++;
+					str.setAttribute("name", "whole_organism");					
+					Element ch = new Element("character");
+					ch.setAttribute("name", "unknown"); //TODO: unknown as a placeholder
+					ch.setAttribute("value", text.trim());
+					str.addContent(ch);
+					statement.addContent(str);
+				}
 			}
 		}		
 	}
@@ -1586,8 +1608,11 @@ public class CharacterAnnotatorChunked {
 				String relation = relationLabel(pp, entity1, structures);//determine the relation
 				if(relation != null){
 					createRelationElements(relation, entity1, structures, modifier, false);//relation elements not visible to outside 
+				}	
+				//reset "subject" structure for prositional preps, so all subsequent characters should refer to organbeforeOf/entity1
+				if(relation!= null && relation.matches("("+ChunkedSentence.positionprep+")")){
+					structures = entity1; 
 				}
-				if(relation!= null && relation.compareTo("part_of")==0) structures = entity1; //part_of holds: make the organbeforeof/entity1 the return value, all subsequent characters should be refering to organbeforeOf/entity1
 			}else{
 				//2: the prep can not be a relation, e.g. through, by. Make these modifiers/contraints to the last relation/character
 				//A reaching B through C : matching element holds "reading"
@@ -1937,7 +1962,6 @@ public class CharacterAnnotatorChunked {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 		return result;
 	}
 	
@@ -2031,6 +2055,10 @@ public class CharacterAnnotatorChunked {
 			String norm = "";
 			String[] segs = object.split("\\s+");
 			String lastN = segs[segs.length-1].replaceAll("\\]+$", "").trim();
+			if(object.matches(".*?\\b(and|or)\\s+"+lastN.replaceFirst("\\(", "\\\\(").replaceFirst("\\)", "\\\\)").replaceFirst("\\{", "\\\\{").replaceFirst("\\}", "\\\\}")+".*")){
+				String lastTokenBeforeAnd = segs[segs.length-3].replaceFirst("\\{", "(").replaceFirst("\\}", ")");
+				segs[segs.length-3] = lastTokenBeforeAnd; //o[the {quadrate} and (hyomandibula)]
+			}
 			for(int i= segs.length-1; i>=0; i--){
 				norm = segs[i]+" "+norm;
 				if(segs[i].matches("(,|and|or)") && !segs[i-1].contains("(")){
@@ -2376,7 +2404,7 @@ public class CharacterAnnotatorChunked {
 		}
 		//mohan code ends.
 		
-		w = w.replaceAll("\\W", "");
+		//w = w.replaceAll("\\W", ""); //don't turn frontal-postorbital to frontalpostorbital
 		String ch = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, this.glosstable, tableprefix);
 		if(ch!=null && ch.matches(".*?_?(position|insertion|structure_type|life_stage|functionality)_?.*") && w.compareTo("low")!=0) return "type";
 		String sw = Utilities.toSingular(w);
