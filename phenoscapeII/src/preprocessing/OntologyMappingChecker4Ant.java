@@ -23,10 +23,6 @@ import org.jdom.output.XMLOutputter;
 
 /**
  * @author Hong Updates
- *This class reads character statements from database, 
- *output XML files, one for each character statement
- *<treatment><character><description> 
- *The XML files will be used as Type 3 source files for the Parser 
  */
 public class OntologyMappingChecker4Ant {
 	private Connection conn;
