@@ -278,7 +278,7 @@ public class TermOutputer {
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
+				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|VAO|AMAO|AAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
 				result[2] = label;
 				return result;
 			}
@@ -290,7 +290,7 @@ public class TermOutputer {
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			result[0] = type;
-			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
+			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|VAO|AMAO|AAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
 			result[2] += label+";";
 		}
 		if(result[1].length()>0){
@@ -307,7 +307,7 @@ public class TermOutputer {
 	private ArrayList<String> getQterms() {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_allwords where "+
+			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
 			"word in (select term from markedupdatasets."+this.glosstable+" where category !='structure') or "+
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category !='structure')";
@@ -325,7 +325,7 @@ public class TermOutputer {
 	private ArrayList<String> getEterms() {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_allwords where "+
+			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
 			"word in (select term from markedupdatasets."+this.glosstable+" where category ='structure') or "+
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category ='structure')";
@@ -347,12 +347,16 @@ public class TermOutputer {
 		String database = "phenoscape";
 		String outputtableprefix = "pheno_archosaur";
 		ArrayList<String> eOntoPaths = new ArrayList<String>();
-		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
-		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
+		//changed
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vertebrate_anatomy.obo");
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AAO.obo");
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AA.obo");
+		
 		ArrayList<String> qOntoPaths = new ArrayList<String>();
 		qOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl");
 		String glosstable = "fishglossaryfixed";
-		String sourceprefix = "pheno_archosaur";
+		//changed to amphibia (was archosaur)
+		String sourceprefix = "pheno_amphibia";
 		TermOutputer to = new TermOutputer(database, outputtableprefix, eOntoPaths, qOntoPaths, glosstable, sourceprefix);
 		to.output();
 		

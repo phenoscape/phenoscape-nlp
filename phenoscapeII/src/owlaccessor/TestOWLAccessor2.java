@@ -1,5 +1,7 @@
 package owlaccessor;
 
+import static org.junit.Assert.*;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,24 +50,34 @@ public class TestOWLAccessor2 {
 //		System.out.println(a.getAllOffSprings(a.getClassByLabel("shape")).size());
 //	}
 //	
-	@Test
-	public void testRetriveConcept(){
-		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/tao.owl");
-		
-		List<OWLClass> l =  a.retrieveConcept("tooth");
-		
-		System.out.println(l.size());
-		
-		System.out.println(a.getID(a.getClassByLabel("tooth")));
-		
-	}
-	
-	@Test
-	public void testGetID(){
-		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		List<OWLClass> l =  a.retrieveConcept("shape");
-		
-		System.out.println("("+a.getLabel(l.get(0))+", "+a.getID(l.get(0))+")");//output the (term, id) pair. 
-	}
+//	@Test
+//	public void testRetriveConcept(){
+//		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/tao.owl");
+//		
+//		List<OWLClass> l =  a.retrieveConcept("tooth");
+//		
+//		System.out.println(l.size());
+//		
+//		System.out.println(a.getID(a.getClassByLabel("tooth")));
+//		
+//	}
+//	
+//	@Test
+//	public void testGetID(){
+//		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+//		List<OWLClass> l =  a.retrieveConcept("shape");
+//		
+//		System.out.println("("+a.getLabel(l.get(0))+", "+a.getID(l.get(0))+")");//output the (term, id) pair. 
+//	}
 
+	@Test
+	public void testGetLastWord(){
+		DBMigrater dbm = new DBMigrater();
+		
+		assertTrue(dbm.getLastWord("est;").equals("est;"));
+		assertTrue(dbm.getLastWord("thi is a t est;").equals("est;"));
+		assertTrue(dbm.getLastWord("").equals(""));
+		assertTrue(dbm.getLastWord("	").equals(""));
+		assertTrue(dbm.getLastWord(" ").equals(""));
+	}
 }
