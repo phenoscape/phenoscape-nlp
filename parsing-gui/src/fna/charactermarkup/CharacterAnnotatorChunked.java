@@ -728,11 +728,12 @@ public class CharacterAnnotatorChunked {
 
 	private ArrayList<Element> annotateNumericals(String chunktext, String character, String modifier, ArrayList<Element> parents, boolean resetfrom) {
 		ArrayList<Element> chars = null;
-		if(character!=null && character.compareTo("size")==0 && chunktext.contains("times")){
+		//if(character!=null && character.compareTo("size")==0 && chunktext.contains("times")){
+			if(character==null) character = "count"; //convenient for phenoscape parsing as it doesn't care numerical values 
 			chars = parseNumericals(chunktext, character);	//annotate "2 times" without changing NumericalHandler.parseNumericals
-		}else{
-			chars = NumericalHandler.parseNumericals(chunktext, character);
-		}
+		//}else{
+		//	chars = NumericalHandler.parseNumericals(chunktext, character); //full numerical parsing for FNA-like data
+		//}
 		if(chars.size()==0){//failed, simplify chunktext
 			chunktext = chunktext.replaceAll("[()\\]\\[]", "");
 			if(character!=null && character.compareTo("size")==0 && chunktext.contains("times")){
@@ -2145,7 +2146,7 @@ public class CharacterAnnotatorChunked {
 					continue;
 				}
 				String type = null;
-				if(w.startsWith("(")) type="parent_organ";
+				if(w.startsWith("(") || w.endsWith(")")) type="parent_organ";
 				else type = constraintType(w, o);
 				if(type!=null){
 					organ[j] = "";
