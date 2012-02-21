@@ -344,6 +344,7 @@ public class TermOutputer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//need an database "obo" (may be empty) if search obo ontologies
 		String database = "phenoscape";
 		String outputtableprefix = "pheno_archosaur";
 		ArrayList<String> eOntoPaths = new ArrayList<String>();
