@@ -251,13 +251,22 @@ public class OWLAccessorImpl implements OWLAccessor {
 		// TODO Auto-generated method stub
 		return ont.getClassesInSignature();
 	}
-
+	
 	@Override
-	public Set<String> getAllOffSprings(OWLClass c) {
+	public Set<OWLClass> getAllOffsprings(OWLClass c){
+		Set<OWLClass> r = new HashSet<OWLClass>();
+		for(OWLClassExpression ch : c.getSubClasses(ont)){
+			r.add(ch.asOWLClass());
+			r.addAll(this.getAllOffsprings(ch.asOWLClass()));
+		}
+		return r;
+	}
+	
+	@Override
+	public Set<String> getAllOffspringLables(OWLClass c) {
 		Set<String> r = new HashSet<String>();
-		for (OWLClassExpression ch : c.getSubClasses(ont)) {
+		for (OWLClassExpression ch : this.getAllOffsprings(c)) {
 			r.add(this.getLabel(ch.asOWLClass()));
-			r.addAll(this.getAllOffSprings(ch.asOWLClass()));
 		}
 		return r;
 	}
