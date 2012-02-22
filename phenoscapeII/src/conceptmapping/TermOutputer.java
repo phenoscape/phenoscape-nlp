@@ -308,7 +308,10 @@ public class TermOutputer {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
 			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
-			"word in (select term from phenoscape."+this.glosstable+" where category !='structure') or "+
+//<<<<<<< HEAD
+//			"word in (select term from phenoscape."+this.glosstable+" where category !='structure') or "+
+//=======
+			"word in (select term from markedupdatasets."+this.glosstable+" where category !='structure') or "+
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category !='structure')";
 			Statement stmt = conn.createStatement();
@@ -326,7 +329,11 @@ public class TermOutputer {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
 			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
-			"word in (select term from phenoscape."+this.glosstable+" where category ='structure') or "+
+//<<<<<<< HEAD
+//			"word in (select term from phenoscape."+this.glosstable+" where category ='structure') or "+
+//=======
+			"word in (select term from markedupdatasets."+this.glosstable+" where category ='structure') or "+
+//>>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category ='structure')";
 			Statement stmt = conn.createStatement();
@@ -344,6 +351,7 @@ public class TermOutputer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//need an database "obo" (may be empty) if search obo ontologies
 		String database = "phenoscape";
 		String outputtableprefix = "pheno_amphibia";
 		String glosstable = "fishglossaryfixed";

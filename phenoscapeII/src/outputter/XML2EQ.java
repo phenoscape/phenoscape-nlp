@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -43,6 +44,7 @@ public class XML2EQ {
 	private String outputtable;
 	private String tableprefix;
 	private String glosstable;
+	private String benchmarktable;
 	private Connection conn;
 	private String username = "root";
 	private String password = "root";
@@ -62,19 +64,32 @@ public class XML2EQ {
 	/**
 	 * 
 	 */
-	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) {
+	public XML2EQ(String sourcedir, String database, String outputtable, String benchmarktable, String prefix, String glosstable) {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
+		this.benchmarktable = benchmarktable;
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
+				//label and id fields are ontology-related fields
+				//other fields are raw text
+				//entity and quality fields are atomic
+				//qualitynegated fields are alternative to quality and is composed as "not quality" for qualitynegated, "not(quality)" for qualitynegatedlabel, the "quality" has id qualityid
+				//qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
 				stmt.execute("drop table if exists "+ outputtable);
-				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, entity varchar(200), entityid varchar(200), quality varchar(200), quality_negated varchar(200), qn_parent varchar(200), qn_parentid varchar(200), qualityid varchar(200), qualitymodifier varchar(200), qualitymodifierid varchar(200), entitylocator varchar(200), entitylocatorid varchar(200))");
+				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, " +
+						"entity varchar(200), entitylabel varchar(200), entityid varchar(200), " +
+						"quality varchar(200), qualitylabel varchar(200), qualityid varchar(200), " +
+						"qualitynegated varchar(200), qualitynegatedlabel varchar(200), " +
+						"qnparentlabel varchar(200), qnparentid varchar(200), " +
+						"qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(200), " +
+						"entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " +
+						"countt varchar(200))");
 				}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -110,11 +125,26 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}
+			discardNonTestCharacterUnits();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * use workbench to select/keep only the ones in the workbench
+	 */
+	private void discardNonTestCharacterUnits() {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("delete from "+this.outputtable+" where source not in (select source from "+this.benchmarktable+ ")");			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+
+
 	/**
 	 * character statements that contain 1 structure "whole_organism" 
 	 * these were caused by annotation errors
@@ -171,15 +201,20 @@ public class XML2EQ {
 		text::long and rounded along entire length
 	5	EQ::[E]lateral wall [Q]long [EL]metapterygoid channel
 	6	EQ::[E]lateral wall [Q]rounded [along entire length] [EL]metapterygoid channel
+	
+	
+	
+	
+	
 	 */
 	private void outputEQs4CharacterUnit() {
-		//sanity check
+		//sanity check has problems
 		
 		for(String stateid: stateids){
 			ArrayList<Hashtable<String, String>> problems = new ArrayList<Hashtable<String,String>>();
 			for(Hashtable<String,String> EQ: allEQs){
 				if(EQ.get("stateid").compareTo(stateid)==0){
-					if(this.related2KeyEntity(EQ.get("entity")) || this.related2KeyEntity(EQ.get("entitylocator"))){
+					if(this.isRelated2KeyEntity(EQ.get("entity")) || this.isRelated2KeyEntity(EQ.get("entitylocator"))){
 						problems = new ArrayList<Hashtable<String, String>>(); //passed, reset problems
 						break;
 					}else{
@@ -192,6 +227,21 @@ public class XML2EQ {
 				repairProblemEQs(problems);
 			}
 		}
+		
+		//filter allEQs to match human cruation practice: only the keyentities are mentioned
+		//remove EQs associated with a state that are not the first EQ or that are not related to entity or entity locator
+		/*for(String stateid: stateids){
+			ArrayList<Hashtable<String, String>> problems = new ArrayList<Hashtable<String,String>>();
+			int count = 0;
+			for(Hashtable<String,String> EQ: allEQs){
+				if(EQ.get("stateid").compareTo(stateid)==0){
+					if(count>0 && (!this.isRelated2KeyEntity(EQ.get("entity")) || !this.isRelated2KeyEntity(EQ.get("entitylocator")))){
+						allEQs.remove(EQ);
+					}
+				}
+			}
+		}*/
+		
 		
 		String text = "";
 		//normalization
@@ -209,14 +259,14 @@ public class XML2EQ {
 			if(EQ.get("type").compareTo("state")==0 && this.keyentitylocator!=null){ 
 				//EQ based on a state statement
 				//this is not a binarystate statement
-				if(EQ.get("entitylocator").compareTo(this.keyentitylocator)!=0 && related2KeyEntity(EQ.get("entity"))){ 
+				if(EQ.get("entitylocator").compareTo(this.keyentitylocator)!=0 && isRelated2KeyEntity(EQ.get("entity"))){ 
 					//to inhere the entitylocator, this entity must be somewhat related to this.keyentity
 					//"lateral wall" is related to "walls" of ...
-					entitylocator += ";"+this.keyentitylocator;
+					entitylocator += ","+this.keyentitylocator;
 					
 				}
 			}
-			entitylocator = entitylocator.trim().replaceAll("(^;|;$)", "");
+			entitylocator = entitylocator.trim().replaceAll("(^,|,$)", "");
 			EQ.put("entitylocator", entitylocator);
 
 			//2. negation
@@ -226,9 +276,9 @@ public class XML2EQ {
 			}
 			
 			//finally
-			if(EQ.get("text").compareTo(text)!=0) {
-				System.out.println("text::"+EQ.get("text"));
-				text = EQ.get("text");
+			if(EQ.get("description").compareTo(text)!=0) {
+				System.out.println("text::"+EQ.get("description"));
+				text = EQ.get("description");
 			}
 			this.insertEQs2Table(EQ);
 		}
@@ -269,7 +319,7 @@ public class XML2EQ {
 			EQ.put("entity", this.keyentity);
 			EQ.put("entitylocator", keyentitylocator==null? "" : keyentitylocator);
 			EQ.put("quality", olde+ " ["+oldq+"]");
-			EQ.put("qualitymodifer", oldel+";"+oldqm);	
+			EQ.put("qualitymodifier", oldel+","+oldqm);	
 	}
 
 	/**
@@ -362,6 +412,7 @@ public class XML2EQ {
 	 */
 	private void createEQs4CharacterUnit(List<Element> charstatements, List<Element> states, String src, Element root) {
 	
+		this.addEQ4CharacterStatement(src, charstatements);
 		//step 0: decide if a character is a binary (yes/no, true/false, rarely/usually types of states)
 		if(isBinary(states)){
 			//the yes state = character description
@@ -369,7 +420,7 @@ public class XML2EQ {
 			//a negation may be to a relation (verb [A "not contact" B] or prep [A "not with" B]) or to a character state ("not expanded") 
 			
 			//compose n EQs from character statement, because a character statement can describe two equally weighted characters ( A exits B and enters C)
-			ArrayList<Hashtable> EQs = processBinaryCharacter(charstatements, src, root);
+			ArrayList<Hashtable<String, String>> EQs = processBinaryCharacter(charstatements, src, root);
 			createEQsFromBinaryStates(states, src, EQs);
 		}else{
 			//on the first try, assuming the simple model: 
@@ -407,6 +458,7 @@ public class XML2EQ {
 			List<Element> charstatements, List<Element> states, String src,
 			Element root) {
 		try{
+			//collect category="character" terms from the glossarytable
 			if(this.characters==null){
 				Statement stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery("select distinct term from markedupdatasets."+this.glosstable+ " where category='character' " +
@@ -417,7 +469,8 @@ public class XML2EQ {
 				}
 				this.characters = characters.replaceFirst("\\|$", "");
 			}
-			//get E and ELs from character
+			//get E and ELs from character statement
+			addEQ4CharacterStatement(src, charstatements);
 			String chtext = charstatements.get(0).getChild("text").getTextTrim();
 			chtext = markcharacters(chtext);
 			System.out.println(chtext);
@@ -434,7 +487,7 @@ public class XML2EQ {
 				String n = firstMatchedStructureName(chparts[i], snames, i);//match in absence of/before [character]
 				if(n!=null){
 					snames.remove(n);
-					ELs = E+";"+ELs;
+					ELs = E+","+ELs;
 					E = n;
 					String rest = chparts[i].replaceFirst(n, "").trim();
 					String moreELs = "";
@@ -442,52 +495,54 @@ public class XML2EQ {
 						n = firstMatchedStructureName(rest, snames, i*-1);
 						if(n!=null){
 							snames.remove(n);
-							moreELs = moreELs+";"+n;
-							rest = rest.replaceFirst(n, "").trim();
+							moreELs = moreELs+","+n;
+							rest = rest.replaceFirst(".*?\\b"+n, "").trim();
 						}else{
 							break;
 						}						
 					}
-					ELs = moreELs+";"+ELs;
+					ELs = moreELs+","+ELs;
 				}
 			}
-			ELs = ELs.replaceAll(";+", ";").replaceFirst("^;", "").replaceFirst(";$", "");
+			ELs = ELs.replaceAll(",+", ",").replaceFirst("^,", "").replaceFirst(",$", "");
 			//get QM
 			String QMs = "";
 			for(String sname: snames){//remaining structures are QMs
-				QMs +=sname+";";
+				QMs +=sname+",";
 			}
 			
 			
 			//process states
 			Hashtable<String, String> EQ = new Hashtable<String, String>();
 			this.initEQHash(EQ);
-			EQ.put("src", src);
+			EQ.put("source", src);
 			EQ.put("entity", E);
 			EQ.put("entitylocator", ELs);
 			EQ.put("type", "state");
 			for(Element state: states){
-				EQ.put("text", state.getChild("text").getTextTrim());
-				EQ.put("characterid", state.getAttributeValue("character_id"));
-				EQ.put("stateid", state.getAttributeValue("state_id"));
+				Hashtable<String, String> EQc = (Hashtable<String, String>)EQ.clone();
+				EQc.put("description", state.getChild("text").getTextTrim());
+				EQc.put("characterid", state.getAttributeValue("character_id"));
+				EQc.put("stateid", state.getAttributeValue("state_id"));
 				//form: low crest (noun as state)
 				Element firststruct = (Element)state.getChildren("structure").get(0);
 				if(!firststruct.getAttributeValue("name").contains("whole_organism")){
 					//noun as state
 					String fsname = this.getStructureName(root, firststruct.getAttributeValue("id"));
 					String characterstr = charactersAsString(root, firststruct);
-					EQ.put("quality", characterstr+" "+fsname);
+					EQc.put("quality", characterstr+" "+fsname);
+					this.allEQs.add(EQc);
 				}else{				
 					//collecting all characters of whole_organism
 					List<Element> chars = XPath.selectNodes(state, ".//structure[@name='whole_organism']/character");
 					for(Element chara: chars){
-						Hashtable<String,String> EQi = (Hashtable<String,String>)EQ.clone();
+						Hashtable<String,String> EQi = (Hashtable<String,String>)EQc.clone();
 						EQi.put("quality", chara.getAttributeValue("value"));
 						if(chara.getAttribute("constraintid")!=null){
 							String names = this.getStructureName(root, chara.getAttributeValue("constraintid"));
-							QMs = QMs+";"+names;
+							QMs = QMs+","+names;
 						}
-						QMs = QMs.replaceFirst(";$", "").replaceFirst("^;", "").replaceAll(";+", ";");
+						QMs = QMs.replaceFirst(",$", "").replaceFirst("^,", "").replaceAll(",+", ",");
 						EQi.put("qualitymodifier", QMs);
 						this.allEQs.add(EQi);
 					}
@@ -497,7 +552,7 @@ public class XML2EQ {
 						String id = wo.getAttributeValue("id");
 						List<Element> rels = XPath.selectNodes(state, ".//relation[@from='"+id+"']");
 						for(Element rel: rels){
-							Hashtable<String, String> EQi = (Hashtable<String, String>)EQ.clone();
+							Hashtable<String, String> EQi = (Hashtable<String, String>)EQc.clone();
 							String relname = rel.getAttributeValue("name");
 							String toname = this.getStructureName(root, rel.getAttributeValue("to"));
 							String negation =rel.getAttributeValue("negation");
@@ -517,6 +572,19 @@ public class XML2EQ {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+
+	private void addEQ4CharacterStatement(String src, List<Element> charstatements) {
+		Hashtable<String, String> EQ = new Hashtable<String, String>();
+		this.initEQHash(EQ);
+		String chtext = charstatements.get(0).getChild("text").getTextTrim();
+		String characterid = charstatements.get(0).getAttributeValue("character_id");
+		EQ.put("source", src);
+		EQ.put("description", chtext);
+		EQ.put("characterid", characterid);
+		EQ.put("type", "character");
+		allEQs.add(EQ);
 	}
 
 	/**
@@ -572,6 +640,7 @@ public class XML2EQ {
 		text = text.replaceFirst("\\[.*$", "")+" ";
 		do{
 			for(String sname : snames){
+				sname = sname.toLowerCase();
 				if(text.startsWith(sname)){
 					if(textc.endsWith(sname) && i==0){
 						snames.remove(sname);
@@ -580,14 +649,14 @@ public class XML2EQ {
 					return sname;
 				}
 			}
-			text = text.replaceFirst("^.*?\\s+", "").trim();
+			text = text.replaceFirst("^.*?\\s+", "");
 		}while(text.length()>0);
 		return null;
 	}
 
 
 	private void createEQsFromBinaryStates(List<Element> states, String src,
-			ArrayList<Hashtable> EQs) {
+			ArrayList<Hashtable<String, String>> EQs) {
 		//copy or negate the EQ for each state
 		for(Element state: states){
 			Element text = state.getChild("text");
@@ -598,12 +667,13 @@ public class XML2EQ {
 			if(stext.matches("("+ChunkedSentence.binaryTvalues+")")){
 				//copy
 				for(Hashtable<String,String> EQ: EQs){ //add some needed fields
-					EQ.put("src", src);
-					EQ.put("characterid", characterid);
-					EQ.put("stateid", stateid);
-					EQ.put("text", stext); 
-					EQ.put("type", "binary");
-					allEQs.add(EQ);
+					Hashtable<String, String> EQcp = (Hashtable<String, String>)EQ.clone();
+					EQcp.put("source", src);
+					EQcp.put("characterid", characterid);
+					EQcp.put("stateid", stateid);
+					EQcp.put("description", stext); 
+					EQcp.put("type", "binary");
+					allEQs.add(EQcp);
 					/*this.addEQStatement(src, characterid, stateid, stext, 
 							EQ.get("entity"), EQ.get("entityid"), EQ.get("quality"), EQ.get("qualitynegated"),
 							EQ.get("qnparent"), EQ.get("qnparentid"),EQ.get("qualityid"), EQ.get("qualitymodifier"), 
@@ -613,14 +683,15 @@ public class XML2EQ {
 			}else if(stext.matches("("+ChunkedSentence.binaryFvalues+")")){
 				//negate
 				for(Hashtable<String,String> EQ: EQs){//add some needed fields
-					EQ.put("src", src);
-					EQ.put("characterid", characterid);
-					EQ.put("stateid", stateid);
-					EQ.put("text", stext); 
-					EQ.put("quality", ""); //reset quality
-					EQ.put("qualitynegated", "not "+EQ.get("quality")); //compose negated quality
-					EQ.put("type", "binary");
-					allEQs.add(EQ);
+					Hashtable<String, String> EQcp = (Hashtable<String, String>)EQ.clone();
+					EQcp.put("source", src);
+					EQcp.put("characterid", characterid);
+					EQcp.put("stateid", stateid);
+					EQcp.put("description", stext); 
+					EQcp.put("qualitynegated", "not "+EQ.get("quality")); //compose negated quality
+					EQcp.put("quality", ""); //reset quality
+					EQcp.put("type", "binary");
+					allEQs.add(EQcp);
 					/*this.addEQStatement(src, characterid, stateid, stext, 
 						EQ.get("entity"), EQ.get("entityid"), "", "not "+EQ.get("quality"),
 						EQ.get("qnparent"), EQ.get("qnparentid"),EQ.get("qualityid"), EQ.get("qualitymodifier"), 
@@ -637,11 +708,12 @@ public class XML2EQ {
 	 * @param root
 	 * @return a hashtable fieldname => value, if a field does not have a value, set it ""
 	 */
-	private ArrayList<Hashtable> processBinaryCharacter(
+	@SuppressWarnings("unchecked")
+	private ArrayList<Hashtable<String, String>> processBinaryCharacter(
 			List<Element> chars, String src, Element root) {
-		ArrayList<Hashtable> EQs = new ArrayList<Hashtable>();
+		//these EQs will be transformed into state EQs
+		ArrayList<Hashtable<String, String>> EQs = new ArrayList<Hashtable<String, String>>();
 		Hashtable<String, String> EQ = new Hashtable<String, String>();
-		//initialization
 		initEQHash(EQ);
 		try{
 			//get the first structure element
@@ -656,6 +728,7 @@ public class XML2EQ {
 			if(chara!=null){
 				String q = formQualityValueFromCharacter(chara).replaceAll("\\[[^\\]]*?\\]", "");
 				EQ.put("quality", q);
+				EQs.add((Hashtable<String, String>)EQ.clone());
 			}
 			//keep positional relations associated with the first element			
 			//List<Element> rels = XPath.selectNodes(root, "//relation[@to='"+sid+"'|@from='"+sid+"']");
@@ -683,7 +756,7 @@ public class XML2EQ {
 				for(int i = 0; i<qs.length; i++){
 						EQ.put("quality", qs[i]);
 						EQ.put("qualitymodifier", qms[i]);
-						EQs.add((Hashtable)EQ.clone());
+						EQs.add((Hashtable<String, String>)EQ.clone());
 				}
 			}
 		}catch(Exception e){
@@ -694,17 +767,28 @@ public class XML2EQ {
 
 
 	private void initEQHash(Hashtable<String, String> EQ) {
+		EQ.put("source", "");
+		EQ.put("characterid", "");
+		EQ.put("stateid", "");
+		EQ.put("description", "");
+		EQ.put("type", ""); //do not output type to table
 		EQ.put("entity", "");
+		EQ.put("entitylabel", "");
 		EQ.put("entityid", "");
 		EQ.put("quality", "");
-		EQ.put("qualitynegated", "");
-		EQ.put("qnparent", "");
-		EQ.put("qnparentid", "");
+		EQ.put("qualitylabel", "");
 		EQ.put("qualityid", "");
+		EQ.put("qualitynegated", "");
+		EQ.put("qualitynegatedlabel", "");		
+		EQ.put("qnparentlabel", "");
+		EQ.put("qnparentid", "");
 		EQ.put("qualitymodifier", "");
+		EQ.put("qualitymodifierlabel", "");
 		EQ.put("qualitymodifierid", "");
 		EQ.put("entitylocator", "");
+		EQ.put("entitylocatorlabel", "");
 		EQ.put("entitylocatorid", "");
+		EQ.put("countt", "");
 	}
 
 	/**
@@ -888,27 +972,36 @@ public class XML2EQ {
 	}
 
 	private void insertEQs2Table(Hashtable<String, String> EQ) {
-		String src = EQ.get("src") ;
-		String characterid = EQ.get("characterid");
-		String stateid = EQ.get("stateid");
-		String text = EQ.get("text") ;
-		String entity = EQ.get("entity");
-		String entityid = EQ.get("entityid");
-		String quality = EQ.get("quality");
-		String qualitynegated = EQ.get("qualitynegated");
-		String qnparent = EQ.get("qnparent"); 
-		String qnparentid = EQ.get("qnparentid");
-		String qualityid = EQ.get("qualityid");
-		String qualitymodifier = EQ.get("qualitymodifier");
-		String qualitymodifierid = EQ.get("qualitymodifierid");
-		String entitylocator = EQ.get("entitylocator");
-		String entitylocatorid = EQ.get("entitylocatorid");
-		String q = "insert into "+this.outputtable+" (source, characterid, stateid, description, entity, entityid, quality, quality_negated, qn_parent, qn_parentid, qualityid, qualitymodifier, qualitymodifierid, entitylocator, entitylocatorid) values " +
-				"('"+src+"','"+characterid+"','"+stateid+"','"+text+"','"+ entity+"','"+ entityid+"','"+ quality+"','"+ qualitynegated+"','"+ qnparent+"','"+ qnparentid+"','"+ qualityid+"','"+qualitymodifier+"','"+ qualitymodifierid+"','"+ entitylocator+"','"+ entitylocatorid+"')";
+		Enumeration<String> fields = EQ.keys();
+		String fieldstring = "";
+		String valuestring = "";
+		while(fields.hasMoreElements()){
+			String f = fields.nextElement();
+			if(f.compareTo("type")!=0){
+				fieldstring += f+",";
+				String fv = EQ.get(f);
+				if(EQ.get("type").compareTo("character")==0){
+					valuestring += "'"+(f.matches("(source|characterid|description)")? fv: "")+"',";
+				}else{
+					valuestring += "'"+fv+"',";
+				}
+			}
+		}
+		fieldstring = fieldstring.replaceFirst(",$", "");
+		valuestring = valuestring.replaceFirst(",$", "");
+		
+		String q = "insert into "+this.outputtable+"("+fieldstring+") values " +
+				"("+valuestring+")";
 		try{
 			Statement stmt = conn.createStatement();
 			stmt.execute(q);
 
+			String entity = EQ.get("entity");
+			String quality = EQ.get("quality");
+			String qualitynegated = EQ.get("qualitynegated");
+			String qualitymodifier = EQ.get("qualitymodifier");
+			String entitylocator = EQ.get("entitylocator");
+		
 			//quality and qualitynegated can not both hold values!
 			if(quality.length()>0 || entitylocator.length()>0){
 				System.out.println("EQ::[E]"+entity+" [Q]"+quality+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
@@ -933,8 +1026,11 @@ public class XML2EQ {
 	 * @param entity
 	 * @return
 	 */
-	private boolean related2KeyEntity(String entity) {
-		if(entity.contains(this.keyentity)) return true;
+	private boolean isRelated2KeyEntity(String entity) {
+		String[] tokens = entity.split("\\s*,\\s*");
+		for(String token: tokens){
+			if(token.contains(this.keyentity) || this.keyentity.contains(token)) return true;
+		}
 		return false;
 	}
 
@@ -957,12 +1053,12 @@ public class XML2EQ {
 				}else{
 					sname = ((structure.getAttribute("constraint")==null? "" : structure.getAttributeValue("constraint"))+" "+structure.getAttributeValue("name"));
 				}
-				result += sname+";";
+				result += sname+",";
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		result = result.replaceAll("\\s+", " ").replaceFirst(";$", "").trim();
+		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
 		return result;
 	}
 
@@ -1007,43 +1103,45 @@ public class XML2EQ {
 						String toid = r.replaceFirst(".*?\\)", "").trim();
 						String toname = this.getStructureName(root, toid);
 						if(r.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){ //entitylocator							
-							entitylocator += toname+";";
+							entitylocator += toname+",";
 						}else if(r.matches("(with).*")){							
 							//do nothing
 						}else if(r.matches("(without).*")){							
 							//output absent as Q for toid
+							if(!keyelement){
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							initEQHash(EQ);
-							EQ.put("src", src);
+							EQ.put("source", src);
 							EQ.put("characterid", characterid);
 							EQ.put("stateid", stateid);
-							EQ.put("text", text); 
+							EQ.put("description", text); 
 							EQ.put("entity", toname);
 							EQ.put("quality", "absent");
 							EQ.put("type", keyelement? "character" : "state");
 							allEQs.add(EQ);
-							//addEQStatement(src, characterid, stateid, text, toname,"", "absent", "","","","", "", "", "", "", keyelement); //without entity locators, which are treated in relation processing 
+							}
 						}else{
-							qualitymodifier +=toname+";";
+							qualitymodifier +=toname+",";
 						}
 					}
-					entitylocator = entitylocator.replaceFirst(";$", "");
-					qualitymodifier = qualitymodifier.replaceFirst(";$", "");
+					entitylocator = entitylocator.replaceFirst(",$", "");
+					qualitymodifier = qualitymodifier.replaceFirst(",$", "");
 				}
 				if(keyelement && structname.compareTo(keyentity)==0) this.keyentitylocator = entitylocator;
-				Hashtable<String, String> EQ = new Hashtable<String, String>();
-				initEQHash(EQ);
-				EQ.put("src", src);
-				EQ.put("characterid", characterid);
-				EQ.put("stateid", stateid);
-				EQ.put("text", text); 
-				EQ.put("entity", structname);
-				EQ.put("quality", quality);
-				EQ.put("qualitymodifier", qualitymodifier);
-				EQ.put("entitylocator", entitylocator);
-				EQ.put("type", keyelement? "character" : "state");
-				allEQs.add(EQ);
-				//addEQStatement(src, characterid, stateid, text, structname,"", quality,"","","", "", qualitymodifier, "", entitylocator, "", keyelement); //without entity locators, which are treated in relation processing 
+				if(!keyelement){
+					Hashtable<String, String> EQ = new Hashtable<String, String>();
+					initEQHash(EQ);
+					EQ.put("source", src);
+					EQ.put("characterid", characterid);
+					EQ.put("stateid", stateid);
+					EQ.put("description", text); 
+					EQ.put("entity", structname);
+					EQ.put("quality", quality);
+					EQ.put("qualitymodifier", qualitymodifier);
+					EQ.put("entitylocator", entitylocator);
+					EQ.put("type", keyelement? "character" : "state");
+					allEQs.add(EQ);
+				}
 			}
 			if(!hascharacter && rels != null){
 				//this is the case where the structure's character information is expressed in the relations (it has no character elements, but is involved in some relations)
@@ -1053,35 +1151,54 @@ public class XML2EQ {
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
 						String quality = rel.replace(toid, "").replaceAll("[()]", "").trim();
 						String qualitymodifier = this.getStructureName(root, toid);	
-						Hashtable<String, String> EQ = new Hashtable<String, String>();
-						initEQHash(EQ);
-						EQ.put("src", src);
-						EQ.put("characterid", characterid);
-						EQ.put("stateid", stateid);
-						EQ.put("text", text); 
-						EQ.put("entity", structname);
-						EQ.put("quality", quality);
-						EQ.put("qualitymodifier", "qualitymodifier");
-						EQ.put("type", keyelement? "character" : "state");
-						allEQs.add(EQ);
-						//addEQStatement(src, characterid, stateid, text, structname,"", quality, "","","", "", qualitymodifier, "", "", "", keyelement); //without entity locators, which are treated in relation processing 
+						if(!keyelement){
+							Hashtable<String, String> EQ = new Hashtable<String, String>();
+							initEQHash(EQ);
+							EQ.put("source", src);
+							EQ.put("characterid", characterid);
+							EQ.put("stateid", stateid);
+							EQ.put("description", text); 
+							EQ.put("entity", structname);
+							EQ.put("quality", quality);
+							EQ.put("qualitymodifier", qualitymodifier);
+							EQ.put("type", keyelement? "character" : "state");
+							allEQs.add(EQ);
+						}
 					}else{
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
 						String entitylocator = this.getStructureName(root, toid);		
 						if(keyelement && structname.compareTo(keyentity)==0) this.keyentitylocator = entitylocator;
-						Hashtable<String, String> EQ = new Hashtable<String, String>();
-						initEQHash(EQ);
-						EQ.put("src", src);
-						EQ.put("characterid", characterid);
-						EQ.put("stateid", stateid);
-						EQ.put("text", text); 
-						EQ.put("entity", structname);
-						EQ.put("entitylocator", entitylocator);
-						EQ.put("type", keyelement? "character" : "state");
-						allEQs.add(EQ);
-						//addEQStatement(src, characterid, stateid, text, structname,"", "", "","","","", "", "", entitylocator, "", keyelement); //without entity locators, which are treated in relation processing 
+						if(!keyelement){
+							Hashtable<String, String> EQ = new Hashtable<String, String>();
+							initEQHash(EQ);
+							EQ.put("source", src);
+							EQ.put("characterid", characterid);
+							EQ.put("stateid", stateid);
+							EQ.put("description", text); 
+							EQ.put("entity", structname);
+							EQ.put("entitylocator", entitylocator);
+							EQ.put("type", keyelement? "character" : "state");
+							allEQs.add(EQ);
+						}
 					}
 				}
+			}else if(!hascharacter && rels == null){ //most likely due to annotation errors
+				if(!keyelement){
+					Hashtable<String, String> EQ = new Hashtable<String, String>();
+					initEQHash(EQ);
+					EQ.put("source", src);
+					EQ.put("characterid", characterid);
+					EQ.put("stateid", stateid);
+					EQ.put("description", text); 
+					EQ.put("entity", structname);
+					if(!this.isRelated2KeyEntity(this.keyentity) && !this.isRelated2KeyEntity(this.keyentitylocator)){
+						String el = (this.keyentity+", "+this.keyentitylocator).replaceAll("null","").trim().replaceFirst("(^,|,$)", "").trim();
+						EQ.put("entitylocator", el);
+					}
+					EQ.put("type", keyelement? "character" : "state");
+					allEQs.add(EQ);
+				}
+				
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1136,10 +1253,12 @@ public class XML2EQ {
 	public static void main(String[] args) {
 		String srcdir = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/final";
 		String database = "phenoscape";
-		String outputtable = "biocreative_nexml2eq";
+		//String outputtable = "biocreative_nexml2eq";
+		String outputtable = "biocreative2012.run0";
+		String benchmarktable = "biocreative2012.internalworkbench";
 		String prefix = "biocreative_test";
 		String glosstable="fishglossaryfixed";
-		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, prefix, glosstable);
+		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, benchmarktable, prefix, glosstable);
 		x2e.outputEQs();
 	}
 
