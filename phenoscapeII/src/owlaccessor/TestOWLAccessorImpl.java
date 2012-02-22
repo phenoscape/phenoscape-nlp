@@ -1,6 +1,7 @@
 package owlaccessor;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
@@ -90,6 +91,13 @@ public class TestOWLAccessorImpl {
 		for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
 			System.out.println(oa.toString());
 		}
+		
+		List<String> s = new ArrayList<String>();
+		System.out.println(a.retrieveConcept("ploidy", s).size());
+		
+		s.add("cellular quality");
+		System.out.println(a.retrieveConcept("ploidy", s).size());
+		
 	}
 	
 //	public static void main(String[] args) {
