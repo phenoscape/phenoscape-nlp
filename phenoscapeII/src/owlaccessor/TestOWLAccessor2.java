@@ -70,14 +70,22 @@ public class TestOWLAccessor2 {
 //		System.out.println("("+a.getLabel(l.get(0))+", "+a.getID(l.get(0))+")");//output the (term, id) pair. 
 //	}
 
+//	@Test
+//	public void testGetLastWord(){
+//		DBMigrater dbm = new DBMigrater();
+//		
+//		assertTrue(dbm.getLastWord("est;").equals("est;"));
+//		assertTrue(dbm.getLastWord("thi is a t est;").equals("est;"));
+//		assertTrue(dbm.getLastWord("").equals(""));
+//		assertTrue(dbm.getLastWord("	").equals(""));
+//		assertTrue(dbm.getLastWord(" ").equals(""));
+//	}
+	
 	@Test
-	public void testGetLastWord(){
-		DBMigrater dbm = new DBMigrater();
-		
-		assertTrue(dbm.getLastWord("est;").equals("est;"));
-		assertTrue(dbm.getLastWord("thi is a t est;").equals("est;"));
-		assertTrue(dbm.getLastWord("").equals(""));
-		assertTrue(dbm.getLastWord("	").equals(""));
-		assertTrue(dbm.getLastWord(" ").equals(""));
+	public void testGetAllOffsprings(){
+		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		for(String s:a.getAllOffspringLables(a.getClassByLabel("cell_quality"))){
+			System.out.println(s);
+		}
 	}
 }
