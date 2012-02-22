@@ -84,7 +84,7 @@ public class TestOWLAccessor2 {
 	@Test
 	public void testGetAllOffsprings(){
 		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		for(String s:a.getAllOffspringLables(a.getClassByLabel("cell_quality"))){
+		for(String s:a.getAllOffspringLables(a.getClassByLabel("cellular quality"))){
 			System.out.println(s);
 		}
 	}
