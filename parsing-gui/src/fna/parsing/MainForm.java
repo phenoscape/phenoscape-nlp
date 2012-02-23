@@ -3331,13 +3331,13 @@ public class MainForm {
 		//	new CharacterStatementsTransformer(listener, shell.getDisplay(), 
 		//			null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
 		
-		//CharacterStatementsTransformer preMarkUp = 
-		//	new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
-		//			null, new ArrayList());
-		
 		CharacterStatementsTransformer preMarkUp = 
-				new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
-						null, new ArrayList());
+			new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
+					null, new ArrayList());
+		
+		//CharacterStatementsTransformer preMarkUp = 
+			//	new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
+				//		null, new ArrayList());
 		preMarkUp.start();
 	}
 	

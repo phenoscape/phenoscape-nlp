@@ -308,6 +308,9 @@ public class TermOutputer {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
 			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
+//<<<<<<< HEAD
+//			"word in (select term from phenoscape."+this.glosstable+" where category !='structure') or "+
+//=======
 			"word in (select term from markedupdatasets."+this.glosstable+" where category !='structure') or "+
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category !='structure')";
@@ -326,7 +329,11 @@ public class TermOutputer {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
 			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
+//<<<<<<< HEAD
+//			"word in (select term from phenoscape."+this.glosstable+" where category ='structure') or "+
+//=======
 			"word in (select term from markedupdatasets."+this.glosstable+" where category ='structure') or "+
+//>>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
 			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
 			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category ='structure')";
 			Statement stmt = conn.createStatement();
@@ -346,14 +353,19 @@ public class TermOutputer {
 	public static void main(String[] args) {
 		//need an database "obo" (may be empty) if search obo ontologies
 		String database = "phenoscape";
-		String outputtableprefix = "pheno_archosaur";
-		ArrayList<String> eOntoPaths = new ArrayList<String>();
-		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
-		eOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
-		ArrayList<String> qOntoPaths = new ArrayList<String>();
-		qOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl");
+		String outputtableprefix = "pheno_amphibia";
 		String glosstable = "fishglossaryfixed";
-		String sourceprefix = "pheno_archosaur";
+		//changed to amphibia (was archosaur)
+		String sourceprefix = "pheno_amphibia";
+		ArrayList<String> eOntoPaths = new ArrayList<String>();
+		//changed
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vertebrate_anatomy.obo");
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AAO.obo");
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AA.obo");
+		
+		ArrayList<String> qOntoPaths = new ArrayList<String>();
+		qOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\pato.owl");
+		
 		TermOutputer to = new TermOutputer(database, outputtableprefix, eOntoPaths, qOntoPaths, glosstable, sourceprefix);
 		to.output();
 		

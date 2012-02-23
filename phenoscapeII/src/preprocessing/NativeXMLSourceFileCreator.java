@@ -176,11 +176,14 @@ public class NativeXMLSourceFileCreator {
 		
 		String source = "original";
 		String database = "phenoscape";*/
-		String output = "Z:\\DATA\\phenotype\\source";
-		String tableprefix = "phenotype";
+//		String output = "Z:\\DATA\\phenotype\\source";
+//		String tableprefix = "phenotype";
 		
-		String source = "test";
-		String database = "markedupdatasets";
+		String output = "C:\\Users\\Zilong Chang\\Documents\\WORK\\amphibia\\source";
+		String tableprefix = "pheno_amphibia";
+		
+		String source = "original";
+		String database = "phenoscape";
 		NativeXMLSourceFileCreator sfc = new NativeXMLSourceFileCreator(source, output, database, tableprefix);
 		sfc.outputXMLFile();
 	}
