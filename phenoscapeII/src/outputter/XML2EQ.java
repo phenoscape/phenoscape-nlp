@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -55,6 +57,21 @@ public class XML2EQ {
 	private HashSet<String> stateids = new HashSet<String>();
 	private static ArrayList<String> serenostyle = new ArrayList<String>();
 	private String characters = null;
+	private XPath path1;
+	private XPath path2;
+	private XPath path3;
+	private XPath path4;
+	private XPath path5;
+	private XPath path6;
+	private XPath path7;
+	private XPath path8;
+	private XPath path9;
+	private XPath path10;
+	private XPath path11;
+	private Hashtable<String, String> entityhash = new Hashtable<String, String>();
+	private Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
+	private Pattern p1 = Pattern.compile("(first|second|third|forth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
+
 	
 	static{
 		serenostyle.add("sereno");
@@ -90,6 +107,20 @@ public class XML2EQ {
 						"qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(200), " +
 						"entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " +
 						"countt varchar(200))");
+				
+					
+				path1 = XPath.newInstance(".//statement[@statement_type='character']");
+				path2 = XPath.newInstance(".//statement[@statement_type='character_state']");
+				path3 = XPath.newInstance(".//structure[@name!='whole_organism']");
+				path4 = XPath.newInstance(".//text");
+				path5 = XPath.newInstance(".//structure[@name='whole_organism']");
+				path6 = XPath.newInstance(".//structure");
+				path7 = XPath.newInstance(".//structure[@name='whole_organism']/character");
+				path8 = XPath.newInstance(".//character");
+				path9 = XPath.newInstance(".//text");
+				path10 = XPath.newInstance(".//relation");
+				path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
+
 				}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -106,10 +137,11 @@ public class XML2EQ {
 				Document xml = builder.build(f);
 				Element root = xml.getRootElement();
 				//expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
-				List<Element> characterstatements = XPath.selectNodes(root, ".//statement[@statement_type='character']");
-				List<Element> statestatements = XPath.selectNodes(root, ".//statement[@statement_type='character_state']");				
+				List<Element> characterstatements = path1.selectNodes(root);
+				List<Element> statestatements = path2.selectNodes(root);				
 				integrateWholeOrganism4CharacterStatements(characterstatements, root);	
 				repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
+				//if(count!= 222){ count++; continue;}
 				System.out.println();
 				System.out.println("["+count+"]"+src);
 				count++;
@@ -156,10 +188,10 @@ public class XML2EQ {
 			List<Element> characterstatements, Element root) {
 		try{
 			for(Element statement: characterstatements){
-				List<Element> structures = XPath.selectNodes(statement, ".//structure[@name!='whole_organism']");
+				List<Element> structures = path3.selectNodes(statement);
 				if(structures.size()==0){
 					//repair
-					Element etext = (Element) XPath.selectSingleNode(statement, ".//text");
+					Element etext = (Element) path4.selectSingleNode(statement);
 					String text = etext.getTextTrim().replaceAll("\\[.*?\\]", "");
 					String struct = text.replaceFirst(".* ", "");
 					String constraint = text.replace(struct, "").trim();
@@ -210,7 +242,7 @@ public class XML2EQ {
 	private void outputEQs4CharacterUnit() {
 		//sanity check has problems
 		
-		for(String stateid: stateids){
+		/*for(String stateid: stateids){
 			ArrayList<Hashtable<String, String>> problems = new ArrayList<Hashtable<String,String>>();
 			for(Hashtable<String,String> EQ: allEQs){
 				if(EQ.get("stateid").compareTo(stateid)==0){
@@ -226,7 +258,7 @@ public class XML2EQ {
 			if(problems.size()>0){
 				repairProblemEQs(problems);
 			}
-		}
+		}*/
 		
 		//filter allEQs to match human cruation practice: only the keyentities are mentioned
 		//remove EQs associated with a state that are not the first EQ or that are not related to entity or entity locator
@@ -271,8 +303,8 @@ public class XML2EQ {
 
 			//2. negation
 			if(EQ.get("quality").startsWith("not ")){
-				EQ.put("quality", "");
 				EQ.put("qualitynegated", EQ.get("quality"));
+				EQ.put("quality", "");
 			}
 			
 			//finally
@@ -350,7 +382,7 @@ public class XML2EQ {
 	private void integrateWholeOrganism4CharacterStatements(List<Element> characterstatements, Element root) {
 		try{
 			for(Element statement: characterstatements){
-				List<Element> wholeOrgans = XPath.selectNodes(statement, ".//structure[@name='whole_organism']");
+				List<Element> wholeOrgans = path5.selectNodes(statement);
 				if(wholeOrgans.size()>0 && statement.getChildren("structure").size()>wholeOrgans.size()){
 					//collect ids and chars from wholeOrgans
 					ArrayList<Element> chars = new ArrayList<Element>();
@@ -361,7 +393,7 @@ public class XML2EQ {
 						wo.detach();
 					}
 					//integration
-					Element firststructure = (Element) XPath.selectSingleNode(statement, ".//structure[@name!='whole_organism']");
+					Element firststructure = (Element) path3.selectSingleNode(statement);
 					String sid = firststructure.getAttributeValue("id");
 					//add characters
 					for(Element chara: chars){
@@ -476,14 +508,14 @@ public class XML2EQ {
 			System.out.println(chtext);
 			chtext = chtext.replaceAll("\\(.*?\\)", "");
 			String[] chparts = chtext.toLowerCase().split("\\s*,\\s*");
-			List<Element> structs = XPath.selectNodes(charstatements.get(0), ".//structure");
+			List<Element> structs = path6.selectNodes(charstatements.get(0));
 			ArrayList<String> snames = new ArrayList<String>();
 			for(Element struct: structs){
 				snames.add(this.getStructureName(root, struct.getAttributeValue("id")).replaceFirst("(?<=\\w)_(?=\\d+$)", " "));
 			}
 			String E = "";
 			String ELs = "";
-			for(int i =0; i<chparts.length; i++){
+			for(int i =0+0; i<chparts.length; i++){
 				String n = firstMatchedStructureName(chparts[i], snames, i);//match in absence of/before [character]
 				if(n!=null){
 					snames.remove(n);
@@ -534,7 +566,7 @@ public class XML2EQ {
 					this.allEQs.add(EQc);
 				}else{				
 					//collecting all characters of whole_organism
-					List<Element> chars = XPath.selectNodes(state, ".//structure[@name='whole_organism']/character");
+					List<Element> chars = path7.selectNodes(state);
 					for(Element chara: chars){
 						Hashtable<String,String> EQi = (Hashtable<String,String>)EQc.clone();
 						EQi.put("quality", chara.getAttributeValue("value"));
@@ -547,7 +579,7 @@ public class XML2EQ {
 						this.allEQs.add(EQi);
 					}
 					//collecting relations of whole_organism
-					List<Element> wos = XPath.selectNodes(state, ".//structure[@name='whole_organism']");
+					List<Element> wos = path5.selectNodes(state);
 					for(Element wo: wos){
 						String id = wo.getAttributeValue("id");
 						List<Element> rels = XPath.selectNodes(state, ".//relation[@from='"+id+"']");
@@ -596,7 +628,7 @@ public class XML2EQ {
 	private String charactersAsString(Element root, Element firststruct) {
 		String chstring = "";
 		try{
-			List<Element> chars = XPath.selectNodes(root, ".//character");
+			List<Element> chars = path8.selectNodes(root);
 			for(Element chara : chars){
 				String m = chara.getAttribute("modifier")==null? "" : chara.getAttributeValue("modifier");
 				chstring += chara.getAttributeValue("value")+" ";
@@ -628,7 +660,8 @@ public class XML2EQ {
 
 
 	/**
-	 * this works only when the names in text are in singular forms as those in snames
+	 * this works only when the names in text are in singular form as those in snames
+	 * this may be true for Sereno style
 	 * @param text: contains no , or ;
 	 * @param snames
 	 * @return a structure name from snames that appear the earliest from text before a [character]
@@ -640,7 +673,8 @@ public class XML2EQ {
 		text = text.replaceFirst("\\[.*$", "")+" ";
 		do{
 			for(String sname : snames){
-				sname = sname.toLowerCase();
+				sname = sname.toLowerCase().replaceAll("_", " ");
+				//if(!sname.matches(".*?[ivx\\d]+") && sname.length()>=3) sname = sname.substring(0, sname.length()-2);
 				if(text.startsWith(sname)){
 					if(textc.endsWith(sname) && i==0){
 						snames.remove(sname);
@@ -717,14 +751,14 @@ public class XML2EQ {
 		initEQHash(EQ);
 		try{
 			//get the first structure element
-			Element firststruct = (Element)XPath.selectSingleNode(chars.get(0), ".//structure[@name!='whole_organism']");
+			Element firststruct = (Element)path3.selectSingleNode(chars.get(0));
 			//TODO: what if firststruct == null?
 			String sid = firststruct.getAttributeValue("id");
 			String sname =this.getStructureName(root, sid);
 			EQ.put("entity", sname);
 			this.keyentity = sname;
 			//take the first character 
-			Element chara = (Element)XPath.selectSingleNode(firststruct, ".//character");
+			Element chara = (Element)path8.selectSingleNode(firststruct);
 			if(chara!=null){
 				String q = formQualityValueFromCharacter(chara).replaceAll("\\[[^\\]]*?\\]", "");
 				EQ.put("quality", q);
@@ -800,7 +834,7 @@ public class XML2EQ {
 		if(states.size()==0) return false;
 		try{
 		for(Element state: states){
-			Element text = (Element)XPath.selectSingleNode(state, ".//text");
+			Element text = (Element)path9.selectSingleNode(state);
 			String value = text.getTextTrim();
 			if(!value.matches("("+ChunkedSentence.binaryTvalues+"|"+ChunkedSentence.binaryFvalues+")")){
 				return false;
@@ -825,7 +859,7 @@ public class XML2EQ {
 		Element key = null;
 		//ArrayList<Element> purge = new ArrayList<Element>();
 		try{
-			key = (Element)XPath.selectSingleNode(chars.get(0), ".//structure[@name!='whole_organism']");
+			key = (Element)path3.selectSingleNode(chars.get(0));
 			//TODO: what if key is null
 			keyentity = this.getStructureName(root, key.getAttributeValue("id"));
 			//boolean findstructure = false;
@@ -855,9 +889,9 @@ public class XML2EQ {
 				}*/
 				//generate other EQ statements from this statement
 				//for(Element e: purge) e.detach();
-				Element text = (Element)XPath.selectSingleNode(statement, ".//text");
-				structures = XPath.selectNodes(statement, ".//structure");
-				List<Element> relations = XPath.selectNodes(statement,".//relation");
+				Element text = (Element)path9.selectSingleNode(statement);
+				structures = path6.selectNodes(statement);
+				List<Element> relations = path10.selectNodes(statement);
 				createEQsfromStatement(src, root, text, structures, relations, true);
 			}
 		}catch(Exception e){
@@ -880,7 +914,7 @@ public class XML2EQ {
 		try{
 			for(Element statement : states){
 				//fill whole_organism place-holder with a real structure
-				List<Element> whole_organism = XPath.selectNodes(statement, ".//structure[@name='whole_organism']");
+				List<Element> whole_organism = path5.selectNodes(statement);
 				for(Element wo : whole_organism){
 					wo.setAttribute("name", key.getAttributeValue("name"));
 					changeIdsInRelations(wo.getAttributeValue("id"), key.getAttributeValue("id"), root);
@@ -890,11 +924,11 @@ public class XML2EQ {
 					}
 				}
 				//generate other EQ statements from this statement
-				Element text = (Element)XPath.selectSingleNode(statement, ".//text");
-				List<Element> structures = XPath.selectNodes(statement, ".//structure");
+				Element text = (Element)path9.selectSingleNode(statement);
+				List<Element> structures = path6.selectNodes(statement, ".//structure");
 				//relations should include those in this state statement and those in character statement
-				List<Element> relations = XPath.selectNodes(statement,".//relation"); 
-				relations.addAll(XPath.selectNodes(root, ".//statement[@statement_type='character']/relation"));
+				List<Element> relations = path10.selectNodes(statement,".//relation"); 
+				relations.addAll(path11.selectNodes(root));
 				createEQsfromStatement(src, root, text, structures, relations, false);
 			}			
 		}catch(Exception ex){
@@ -973,34 +1007,21 @@ public class XML2EQ {
 
 	private void insertEQs2Table(Hashtable<String, String> EQ) {
 		Enumeration<String> fields = EQ.keys();
-		String fieldstring = "";
-		String valuestring = "";
-		while(fields.hasMoreElements()){
-			String f = fields.nextElement();
-			if(f.compareTo("type")!=0){
-				fieldstring += f+",";
-				String fv = EQ.get(f);
-				if(EQ.get("type").compareTo("character")==0){
-					valuestring += "'"+(f.matches("(source|characterid|description)")? fv: "")+"',";
-				}else{
-					valuestring += "'"+fv+"',";
-				}
-			}
-		}
-		fieldstring = fieldstring.replaceFirst(",$", "");
-		valuestring = valuestring.replaceFirst(",$", "");
-		
-		String q = "insert into "+this.outputtable+"("+fieldstring+") values " +
-				"("+valuestring+")";
 		try{
-			Statement stmt = conn.createStatement();
-			stmt.execute(q);
-
+			//print
 			String entity = EQ.get("entity");
+			EQ.put("entity", format(entity));
+			EQ.put("entitylabel", transform(entity));
 			String quality = EQ.get("quality");
+			EQ.put("quality", format(quality));
 			String qualitynegated = EQ.get("qualitynegated");
+			EQ.put("qualitynegated", format(qualitynegated));
 			String qualitymodifier = EQ.get("qualitymodifier");
+			EQ.put("qualitymodifier", format(qualitymodifier)); 
+			EQ.put("qualitymodifierlabel", transform(qualitymodifier));
 			String entitylocator = EQ.get("entitylocator");
+			EQ.put("entitylocator", format(entitylocator)); 
+			EQ.put("entitylocatorlabel", transform(entitylocator));
 		
 			//quality and qualitynegated can not both hold values!
 			if(quality.length()>0 || entitylocator.length()>0){
@@ -1009,11 +1030,189 @@ public class XML2EQ {
 			if(qualitynegated.length()>0){
 				System.out.println("EQ::[E]"+entity+" [QN]"+qualitynegated+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
 			}
-			}catch(Exception e){
+			
+			//compose sql for insertion
+			String fieldstring = "";
+			String valuestring = "";
+			while(fields.hasMoreElements()){
+				String f = fields.nextElement();
+				if(f.compareTo("type")!=0){
+					fieldstring += f+",";
+					String fv = EQ.get(f);
+					if(EQ.get("type").compareTo("character")==0){
+						valuestring += "'"+(f.matches("(source|characterid|description)")? fv: "")+"',";
+					}else{
+						valuestring += "'"+fv+"',";
+					}
+				}
+			}
+			fieldstring = fieldstring.replaceFirst(",$", "");
+			valuestring = valuestring.replaceFirst(",$", "");
+			
+			String q = "insert into "+this.outputtable+"("+fieldstring+") values " +
+					"("+valuestring+")";
+			Statement stmt = conn.createStatement();
+			stmt.execute(q);			
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
+	
+	private String format(String word) {
+		word = word.replaceAll("_", " "); //abc_1
+		word = word.replaceAll("(?<=\\w)- (?=\\w)", "-"); //dorsal- fin
+		//word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
+		word = word.replaceAll("[()]", ""); //turn dorsal-(fin) to dorsal-fin
+		word = word.replaceAll("-to\\b", " to"); //turn dorsal-to to dorsal to
+		return word;
+	}
+	
+	
+
+
+	/**
+	 * fifth abc => abc 5
+	 * abc_1 => abc 1
+	 * @param entitylist: entity1, entity2
+	 * @return
+	 */
+	private String transform(String entitylist) {
+		entitylist = entitylist.replaceAll("(?<=\\w)- (?=\\w)", "-");
+		String transformed = entityhash.get(entitylist);
+		if(transformed != null) return transformed;
+		
+		transformed = "";
+		if(entitylist.matches(".*?(_[\\divx]+|first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth).*")){
+			String[] entities = entitylist.split("(?<!_),(?!_)");
+			for(String entity : entities){
+				//case one
+				entity = entity.trim();
+				if(entity.matches(".*?\\b(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b.*")){
+					Matcher m = p1.matcher(entity);
+					if(m.matches()){
+						String position = turnPosition2Number(m.group(1));
+						entity = m.group(2)+" "+position;
+						transformed += entity+",";
+					}
+					//transformed = transformed.replaceFirst(",$", "").trim();
+					//entityhash.put(entitylist, transformed);
+					//return transformed;
+				}
+				//case two
+				if(entity.matches(".*?_[\\divx]+")){//abc_1, abc_1_and_2, abc_1_to_3
+					String organ = entity.substring(0, entity.indexOf("_"));
+					entity = reformatRomans(entity);
+					entity = entity.replaceAll("_(?=\\d+)", " ").replaceAll("(?<=\\d)_", " "); //abc_1_and_3 => abc 1 and 3
+					if(entity.indexOf(" and ")<0 && entity.indexOf(" to ")<0){ //single entity
+						transformed += entity +",";
+						//entityhash.put(entitylist, transformed);
+						//return transformed;
+					}else{// abc 1 and 2 
+						if(entity.indexOf(" and ")>0){
+							transformed += entity.replaceFirst(" and ", ","+organ+" ")+","; //abc 1,abc 2
+							//entityhash.put(entitylist, transformed);
+							//return transformed;
+						}
+						//abc 1 , 2 to 5 ; abc 2 to 5
+						Matcher m = p2.matcher(entity);
+						if(m.matches()){
+							String part1 = m.group(1);
+							int from = Integer.parseInt(m.group(2));
+							int to = Integer.parseInt(m.group(3));
+							String temp1 = "";
+							for(int i = from; i <= to; i++){
+								temp1 = temp1 + organ +" "+ i +",";
+							}
+							
+							String temp = "";
+							part1 = part1.replaceAll("\\D", "").trim();
+							if(part1.length()>0){
+								String[] nums = part1.split("\\s+");
+								for(String n : nums){
+									temp = temp + organ +" "+ n +","; 
+								}
+							}
+							
+							transformed = transformed+ temp + temp1;
+							//transformed.replaceFirst(",$", "").trim();
+							//entityhash.put(entitylist, transformed);
+							//return transformed;
+						}												
+					}
+				}
+			}
+		}else{			
+			transformed = entitylist;
+			entityhash.put(entitylist, entitylist);
+		}
+		transformed = transformed.replaceFirst(",$", "").trim();
+		entityhash.put(entitylist, transformed);
+		return transformed;
+	}
+	
+	/**
+	 * abc_iv_and_v
+	 * @param entity
+	 * @return
+	 */
+	private String reformatRomans(String entity) {
+		String[] parts = entity.split("_");
+		String reformatted = "";
+		for(String part : parts){
+			if(part.matches("[ivx]+")) reformatted += this.turnRoman2Number(part)+"_";
+			else reformatted += part+"_";
+		}
+		return reformatted.replaceFirst("_$", "");
+	}
+	
+	/**
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	private String turnRoman2Number(String word) {
+		int total = 0;
+		if(word.endsWith("iv")){
+			total += 4;
+			word = word.replaceFirst("iv$", "");
+		}
+		if(word.endsWith("ix")){
+			total += 9;
+			word = word.replaceFirst("ix$", "");
+		}
+		int length = word.length();
+		for(int i = 0; i < length; i++){
+			if(word.charAt(i)=='i') total += 1;
+			if(word.charAt(i)=='v') total += 5;
+			if(word.charAt(i)=='x') total += 10;
+		}		
+		return total+"";
+	}
+
+
+	/**
+	 * fifth => 5
+	 * @param word
+	 * @return
+	 */
+	private String turnPosition2Number(String word) {
+		if(word.compareTo("first")==0) return "1";
+		if(word.compareTo("second")==0) return "2";
+		if(word.compareTo("third")==0) return "3";
+		if(word.compareTo("forth")==0) return "4";
+		if(word.compareTo("fouth")==0) return "4";
+		if(word.compareTo("fourth")==0) return "4";
+		if(word.compareTo("fifth")==0) return "5";
+		if(word.compareTo("sixth")==0) return "6";
+		if(word.compareTo("seventh")==0) return "7";
+		if(word.compareTo("eighth")==0) return "8";
+		if(word.compareTo("ninth")==0) return "9";
+		if(word.compareTo("tenth")==0) return "10";
+		return null;
+	}
+
+
 	/**
 	 *  [8]Armbruster_2004.xml_0638f15b-0de4-45fd-a3af-b1d209cea9d3.xml
 		text::Walls of metapterygoid channel
@@ -1083,8 +1282,9 @@ public class XML2EQ {
 		if(arelation!=null) rels = arelation.split("#");
 		String structname = this.getStructureName(root, structid);
 		try{
-			List<Element> chars = XPath.selectNodes(struct, ".//character");
+			List<Element> chars = path8.selectNodes(struct, ".//character");
 			Iterator<Element> it = chars.iterator();
+			//structure has both characters and relations
 			boolean hascharacter = false;
 			while(it.hasNext()){
 				hascharacter = true;
@@ -1143,15 +1343,32 @@ public class XML2EQ {
 					allEQs.add(EQ);
 				}
 			}
+			//structure has only relations
 			if(!hascharacter && rels != null){
 				//this is the case where the structure's character information is expressed in the relations (it has no character elements, but is involved in some relations)
+				String entitylocator ="";
+				//first, collect entitylocators
 				for(String rel : rels){ //rel: (covered in)o621
+					if(rel.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){
+						String toid = rel.replaceFirst(".*?\\)", "").trim();
+						String toname = this.getStructureName(root, toid);
+						entitylocator +=toname+",";
+					}
+				}
+				entitylocator = entitylocator.replaceFirst(",$", "");
+				if(keyelement && structname.compareTo(keyentity)==0) this.keyentitylocator = entitylocator;
+				//then, create EQs for each qualities
+				boolean hasrelquality = false;
+				for(String rel: rels){//rel: (covered in)o621
 					//make "covered in" a quality and "o621" quality modifier
+					//quality and qualitymodifier
 					if(!rel.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){//exclude Locator relations
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
+						String toname = this.getStructureName(root, toid);
 						String quality = rel.replace(toid, "").replaceAll("[()]", "").trim();
 						String qualitymodifier = this.getStructureName(root, toid);	
-						if(!keyelement){
+						if(!keyelement && !quality.matches("(with|without)")){
+							hasrelquality =true;
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							initEQHash(EQ);
 							EQ.put("source", src);
@@ -1159,30 +1376,41 @@ public class XML2EQ {
 							EQ.put("stateid", stateid);
 							EQ.put("description", text); 
 							EQ.put("entity", structname);
-							EQ.put("quality", quality);
+							EQ.put("quality", quality); //may be negated: not closely connected to 
 							EQ.put("qualitymodifier", qualitymodifier);
+							EQ.put("entitylocator", entitylocator);
 							EQ.put("type", keyelement? "character" : "state");
 							allEQs.add(EQ);
-						}
-					}else{
-						String toid = rel.replaceFirst(".*?\\)", "").trim();
-						String entitylocator = this.getStructureName(root, toid);		
-						if(keyelement && structname.compareTo(keyentity)==0) this.keyentitylocator = entitylocator;
-						if(!keyelement){
+						}else if(quality.compareTo("without")==0){
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							initEQHash(EQ);
 							EQ.put("source", src);
 							EQ.put("characterid", characterid);
 							EQ.put("stateid", stateid);
 							EQ.put("description", text); 
-							EQ.put("entity", structname);
-							EQ.put("entitylocator", entitylocator);
+							EQ.put("entity", toname);
+							EQ.put("quality", "absent");
+							EQ.put("qualitymodifier", qualitymodifier);
 							EQ.put("type", keyelement? "character" : "state");
 							allEQs.add(EQ);
 						}
 					}
 				}
-			}else if(!hascharacter && rels == null){ //most likely due to annotation errors
+				if(!hasrelquality){//output E and EL only /without quality
+					Hashtable<String, String> EQ = new Hashtable<String, String>();
+					initEQHash(EQ);
+					EQ.put("source", src);
+					EQ.put("characterid", characterid);
+					EQ.put("stateid", stateid);
+					EQ.put("description", text); 
+					EQ.put("entity", structname);
+					EQ.put("entitylocator", entitylocator);
+					EQ.put("type", keyelement? "character" : "state");
+					allEQs.add(EQ);
+				}
+			}
+			//structure has no character, no relations
+			if(!hascharacter && rels == null){ //most likely due to annotation errors
 				if(!keyelement){
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					initEQHash(EQ);
@@ -1197,8 +1425,7 @@ public class XML2EQ {
 					}
 					EQ.put("type", keyelement? "character" : "state");
 					allEQs.add(EQ);
-				}
-				
+				}				
 			}
 		}catch(Exception e){
 			e.printStackTrace();

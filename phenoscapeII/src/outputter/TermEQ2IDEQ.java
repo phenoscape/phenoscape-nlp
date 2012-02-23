@@ -23,10 +23,12 @@ public class TermEQ2IDEQ {
 	private Connection conn;
 	private String username="root";
 	private String password="root";
-	private TreeSet<String> entityterms = new TreeSet<String>();
-	private TreeSet<String> qualityterms = new TreeSet<String>();
-	//private Hashtable<String, String> entityIDCache = new Hashtable<String, String>();
-	//private Hashtable<String, String> qualityIDCache = new Hashtable<String, String>();
+	//private TreeSet<String> entityterms = new TreeSet<String>();
+	//private TreeSet<String> qualityterms = new TreeSet<String>();
+	private Hashtable<String, String> entityIDCache = new Hashtable<String, String>();
+	private Hashtable<String, String> qualityIDCache = new Hashtable<String, String>();
+	
+	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	
 	/**
 	 * 
@@ -39,19 +41,15 @@ public class TermEQ2IDEQ {
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select entity, qualitymodifier, entitylocator from "+outputtable);
+				ResultSet rs = stmt.executeQuery("select id, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel from "+outputtable+" where stateid!=''");
 				while(rs.next()){
-					String e = normalize(rs.getString("entity"));
-					if(e.length()>0) entityterms.add(e);
-					e = normalize(rs.getString("qualitymodifier"));
-					if(e.length()>0) entityterms.add(e);
-					e = normalize(rs.getString("entitylocator"));
-					if(e.length()>0) entityterms.add(e);
-				}
-				rs = stmt.executeQuery("select quality from "+outputtable);
-				while(rs.next()){
-					String e = normalize(rs.getString("quality"));
-					if(e.length()>0)qualityterms.add(e);
+					String srcid = rs.getString("id");
+					String entitylabel = rs.getString("entitylabel");
+					String entitylocatorlabel = rs.getString("entitylocatorlabel");
+					String quality = rs.getString("quality");
+					String qualitynegated = rs.getString("qualitynegated");
+					String qualitymodifierlabel = rs.getString("qualitymodifierlabel");
+					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
 			}			
 		}catch(Exception e){
@@ -59,29 +57,63 @@ public class TermEQ2IDEQ {
 		}
 	}
 
+
 	/**
 	 * 
-	 * @param string
-	 * @return
+	 * @param srcid used to insert IDs back into the output table
+	 * @param entitylabel will be updated to a label that matches an ID
+	 * @param entitylocatorlabel will be updated to labels that match a set of IDs
+	 * @param quality used to find an qualityID and qualitylabel
+	 * @param qualitynegated used to find an qualityID, qualitynegatedlabel, qnparentlabel, and qnparentid
+	 * @param qualitymodifierlabel will be updated to labels that match a set of IDs
 	 */
-	private String normalize(String string) {
-		string = string.replaceAll("\\[.*?\\]", "");//remove [usually]
-		string = string.replaceAll("[()]", ""); //turn dorsal-(fin) to dorsal-fin
-		string = string.replaceAll("-to\\b", " to"); //turn dorsal-to to dorsal to
-		return string.trim();
-	}
-
-	public void fillInIDs(){
-		for(String entityterm: entityterms){
-			ArrayList<String[]> results = Utilities.searchOntologies(entityterm, "entity");
-			if(results!=null && results.size()>=1) insertEntityResults2Table(entityterm, results);
+	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel){
+		//first find update entitylabel
+		fillInIDs4Entity(srcid, entitylabel, entitylocatorlabel); //0: label; 1:id
+		if(quality.length()>0){//rounded dorsally
+			fillInIDs4Quality(srcid, quality);
+		}else if(qualitynegated.length()>0){
+			fillInIDs4Qualitynegated(srcid, qualitynegated);
 		}
-		for(String qualityterm: qualityterms){
-			ArrayList<String[]>  results = Utilities.searchOntologies(qualityterm, "quality");
-			if(results!=null && results.size()>=1)insertQualityResults2Table(qualityterm, results);
-		}		
 	}
 	
+	
+	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	private void fillInIDs4Quality(String srcid, String quality) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid
+	 * @param srcid
+	 * @param entitylabel
+	 * @param entitylocatorlabel
+	 */
+	private void fillInIDs4Entity(String srcid, String entitylabel,
+			String entitylocatorlabel) {
+		entitylabel = entitylabel.replaceAll("("+this.process+")", "process");
+		entitylocatorlabel = entitylocatorlabel.replaceAll("("+this.process+")", "process");
+		//try a number of heuristics
+		//search starts with the last token, and move progressively backwards
+			//preopercular latero-sensory canal =>	preopercular sensory canal
+			//ventrolateral corner => ventro-lateral region
+			//pectoral-fin spine => pectoral fin spine
+		//if an entity returned no match, try entitylocator one by one, update entitylabel and entitylocatorlabel
+	}
+
+	private Hashtable<String, String> searchPATO(String entityterm){
+		
+		
+		
+		ArrayList<String[]> results = Utilities.searchOntologies(entityterm, "entity");
+		return null;
+	}
 	/**
 	 * 
 	 * @param entityterm
@@ -122,7 +154,7 @@ public class TermEQ2IDEQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ("phenoscape", "biocreative_nexml2eq");
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "run0");
 		t2id.fillInIDs();
 
 	}

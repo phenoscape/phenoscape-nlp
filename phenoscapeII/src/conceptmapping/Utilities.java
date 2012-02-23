@@ -19,8 +19,10 @@ public class Utilities {
 	
 	public static ArrayList<String> qualityOntoPaths = new ArrayList<String>();;
 	public static ArrayList<String> entityOntoPaths  = new ArrayList<String>();
+	public static ArrayList<String> excluded = new ArrayList<String>();
 
 	static{
+		excluded.add("cellular quality");
 		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\tao.owl");
 		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
 		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
@@ -110,7 +112,7 @@ public class Utilities {
 
 	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term);
+		List<OWLClass> matches = owlapi.retrieveConcept(term, this.excluded);
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
