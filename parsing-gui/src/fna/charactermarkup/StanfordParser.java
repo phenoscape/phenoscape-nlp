@@ -58,6 +58,60 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private boolean printSent = true;
 	private boolean printProgress = true;
 	private boolean evaluation = false;
+	static public XPath path1;
+	static public XPath path2;
+	static public XPath path3;
+	static public XPath path4;
+	static public XPath path5;
+	static public XPath path6;
+	static public XPath path7;
+	static public XPath path8;
+	static public XPath path9;
+	static public XPath path10;
+	static public XPath path11;
+	static public XPath path12;
+	static public XPath path13;
+	static public XPath path14;
+	static public XPath path15;
+	static public XPath path16;
+	static public XPath path17;
+	static public XPath path18;
+	static public XPath path19;
+	static public XPath path20;
+	static public XPath path21;
+	static public XPath path22;
+	static public XPath path23;
+
+	static{
+		try{
+			path1 = XPath.newInstance(".//character[@value='none']");
+			path2 = XPath.newInstance(".//character[@name='presence'][@value='no']");
+			path3 = XPath.newInstance(".//character[@name='presence'][@value='present']");
+			path4 = XPath.newInstance(".//relation[starts-with(@name, 'present']");
+			path5 = XPath.newInstance(".//character[@name='character']");
+			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
+			path7 = XPath.newInstance(".//structure");
+			path8 = XPath.newInstance(".//character[@name='count']");
+
+			path9 = XPath.newInstance(".//QP");
+			path10 = XPath.newInstance(".//PP/IN");
+			path11 = XPath.newInstance(".//VP/VBD|.//VP/VBG|.//VP/VBN|.//VP/VBP|.//VP/VBZ|.//VP/VB");
+			path12 = XPath.newInstance(".//NP/NN|.//NP/NNS");
+			path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that']");
+			path14 = XPath.newInstance(".//SBAR/WHNP/*[@text='which']");
+			path15 = XPath.newInstance(".//SBAR/WHADVP/*[@text='where']");
+			path16 = XPath.newInstance(".//*[@text='when']");
+			path17 = XPath.newInstance(".//VBD|.//VBG|.//VBN|.//VBP|.//VBZ|.//VB");
+			path18 = XPath.newInstance(".//NP/CC");
+			path19 = XPath.newInstance("CC");
+			path20 = XPath.newInstance(".//ADJP");
+			path21 = XPath.newInstance(".//PP");
+			path22 = XPath.newInstance(".//PP/CC");
+			path23 = XPath.newInstance(".//NN|.//NNS");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * 
 	 */
@@ -317,6 +371,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 
 	public static String normalizeSpacesRoundNumbers(String sent) {
 		sent = ratio2number(sent);//bhl
+		sent = sent.replaceAll("<?\\{?\\ba\\}?>? <?\\{?pair\\b?\\}?>?", "1 <pair>");
 		sent = sent.replaceAll("(?<=\\d)\\s*/\\s*(?=\\d)", "/");
 		sent = sent.replaceAll("(?<=\\d)\\s+(?=\\d)", "-"); //bhl: two numbers connected by a space
 		sent = sent.replaceAll("at least", "at-least");

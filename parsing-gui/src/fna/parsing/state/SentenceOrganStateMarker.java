@@ -45,7 +45,7 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of|";
+	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
 	private StyledText charLog;
@@ -70,7 +70,7 @@ public class SentenceOrganStateMarker {
 		}
 
 		//preparing...
-		this.adjnounsent = new Hashtable(); //source ->adjnoun (e.g. inner)
+		this.adjnounsent = new Hashtable<String, String>(); //source ->adjnoun (e.g. inner)
 		ArrayList<String> adjnouns = new ArrayList<String>();//all adjnouns
 		try{
 			Statement stmt = conn.createStatement();
@@ -180,7 +180,7 @@ public class SentenceOrganStateMarker {
 					String[] splits = sent.split("##");
 					String modifier = splits[0];
 					String tag = splits[1];
-					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+")\\b", "");
+					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
 					taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
 				

@@ -31,6 +31,7 @@ import org.jdom.xpath.*;
 @SuppressWarnings({ "unchecked", "unused","static-access" })
 
 public class CharacterAnnotatorChunked {
+	
 	private Element statement = null;
 	private ChunkedSentence cs = null;
 	private static ArrayList<Element> subjects = new ArrayList<Element>();//static so a ditto sent can see the last subject
@@ -167,14 +168,15 @@ public class CharacterAnnotatorChunked {
 			annotateByChunk(cs, false);
 		}
 		//postprocess functions
-		lifeStyle();
+		//lifeStyle();
 		//if(!this.evaluation) mayBeSameRelation();
-		if(this.partofinference){
-			puncBasedPartOfRelation();
-		}
+		//if(this.partofinference){
+		//	puncBasedPartOfRelation();
+		//}
 		removeIsolatedCharacters();
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
+		standardization();
 		if(printAnnotation){
 			XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());
 			System.out.println();
@@ -184,6 +186,99 @@ public class CharacterAnnotatorChunked {
 	}
 
 	/**
+	 * count = "none" =>count = 0
+	 */
+	private void standardization() {
+		try{
+			/*count = "none" =>count = 0*/
+			List<Element> es = StanfordParser.path1.selectNodes(this.statement);
+			for(Element e : es){
+				e.setAttribute("value", "0");
+			}
+			
+			
+			/*<structure id="o437" name="tooth">
+    			<character name="presence" value="no" />
+    			<character name="presence" value="present" constraint="on fourth upper pharyngeal tooth plate" constraintid="o438" />
+  			</structure> 
+  			
+  			==>
+  			
+  			<structure id="o437" name="tooth">
+    			<character name="presence" value="absent" constraint="on fourth upper pharyngeal tooth plate" constraintid="o438" />
+  			</structure> 
+  			
+  			
+  			  <text>no circuli present on posterior surface of scales</text>
+  				<structure id="o357" name="circulus">
+    				<character name="presence" value="no" />
+  				</structure>
+  				<structure id="o358" name="surface" constraint="posterior" />
+  				<relation id="r130" name="present on" from="o357" to="o358" negation="false" />
+  			
+  			==>
+  			  <text>no circuli present on posterior surface of scales</text>
+  				<structure id="o357" name="circulus">
+  				</structure>
+  				<structure id="o358" name="surface" constraint="posterior" />
+  				<relation id="r130" name="present on" from="o357" to="o358" negation="true" />
+
+  			
+  			*/
+			//XPath nopresencech = XPath.newInstance(".//character[@name='presence'][@value='no']");
+			es = StanfordParser.path2.selectNodes(this.statement);
+			ArrayList<Element> esstructures = new ArrayList<Element>();
+			for(Element e : es){
+				esstructures.add(e.getParentElement());
+			}
+			List<Element> esc = StanfordParser.path3.selectNodes(this.statement);
+			ArrayList<Element> escstructures = new ArrayList<Element>();
+			for(Element e : esc){
+				escstructures.add(e.getParentElement());
+			}
+			List<Element> esr = StanfordParser.path4.selectNodes(this.statement);
+			ArrayList<Element> esrstructures = new ArrayList<Element>();
+			for(Element e : esr){
+				String strid = e.getAttributeValue("from");
+				esrstructures.add((Element)XPath.selectSingleNode(this.statement, ".//structure[@id='"+strid+"']"));
+			}
+			esc = intersect(esstructures, escstructures);
+			esr = intersect(esstructures, esrstructures);
+			
+			for(Element e : esc){
+				Element c = (Element) StanfordParser.path2.selectSingleNode(e);
+				c.detach();				
+				List<Element>cl = StanfordParser.path3.selectNodes(e);
+				for(Element c1: cl) c1.setAttribute("value", "absent");
+			}
+			
+			for(Element e: esr){
+				List<Element> rs = StanfordParser.path2.selectNodes(e);
+				for(Element r : rs)	r.detach();
+				rs = XPath.selectNodes(this.statement, ".//relation[@from='"+e.getAttributeValue("id")+"'][starts-with(@name, 'present']");
+				for(Element r: rs) r.setAttribute("negation", "true");
+			}						
+			/*the remaining presence = no cases*/
+			es = StanfordParser.path2.selectNodes(this.statement);
+			for(Element e : es){
+				e.setAttribute("value", "absent");
+			}
+		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+	private List<Element> intersect(List<Element> es, List<Element> esc) {
+		ArrayList<Element> common = new ArrayList<Element>();
+		for(Element e: es){
+			if(esc.contains(e)) common.add(e);
+		}		
+		return common;
+	}
+	/**
 	 * characters such as "orientation", "length" may be used in a character statement as
 	 *     <character name="character" value="orientation" />
 	 *  these elements are removed by this function  
@@ -191,7 +286,7 @@ public class CharacterAnnotatorChunked {
 	 */
 	private void removeIsolatedCharacters() throws JDOMException {
 		if(this.statement.getAttribute("state_id")==null){
-			List<Element> chars = XPath.selectNodes(this.statement, ".//character[@name='character']");
+			List<Element> chars = StanfordParser.path5.selectNodes(this.statement);
 			for(Element chara: chars ){
 				String v = chara.getAttributeValue("value");
 				String text = this.statement.getChild("text").getTextTrim();
@@ -233,7 +328,7 @@ public class CharacterAnnotatorChunked {
 	private void removeIsolatedWholeOrganismPlaceholders() throws JDOMException {
 		//remove whole_organism structures that without any character children and are not involved in a relation. 
 		//These structures were put in as placeholders in processing characters/character states descriptions
-		List<Element> wholeOrgans = XPath.selectNodes(statement, ".//structure[@name='whole_organism']");
+		List<Element> wholeOrgans = StanfordParser.path6.selectNodes(statement);
 		Iterator<Element> it = wholeOrgans.iterator();
 		while(it.hasNext()){
 			Element wo = it.next();
@@ -270,7 +365,7 @@ public class CharacterAnnotatorChunked {
 	private void lifeStyle() {
 		try{			
 			//find life_style structures
-			List<Element> structures = XPath.selectNodes(this.statement, ".//structure");
+			List<Element> structures = StanfordParser.path7.selectNodes(this.statement);
 			Iterator<Element> it = structures.iterator();
 			//Element structure = null;
 			while(it.hasNext()){
@@ -284,7 +379,7 @@ public class CharacterAnnotatorChunked {
 						name = structure.getAttributeValue("constraint_parent_organ")+" "+name;
 					if(structure.getAttribute("constraint") !=null)
 						name = structure.getAttributeValue("constraint")+" "+name;					
-					Element wo = (Element)XPath.selectSingleNode(this.statement, ".//structure[@name='whole_organism']");
+					Element wo = (Element)StanfordParser.path6.selectSingleNode(this.statement);
 					if(wo!=null){
 						List<Element> content = structure.getContent();
 						structure.removeContent();
@@ -328,7 +423,7 @@ public class CharacterAnnotatorChunked {
 
 	private void mayBeSameRelation() {
 		try{
-			List<Element> structures = XPath.selectNodes(this.statement, ".//structure");
+			List<Element> structures = StanfordParser.path7.selectNodes(this.statement);
 			Hashtable<String, ArrayList<String>> names = new Hashtable<String, ArrayList<String>>();
 			Iterator<Element> it = structures.iterator();
 			//structure => ids hash
@@ -1005,11 +1100,22 @@ public class CharacterAnnotatorChunked {
 		String relation = rest.substring(rest.indexOf("v["));
 		String modifier = rest.replace(relation, "").trim().replaceAll("(m\\[|\\])", "");
 		
+		/*excluded from contact with frontal by sphenotic: "contact" is the subject of with...
+		 * if(object.indexOf("(")<0){//content: v[{present}] regardless o[r[p[of] o[l[season or sex]]]]
+			//take the v and make it a character //relation: v[{present}] regardless o[r[p[of]
+			String v = relation.substring(0, relation.indexOf("]")).replaceAll("(v\\[|\\{|\\}|\\])", "");
+			String character = Utilities.lookupCharacter(v, conn, ChunkedSentence.characterhash, glosstable, tableprefix);
+			if(character !=null){
+				this.createCharacterElement(this.subjects, results, "", v, character, "");
+			}
+			return results;
+		}*/
 		object = parenthesis(object);
 		ArrayList<Element> tostructures = this.processObject(object); //TODO: fix content is wrong. i8: o[a] architecture[surrounding (involucre)]
 		results.addAll(tostructures);
 		
 		this.createRelationElements(relation.replaceAll("(\\w\\[|\\])", ""), this.subjects, tostructures, modifier, false);
+		
 		return results;
 	}
 
@@ -1376,6 +1482,7 @@ public class CharacterAnnotatorChunked {
 		//String object  = ckstring.substring(ckstring.lastIndexOf("o[")).replaceFirst("\\]+$", "")+"]";	
 		int objectindex = ckstring.indexOf("]", ckstring.indexOf("p[")+1);
 		String pp = ckstring.substring(ckstring.indexOf("p["), objectindex).replaceAll("(\\w\\[|])", "");
+		pp = pp.replace("-", " ");
 		String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\b\\w\\[)|]", "").trim()+"]";
 		//String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\b\\w\\[|])", "")+"]";
 		//String object = "o["+ckstring.substring(objectindex).trim().replaceAll("(\\[|])", "")+"]";
@@ -1535,8 +1642,10 @@ public class CharacterAnnotatorChunked {
 				Iterator<Element> it = this.latestelements.iterator();
 				while(it.hasNext()){
 					lastelement = it.next();
-					lastelement.setAttribute("name", lastword);
-					lastelement.setAttribute("value", cvalue);
+					Element chara = new Element("character");
+					chara.setAttribute("name", lastword);
+					chara.setAttribute("value", cvalue);
+					this.addContent(lastelement, chara);
 				}
 				done = true;
 			}
@@ -1546,7 +1655,13 @@ public class CharacterAnnotatorChunked {
 
 	private String parenthesis(String object) {
 		if(!object.matches(".*?\\}\\]+$")){ //contains organ: > or untagged: arrays
-			if(object.matches(".*?[a-z]\\]+$")){//there is a bare word
+			if(object.matches(".*?\\bl\\[.*")){ //deal with list: o[l[season or sex]]]]
+				String beforelist = object.substring(0, object.indexOf("l["));
+				String list = object.substring(object.indexOf("l[")); //l[season or sex]]]]
+				list = list.replaceFirst("\\]", ")]").replaceFirst("\\[", "[(").replaceAll(" ", ") (");
+				list = list.replaceAll("\\)+", ")").replaceAll("\\(+", "(").replaceAll("\\(or\\)", "or").replaceAll("\\(and\\)", "and").replaceAll("\\(,\\)", ",").trim();				
+				return beforelist+list;
+			}else if(object.matches(".*?[a-z]\\]+$")){//there is a bare word
 				int l = object.lastIndexOf(' ');
 				l = l < 0 ? object.lastIndexOf('[') : l; 
 				String last = object.substring(l+1).replaceAll("\\W+$", "");
@@ -1932,11 +2047,13 @@ public class CharacterAnnotatorChunked {
 				String b = organsbeforeOf.get(i).getAttributeValue("name");
 				if(b.matches("("+ChunkedSentence.pairs+"|"+ChunkedSentence.clusters+")")){
 				 // z[{2} (pairs)] r[p[of] o[(uroneural) (bones)]]
-				    List<Element> c = XPath.selectNodes(organsbeforeOf.get(i), ".//character[@name='count']");	
+					//2 was marked as the count from the organsbeforeOf
+				    List<Element> c = StanfordParser.path8.selectNodes(organsbeforeOf.get(i));	
 					if(c.size()>0){
 						//append "pair(s)" to count value, then move counts to organsafterOf
 						countPairs(c, organsafterOf, organsbeforeOf.get(i));
 						result = null;
+						break;
 					}else{
 						result = "consist_of";
 					}
@@ -1967,7 +2084,7 @@ public class CharacterAnnotatorChunked {
 	}
 	
 	/**
-	 * append "pair(s)" to count value, then move counts to organsafterOf
+	 * append "pair(s)" to count value from organsbeforeof, then move counts to organsafterOf
 	 * @param countCharas
 	 * @param organsafterOf
 	 * @param elementbeforeOf 
@@ -1975,6 +2092,8 @@ public class CharacterAnnotatorChunked {
 
 	private void countPairs(List<Element> countCharas, ArrayList<Element> organsafterOf, Element elementbeforeOf) {
 		String pair = elementbeforeOf.getAttributeValue("name");
+		String pairid = elementbeforeOf.getAttributeValue("id");
+		String organsafterOfids = "";
 		if(elementbeforeOf.getAttribute("constraint")!=null) pair = elementbeforeOf.getAttributeValue("constraint")+" "+pair; 
 		Element parentOfCount= countCharas.get(0).getParentElement();
 		int totalchildren = parentOfCount.getChildren().size();
@@ -1992,11 +2111,33 @@ public class CharacterAnnotatorChunked {
 			movedChildren++;
 			Iterator<Element> et = organsafterOf.iterator();
 			while(et.hasNext()){
-				//et.next().addContent(count);
-				addContent(et.next(), count);
+				Element e = et.next();
+				addContent(e, count);
+				organsafterOfids += e.getAttributeValue("id")+" ";
 			}
 		}		
-		if(totalchildren== movedChildren) parentOfCount.detach();
+		if(totalchildren == movedChildren) parentOfCount.detach();
+		
+		//because "pair" is treated as a count and not an organ, if its ids are used in any constraintid and in relations 
+		//these ids need to be changed to the ids of organsafterOf
+		organsafterOfids  = organsafterOfids.trim();
+		try{
+			List<Element> elements = XPath.selectNodes(this.statement, ".//character[@constraintid='"+pairid+"']");
+			for(Element c: elements){
+				c.setAttribute("constraintid", organsafterOfids);
+			}
+			elements = XPath.selectNodes(this.statement, ".//relation[@to='"+pairid+"']");
+			for(Element r: elements){
+				r.setAttribute("to", organsafterOfids);
+			}
+			//structure "pair" no longer there, so drop any relations from pair.
+			elements = XPath.selectNodes(this.statement, ".//relation[@from='"+pairid+"']");
+			for(Element r: elements){
+				r.detach();
+			}	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * separate o[......... {m} {m} (o1) and {m} (o2)] to two parts: the last part include all organ names
@@ -2081,6 +2222,17 @@ public class CharacterAnnotatorChunked {
 	 */
 	private ArrayList<Element> createStructureElements(String listofstructures/*, boolean makeconstraint*/){
 		ArrayList<Element> results = new ArrayList<Element>();	
+		//special case: pronouns like them: resolve to the last structure
+		if(listofstructures.matches(".*?\\b("+ChunkedSentence.pronouns+")\\b.*") && listofstructures.indexOf(" ")<0){
+			for(int e = this.elementlog.size() -1 ; e >=0; e--){
+				Element el = elementlog.get(e);
+				if(el.getName().compareTo("structure")==0){
+					results.add(el);
+					return results;
+				}
+			}
+		}
+		
 		//String[] organs = listofstructures.replaceAll(" (and|or|plus) ", " , ").split("\\)\\s*,\\s*"); //TODO: flower and leaf blades???
 		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); //TODO: flower and leaf blades???		
 		//mohan 28/10/2011. If the first organ is a preposition then join the preposition with the following organ
@@ -2191,7 +2343,7 @@ public class CharacterAnnotatorChunked {
 			String relation, String toorganname) {
 		try{
 			//try to link toorganname to an previously mentioned organ
-			List<Element> structures = XPath.selectNodes(this.statement, ".//structure");
+			List<Element> structures = StanfordParser.path7.selectNodes(this.statement);
 			Iterator<Element> it = structures.iterator();
 			boolean exist = false;
 			while(it.hasNext()){

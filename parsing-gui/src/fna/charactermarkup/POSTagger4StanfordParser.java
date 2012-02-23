@@ -126,6 +126,15 @@ public class POSTagger4StanfordParser {
 	           str = normalizeAsAs(str);
 	        }
 	        
+	        if(str.matches(".*\\bsame\\b.*?\\bas\\b.*")){
+	        	str = normalizeSameAs(str);
+	        }
+	        
+	        if(str.matches(".*?\\bin\\b.*?\\bassociation\\W+(with|to)\\b.*")){
+	        	str = normalizeAssociationWith(str);
+	        }
+	        
+	        
 	        if(str.matches(".*?(?<=[a-z])/(?=[a-z]).*")){
 	        	str = str.replaceAll("(?<=[a-z])/(?=[a-z])", "-");
 	        }
@@ -272,7 +281,11 @@ public class POSTagger4StanfordParser {
 	        	   }else if(word.matches("("+ChunkedSentence.units+")")){
 	       			   sb.append(word+"/NNS ");
 	       		   }else if(word.matches("as-\\S+")){ //as-wide-as
-	       		   	   sb.append(word+"/RB ");
+	       		   	   sb.append(word+"/IN "); //changed from RB to IN 2/22/02 by Hong
+	       		   }else if(word.matches("same-\\S+")){ //same-as
+	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
+	       		   }else if(word.matches("in-\\S+")){ //in-association-with/to
+	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
 	       		   }else if(p.contains("op")){ //<inner> larger.
 	       				//System.out.println(rs1.getString(2));
 	       			   sb.append(word+"/NNS ");
@@ -694,8 +707,49 @@ public class POSTagger4StanfordParser {
 		
 		return result.trim();
 	}
-	
+		
+	/**
+	 * the same as => same-as/IN
+	 * as wide as or/to wider than inner
+	 * as wide as inner
+	 * as wide as long
+	 * @return
+	 */	
+	private String normalizeAssociationWith(String str) {
+		String result = "";
+		Pattern p = Pattern.compile("(.*?\\b)(in\\b.*?\\bassociation\\W+(?:with|to))(\\b.*)");
+		Matcher m = p.matcher(str);
+		while(m.matches()){
+			result+=m.group(1);
+			result+="{"+m.group(2).replaceAll("\\s+", "-").replaceAll("[{}<>]", "")+"}";
+			str = m.group(3);
+			m = p.matcher(str);
+		}
+		result+=str;
+		return result.replaceAll("\\{+", "{").replaceAll("\\}+", "}").trim();
+	}
 
+
+	/**
+	 * the same as => same-as/IN
+	 * as wide as or/to wider than inner
+	 * as wide as inner
+	 * as wide as long
+	 * @return
+	 */	
+	private String normalizeSameAs(String str) {
+		String result = "";
+		Pattern p = Pattern.compile("(.*?\\b)(same\\b[ \\w{}<>]+\\s+as)(\\b.*)");
+		Matcher m = p.matcher(str);
+		while(m.matches()){
+			result+=m.group(1);
+			result+="{"+m.group(2).replaceAll("\\s+", "-").replaceAll("[{}<>]", "")+"}";
+			str = m.group(3);
+			m = p.matcher(str);
+		}
+		result+=str;
+		return result.replaceAll("\\{+", "{").replaceAll("\\}+", "}").trim();
+	}
 
 	/**
 	 * as wide as => as-wide-as/IN

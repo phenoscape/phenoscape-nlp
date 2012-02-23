@@ -44,6 +44,7 @@ public class ChunkedSentence {
 	private String text = null;
 	private String sentsrc = null;
 	private String tableprefix = null;
+	public static final String pronouns = "them";
 	public static final String binaryTvalues = "true|yes|usually";
 	public static final String binaryFvalues = "false|no|rarely";
 	public static final String locationpp="near|from";
@@ -1000,7 +1001,8 @@ public class ChunkedSentence {
 		for(int i = 0; i<this.chunkedtokens.size(); i++){
 			String token = this.chunkedtokens.get(i);
 			
-			if(token.matches(".*?p\\[\\{?[a-z]+\\}?\\]+") || token.matches(".*?\\b("+preps+")\\b\\]*$")){//[of] ...onto]]
+			if(token.matches(".*?p\\[\\{?[a-z]+\\}?\\]+") || token.matches(".*?\\b("+preps+")\\b\\]*$") ||
+					token.matches(".*?\\b(as-.*?-as|same-.*?-as|in-.*?-(with|to))\\b.*?")){//[of] ...onto]]
 				token = token.replaceAll("[{}]", "");
 				if(this.printNorm){
 					System.out.println(token+" needs normalization!");
@@ -1120,7 +1122,8 @@ public class ChunkedSentence {
 					if(j-i==1){
 						//cancel the normalization attempt on this prep, return to the original chunkedtokens
 						this.chunkedtokens = copy;
-					}else{//reached the end of the sentence.This is the case for "plumose on distal 80 % ."?
+					}else if(np.matches(".*? [\\d+%]$")){//reached the end of the sentence.This is the case for "plumose on distal 80 % ."?
+						//also the same width dorsally as proximally
 						this.chunkedtokens = copy;
 						//np = np.replaceAll("\\s+", " ").trim();
 						String head = token.replaceFirst("\\]+$", "").trim();
@@ -1140,6 +1143,9 @@ public class ChunkedSentence {
 							}
 							count++;
 						}
+					}else{
+						//cancel the normalization attempt on this prep, return to the original chunkedtokens
+						this.chunkedtokens = copy;
 					}
 				}
 			}
@@ -1959,6 +1965,12 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				//r[p[without] o[or r[p[with] o[{poorly} {developed} {glutinous} ({ridge})]]]] ; 
 				token = token.replaceAll("r\\[p\\[of\\]\\]", "of");
 				this.chunkedtokens.set(id, token);
+				//r[p[for] o[{dorsal} 12 , {form}]] SG.SG
+				if(token.matches(".*? o\\[.*?, \\{\\w+\\}\\]+") && id >= this.chunkedtokens.size()-2){
+					token = token.replaceFirst(", \\{\\w+\\}(?=\\]{1,3})","");
+					this.chunkedtokens.set(id, token);
+				}
+				//nested preps
 				if(token.matches(".*?\\[p\\[\\w+\\] o\\[\\w+ r\\[p\\[.*")){
 					Pattern p = Pattern.compile("(.*?\\[p\\[\\w+)(\\] o\\[)(\\w+ )(r\\[p\\[)(.*)");
 					Matcher m = p.matcher(token);
@@ -1968,6 +1980,24 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 					}					
 				}
 				return "ChunkPrep";
+			}else if(token.indexOf("-as")>0){//as-wide-as, same-width-as:r[p[{same-width-distally-as}]]
+				//a[intensity_level_or_thickness[thin]]
+				//repack as ChunkSimpleCharacterState
+				token = token.substring(token.lastIndexOf("[")+1, token.indexOf("]")).replaceAll("[{}]", ""); //same-width-distally-as
+				String charword = token.replaceFirst(".*?-", "").replaceFirst("-.*", "");
+				String chara = Utilities.lookupCharacter(charword, this.conn, ChunkedSentence.characterhash, glosstable, tableprefix);
+				if(chara==null) return null;
+				else{
+					token = token.replace("-", " ");
+					String nexttoken = this.chunkedtokens.get(id+1);
+					if(nexttoken.indexOf("[")<0){
+						token = "a["+chara+"["+token+" "+nexttoken+"]]";
+						this.chunkedtokens.set(id+1, "");
+					}else token = "a["+chara+"["+token+"]]";
+					this.chunkedtokens.set(id, token);
+					return "ChunkSimpleCharacterState";
+				}
+				
 			}else{
 				return null;
 			}
@@ -2176,22 +2206,25 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 						if(m.find()){
 							subject = m.group(1);
 							subject = subject.replaceAll("\\s+-\\s+", "-");
-							skipLead(subject.split("\\s+"));
-							String organs = senttag.replaceAll("\\w+\\s+(?!(and |or |plus |$))", "|").replaceAll("\\s*\\|\\s*", "|").replaceAll("(^\\||\\|$)", "").replaceAll("\\|+", "|");//o1|o2
-							//turn organ names in subject to singular
-							String[] stokens = subject.split("\\s+");
-							subject = "";
-							for(int i = 0; i < stokens.length; i++){
-								String singular = Utilities.toSingular(stokens[i]);
-								if(singular.matches("("+organs+")")){
-									stokens[i] = singular;
+							if(skipLead(subject.split("\\s+"))<0){
+								this.subjecttext = null;
+							}else{
+								String organs = senttag.replaceAll("\\w+\\s+(?!(and |or |plus |$))", "|").replaceAll("\\s*\\|\\s*", "|").replaceAll("(^\\||\\|$)", "").replaceAll("\\|+", "|");//o1|o2
+								//turn organ names in subject to singular
+								String[] stokens = subject.split("\\s+");
+								subject = "";
+								for(int i = 0; i < stokens.length; i++){
+									String singular = Utilities.toSingular(stokens[i]);
+									if(singular.matches("("+organs+")")){
+										stokens[i] = singular;
+									}
+									subject += stokens[i]+" ";
 								}
-								subject += stokens[i]+" ";
+								subject = formatSubject(subject, taggedtext);
+								//subject = subject.trim().replaceAll("(?<=\\b("+organs+")\\b) ", ") ").replaceAll(" (?=\\b("+organs+")\\b)", " (").replaceFirst("(?<=\\b("+organs+")\\b)$", ")").replaceFirst("^(?=\\b("+organs+")\\b)", "(").trim();
+								//subject = subject.replaceAll("(?<=\\w) ", "} ").replaceAll(" (?=\\w)", " {").replaceAll("(?<=\\w)$", "}").replaceAll("^(?=\\w)", "{").replaceAll("[{(]and[)}]", "and").replaceAll("[{(]or[)}]", "or").replaceAll("\\{\\}", "").replaceAll("\\s+", " ").trim();
+								this.subjecttext = subject;
 							}
-							subject = formatSubject(subject, taggedtext);
-							//subject = subject.trim().replaceAll("(?<=\\b("+organs+")\\b) ", ") ").replaceAll(" (?=\\b("+organs+")\\b)", " (").replaceFirst("(?<=\\b("+organs+")\\b)$", ")").replaceFirst("^(?=\\b("+organs+")\\b)", "(").trim();
-							//subject = subject.replaceAll("(?<=\\w) ", "} ").replaceAll(" (?=\\w)", " {").replaceAll("(?<=\\w)$", "}").replaceAll("^(?=\\w)", "{").replaceAll("[{(]and[)}]", "and").replaceAll("[{(]or[)}]", "or").replaceAll("\\{\\}", "").replaceAll("\\s+", " ").trim();
-							this.subjecttext = subject;
 						}	
 						
 					}else{
@@ -2276,6 +2309,10 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			}else{
 				this.subjecttext = "ignore";
 			}
+		}
+		if(this.subjecttext!=null && this.subjecttext.endsWith("}")){
+			this.subjecttext = null;
+			this.pointer = 0;
 		}
 	}
 	
