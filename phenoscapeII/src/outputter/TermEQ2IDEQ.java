@@ -25,10 +25,11 @@ public class TermEQ2IDEQ {
 	private String password="root";
 	//private TreeSet<String> entityterms = new TreeSet<String>();
 	//private TreeSet<String> qualityterms = new TreeSet<String>();
-	private Hashtable<String, String> entityIDCache = new Hashtable<String, String>();
-	private Hashtable<String, String> qualityIDCache = new Hashtable<String, String>();
+	private Hashtable<String, String[]> entityIDCache = new Hashtable<String, String[]>(); //term=> {id, label}
+	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
 	
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
+	private boolean debug = true;
 	
 	/**
 	 * 
@@ -90,30 +91,210 @@ public class TermEQ2IDEQ {
 	}
 
 	/**
-	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid
+	 * Search a phrase A B C
+	 * search A B C
+	 * if succeeds, search the parent entity locator + A B C [tooth => ceratobranchial 5 tooth]
+	 *             if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
+	 *             if fails, entitylabel = A B C, entitylocator = entitylocator
+	 * if fails, search B C
+	 *             if succeeds, entitylabel = B C, entitylocator = entitylocator
+	 *             if fails, search C
+	 *             			 if succeeds, entitylabel = C, entitylocator = entitylocator
+	 *             			 if fails, search the parent entity locator
+	 *                                 if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
+	 *                                 if fails, search the next parent entity locator
+	 *                                 ....
+	 *                                 
+	 *                                   
+	 *                                   
+	 * then lookup IDs for other terms in entitylocators                                  	
+	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid using srcid
 	 * @param srcid
 	 * @param entitylabel
 	 * @param entitylocatorlabel
 	 */
+	
+	
+	
+	
 	private void fillInIDs4Entity(String srcid, String entitylabel,
 			String entitylocatorlabel) {
+		if(this.debug){
+			System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
+		}
+		
 		entitylabel = entitylabel.replaceAll("("+this.process+")", "process");
 		entitylocatorlabel = entitylocatorlabel.replaceAll("("+this.process+")", "process");
-		//try a number of heuristics
-		//search starts with the last token, and move progressively backwards
-			//preopercular latero-sensory canal =>	preopercular sensory canal
-			//ventrolateral corner => ventro-lateral region
-			//pectoral-fin spine => pectoral fin spine
-		//if an entity returned no match, try entitylocator one by one, update entitylabel and entitylocatorlabel
+		String finalentitylocator = "";
+		String finalentitylabel = "";
+		String finalentityid = "";
+		String[] entitylocators = null;
+		if(entitylocatorlabel.length()>0) entitylocators = entitylocatorlabel.split("\\s*,\\s*");
+		String[] entitylabeltokens = entitylabel.split("\\s+");
+		//unhandled cases: 
+		//upper pharyngeal tooth plates 4 and 5 => upper pharyngeal tooth plate
+		//humeral deltopectoral crest apex => process
+		int size = entitylabeltokens.length - 1;
+		for(int i = 0; i <= size; i++){
+			String entityterm = join(entitylabeltokens, i, size, " "); 
+			String [] result = searchTerm(entityterm, "entity");
+			if(result!=null){
+				if(entitylocators != null && i==0){//has entitylocator
+					String [] newresult = searchTerm(entitylocators[0]+" "+entityterm, "entity");
+					if(newresult!=null){
+						finalentityid = newresult[0];
+						finalentitylabel = newresult[1];
+						finalentitylocator = entitylocatorlabel.replaceFirst(entitylocators[0], "").replaceAll("^\\s*,\\s*", "");
+						break;
+					}
+				}else{
+					finalentityid = result[0];
+					finalentitylabel = result[1];
+					finalentitylocator = entitylocatorlabel;
+					break;
+				}			
+			}else{
+				if(i == size && entitylocators!= null){//entitylabel returned no result, try entitylocators
+					int j = 0;
+					while(result==null && j<entitylocators.length){
+						result = searchTerm(entitylocators[j], "entity");
+						j++;
+					}
+					if(result!=null){
+						finalentityid = result[0];
+						finalentitylabel = result[1];
+						finalentitylocator = join(entitylocators, j, entitylocators.length-1, ",");
+						break;
+					}
+				}
+			}				
+		}
+		
+		String finalentitylocatorids = "";
+		String finalentitylocatorlabels="";
+		if(finalentitylocator.length()>0){
+			String[] finalentitylocators = finalentitylocator.split("\\s*,\\s*");
+			for(String fel: finalentitylocators){
+				String [] result = searchTerm(fel, "entity");
+				if(result!=null){
+					finalentitylocatorids += result[0]+",";
+					finalentitylocatorlabels += result[1]+",";
+				}
+			}
+			finalentitylocatorids = finalentitylocatorids.replaceFirst(",$", "");
+			finalentitylocatorlabels = finalentitylocatorlabels.replaceFirst(",$", "");
+		}
+	
+
+		if(this.debug){
+			System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
+		}
+		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
 	}
 
-	private Hashtable<String, String> searchPATO(String entityterm){
+	
+	/**
+	 * like array join function in Perl
+	 * @param entitylabeltokens
+	 * @param i
+	 * @param size
+	 * @param string
+	 * @return
+	 */
+	private String join(String[] tokens, int start, int end,
+			String delimiter) {
+		String result = "";
+		for(int i = start; i <=end; i++) result += tokens[i]+delimiter;
+		return result.replaceFirst(delimiter+"$", "");
+	}
+
+
+	private void updateEntityIDs(String srcid, String entitylabel,
+			String entityid, String entitylocatorlabels,
+			String entitylocatorids) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set entitylabel='"+entitylabel+"'," +
+					" entityid='"+entityid+"', entitylocatorlabel='"+entitylocatorlabels+"'," +
+					" entitylocatorid='"+entitylocatorids+"' where id="+srcid);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
+	}
+
+
+	/**
+	 * preopercular latero-sensory canal =>	preopercular sensory canal
+	 * pectoral-fin spine => pectoral fin spine
+	 * @param term
+	 * @return
+	 */
+	private String[] searchTerm(String term, String type){	
+		//search in cache
+		if(type.compareTo("entity")==0){
+			String[] result = this.entityIDCache.get(term);
+			if(result!=null) return result;
+		}
+		if(type.compareTo("quality")==0){
+			String[] result = this.qualityIDCache.get(term);
+			if(result!=null) return result;
+		}
 		
-		
-		ArrayList<String[]> results = Utilities.searchOntologies(entityterm, "entity");
+		//search ontologies
+		if(term.indexOf("-")>0){
+		    //first search the original word
+			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
+			String[] exactmatch = retrieveExactMatch(results, term);
+			if(exactmatch!=null){
+				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+				return exactmatch;
+			}
+			/*String termcp = term;
+			if(results.size()==0){
+				//then search the word without -
+				while(term.indexOf("-")>0 && results.size()==0){
+					term = term.replaceFirst("-", " ");
+					results = Utilities.searchOntologies(term, type);
+				}
+			}
+			term = termcp;
+			*/
+			
+			//then search the word after "ccc-" part is removed
+			/*while(term.indexOf("-")>0 && results.size()==0){
+				term = term.replaceFirst("(?<=(^| ))\\w+-", "");
+				results = Utilities.searchOntologies(term, type);
+			}*/
+						 
+		}else{
+			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
+			String[] exactmatch = retrieveExactMatch(results, term);
+			if(exactmatch!=null){
+				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+				return exactmatch;
+			}
+		}		
 		return null;
 	}
+	
+	/**
+	 * 
+	 * @param results
+	 * @return
+	 */
+	private String[] retrieveExactMatch(ArrayList<String[]> results, String term) {
+		for(String[] result: results){
+			if(result[2].compareTo(term)==0){
+				return new String[]{result[1], result[2]};
+			}
+		}
+		return null;
+	}
+
+
 	/**
 	 * 
 	 * @param entityterm
@@ -155,8 +336,6 @@ public class TermEQ2IDEQ {
 	 */
 	public static void main(String[] args) {
 		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "run0");
-		t2id.fillInIDs();
-
 	}
 
 }

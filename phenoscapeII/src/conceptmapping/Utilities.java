@@ -17,16 +17,21 @@ import owlaccessor.OWLAccessorImpl;
  */
 public class Utilities {
 	
-	public static ArrayList<String> qualityOntoPaths = new ArrayList<String>();;
-	public static ArrayList<String> entityOntoPaths  = new ArrayList<String>();
+	public static ArrayList<OBO2DB> OBOqualityOntoAPIs = new ArrayList<OBO2DB>();;
+	public static ArrayList<OBO2DB> OBOentityOntoAPIs  = new ArrayList<OBO2DB>();
+	public static ArrayList<OWLAccessorImpl> OWLqualityOntoAPIs = new ArrayList<OWLAccessorImpl>();;
+	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 
 	static{
 		excluded.add("cellular quality");
-		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\tao.owl");
-		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo");
-		entityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo");
-		qualityOntoPaths.add("C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl");
+		
+		String [] entityontologies = new String[]{
+ 		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\tao.owl",
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo",
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo"};
+		String [] qualityontologies = new String[]{
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl"};
 		 
 		/*
 		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
@@ -34,6 +39,35 @@ public class Utilities {
 		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo");
 		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
 		*/
+		
+		for(String onto: entityontologies){
+			if(onto.endsWith(".owl")){
+				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto));
+				OWLentityOntoAPIs.add(api);
+			}else if(onto.endsWith(".obo")){
+				int i = onto.lastIndexOf("/");
+				int j = onto.lastIndexOf("\\");
+				i = i>j? i:j;
+				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
+				OBO2DB o2d = new OBO2DB("obo", onto ,ontoname);
+				OBOentityOntoAPIs.add(o2d);
+			}
+		}
+		
+		for(String onto: qualityontologies){
+			if(onto.endsWith(".owl")){
+				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto));
+				OWLqualityOntoAPIs.add(api);
+			}else if(onto.endsWith(".obo")){
+				int i = onto.lastIndexOf("/");
+				int j = onto.lastIndexOf("\\");
+				i = i>j? i:j;
+				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
+				OBO2DB o2d = new OBO2DB("obo", onto ,ontoname);
+				OBOqualityOntoAPIs.add(o2d);
+			}
+		}
+		
 	}
 	
 
@@ -41,63 +75,53 @@ public class Utilities {
 	 * 
 	 * @param term
 	 * @param type: entity or quality
-	 * @return 
+	 * @return ArrayList of results, one result from an ontology 
 	 */
 	public static ArrayList<String[]> searchOntologies(String term, String type) {
 		//search quality ontologies
 		ArrayList<String[]> results = new ArrayList<String[]>();
-		boolean added = false;
+		//boolean added = false;
 		if(type.compareTo("quality")==0){
-			for(String qonto: qualityOntoPaths){
-				if(qonto.endsWith(".owl")){
-					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(qonto));
-					//OWLAccessorImpl owlapi = new OWLAccessorImpl(qonto);
-					String[] result = searchOWLOntology(term, owlapi, type);
-					if(result!=null){
-						added = true;
-						results.add(result);
-					}
-				}else if(qonto.endsWith(".obo")){
-					String[] result = searchOBOOntology(term, qonto, type);
-					if(result!=null){
-						added = true;
-						results.add(result);
-					}
+			for(OWLAccessorImpl api: OWLqualityOntoAPIs){
+				String[] result = searchOWLOntology(term, api, type);
+				if(result!=null){
+					//added = true;
+					results.add(result);
+				}
+			}			
+			for(OBO2DB o2d: OBOqualityOntoAPIs){
+				String[] result = searchOBOOntology(term, o2d, type);
+				if(result!=null){
+					//added = true;
+					results.add(result);
 				}
 			}
 		}else if(type.compareTo("entity")==0){
-			for(String eonto: entityOntoPaths){
-				if(eonto.endsWith(".owl")){
-					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(eonto));
-					//OWLAccessorImpl owlapi = new OWLAccessorImpl(eonto);
-					String[] result = searchOWLOntology(term, owlapi, type);
-					if(result!=null){
-						added = true;
-						results.add(result);
-					}
-				}else if(eonto.endsWith(".obo")){
-					String[] result = searchOBOOntology(term, eonto, type);
-					if(result!=null){
-						added = true;
-						results.add(result);
-					}
+			for(OWLAccessorImpl api: OWLentityOntoAPIs){
+				String[] result = searchOWLOntology(term, api, type);
+				if(result!=null){
+					//added = true;
+					results.add(result);
+				}
+			}			
+			for(OBO2DB o2d: OBOentityOntoAPIs){
+				String[] result = searchOBOOntology(term, o2d, type);
+				if(result!=null){
+					//added = true;
+					results.add(result);
 				}
 			}
 		}
-		if(added){
-			return results;
-		}else{
-			return null;
-		}
+		return results;
+		//if(added){
+		//	return results;
+		//}else{
+		//	return null;
+		//}
 	}
 
-	private static String[] searchOBOOntology(String term, String ontofile, String type) {
+	private static String[] searchOBOOntology(String term, OBO2DB o2d, String type) {
 		String [] result = new String[3]; //an array with three elements: type, id, and label
-		int i = ontofile.lastIndexOf("/");
-		int j = ontofile.lastIndexOf("\\");
-		i = i>j? i:j;
-		String ontoname = ontofile.substring(i+1).replaceFirst("\\.obo", "");
-		OBO2DB o2d = new OBO2DB("obo", ontofile ,ontoname);
 		String[] match = o2d.getID(term);
 		if(match !=null){
 			result[0] = type;
@@ -109,10 +133,16 @@ public class Utilities {
 		return result;
 	}
 
-
+	/**
+	 * 
+	 * @param term
+	 * @param owlapi
+	 * @param type
+	 * @return array of 3 elements: 0: type; 1:ID; 2:label
+	 */
 	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term, this.excluded);
+		List<OWLClass> matches = owlapi.retrieveConcept(term, excluded);
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
@@ -122,7 +152,7 @@ public class Utilities {
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
+				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|AMAO|VAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
 				result[2] = label;
 				return result;
 			}
@@ -134,7 +164,7 @@ public class Utilities {
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			result[0] = type;
-			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
+			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|AMAO|VAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
 			result[2] += label+";";
 		}
 		if(result[1].length()>0){

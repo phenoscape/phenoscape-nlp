@@ -141,7 +141,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		return result;
 	}
@@ -170,8 +170,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public Set<OWLClass> getWordsToEliminate(List<String> eliminate){
 		Set<OWLClass> er = new HashSet<OWLClass>();
 		for (String s:eliminate){
-			er.add(this.getClassByLabel(s));//add itself to the set first
-			er.addAll(this.getAllOffsprings(this.getClassByLabel(s)));//add all its offsprings
+			OWLClass c = this.getClassByLabel(s);
+			er.add(c);//add itself to the set first
+			er.addAll(this.getAllOffsprings(c));//add all its offsprings
 		}
 		return er;
 	}
@@ -363,9 +364,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public Set<OWLClass> getAllOffsprings(OWLClass c) {
 		Set<OWLClass> r = new HashSet<OWLClass>();
-		for (OWLClassExpression ch : c.getSubClasses(ont)) {
-			r.add(ch.asOWLClass());
-			r.addAll(this.getAllOffsprings(ch.asOWLClass()));
+		if(c!=null){
+			for (OWLClassExpression ch : c.getSubClasses(ont)) {
+				OWLClass o = ch.asOWLClass();
+				r.add(o);
+				r.addAll(this.getAllOffsprings(o));
+			}
 		}
 		return r;
 	}

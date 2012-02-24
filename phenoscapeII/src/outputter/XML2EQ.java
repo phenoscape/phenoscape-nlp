@@ -24,6 +24,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import fna.charactermarkup.ChunkedSentence;
+import fna.charactermarkup.StanfordParser;
 
 /**
  * @author Hong Updates
@@ -141,7 +142,7 @@ public class XML2EQ {
 				List<Element> statestatements = path2.selectNodes(root);				
 				integrateWholeOrganism4CharacterStatements(characterstatements, root);	
 				repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
-				//if(count!= 222){ count++; continue;}
+				if(count!= 222){ count++; continue;}
 				System.out.println();
 				System.out.println("["+count+"]"+src);
 				count++;
@@ -294,8 +295,7 @@ public class XML2EQ {
 				if(EQ.get("entitylocator").compareTo(this.keyentitylocator)!=0 && isRelated2KeyEntity(EQ.get("entity"))){ 
 					//to inhere the entitylocator, this entity must be somewhat related to this.keyentity
 					//"lateral wall" is related to "walls" of ...
-					entitylocator += ","+this.keyentitylocator;
-					
+					entitylocator += ","+this.keyentitylocator;					
 				}
 			}
 			entitylocator = entitylocator.trim().replaceAll("(^,|,$)", "");
@@ -515,7 +515,7 @@ public class XML2EQ {
 			}
 			String E = "";
 			String ELs = "";
-			for(int i =0+0; i<chparts.length; i++){
+			for(int i =0; i<chparts.length; i++){
 				String n = firstMatchedStructureName(chparts[i], snames, i);//match in absence of/before [character]
 				if(n!=null){
 					snames.remove(n);
@@ -925,7 +925,8 @@ public class XML2EQ {
 				}
 				//generate other EQ statements from this statement
 				Element text = (Element)path9.selectSingleNode(statement);
-				List<Element> structures = path6.selectNodes(statement, ".//structure");
+				//List<Element> structures = path6.selectNodes(statement, ".//structure");
+				List<Element> structures = selectEntityStructures(statement);
 				//relations should include those in this state statement and those in character statement
 				List<Element> relations = path10.selectNodes(statement,".//relation"); 
 				relations.addAll(path11.selectNodes(root));
@@ -935,6 +936,32 @@ public class XML2EQ {
 			ex.printStackTrace();
 		}		
 	}
+
+
+	/**
+	 * select structures that have characters and/or are from structure in a relation
+	 * @param statement
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private List<Element> selectEntityStructures(Element statement) {
+		ArrayList<Element> selected = new ArrayList<Element>();
+		try{
+			List<Element> allstructs = StanfordParser.path7.selectNodes(statement);
+			for(Element struct: allstructs){
+				if(struct.getChildren().size()>0) selected.add(struct);
+				else{
+					String id = struct.getAttributeValue("id");
+					List<Element> from = XPath.selectNodes(statement, ".//relation[@from='"+id+"']");
+					if(from.size()>0) selected.add(struct);
+				}
+			}						
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return selected;
+	}
+
 
 	/**
 	 * search in all relations in root and replace oldid with newid for all from and to attributes
@@ -1023,12 +1050,17 @@ public class XML2EQ {
 			EQ.put("entitylocator", format(entitylocator)); 
 			EQ.put("entitylocatorlabel", transform(entitylocator));
 		
+			if(quality.length()==0 && qualitynegated.length()==0) return; //do not add E/EL only statement
 			//quality and qualitynegated can not both hold values!
-			if(quality.length()>0 || entitylocator.length()>0){
+			//if(quality.length()>0 || entitylocator.length()>0){
+			if(quality.length()>0){
 				System.out.println("EQ::[E]"+entity+" [Q]"+quality+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
-			}
-			if(qualitynegated.length()>0){
+			}else if(qualitynegated.length()>0){
 				System.out.println("EQ::[E]"+entity+" [QN]"+qualitynegated+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
+			}else if(quality.length()==0 && qualitynegated.length()==0 && entitylocator.length()>0){
+				System.out.println("EQ::[E]"+entity+" [Q]"+quality+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
+			}else{
+				if(EQ.get("type").compareTo("character")!=0) System.out.println("A EQ was not printed");
 			}
 			
 			//compose sql for insertion
@@ -1233,6 +1265,30 @@ public class XML2EQ {
 		return false;
 	}
 
+	/**
+	 * trace part_of relations of structid to get all its parent structures, 
+	 * separated by , in order
+	 * @param root
+	 * @param xpath: "//relation[@name='part_of'][@from='"+structid+"']"
+	 * @return
+	 */
+	private String getStructureChain(Element root, String xpath){
+		String path = "";
+		try{
+			List<Element> parents = XPath.selectNodes(root, xpath);
+			xpath = "";
+			for(Element p: parents){
+				String pid = p.getAttributeValue("id");
+				path += this.getStructureName(root, pid)+",";
+				xpath += "//relation[@name='part_of'][@from='"+pid+"']|";
+			}
+			xpath = xpath.replaceFirst("\\|$", "");
+			path += getStructureChain(root, xpath);			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return path;
+	}
 
 	/**
 	 * 
@@ -1269,7 +1325,7 @@ public class XML2EQ {
 	 * @param struct
 	 * @param keyelement TODO
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "static-access" })
 	private void createEQs4Structure(String src, Element root, String text, Element struct, Hashtable<String, String> relations, boolean keyelement) {
 		if(keyelement) 		System.out.println("text::"+text);
 		Hashtable<String, String> srcids = getStateId(root, struct);
@@ -1304,9 +1360,9 @@ public class XML2EQ {
 						String toname = this.getStructureName(root, toid);
 						if(r.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){ //entitylocator							
 							entitylocator += toname+",";
-						}else if(r.matches("(with).*")){							
-							//do nothing
-						}else if(r.matches("(without).*")){							
+						}else if(r.matches("\\(with\\).*")){							
+							continue;
+						}else if(r.matches("\\(without\\).*")){							
 							//output absent as Q for toid
 							if(!keyelement){
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
@@ -1377,7 +1433,7 @@ public class XML2EQ {
 							EQ.put("description", text); 
 							EQ.put("entity", structname);
 							EQ.put("quality", quality); //may be negated: not closely connected to 
-							EQ.put("qualitymodifier", qualitymodifier);
+							EQ.put("qualitymodifier", qualitymodifier);//qm may have locator too
 							EQ.put("entitylocator", entitylocator);
 							EQ.put("type", keyelement? "character" : "state");
 							allEQs.add(EQ);
