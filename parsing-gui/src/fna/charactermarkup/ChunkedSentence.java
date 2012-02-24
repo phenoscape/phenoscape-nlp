@@ -44,9 +44,9 @@ public class ChunkedSentence {
 	private String text = null;
 	private String sentsrc = null;
 	private String tableprefix = null;
-	public static final String pronouns = "them";
 	public static final String binaryTvalues = "true|yes|usually";
 	public static final String binaryFvalues = "false|no|rarely";
+	public static final String pronouns = "them";
 	public static final String locationpp="near|from";
 	public static final String units= "cm|mm|dm|m|meter|meters|microns|micron|unes|µm|um";
 	public static final String percentage="%|percent";

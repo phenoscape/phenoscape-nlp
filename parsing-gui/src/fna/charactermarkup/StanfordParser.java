@@ -81,7 +81,6 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	static public XPath path21;
 	static public XPath path22;
 	static public XPath path23;
-	static public XPath path24;
 	static{
 		try{
 			path1 = XPath.newInstance(".//character[@value='none']");
@@ -92,7 +91,6 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
 			path7 = XPath.newInstance(".//structure");
 			path8 = XPath.newInstance(".//character[@name='count']");
-			path24 = XPath.newInstance(".//structure[character]");
 
 			path9 = XPath.newInstance(".//QP");
 			path10 = XPath.newInstance(".//PP/IN");

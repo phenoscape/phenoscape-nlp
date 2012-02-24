@@ -25,6 +25,9 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
+import outputter.TermEQ2IDEQ;
+import outputter.XML2EQ;
+
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
 
@@ -100,7 +103,15 @@ public class VolumeFinalizer extends Thread {
 		sp.parsing();
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
-
+		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
+		String xmldir = Registry.TargetDirectory+"\\final\\";;
+		String outputtable = "xml2eq";
+		String benchmarktable = "internalworkbench";
+		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
+		x2e.outputEQs();
+		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable);
+		if(!standalone) this.showOutputMessage("Operations completed. Check results in "+database+" database.");
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {

@@ -48,5 +48,6 @@
 	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.observable_1.4.0.I20110222-0800.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.property_1.4.0.I20110222-0800.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.jface.databinding_1.5.0.I20100907-0800.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PhenoscapeII"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
