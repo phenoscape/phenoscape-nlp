@@ -1581,7 +1581,8 @@ public class CharacterAnnotatorChunked {
 			//Element last = this.latestelements.get(this.latestelements.size()-1);
 			if(lastIsStruct){
 				for(Element lastE: this.latestelements){
-					addAttribute(lastE, "constraint", ckstring.replaceAll("(\\w\\[|\\]|\\{|\\})", ""));//TODO 5/16/2011 <corollas> r[p[of] o[{sterile} {much} {expanded} and {exceeding} (corollas)]] This should not be happening.z[{equaling} (phyllaries)] r[p[at] o[{flowering}]]
+					lastE.setAttribute("name", lastE.getAttributeValue("name")+" "+ckstring.replaceAll("(\\w\\[|\\]|\\{|\\})", "").trim());
+					//addAttribute(lastE, "constraint", ckstring.replaceAll("(\\w\\[|\\]|\\{|\\})", ""));//TODO 5/16/2011 <corollas> r[p[of] o[{sterile} {much} {expanded} and {exceeding} (corollas)]] This should not be happening.z[{equaling} (phyllaries)] r[p[at] o[{flowering}]]
 				}
 			}else if(lastIsChara){ //character element
 				for(Element lastE: this.latestelements){
@@ -1726,7 +1727,8 @@ public class CharacterAnnotatorChunked {
 					createRelationElements(relation, entity1, structures, modifier, false);//relation elements not visible to outside 
 				}	
 				//reset "subject" structure for prositional preps, so all subsequent characters should refer to organbeforeOf/entity1
-				if(relation!= null && relation.matches("("+ChunkedSentence.positionprep+")")){
+				boolean nextisposition = isNextChunkPosition();
+				if(relation!= null && relation.matches("("+ChunkedSentence.positionprep+")") && !nextisposition){
 					structures = entity1; 
 				}
 			}else{
@@ -1760,7 +1762,20 @@ public class CharacterAnnotatorChunked {
 		}
 		return structures;
 	}
-	
+	/**
+	 * peek if the next chunk is a postion chunk
+	 * @return
+	 */
+	private boolean isNextChunkPosition() {
+		int pointer = cs.getPointer()+1;
+		int size = cs.getSize();
+		String token = "";
+		while(token.length()==0 && pointer < size){
+			token = cs.getTokenAt(pointer++);
+		}
+		if(token.matches(".*?\\b("+ChunkedSentence.positionprep+")\\b.*")) return true;
+		return false;
+	}
 	/**
 	 * In elementlog, find relation/character elements that matches the token
 	 * @param lasttoken
@@ -2193,7 +2208,8 @@ public class CharacterAnnotatorChunked {
 	 */
 	private String normalizeSharedOrganObject(String object) {
 		// TODO Auto-generated method stub
-		if(object.matches(".*?\\b(and|or)\\b.*")){
+		//if(object.matches(".*?\\b(and|or)\\b.*")){//a conic or subcylindric lateral extremity is not a case of shared object
+		if(object.matches(".*?\\band\\b.*")){	
 			String norm = "";
 			String[] segs = object.split("\\s+");
 			String lastN = segs[segs.length-1].replaceAll("\\]+$", "").trim();
@@ -2203,14 +2219,16 @@ public class CharacterAnnotatorChunked {
 			}
 			for(int i= segs.length-1; i>=0; i--){
 				norm = segs[i]+" "+norm;
-				if(segs[i].matches("(,|and|or)") && !segs[i-1].contains("(")){
+				//if(segs[i].matches("(,|and|or)") && !segs[i-1].contains("(")){
+				if(segs[i].matches("(,|and)") && !segs[i-1].contains("(")){
 					norm = lastN+" "+norm;
 				}
-				if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
+				//if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
+				if(segs[i].matches("(,|and)") && segs[i-1].contains("(")){
 					lastN = segs[i-1].trim();
 				}
 			}
-			return norm;
+			return norm.trim();
 		}
 		
 		return object;
