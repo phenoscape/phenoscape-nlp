@@ -40,6 +40,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The ont. */
 	private OWLOntology ont;
 
+	private Set<OWLClass> allclasses; 
+	
+	private String source;
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -49,8 +52,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
+		source = ontoURL;
 		try {
 			ont = manager.loadOntologyFromOntologyDocument(iri);
+			allclasses = ont.getClassesInSignature();
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -65,13 +70,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public OWLAccessorImpl(File file) {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
-
+		source = file.getAbsolutePath();
 		try {
 			ont = manager.loadOntologyFromOntologyDocument(file);
+			allclasses = ont.getClassesInSignature();
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public String getSource(){
+		return source;
 	}
 
 	/**
@@ -123,7 +133,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
 		try {
-			Set<OWLClass> allclasses = ont.getClassesInSignature();
+
 			//eliminate words
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 			
@@ -131,12 +141,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 				// match class concepts and also the synonyms
 				List<String> syns = this.getSynonymLabels(c);
 				String label = this.getLabel(c);
-				boolean syn = matchSyn(con, syns, "p");
-				if (label.contains(con) || label.equals(con) || syn) {
+				boolean syn = matchSyn(con, syns, "e");
+				//if (label.contains(con) || label.equals(con) || syn) {
+				if (label.equals(con) || syn) {
 					result.add(c);
-					if (syn && !label.contains(con)) {
+					//if (syn && !label.contains(con)) {
 						// System.out.println("syn+:" + con);
-					}
+					//}
 					// break;
 				}
 			}
@@ -181,8 +192,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * Remove the non-readable or non-meaningful characters in the retrieval
 	 * from OWL API, and return the refined output.
 	 *
-	 * @param origin the origin
-	 * @return the refined output
+	 * @param origin the origin??? what does it look like?
+	 * @return the refined output ??? what does it look like??
 	 */
 	public String getRefinedOutput(String origin) {
 		// Annotation(<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>
@@ -352,7 +363,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public Set<OWLClass> getAllClasses() {
 		// TODO Auto-generated method stub
-		return ont.getClassesInSignature();
+		return allclasses;
 	}
 
 	/**

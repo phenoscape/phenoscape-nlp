@@ -35,14 +35,16 @@ public class TermEQ2IDEQ {
 	 * 
 	 */
 	public TermEQ2IDEQ(String database, String outputtable) {
-		this.outputtable = outputtable;
+		this.outputtable = outputtable+"_result";
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select id, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel from "+outputtable+" where stateid!=''");
+				stmt.execute("drop table if exists "+this.outputtable);
+				stmt.execute("create table "+this.outputtable+" select * from "+outputtable);
+				ResultSet rs = stmt.executeQuery("select id, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel from "+this.outputtable+" where stateid!=''");
 				while(rs.next()){
 					String srcid = rs.getString("id");
 					String entitylabel = rs.getString("entitylabel");
@@ -78,17 +80,66 @@ public class TermEQ2IDEQ {
 		}
 	}
 	
-	
+	/**
+	 * update qualitynegatedlabel, qualityid, qnparentlabel, qnparentid
+	 * @param srcid
+	 * @param qualitynegated
+	 */
 	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated) {
-		// TODO Auto-generated method stub
+		String term = qualitynegated.replaceFirst("not ", "").trim();
+		String qualitynegatedlabel="";
+		String qualityid="";
+		String qnparentlabels="";
+		String qnparentids="";
+		String[] result = this.searchTerm(term, "quality");
+		if(result!=null){
+			qualitynegatedlabel = "not("+result[1]+")";
+			qualityid = result[0];
+			String [] parentinfo = Utilities.retreiveParentInfoFromPATO(result[1]);
+			qnparentids = parentinfo[0];
+			qnparentlabels = parentinfo[1];
+			
+		}
+		updateQualitynegatedIDs(srcid, qualitynegatedlabel, qualityid, qnparentlabels, qnparentids);
 		
 	}
 
-
-	private void fillInIDs4Quality(String srcid, String quality) {
-		// TODO Auto-generated method stub
-		
+	private void updateQualitynegatedIDs(String srcid,
+			String qualitynegatedlabel, String qualityid,
+			String qnparentlabels, String qnparentids) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set qualitynegatedlabel='"+qualitynegatedlabel+"'," +
+					" qualityid='"+qualityid+"', qnparentlabel='"+qnparentlabels+"'," +
+					" qnparentid='"+qnparentids+"' where id="+srcid);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
+
+
+	/**
+	 * update qualitylabel, qualityid
+	 * @param srcid
+	 * @param quality
+	 */
+	private void fillInIDs4Quality(String srcid, String term) {
+		String[] result = this.searchTerm(term, "quality");
+		if(result!=null){
+			updateQualityIDs(srcid, result[1], result[0]);
+		}
+	}
+
+	private void updateQualityIDs(String srcid, String qualitylabel, String qualityid) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set qualitylabel='"+qualitylabel+"'," +
+					" qualityid='"+qualityid+"' where id="+srcid);
+		}catch(Exception e){
+			e.printStackTrace();
+		}				
+	}
+
 
 	/**
 	 * Search a phrase A B C
@@ -147,12 +198,11 @@ public class TermEQ2IDEQ {
 						finalentitylocator = entitylocatorlabel.replaceFirst(entitylocators[0], "").replaceAll("^\\s*,\\s*", "");
 						break;
 					}
-				}else{
-					finalentityid = result[0];
-					finalentitylabel = result[1];
-					finalentitylocator = entitylocatorlabel;
-					break;
-				}			
+				}
+				finalentityid = result[0];
+				finalentitylabel = result[1];
+				finalentitylocator = entitylocatorlabel;
+				break;			
 			}else{
 				if(i == size && entitylocators!= null){//entitylabel returned no result, try entitylocators
 					int j = 0;
@@ -245,7 +295,8 @@ public class TermEQ2IDEQ {
 		if(term.indexOf("-")>0){
 		    //first search the original word
 			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
-			String[] exactmatch = retrieveExactMatch(results, term);
+			String[] exactmatch = null;
+			if(results.size()>0) exactmatch = results.get(0);
 			if(exactmatch!=null){
 				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
 				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
@@ -270,7 +321,8 @@ public class TermEQ2IDEQ {
 						 
 		}else{
 			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
-			String[] exactmatch = retrieveExactMatch(results, term);
+			String[] exactmatch = null;
+			if(results.size()>0) exactmatch = results.get(0);
 			if(exactmatch!=null){
 				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
 				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				

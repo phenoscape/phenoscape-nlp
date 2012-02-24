@@ -70,6 +70,31 @@ public class Utilities {
 		
 	}
 	
+	public static String[] retreiveParentInfoFromPATO (String classlabel){
+		//find OWL PATO
+		OWLAccessorImpl pato = null;
+		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
+			if(api.getSource().indexOf("pato")>=0){
+				pato = api;
+				break;
+			}
+		}
+		//find parent
+		String [] result = null; 
+		if(pato!=null){
+			OWLClass c = pato.getClassByLabel(classlabel);
+			List<OWLClass> pcs = pato.getParents(c);
+			result = new String[2]; //0: ID; 1:label
+			for(OWLClass pc: pcs){
+				result[0] += pato.getID(pc)+",";
+				result[1] += pato.getLabel(pc)+",";
+			}
+			result[0] = result[0].replaceFirst(",$", "");
+			result[1] = result[1].replaceFirst(",$", "");
+		}		
+		return result;
+	}
+	
 
 	/**
 	 * 

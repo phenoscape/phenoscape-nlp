@@ -86,14 +86,15 @@ public class TestOWLAccessorImpl {
 	
 	@Test
 	public void testGetAnnotationProperties(){
-		OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));
-		for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
-			System.out.println(oa.toString());
-		}
+		//OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		OWLAccessorImpl a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl");
+		//System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));
+		//for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
+		//	System.out.println(oa.toString());
+		//}
 		
 		List<String> s = new ArrayList<String>();
-		System.out.println(a.retrieveConcept("ploidy", s).size());
+		System.out.println(a.retrieveConcept("pterotic-supracleithrum", s).size());
 		
 		s.add("cellular quality");
 		System.out.println(a.retrieveConcept("ploidy", s).size());

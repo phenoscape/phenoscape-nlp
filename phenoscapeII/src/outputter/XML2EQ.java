@@ -19,12 +19,9 @@ import java.util.regex.Pattern;
 
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
-import fna.charactermarkup.ChunkedSentence;
-import fna.charactermarkup.StanfordParser;
 
 /**
  * @author Hong Updates
@@ -69,11 +66,15 @@ public class XML2EQ {
 	private XPath path9;
 	private XPath path10;
 	private XPath path11;
+	private XPath path12;
+	private XPath path13;
 	private Hashtable<String, String> entityhash = new Hashtable<String, String>();
 	private Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 	private Pattern p1 = Pattern.compile("(first|second|third|forth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
+	private String binaryTvalues = "true|yes|usually";
+	private String binaryFvalues = "false|no|rarely";
+	private String positionprep = "of|part_of|in|on|between";
 
-	
 	static{
 		serenostyle.add("sereno");
 		serenostyle.add("martinez");
@@ -121,7 +122,8 @@ public class XML2EQ {
 				path9 = XPath.newInstance(".//text");
 				path10 = XPath.newInstance(".//relation");
 				path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
-
+				path12 = XPath.newInstance(".//structure");
+				path13 = XPath.newInstance("//relation[@name='with']");
 				}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -137,12 +139,13 @@ public class XML2EQ {
 				SAXBuilder builder = new SAXBuilder();
 				Document xml = builder.build(f);
 				Element root = xml.getRootElement();
+				with2partof(root);
 				//expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
 				List<Element> characterstatements = path1.selectNodes(root);
 				List<Element> statestatements = path2.selectNodes(root);				
 				integrateWholeOrganism4CharacterStatements(characterstatements, root);	
 				repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
-				if(count!= 222){ count++; continue;}
+				//if(count!= 222){ count++; continue;}
 				System.out.println();
 				System.out.println("["+count+"]"+src);
 				count++;
@@ -164,6 +167,28 @@ public class XML2EQ {
 		}
 	}
 	
+	/**
+	 * A with B => B part_of A
+	 * @param root
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private void with2partof(Element root) {
+		try{
+			List<Element> withs = path13.selectNodes(root);
+			for(Element with: withs){
+				String to = with.getAttributeValue("to");
+				String from = with.getAttributeValue("from");
+				with.setAttribute("name", "part_of");
+				with.setAttribute("to", from);
+				with.setAttribute("from", to);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+
 	/**
 	 * use workbench to select/keep only the ones in the workbench
 	 */
@@ -572,6 +597,8 @@ public class XML2EQ {
 						EQi.put("quality", chara.getAttributeValue("value"));
 						if(chara.getAttribute("constraintid")!=null){
 							String names = this.getStructureName(root, chara.getAttributeValue("constraintid"));
+							names = names+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+chara.getAttributeValue("constraintid")+"']");
+							names = names.replaceFirst(",$", "");
 							QMs = QMs+","+names;
 						}
 						QMs = QMs.replaceFirst(",$", "").replaceFirst("^,", "").replaceAll(",+", ",");
@@ -586,7 +613,10 @@ public class XML2EQ {
 						for(Element rel: rels){
 							Hashtable<String, String> EQi = (Hashtable<String, String>)EQc.clone();
 							String relname = rel.getAttributeValue("name");
-							String toname = this.getStructureName(root, rel.getAttributeValue("to"));
+							String toid = rel.getAttributeValue("to");
+							String toname = this.getStructureName(root, toid);
+							toname = toname+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
+							toname = toname.replaceFirst(",$", "");
 							String negation =rel.getAttributeValue("negation");
 							if(negation.contains("true")){
 								EQi.put("qualitynegated", "not "+relname);
@@ -698,7 +728,7 @@ public class XML2EQ {
 			String characterid = state.getAttributeValue("character_id");
 			String stateid = state.getAttributeValue("state_id");
 			stateids.add(stateid);
-			if(stext.matches("("+ChunkedSentence.binaryTvalues+")")){
+			if(stext.matches("("+binaryTvalues+")")){
 				//copy
 				for(Hashtable<String,String> EQ: EQs){ //add some needed fields
 					Hashtable<String, String> EQcp = (Hashtable<String, String>)EQ.clone();
@@ -714,7 +744,7 @@ public class XML2EQ {
 							EQ.get("qualitymodifierid"),EQ.get("entitylocator"), EQ.get("entitylocatorid"), true);*/
 				}
 
-			}else if(stext.matches("("+ChunkedSentence.binaryFvalues+")")){
+			}else if(stext.matches("("+binaryFvalues+")")){
 				//negate
 				for(Hashtable<String,String> EQ: EQs){//add some needed fields
 					Hashtable<String, String> EQcp = (Hashtable<String, String>)EQ.clone();
@@ -775,7 +805,9 @@ public class XML2EQ {
 				//String fromid = rel.getAttributeValue("from");
 				//String lid = toid.compareTo("sid")==0? fromid : toid;
 				String toname = this.getStructureName(root, toid);
-				if(relname.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){
+				toname = toname+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
+				toname = toname.replaceFirst(",$", "");
+				if(relname.matches("\\(("+positionprep+")\\).*")){
 					EQ.put("entitylocator", toname);//TODO chained part_of relations??
 					this.keyentitylocator = toname;
 				}else if(EQ.get("quality").compareTo("")==0){//quality not found, turn relation to quality, toid to qualitymodifier
@@ -836,7 +868,7 @@ public class XML2EQ {
 		for(Element state: states){
 			Element text = (Element)path9.selectSingleNode(state);
 			String value = text.getTextTrim();
-			if(!value.matches("("+ChunkedSentence.binaryTvalues+"|"+ChunkedSentence.binaryFvalues+")")){
+			if(!value.matches("("+binaryTvalues+"|"+binaryFvalues+")")){
 				return false;
 			}
 		}
@@ -947,7 +979,7 @@ public class XML2EQ {
 	private List<Element> selectEntityStructures(Element statement) {
 		ArrayList<Element> selected = new ArrayList<Element>();
 		try{
-			List<Element> allstructs = StanfordParser.path7.selectNodes(statement);
+			List<Element> allstructs = path12.selectNodes(statement);
 			for(Element struct: allstructs){
 				if(struct.getChildren().size()>0) selected.add(struct);
 				else{
@@ -1275,19 +1307,26 @@ public class XML2EQ {
 	private String getStructureChain(Element root, String xpath){
 		String path = "";
 		try{
-			List<Element> parents = XPath.selectNodes(root, xpath);
+			List<Element> relations = XPath.selectNodes(root, xpath);
 			xpath = "";
-			for(Element p: parents){
-				String pid = p.getAttributeValue("id");
+			for(Element r: relations){
+				String pid = r.getAttributeValue("to");
 				path += this.getStructureName(root, pid)+",";
-				xpath += "//relation[@name='part_of'][@from='"+pid+"']|";
+				String [] pids = pid.split("\\s+");
+				for(String id: pids){
+					if(id.length()>0) xpath += "//relation[@name='part_of'][@from='"+id+"']|";
+				}
 			}
-			xpath = xpath.replaceFirst("\\|$", "");
-			path += getStructureChain(root, xpath);			
+			if(xpath.length()>0){
+				xpath = xpath.replaceFirst("\\|$", "");
+				path += getStructureChain(root, xpath);
+			}else{
+				return path.replaceFirst(",$", "");
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return path;
+		return path.replaceFirst(",$", "");
 	}
 
 	/**
@@ -1350,7 +1389,9 @@ public class XML2EQ {
 				//constraints
 				String qualitymodifier = "";
 				if(chara.getAttribute("constraintid")!=null){
-					qualitymodifier =this.getStructureName(root, chara.getAttributeValue("constraintid"));
+					qualitymodifier = this.getStructureName(root, chara.getAttributeValue("constraintid"));
+					qualitymodifier = qualitymodifier+","+this.getStructureChain(root, "//relation[@from='"+chara.getAttributeValue("constraintid")+"']");	
+					qualitymodifier = qualitymodifier.replaceFirst(",$", "");
 				}
 				//relations: may be entitylocators or qualitymodifiers
 				String entitylocator = "";
@@ -1358,7 +1399,9 @@ public class XML2EQ {
 					for(String r : rels){
 						String toid = r.replaceFirst(".*?\\)", "").trim();
 						String toname = this.getStructureName(root, toid);
-						if(r.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){ //entitylocator							
+						toname = toname+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
+						toname = toname.replaceFirst(",$", "");
+						if(r.matches("\\(("+positionprep+")\\).*")){ //entitylocator							
 							entitylocator += toname+",";
 						}else if(r.matches("\\(with\\).*")){							
 							continue;
@@ -1405,9 +1448,11 @@ public class XML2EQ {
 				String entitylocator ="";
 				//first, collect entitylocators
 				for(String rel : rels){ //rel: (covered in)o621
-					if(rel.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){
+					if(rel.matches("\\(("+positionprep+")\\).*")){
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
 						String toname = this.getStructureName(root, toid);
+						toname = toname +","+ this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
+						toname = toname.replaceFirst(",$", "");
 						entitylocator +=toname+",";
 					}
 				}
@@ -1418,11 +1463,13 @@ public class XML2EQ {
 				for(String rel: rels){//rel: (covered in)o621
 					//make "covered in" a quality and "o621" quality modifier
 					//quality and qualitymodifier
-					if(!rel.matches("\\(("+ChunkedSentence.positionprep+")\\).*")){//exclude Locator relations
+					if(!rel.matches("\\(("+positionprep+")\\).*")){//exclude Locator relations
 						String toid = rel.replaceFirst(".*?\\)", "").trim();
 						String toname = this.getStructureName(root, toid);
 						String quality = rel.replace(toid, "").replaceAll("[()]", "").trim();
 						String qualitymodifier = this.getStructureName(root, toid);	
+						qualitymodifier = qualitymodifier+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
+						qualitymodifier = qualitymodifier.replaceFirst(",$", "");
 						if(!keyelement && !quality.matches("(with|without)")){
 							hasrelquality =true;
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
