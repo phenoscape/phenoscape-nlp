@@ -175,7 +175,7 @@ public class TermOutputer {
 		if(type.compareTo(this.qualitytable)==0){
 			for(String qonto: this.qualityOntosPath){
 				if(qonto.endsWith(".owl")){
-					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(qonto));
+					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(qonto), new ArrayList<String>());
 					String[] result = searchOWLOntology(term, owlapi, type);
 					if(result!=null){
 						added = true;
@@ -192,7 +192,7 @@ public class TermOutputer {
 		}else if(type.compareTo(this.entitytable)==0){
 			for(String eonto: this.entityOntosPath){
 				if(eonto.endsWith(".owl")){
-					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(eonto));
+					OWLAccessorImpl owlapi = new OWLAccessorImpl(new File(eonto), new ArrayList<String>());
 					String[] result = searchOWLOntology(term, owlapi, type);
 					if(result!=null){
 						added = true;
@@ -268,7 +268,7 @@ public class TermOutputer {
 
 	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term, new ArrayList<String>());
+		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first

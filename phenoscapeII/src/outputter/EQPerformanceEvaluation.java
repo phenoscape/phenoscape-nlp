@@ -457,16 +457,17 @@ public class EQPerformanceEvaluation {
 		if(!e.contains(entity) && !entity.contains(e) && !q.contains(quality) && !quality.contains(q)){
 			return 0;
 		}
-
-		if(e.compareTo(entity) ==0){
+		if(e.length()==0 || q.length()==0 || entity.length()==0 || quality.length()==0) return 0;
+		
+		if(e.compareTo(entity) ==0 && e.length()!=0 && entity.length()!=0 ){
 			exact++;
-		}else if(e.contains(entity) || entity.contains(e)){
+		}else if((e.contains(entity) || entity.contains(e)) && e.length()!=0 && entity.length()!=0){
 			partial++;
 		}
 		
-		if(q.compareTo(quality)==0){
+		if(q.compareTo(quality)==0 && q.length()!=0 && quality.length()!=0){
 			exact++;
-		}else if(q.contains(quality) || quality.contains(q)){
+		}else if((q.contains(quality) || quality.contains(q)) && q.length()!=0 && quality.length()!=0){
 			partial++;
 		}
 		

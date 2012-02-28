@@ -70,7 +70,7 @@ public class XML2EQ {
 	private XPath path13;
 	private Hashtable<String, String> entityhash = new Hashtable<String, String>();
 	private Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
-	private Pattern p1 = Pattern.compile("(first|second|third|forth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
+	private Pattern p1 = Pattern.compile("(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
 	private String binaryTvalues = "true|yes|usually";
 	private String binaryFvalues = "false|no|rarely";
 	private String positionprep = "of|part_of|in|on|between";
@@ -145,7 +145,7 @@ public class XML2EQ {
 				List<Element> statestatements = path2.selectNodes(root);				
 				integrateWholeOrganism4CharacterStatements(characterstatements, root);	
 				repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
-				//if(count!= 222){ count++; continue;}
+				//if(count!= 67){ count++; continue;}
 				System.out.println();
 				System.out.println("["+count+"]"+src);
 				count++;
@@ -1070,27 +1070,30 @@ public class XML2EQ {
 			//print
 			String entity = EQ.get("entity");
 			EQ.put("entity", format(entity));
-			EQ.put("entitylabel", transform(entity));
+			String entitylabel = transform(entity);
+			EQ.put("entitylabel", entitylabel);
 			String quality = EQ.get("quality");
 			EQ.put("quality", format(quality));
 			String qualitynegated = EQ.get("qualitynegated");
 			EQ.put("qualitynegated", format(qualitynegated));
 			String qualitymodifier = EQ.get("qualitymodifier");
 			EQ.put("qualitymodifier", format(qualitymodifier)); 
-			EQ.put("qualitymodifierlabel", transform(qualitymodifier));
+			String qualitymodifierlabel = transform(qualitymodifier);
+			EQ.put("qualitymodifierlabel", qualitymodifierlabel);
 			String entitylocator = EQ.get("entitylocator");
 			EQ.put("entitylocator", format(entitylocator)); 
-			EQ.put("entitylocatorlabel", transform(entitylocator));
+			String entitylocatorlabel = transform(entitylocator);
+			EQ.put("entitylocatorlabel", entitylocatorlabel);
 		
 			if(quality.length()==0 && qualitynegated.length()==0) return; //do not add E/EL only statement
 			//quality and qualitynegated can not both hold values!
 			//if(quality.length()>0 || entitylocator.length()>0){
 			if(quality.length()>0){
-				System.out.println("EQ::[E]"+entity+" [Q]"+quality+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
+				System.out.println("EQ::[E]"+entitylabel+" [Q]"+quality+(qualitymodifierlabel.length()>0? " [QM]"+qualitymodifierlabel :"")+(entitylocatorlabel.length()>0? " [EL]"+entitylocatorlabel :""));
 			}else if(qualitynegated.length()>0){
-				System.out.println("EQ::[E]"+entity+" [QN]"+qualitynegated+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
+				System.out.println("EQ::[E]"+entitylabel+" [QN]"+qualitynegated+(qualitymodifierlabel.length()>0? " [QM]"+qualitymodifierlabel :"")+(entitylocatorlabel.length()>0? " [EL]"+entitylocatorlabel :""));
 			}else if(quality.length()==0 && qualitynegated.length()==0 && entitylocator.length()>0){
-				System.out.println("EQ::[E]"+entity+" [Q]"+quality+(qualitymodifier.length()>0? " [QM]"+qualitymodifier :"")+(entitylocator.length()>0? " [EL]"+entitylocator :""));
+				System.out.println("EQ::[E]"+entitylabel+" [Q]"+quality+(qualitymodifierlabel.length()>0? " [QM]"+qualitymodifierlabel :"")+(entitylocatorlabel.length()>0? " [EL]"+entitylocatorlabel :""));
 			}else{
 				if(EQ.get("type").compareTo("character")!=0) System.out.println("A EQ was not printed");
 			}
@@ -1158,13 +1161,14 @@ public class XML2EQ {
 						String position = turnPosition2Number(m.group(1));
 						entity = m.group(2)+" "+position;
 						transformed += entity+",";
+					}else{
+						transformed += entity+",";
 					}
 					//transformed = transformed.replaceFirst(",$", "").trim();
 					//entityhash.put(entitylist, transformed);
 					//return transformed;
-				}
-				//case two
-				if(entity.matches(".*?_[\\divx]+")){//abc_1, abc_1_and_2, abc_1_to_3
+				} //case two
+				else if(entity.matches(".*?_[\\divx]+")){//abc_1, abc_1_and_2, abc_1_to_3
 					String organ = entity.substring(0, entity.indexOf("_"));
 					entity = reformatRomans(entity);
 					entity = entity.replaceAll("_(?=\\d+)", " ").replaceAll("(?<=\\d)_", " "); //abc_1_and_3 => abc 1 and 3
@@ -1204,11 +1208,13 @@ public class XML2EQ {
 							//return transformed;
 						}												
 					}
+				}else{//neither
+					transformed += entity+",";
 				}
 			}
 		}else{			
 			transformed = entitylist;
-			entityhash.put(entitylist, entitylist);
+			//entityhash.put(entitylist, entitylist);
 		}
 		transformed = transformed.replaceFirst(",$", "").trim();
 		entityhash.put(entitylist, transformed);

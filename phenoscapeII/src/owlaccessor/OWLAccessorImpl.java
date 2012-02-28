@@ -3,6 +3,7 @@ package owlaccessor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -42,13 +43,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	private Set<OWLClass> allclasses; 
 	
+	private boolean excluded = false;
+	
+	private Hashtable<String, OWLClass> searchCache;
+	
 	private String source;
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
 	 * @param ontoURL the onto url
 	 */
-	public OWLAccessorImpl(String ontoURL) {
+	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate) {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
@@ -56,6 +61,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 		try {
 			ont = manager.loadOntologyFromOntologyDocument(iri);
 			allclasses = ont.getClassesInSignature();
+			//eliminate branches
+			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -67,13 +74,15 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 *
 	 * @param file the file
 	 */
-	public OWLAccessorImpl(File file) {
+	public OWLAccessorImpl(File file, ArrayList<String> eliminate) {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		source = file.getAbsolutePath();
 		try {
 			ont = manager.loadOntologyFromOntologyDocument(file);
 			allclasses = ont.getClassesInSignature();
+			//eliminate branches
+			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,14 +138,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @return the list
 	 */
 	@Override
-	public List<OWLClass> retrieveConcept(String con, List<String> eliminate) {
+	public List<OWLClass> retrieveConcept(String con) {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
 		try {
-
-			//eliminate words
-			allclasses.removeAll(this.getWordsToEliminate(eliminate));
-			
 			for (OWLClass c : allclasses) {
 				// match class concepts and also the synonyms
 				List<String> syns = this.getSynonymLabels(c);
@@ -144,6 +149,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 				boolean syn = matchSyn(con, syns, "e");
 				//if (label.contains(con) || label.equals(con) || syn) {
 				if (label.equals(con) || syn) {
+					
 					result.add(c);
 					//if (syn && !label.contains(con)) {
 						// System.out.println("syn+:" + con);

@@ -20,8 +20,8 @@ public class DBMigrater {
 	private Connection con;
 	private String url;
 	private String dburl = "jdbc:mysql://localhost:3306/";
-	private String uname = "termsuser";
-	private String upw = "termspassword";
+	private String uname = "root";
+	private String upw = "root";
 
 	/**
 	 * This method extracts terms, their IDs and synonyms from PATO (from web)
@@ -72,9 +72,9 @@ public class DBMigrater {
 				// create the accessor to the pato on web
 				OWLAccessor oa = null;
 				if (url.startsWith("http")) {
-					oa = new OWLAccessorImpl(url);
+					oa = new OWLAccessorImpl(url, new ArrayList<String>());
 				} else {
-					oa = new OWLAccessorImpl(new File(url));
+					oa = new OWLAccessorImpl(new File(url), new ArrayList<String>());
 				}
 
 				// for each pato term
@@ -168,18 +168,20 @@ public class DBMigrater {
 		// String tname = "ontoPATO";
 		// String url = "http://purl.obolibrary.org/obo/tao.owl";
 		// String tname = "ontoTAO";
+		String url = "http://www.berkeleybop.org/ontologies/bspo.owl";
+		String tname = "ontoBSPO";
 //		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
 //		String tname = "ontoVAO";
 //		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\aa.owl";
 //		String tname = "ontoAMAO";
 //		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
 //		String tname = "ontoVAO";
-//		
-		//String tname = "ontoAMAO";
-//		dbm.migrate("phenoscape", tname, url);
+	
+
+		dbm.migrate("biocreative2012", tname, url);
 		
-		dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
-		System.out.println("DONE!");
+		//dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
+		//System.out.println("DONE!");
 
 	}
 

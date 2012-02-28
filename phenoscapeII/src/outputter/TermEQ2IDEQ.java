@@ -27,6 +27,7 @@ public class TermEQ2IDEQ {
 	//private TreeSet<String> qualityterms = new TreeSet<String>();
 	private Hashtable<String, String[]> entityIDCache = new Hashtable<String, String[]>(); //term=> {id, label}
 	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
+	private ArrayList<String> spatialterms = new ArrayList<String>();
 	
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = true;
@@ -36,22 +37,30 @@ public class TermEQ2IDEQ {
 	 */
 	public TermEQ2IDEQ(String database, String outputtable) {
 		this.outputtable = outputtable+"_result";
+		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery("select distinct term from uniquespatialterms");
+				while(rs.next()){
+					spatialterms.add(rs.getString("term"));
+				}			
+				spatialterms.add("accessory");
 				stmt.execute("drop table if exists "+this.outputtable);
 				stmt.execute("create table "+this.outputtable+" select * from "+outputtable);
-				ResultSet rs = stmt.executeQuery("select id, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel from "+this.outputtable+" where stateid!=''");
+				rs = stmt.executeQuery("select source,id, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel from "+this.outputtable+" where stateid!=''");
 				while(rs.next()){
+					String src = rs.getString("source");
 					String srcid = rs.getString("id");
 					String entitylabel = rs.getString("entitylabel");
 					String entitylocatorlabel = rs.getString("entitylocatorlabel");
 					String quality = rs.getString("quality");
 					String qualitynegated = rs.getString("qualitynegated");
 					String qualitymodifierlabel = rs.getString("qualitymodifierlabel");
+					System.out.println(src);
 					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
 			}			
@@ -73,6 +82,7 @@ public class TermEQ2IDEQ {
 	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel){
 		//first find update entitylabel
 		fillInIDs4Entity(srcid, entitylabel, entitylocatorlabel); //0: label; 1:id
+		fillInIDs4QualityModifier(srcid, qualitymodifierlabel);
 		if(quality.length()>0){//rounded dorsally
 			fillInIDs4Quality(srcid, quality);
 		}else if(qualitynegated.length()>0){
@@ -80,6 +90,50 @@ public class TermEQ2IDEQ {
 		}
 	}
 	
+	/**
+	 * update qualitymodifierlabel and qualitymodifierid
+	 * @param srcid
+	 * @param qualitymodifierlabel
+	 */
+	private void fillInIDs4QualityModifier(String srcid,
+			String qualitymodifierlabel) {
+		String finalqualitymodifierids = "";
+		String finalqualitymodifierlabels = "";		
+		if(qualitymodifierlabel.length()>0){
+			String[] qualitymodifiers = qualitymodifierlabel.split("\\s*,\\s*");
+			for(String qm: qualitymodifiers){
+				/*String [] result = searchTerm(fel, "entity");
+				if(result!=null){
+					finalentitylocatorids += result[1]+",";
+					finalentitylocatorlabels += result[2]+",";
+				}*/
+				String [] finalresult = searchEntity(qm, "", false);
+				if(finalresult!=null){
+					finalqualitymodifierids += finalresult[0]+",";
+					finalqualitymodifierlabels += finalresult[1]+",";
+				}else{//no result, insert empty string as result 
+					finalqualitymodifierids += ",";
+					finalqualitymodifierlabels += ",";
+				}
+			}
+			finalqualitymodifierids = finalqualitymodifierids.replaceFirst(",$", "");
+			finalqualitymodifierlabels = finalqualitymodifierlabels.replaceFirst(",$", "");
+		}
+		updateQualityModifierIDs(srcid, finalqualitymodifierlabels, finalqualitymodifierids);
+	}
+
+	private void updateQualityModifierIDs(String srcid, String qualitymodifierlabels,
+			String qualitymodifierids) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set qualitymodifierlabel='"+qualitymodifierlabels+"'," +
+					" qualitymodifierid='"+qualitymodifierids+"' where id="+srcid);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+
 	/**
 	 * update qualitynegatedlabel, qualityid, qnparentlabel, qnparentid
 	 * @param srcid
@@ -91,11 +145,11 @@ public class TermEQ2IDEQ {
 		String qualityid="";
 		String qnparentlabels="";
 		String qnparentids="";
-		String[] result = this.searchTerm(term, "quality");
+		String[] result = this.searchTerm(term, "quality");//3-element array: 0:type; 1:id; 2:label
 		if(result!=null){
-			qualitynegatedlabel = "not("+result[1]+")";
-			qualityid = result[0];
-			String [] parentinfo = Utilities.retreiveParentInfoFromPATO(result[1]);
+			qualitynegatedlabel = "not("+result[2]+")";
+			qualityid = result[1];
+			String [] parentinfo = Utilities.retreiveParentInfoFromPATO(result[2]);
 			qnparentids = parentinfo[0];
 			qnparentlabels = parentinfo[1];
 			
@@ -126,7 +180,7 @@ public class TermEQ2IDEQ {
 	private void fillInIDs4Quality(String srcid, String term) {
 		String[] result = this.searchTerm(term, "quality");
 		if(result!=null){
-			updateQualityIDs(srcid, result[1], result[0]);
+			updateQualityIDs(srcid, result[2], result[1]);
 		}
 	}
 
@@ -148,9 +202,9 @@ public class TermEQ2IDEQ {
 	 *             if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
 	 *             if fails, entitylabel = A B C, entitylocator = entitylocator
 	 * if fails, search B C
-	 *             if succeeds, entitylabel = B C, entitylocator = entitylocator
+	 *             if succeeds, entitylabel = B C, entitylocator = (entitylabel - B C), entitylocator
 	 *             if fails, search C
-	 *             			 if succeeds, entitylabel = C, entitylocator = entitylocator
+	 *             			 if succeeds, entitylabel = C, entitylocator = (entitylabel - C), entitylocator
 	 *             			 if fails, search the parent entity locator
 	 *                                 if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
 	 *                                 if fails, search the next parent entity locator
@@ -174,6 +228,50 @@ public class TermEQ2IDEQ {
 			System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
 		}
 		
+		String finalentitylocator = "";
+		String finalentitylabel = "";
+		String finalentityid = "";
+		String[] finals = searchEntity(entitylabel, entitylocatorlabel, true);
+		finalentityid = finals[0];
+		finalentitylabel = finals[1];
+		finalentitylocator = finals[2];
+		
+		
+		String finalentitylocatorids = "";
+		String finalentitylocatorlabels="";
+		if(finalentitylocator.length()>0){
+			String[] finalentitylocators = finalentitylocator.split("\\s*,\\s*");
+			for(String fel: finalentitylocators){
+				/*String [] result = searchTerm(fel, "entity");
+				if(result!=null){
+					finalentitylocatorids += result[1]+",";
+					finalentitylocatorlabels += result[2]+",";
+				}*/
+				String [] finalresult = searchEntity(fel, "", false);
+				if(finalresult!=null){
+					finalentitylocatorids += finalresult[0]+",";
+					finalentitylocatorlabels += finalresult[1]+",";
+				}else{//no result, insert empty string as result 
+					finalentitylocatorids += ",";
+					finalentitylocatorlabels += ",";
+				}
+			}
+			finalentitylocatorids = finalentitylocatorids.replaceFirst(",$", "");
+			finalentitylocatorlabels = finalentitylocatorlabels.replaceFirst(",$", "");
+		}
+	
+
+		if(this.debug){
+			System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
+		}
+		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
+	}
+
+	
+	
+	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean isEntity) {
+		String [] finals = new String[3];
+		finals[2] = entitylocatorlabel;
 		entitylabel = entitylabel.replaceAll("("+this.process+")", "process");
 		entitylocatorlabel = entitylocatorlabel.replaceAll("("+this.process+")", "process");
 		String finalentitylocator = "";
@@ -190,18 +288,24 @@ public class TermEQ2IDEQ {
 			String entityterm = join(entitylabeltokens, i, size, " "); 
 			String [] result = searchTerm(entityterm, "entity");
 			if(result!=null){
-				if(entitylocators != null && i==0){//has entitylocator
+				if(entitylocators != null && i==0 && isEntity){//has entitylocator
 					String [] newresult = searchTerm(entitylocators[0]+" "+entityterm, "entity");
 					if(newresult!=null){
-						finalentityid = newresult[0];
-						finalentitylabel = newresult[1];
+						finalentityid = newresult[1];
+						finalentitylabel = newresult[2];
 						finalentitylocator = entitylocatorlabel.replaceFirst(entitylocators[0], "").replaceAll("^\\s*,\\s*", "");
 						break;
 					}
 				}
-				finalentityid = result[0];
-				finalentitylabel = result[1];
-				finalentitylocator = entitylocatorlabel;
+				finalentityid = result[1];
+				finalentitylabel = result[2];
+				String left = entitylabel.replaceFirst(entityterm, "").trim();//e.g. ventral [process]
+				if(!this.spatialterms.contains(left)){
+					finalentitylocator = left+","+entitylocatorlabel.trim();
+				}else{
+					finalentitylocator = entitylocatorlabel;
+				}
+				finalentitylocator = finalentitylocator.replaceFirst(",$", "").replaceFirst("^,", "").trim();
 				break;			
 			}else{
 				if(i == size && entitylocators!= null){//entitylabel returned no result, try entitylocators
@@ -211,38 +315,38 @@ public class TermEQ2IDEQ {
 						j++;
 					}
 					if(result!=null){
-						finalentityid = result[0];
-						finalentitylabel = result[1];
+						finalentityid = result[1];
+						finalentitylabel = result[2];
 						finalentitylocator = join(entitylocators, j, entitylocators.length-1, ",");
 						break;
 					}
 				}
 			}				
-		}
-		
-		String finalentitylocatorids = "";
-		String finalentitylocatorlabels="";
-		if(finalentitylocator.length()>0){
-			String[] finalentitylocators = finalentitylocator.split("\\s*,\\s*");
-			for(String fel: finalentitylocators){
-				String [] result = searchTerm(fel, "entity");
+		}		
+
+		//having gone through all of the above, still hasn't find a good entityid
+		//deal with spatial expressions here
+		if(finalentityid.length()==0){
+			String tokens[] = entitylabel.split("\\s+");
+			if(tokens.length==2 && this.spatialterms.contains(tokens[0])){
+				tokens[1] = "region";
+				entitylabel = this.join(tokens, 0, 1, " ");
+				String[] result = searchTerm(entitylabel, "entity");
 				if(result!=null){
-					finalentitylocatorids += result[0]+",";
-					finalentitylocatorlabels += result[1]+",";
+					finalentityid = result[1];
+					finalentitylabel = result[2];
 				}
 			}
-			finalentitylocatorids = finalentitylocatorids.replaceFirst(",$", "");
-			finalentitylocatorlabels = finalentitylocatorlabels.replaceFirst(",$", "");
-		}
-	
 
-		if(this.debug){
-			System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
 		}
-		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
+		
+		finals[0] = finalentityid;
+		finals[1] = finalentitylabel;
+		finals[2] = finalentitylocator;
+		return finals;
 	}
 
-	
+
 	/**
 	 * like array join function in Perl
 	 * @param entitylabeltokens
@@ -278,9 +382,10 @@ public class TermEQ2IDEQ {
 	 * preopercular latero-sensory canal =>	preopercular sensory canal
 	 * pectoral-fin spine => pectoral fin spine
 	 * @param term
-	 * @return
+	 * @return 3-element array: type, id, label
 	 */
 	private String[] searchTerm(String term, String type){	
+		if(term.trim().length()==0) return null;
 		//search in cache
 		if(type.compareTo("entity")==0){
 			String[] result = this.entityIDCache.get(term);
@@ -292,36 +397,22 @@ public class TermEQ2IDEQ {
 		}
 		
 		//search ontologies
-		if(term.indexOf("-")>0){
-		    //first search the original word
-			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
-			String[] exactmatch = null;
-			if(results.size()>0) exactmatch = results.get(0);
-			if(exactmatch!=null){
-				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
-				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
-				return exactmatch;
-			}
-			/*String termcp = term;
-			if(results.size()==0){
-				//then search the word without -
-				while(term.indexOf("-")>0 && results.size()==0){
-					term = term.replaceFirst("-", " ");
-					results = Utilities.searchOntologies(term, type);
-				}
-			}
-			term = termcp;
-			*/
-			
-			//then search the word after "ccc-" part is removed
-			/*while(term.indexOf("-")>0 && results.size()==0){
-				term = term.replaceFirst("(?<=(^| ))\\w+-", "");
-				results = Utilities.searchOntologies(term, type);
-			}*/
-						 
-		}else{
-			ArrayList<String[]> results = Utilities.searchOntologies(term, type);
-			String[] exactmatch = null;
+
+		//first search the original word
+		ArrayList<String[]> results = Utilities.searchOntologies(term, type);
+		String[] exactmatch = null;
+		if(results.size()>0) exactmatch = results.get(0);
+		if(exactmatch!=null){
+			if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+			if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+			return exactmatch;
+		}
+
+		//if landed here, the first try has failed				 
+		if(term.indexOf("-")>0){ //caudal-fin
+			term = term.replaceAll("-", " ");
+			results = Utilities.searchOntologies(term, type);
+			exactmatch = null;
 			if(results.size()>0) exactmatch = results.get(0);
 			if(exactmatch!=null){
 				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
@@ -329,6 +420,21 @@ public class TermEQ2IDEQ {
 				return exactmatch;
 			}
 		}		
+		
+		//if landed here, the 2nd try was not successful either
+		if(term.indexOf("/")>0){ //bone/tendon
+			String[] tokens = term.split("/");
+			for(String token: tokens){
+				results = Utilities.searchOntologies(token, type);
+				exactmatch = null;
+				if(results.size()>0) exactmatch = results.get(0);
+				if(exactmatch!=null){
+					if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+					if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+					return exactmatch;
+				}
+			}
+		}
 		return null;
 	}
 	

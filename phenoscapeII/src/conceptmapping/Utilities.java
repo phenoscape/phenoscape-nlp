@@ -27,22 +27,24 @@ public class Utilities {
 		excluded.add("cellular quality");
 		
 		String [] entityontologies = new String[]{
- 		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\tao.owl",
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo",
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo"};
+ 		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\tao.owl",
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\vertebrate_anatomy.obo",
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\amniote_draft.obo",
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\bspo.owl"};
 		String [] qualityontologies = new String[]{
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\pato.owl"};
+		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\pato.owl"};
 		 
 		/*
 		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
 		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/skeletal/obo/vertebrate_anatomy.obo");
 		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo");
+		entityOntoPaths.add("http://www.berkeleybop.org/ontologies/bspo.owl");
 		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
 		*/
 		
 		for(String onto: entityontologies){
 			if(onto.endsWith(".owl")){
-				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto));
+				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
 			}else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
@@ -56,7 +58,7 @@ public class Utilities {
 		
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
-				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto));
+				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), excluded);
 				OWLqualityOntoAPIs.add(api);
 			}else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
@@ -167,7 +169,7 @@ public class Utilities {
 	 */
 	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term, excluded);
+		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
@@ -177,7 +179,7 @@ public class Utilities {
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|AMAO|VAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
+				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|AMAO|VAO|BSPO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
 				result[2] = label;
 				return result;
 			}
@@ -189,7 +191,7 @@ public class Utilities {
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			result[0] = type;
-			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|AMAO|VAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
+			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|AMAO|VAO|BSPO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
 			result[2] += label+";";
 		}
 		if(result[1].length()>0){

@@ -108,13 +108,13 @@ public class OBO2DB {
 				result[1] = rs.getString("term");
 				return result;
 			}
-			q = "select ontoid, term from "+this.ontoname+" where term like \"%"+term+"%\"";
+			/*q = "select ontoid, term from "+this.ontoname+" where term like \"%"+term+"%\"";
 			rs = stmt.executeQuery(q);
 			if(rs.next()){
 				result[0] += rs.getString("ontoid")+";";
 				result[1] += rs.getString("term")+";";
 				return result;
-			}			
+			}*/		
 		}catch(Exception e){
 			e.printStackTrace();
 		}
