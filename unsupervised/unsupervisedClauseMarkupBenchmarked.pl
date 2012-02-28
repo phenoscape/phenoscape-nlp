@@ -168,7 +168,7 @@ my $debugp = 0; #debug pattern
 my $debugnouns = 0; #debug heuristic nouns for phenoscape
 
 #my $kb = "fnaknowledgebase";
-my $kb = "phenoscape";
+my $kb = "biocreative2012";
 
 my $taglength = 150;
 
