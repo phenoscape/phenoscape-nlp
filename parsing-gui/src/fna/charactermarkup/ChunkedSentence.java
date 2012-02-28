@@ -204,7 +204,7 @@ public class ChunkedSentence {
 		
 		recoverVPChunks();//recover unidentified verb phrases
 		recoverConjunctedOrgans(); //
-		findSubject(); //set the pointer to a place right after the subject, assuming the subject part is stable in chunkedtokens at this time
+		//findSubject(); no longer needed //set the pointer to a place right after the subject, assuming the subject part is stable in chunkedtokens at this time
 		recoverOrgans();
 		segmentSent();//insert segment marks in chunkedtokens while producing this.chunkedsent
 		
@@ -368,7 +368,8 @@ public class ChunkedSentence {
 	 * does not attempt to recognize conjunctions as the decisions may be context-dependent
 	 */
 	private void recoverOrgans() {
-		for(int i = this.chunkedtokens.size()-1; i >=this.pointer; i--){
+		//for(int i = this.chunkedtokens.size()-1; i >=this.pointer; i--){
+		for(int i = this.chunkedtokens.size()-1; i >=0; i--){
 			String t = this.chunkedtokens.get(i);
 			if(t.endsWith(">") || t.endsWith(")")){//TODO: not dealing with nplist at this time, may be later
 				recoverOrgan(i);//chunk and update chunkedtokens
@@ -385,7 +386,8 @@ public class ChunkedSentence {
 		boolean foundm = false; //modifiers
 		boolean subjecto = false;
 		int i = last-1;
-		for(;i >=this.pointer; i--){
+		//for(;i >=this.pointer; i--){
+		for(;i >=0; i--){
 			String t = this.chunkedtokens.get(i);
 			/*preventing "the" from blocking the organ following ",the" to being matched as a subject organ- mohan 10/19/2011*/
 			if(t.matches("the|a|an")){
@@ -2130,6 +2132,15 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		
 	}
 	public String getText(){
+		try{
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select originalsent from "+this.tableprefix+"_sentence where source ='"+sentsrc+"'");
+			if(rs.next()){
+				this.text = rs.getString(1); //has to use originalsent, because it is "ditto"-fixed (in SentenceOrganStateMarker.java) and perserve capitalization for measurements markup
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		return this.text;
 	}
 	
@@ -2137,6 +2148,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		return this.subjecttext;
 	}
 
+	
+	/*
 	private void findSubject(){
 		String senttag = null;
 		String sentmod = null;
@@ -2158,10 +2171,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				taggedtext = rs.getString(1).trim();
 				text = taggedtext.replaceAll("[{}<>]", "").trim();
 			}
-			/*rs = stmt.executeQuery("select * from "+this.glosstable+" where category ='life_style' and term like'%"+senttag+"'");
-			if(rs.next()){
-				islifestyle = true;
-			}*/
+
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -2169,7 +2179,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		
 		if(senttag.compareTo("ignore")!=0){
 			//sentence subject
-			if(senttag.compareTo("whole_organism")==0 /*|| islifestyle*/){
+			if(senttag.compareTo("whole_organism")==0){
 				this.subjecttext = "(whole_organism)";
 			}else if(senttag.compareTo("chromosome")==0){
 				this.subjecttext = "(chromosome)";
@@ -2193,11 +2203,6 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 						}else{
 							seg = seg.replaceFirst("...$", "\\\\w+\\\\b");
 						}
-						/*if(seg.length() - seg.lastIndexOf(")")-1 >=3){
-							seg =seg.replaceFirst("...$", "\\\\w+\\\\b");
-						}else{
-							seg = seg.replaceFirst("(?<=\\)).*", "\\\\w+\\\\b");
-						}*/
 						//seg = seg.replaceFirst("(and|or) ", "(and|or|plus|,) .*?");
 						seg = seg.replaceFirst("(and|or) ", "(\\\\band\\\\b|\\\\bor\\\\b|\\\\bplus\\\\b|,).*?\\\\b");
 						//tag derived from complex text expression: "biennial or short_lived perennial" from "iennials or short-lived , usually monocarpic perennials ,"
@@ -2258,18 +2263,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 					if(mt.length()>0)
 						skipLead(mt.split("\\s+"));
 				}
-				
-				/*
-				String subject = ("{"+sentmod.replaceAll("[\\[\\]]", "").replaceAll(" ", "} {")+"} ("+senttag.replaceAll("[\\[\\]]", "").replaceAll(" ", ") (")+")").replaceAll("[{(]and[)}]", "and").replaceAll("[{(]or[)}]", "or").replaceAll("\\{\\}", "").replaceAll("\\s+", " ").trim();
-				establishSubject(subject, true);
-				String mt = "";
-				if(of){
-					mt = senttag.replaceAll("\\[+.+?\\]+", "").replaceAll("\\s+", " ").trim();
-				}else{
-					mt = (sentmod+" "+senttag).replaceAll("\\[+.+?\\]+", "").replaceAll("\\s+", " ").trim();
-				}
-				if(mt.length()>0)
-					cs.skipLead(mt.split("\\s+"));*/
+
 			}else if(senttag.compareTo("ditto")==0){
 				if(sentsrc.endsWith("0")){
 					this.subjecttext ="(whole_organism)";//it is a starting sentence in a treatment, without an explicit subject.
@@ -2297,10 +2291,6 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 								this.subjecttext =null;
 								break;
 							}
-							/*else
-							{
-								this.subjecttext="ditto";
-							}*/
 						}
 						
 					}
@@ -2318,8 +2308,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			this.subjecttext = null;
 			this.pointer = 0;
 		}
-	}
-	
+	}*/
 	
 	/**
 	 * manual digit 

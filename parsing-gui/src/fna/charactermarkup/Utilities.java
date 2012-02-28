@@ -266,7 +266,7 @@ public class Utilities {
 
 	public static String toSingular(String word){
 		String s = "";
-		word = word.toLowerCase().replaceAll("\\W", "");
+		word = word.toLowerCase().replaceAll("[(){}]", "").trim(); //bone/tendon
 
 		s = singulars.get(word);
 		if(s!=null) return s;

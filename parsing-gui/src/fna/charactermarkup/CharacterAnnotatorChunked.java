@@ -135,21 +135,25 @@ public class CharacterAnnotatorChunked {
 		Element text = new Element("text");//make <text> the first element in statement
 		text.addContent(this.text);
 		if(!this.evaluation) this.statement=addContent(this.statement, text);//add Element, record in elementlog
-		String subject= cs.getSubjectText();
+		
+		int i = 0;
+		String token = cs.getTokenAt(i++);
+		while(token.length()==0){
+			token = cs.getTokenAt(i++);
+		}
+		if(token.startsWith("z[")){
+			annotateByChunk(cs, false);
+		}else{
+			establishSubject("(whole_organism)");
+			cs.setInSegment(true);
+			cs.setRightAfterSubject(true);
+			annotateByChunk(cs, false);
+		}
+		/*String subject= cs.getSubjectText();
 		if(subject==null && cs.getPointer()==0){
 			Chunk ck = cs.nextChunk();
 			cs.resetPointer();
 			establishSubject("(whole_organism)");
-			/*if(ck instanceof ChunkVP){	
-				establishSubject("(whole_organism)");
-			}
-			if(ck instanceof ChunkPrep){	//check if the first chunk is a preposition chunk. If so make the subjects and the latest elements from the previous sentence empty.
-				establishSubject("(whole_organism)");
-
-			}
-			if(ck instanceof ChunkSimpleCharacterState){//setup a "whole_organism" placeholder
-				establishSubject("(whole_organism)");
-			}*/
 			annotateByChunk(cs, false);
 		}//end mohan code
 		else if(subject.equals("measurements")){
@@ -166,7 +170,13 @@ public class CharacterAnnotatorChunked {
 			cs.setInSegment(true);
 			cs.setRightAfterSubject(true);
 			annotateByChunk(cs, false);
-		}
+		}*/
+		
+		
+		
+		
+		
+		
 		//postprocess functions
 		//lifeStyle();
 		//if(!this.evaluation) mayBeSameRelation();
