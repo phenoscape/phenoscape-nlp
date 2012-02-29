@@ -110,7 +110,7 @@ public class Utilities {
 
 	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term);
+		List<OWLClass> matches = owlapi.retrieveConcept(term, new ArrayList<String>());
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
