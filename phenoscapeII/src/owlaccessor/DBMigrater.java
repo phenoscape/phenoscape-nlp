@@ -112,6 +112,75 @@ public class DBMigrater {
 		}
 
 	}
+	
+	public void migrateKeywords(String dbName, String tabName, String ontoURI){
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			try {
+				con = DriverManager.getConnection(dburl + dbName, uname, upw);
+
+				// Drop table if exists
+				Statement stmt0 = con.createStatement();
+				stmt0.executeUpdate("DROP TABLE IF EXISTS " + tabName);
+
+				// Create table
+				Statement stmtc = con.createStatement();
+				stmtc.executeUpdate("create table " + tabName + " ("
+						+ "kid int primary key auto_increment, "
+						+ "term varchar(100) not null, "
+						+ "termid varchar(50) not null, "
+						+ "keyword varchar(100)" + ")");
+
+				Statement stmt = con.createStatement();
+				this.url = ontoURI;
+				// create the accessor to the pato on web
+				OWLAccessor oa = null;
+				if (url.startsWith("http")) {
+					oa = new OWLAccessorImpl(url);
+				} else {
+					oa = new OWLAccessorImpl(new File(url));
+				}
+
+				// for each pato term
+				for (OWLClass c : oa.getAllClasses()) {
+					String id = oa.getID(c);
+					String label = oa.getLabel(c);
+					
+					//keywords of the term itself
+					for (String k:oa.getKeywords(c)){
+						stmt.executeUpdate("INSERT INTO " + tabName
+								+ "(term, termid, keyword) VALUES('"
+								+ label.trim().replaceAll("'", "''")
+								+ "','" + id.trim().replaceAll("'", "''")
+								+ "','" + k.trim().replaceAll("'", "''")
+								+ "')");
+					}
+					
+					//add parents' keywords
+					for(OWLClass p:((OWLAccessorImpl)oa).getParents(c)){
+						for (String k:oa.getKeywords(p)){
+							stmt.executeUpdate("INSERT INTO " + tabName
+									+ "(term, termid, keyword) VALUES('"
+									+ label.trim().replaceAll("'", "''")
+									+ "','" + id.trim().replaceAll("'", "''")
+									+ "','" + k.trim().replaceAll("'", "''")
+									+ "')");
+						}
+					}
+
+				}
+
+				con.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 
 	/**
 	 * Gets the last word of a given string.
@@ -178,8 +247,13 @@ public class DBMigrater {
 		//String tname = "ontoAMAO";
 //		dbm.migrate("phenoscape", tname, url);
 		
-		dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
-		System.out.println("DONE!");
+//		dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
+//		System.out.println("DONE!");
+		
+		String url = "http://purl.obolibrary.org/obo/pato.owl";
+		String tname = "patokeywords";
+		
+		dbm.migrateKeywords("phenoscape", tname, url);
 
 	}
 
