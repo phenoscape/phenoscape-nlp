@@ -5,17 +5,25 @@ package outputter;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * @author Hong Updates
  * compare raw EQ table to EQ answer table
  * obtain precision/recall measurements 
+ * 
+ * 
+ * 
+ * notes: basibranchial 2 absent => basibranchial 2 cartilage absent + basibranchial 2 bone absent
  */
 public class EQPerformanceEvaluation {
 
@@ -27,10 +35,12 @@ public class EQPerformanceEvaluation {
 	private String prtablefields;
 	private String prtableEQs;
 	private String prtableTranslations;
-	private boolean printfields = true;
+	private boolean printfields = false;
 	private boolean printEQs = true;
 	private boolean printTranslations = true;
-	
+	private ArrayList<ArrayList<Hashtable<String,String>>> astates;
+	private ArrayList<ArrayList<Hashtable<String,String>>> tstates;
+	private ArrayList<String> states = new ArrayList<String>(); 
 	//init
 	Hashtable<String, String> counts;
 	ArrayList<String> fields = new ArrayList<String>();
@@ -116,7 +126,7 @@ public class EQPerformanceEvaluation {
 	 * recall = #matched/#inanswer
 	 */
 	public void evaluate(){	
-		ArrayList<String> states = new ArrayList<String>(); 
+		
 		//tallying 
 		try{
 			//collect all unique state ids
@@ -129,44 +139,54 @@ public class EQPerformanceEvaluation {
 					states.add(stateid);
 				}
 			}
-			//pair up answer and test states
-			ArrayList<ArrayList<Hashtable<String,String>>> astates = new ArrayList<ArrayList<Hashtable<String,String>>>();
-			ArrayList<ArrayList<Hashtable<String,String>>> tstates = new ArrayList<ArrayList<Hashtable<String,String>>>();			
-			Iterator<String> it = states.iterator();
-			while(it.hasNext()){
-				String stateid = it.next();
-				ArrayList<Hashtable<String, String>> astate = new ArrayList<Hashtable<String, String>>();
-				rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
-					this.answertable+" where stateid = '"+stateid+"'");
-				while(rs.next()){
-					Hashtable<String, String> EQ = new Hashtable<String, String> ();
-					for(String field: this.fields){
-						String v = rs.getString(field);
-						EQ.put(field, v);
-					}		
-					astate.add(EQ);
-				}
-				System.out.println("added ["+stateid+"] from answer");
-				astates.add(astate);
-				ArrayList<Hashtable<String, String>> tstate = new ArrayList<Hashtable<String, String>>();
-				rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
-					this.testtable+" where stateid = '"+stateid+"'");
-				while(rs.next()){
-					Hashtable<String, String> EQ = new Hashtable<String, String> ();
-					for(String field: this.fields){
-						String v = rs.getString(field);
-						EQ.put(field, v);
-					}
-					tstate.add(EQ);
-				}
-				tstates.add(tstate);
-				System.out.println("added ["+stateid+"] from test");
-			}
-			compareFields(tstates, astates);//precision and recall for each of the fields
-			compareEQs(tstates, astates); //for raw/labeled EQ statements
+			stmt.close();
+			
+			readResultsfromDatabase();
+			compareFields();//precision and recall for each of the fields
+			readResultsfromDatabase();
+			compareEQs(); //for raw/labeled EQ statements
+			readResultsfromDatabase();
 			compareTranslations(); //translation from raw to labels/Ids
 		}catch(Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	private void readResultsfromDatabase() throws SQLException {
+		ResultSet rs;
+		Statement stmt = conn.createStatement();
+		//pair up answer and test states
+		astates = new ArrayList<ArrayList<Hashtable<String,String>>>();
+		tstates = new ArrayList<ArrayList<Hashtable<String,String>>>();			
+		Iterator<String> it = states.iterator();
+		while(it.hasNext()){
+			String stateid = it.next();
+			ArrayList<Hashtable<String, String>> astate = new ArrayList<Hashtable<String, String>>();
+			rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
+				this.answertable+" where stateid = '"+stateid+"'");
+			while(rs.next()){
+				Hashtable<String, String> EQ = new Hashtable<String, String> ();
+				for(String field: this.fields){
+					String v = rs.getString(field);
+					EQ.put(field, v);
+				}		
+				astate.add(EQ);
+			}
+			//System.out.println("added ["+stateid+"] from answer");
+			astates.add(astate);
+			ArrayList<Hashtable<String, String>> tstate = new ArrayList<Hashtable<String, String>>();
+			rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
+				this.testtable+" where stateid = '"+stateid+"'");
+			while(rs.next()){
+				Hashtable<String, String> EQ = new Hashtable<String, String> ();
+				for(String field: this.fields){
+					String v = rs.getString(field);
+					EQ.put(field, v);
+				}
+				tstate.add(EQ);
+			}
+			tstates.add(tstate);
+			//System.out.println("added ["+stateid+"] from test");
 		}
 	}
 
@@ -176,8 +196,7 @@ public class EQPerformanceEvaluation {
 	 * @param tstate
 	 * @param astate
 	 */
-	private void compareFields(ArrayList<ArrayList<Hashtable<String, String>>> tstates,
-			ArrayList<ArrayList<Hashtable<String, String>>> astates) {
+	private void compareFields() {
 		if(counts == null){
 			 counts = new Hashtable<String, String> ();
 			 //init
@@ -201,7 +220,7 @@ public class EQPerformanceEvaluation {
 			for(int i = 0; i < astates.size(); i++){
 				ArrayList<String> avalues = new ArrayList<String>();
 				for(Hashtable<String, String> EQ :astates.get(i)){
-					String v = EQ.get(field);
+					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*,\\s*");
 						for(String v1 : vs){
@@ -213,47 +232,58 @@ public class EQPerformanceEvaluation {
 							
 				ArrayList<String> tvalues = new ArrayList<String>();
 				for(Hashtable<String, String> EQ :tstates.get(i)){
-					String v = EQ.get(field);
+					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*,\\s*");
 						for(String v1 : vs){
-							if(v1.length()>0)tvalues.add(v1);
+							if(v1.length()>0) tvalues.add(v1);
 						}
 					}
 				}
 				
-				if(field.compareTo("entity")==0){
+				if(this.printfields && field.compareTo("entity")==0){
 					tcount += tvalues.size();
 					acount += avalues.size();
-					System.out.println("t +"+tvalues.size()+"at state "+i);
-					System.out.println("a +"+avalues.size()+"at state "+i);
+				//	System.out.println("t +"+tvalues.size()+"at state "+i);
+				//	System.out.println("a +"+avalues.size()+"at state "+i);
 				}
 				for(int j = 0; j<tvalues.size(); j++){
 					for(int k = 0; k < avalues.size(); k++){
 						String v = tvalues.get(j);
 						String a = avalues.get(k);
 						if(a.length()>0 && v.length()>0 && (a.contains(v) || v.contains(a))){
-							if(this.printfields && field.compareTo("entity")==0){								
-								wcount++;
+							wcount++;
+							/*if(this.printfields && field.compareTo("entitylabel")==0){								
 								System.out.println("total t:"+tcount);
 								System.out.println("total a:"+acount);
 								System.out.println("total m:"+wcount);
-								System.out.println(wcount+":["+v+"]=["+avalues.toString()+"]");
+								System.out.println(wcount+":["+v+"]=["+a+"]");
 								
-							}
+							}*/
 							counts.put("matched"+field, ""+(Integer.parseInt(counts.get("matched"+field))+1));
 							tvalues.set(j, ""); //remove matched
 							avalues.set(k, "");
 							break;
 						}else{ //not matched
 							//if(this.printfields && field.compareTo("entity")==0){
-							//	System.out.println("["+v+"]x["+avalues.toString()+"]");
+							//	System.out.println("["+v+"]x["+a+"]");
 							//}
 						}
 					}
 				}
+				if(this.printfields && field.compareTo("entity")==0){
+					System.out.println("unmatched in the answer:");
+					for(String a : avalues){
+						if(a.length()>0) System.out.println(a);
+					}
+					System.out.println("unmatched in the result:");
+					for(String t : tvalues){
+						if(t.length()>0) System.out.println(t);
+					}
+				}
+				
 			}
-			if(field.compareTo("entity")==0){
+			if(this.printfields && field.compareTo("entity")==0){
 				System.out.println("total t:"+tcount);
 				System.out.println("total a:"+acount);
 				System.out.println("total m:"+wcount);
@@ -326,9 +356,10 @@ public class EQPerformanceEvaluation {
 	 * 
 	 * @param tstate: EQs generated by the algorithm for a state
 	 * @param astate: EQs in answer key for a state
+	 * @throws SQLException 
 	 */
-	private void compareEQs(ArrayList<ArrayList<Hashtable<String, String>>> tstates,
-			ArrayList<ArrayList<Hashtable<String, String>>> astates) {
+	@SuppressWarnings("unchecked")
+	private void compareEQs() throws SQLException {
 		//raw
 		int totalrawgenerated = 0;
 		int totalrawinanswer = 0;
@@ -362,6 +393,9 @@ public class EQPerformanceEvaluation {
 				partialrawp +","+ partialrawr+",";
 		
 		//labeled
+		
+		readResultsfromDatabase();
+
 		int totallabeledgenerated = 0;
 		int totallabeledinanswer = 0;
 		int partiallabeledmatches = 0;
@@ -628,12 +662,16 @@ public class EQPerformanceEvaluation {
 				e.printStackTrace();
 		}				
 	}
+	
+	
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		String database = "biocreative2012";
-		String testtable = "run0";
+		//String testtable = "run0_result";
+		String testtable = "xml2eq_result";
 		String answertable = "internalworkbench";
 		String prtable = "evaluationrecords";
 		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);

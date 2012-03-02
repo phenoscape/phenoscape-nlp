@@ -11,6 +11,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import conceptmapping.Utilities;
 
 /**
@@ -178,11 +181,56 @@ public class TermEQ2IDEQ {
 	 * @param quality
 	 */
 	private void fillInIDs4Quality(String srcid, String term) {
+		term = term.replaceAll("\\[.*?\\]", "").trim();
+		//if(this.debug){
+		//	System.out.println("quality term:["+term+"]");
+		//}
+		//heuristics: numerical
+		if(term.startsWith("present ")){//present regardless of ...
+			term = "present";
+		}else if(term.matches(".*?\\d+.*")){
+			updateCount(srcid, term);
+			if(term.indexOf("%")>0 && term.matches(".*?\\d\\.\\d.*")){//80% or 1.2
+				term = "size";
+			}else if(term.indexOf("°")>0 ){
+				term = "orientation";
+			}else{
+				term = "count";
+			}
+		}else if(term.matches("zero")){
+			updateCount(srcid, term);
+			term = "count";
+		}else if(term.matches("^\\w+er\\b.*") || term.endsWith("^\\w+est\\b.*")){//heuristics: comparative/superlative adjective
+			term = term.replaceFirst(" .*", "");
+			term = checkWN4base(term);
+		}else if(term.matches(".*?\\b(width|wide|widen|long|length|\\w+-sized)\\b.*")){
+			term = "size";
+		}else if(term.matches(".*?equal.*")){
+			term = "size";
+		}		
 		String[] result = this.searchTerm(term, "quality");
 		if(result!=null){
+			//if(this.debug){
+			//	System.out.println("qulity label:["+result[2]+"/"+result[1]+"]");
+			//}
 			updateQualityIDs(srcid, result[2], result[1]);
+		}else{
+			if(this.debug){
+				System.out.println("quality term:["+term+"]");
+				System.out.println("qulity label:[/]");
+			}
 		}
 	}
+	
+	private void updateCount(String srcid, String term) {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set countt='"+term+"' where id="+srcid);
+		}catch(Exception e){
+			e.printStackTrace();
+		}				
+	}
+	
 
 	private void updateQualityIDs(String srcid, String qualitylabel, String qualityid) {
 		try{
@@ -224,9 +272,9 @@ public class TermEQ2IDEQ {
 	
 	private void fillInIDs4Entity(String srcid, String entitylabel,
 			String entitylocatorlabel) {
-		if(this.debug){
-			System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
-		}
+		//if(this.debug){
+		//	System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
+		//}
 		
 		String finalentitylocator = "";
 		String finalentitylabel = "";
@@ -261,9 +309,9 @@ public class TermEQ2IDEQ {
 		}
 	
 
-		if(this.debug){
-			System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
-		}
+		//if(this.debug){
+		//	System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
+		//}
 		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
 	}
 
@@ -489,11 +537,73 @@ public class TermEQ2IDEQ {
 		
 	}
 
+	public static String checkWN4base(String word){
+		
+		String result = checkWN("wn "+word+" -over");
+		if (result.length()==0){//word not in WN
+			return word;
+		}
+		//found word in WN:
+		String t = "";
+		Pattern p = Pattern.compile("(.*?)Overview of adj (\\w+) (.*)");
+		Matcher m = p.matcher(result);
+		while(m.matches()){
+			 t += m.group(2)+" ";
+			 result = m.group(3);
+			 m = p.matcher(result);
+		}
+		if (t.length() ==0){//word is not an adj
+			return word;
+		} 
+		String[] ts = t.trim().split("\\s+"); 
+		for(int i = 0; i<ts.length; i++){
+			if(ts[i].compareTo(word)!=0){//find the base
+				return ts[i];
+			}
+		}
+		return word;
+	}
+	 
+	public static String checkWN(String cmdtext){
+		try{
+ 	  		Runtime r = Runtime.getRuntime();	
+	  		Process proc = r.exec(cmdtext);
+		    ArrayList<String> errors = new ArrayList<String>();
+	  	    ArrayList<String> outputs = new ArrayList<String>();
+	  
+            // any error message?
+            //StreamGobbler errorGobbler = new 
+                //StreamGobblerWordNet(proc.getErrorStream(), "ERROR", errors, outputs);            
+            
+            // any output?
+            StreamGobbler outputGobbler = new 
+                StreamGobblerWordNet(proc.getInputStream(), "OUTPUT", errors, outputs);
+                
+            // kick them off
+            //errorGobbler.start();
+            outputGobbler.start();
+                                    
+            // any error???
+            int exitVal = proc.waitFor();
+            //System.out.println("ExitValue: " + exitVal);
+
+            StringBuffer sb = new StringBuffer();
+            for(int i = 0; i<outputs.size(); i++){
+            	//sb.append(errors.get(i)+" ");
+            	sb.append(outputs.get(i)+" ");
+            }
+            return sb.toString();
+			
+	  	}catch(Exception e){
+	  		e.printStackTrace();
+	  	}
+	  	return "";
+	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "run0");
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq");
 	}
 
 }

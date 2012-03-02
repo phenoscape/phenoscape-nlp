@@ -68,6 +68,8 @@ public class XML2EQ {
 	private XPath path11;
 	private XPath path12;
 	private XPath path13;
+	private XPath path14;
+	private XPath path15;
 	private Hashtable<String, String> entityhash = new Hashtable<String, String>();
 	private Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 	private Pattern p1 = Pattern.compile("(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
@@ -123,8 +125,10 @@ public class XML2EQ {
 				path10 = XPath.newInstance(".//relation");
 				path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
 				path12 = XPath.newInstance(".//structure");
-				path13 = XPath.newInstance("//relation[@name='with']");
-				}
+				path13 = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
+				path14 = XPath.newInstance("//character[@char_type='range_value']");
+				path15 = XPath.newInstance("//structure[character[@name='count']]");
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -140,6 +144,7 @@ public class XML2EQ {
 				Document xml = builder.build(f);
 				Element root = xml.getRootElement();
 				with2partof(root);
+				removeCategoricalRanges(root);
 				//expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
 				List<Element> characterstatements = path1.selectNodes(root);
 				List<Element> statestatements = path2.selectNodes(root);				
@@ -167,6 +172,58 @@ public class XML2EQ {
 		}
 	}
 	
+	/**
+	 * remove categorical char_type="range_value"
+	 * recompose numerical char_type="range_value"
+	 * recompose count "7 or more"
+	 * @param root
+	 */
+	@SuppressWarnings("unchecked")
+	private void removeCategoricalRanges(Element root) {
+		try{
+			List<Element> charas = this.path14.selectNodes(root);
+			for(Element chara: charas){
+				if(!chara.getAttributeValue("from").matches("[\\d\\.]+") && !chara.getAttributeValue("to").matches("[\\d\\.]+")){
+					chara.detach(); //remove
+				}else{//recompose
+					String value = chara.getAttributeValue("from")+ 
+							(chara.getAttribute("from_unit")==null? "" : chara.getAttributeValue("from_unit")) + " to "+
+							chara.getAttributeValue("to")+ 
+							(chara.getAttribute("to_unit")==null? "" : chara.getAttributeValue("to_unit"));
+					chara.removeAttribute("from");
+					chara.removeAttribute("from_unit");
+					chara.removeAttribute("to");
+					chara.removeAttribute("to_unit");
+					chara.removeAttribute("char_type");
+					chara.setAttribute("value", value.trim());
+				}
+			}			
+			
+			List<Element> structs = this.path15.selectNodes(root);
+			for(Element struct: structs){
+				charas = struct.getChildren();
+				int i = 0;
+				String name = "";
+				while(charas.size() > i && !name.equals("count")){
+					name = charas.get(i).getAttributeValue("name");
+					i++;
+				}
+				if(name.equals("count") && charas.size()>i){
+					//i is count, check i+1
+					if(charas.get(i).getAttributeValue("name").equals("count")){
+						String value = charas.get(i-1).getAttributeValue("value")+" or "+charas.get(i).getAttributeValue("value");
+						charas.get(i-1).setAttribute("value", value);
+						charas.get(i).detach();
+					}				
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+
+
 	/**
 	 * A with B => B part_of A
 	 * @param root
@@ -518,9 +575,9 @@ public class XML2EQ {
 			//collect category="character" terms from the glossarytable
 			if(this.characters==null){
 				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select distinct term from markedupdatasets."+this.glosstable+ " where category='character' " +
+				ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
 						"union "+
-						"select distinct term from markedupdatasets."+this.tableprefix+ "_term_category where category='character' ");
+						"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
 				while(rs.next()){
 					this.characters += rs.getString(1)+"|";
 				}
@@ -578,17 +635,25 @@ public class XML2EQ {
 			EQ.put("type", "state");
 			for(Element state: states){
 				Hashtable<String, String> EQc = (Hashtable<String, String>)EQ.clone();
-				EQc.put("description", state.getChild("text").getTextTrim());
+				String description = state.getChild("text").getTextTrim();
+				EQc.put("description", description);
 				EQc.put("characterid", state.getAttributeValue("character_id"));
 				EQc.put("stateid", state.getAttributeValue("state_id"));
-				//form: low crest (noun as state)
+				
 				Element firststruct = (Element)state.getChildren("structure").get(0);
 				if(!firststruct.getAttributeValue("name").contains("whole_organism")){
 					//noun as state
 					String fsname = this.getStructureName(root, firststruct.getAttributeValue("id"));
 					String characterstr = charactersAsString(root, firststruct);
-					EQc.put("quality", characterstr+" "+fsname);
-					this.allEQs.add(EQc);
+					if(description.endsWith(fsname)){//form: low crest (noun as state)						
+						EQc.put("quality", characterstr+" "+fsname);
+						this.allEQs.add(EQc);
+					}else{
+						EQc.put("entitylocator", EQc.get("entity")+","+EQc.get("entitylocator").replaceFirst(",$", ""));
+						EQc.put("entity", fsname);
+						EQc.put("quality", characterstr);
+						this.allEQs.add(EQc);
+					}
 				}else{				
 					//collecting all characters of whole_organism
 					List<Element> chars = path7.selectNodes(state);
@@ -658,7 +723,7 @@ public class XML2EQ {
 	private String charactersAsString(Element root, Element firststruct) {
 		String chstring = "";
 		try{
-			List<Element> chars = path8.selectNodes(root);
+			List<Element> chars = path8.selectNodes(firststruct);
 			for(Element chara : chars){
 				String m = chara.getAttribute("modifier")==null? "" : chara.getAttributeValue("modifier");
 				chstring += chara.getAttributeValue("value")+" ";
@@ -1588,11 +1653,11 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		String srcdir = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/final";
-		String database = "phenoscape";
+		String database = "biocreative2012";
 		//String outputtable = "biocreative_nexml2eq";
-		String outputtable = "biocreative2012.run0";
-		String benchmarktable = "biocreative2012.internalworkbench";
-		String prefix = "biocreative_test";
+		String outputtable = "xml2eq";
+		String benchmarktable = "internalworkbench";
+		String prefix = "test";
 		String glosstable="fishglossaryfixed";
 		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, benchmarktable, prefix, glosstable);
 		x2e.outputEQs();
