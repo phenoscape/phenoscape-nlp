@@ -125,8 +125,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-			    String URL = "jdbc:mysql://localhost/"+database+"?user=termsuser&password=termspassword";
-				//String URL = ApplicationUtilities.getProperty("database.url");
+			    //String URL = "jdbc:mysql://localhost/"+database+"?user=termsuser&password=termspassword";
+				String URL = ApplicationUtilities.getProperty("database.url");
 				conn = DriverManager.getConnection(URL);
 			}
 			Statement stmt = conn.createStatement();
@@ -369,6 +369,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
     }
 
 	public static String normalizeSpacesRoundNumbers(String sent) {
+		sent = sent.replaceAll("one another", "one_another");
 		sent = ratio2number(sent);//bhl
 		sent = sent.replaceAll("<?\\{?\\ba\\}?>? <?\\{?pair\\b?\\}?>?", "1 <pair>");
 		sent = sent.replaceAll("(?<=\\d)\\s*/\\s*(?=\\d)", "/");
@@ -596,12 +597,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
 
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_test_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_test_parsedsentences.txt";
+		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
+		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
-		String database = "markedupdatasets";
+		String database = "biocreative2012";
 		
 
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
@@ -609,7 +610,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_test", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "test", "fishglossaryfixed", false);
 
 		
 		//sp.POSTagging();

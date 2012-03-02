@@ -69,7 +69,8 @@ public class VolumeFinalizer extends Thread {
 			e.printStackTrace();
 		}
         //check for final result errors
-        File finalFileList= null;
+		//no final folder for EQ application
+        /*File finalFileList= null;
         File transformedFileList = null;
         if(!standalone){
         	finalFileList = new File(Registry.TargetDirectory+"\\final\\");
@@ -82,7 +83,7 @@ public class VolumeFinalizer extends Thread {
         if(finalFileList.list().length != transformedFileList.list().length)
         {
     		if(!standalone) this.showOutputMessage("System terminates with errors. Annotated files are not completed.");
-        }
+        }*/
     }
 	
     /**
@@ -90,12 +91,16 @@ public class VolumeFinalizer extends Thread {
      * @throws ParsingException
      */
     public void outputFinal() throws Exception {
-    	if(!standalone) this.showOutputMessage("System is starting finalization step [could take hours]...");
+    	if(!standalone) this.showOutputMessage("System is starting the annotation step [could take hours on large collections]...");
 		
 		String posedfile = Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
 		String parsedfile =Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
 		String database = ApplicationUtilities.getProperty("database.name");
 		String glosstable = this.glossaryPrefix;
+		
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, this.dataPrefix, glosstable, true, null, null);
+		if(!standalone) this.showOutputMessage("System is pre-tagging sentences...");
+		sosm.markSentences();
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, this.dataPrefix,glosstable, false);
 		if(!standalone) this.showOutputMessage("System is POS-tagging sentences...");
 		sp.POSTagging();
@@ -105,7 +110,7 @@ public class VolumeFinalizer extends Thread {
 		sp.extracting();
 		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
 		String xmldir = Registry.TargetDirectory+"\\final\\";;
-		String outputtable = "xml2eq";
+		String outputtable = this.dataPrefix+"_xml2eq";
 		String benchmarktable = "internalworkbench";
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
 		x2e.outputEQs();

@@ -403,7 +403,11 @@ public class ChunkedSentence {
 			}else if(!foundm && (t.endsWith(">") ||t.endsWith(")") )){ //if m o m o, collect two chunks
 				chunk = t+" "+chunk;
 			}else{
-				if(t.equals(",")) subjecto = true;
+				if(t.equals(","))subjecto = true;
+				else if((i==0 && t.matches("(a|an|the)"))){
+					subjecto = true;
+					this.chunkedtokens.set(0, ""); //remove the article
+				}
 				break;
 			}
 		}
@@ -1004,7 +1008,7 @@ public class ChunkedSentence {
 			String token = this.chunkedtokens.get(i);
 			
 			if(token.matches(".*?p\\[\\{?[a-z]+\\}?\\]+") || token.matches(".*?\\b("+preps+")\\b\\]*$") ||
-					token.matches(".*?\\b(as-.*?-as|same-.*?-as|in-.*?-(with|to))\\b.*?")){//[of] ...onto]]
+					token.matches(".*?\\b(as-.*?-as|same-.*?-as|\\w+-to|in-.*?-(with|to))\\b.*?")){//[of] ...onto]]
 				token = token.replaceAll("[{}]", "");
 				if(this.printNorm){
 					System.out.println(token+" needs normalization!");

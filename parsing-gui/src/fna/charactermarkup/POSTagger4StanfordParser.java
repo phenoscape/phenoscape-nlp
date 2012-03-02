@@ -61,7 +61,7 @@ public class POSTagger4StanfordParser {
 			
 			rs= stmt.executeQuery("select distinct term from "+tableprefix+"_term_category where category='position' union select distinct term from "+this.glosstable+" where category='position'");
 			while(rs.next()){
-				positions += rs.getString(1)+"|";
+				positions += rs.getString(1).replaceAll("\\(.*?\\)", "")+"|";
 			}
 			positions = positions.replaceFirst("\\|$", "");
 			positionptn2 = Pattern.compile("(.*?)([<{]?\\b(?:"+this.positions+")\\b[}>]?\\s+to)(\\b.*)");			
@@ -103,6 +103,13 @@ public class POSTagger4StanfordParser {
 			str = str.replaceAll("(?<![\\d(\\[–—-]\\s?)[–—-]+\\s*(?="+NumericalHandler.numberpattern+"\\s+\\W?("+ChunkedSentence.units+")\\W?)", " to "); //fna: tips>-2.5 {mm}
 			if(!scp.equals(str)){
 				System.out.println();
+			}
+			
+			//make a position to [anterior to] a single token
+			m = this.positionptn2.matcher(str);
+			while(m.matches()){
+				str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+				m = this.positionptn2.matcher(str);
 			}
 			
 			str = str.replaceAll("(?<=> [\\d"+this.romandigits+"]{1,3})-(?=<)", " - "); //<metacarpal> 2-<metacarpal> 1 {length} {ratio}
@@ -192,11 +199,11 @@ public class POSTagger4StanfordParser {
 				}		
 				
 				//make a position to [anterior to] a single token
-				m = this.positionptn2.matcher(str);
-				while(m.matches()){
-					str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
-					m = this.positionptn2.matcher(str);
-				}
+				//m = this.positionptn2.matcher(str);
+				//while(m.matches()){
+				//	str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+				//	m = this.positionptn2.matcher(str);
+				//}
 										
 				if(str.indexOf("×")>0){
 					containsArea = true;
@@ -273,6 +280,8 @@ public class POSTagger4StanfordParser {
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("at-least")==0){
 	        		   sb.append(word+"/RB ");
+	        	   }else if(word.compareTo("one_another")==0){
+	        		   sb.append(word+"/NNS ");
 	        	   }else if(word.compareTo("plus")==0){
 	        		   sb.append(word+"/CC ");
 	        	   }else if(word.matches("\\d+[cmd]?m\\d+[cmd]?m")){ //area turned into 32cm35mm

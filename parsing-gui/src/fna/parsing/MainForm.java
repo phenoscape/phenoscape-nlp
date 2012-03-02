@@ -124,9 +124,9 @@ public class MainForm {
 	private Table verificationTable;
 	private Table extractionTable;
 	private Table tagTable;
-	private Text targetText;
-	private Text sourceText;
-	private Text configurationText;
+	//private Text targetText;
+	//private Text sourceText;
+	//private Text configurationText;
 	private TabItem generalTabItem;
 	private StyledText contextStyledText;
 	private ProgressBar extractionProgressBar;
@@ -159,7 +159,8 @@ public class MainForm {
 	public Shell shell;
 	/*In Unknown removal this variable is used to remember the last tab selected*/
 	private static int hashCodeOfItem = 0;
-	private boolean [] statusOfMarkUp = {false, false, false, false, false, false, false, false};
+	//private boolean [] statusOfMarkUp = {false, false, false, false, false, false, false, false};
+	private boolean [] statusOfMarkUp = {false, false, false, false};
 	private static boolean saveFlag = false;
 	private static final Logger LOGGER = Logger.getLogger(MainForm.class);
 	/* document type: This will determine how many tabs to show */
@@ -375,21 +376,21 @@ public class MainForm {
 				/****** Logic for tab access goes here*******/
 				//if status is true  - u can go to the next tab, else don't even think! 
 				// For general tab
-				if (configurationText == null ) return;
-				if(tabName.indexOf(
-						ApplicationUtilities.getProperty("tab.one.name")) == -1 && statusOfMarkUp[0] 
-						      && !saveFlag)  {
+				//if (configurationText == null ) return;
+				if(dataPrefixCombo == null) return;
+				if(tabName.indexOf(ApplicationUtilities.getProperty("tab.one.name")) == -1 &&
+						!statusOfMarkUp[0] && !saveFlag)  {
 					// inform the user that he needs to load the information for starting mark up
 					// focus back to the general tab
 					checkFields(messageText, tabFolder);
 					return;
 				}
-				if (combo.getText().equals("")) {
+				if (combo.getText().equals("")) {//data prefix combo
 					checkFields(messageText, tabFolder);
 					return;
 				}
-				//show pop up to inform the user
-				if(statusOfMarkUp[0]) {
+				//show pop up to inform the user: configuration info is saved
+				/*if(statusOfMarkUp[0]) {
 					if(!saveFlag) {
 						ApplicationUtilities.showPopUpWindow(
 								ApplicationUtilities.getProperty("popup.info.prefix.save"), 
@@ -405,9 +406,9 @@ public class MainForm {
 						LOGGER.error("Error saving dataprefix", exe);
 						exe.printStackTrace();
 					}
-				 }
+				 }*/
 				/* Check if the Type of document selected is Type 3 or Type 4*/
-				if (type.equals("")){
+				//if (type.equals("")){
 					//segmentation
 					if (!statusOfMarkUp[1]) {
 						if(!tabName.equals(ApplicationUtilities.getProperty("tab.one.name"))
@@ -439,7 +440,7 @@ public class MainForm {
 						}
 
 					}
-				}
+				//}
 
 				//Transformation
 				if (!statusOfMarkUp[3]) {
@@ -452,17 +453,18 @@ public class MainForm {
 								ApplicationUtilities.getProperty("tab.four.name"), 
 								ApplicationUtilities.getProperty("popup.header.error"),
 								SWT.ICON_ERROR);
-						if (type.equals("")){
+						//if (type.equals("")){
 							tabFolder.setSelection(3);
-						} else {
-							tabFolder.setSelection(1);
-						}
+						//} else {
+						//	tabFolder.setSelection(1);
+						//}
 						
 						tabFolder.setFocus();
 						return;							
 					}
 
 				}
+				/*
 				// Mark Up
 				if (!statusOfMarkUp[4]) {
 					if(!tabName.equals(ApplicationUtilities.getProperty("tab.one.name"))
@@ -559,6 +561,7 @@ public class MainForm {
 						//createRemainingTermsGroup();
 					}
 				}
+				*/
 
 			}
 			
@@ -574,6 +577,11 @@ public class MainForm {
 		final Composite composite = new Composite(tabFolder, SWT.NONE);
 		generalTabItem.setControl(composite);
 
+		//initialized variables to hold three filepaths when save project				
+		//targetText = new Text(composite, SWT.BORDER);
+		//configurationText = new Text(composite, SWT.BORDER);
+		//sourceText = new Text(composite, SWT.BORDER);
+		
 		final Group configurationDirectoryGroup_1_1_1 = new Group(composite, SWT.NONE);
 		//configurationDirectoryGroup_1_1_1.setEnabled(false);
 		//configurationDirectoryGroup_1_1_1.setBounds(20, 117, 748, 70);
@@ -631,21 +639,20 @@ public class MainForm {
 					return;
 				}
 				saveProject(); 
-				saveFlag = false;
 				try {
 					int option_chosen =getType(type); 
 					mainDb.savePrefixData(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim(),option_chosen);
-					mainDb.loadStatusOfMarkUp(statusOfMarkUp, combo.getText());
-					//mainDb.createNonEQTable();
+					//mainDb.loadStatusOfMarkUp(statusOfMarkUp, combo.getText());
 				} catch (Exception exe) {
 					exe.printStackTrace();
 					LOGGER.error("Error saving dataprefix", exe);
 				}
 				String messageHeader = ApplicationUtilities.getProperty("popup.header.info");
 				String message = ApplicationUtilities.getProperty("popup.info.saved");				
-				ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION);
-				
-								
+				ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION);	
+				//saveFlag = false;
+				saveFlag = true;
+				statusOfMarkUp[0] = true;
 			}
 		});
 
@@ -683,8 +690,9 @@ public class MainForm {
 				removedEdges.clear();
 			}
 		});
-
-		Group grpContinueWithThe = new Group(composite, SWT.NONE);
+		
+		//hide load last project part
+		/*Group grpContinueWithThe = new Group(composite, SWT.NONE);
 		grpContinueWithThe.setToolTipText("Continue with the last project");
 		grpContinueWithThe.setText("Continue with the last project");
 		grpContinueWithThe.setBounds(20, 264, 763, 144);
@@ -774,11 +782,6 @@ public class MainForm {
 						StepsToBeCompletedLbl.setText(remainingStepsLb);
 						
 					}
-					/*else
-					{
-						StepsToBeCompletedLbl.setText("All steps are complete from this project.");
-					}*/
-					
 					
 					if(glossprefixes!=null && glossprefixes.length>0)
 					MainForm.glossaryPrefixCombo.setText(glossaryName);
@@ -794,10 +797,6 @@ public class MainForm {
 					createSubtab(markupNReviewTabFolder, "structures",composite4structures,group4structures, scrolledComposite4structures, termRoleMatrix4structures, contextText4structures);
 					createSubtab(markupNReviewTabFolder, "characters", composite4characters,group4characters, scrolledComposite4characters, termRoleMatrix4characters, contextText4characters);
 					createSubtab(markupNReviewTabFolder, "others", composite4others,group4others, scrolledComposite4others, termRoleMatrix4others, contextText4others);
-					/*loadFindStructureTable();
-					loadFindDescriptorTable();
-					loadFindMoreStructureTable();
-					loadFindMoreDescriptorTable();*/
 					//loadOthersTable();
 					
 				}
@@ -825,63 +824,8 @@ public class MainForm {
 				}
 				
 			}
-/*
-			protected void loadFindStructureTable() {
-				
-				ArrayList <String> structures = new ArrayList<String>();
-				try {
-					VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim());
-					//words = vmdb.getDescriptorWords();
-					vmdb.structureTags4Curation(structures);
-					int count = 1;
-					if (structures != null) {
-						for (String word : structures){
-							TableItem item = new TableItem(findStructureTable, SWT.NONE);
-							item.setText(new String [] {count+"", word});
-							count++;
-						}
-					}
-					
-				} catch (Exception exe){
-					LOGGER.error("unable to load descriptor tab in Markup : MainForm", exe);
-					exe.printStackTrace();
-				}
 			
-			
-			}
-*/
-			/*protected void loadOthersTable() {
-				// TODO Auto-generated method stub
-				//showOtherTerms();
-				showOtherTermsTable();
-			}*/
-/*
-			protected void loadFindDescriptorTable() {
-				// TODO Auto-generated method stub
-				ArrayList <String> words = null;
-				try {
-					VolumeMarkupDbAccessor vmdb = new VolumeMarkupDbAccessor(dataPrefixCombo.getText().replaceAll("-", "_").trim(),glossaryPrefixCombo.getText().trim());
-					words = vmdb.getSavedDescriptorWords();
-					//words = vmdb.getDescriptorWords();
-					
-					int count = 1;
-					if (words != null) {
-						for (String word : words){
-							TableItem item = new TableItem(findDescriptorTable, SWT.NONE);
-							item.setText(new String [] {count+"", word});
-							count++;
-						}
-					}
-					
-				} catch (Exception exe){
-					LOGGER.error("unable to load descriptor tab in Markup : MainForm", exe);
-					exe.printStackTrace();
-				}
-			
-			}
-*/
-			}
-		);
+			});
 		
 		this.lblStepsToBe = new CLabel(grpContinueWithThe, SWT.NONE);
 		lblStepsToBe.setVisible(false);
@@ -919,268 +863,16 @@ public class MainForm {
 		this.label_glossary= new CLabel(grpContinueWithThe, SWT.NONE);
 		label_glossary.setBounds(348, 52, 137, 21);
 		label_glossary.setText("");
-		//initialized variables to hold three filepaths when save project				
-		targetText = new Text(composite, SWT.BORDER);
-		configurationText = new Text(composite, SWT.BORDER);
-		sourceText = new Text(composite, SWT.BORDER);
-		//targetText.setBounds(20, 220, 618, 23);
-		//targetText.setEditable(false);
-		//targetText.setVisible(false);
-								
-		//final Group configurationDirectoryGroup_1 = new Group(composite, SWT.NONE);
-		//configurationDirectoryGroup_1.setBounds(20, 216, 763, 70);
-		//configurationDirectoryGroup_1.setText(ApplicationUtilities.getProperty("source"));
-		//configurationDirectoryGroup_1.setVisible(false);
-										
-		//final Group configurationDirectoryGroup = new Group(configurationDirectoryGroup_1, SWT.NONE);
-		//configurationDirectoryGroup.setBounds(-10, 46, 763, 70);
-		//configurationDirectoryGroup.setText(ApplicationUtilities.getProperty("config"));
-		//configurationDirectoryGroup.setVisible(false);
-												
-		//configurationText = new Text(configurationDirectoryGroup, SWT.BORDER);
-		//configurationText.setEditable(false);
-		//configurationText.setBounds(10, 25, 618, 23);
-		//configurationText.setVisible(false);
-														
-		//sourceText = new Text(configurationDirectoryGroup, SWT.NONE);
-		//sourceText.setBounds(20, 28, 618, 23);
-		//sourceText.setEditable(false);
+		*/
 		
-		//final Group configurationDirectoryGroup_1_1 = new Group(configurationDirectoryGroup_1, SWT.NONE);
-		//configurationDirectoryGroup_1_1.setBounds(10, 10, 763, 70);
-		//configurationDirectoryGroup_1_1.setVisible(false);
-		//configurationDirectoryGroup_1_1.setText(
-		//		ApplicationUtilities.getProperty("target"));
 				
 		
-		//////////////////////////////////////////////////////////////////////
-		if (type.equals("")){//type 1
-			/* Segmentation Tab step 1*/
-			final TabItem segmentationTabItem = new TabItem(tabFolder, SWT.NONE);
-			segmentationTabItem.setText(ApplicationUtilities.getProperty("tab.two.name"));
-			
-			final Composite composite_1 = new Composite(tabFolder, SWT.NONE);
-			segmentationTabItem.setControl(composite_1);
-			
-			//label giving the description for this step is::
-			this.tab2desc = new Text(composite_1, SWT.READ_ONLY | SWT.WRAP);
-			tab2desc.setBounds(10,10,784,60);
-			tab2desc.setText(ApplicationUtilities.getProperty("step1DescpPart1")+ApplicationUtilities.getProperty("step1DescpPart2")+ApplicationUtilities.getProperty("step1DescpPart3"));
-
-			extractionTable = new Table(composite_1, SWT.FULL_SELECTION | SWT.BORDER );
-			extractionTable.setLinesVisible(true);
-			extractionTable.setHeaderVisible(true);
-			extractionTable.setBounds(10, 75, 784, 358);
-
-			final TableColumn extractionNumberColumnTableColumn = new TableColumn(extractionTable, SWT.NONE);
-			extractionNumberColumnTableColumn.setWidth(100);
-			extractionNumberColumnTableColumn.setText(
-					ApplicationUtilities.getProperty("count"));
-
-			final TableColumn extractionFileColumnTableColumn = new TableColumn(extractionTable, SWT.NONE);
-			extractionFileColumnTableColumn.setWidth(254);
-			extractionFileColumnTableColumn.setText(
-					ApplicationUtilities.getProperty("file"));
-
-			extractionProgressBar = new ProgressBar(composite_1, SWT.NONE);
-			extractionProgressBar.setVisible(false);
-			extractionProgressBar.setBounds(10, 440, 551, 17);
-			
-			final Button startExtractionButton = new Button(composite_1, SWT.NONE);
-			startExtractionButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					try {
-						extractionTable.removeAll();
-						startExtraction(); // start the extraction process
-					} catch (Exception exe) {
-						LOGGER.error("unable to extract in mainform", exe);
-						exe.printStackTrace();
-					}
-					 
-					// Saving the status of markup
-					statusOfMarkUp[1] = true;
-					try {
-						mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), true);
-					} catch (Exception exe) {
-						LOGGER.error("Couldnt save status - segment" , exe);
-						exe.printStackTrace();
-					}
-				}
-			});
-			startExtractionButton.setText(ApplicationUtilities.getProperty("step1RunBtn"));
-			startExtractionButton.setToolTipText(ApplicationUtilities.getProperty("step1RunTTT"));
-			startExtractionButton.setBounds(420, 440, 83, 23);
-		
-			/*Hyperlinking the files */
-			extractionTable.addMouseListener(new MouseListener () {
-				public void mouseDoubleClick(MouseEvent event) {
-					String filePath = Registry.TargetDirectory + "\\"+ 
-					ApplicationUtilities.getProperty("EXTRACTED")+"\\"+
-					extractionTable.getSelection()[0].getText(1).trim();
-					
-					try {
-						Runtime.getRuntime().exec(ApplicationUtilities.getProperty("notepad") 
-								+ " \"" + filePath + "\"");
-					} catch (Exception e){
-						ApplicationUtilities.showPopUpWindow(ApplicationUtilities.getProperty("popup.error.msg") +
-								ApplicationUtilities.getProperty("popup.editor.msg"),
-								ApplicationUtilities.getProperty("popup.header.error"), 
-								SWT.ERROR);
-					} 
-				}			
-				public void mouseDown(MouseEvent event) {}
-				public void mouseUp(MouseEvent event) {}
-			});
-			
-			Button btnLoad = new Button(composite_1, SWT.NONE);
-			btnLoad.setBounds(510, 440, 173, 23);
-			btnLoad.setText(ApplicationUtilities.getProperty("step1LoadBtn"));
-			btnLoad.setToolTipText(ApplicationUtilities.getProperty("step1LoadTTT"));
-			btnLoad.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					loadFileInfo(extractionTable, Registry.TargetDirectory + 
-							ApplicationUtilities.getProperty("EXTRACTED"));
-				}
-			});
-			
-			Button btnClear = new Button(composite_1, SWT.NONE);
-			btnClear.setBounds(695, 440, 100, 23);
-			btnClear.setText(ApplicationUtilities.getProperty("ClearRerunBtn"));
-			btnClear.setToolTipText(ApplicationUtilities.getProperty("ClearRerunTTT"));
-			
-			btnClear.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					extractionTable.removeAll();
-					statusOfMarkUp[1] = false;
-					try {
-						startExtraction();
-						statusOfMarkUp[1] = true;
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					try {
-					//	mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), false);
-					} catch (Exception exe) {
-						LOGGER.error("Couldnt save status - verify" , exe);
-						exe.printStackTrace();
-					}
-				}
-			});
-						
-			/* Verification Tab: step 2*/			
-			
-			final TabItem verificationTabItem = new TabItem(tabFolder, SWT.NONE);
-			verificationTabItem.setText(ApplicationUtilities.getProperty("tab.three.name"));
-
-			final Composite composite_2 = new Composite(tabFolder, SWT.NONE);
-			verificationTabItem.setControl(composite_2);
-
-			this.tab3desc = new Text(composite_2, SWT.READ_ONLY | SWT.WRAP);
-			tab3desc.setBounds(10,10,744,60);
-			tab3desc.setText(ApplicationUtilities.getProperty("step2DescpPart1")+ApplicationUtilities.getProperty("step2DescpPart2"));
-			
-			
-			verificationTable = new Table(composite_2, SWT.BORDER | SWT.FULL_SELECTION);
-			verificationTable.setBounds(10, 75, 744, 369);
-			verificationTable.setLinesVisible(true);
-			verificationTable.setHeaderVisible(true);
-
-			final TableColumn verificationStageColumnTableColumn = new TableColumn(verificationTable, SWT.NONE);
-			verificationStageColumnTableColumn.setWidth(168);
-			verificationStageColumnTableColumn.setText("Tasks");
-
-			final TableColumn verificationFileColumnTableColumn = new TableColumn(verificationTable, SWT.NONE);
-			verificationFileColumnTableColumn.setWidth(172);
-			verificationFileColumnTableColumn.setText(ApplicationUtilities.getProperty("file"));
-
-			final TableColumn verificationErrorColumnTableColumn = new TableColumn(verificationTable, SWT.NONE);
-			verificationErrorColumnTableColumn.setWidth(376);
-			verificationErrorColumnTableColumn.setText("Errors to be corrected");
-
-			
-			verificationTable.addMouseListener(new MouseListener () {
-				public void mouseDoubleClick(MouseEvent event) {
-					String filePath = Registry.TargetDirectory + 
-					ApplicationUtilities.getProperty("EXTRACTED")+ "\\" +
-					verificationTable.getSelection()[0].getText(1).trim();
-					if (filePath.indexOf("xml") != -1) {
-						try {
-							Runtime.getRuntime().exec(ApplicationUtilities.getProperty("notepad") 
-									+ " \"" + filePath + "\"");
-						} catch (Exception e){
-							ApplicationUtilities.showPopUpWindow(ApplicationUtilities.getProperty("popup.error.msg") +
-									ApplicationUtilities.getProperty("popup.editor.msg"),
-									ApplicationUtilities.getProperty("popup.header.error"), 
-									SWT.ERROR);
-						}
-					} 
-				}			
-				public void mouseDown(MouseEvent event) {}
-				public void mouseUp(MouseEvent event) {}
-			});
-
-			
-			verificationProgressBar = new ProgressBar(composite_2, SWT.NONE);
-			verificationProgressBar.setVisible(false);
-			verificationProgressBar.setBounds(10, 450, 515, 17);
-
-			final Button startVerificationButton = new Button(composite_2, SWT.NONE);
-			startVerificationButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					System.out.println("Starting!!");
-					verificationTable.removeAll();
-					startVerification(); // start the verification process
-					statusOfMarkUp[2] = true;
-					try {
-						mainDb.saveStatus(ApplicationUtilities.getProperty("tab.three.name"), combo.getText(), true);
-					} catch (Exception exe) {
-						LOGGER.error("Couldnt save status - verify" , exe);
-						exe.printStackTrace();
-					}
-				}
-			});
-			startVerificationButton.setBounds(543, 450, 95, 23);
-			startVerificationButton.setText(ApplicationUtilities.getProperty("step2RunBtn"));
-			startVerificationButton.setToolTipText(ApplicationUtilities.getProperty("step2RunTTT"));
-			final Button clearVerificationButton = new Button(composite_2, SWT.NONE);
-			clearVerificationButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					clearVerification();
-					//statusOfMarkUp[2] = false;
-					
-					try {
-						startVerification(); // start the verification process
-						statusOfMarkUp[2] = true;
-						
-						//mainDb.saveStatus(ApplicationUtilities.getProperty("tab.three.name"), combo.getText(), false);
-					} catch (Exception exe) {
-						LOGGER.error("Couldnt save status - verify" , exe);
-						exe.printStackTrace();
-					}
-				}
-			});
-			clearVerificationButton.setBounds(648, 450, 110, 23);
-			clearVerificationButton.setText(ApplicationUtilities.getProperty("ClearRerunBtn"));
-			clearVerificationButton.setToolTipText(ApplicationUtilities.getProperty("ClearRerunTTT"));
-
-			/*Button btnLoad_1 = new Button(composite_2, SWT.NONE);
-			btnLoad_1.setBounds(543, 385, 75, 23);
-			btnLoad_1.setText("Load");
-			btnLoad_1.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(final SelectionEvent e) {
-					loadFileInfo(verificationTable, Registry.TargetDirectory + 
-							ApplicationUtilities.getProperty("EXTRACTED"));
-				}
-			});*/
-			
-		}
 		/*****end of type1-specific tabs****/
 		/*****start all type shared tabs****/
 
 		/* Transformation Tab: step 3*/
 		final TabItem transformationTabItem = new TabItem(tabFolder, SWT.NONE);
-		transformationTabItem.setText(ApplicationUtilities.getProperty("tab.four.name"));
+		transformationTabItem.setText(ApplicationUtilities.getProperty("tab.two.name"));
 		final Composite composite_3 = new Composite(tabFolder, SWT.NONE);
 		transformationTabItem.setControl(composite_3);
 		
@@ -1243,8 +935,8 @@ public class MainForm {
 				}
 				
 				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.four.name"), combo.getText(), true);
-					statusOfMarkUp[3] = true;
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), true);
+					statusOfMarkUp[1] = true;
 				} catch (Exception exe) {
 					LOGGER.error("Couldnt save status - transform" , exe);
 					exe.printStackTrace();
@@ -1264,7 +956,7 @@ public class MainForm {
 			public void widgetSelected(final SelectionEvent e) {/*
 				clearTransformation();				
 				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.four.name"), combo.getText(), false);
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), false);
 					statusOfMarkUp[3] = false;
 				} catch (Exception exe) {
 					LOGGER.error("Couldnt save status - transform" , exe);
@@ -1285,9 +977,9 @@ public class MainForm {
 				} else if (type.equals("type4")) {
 					startType4Transformation(); // When the doc selected is type 4
 				}
-				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.four.name"), combo.getText(), true);
-					statusOfMarkUp[3] = true;
+				try {					
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), true);
+					statusOfMarkUp[1] = true;
 				} catch (Exception exe) {
 					LOGGER.error("Couldnt save status - transform" , exe);
 					exe.printStackTrace();
@@ -1327,7 +1019,7 @@ public class MainForm {
 		/*4: "Find More Structures" from allwords (dhword), save to WordRole*/
 		/*5: "Find More Descriptors" from unknownwords(dhword), save to WordRole*/
 		final TabItem markupTabItem = new TabItem(tabFolder, SWT.NONE);
-		markupTabItem.setText(ApplicationUtilities.getProperty("tab.five.name"));
+		markupTabItem.setText(ApplicationUtilities.getProperty("tab.three.name"));
 
 		final Composite composite_4 = new Composite(tabFolder, SWT.NONE);
 		markupTabItem.setControl(composite_4);
@@ -1371,18 +1063,8 @@ public class MainForm {
 				}
 				startMarkup();
 				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.five.name"), combo.getText(), true);
-					statusOfMarkUp[4] = true;
-					/*forward to "review structure" subtab
-					markupNReviewTabFolder.setSelection(1);
-					//auto load structure terms
-					ArrayList<String> words = fetchStructureTerms();
-					int c = loadTermArea(termRoleMatrix4structures, scrolledComposite4structures, words, contextText4structures, type);
-					if(c==0){
-						String messageHeader = ApplicationUtilities.getProperty("popup.header.info");
-						String message = ApplicationUtilities.getProperty("popup.load.nodata");				
-						ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION);
-					}*/
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.three.name"), combo.getText(), true);
+					statusOfMarkUp[2] = true;
 				} catch (Exception exe) {
 					LOGGER.error("Couldn't save status - markup" , exe);
 					exe.printStackTrace();
@@ -1526,8 +1208,8 @@ public class MainForm {
 				}
 				//removeBadStructuresFromTable(findStructureTable);
 				//try { You don't need to run markup again ater removal!
-				//	mainDb.saveStatus(ApplicationUtilities.getProperty("tab.five.name"), combo.getText(), false);
-				//	statusOfMarkUp[4] = false;
+				//	mainDb.saveStatus(ApplicationUtilities.getProperty("tab.three.name"), combo.getText(), false);
+				//	statusOfMarkUp[2] = false;
 				//} catch (Exception exe) {
 				//	LOGGER.error("Couldnt save status - markup" , exe);
 				//} 				
@@ -1923,6 +1605,7 @@ public class MainForm {
 		/********************************/
 		/*"unknown removal" tab: step 5 */
 		/********************************/
+		/*
 		final TabItem tagTabItem = new TabItem(tabFolder, SWT.NONE);
 		tagTabItem.setText(ApplicationUtilities.getProperty("tab.six.name"));
 
@@ -1959,11 +1642,7 @@ public class MainForm {
 		final TableColumn sentenceColumnTableColumn = new TableColumn(tagTable, SWT.NONE);
 		sentenceColumnTableColumn.setWidth(515);
 		sentenceColumnTableColumn.setText("Sentence");
-		//added to check on focus,to display any message
-		/*if(tabFolder.getSelectionIndex()==6){
-			tabFolder.setSelection(1);
-			tabFolder.setFocus();
-		}*/
+
 		
 	    tagTable.addListener(SWT.Selection, new Listener() {
 	        public void handleEvent(Event event) {
@@ -2035,14 +1714,6 @@ public class MainForm {
 				try {
 					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.six.name"), combo.getText(), true);
 					statusOfMarkUp[5] = true;
-					/*if(tagTable.getItemCount()==0)
-					{
-						String messageHeader = ApplicationUtilities.getProperty("popup.header.info");
-						String message = ApplicationUtilities.getProperty("popup.load.nodata");				
-						ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION);
-
-						//ApplicationUtilities.showPopUpWindowTab5("Nothing to Load. Please proceed to the next tab", "Information", SWT.OK|SWT.CANCEL,tabFolder);
-					}*/
 					
 				} catch (Exception exe) {
 					LOGGER.error("Couldnt save status - unknown" , exe);
@@ -2064,27 +1735,12 @@ public class MainForm {
 			}
 		});
 
-
-
-
-		
-
-		
-		/*TableViewer tableViewer = new TableViewer(composite_6, SWT.BORDER | SWT.FULL_SELECTION);
-		table_1 = tableViewer.getTable();
-		table_1.setBounds(13, 147, 85, 85);
-		formToolkit.paintBordersFor(table_1);
-		String[] myList = {"A","B","C"};
-		CellEditor[] editors = new CellEditor[3];
-		editors[0] = new CheckboxCellEditor(table_1);
-		editors[2]=new ComboBoxCellEditor(table_1,myList );
-		tableViewer.setCellEditors(editors);*/
-		
-		
+		*/
 		/********************************/
 		/*"Character State" tab: step 6 */
 		/*make changes in prefix_grouped_terms, save decisions to prefix_group_decisions */
 		/********************************/
+		/*
 		TabItem tbtmCharacterStates = new TabItem(tabFolder, SWT.NONE);
 		tbtmCharacterStates.setText(ApplicationUtilities.getProperty("tab.character"));
 		
@@ -2176,39 +1832,9 @@ public class MainForm {
 		btnSave.setBounds(550, 8, 75, 25);
 		btnSave.setText(ApplicationUtilities.getProperty("SaveCategoryBtn"));
 		btnSave.setToolTipText(ApplicationUtilities.getProperty("SaveCategoryTTT"));
-		//added March 1st
-		/*if(groupsCombo==null || groupsCombo.getItemCount()==0 ||groupsCombo.getText().trim()=="")
-		{
-			btnSave.setEnabled(false);
-		}
-		else{*/
+
 		btnSave.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				/*if(unpaired){ //use a different machanism to save the unpaired term/decisions 
-					Control[] children = termsGroup.getChildren();
-					//loop through children for Group (hold term1) and Text (holds category)
-					//save to the final term-category table
-					for(int i = 1; i < children.length; i++){
-						if(children[i] instanceof Text && children[i-1] instanceof Group){
-							String term = children[i-1].getToolTipText();
-							String decision = ((Text)(children[i])).getText();
-							charDb.saveTermCategory(groupsCombo.getText().replace("Group_", ""),term, decision);
-						}
-					}
-					//update processed group
-					String savedGroupName = groupsCombo.getText();
-					processedGroups.put(savedGroupName, savedGroupName);				
-					Set <String> processed = processedGroups.keySet();
-					processedGroupsTable.removeAll();
-					for (String groupName : processed) {
-						TableItem item = new TableItem(processedGroupsTable, SWT.NONE);
-						item.setText(groupName);
-					}
-					//set "saved" in groupInfo
-					((CharacterGroupBean)groupInfo.get(groupsCombo.getText())).setSaved(true);
-					((CharacterGroupBean)groupInfo.get(groupsCombo.getText())).setDecision("done");
-
-				}else{*/
 				
 				try {
 					String decision4group = comboDecision.getText();
@@ -2241,10 +1867,10 @@ public class MainForm {
 					((CharacterGroupBean)groupInfo.get(groupsCombo.getText())).setSaved(true);
 					((CharacterGroupBean)groupInfo.get(groupsCombo.getText())).setDecision(decision4group);
 
-					/*Save the decision first */
+					//Save the decision first 
 					charDb.saveDecision(cooccurrences.get(0).getGroupNo(), decision4group);
 					
-					/*Save the terms remain in the group */
+					//Save the terms remain in the group
 					for (CoOccurrenceBean cbean : cooccurrences) {
 						TermsDataBean tbean = new TermsDataBean();
 						tbean.setFrequency(Integer.parseInt(cbean.getFrequency().getText()));
@@ -2252,7 +1878,7 @@ public class MainForm {
 						tbean.setKeep(cbean.getKeep());
 						tbean.setSourceFiles(cbean.getSourceFiles());
 						
-						/* The fun starts here! try and save the terms that are there in parentTermGroup*/
+						// The fun starts here! try and save the terms that are there in parentTermGroup
 						if(cbean.getTerm1() != null && cbean.getTerm1().isTogglePosition()) {
 							tbean.setTerm1(cbean.getTerm1().getTermText().getText());
 						} else {
@@ -2264,11 +1890,11 @@ public class MainForm {
 						} else {
 							tbean.setTerm2("");
 						}
-						/* Add the termdatabean to the arraylist*/
+						// Add the termdatabean to the arraylist
 						terms.add(tbean);
 					}
 					
-					/* update terms table, keeping on the terms remains in the group */
+					// update terms table, keeping on the terms remains in the group
 					charDb.saveTerms(terms);
 					
 				} catch (Exception exe) {
@@ -2284,9 +1910,9 @@ public class MainForm {
 					TableItem item = new TableItem(processedGroupsTable, SWT.NONE);
 					item.setText(groupName);
 				}		
-				//}//if(unpaired)
+	
 
-				/** Logic for the terms removed from the groups goes here */
+				// Logic for the terms removed from the groups goes here 
 				if (noOfTermGroups <= getNumberOfGroupsSaved() && isTermsNotGrouped()) {
 					int choice = 0;
 					if(charStatePopUp){
@@ -2322,7 +1948,7 @@ public class MainForm {
 			}
 
 		});
-	//	}
+	
 		
 		Label label_1 = new Label(composite_8, SWT.SEPARATOR | SWT.VERTICAL);
 		label_1.setBounds(510, 240, -6, 191);
@@ -2409,12 +2035,12 @@ public class MainForm {
 								&& beanFirst.getTerm2() != null
 								&& beanLast.getTerm1() != null
 								&& beanLast.getTerm2() != null) {
-							/* Swap coordinates of radio button */
+							// Swap coordinates of radio button 
 							tempCoordinates = beanFirst.getContextButton().getBounds();
 							beanFirst.getContextButton().setBounds(beanLast.getContextButton().getBounds());
 							beanLast.getContextButton().setBounds(tempCoordinates);
 							
-							/* Swap Frequencies */						
+							// Swap Frequencies 					
 							tempCoordinates = null;
 							tempCoordinates = beanFirst.getFrequency().getBounds();
 							beanFirst.getFrequency().setBounds(beanLast.getFrequency().getBounds());
@@ -2422,8 +2048,8 @@ public class MainForm {
 							
 							
 							if (toSort) {
-								/*Sort Ascending*/
-									/* Swap Group 1 */
+								//Sort Ascending
+									// Swap Group 1 
 									tempCoordinates = beanFirst.getTerm1().getTermGroup().getBounds();
 									tempCoordinates.y += k * standardIncrement;
 									beanFirst.getTerm1().getTermGroup().setBounds(tempCoordinates);
@@ -2432,7 +2058,7 @@ public class MainForm {
 									tempCoordinates.y -= k * standardIncrement;						
 									beanLast.getTerm1().getTermGroup().setBounds(tempCoordinates);
 									
-									/* Swap Group 2 */
+									// Swap Group 2
 									tempCoordinates = beanFirst.getTerm2().getTermGroup().getBounds();
 									tempCoordinates.y += k * standardIncrement;
 									beanFirst.getTerm2().getTermGroup().setBounds(tempCoordinates);
@@ -2443,8 +2069,8 @@ public class MainForm {
 
 								
 							} else {
-								/* Sort Descending*/
-								/* Swap Group 1 */
+								// Sort Descending
+								// Swap Group 1
 									tempCoordinates = beanFirst.getTerm1().getTermGroup().getBounds();
 									tempCoordinates.y -= k * standardIncrement;
 									beanFirst.getTerm1().getTermGroup().setBounds(tempCoordinates);
@@ -2453,7 +2079,7 @@ public class MainForm {
 									tempCoordinates.y += k * standardIncrement;						
 									beanLast.getTerm1().getTermGroup().setBounds(tempCoordinates);
 									
-									/* Swap Group 2 */
+									// Swap Group 2 
 									tempCoordinates = beanFirst.getTerm2().getTermGroup().getBounds();
 									tempCoordinates.y -= k * standardIncrement;
 									beanFirst.getTerm2().getTermGroup().setBounds(tempCoordinates);
@@ -2469,12 +2095,12 @@ public class MainForm {
 					}
 						
 					if(sortedBy!=null && sortedBy.length>0 && sortedBy[selectionIndex]) {
-						/*Sort Ascending*/
+						//Sort Ascending
 						sortedBy[selectionIndex] = false;
 						sortLabel.setImage(SWTResourceManager.getImage(MainForm.class, "/fna/parsing/up.jpg"));
 						
 					} else if(sortedBy!=null && sortedBy.length>0 && !sortedBy[selectionIndex]){
-						/* Sort Descending*/
+						// Sort Descending
 						sortedBy[selectionIndex] = true;
 						sortLabel.setImage(SWTResourceManager.getImage(MainForm.class, "/fna/parsing/down.jpg"));	
 						
@@ -2497,17 +2123,7 @@ public class MainForm {
 		step6_desc.setEditable(false);
 		step6_desc.setBounds(10, 10, 762, 39);
 	
-		
-		/*Removed terms test*/
-/*		Button btnRemovedTerms = new Button(composite_8, SWT.NONE);
-		btnRemovedTerms.setBounds(622, 0, 105, 25);
-		btnRemovedTerms.setText("Removed Terms");
-		btnRemovedTerms.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(final SelectionEvent e) {
-				showRemainingTerms();
-			}
-		});*/
-		
+
 		btnViewGraphVisualization.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				if(groupsCombo.getItemCount()>0 && groupsCombo.getText().trim()!="")
@@ -2523,11 +2139,11 @@ public class MainForm {
 				}
 			}
 		});
-		
+		*/
 		/*************** Finalizer tab ***********************/
 
 		final TabItem finalizerTabItem = new TabItem(tabFolder, SWT.NONE);
-		finalizerTabItem.setText(ApplicationUtilities.getProperty("tab.seven.name"));
+		finalizerTabItem.setText(ApplicationUtilities.getProperty("tab.four.name"));
 
 		final Composite composite_5 = new Composite(tabFolder, SWT.NONE);
 		finalizerTabItem.setControl(composite_5);
@@ -2564,7 +2180,7 @@ public class MainForm {
 
 		final TableColumn transformationNumberColumnTableColumn_1_2 = new TableColumn(finalizerTable, SWT.NONE);
 		transformationNumberColumnTableColumn_1_2.setWidth(168);
-		transformationNumberColumnTableColumn_1_2.setText("Count");
+		transformationNumberColumnTableColumn_1_2.setText("File Count");
 
 		final TableColumn transformationNameColumnTableColumn_1_2 = new TableColumn(finalizerTable, SWT.NONE);
 		transformationNameColumnTableColumn_1_2.setWidth(359);
@@ -2580,7 +2196,8 @@ public class MainForm {
 
 		final Button startFinalizerButton = new Button(composite_5, SWT.NONE);
 		startFinalizerButton.setToolTipText("Run step 7");
-		startFinalizerButton.setBounds(364, 470, 85, 23);
+		startFinalizerButton.setBounds(530, 470, 96, 23);
+		//startFinalizerButton.setBounds(364, 470, 85, 23);
 		startFinalizerButton.setText(ApplicationUtilities.getProperty("step7RunBtn"));
 		startFinalizerButton.setToolTipText(ApplicationUtilities.getProperty("step7RunTTT"));
 		startFinalizerButton.addSelectionListener(new SelectionAdapter() {
@@ -2588,14 +2205,14 @@ public class MainForm {
 				finalizerTable.removeAll();
 				boolean completed = startFinalize(finalLog);
 				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.seven.name"), combo.getText(), true);
-					statusOfMarkUp[6] = true;
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.four.name"), combo.getText(), true);
+					statusOfMarkUp[3] = true;
 					if(completed){
 					/*File fileList= new File(Registry.TargetDirectory+"\\final\\");
 					if(fileList.list().length==0)
 					{
 						//show error popup
-						statusOfMarkUp[6] = false;
+						statusOfMarkUp[3] = false;
 						ApplicationUtilities.showPopUpWindow("Error executing step 7", "Error",SWT.ERROR);
 					}*/
 					}
@@ -2607,7 +2224,7 @@ public class MainForm {
 			}
 		});
 		
-		Button btnLoad_2 = new Button(composite_5, SWT.NONE);
+		/*Button btnLoad_2 = new Button(composite_5, SWT.NONE);
 		btnLoad_2.setToolTipText(ApplicationUtilities.getProperty("step7LoadTTT"));
 		btnLoad_2.setBounds(455, 470, 192, 23);
 		btnLoad_2.setText(ApplicationUtilities.getProperty("step7LoadBtn"));
@@ -2616,7 +2233,7 @@ public class MainForm {
 				loadFileInfo(finalizerTable, Registry.TargetDirectory + 
 						ApplicationUtilities.getProperty("FINAL"));
 			}
-		});
+		});*/
 		
 		final Button clearFinalizerButton = new Button(composite_5, SWT.NONE);
 		clearFinalizerButton.setToolTipText(ApplicationUtilities.getProperty("ClearRerunTTT"));
@@ -2627,14 +2244,14 @@ public class MainForm {
 				finalizerTable.removeAll();
 				startFinalize(finalLog);
 				try {
-					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.seven.name"), combo.getText(), true);
-					statusOfMarkUp[6] = true;
+					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.four.name"), combo.getText(), true);
+					statusOfMarkUp[3] = true;
 					//check if finalized final contains files--this should be done after finalize step is completed.
 					/*File fileList= new File(Registry.TargetDirectory+"\\final\\");
 					if(fileList.list().length==0)
 					{
 						//show error popup
-						statusOfMarkUp[6] = false;
+						statusOfMarkUp[3] = false;
 						ApplicationUtilities.showPopUpWindow("Error executing step 7", "Error",SWT.ERROR);
 					}*/
 				} catch (Exception exe) {
@@ -2686,13 +2303,13 @@ public class MainForm {
 		String subtabTitle ="";
 		String subtabInstruction = "";
 		if(type.compareToIgnoreCase("others")==0){
-			subtabTitle = "4.3 Categorize Other Terms";
+			subtabTitle = "2.3 Categorize Other Terms";
 			subtabInstruction = "step4Descp3";
 		}else if(type.compareToIgnoreCase("structures")==0){
-			subtabTitle = "4.1 Review Structure Terms";
+			subtabTitle = "2.1 Review Structure Terms";
 			subtabInstruction = "step4Descp1";
 		}else if(type.compareToIgnoreCase("characters")==0){
-			subtabTitle = "4.2 Review Character Terms";
+			subtabTitle = "2.2 Review Character Terms";
 			subtabInstruction = "step4Descp2";
 		}		
 		
@@ -2707,10 +2324,12 @@ public class MainForm {
 		text_1.setToolTipText(ApplicationUtilities.getProperty(subtabInstruction));
 		text_1.setText(ApplicationUtilities.getProperty(subtabInstruction));
 		text_1.setEditable(false);
-		text_1.setBounds(10, 17, 744, 39);
+		//text_1.setBounds(10, 17, 744, 39);
+		text_1.setBounds(10, 2, 744, 68);
 		
 		//final Group group = new Group(composite_1, SWT.NONE);
-		group.setBounds(10, 62, 744, 250);
+		//group.setBounds(10, 62, 744, 250);
+		group.setBounds(10, 72, 744, 250);
 
 		//"table" header
 		Label lblCount = new Label(group, SWT.NONE);
@@ -2741,12 +2360,12 @@ public class MainForm {
 		/*context area: event handler in loadOthersArea */
 		contextText.setEditable(false);
 		contextText.setDoubleClickEnabled(false);
-		contextText.setBounds(10, 310, 744, 120);
+		contextText.setBounds(10, 320, 744, 120);
 		
 		/*"load" button*/
 		//final Composite termRoleMatrix = new Composite(scrolledComposite, SWT.NONE);
 		Button tab5_others_loadFromLastTimeButton = new Button(composite_1, SWT.NONE);
-		tab5_others_loadFromLastTimeButton.setBounds(459, 433, 155, 25);
+		tab5_others_loadFromLastTimeButton.setBounds(459, 443, 155, 25);
 		tab5_others_loadFromLastTimeButton.setText(ApplicationUtilities.getProperty("termCurationLoad"));
 		tab5_others_loadFromLastTimeButton.setToolTipText(ApplicationUtilities.getProperty("termCurationLoadTTT"));
 		tab5_others_loadFromLastTimeButton.addSelectionListener(new SelectionAdapter() {
@@ -2754,17 +2373,17 @@ public class MainForm {
 			public void widgetSelected(SelectionEvent e) {	
 				ArrayList<String> words = null;
 				if(type.compareTo("others")==0){
-					words = fetchContentTerms();
+					words = fetchContentTerms(contextText);
 				}else if(type.compareTo("structures")==0){
 					if(inistructureterms==null || inistructureterms.size()==0){
-						words = fetchStructureTerms();
+						words = fetchStructureTerms(contextText);
 						inistructureterms = (ArrayList<String>) words.clone();
 					}else{
 						words = (ArrayList<String>) inistructureterms.clone();
 					}
 				}else if(type.compareTo("characters")==0){
 					if(inicharacterterms==null || inicharacterterms.size()==0){
-						words = fetchCharacterTerms();
+						words = fetchCharacterTerms(contextText);
 						inicharacterterms = (ArrayList<String>) words.clone();
 					}else{
 						words = (ArrayList<String>) inicharacterterms.clone();
@@ -2783,7 +2402,7 @@ public class MainForm {
 		/* "Save" button */ 
 		final Button saveButton = new Button(composite_1, SWT.NONE);
 		saveButton.setText("Save");
-		saveButton.setBounds(622, 433, 132, 25);//(650, 427, 98, 25);
+		saveButton.setBounds(622, 443, 132, 25);//(650, 427, 98, 25);
 		saveButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent e) {
@@ -2855,7 +2474,7 @@ public class MainForm {
 				//termRoleMatrix4others.dispose();
 				//termRoleMatrix4structures.dispose();
 				//termRoleMatrix4characters.dispose();
-				contextText.setText("");
+				contextText.setText("Decisions on this tab are saved");
 				/*Control[] controls = termRoleMatrix.getChildren();
 				Hashtable<String, String> structures = new Hashtable<String, String>();
 				Hashtable<String, String> characters = new Hashtable<String, String>();
@@ -3287,10 +2906,10 @@ public class MainForm {
         habitats.mkdir();
         //markedup.mkdir();
         transformed.mkdir();
-
-        configurationText.setText(confFldr.getAbsolutePath());
-        sourceText.setText(srcFldr.getAbsolutePath());
-        targetText.setText(targetFldr.getAbsolutePath());
+        
+        //configurationText.setText(confFldr.getAbsolutePath());
+        //sourceText.setText(srcFldr.getAbsolutePath());
+        //targetText.setText(targetFldr.getAbsolutePath());
           
         Registry.ConfigurationDirectory = confFldr.getAbsolutePath()+"\\";
         Registry.SourceDirectory=srcFldr.getAbsolutePath()+"\\";
@@ -3331,13 +2950,13 @@ public class MainForm {
 		//	new CharacterStatementsTransformer(listener, shell.getDisplay(), 
 		//			null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
 		
-		CharacterStatementsTransformer preMarkUp = 
-			new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
-					null, new ArrayList());
-		
 		//CharacterStatementsTransformer preMarkUp = 
-			//	new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
-				//		null, new ArrayList());
+		//	new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
+		//			null, new ArrayList());
+		
+		CharacterStatementsTransformer preMarkUp = 
+				new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
+						null, new ArrayList());
 		preMarkUp.start();
 	}
 	
@@ -3385,17 +3004,17 @@ public class MainForm {
 		BufferedReader in = new BufferedReader(new FileReader(project));
 		String conf = in.readLine();
 		conf = conf == null ? "" : conf;
-		configurationText.setText(conf);
+		//configurationText.setText(conf);
         Registry.ConfigurationDirectory = conf;
 
         String source = in.readLine();
         source = source == null ? "" : source;
-        sourceText.setText(source);
+        //sourceText.setText(source);
         Registry.SourceDirectory = source;
         
         String target = in.readLine();
         target = target == null ? "" : target;
-        targetText.setText(target);
+        //targetText.setText(target);
         Registry.TargetDirectory = target;
         step3_desc.append(Registry.TargetDirectory+ApplicationUtilities.getProperty("TRANSFORMED"));
         
@@ -3414,9 +3033,13 @@ public class MainForm {
 	private void saveProject() {
 
 		StringBuffer sb = new StringBuffer();
-		sb.append(configurationText.getText()).append("\\\n");
-		sb.append(sourceText.getText()).append("\\\n");
-		sb.append(targetText.getText());
+		
+		//sb.append(configurationText.getText()).append("\\\n");
+		//sb.append(sourceText.getText()).append("\\\n");
+		//sb.append(targetText.getText());
+		sb.append(Registry.ConfigurationDirectory);
+		sb.append(Registry.SourceDirectory);
+		sb.append(Registry.TargetDirectory);
 		//save the main directory also
 		sb.append("\\\n").append(projectDirectory.getText());
 		
@@ -3458,6 +3081,7 @@ public class MainForm {
 
 		mainDb.createWordRoleTable();//roles are: op for plural organ names, os for singular, c for character, v for verb
 		mainDb.createNonEQTable();
+		mainDb.createTermCategoryTable();
 		String workdir = Registry.TargetDirectory;
 		//if there is a characters folder,add the files in characters folder to descriptions folder
 		mergeCharDescFolders(new File(workdir));
@@ -3678,15 +3302,18 @@ public class MainForm {
 		
 		boolean errorFlag = false;
 		
-		if ( configurationText != null && configurationText.getText().equals("")) {
+		//if ( configurationText != null && configurationText.getText().equals("")) {
+		if(Registry.ConfigurationDirectory==null){
 			messageText.append(ApplicationUtilities.getProperty("popup.error.config"));
 		}  			
-		if ( targetText != null && targetText.getText().equals("")) {
-			messageText.append(ApplicationUtilities.getProperty("popup.error.target"));
-		} 					
-		if ( sourceText != null && sourceText.getText().equals("")) {
-			messageText.append(ApplicationUtilities.getProperty("popup.error.source"));
-		} 
+		//if ( targetText != null && targetText.getText().equals("")) {
+		//if(Registry.TargetDirectory == null){
+		//	messageText.append(ApplicationUtilities.getProperty("popup.error.target"));
+		//} 					
+		//if ( sourceText != null && sourceText.getText().equals("")) {
+		//if(Registry.SourceDirectory==null){
+		//	messageText.append(ApplicationUtilities.getProperty("popup.error.source"));
+		//} 
 		
 		if (dataPrefixCombo != null && dataPrefixCombo.getText().replaceAll("-", "_").trim().equals("")) {
 			
@@ -3702,12 +3329,12 @@ public class MainForm {
 			tabFolder.setFocus();
 			errorFlag = true;
 		} else {
-			if(configurationText != null && !saveFlag) {
+			//if(configurationText != null && !saveFlag) {
+			if(dataPrefixCombo != null && !saveFlag) {
 				errorFlag = false;
 			}
 
-		}
-		
+		}		
 		return errorFlag;
 	}
 	
@@ -4537,9 +4164,10 @@ public class MainForm {
 	 * 3. filtered terms are not displayed and they will not be saved to wordroles table as "os" or "op".
 	 * 4. terms filtered by 2.1.adv or 2.3 will be saved in NONEQTERMSTABLE
 	 * 5. cache results to reduce cost
+	 * @param contextText 
 	 * @return filtered candidate structure words
 	 */
-	private ArrayList<String> fetchStructureTerms(){
+	private ArrayList<String> fetchStructureTerms(StyledText contextText){
 		ArrayList <String> words = new ArrayList<String>();
 		ArrayList <String> filteredwords = new ArrayList<String>();
 		ArrayList <String> noneqwords = new ArrayList<String>();
@@ -4556,6 +4184,7 @@ public class MainForm {
 				if(Utilities.mustBeVerb(word, this.conn, prefix) || Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
 					//if(Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
 						noneqwords.add(word);
+						contextText.append(word+" is excluded\n");						
 						//sentences with those tags should be marked as unknown for later review
 					//}					
 					continue;
@@ -4580,9 +4209,10 @@ public class MainForm {
 	 * 3. filtered terms are not displayed and they will not be saved to wordroles table as "os" or "op".
 	 * 4. terms filtered by 2.1.adv or 2.2 will be saved in NONEQTERMSTABLE
 	 * 5. cache results to reduce cost
+	 * @param contextText 
 	 * @return filtered candidate character words
 	 */
-	private ArrayList<String> fetchCharacterTerms(){
+	private ArrayList<String> fetchCharacterTerms(StyledText contextText){
 		ArrayList <String> words = new ArrayList<String>();;
 		ArrayList <String> filteredwords = new ArrayList<String>();
 		ArrayList <String> noneqwords = new ArrayList<String>();
@@ -4597,6 +4227,7 @@ public class MainForm {
 			for(String word: words){
 				if(Utilities.mustBeVerb(word, conn, prefix) || Utilities.mustBeAdv(word) || Utilities.partOfPrepPhrase(word, this.conn, prefix)){
 					noneqwords.add(word);
+					contextText.append(word+" is excluded\n");
 					continue;
 				}
 				filteredwords.add(word);
@@ -4611,7 +4242,7 @@ public class MainForm {
 		return filteredwords;	
 		}
 	
-	private ArrayList<String> fetchContentTerms() {
+	private ArrayList<String> fetchContentTerms(StyledText contextText) {
 		ArrayList<String> words = new ArrayList<String>();
 		ArrayList <String> filteredwords = new ArrayList<String>();
 		ArrayList <String> noneqwords = new ArrayList<String>();
@@ -4633,6 +4264,7 @@ public class MainForm {
 			for(String word: words){
 				if(Utilities.mustBeVerb(word, conn, prefix) || Utilities.mustBeAdv(word) || Utilities.partOfPrepPhrase(word, this.conn, prefix)){
 					noneqwords.add(word);
+					contextText.append(word+" is excluded\n");
 					continue;
 				}
 				filteredwords.add(word);

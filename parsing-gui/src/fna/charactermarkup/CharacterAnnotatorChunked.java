@@ -834,8 +834,8 @@ public class CharacterAnnotatorChunked {
 	private ArrayList<Element> annotateNumericals(String chunktext, String character, String modifier, ArrayList<Element> parents, boolean resetfrom) {
 		ArrayList<Element> chars = null;
 		//if(character!=null && character.compareTo("size")==0 && chunktext.contains("times")){
-			if(character==null) character = "count"; //convenient for phenoscape parsing as it doesn't care numerical values 
-			chars = parseNumericals(chunktext, character);	//annotate "2 times" without changing NumericalHandler.parseNumericals
+		if(character==null) character = "count"; //convenient for phenoscape parsing as it doesn't care numerical values 
+		chars = parseNumericals(chunktext, character);	//annotate "2 times" without changing NumericalHandler.parseNumericals
 		//}else{
 		//	chars = NumericalHandler.parseNumericals(chunktext, character); //full numerical parsing for FNA-like data
 		//}

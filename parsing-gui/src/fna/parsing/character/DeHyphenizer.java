@@ -21,8 +21,8 @@ public class DeHyphenizer {
 	private String countcolumn;
 	private String hyphen; 
 	static private Connection conn = null;
-	static private String username = "termsuser";
-	static private String password = "termspassword";
+	//static private String username = "termsuser";
+	//static private String password = "termspassword";
 	
 	public DeHyphenizer(String database, String table, String column, String countcolumn, String hyphen) {
 		// TODO Auto-generated constructor stub

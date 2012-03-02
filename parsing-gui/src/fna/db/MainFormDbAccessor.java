@@ -85,6 +85,19 @@ public class MainFormDbAccessor {
 			e.printStackTrace();
 		}
 	}
+
+	public void createTermCategoryTable(){
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+MainForm.dataPrefixCombo.getText()+"_term_category");
+			stmt.execute("create table if not exists "+MainForm.dataPrefixCombo.getText()+"_term_category (term varchar(100), category varchar(200))");
+			stmt.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+}
+
+	
 	/**
 	 * change pos for these removedtags to 'b' in wordpos table
 	 * @param removedTags
@@ -408,7 +421,7 @@ public class MainFormDbAccessor {
 		try {
 			//conn = DriverManager.getConnection(url);
 			stmt = conn.createStatement();
-			rset = stmt.executeQuery("SELECT table_name FROM information_schema.tables where table_schema ='markedupdatasets' and table_name like '%glossaryfixed'");
+			rset = stmt.executeQuery("SELECT table_name FROM information_schema.tables where table_schema ='"+ApplicationUtilities.getProperty("database.name")+"' and table_name like '%glossaryfixed'");
 			while (rset.next()) {
 				datasetPrefixes.add(rset.getString("table_name"));
 			}
@@ -442,7 +455,7 @@ public class MainFormDbAccessor {
 		Statement stmt = null;
 		ResultSet rset = null;
 		
-		String createprefixTable = "CREATE TABLE  if not exists datasetprefix (" +
+		/*String createprefixTable = "CREATE TABLE  if not exists datasetprefix (" +
 				 "prefix varchar(20) NOT NULL DEFAULT '', "+
 				  "time_last_accessed timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
 				  "tab_general varchar(1) DEFAULT NULL, "+
@@ -453,6 +466,17 @@ public class MainFormDbAccessor {
 				  "tab_unknown varchar(1) DEFAULT NULL, "+
 				  "tab_finalm varchar(1) DEFAULT NULL, "+
 				  "tab_gloss varchar(1) DEFAULT NULL, "+
+				  "glossary varchar(40) DEFAULT NULL, "+
+				  "option_chosen varchar(1) DEFAULT '', "+
+				  "PRIMARY KEY (prefix, time_last_accessed) ) " ; */
+		
+		String createprefixTable = "CREATE TABLE  if not exists datasetprefix (" +
+				 "prefix varchar(20) NOT NULL DEFAULT '', "+
+				  "time_last_accessed timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
+				  "tab_general varchar(1) DEFAULT NULL, "+
+				  "tab_trans varchar(1) DEFAULT NULL, "+
+				  "tab_struct varchar(1) DEFAULT NULL, "+
+				  "tab_finalm varchar(1) DEFAULT NULL, "+
 				  "glossary varchar(40) DEFAULT NULL, "+
 				  "option_chosen varchar(1) DEFAULT '', "+
 				  "PRIMARY KEY (prefix, time_last_accessed) ) " ; 
@@ -578,20 +602,26 @@ public class MainFormDbAccessor {
 	
 	try {
 		if (!prefix.equals("")) {
-			//conn = DriverManager.getConnection(url);		
-			/*stmt = conn.prepareStatement("insert into datasetprefix values ('"+ 
-					prefix + "', current_timestamp, 1, 1, 1 ,1, 1, 1, 1, 0,'"+glossaryName+"','"+optionChosen+"')");*/
+
 			stmt = conn.prepareStatement("select prefix from datasetprefix where prefix='"+prefix+"'");
 			rset=stmt.executeQuery();
 			if(rset.next()){
-				stmt = conn.prepareStatement("update datasetprefix set time_last_accessed = current_timestamp, tab_general = 1,tab_segm=1," +
-						"tab_verf =1,tab_trans =1,tab_struct =1,tab_unknown =1,tab_finalm =1,tab_gloss =1,glossary= '" +glossaryName+"',option_chosen='"+optionChosen+"' where prefix='"+prefix+"'");
+				//stmt = conn.prepareStatement("update datasetprefix set time_last_accessed = current_timestamp, tab_general = 1,tab_segm=1," +
+				//		"tab_verf =1,tab_trans =1,tab_struct =1,tab_unknown =1,tab_finalm =1,tab_gloss =1,glossary= '" +glossaryName+"',option_chosen='"+optionChosen+"' where prefix='"+prefix+"'");
+
+				//stmt = conn.prepareStatement("update datasetprefix set time_last_accessed = current_timestamp, tab_general = 1," +
+				//		"tab_trans =0,tab_struct =0,tab_finalm =0,glossary= '" +glossaryName+"',option_chosen='"+optionChosen+"' where prefix='"+prefix+"'");
+				stmt = conn.prepareStatement("update datasetprefix set time_last_accessed = current_timestamp, tab_general = 1," +
+						"glossary= '" +glossaryName+"',option_chosen='"+optionChosen+"' where prefix='"+prefix+"'");
 				stmt.executeUpdate();
 			}
 			else
 			{
 				stmt = conn.prepareStatement("insert into datasetprefix values ('"+ 
-						prefix + "', current_timestamp, 1, 1, 1 ,1, 1, 1, 1, 1,'"+glossaryName+"','"+optionChosen+"')");
+						prefix + "', current_timestamp, 1, 0, 0 ,0,'"+glossaryName+"','"+optionChosen+"')");
+
+				//stmt = conn.prepareStatement("insert into datasetprefix values ('"+ 
+				//		prefix + "', current_timestamp, 1, 1, 1 ,1, 1, 1, 1, 1,'"+glossaryName+"','"+optionChosen+"')");
 				//changed insert from 0 to 1 by Prasad, since the remaining code is taking 1 as unprocessed 
 				stmt.executeUpdate();
 			}
@@ -640,54 +670,73 @@ public class MainFormDbAccessor {
 				
 				if (rset != null && rset.next()) {
 					
-					/* Segmentation tab */
+					/* Segmentation tab 
 					if (rset.getInt("tab_segm") == 0) {
+						markUpStatus[1] = false;
+					} else {
+						markUpStatus[1] = true;
+					}*/
+					
+					/* Verification tab 
+					if (rset.getInt("tab_verf") == 0) {
+						markUpStatus[2] = false;
+					} else {
+						markUpStatus[2] = true;
+					}*/
+					
+					/* Transformation tab 
+					if (rset.getInt("tab_trans") == 0) {
+						markUpStatus[3] = false;
+					} else {
+						markUpStatus[3] = true;
+					}*/
+					
+					/* Transformation tab */
+					if (rset.getInt("tab_trans") == 0) {
 						markUpStatus[1] = false;
 					} else {
 						markUpStatus[1] = true;
 					}
 					
-					/* Verification tab */
-					if (rset.getInt("tab_verf") == 0) {
+					/* Structure Name Correction tab 
+					if (rset.getInt("tab_struct") == 0) {
+						markUpStatus[4] = false;
+					} else {
+						markUpStatus[4] = true;
+					}*/
+					
+					if (rset.getInt("tab_struct") == 0) {
 						markUpStatus[2] = false;
 					} else {
 						markUpStatus[2] = true;
 					}
 					
-					/* Transformation tab */
-					if (rset.getInt("tab_trans") == 0) {
+					/* Unknown removal tab 
+					if (rset.getInt("tab_unknown") == 0) {
+						markUpStatus[5] = false;
+					} else {
+						markUpStatus[5] = true;
+					}*/
+					
+					/* Finalizer tab 
+					if (rset.getInt("tab_finalm") == 0) {
+						markUpStatus[6] = false;
+					} else {
+						markUpStatus[6] = true;
+					}*/
+					
+					if (rset.getInt("tab_finalm") == 0) {
 						markUpStatus[3] = false;
 					} else {
 						markUpStatus[3] = true;
 					}
 					
-					/* Structure Name Correction tab */
-					if (rset.getInt("tab_struct") == 0) {
-						markUpStatus[4] = false;
-					} else {
-						markUpStatus[4] = true;
-					}
-					
-					/* Unknown removal tab */
-					if (rset.getInt("tab_unknown") == 0) {
-						markUpStatus[5] = false;
-					} else {
-						markUpStatus[5] = true;
-					}
-					
-					/* Finalizer tab */
-					if (rset.getInt("tab_finalm") == 0) {
-						markUpStatus[6] = false;
-					} else {
-						markUpStatus[6] = true;
-					}
-					
-					/* Glossary tab */
+					/* Glossary tab 
 					if (rset.getInt("tab_gloss") == 0) {
 						markUpStatus[7] = false;
 					} else {
 						markUpStatus[7] = true;
-					}
+					}*/
 					
 					
 				}
@@ -721,7 +770,7 @@ public class MainFormDbAccessor {
 		int tabStatus = 0;
 		//Lookup
 		{
-			if (tab.equals(ApplicationUtilities.getProperty("tab.one.name"))) {
+			/*if (tab.equals(ApplicationUtilities.getProperty("tab.one.name"))) {
 				tab = "tab_general";
 			}
 			if (tab.equals(ApplicationUtilities.getProperty("tab.two.name"))) {
@@ -744,11 +793,26 @@ public class MainFormDbAccessor {
 			}
 			if (tab.equals(ApplicationUtilities.getProperty("tab.eight.name"))) {
 				tab = "tab_gloss";
+			}*/
+			
+			if (tab.equals(ApplicationUtilities.getProperty("tab.one.name"))) {
+				tab = "tab_general";
 			}
+			if (tab.equals(ApplicationUtilities.getProperty("tab.two.name"))) {
+				tab = "tab_trans";
+			}
+			if (tab.equals(ApplicationUtilities.getProperty("tab.three.name"))) {
+				tab = "tab_struct";
+			}
+			if (tab.equals(ApplicationUtilities.getProperty("tab.four.name"))) {
+				tab = "tab_finalm";
+			}
+
 		}
 		
 		 if (status == true) {
-			 tabStatus = 0;//changed to 0 by Prasad. if status is 0 that means processed and can be loaded
+			 tabStatus = 1;
+			 //tabStatus = 0;//changed to 0 by Prasad. if status is 0 that means processed and can be loaded
 			 //status of 1 means yet to be loaded
 		 } 
 		
@@ -1087,7 +1151,8 @@ public class MainFormDbAccessor {
 		String prefix = MainForm.dataPrefixCombo.getText();
 		try{
 			Statement stmt = conn.createStatement();
-			String q = "select distinct groupId, category from "+ prefix+"_group_decisions where category !='done'"; //"done" was a fake decision for unpaired terms
+			//skipped term categorization step so don't need this
+			/*String q = "select distinct groupId, category from "+ prefix+"_group_decisions where category !='done'"; //"done" was a fake decision for unpaired terms
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				int gid = rs.getInt(1);
@@ -1100,8 +1165,15 @@ public class MainFormDbAccessor {
 					insert2TermCategoryTable(t1, cat);
 					if(t2!=null && t2.trim().length()>0) insert2TermCategoryTable(t2, cat);
 				}
+			}*/
+			//simply add "c" terms as "feature" in term_category table
+			String q = "select distinct word from "+prefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where semanticrole in ('c') and " +
+					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category not in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
+			ResultSet rs = stmt.executeQuery(q);
+			while(rs.next()){
+				String t = rs.getString(1);
+				insert2TermCategoryTable(t, "feature");
 			}
-			
 			//insert structure terms
 			q = "select distinct word from "+prefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where semanticrole in ('op', 'os') and " +
 					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
