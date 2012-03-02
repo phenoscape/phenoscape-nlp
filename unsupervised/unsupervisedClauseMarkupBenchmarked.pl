@@ -147,7 +147,7 @@ use DBI;
 
 
 
-print stdout "Ha ha: Initialized:\n";
+print stdout "Initialized:\n";
 ###########################################################################################
 #########################                                     #############################
 #########################set up global variables              #############################
@@ -173,8 +173,8 @@ my $kb = "biocreative2012";
 my $taglength = 150;
 
 my $host = "localhost";
-my $user = "termsuser";
-my $password = "termspassword";
+my $user = "biocreative";
+my $password = "biocreative";
 my $dbh = DBI->connect("DBI:mysql:host=$host", $user, $password)
 or die DBI->errstr."\n";
 
@@ -1657,8 +1657,13 @@ sub changePOS{
     	#$certaintyu++; #6/11/09
     	$certaintyu += $increment;
     	discount($word, $oldpos, $newpos, "all");
-    	$sth = $dbh->prepare("insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl)values ('$word', '$newpos', '$role', $certaintyu, 0)");
-    	$sth->execute() or print STDOUT "$sth->errstr\n";;
+    	
+    	$sth = $dbh->prepare("select * from ".$prefix."_wordpos where word = '$word' and pos = '$newpos'");
+    	$sth->execute() or print STDOUT "$sth->errstr\n";
+    	if($sth->rows == 0){
+    		$sth = $dbh->prepare("insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl)values ('$word', '$newpos', '$role', $certaintyu, 0)");
+    		$sth->execute() or print STDOUT "$sth->errstr\n";;
+    	}
 		print "\t: change [$word($oldpos => $newpos)] role=>$role\n" if $debug;
 		$sign++;
 		#all sentences tagged with $word (b), retag.
@@ -1675,8 +1680,13 @@ sub changePOS{
     	#$certaintyu++; #6/11/09
     	$certaintyu += $increment;
     	discount($word, $oldpos, $newpos, "all");
-    	$sth = $dbh->prepare("insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values ('$word', '$newpos', '$role', $certaintyu, 0)");
+    	
+    	$sth = $dbh->prepare("select * from ".$prefix."_wordpos where word = '$word' and pos = '$newpos'");
     	$sth->execute() or print STDOUT "$sth->errstr\n";
+    	if($sth->rows == 0){
+	    	$sth = $dbh->prepare("insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values ('$word', '$newpos', '$role', $certaintyu, 0)");
+    		$sth->execute() or print STDOUT "$sth->errstr\n";
+    	}
 		print "\t: change [$word($oldpos => $newpos)] role=>$role\n" if $debug;
 		$sign++;
 	}
