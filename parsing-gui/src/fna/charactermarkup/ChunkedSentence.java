@@ -210,9 +210,9 @@ public class ChunkedSentence {
 		
 		//TODO move this to an earlier place
 		//if the last words in l[] are marked with {}, take them out of the chunk
-		if(this.chunkedsent.matches(".*?l\\[[^\\[].*?}\\].*")){
-			removeStateFromList();
-		}
+		//if(this.chunkedsent.matches(".*?l\\[[^\\[].*?}\\].*")){
+		//	removeStateFromList();
+		//}
 	}
 	
 	/**
@@ -1955,8 +1955,24 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		/*if(token.startsWith("s[")){
 			return "ChunkSBAR";
 		}*/
-		if(token.startsWith("b[")){
-			return "ChunkVP";
+		if(token.startsWith("b[")){//z[{longitudinal} (ridge)] b[v[{running}] o[the {length}]] r[p[of] o[the ({quadrate})]] laterally . 
+			if(token.matches(".*\\)\\]+")){
+				return "ChunkVP";
+			}else{//z[{longitudinal} (ridge)] b[v[{running}] o[the {length}]] r[p[of] o[the ({quadrate})]] laterally . 
+				String nexttoken = "";
+				int i = id+1;
+				while(nexttoken.length()==0 && i < this.chunkedtokens.size()){
+					nexttoken = this.chunkedtokens.get(i++);
+				}
+				if(nexttoken.matches("r\\[p.*?\\)\\]+")){//merge
+					token = token.replaceFirst("\\] o\\[", "").replaceFirst("\\]+", "");
+					nexttoken = nexttoken.replaceFirst("r\\[p\\[", "");
+					this.chunkedtokens.set(id, token+" "+nexttoken);
+					this.chunkedtokens.set(i-1, "");
+					return "ChunkVP";
+				}
+				return "ChunkVP"; //return positively anyway
+			}
 		}
 		//if(token.startsWith("r[") && token.indexOf("[of]") >= 0){
 		//	return "ChunkOf";

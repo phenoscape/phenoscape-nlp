@@ -555,54 +555,54 @@ public class CharacterAnnotatorChunked {
 			}else if(ck instanceof ChunkSimpleCharacterState){
 				String content = ck.toString().replaceFirst("^a\\[", "").replaceFirst("\\]$", "");
 				//ArrayList<Element> chars = processSimpleCharacterState(content, lastStructures());//with teeth closely spaced
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
 				ArrayList<Element> chars = processSimpleCharacterState(content, lastStructures());//apices of basal leaves spread 
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
-				}
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
+				//}
 				updateLatestElements(chars);
 			}else if(ck instanceof ChunkSL){//coloration[coloration-list-red-to-black]
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(ck.toString() + " attached to "+parents.get(0).getAttributeValue("name"));
-				}
-				ArrayList<Element> chars = processCharacterList(ck.toString(), this.subjects);
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(ck.toString() + " attached to "+parents.get(0).getAttributeValue("name"));
+				//}
+				ArrayList<Element> chars = processCharacterList(ck.toString(), lastStructures()/*this.subjects*/);
 				updateLatestElements(chars);
 			}else if(ck instanceof ChunkComma){
 				this.latestelements.add(new Element("comma"));
 			}else if(ck instanceof ChunkVP){
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
 				/*if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
 					System.out.println(ck.toString() + " attached to "+parents.get(0).getAttributeValue("name"));
 				}*/
-				ArrayList<Element> es = processTVerb(ck.toString().replaceFirst("^b\\[", "").replaceFirst("\\]$", ""), parents);
+				ArrayList<Element> es = processTVerb(ck.toString().replaceFirst("^b\\[", "").replaceFirst("\\]$", ""), subjects);
 				//ArrayList<Element> es = processTVerb(ck.toString().replaceFirst("^b\\[", "").replaceFirst("\\]$", ""), CharacterAnnotatorChunked.subjects);
 				updateLatestElements(es);
 			}else if(ck instanceof ChunkComparativeValue){
 				//ArrayList<Element> chars = processComparativeValue(ck.toString().replaceAll("–", "-"), lastStructures());
 				String content = ck.toString();
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
-				}
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
+				//}
 				ArrayList<Element> chars = processComparativeValue(content.replaceAll("–", "-"), lastStructures());
 				updateLatestElements(chars);
 			}else if(ck instanceof ChunkRatio){
 				//ArrayList<Element> chars = annotateNumericals(ck.toString(), "lwratio", "", lastStructures());
 				String content = ck.toString();
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
-				}
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(content + " attached to "+parents.get(0).getAttributeValue("name"));
+				//}
 				ArrayList<Element> chars = annotateNumericals(content, "lwratio", "", lastStructures(), false);
 				updateLatestElements(chars);
 			}else if(ck instanceof ChunkArea){
 				//ArrayList<Element> chars = annotateNumericals(ck.toString(), "area", "", lastStructures());
 				String content = ck.toString();
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(content + " attached to "+ parents.get(0).getAttributeValue("name"));
-				}
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(content + " attached to "+ parents.get(0).getAttributeValue("name"));
+				//}
 				ArrayList<Element> chars = annotateNumericals(content, "area", "", lastStructures(), false);
 				updateLatestElements(chars);
 			}else if(ck instanceof  ChunkNumericals){
@@ -615,10 +615,10 @@ public class CharacterAnnotatorChunked {
 					text = text.replaceFirst("to\\s+", "0-");
 					resetfrom = true;
 				}
-				ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
-				if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
-					System.out.println(text + " attached to "+parents.get(0).getAttributeValue("name"));
-				}				
+				//ArrayList<Element> parents = this.attachToLast? lastStructures() : subjects;
+				//if(printAttach && subjects.get(0).getAttributeValue("name").compareTo(lastStructures().get(0).getAttributeValue("name")) != 0){
+				//	System.out.println(text + " attached to "+parents.get(0).getAttributeValue("name"));
+				//}				
 				if(debugNum){
 					System.out.println();
 					System.out.println(">>>>>>>>>>>>>"+text);
@@ -670,9 +670,23 @@ public class CharacterAnnotatorChunked {
 						//this will not work for misidentified nouns before "that/which" statements, in "of/among which", and other cases
 					}
 				}
+				ArrayList<String> chunkedTokens = ck.getChunkedTokens();
 				String connector = ck.toString().substring(0,ck.toString().indexOf(" "));
-				String content = ck.toString().substring(ck.toString().indexOf(" ")+1);
-				ChunkedSentence newcs = new ChunkedSentence(ck.getChunkedTokens(), content, conn, glosstable, this.tableprefix);
+				String text = ck.toString();
+				while(!connector.matches("that|when|where|which")){
+					text = text.replace(connector, "").trim();			
+					for(int i = 0; i< chunkedTokens.size(); i++){
+						if(chunkedTokens.get(i).equals(connector)) {chunkedTokens.set(i, ""); break;}
+					}
+					connector = text.substring(0,text.indexOf(" "));
+				}
+				String content = text.substring(text.indexOf(" ")+1);
+				ChunkedSentence newcs = new ChunkedSentence(chunkedTokens, content, conn, glosstable, this.tableprefix);
+				Chunk firstck = newcs.getNextChunk();
+				if(firstck instanceof ChunkNonSubjectOrgan || firstck instanceof ChunkOrgan){
+					establishSubject(firstck.toString().replaceAll("\\w\\[", "").replaceAll("\\]", "").trim());
+				}
+				
 				if(connector.compareTo("when")==0){//rewrite content and its chunkedTokens
 					Pattern p = Pattern.compile("[\\.,:;]");
 					Matcher m = p.matcher(ck.toString());
@@ -717,7 +731,7 @@ public class CharacterAnnotatorChunked {
 					if(last.matches(".*?\\)\\]+")) constraintId = "o"+(this.structid-1);				
 					cs.setClauseModifierConstraint(last.replaceAll("(\\w+\\[|\\]|\\{|\\}|\\)|\\()", ""), constraintId);
 				}
-				if(newcs!=null) newcs.setInSegment(true);
+				if(newcs!=null) newcs.setInSegment(true);				
 				annotateByChunk(newcs, false); //no need to updateLatestElements				
 				this.subjects = subjectscopy;//return to original status
 				cs.setClauseModifierConstraint(null, null); //return to original status
@@ -1121,12 +1135,14 @@ public class CharacterAnnotatorChunked {
 			return results;
 		}*/
 		object = parenthesis(object);
-		ArrayList<Element> tostructures = this.processObject(object); //TODO: fix content is wrong. i8: o[a] architecture[surrounding (involucre)]
-		results.addAll(tostructures);
-		
-		this.createRelationElements(relation.replaceAll("(\\w\\[|\\])", ""), this.subjects, tostructures, modifier, false);
-		
-		return results;
+		if(object.endsWith(")]")){
+			ArrayList<Element> tostructures = this.processObject(object); //TODO: fix content is wrong. i8: o[a] architecture[surrounding (involucre)]
+			results.addAll(tostructures);		
+			this.createRelationElements(relation.replaceAll("(\\w\\[|\\])", ""), this.subjects, tostructures, modifier, false);
+			return results;
+		}else{
+			return latestelements;
+		}
 	}
 
 	/**
@@ -2291,6 +2307,7 @@ public class CharacterAnnotatorChunked {
 				}
 			}
 			o = o.replaceAll("(\\w\\[|\\]|\\(|\\))", "").trim();
+			if(o.length() == 0) return results;
 			//create element, 
 			Element e = new Element("structure");
 			if(this.inbrackets){e.setAttribute("note", "in_bracket");}

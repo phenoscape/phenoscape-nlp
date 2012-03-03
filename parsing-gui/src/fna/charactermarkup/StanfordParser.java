@@ -96,7 +96,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path10 = XPath.newInstance(".//PP/IN");
 			path11 = XPath.newInstance(".//VP/VBD|.//VP/VBG|.//VP/VBN|.//VP/VBP|.//VP/VBZ|.//VP/VB");
 			path12 = XPath.newInstance(".//NP/NN|.//NP/NNS");
-			path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that']");
+			//path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that']");
+			path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that'] | .//SBAR/*[@text='that']" );//(SBAR (RB so) (IN that)
 			path14 = XPath.newInstance(".//SBAR/WHNP/*[@text='which']");
 			path15 = XPath.newInstance(".//SBAR/WHADVP/*[@text='where']");
 			path16 = XPath.newInstance(".//*[@text='when']");
@@ -157,7 +158,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				String str = rs.getString(2);
 				String type = rs.getString(3);
 				//TODO: may need to fix "_"
-				//if(src.compareTo("Sereno_2009.xml_339da433-55ca-40fe-8a24-ca6cde52348e.txt-0")!=0) continue;
+				//if(src.compareTo("Sereno_2009.xml_8999df54-5901-456e-9250-06c795e0b1bc_85751e91-7e17-4adf-b8b1-84236d41c2f0.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
@@ -613,8 +614,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "test", "fishglossaryfixed", false);
 
 		
-		//sp.POSTagging();
-		//sp.parsing();
+		sp.POSTagging();
+		sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);

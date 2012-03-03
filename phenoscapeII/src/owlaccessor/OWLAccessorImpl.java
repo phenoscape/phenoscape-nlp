@@ -145,7 +145,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			for (OWLClass c : allclasses) {
 				// match class concepts and also the synonyms
 				List<String> syns = this.getSynonymLabels(c);
-				String label = this.getLabel(c);
+				String label = this.getLabel(c).toLowerCase();
 				boolean syn = matchSyn(con, syns, "e");
 				//if (label.contains(con) || label.equals(con) || syn) {
 				if (label.equals(con) || syn) {

@@ -618,12 +618,17 @@ public class XML2EQ {
 					ELs = moreELs+","+ELs;
 				}
 			}
-			ELs = ELs.replaceAll(",+", ",").replaceFirst("^,", "").replaceFirst(",$", "");
 			//get QM
 			String QMs = "";
-			for(String sname: snames){//remaining structures are QMs
-				QMs +=sname+",";
+			for(String sname: snames){//some remaining structures after [character] are QMs
+				if(chtext.indexOf("] of "+sname)>0){//Postorbital, [form] of dorsal surface
+					ELs = E+","+ELs;
+					E = sname;					
+				}else{
+					QMs +=sname+",";
+				}
 			}
+			ELs = ELs.replaceAll(",+", ",").replaceFirst("^,", "").replaceFirst(",$", "");
 			
 			
 			//process states

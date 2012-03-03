@@ -115,7 +115,7 @@ public class VolumeFinalizer extends Thread {
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable);
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix);
 		if(!standalone) this.showOutputMessage("Operations completed. Check results in "+database+" database.");
 	}
 

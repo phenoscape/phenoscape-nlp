@@ -31,6 +31,7 @@ public class TermEQ2IDEQ {
 	private Hashtable<String, String[]> entityIDCache = new Hashtable<String, String[]>(); //term=> {id, label}
 	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
 	private ArrayList<String> spatialterms = new ArrayList<String>();
+	private String prefix;
 	
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = true;
@@ -38,7 +39,8 @@ public class TermEQ2IDEQ {
 	/**
 	 * 
 	 */
-	public TermEQ2IDEQ(String database, String outputtable) {
+	public TermEQ2IDEQ(String database, String outputtable, String prefix) {
+		this.prefix = prefix;
 		this.outputtable = outputtable+"_result";
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
 		try{
@@ -64,6 +66,9 @@ public class TermEQ2IDEQ {
 					String qualitynegated = rs.getString("qualitynegated");
 					String qualitymodifierlabel = rs.getString("qualitymodifierlabel");
 					System.out.println(src);
+					entitylabel = knowntransformation(entitylabel);
+					entitylocatorlabel= knowntransformation(entitylocatorlabel);
+					qualitymodifierlabel = knowntransformation(qualitymodifierlabel);
 					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
 			}			
@@ -71,7 +76,15 @@ public class TermEQ2IDEQ {
 			e.printStackTrace();
 		}
 	}
+	
+	
 
+
+	private String knowntransformation(String entitylabel) {
+		entitylabel = entitylabel.replaceAll("latero-sensory", "sensory");
+		entitylabel = entitylabel.replaceAll("laterosensory", "sensory");
+		return entitylabel;
+	}
 
 	/**
 	 * 
@@ -244,22 +257,7 @@ public class TermEQ2IDEQ {
 
 
 	/**
-	 * Search a phrase A B C
-	 * search A B C
-	 * if succeeds, search the parent entity locator + A B C [tooth => ceratobranchial 5 tooth]
-	 *             if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
-	 *             if fails, entitylabel = A B C, entitylocator = entitylocator
-	 * if fails, search B C
-	 *             if succeeds, entitylabel = B C, entitylocator = (entitylabel - B C), entitylocator
-	 *             if fails, search C
-	 *             			 if succeeds, entitylabel = C, entitylocator = (entitylabel - C), entitylocator
-	 *             			 if fails, search the parent entity locator
-	 *                                 if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
-	 *                                 if fails, search the next parent entity locator
-	 *                                 ....
-	 *                                 
-	 *                                   
-	 *                                   
+	 * search entities
 	 * then lookup IDs for other terms in entitylocators                                  	
 	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid using srcid
 	 * @param srcid
@@ -316,7 +314,25 @@ public class TermEQ2IDEQ {
 	}
 
 	
-	
+	/**
+	 * 	 * Search a phrase A B C
+	 * search A B C
+	 * if succeeds, search the parent entity locator + A B C [tooth => ceratobranchial 5 tooth]
+	 *             if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
+	 *             if fails, entitylabel = A B C, entitylocator = entitylocator
+	 * if fails, search B C
+	 *             if succeeds, entitylabel = B C, entitylocator = (entitylabel - B C), entitylocator
+	 *             if fails, search C
+	 *             			 if succeeds, entitylabel = C, entitylocator = (entitylabel - C), entitylocator
+	 *             			 if fails, search the parent entity locator
+	 *                                 if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
+	 *                                 if fails, search the next parent entity locator
+	 *                                 ....
+	 * @param entitylabel
+	 * @param entitylocatorlabel
+	 * @param isEntity
+	 * @return
+	 */
 	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean isEntity) {
 		String [] finals = new String[3];
 		finals[2] = entitylocatorlabel;
@@ -385,14 +401,62 @@ public class TermEQ2IDEQ {
 					finalentitylabel = result[2];
 				}
 			}
-
 		}
-		
 		finals[0] = finalentityid;
 		finals[1] = finalentitylabel;
 		finals[2] = finalentitylocator;
+
+		
+		//bone, cartilage, and element
+		if(finalentityid.length()==0){
+			entitylabel = entitylabel+" bone";
+			String[] result = searchTerm(entitylabel, "entity");
+			if(result!=null){
+				finalentityid = result[1];
+				finalentitylabel = result[2];
+				finals[0] = finalentityid;
+				finals[1] = finalentitylabel;
+				finals[2] = finalentitylocator;
+				return finals;
+			}
+		}
+		//last resort
+		//still not find a match, remove the last term in the entitylabel 
+		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"
+		if(finalentityid.length()==0){
+			String[] tokens = entitylabel.split("\\s+");
+			if(tokens.length>=2){
+				String last2 = "<"+join(tokens, tokens.length-2, tokens.length-1, " ").replace(" ", "> <")+">";
+				if(valid(last2)){
+					entitylabel = entitylabel.substring(0, entitylabel.lastIndexOf(" ")).trim();
+					return searchEntity(entitylabel, entitylocatorlabel, isEntity);
+				}
+			}
+		}
+
+		
 		return finals;
 	}
+
+	/**
+	 * 
+	 * @param two word structure phrase marked with <>, like <process> <apex>
+	 * @return
+	 */
+	private boolean valid(String organphrase) {
+		try{
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from "+prefix+"_markedsentence where markedsent like '%"+organphrase+"%'");
+			if(rs.next()){
+				return true;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+
 
 
 	/**
@@ -603,7 +667,7 @@ public class TermEQ2IDEQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq");
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test");
 	}
 
 }

@@ -40,7 +40,7 @@ public class POSTagger4StanfordParser {
 	private String countp = "more|fewer|less|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 
-	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?)?)");
+	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?!%))?)");
 	private ArrayList<String> prepphrases = new ArrayList<String>();
 	private String positions = "equal|subequal"; //initialized with two values that are not positions for convenience
 	private Pattern positionptn2;
@@ -213,9 +213,9 @@ public class POSTagger4StanfordParser {
 				}
 
 				str = handleBrackets(str);
-				if(type.compareTo("character")==0){
+				if(type.compareTo("character")==0){//{postorbital} , {form} of {dorsal} <surface>
 					String temp = str;
-					str = str.replaceFirst("^[^<]*\\}? of ", "").trim();
+					str = str.replaceFirst("(?<=^|,\\s)\\{?\\w+\\}? of ", "").trim(); //shape of 
 					String ch = temp.replace(str, "").replace("\\s+of\\s+", "").replaceAll("[{}]", "").trim();
 					StanfordParser.characters.put(ch, "1"); //to keep only the unique characters
 				}
