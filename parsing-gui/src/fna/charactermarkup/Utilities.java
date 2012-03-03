@@ -104,10 +104,11 @@ public class Utilities {
 			if(debugPOS) System.out.println(word+" is sureVerb");
 			return true;
 		}
+		if(!v) return false;
 		try{
 			Statement stmt = conn.createStatement();
 			String q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
-					"where originalsent like '%does not "+word+"%'";
+					"where originalsent rlike '(does|do) not "+word+"'";
 			ResultSet rs = stmt.executeQuery(q);
 			if(rs.next()){
 				sureVerbs.add(word);

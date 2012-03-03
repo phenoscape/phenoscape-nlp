@@ -34,7 +34,7 @@ public class TermEQ2IDEQ {
 	private String prefix;
 	
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
-	private boolean debug = true;
+	private boolean debug = false;
 	
 	/**
 	 * 
@@ -77,9 +77,6 @@ public class TermEQ2IDEQ {
 		}
 	}
 	
-	
-
-
 	private String knowntransformation(String entitylabel) {
 		entitylabel = entitylabel.replaceAll("latero-sensory", "sensory");
 		entitylabel = entitylabel.replaceAll("laterosensory", "sensory");
@@ -123,7 +120,7 @@ public class TermEQ2IDEQ {
 					finalentitylocatorids += result[1]+",";
 					finalentitylocatorlabels += result[2]+",";
 				}*/
-				String [] finalresult = searchEntity(qm, "", false);
+				String [] finalresult = searchEntity(qm, "", false, qm);
 				if(finalresult!=null){
 					finalqualitymodifierids += finalresult[0]+",";
 					finalqualitymodifierlabels += finalresult[1]+",";
@@ -273,16 +270,16 @@ public class TermEQ2IDEQ {
 		//if(this.debug){
 		//	System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
 		//}
-		
+		//find ID for entity
 		String finalentitylocator = "";
 		String finalentitylabel = "";
 		String finalentityid = "";
-		String[] finals = searchEntity(entitylabel, entitylocatorlabel, true);
+		String[] finals = searchEntity(entitylabel, entitylocatorlabel, true, entitylabel);
 		finalentityid = finals[0];
 		finalentitylabel = finals[1];
 		finalentitylocator = finals[2];
 		
-		
+		//find IDs for entitylocator
 		String finalentitylocatorids = "";
 		String finalentitylocatorlabels="";
 		if(finalentitylocator.length()>0){
@@ -293,7 +290,7 @@ public class TermEQ2IDEQ {
 					finalentitylocatorids += result[1]+",";
 					finalentitylocatorlabels += result[2]+",";
 				}*/
-				String [] finalresult = searchEntity(fel, "", false);
+				String [] finalresult = searchEntity(fel, "", false, fel);
 				if(finalresult!=null){
 					finalentitylocatorids += finalresult[0]+",";
 					finalentitylocatorlabels += finalresult[1]+",";
@@ -330,10 +327,11 @@ public class TermEQ2IDEQ {
 	 *                                 ....
 	 * @param entitylabel
 	 * @param entitylocatorlabel
-	 * @param isEntity
+	 * @param entityWithLocator
 	 * @return
 	 */
-	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean isEntity) {
+	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean entityWithLocator, String originalentitylabel) {
+		//System.out.println("search entity: "+entitylabel);
 		String [] finals = new String[3];
 		finals[2] = entitylocatorlabel;
 		entitylabel = entitylabel.replaceAll("("+this.process+")", "process");
@@ -352,7 +350,7 @@ public class TermEQ2IDEQ {
 			String entityterm = join(entitylabeltokens, i, size, " "); 
 			String [] result = searchTerm(entityterm, "entity");
 			if(result!=null){
-				if(entitylocators != null && i==0 && isEntity){//has entitylocator
+				if(entitylocators != null && i==0 && entityWithLocator){//has entitylocator
 					String [] newresult = searchTerm(entitylocators[0]+" "+entityterm, "entity");
 					if(newresult!=null){
 						finalentityid = newresult[1];
@@ -406,9 +404,8 @@ public class TermEQ2IDEQ {
 		finals[1] = finalentitylabel;
 		finals[2] = finalentitylocator;
 
-		
 		//bone, cartilage, and element
-		if(finalentityid.length()==0){
+		if(finalentityid.length()==0 && entitylabel.equals(originalentitylabel)){
 			entitylabel = entitylabel+" bone";
 			String[] result = searchTerm(entitylabel, "entity");
 			if(result!=null){
@@ -419,8 +416,9 @@ public class TermEQ2IDEQ {
 				finals[2] = finalentitylocator;
 				return finals;
 			}
-		}
-		//last resort
+		}			
+
+		//last rule
 		//still not find a match, remove the last term in the entitylabel 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"
 		if(finalentityid.length()==0){
@@ -428,13 +426,11 @@ public class TermEQ2IDEQ {
 			if(tokens.length>=2){
 				String last2 = "<"+join(tokens, tokens.length-2, tokens.length-1, " ").replace(" ", "> <")+">";
 				if(valid(last2)){
-					entitylabel = entitylabel.substring(0, entitylabel.lastIndexOf(" ")).trim();
-					return searchEntity(entitylabel, entitylocatorlabel, isEntity);
+					String shortened = entitylabel.substring(0, entitylabel.lastIndexOf(" ")).trim();
+					return searchEntity(shortened, entitylocatorlabel, entityWithLocator, entitylabel);
 				}
 			}
 		}
-
-		
 		return finals;
 	}
 
@@ -445,11 +441,16 @@ public class TermEQ2IDEQ {
 	 */
 	private boolean valid(String organphrase) {
 		try{
+			String text = organphrase.replaceAll("[<>]", "");
+			boolean flag1= false;
+			boolean flag2 = false;
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from "+prefix+"_markedsentence where markedsent like '%"+organphrase+"%'");
-			if(rs.next()){
-				return true;
-			}
+			if(rs.next()) flag1=true;
+			rs = stmt.executeQuery("select count(*) from "+prefix+"_sentence where sentence like '%"+text+"%'");
+			if(rs.next()) flag2=true;
+			return flag1&&flag2;
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
