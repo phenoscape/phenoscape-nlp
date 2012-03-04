@@ -51,7 +51,7 @@ public class CharacterAnnotatorChunked {
 	private String negationpt = "not|never";
 	private String nonrelation = "through|by|to|into";
 	private String lifestyle = "";
-	private String characters = "";
+	private String characters;
 	private boolean partofinference = false;
 	private ArrayList<Element> pstructures = new ArrayList<Element>();
 	private ArrayList<Element> cstructures = new ArrayList<Element>();
@@ -68,12 +68,13 @@ public class CharacterAnnotatorChunked {
 	/**
 	 * 
 	 */
-	public CharacterAnnotatorChunked(Connection conn, String tableprefix, String glosstable, boolean evaluation) {
+	public CharacterAnnotatorChunked(Connection conn, String tableprefix, String glosstable, String characters, boolean evaluation) {
 		this.conn = conn;
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
 		this.evaluation = evaluation;
 		this.nosubject = false;
+		this.characters = characters;
 		if(this.evaluation) this.partofinference = false; //partofinterference causes huge number of "relations"
 		try{
 			//collect life_style terms
@@ -84,13 +85,6 @@ public class CharacterAnnotatorChunked {
 			}
 			this.lifestyle = lifestyle.replaceFirst("\\|$", "");
 			
-			rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
-					"union "+
-					"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
-			while(rs.next()){
-				this.characters += rs.getString(1)+"|";
-			}
-			this.characters = characters.replaceFirst("\\|$", "");
 		}catch(Exception e){
 			e.printStackTrace();
 		}

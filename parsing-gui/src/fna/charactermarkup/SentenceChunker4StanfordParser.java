@@ -64,6 +64,7 @@ public class SentenceChunker4StanfordParser {
 	private String glosstable = null;
 	private Document tree = null;
 	private Document treecp = null;
+	private String characters;
 	private String markedsent = null;
 	private String [] tokensinsent = null;
 	private String [] posoftokens = null;
@@ -84,15 +85,18 @@ public class SentenceChunker4StanfordParser {
 	private boolean printPP = false;
 	private boolean printNPlist = false;
 	private boolean debug = false;
+	private String type;
 	//private boolean printPPTO = true;
 	/**
 	 * 
 	 */
-	public SentenceChunker4StanfordParser(int index, Document parsingTree, String markedsent, String sentsrc, String tableprefix,Connection conn, String glosstable) {
+	public SentenceChunker4StanfordParser(int index, Document parsingTree, String markedsent, String sentsrc, String type, String tableprefix,Connection conn, String glosstable, String characters) {
+		this.type = type;
 		this.sentsrc = sentsrc;
 		this.tableprefix = tableprefix;
 		this.conn = conn;
 		this.glosstable = glosstable;
+		this.characters = characters;
 		this.sentindex = index;
 		this.tree = parsingTree;
 		this.treecp = (Document)tree.clone();
@@ -181,7 +185,7 @@ public class SentenceChunker4StanfordParser {
 		collapseWhereClause();//where
 		collapseWhenClause(); //when
 		
-		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.tableprefix,this.conn, this.glosstable);
+		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.type, this.tableprefix,this.conn, this.glosstable, this.characters);
 		return cs;
 			}catch(Exception e){
 				e.printStackTrace();

@@ -12,11 +12,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.xpath.XPath;
 
 
 
@@ -44,6 +47,7 @@ public class ChunkedSentence {
 	private String text = null;
 	private String sentsrc = null;
 	private String tableprefix = null;
+	private Element root;
 	public static final String binaryTvalues = "true|yes|usually";
 	public static final String binaryFvalues = "false|no|rarely";
 	public static final String pronouns = "them";
@@ -90,6 +94,8 @@ public class ChunkedSentence {
 	private boolean printRecover = false;
 	private String clauseModifierConstraint;
 	private String clauseModifierContraintId;
+	private String type;
+	private String characters;
 	
 
 	
@@ -107,7 +113,7 @@ public class ChunkedSentence {
 	 * @param tree 
 	 * 
 	 */
-	public ChunkedSentence(int id, Document collapsedtree, Document tree, String tobechunkedmarkedsent,  String sentsrc, String tableprefix,Connection conn, String glosstable) {
+	public ChunkedSentence(int id, Document collapsedtree, Document tree, String tobechunkedmarkedsent,  String sentsrc, String type, String tableprefix,Connection conn, String glosstable, String characters) throws Exception {
 		eqcharacters.put("wide", "width"); //2 cm. wide
 		eqcharacters.put("long", "length");
 		eqcharacters.put("broad", "width");
@@ -119,7 +125,9 @@ public class ChunkedSentence {
 				
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
+		this.characters = characters;
 		this.conn = conn;
+		this.type = type;
 		
 		try{
 			Statement stmt = conn.createStatement();
@@ -142,7 +150,7 @@ public class ChunkedSentence {
 		String[] temp = tobechunkedmarkedsent.split("\\s+");
 		chunkedtokens = new ArrayList<String>(Arrays.asList(temp)); //based on markedsent, which provides <>{} tags.
 				
-		Element root = collapsedtree.getRootElement();
+		root = collapsedtree.getRootElement();
 		String treetext = SentenceChunker4StanfordParser.allText(root).trim();
 		String[] treetoken = treetext.split("\\s+"); //based on the parsing tree, which holds some chunks.
 		String realchunk = "";
@@ -201,6 +209,7 @@ public class ChunkedSentence {
 		int allchunks = chunks();
 		StanfordParser.countChunks(allchunks, discoveredchunks);
 		
+		recoverSubjectOrgan4Character();
 		recoverVPChunks();//recover unidentified verb phrases
 		recoverConjunctedOrgans(); //
 		//findSubject(); no longer needed //set the pointer to a place right after the subject, assuming the subject part is stable in chunkedtokens at this time
@@ -213,7 +222,39 @@ public class ChunkedSentence {
 		//	removeStateFromList();
 		//}
 	}
-	
+	/**
+	 * contact between organ a and organ b
+	 * @throws Exception 
+	 * 
+	 * 
+	 */	
+	private void recoverSubjectOrgan4Character() throws Exception {
+		//if type is character and the first non-empty chunk is not a noun
+		if(type.equals("character")){
+			if(this.chunkedtokens.size()<=2 && this.chunkedtokens.get(0).matches("\\w+")){
+				if(this.chunkedtokens.size()>1 && !this.chunkedtokens.get(1).matches("\\w+")){
+					this.chunkedtokens.set(0, "<"+this.chunkedtokens.get(0)+">");
+					return;
+				}
+			}
+			
+			String token = "";
+			int i = 0;
+			while(token.length()==0 && i < this.chunkedtokens.size()){
+				token = this.chunkedtokens.get(i);
+				i++;
+			}
+			for(int j = i-1; j < this.chunkedtokens.size(); j++){ //process the leading bare tokens
+				token = this.chunkedtokens.get(j);
+				if(token.length()==0 || token.indexOf("[")>0 || token.indexOf("<")>=0 || token.indexOf("{")>=0) break;
+				if(XPath.selectNodes(root, "//NN[@text='"+token+"']").size() > 0 &&
+						!token.matches("("+this.characters+")")){//bare token
+					token = "<"+token+">";
+					this.chunkedtokens.set(j, token);					
+				}
+			}
+		}		
+	}
 	/**
 	 * count the chunks in chunkedtokens
 	 * @return

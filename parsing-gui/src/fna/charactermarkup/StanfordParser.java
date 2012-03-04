@@ -52,7 +52,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private POSTagger4StanfordParser tagger = null;
 	private String tableprefix = null;
 	private String glosstable = null;
-	static public Hashtable<String, String> characters = new Hashtable<String, String>();
+	static public Hashtable<String, String> characterRstates = new Hashtable<String, String>();
+	private String characters;
 	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
@@ -108,6 +109,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path21 = XPath.newInstance(".//PP");
 			path22 = XPath.newInstance(".//PP/CC");
 			path23 = XPath.newInstance(".//NN|.//NNS");
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -133,6 +135,15 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			Statement stmt = conn.createStatement();
 			stmt.execute("create table if not exists "+this.tableprefix+"_"+this.POSTaggedSentence+"(source varchar(100) NOT NULL, posedsent TEXT, PRIMARY KEY(source))");
 			stmt.execute("delete from "+this.tableprefix+"_"+this.POSTaggedSentence);
+			
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
+					"union "+
+					"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
+			while(rs.next()){
+				this.characters += rs.getString(1)+"|";
+			}
+			this.characters = characters.replaceFirst("\\|$", "");
 			stmt.close();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -276,12 +287,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			String text = "";
 			int i = 0;
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select source, rmarkedsent from "+this.tableprefix+"_markedsentence order by sentid");//(source+0)"); //+0 so sort as numbers
+			ResultSet rs = stmt.executeQuery("select source, rmarkedsent, type from "+this.tableprefix+"_markedsentence order by sentid");//(source+0)"); //+0 so sort as numbers
 			Pattern ptn = Pattern.compile("^Parsing \\[sent\\. (\\d+) len\\. \\d+\\]:(.*)");
 			Matcher m = null;
 			Tree2XML t2x = null;
 			Document doc = null;
-			CharacterAnnotatorChunked cac = new CharacterAnnotatorChunked(conn, this.tableprefix, glosstable, this.evaluation);
+			CharacterAnnotatorChunked cac = new CharacterAnnotatorChunked(conn, this.tableprefix, glosstable,characters, this.evaluation);
 			SentenceChunker4StanfordParser ex = null;
 			Element statement = null;
 			ChunkedSentence cs = null;
@@ -308,15 +319,16 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 						doc = t2x.xml();
 						if(rs.relative(i)){
 							//1. annotate a sentence in XML format
-							String sent = rs.getString(2);
-							String src = rs.getString(1);
+							String sent = rs.getString("rmarkedsent");
+							String src = rs.getString("source");
+							String type = rs.getString("type");
 							if(!sent.matches(".*? [;\\.]\\s*$")){//at 30x. => at 30x. .
 								sent = sent+" .";
 							}
 							sent = sent.replaceAll("<\\{?times\\}?>", "times");
 							sent = sent.replaceAll("<\\{?diam\\}?>", "diam");
 							sent = sent.replaceAll("<\\{?diams\\}?>", "diams");
-							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, this.tableprefix, conn, glosstable);
+							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, type, this.tableprefix, conn, glosstable, characters);
 							cs = ex.chunkIt();
 							if(this.printSent){
 								System.out.println();
@@ -614,8 +626,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "test", "fishglossaryfixed", false);
 
 		
-		sp.POSTagging();
-		sp.parsing();
+		//sp.POSTagging();
+		//sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);

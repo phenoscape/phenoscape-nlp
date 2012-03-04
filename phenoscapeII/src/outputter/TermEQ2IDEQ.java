@@ -100,7 +100,10 @@ public class TermEQ2IDEQ {
 	 * @param qualitymodifierlabel will be updated to labels that match a set of IDs
 	 */
 	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel) throws Exception{
-		//first find update entitylabel
+		//deal with special case first: between
+		boolean completed = fillInIDs4ContactBetween(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
+		if(completed) return;
+		
 		fillInIDs4Entity(srcid, entitylabel, entitylocatorlabel); //0: label; 1:id
 		fillInIDs4QualityModifier(srcid, qualitymodifierlabel);
 		if(quality.length()>0){//rounded dorsally
@@ -278,6 +281,95 @@ public class TermEQ2IDEQ {
 		finalentitylocator = finals[2];
 		
 		//find IDs for entitylocator
+		String[] finalentitylocatorresult = new String[2];
+		searchEntityLocator(finalentitylocator, finalentitylocatorresult);	
+		String finalentitylocatorids = finalentitylocatorresult[0]; 
+		String finalentitylocatorlabels = finalentitylocatorresult[1]; 
+		//if(this.debug){
+		//	System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
+		//}
+		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
+	}
+
+	
+	/**
+	 * this deals with a transformation of the pattern similar to this: 
+	 * original: contact between A and B / present / absent
+	 * results: A in contact with B/A separated from B
+	 * 
+	 * very prelimary/specific at this time
+	 * @param srcid
+	 * @param entitylabel
+	 * @param entitylocatorlabel
+	 * @return
+	 * @throws Exception 
+	 */
+	private boolean fillInIDs4ContactBetween(String srcid, String entitylabel,
+			String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel) throws Exception {
+		boolean complete = false;
+		if(entitylabel.matches("(contact|connection)") && entitylocatorlabel.matches("between .*") && quality.matches("(absent|present).*")){
+			//new entitylabel, qualitymodifierlabel, entitylocator, quality
+			String[] els = entitylocatorlabel.split("\\s*,\\s*");
+			entitylabel = els[0].replaceFirst("between ", "");
+			qualitymodifierlabel = els[1] +","+qualitymodifierlabel;
+			qualitymodifierlabel = qualitymodifierlabel.trim().replaceFirst(",$", "");
+			if(els.length-1 > 2) entitylocatorlabel = join(els, 2, els.length-1, " ");
+			else entitylocatorlabel = "";
+		
+			if(quality.equals("present")) quality = "in contact with";
+			else if(quality.equals("absent")) quality = "separated from";
+			
+			//search for IDs: entity
+			String[] finals = searchEntity(entitylabel, entitylocatorlabel, true, entitylabel);
+			String finalentityid = finals[0];
+			String finalentitylabel = finals[1];
+			String finalentitylocator = finals[2];
+			
+			if(finalentityid.length()>0){
+				//search for IDs: entitylocator
+				String[] entitylocatorinfo = new String[2];
+				String finalentitylocatorids = "";
+				String finalentitylocatorlabels = "";
+				if(finalentitylocator.length()>0){
+					searchEntityLocator(finalentitylocator, entitylocatorinfo);
+					finalentitylocatorids = entitylocatorinfo[0];
+					finalentitylocatorlabels = entitylocatorinfo[1];
+				}
+				
+				//search for IDs: quality
+				String[] result = this.searchTerm(quality, "quality");
+				String finalqualitylabel = result[2];
+				String finalqualityid = result[1];
+				
+				//search for IDs: qualitymodifierlabel
+				String[] qualitymodifierinfo = new String[2];
+				String finalqualitymodifierids = "";
+				String finalqualitymodifierlabels = "";
+				if(qualitymodifierlabel.length()>0){
+					searchEntityLocator(qualitymodifierlabel, qualitymodifierinfo);
+					finalqualitymodifierids = qualitymodifierinfo[0];
+					finalqualitymodifierlabels = qualitymodifierinfo[1];
+				}				
+				updateEQIDs(srcid, finalentitylabel, finalentityid, finalqualitylabel, finalqualityid, finalqualitymodifierlabels, finalqualitymodifierids, finalentitylocatorlabels, finalentitylocatorids);
+				complete = true;
+			}
+		}
+		return complete;
+	}
+
+	private void updateEQIDs(String srcid, String entitylabel,
+			String entityid, String qualitylabel, String qualityid, String qualitymodifierlabels, String qualitymodifierids, String entitylocatorlabels,
+			String entitylocatorids) throws Exception{
+		
+			Statement stmt = conn.createStatement();
+			stmt.execute("update "+this.outputtable+" set entitylabel='"+entitylabel+"', " +
+					" entityid='"+entityid+"', qualitylabel ='"+qualitylabel+"', qualityid='"+qualityid+"', qualitymodifierlabel='"+
+					qualitymodifierlabels+"', qualitymodifierid='"+qualitymodifierids+"', entitylocatorlabel='"+entitylocatorlabels+"'," +
+					" entitylocatorid='"+entitylocatorids+"' where id="+srcid);
+	}
+
+	private void searchEntityLocator(String finalentitylocator,
+			String[] finalentitylocatorresult) throws Exception {
 		String finalentitylocatorids = "";
 		String finalentitylocatorlabels="";
 		if(finalentitylocator.length()>0){
@@ -299,13 +391,9 @@ public class TermEQ2IDEQ {
 			}
 			finalentitylocatorids = finalentitylocatorids.replaceFirst(",$", "");
 			finalentitylocatorlabels = finalentitylocatorlabels.replaceFirst(",$", "");
+			finalentitylocatorresult[0] = finalentitylocatorids;
+			finalentitylocatorresult[1] = finalentitylocatorlabels;
 		}
-	
-
-		//if(this.debug){
-		//	System.out.println("entity IDs:["+finalentitylabel+"/"+finalentityid+"]["+finalentitylocatorlabels+"/"+finalentitylocatorids+"]");
-		//}
-		updateEntityIDs(srcid, finalentitylabel, finalentityid, finalentitylocatorlabels, finalentitylocatorids);
 	}
 
 	

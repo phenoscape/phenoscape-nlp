@@ -217,7 +217,7 @@ public class POSTagger4StanfordParser {
 					String temp = str;
 					str = str.replaceFirst("(?<=^|,\\s)\\{?\\w+\\}? of ", "").trim(); //shape of 
 					String ch = temp.replace(str, "").replace("\\s+of\\s+", "").replaceAll("[{}]", "").trim();
-					StanfordParser.characters.put(ch, "1"); //to keep only the unique characters
+					StanfordParser.characterRstates.put(ch, "1"); //to keep only the unique characters
 				}
 				
 				stmt.execute("update "+this.tableprefix+"_markedsentence set rmarkedsent ='"+str.replaceAll("-PPP", "")+"' where source='"+src+"'");	
