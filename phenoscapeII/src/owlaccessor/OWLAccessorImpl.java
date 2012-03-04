@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  * @author Zilong Chang, Hong Cui
  * 
  */
+@SuppressWarnings("unused")
 public class OWLAccessorImpl implements OWLAccessor {
 
 	/** The manager. */
@@ -53,40 +54,34 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 *
 	 * @param ontoURL the onto url
 	 */
-	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate) {
+	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate)throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
 		source = ontoURL;
-		try {
+		
 			ont = manager.loadOntologyFromOntologyDocument(iri);
 			allclasses = ont.getClassesInSignature();
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
-		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 
 	/**
 	 * Instantiates a new oWL accessor impl.
-	 *
+	 * 
 	 * @param file the file
 	 */
-	public OWLAccessorImpl(File file, ArrayList<String> eliminate) {
+	public OWLAccessorImpl(File file, ArrayList<String> eliminate) throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		source = file.getAbsolutePath();
-		try {
+
 			ont = manager.loadOntologyFromOntologyDocument(file);
 			allclasses = ont.getClassesInSignature();
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
-		} catch (OWLOntologyCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 	
 	public String getSource(){
@@ -138,10 +133,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @return the list
 	 */
 	@Override
-	public List<OWLClass> retrieveConcept(String con) {
+	public List<OWLClass> retrieveConcept(String con) throws Exception {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
-		try {
+		
 			for (OWLClass c : allclasses) {
 				// match class concepts and also the synonyms
 				List<String> syns = this.getSynonymLabels(c);
@@ -157,9 +152,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 					// break;
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 		return result;
 	}
 	

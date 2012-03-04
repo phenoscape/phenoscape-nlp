@@ -3,26 +3,18 @@
  */
 package fna.parsing;
 import java.io.BufferedWriter;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-
-import org.jdom.*;
-import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import org.jdom.xpath.XPath;
 
-import fna.db.*;
+
 
 /**
  * @author hongcui
@@ -30,7 +22,7 @@ import fna.db.*;
  * transform NeXML chars/states to a suitable format for CharaParser
  * expect 1 NeXML file per PDF paper (original pub) in source folder 
  */
-@SuppressWarnings("unchecked")
+
 public abstract class CharacterStatementsTransformer extends Thread {
 	protected ArrayList<String> seeds = new ArrayList<String>();
 	//private File source =new File(Registry.SourceDirectory); //a folder of text documents to be annotated
@@ -50,7 +42,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 
 	
 	CharacterStatementsTransformer(ProcessListener listener, Display display, 
-			Text perllog, ArrayList seeds/*, String prefix, String glossarytable*/){
+			Text perllog, ArrayList<String> seeds/*, String prefix, String glossarytable*/){
 		this.seeds = seeds;
 		this.listener = listener;
 		this.perlLog = perllog;

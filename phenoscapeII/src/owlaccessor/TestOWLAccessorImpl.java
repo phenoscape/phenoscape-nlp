@@ -1,12 +1,9 @@
 package owlaccessor;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLClass;
+
 
 public class TestOWLAccessorImpl {
 	
@@ -85,7 +82,7 @@ public class TestOWLAccessorImpl {
 //	}
 	
 	@Test
-	public void testGetAnnotationProperties(){
+	public void testGetAnnotationProperties() throws Exception{
 		//OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
 		OWLAccessorImpl a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl", new ArrayList<String>());
 		//System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));

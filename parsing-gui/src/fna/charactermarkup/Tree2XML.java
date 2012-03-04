@@ -2,8 +2,6 @@
 package fna.charactermarkup;
 
 import java.io.*;
-
-import java.util.regex.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,10 +13,10 @@ import org.jdom.input.SAXBuilder;
  * @author hongcui
  *
  */
-@SuppressWarnings({ "unused","static-access" })
+
 public class Tree2XML {
     private String test=null;
-    private String str = "";
+    //private String str = "";
     public static ArrayList<String> adverbs = new ArrayList<String>();
     //private static PrintWriter out; 
     /**

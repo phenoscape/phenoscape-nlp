@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +28,7 @@ import fna.parsing.ApplicationUtilities;
  * last stable version: 653
  * this version: try to find additional nouns from unknown words, and mark them with <>. 
  */
-
-@SuppressWarnings("unchecked")
+@SuppressWarnings("unused")
 public class SentenceOrganStateMarker {
 	private Hashtable<String, String> sentences = new Hashtable<String, String>();
 	private Connection conn = null;
@@ -52,6 +50,7 @@ public class SentenceOrganStateMarker {
 	/**
 	 * 
 	 */
+
 	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn, Display display, StyledText charLog) {
 		this.display = display;
 		this.charLog = charLog;
@@ -163,7 +162,7 @@ public class SentenceOrganStateMarker {
 		return text;
 	}
 
-	public Hashtable markSentences(){
+	public Hashtable<String, String> markSentences(){
 		if(this.marked){
 			loadMarked();
 		}else{
@@ -353,8 +352,7 @@ public class SentenceOrganStateMarker {
 	 * @param taggedsent
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private String fixAdjNouns(ArrayList adjnouns, String adjnoun, String taggedsent) {
+	private String fixAdjNouns(/*ArrayList<?> adjnouns,*/ String adjnoun, String taggedsent) {
 		adjnoun = adjnoun.replaceAll("\\s+", "\\\\W+");
 		taggedsent = Pattern.compile("[<{]*\\b"+adjnoun+"\\b[}>]*", Pattern.CASE_INSENSITIVE).matcher(taggedsent).replaceFirst("<"+adjnoun+">").replaceAll("W\\+", "> <").replaceAll("<and>", "and").replaceAll("<or>", "or");
 		return taggedsent;
@@ -531,7 +529,7 @@ public class SentenceOrganStateMarker {
 		return colors.toString().replaceFirst("\\|$", "");
 	}
 	
-    private void resetOutputMessage() {
+	private void resetOutputMessage() {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
 			public void run() {

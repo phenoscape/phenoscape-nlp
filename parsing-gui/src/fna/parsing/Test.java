@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import fna.charactermarkup.Utilities;
-
 public class Test{
 	
 	public Test(String com){
@@ -33,7 +31,7 @@ public class Test{
 		
 		// read the output from the command
 		String s = "";
-		int i = 0;
+		//int i = 0;
 		while ((s = stdInput.readLine()) != null) {
 			System.out.println(s + " at " + (System.currentTimeMillis() - time)
 					/ 1000 + " seconds");

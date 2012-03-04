@@ -3,7 +3,7 @@ package fna.parsing;
 import java.util.Hashtable;
 import fna.parsing.character.Glossary;
 //
-@SuppressWarnings({ "unchecked"})
+
 public class DeHyphenizerCorrected extends DeHyphenizer {
 	public DeHyphenizerCorrected(String database, String table, String column, String countcolumn, String hyphen, String glossarytable, Glossary glossary) {
 		super(database, table, column, countcolumn, hyphen, glossarytable, glossary);
@@ -13,7 +13,7 @@ public class DeHyphenizerCorrected extends DeHyphenizer {
 	protected void collectTerms(String[] segs, String[] terms, int[][] matrix) {
 		//rank rows by the distance between a 1 in upper matrix to the diagonal line
 		int max = 0;
-		Hashtable rank = new Hashtable();
+		Hashtable<String, String> rank = new Hashtable<String, String>();
 		for(int i = 0; i < segs.length; i++){
 			int distance = getDistance(matrix[i], i);
 			if(distance > max){

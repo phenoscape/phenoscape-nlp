@@ -4,11 +4,9 @@ import org.apache.commons.collections15.Predicate;
 
 import edu.uci.ics.jung.graph.Graph;
 
-
-@SuppressWarnings({ "unchecked", "hiding" })
-public class VertexPredicate<State>  implements Predicate<State>{
-			Graph g;
-		public VertexPredicate(Graph g){
+public class VertexPredicate  implements Predicate<State>{
+			Graph<State, MyLink> g;
+		public VertexPredicate(Graph<State, MyLink> g){
 			this.g = g;
 		}
 		public boolean evaluate(State s) {

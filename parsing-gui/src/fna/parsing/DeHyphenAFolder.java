@@ -25,14 +25,11 @@ import fna.parsing.character.Glossary;
  * @author hongcui
  * Move the dyhypen() function from VolumeDehypenizer, to make DeHyphenAFolder a utility class that can be called by other projects.
  */
-@SuppressWarnings("unchecked")
 public class DeHyphenAFolder {
 	private ProcessListener listener;
 	private String database;
-	@SuppressWarnings("unused")
 	private VolumeDehyphenizer vd;
-	@SuppressWarnings("unused")
-	private String dataPrefix;
+	//private String dataPrefix;
 	private String tablename;
 	private Glossary glossary;
 	private File folder;
@@ -51,7 +48,7 @@ public class DeHyphenAFolder {
 		this.glossarytable = glossarytable;
         this.database = database;
         this.vd = vd;
-        this.dataPrefix = dataPrefix;
+        //this.dataPrefix = dataPrefix;
         this.tablename = dataPrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS");
         
         this.glossary = glossary;
@@ -461,7 +458,7 @@ public class DeHyphenAFolder {
 	    }*/
 	    
 	    private String performMapping(String original){
-	        Enumeration en = mapping.keys();
+	        Enumeration<String> en = mapping.keys();
 	        while(en.hasMoreElements()){
 	            String hword = (String)en.nextElement();
 	            String dhword = (String)mapping.get(hword);

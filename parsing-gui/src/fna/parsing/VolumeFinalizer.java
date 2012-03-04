@@ -3,38 +3,24 @@
  */
 package fna.parsing;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.apache.log4j.Logger;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-
 import org.jdom.Comment;
-
-import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.xpath.XPath;
-
 import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
-
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
 
 /**
  * @author chunshui
  */
-@SuppressWarnings({ "unchecked", "static-access" })
+@SuppressWarnings("unused")
 public class VolumeFinalizer extends Thread {
     /*glossary established in VolumeDehyphenizer
     private String glossary;*/
@@ -45,13 +31,13 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = true;
+    private static boolean standalone = false;
     private static String standalonefolder = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source";
     private Text finalLog;
     private Display display;
     
     public VolumeFinalizer(ProcessListener listener, Text finalLog, String dataPrefix, Connection conn, String glossaryPrefix, Display display) {
-        if(!standalone) this.listener = listener;
+        if(!standalone) VolumeFinalizer.listener = listener;
     	if(!standalone) this.finalLog = finalLog;
     	if(!standalone) this.display = display;
     	this.dataPrefix = dataPrefix;
@@ -109,14 +95,18 @@ public class VolumeFinalizer extends Thread {
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
 		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
-		String xmldir = Registry.TargetDirectory+"\\final\\";;
+		String xmldir = Registry.TargetDirectory+"/final/";
 		String outputtable = this.dataPrefix+"_xml2eq";
 		String benchmarktable = "internalworkbench";
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix);
-		if(!standalone) this.showOutputMessage("Operations completed. Check results in "+database+" database.");
+		String csv = xmldir+"/"+dataPrefix+"_EQ.csv";
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, csv);
+		if(!standalone){
+			this.showOutputMessage("Operations completed.");
+			this.showOutputMessage("Check result file in "+csv);
+		}
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {

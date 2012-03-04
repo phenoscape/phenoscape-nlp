@@ -3,24 +3,23 @@
  */
 package outputter;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import conceptmapping.Utilities;
+
 
 /**
  * @author Hong Updates
  * This class finds IDs from ontologies for Entity and Quality terms
  * and fill in the blank ID columns in the outputtable
  */
+@SuppressWarnings("unused")
 public class TermEQ2IDEQ {
 	private String outputtable;
 	private Connection conn;
@@ -39,11 +38,11 @@ public class TermEQ2IDEQ {
 	/**
 	 * 
 	 */
-	public TermEQ2IDEQ(String database, String outputtable, String prefix) {
+	public TermEQ2IDEQ(String database, String outputtable, String prefix, String csv) throws Exception {
 		this.prefix = prefix;
 		this.outputtable = outputtable+"_result";
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
-		try{
+		
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
@@ -71,10 +70,18 @@ public class TermEQ2IDEQ {
 					qualitymodifierlabel = knowntransformation(qualitymodifierlabel);
 					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
+				//export the table to a csv file
+				String fieldlist ="source, characterid, stateid, description, entity, entitylabel, entityid, " +
+						"quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, " +
+						"qualitymodifier, qualitymodifierlabel, qualitymodifierid, " +
+						"entitylocator, entitylocatorlabel, entitylocatorid, countt";
+				String header = "'"+fieldlist.replaceAll("\\s*,\\s*", "','")+"'";
+				String export = "SELECT * "+
+						" INTO OUTFILE '"+csv+"' FIELDS TERMINATED BY ',' "+
+						" OPTIONALLY ENCLOSED BY '\"' "+
+						" ESCAPED BY '\\' LINES TERMINATED BY '\n' FROM ("+
+						" SELECT "+header+ " UNION SELECT "+fieldlist+ " From "+ this.outputtable+") a";					
 			}			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 	
 	private String knowntransformation(String entitylabel) {
@@ -92,7 +99,7 @@ public class TermEQ2IDEQ {
 	 * @param qualitynegated used to find an qualityID, qualitynegatedlabel, qnparentlabel, and qnparentid
 	 * @param qualitymodifierlabel will be updated to labels that match a set of IDs
 	 */
-	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel){
+	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel) throws Exception{
 		//first find update entitylabel
 		fillInIDs4Entity(srcid, entitylabel, entitylocatorlabel); //0: label; 1:id
 		fillInIDs4QualityModifier(srcid, qualitymodifierlabel);
@@ -109,7 +116,7 @@ public class TermEQ2IDEQ {
 	 * @param qualitymodifierlabel
 	 */
 	private void fillInIDs4QualityModifier(String srcid,
-			String qualitymodifierlabel) {
+			String qualitymodifierlabel) throws Exception{
 		String finalqualitymodifierids = "";
 		String finalqualitymodifierlabels = "";		
 		if(qualitymodifierlabel.length()>0){
@@ -136,14 +143,11 @@ public class TermEQ2IDEQ {
 	}
 
 	private void updateQualityModifierIDs(String srcid, String qualitymodifierlabels,
-			String qualitymodifierids) {
-		try{
+			String qualitymodifierids) throws Exception {
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set qualitymodifierlabel='"+qualitymodifierlabels+"'," +
 					" qualitymodifierid='"+qualitymodifierids+"' where id="+srcid);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		
 	}
 
@@ -152,7 +156,7 @@ public class TermEQ2IDEQ {
 	 * @param srcid
 	 * @param qualitynegated
 	 */
-	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated) {
+	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated) throws Exception{
 		String term = qualitynegated.replaceFirst("not ", "").trim();
 		String qualitynegatedlabel="";
 		String qualityid="";
@@ -173,15 +177,13 @@ public class TermEQ2IDEQ {
 
 	private void updateQualitynegatedIDs(String srcid,
 			String qualitynegatedlabel, String qualityid,
-			String qnparentlabels, String qnparentids) {
-		try{
+			String qnparentlabels, String qnparentids) throws Exception{
+
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set qualitynegatedlabel='"+qualitynegatedlabel+"'," +
 					" qualityid='"+qualityid+"', qnparentlabel='"+qnparentlabels+"'," +
 					" qnparentid='"+qnparentids+"' where id="+srcid);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 	}
 
 
@@ -190,7 +192,7 @@ public class TermEQ2IDEQ {
 	 * @param srcid
 	 * @param quality
 	 */
-	private void fillInIDs4Quality(String srcid, String term) {
+	private void fillInIDs4Quality(String srcid, String term) throws Exception {
 		term = term.replaceAll("\\[.*?\\]", "").trim();
 		//if(this.debug){
 		//	System.out.println("quality term:["+term+"]");
@@ -232,24 +234,20 @@ public class TermEQ2IDEQ {
 		}
 	}
 	
-	private void updateCount(String srcid, String term) {
-		try{
+	private void updateCount(String srcid, String term) throws Exception{
+
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set countt='"+term+"' where id="+srcid);
-		}catch(Exception e){
-			e.printStackTrace();
-		}				
+			
 	}
 	
 
-	private void updateQualityIDs(String srcid, String qualitylabel, String qualityid) {
-		try{
+	private void updateQualityIDs(String srcid, String qualitylabel, String qualityid) throws Exception{
+
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set qualitylabel='"+qualitylabel+"'," +
 					" qualityid='"+qualityid+"' where id="+srcid);
-		}catch(Exception e){
-			e.printStackTrace();
-		}				
+				
 	}
 
 
@@ -266,7 +264,7 @@ public class TermEQ2IDEQ {
 	
 	
 	private void fillInIDs4Entity(String srcid, String entitylabel,
-			String entitylocatorlabel) {
+			String entitylocatorlabel) throws Exception{
 		//if(this.debug){
 		//	System.out.println("entity terms:["+entitylabel+"]["+entitylocatorlabel+"]");
 		//}
@@ -330,7 +328,7 @@ public class TermEQ2IDEQ {
 	 * @param entityWithLocator
 	 * @return
 	 */
-	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean entityWithLocator, String originalentitylabel) {
+	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean entityWithLocator, String originalentitylabel) throws Exception{
 		//System.out.println("search entity: "+entitylabel);
 		String [] finals = new String[3];
 		finals[2] = entitylocatorlabel;
@@ -439,8 +437,8 @@ public class TermEQ2IDEQ {
 	 * @param two word structure phrase marked with <>, like <process> <apex>
 	 * @return
 	 */
-	private boolean valid(String organphrase) {
-		try{
+	private boolean valid(String organphrase) throws Exception{
+
 			String text = organphrase.replaceAll("[<>]", "");
 			boolean flag1= false;
 			boolean flag2 = false;
@@ -450,11 +448,7 @@ public class TermEQ2IDEQ {
 			rs = stmt.executeQuery("select count(*) from "+prefix+"_sentence where sentence like '%"+text+"%'");
 			if(rs.next()) flag2=true;
 			return flag1&&flag2;
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return false;
+
 	}
 
 
@@ -478,16 +472,13 @@ public class TermEQ2IDEQ {
 
 	private void updateEntityIDs(String srcid, String entitylabel,
 			String entityid, String entitylocatorlabels,
-			String entitylocatorids) {
-		try{
+			String entitylocatorids) throws Exception{
+		
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set entitylabel='"+entitylabel+"'," +
 					" entityid='"+entityid+"', entitylocatorlabel='"+entitylocatorlabels+"'," +
 					" entitylocatorid='"+entitylocatorids+"' where id="+srcid);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
+
 	}
 
 
@@ -497,7 +488,7 @@ public class TermEQ2IDEQ {
 	 * @param term
 	 * @return 3-element array: type, id, label
 	 */
-	private String[] searchTerm(String term, String type){	
+	private String[] searchTerm(String term, String type) throws Exception{	
 		if(term.trim().length()==0) return null;
 		//search in cache
 		if(type.compareTo("entity")==0){
@@ -556,6 +547,7 @@ public class TermEQ2IDEQ {
 	 * @param results
 	 * @return
 	 */
+
 	private String[] retrieveExactMatch(ArrayList<String[]> results, String term) {
 		for(String[] result: results){
 			if(result[2].compareTo(term)==0){
@@ -572,15 +564,10 @@ public class TermEQ2IDEQ {
 	 * @param results: a two dimensional array holding multiple mappings, 
 	 * each mapping contains 3 elements: type, id, and label
 	 */
-	private void insertQualityResults2Table(String qualityterm, ArrayList<String[]>  results) {
-		try{
+	private void insertQualityResults2Table(String qualityterm, ArrayList<String[]>  results) throws Exception {
 			String id = results.get(0)[1]+":"+results.get(0)[2];
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set qualityid='"+id+"' where quality='"+qualityterm+"'");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
 	}
 
 	/**
@@ -589,20 +576,16 @@ public class TermEQ2IDEQ {
 	 * @param results: a two dimensional array holding multiple mappings, 
 	 * each mapping contains 3 elements: type, id, and label
 	 */
-	private void insertEntityResults2Table(String entityterm, ArrayList<String[]> results) {
-		try{
+	private void insertEntityResults2Table(String entityterm, ArrayList<String[]> results) throws Exception{
+		
 			String id = results.get(0)[1]+":"+results.get(0)[2];
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.outputtable+" set entityid='"+id+"' where entity='"+entityterm+"'");
 			stmt.execute("update "+this.outputtable+" set entitylocatorid='"+id+"' where entitylocator='"+entityterm+"'");
 			stmt.execute("update "+this.outputtable+" set qualitymodifierid='"+id+"' where qualitymodifier='"+entityterm+"'");			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
 	}
 
-	public static String checkWN4base(String word){
+	public static String checkWN4base(String word) throws Exception{
 		
 		String result = checkWN("wn "+word+" -over");
 		if (result.length()==0){//word not in WN
@@ -629,8 +612,8 @@ public class TermEQ2IDEQ {
 		return word;
 	}
 	 
-	public static String checkWN(String cmdtext){
-		try{
+	public static String checkWN(String cmdtext) throws Exception{
+		
  	  		Runtime r = Runtime.getRuntime();	
 	  		Process proc = r.exec(cmdtext);
 		    ArrayList<String> errors = new ArrayList<String>();
@@ -658,17 +641,16 @@ public class TermEQ2IDEQ {
             	sb.append(outputs.get(i)+" ");
             }
             return sb.toString();
-			
-	  	}catch(Exception e){
-	  		e.printStackTrace();
-	  	}
-	  	return "";
 	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test");
+		try{
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test", "eqs");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 }

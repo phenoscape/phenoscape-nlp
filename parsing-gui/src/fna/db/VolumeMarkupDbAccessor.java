@@ -16,9 +16,6 @@
 
 package fna.db;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -455,11 +452,11 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 	}
 
 
-	public ArrayList<ArrayList> getUnSavedDescriptorWords() throws SQLException {
+	public ArrayList<ArrayList<String>> getUnSavedDescriptorWords() throws SQLException {
 		
 		ArrayList<String> words = new ArrayList<String>();
 		ArrayList<String> flag = new ArrayList<String>();
-		ArrayList<ArrayList> wordsAndFlag = new ArrayList<ArrayList>();
+		ArrayList<ArrayList<String>> wordsAndFlag = new ArrayList<ArrayList<String>>();
 		
 		PreparedStatement stmt = null;
 		ResultSet rset = null;

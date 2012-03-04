@@ -24,6 +24,7 @@ public class Utilities {
 	public static ArrayList<String> excluded = new ArrayList<String>();
 
 	static{
+		try{
 		excluded.add("cellular quality");
 		
 		String [] entityontologies = new String[]{
@@ -69,7 +70,9 @@ public class Utilities {
 				OBOqualityOntoAPIs.add(o2d);
 			}
 		}
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	public static String[] retreiveParentInfoFromPATO (String classlabel){
@@ -104,7 +107,7 @@ public class Utilities {
 	 * @param type: entity or quality
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public static ArrayList<String[]> searchOntologies(String term, String type) {
+	public static ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
 		ArrayList<String[]> results = new ArrayList<String[]>();
 		//boolean added = false;
@@ -167,7 +170,7 @@ public class Utilities {
 	 * @param type
 	 * @return array of 3 elements: 0: type; 1:ID; 2:label
 	 */
-	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
+	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();

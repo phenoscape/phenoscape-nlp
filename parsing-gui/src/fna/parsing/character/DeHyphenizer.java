@@ -14,7 +14,7 @@ import fna.parsing.ApplicationUtilities;
  * @author hongcui
  *
  */
-@SuppressWarnings({ "unchecked", "unused" })
+@SuppressWarnings({"unused" })
 public class DeHyphenizer {
 	private String tablename;
 	private String columnname;
@@ -77,7 +77,7 @@ public class DeHyphenizer {
 		}
 		//rank rows
 		int max = 0;
-		Hashtable rank = new Hashtable();
+		Hashtable<String, String> rank = new Hashtable<String, String>();
 		for(int i = 0; i < segs.length; i++){
 			int ones = countOnes(matrix[i]);
 			if(ones > max){

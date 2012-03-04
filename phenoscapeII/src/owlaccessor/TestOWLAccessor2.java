@@ -1,14 +1,8 @@
 package owlaccessor;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLClass;
+
 
 public class TestOWLAccessor2 {
 
@@ -83,7 +77,7 @@ public class TestOWLAccessor2 {
 //	}
 	
 	@Test
-	public void testGetAllOffsprings(){
+	public void testGetAllOffsprings() throws Exception{
 		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl", new ArrayList<String>());
 		for(String s:a.getAllOffspringLables(a.getClassByLabel("cellular quality"))){
 			System.out.println(s);

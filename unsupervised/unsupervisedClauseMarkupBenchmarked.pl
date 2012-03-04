@@ -147,7 +147,7 @@ use DBI;
 
 
 
-print stdout "Initialized:\n";
+print STDOUT "Initialized:\n";
 ###########################################################################################
 #########################                                     #############################
 #########################set up global variables              #############################
@@ -222,12 +222,12 @@ my $haskb = kbexists();
 setupdatabase();
 
 if($haskb){
-	print stdout "importing from knowledgebase: $kb\n";
+	print STDOUT "importing from knowledgebase: $kb\n";
 	importfromkb();
 }
 
 #read sentences in from disk
-print stdout "Reading sentences:\n";
+print STDOUT "Reading sentences:\n";
 populatesents();
 
 
@@ -311,24 +311,24 @@ markupbypattern(); #chromosome
 
 markupignore();#similar to , differs from etc.3/21/09
 
-print stdout "Learning rules with high certainty:\n";
+print STDOUT "Learning rules with high certainty:\n";
 discover("start");
 
-print stdout "Bootstrapping rules:\n";
+print STDOUT "Bootstrapping rules:\n";
 discover("normal");
 
 #Hong Nov.18:
 my $test = $dbh->prepare('use '.$db)
 or die "Program terminates unexpected due to: ".$dbh->errstr."\n";
 $test->execute() or die $test->errstr."\n";
-print stdout "Additional bootstrappings:\n";
+print STDOUT "Additional bootstrappings:\n";
 additionalbootstrapping();
 
 #4/7/09 switch order between unknownwordbootstrapping and separatemodifiers
 #bootstrap the unknownwords table: starting with simple pls.
 unknownwordbootstrapping(); #result in entire set of fully tagged sentences
 
-print stdout "Miscellaneous tasks\n";
+print STDOUT "Miscellaneous tasks\n";
 #4/7/09
 adjsverification(); #lateral mistaken as "s", doesn't work
 
@@ -338,16 +338,16 @@ adjsverification(); #lateral mistaken as "s", doesn't work
 separatemodifiertag();
 
 #4/15/09
-print stdout "::::::::::::::::::::::::reduce roles for NMB words: \n";
+print STDOUT "::::::::::::::::::::::::reduce roles for NMB words: \n";
 resolvenmb();
 
 #Hong Nov.18: adding
-print stdout "::::::::::::::::::::::::set and or: \n";
+print STDOUT "::::::::::::::::::::::::set and or: \n";
 setandor(); #reset tag to [andor] for and/or sentence
 
 
 if ($lm eq "adj"){
-	print stdout "::::::::::::::::::::::::Bootstrapping on adjective subjects: \n";
+	print STDOUT "::::::::::::::::::::::::Bootstrapping on adjective subjects: \n";
 	adjectivesubjectbootstrapping()
 }else{
 	#3/11/09
@@ -355,61 +355,61 @@ if ($lm eq "adj"){
 	do{
 		$v = 0;
 		$v= andor();
-	#	print stdout "::::::::::::::::::::::::Bootstrapping on adjective subjects: \n";
+	#	print STDOUT "::::::::::::::::::::::::Bootstrapping on adjective subjects: \n";
 	#	adjectivesubjectbootstrapping() if $v >0;
 	}while $v > 0;
 }
 
-print stdout "::::::::::::::::::::::::reset and or: \n";
+print STDOUT "::::::::::::::::::::::::reset and or: \n";
 resetandor();
 
-print stdout "::::::::::::::::::::::::tag all sentences: \n";
+print STDOUT "::::::::::::::::::::::::tag all sentences: \n";
 tagallsentences("singletag", "sentence"); #not "original"
 
-print stdout "::::::::::::::::::::::::markup by pos: \n";
+print STDOUT "::::::::::::::::::::::::markup by pos: \n";
 markupbypos(); #3/26/09 takes R0, R1, and R2 out of remainnulltag(). makes new discoveries. pattern: one word sentence => boundary e.g. alternate; x x x pl cases
 #3/21/09 switched order of phraseclause() and ditto()
-print stdout "::::::::::::::::::::::::PhraseClause: \n";
+print STDOUT "::::::::::::::::::::::::PhraseClause: \n";
 phraseclause(); #does not make new discoveries, work on remaining null tagged clauses: to be tested, test1 does not have such cases.
-print stdout "::::::::::::::::::::::::Ditto: \n";
+print STDOUT "::::::::::::::::::::::::Ditto: \n";
 ditto(); #does not make new discoveries, work on remaining null tagged clauses.
-print stdout "::::::::::::::::::::::::Of: \n";
+print STDOUT "::::::::::::::::::::::::Of: \n";
 #comment if slow
 #of(); #need knowledge of structural hierarchy, should be the last learning module
-print stdout "::::::::::::::::::::::::Pronoun/character/proposition/errours noun subjects: \n";
+print STDOUT "::::::::::::::::::::::::Pronoun/character/proposition/errours noun subjects: \n";
 pronouncharactersubject(); #no new discoveries
-print stdout "::::::::::::::::::::::::Finalize ignored sentences: \n";## 3/24/09
+print STDOUT "::::::::::::::::::::::::Finalize ignored sentences: \n";## 3/24/09
 finalizeignored(); #modified 3/26/09
-print stdout "::::::::::::::::::::::::Tag remaining isnull(tag) sentences: \n";
+print STDOUT "::::::::::::::::::::::::Tag remaining isnull(tag) sentences: \n";
 remainnulltag(); #keep only R3 3/26/09
 if($lm eq "adj"){
-	print stdout "::::::::::::::::::::::::Common Substructures: \n";
+	print STDOUT "::::::::::::::::::::::::Common Substructures: \n";
 	commonsubstructure();
 }
 
 #3/28/09 tobe checked
-print stdout "::::::::::::::::::::::::Comma used for 'and': \n";
+print STDOUT "::::::::::::::::::::::::Comma used for 'and': \n";
 commaand(); #to be tested on a larger set, test0 does not have this case. no new discovery, all clauses matching the
 
 
 
 #3/11/09
-#print stdout":::::::::::::::::::::::::x with y pattern:\n";
+#print STDOUT":::::::::::::::::::::::::x with y pattern:\n";
 #fixxwithy(); #disabled. could be "shape with ..."
 
 #3/29/09, 4/29/09 swith order with normalizetags
 if ($lm eq "plain"){
-	print stdout "::::::::::::::::::::::::Normalize modifiers: \n";
+	print STDOUT "::::::::::::::::::::::::Normalize modifiers: \n";
 	normalizemodifiers(); #to be tested on a larger set, test0 does not have this case.
 }
 
-print stdout "::::::::::::::::::::::::Final step: normalize tag and modifiers: \n";
+print STDOUT "::::::::::::::::::::::::Final step: normalize tag and modifiers: \n";
 normalizetags(); ##normalization is the last step : turn all tags and modifiers to singular form, remove <NBM> tags from sentence
 prepareTables4Parser();
 #resolvesentencetags(); #for future
 
 
-print stdout "Done:\n";
+print STDOUT "Done:\n";
 
 #test 4/15/09 true modifiers
 #listtruemodifiers();
@@ -427,7 +427,7 @@ print stdout "Done:\n";
 #	$multi++ if(length($WNPOSRECORDS{$_})>1);
 #	print "$_ => $WNPOSRECORDS{$_}\n";
 #}
-#print stdout "wordnet counts: $t $notin $multi\n";
+#print STDOUT "wordnet counts: $t $notin $multi\n";
 
 
 ##################################################################################################
@@ -463,7 +463,7 @@ sub prepareTables4Parser{
 }
 
 #old subroutines
-##print stdout "Handling 'and' and 'or':\n";
+##print STDOUT "Handling 'and' and 'or':\n";
 ##print "##############andor cases\n" if $debug;
 ##andor();
 ##defaultmarkup($TAGS);
@@ -566,7 +566,7 @@ my $test = $dbh->prepare('create database if not exists '.$db.' CHARACTER SET ut
 or die "Program terminates unexpected due to: ".$dbh->errstr."\n";
 $test->execute() or die $test->errstr."\n";
 
-my $test = $dbh->prepare('use '.$db)
+$test = $dbh->prepare('use '.$db)
 or die "Program terminates unexpected due to: ".$dbh->errstr."\n";
 $test->execute() or die $test->errstr."\n";
 
@@ -1571,7 +1571,8 @@ sub discovernewmodifiers{	#each modifier is one word
 				}
 				print "find a modifier [A]: $newm\n" if $debug;
 				my $tag = getparentsentencetag($sentid);
-				my ($m,$tag) = getpartsfromparenttag($tag);
+				my $m;
+				($m,$tag) = getpartsfromparenttag($tag);
 				$modifier .= " ".$m if $m =~/\w/;
 				tagsentwmt($sentid, $sentence, $modifier, $tag, "discovernewmodifiers");
 				#$sth1 = $dbh->prepare("update ".$prefix."_sentence set modifier = '$modifier', tag = '$tag' where sentid = $sentid");
@@ -1606,7 +1607,8 @@ sub discovernewmodifiers{	#each modifier is one word
 			}
 			print "find a modifier [C]: $newm\n" if $debug;
 			my $tag = getparentsentencetag($sentid);
-			my ($m,$tag) = getpartsfromparenttag($tag);
+			my $m;
+			($m,$tag) = getpartsfromparenttag($tag);
 			$modifier .= " ".$m if $m =~/\w/;
 			tagsentwmt($sentid, $sentence, $modifier, $tag, "discovernewmodifiers");
 			#$sth1 = $dbh->prepare("update ".$prefix."_sentence set modifier = '$modifier', tag = '$tag' where sentid = $sentid");
@@ -1626,7 +1628,7 @@ sub discovernewmodifiers{	#each modifier is one word
 sub changePOS{
 #sub n2m{
 	my ($word, $oldpos, $newpos, $role, $increment) = @_;
-	my ($sth, $sentid, $modifier, $tag, $sentid, $sentence, $sth1, $sign);
+	my ($sth, $sentid, $modifier, $tag, $sentence, $sth1, $sign);
 	$oldpos = lc $oldpos;
 	$newpos = lc $newpos;
 
@@ -1730,7 +1732,7 @@ sub getparentsentencetag{
 sub getpartsfromparenttag{
 	my $tag = shift;
 	if($tag =~/\[/){
-		$tag =~ s# (\w+\])$#][\1#;
+		$tag =~ s# (\w+\])$#][$1#;
 		$tag =~ /(\[.*?\])?(\[.*?\])/;
 		return ($1, $2);
 	}else{
@@ -1881,7 +1883,7 @@ sub andortag{
 				my $conj = $1;
 				$tag =~ s#,# $conj #g;
 				$tag =~ s#\s+# #g;
-				$tag =~ s#($conj )+#\1#g;
+				$tag =~ s#($conj )+#$1#g;
 				$tag =~ s#^\s+##g;
 				$tag =~ s#\s+$##g;
 				tagsentwmt($sentid, $sentence, "", $tag, "andor[n&n]");
@@ -1950,7 +1952,7 @@ sub andortag{
 		#structure patterns and segments:	$nptn = "((?:[np],?)*&?[np])"; #grouped #must present, no q allowed
 		#mark all ps "p"
 		for(my $i = 0; $i <@sptns; $i++){
-			$sptns[$i] =~ s#(.)#\1 #g;   #one modifier pattern
+			$sptns[$i] =~ s#(.)#$1 #g;   #one modifier pattern
 			chop($sptns[$i]);
 			my @ps = split(/ /, $sptns[$i]);
 			my @ts = split(/\s+/, $ssegs[$i]);#matching segment pattern
@@ -2034,7 +2036,7 @@ sub commaand{
 	$ptn = $phraseptn."\\s+".$commaptn."\\s+(?:".$phraseptn."| |".$commaptn.")+";
 	$ptn1 = "^(".$ptn.")";
 	$ptn2 = "(.*?)(".$ptn.")\\s*".$bptn."\$";
-	$ptn3 = "^((?:".$mphraseptn."\\s+)+".$commaptn."\\s+(?:".$mphraseptn."|\s*|".$commaptn.")+".$mphraseptn."+\\s*".$nphraseptn.")"; #changed last * to + 5/01/09 check 5606
+	$ptn3 = "^((?:".$mphraseptn."\\s+)+".$commaptn."\\s+(?:".$mphraseptn."|\\s*|".$commaptn.")+".$mphraseptn."+\\s*".$nphraseptn.")"; #changed last * to + 5/01/09 check 5606
 	#changed | | to |\s*|, check 3723
 
 	#my $nphraseptn = "(?:<[A-Z]*[NO]+[A-Z]*>[^<]+?<\/[A-Z]*[NO]+[A-Z]*>)+"; #4/26/09: last + =>*
@@ -2746,8 +2748,8 @@ sub choosesubstructure{
 
 	$s1 = $struct1;
 	$s2 = $struct2;
-	$struct1 =~ s#^(\w+) .*#\1#;
-	$struct2 =~ s#^.* (\w+)$#\1#;
+	$struct1 =~ s#^(\w+) .*#$1#;
+	$struct2 =~ s#^.* (\w+)$#$1#;
 
 	#check substructure table
 	$sth = $dbh->prepare("select * from ".$prefix."_substructure where substructure = '$struct1' and structure='$struct2' ");
@@ -2791,7 +2793,7 @@ sub choosesubstructure{
 	}
 
 	#check evidence 0: n-n phrase
-	my $q = "select * from ".$prefix."_sentence where (tag != 'ignore' or isnull(tag)) and originalsent rlike '$struct1 $struct2' ";
+	$q = "select * from ".$prefix."_sentence where (tag != 'ignore' or isnull(tag)) and originalsent rlike '$struct1 $struct2' ";
 	$sth = $dbh->prepare($q);
 	$sth->execute() or  warn "$sth->errstr\n";
 	if($sth->rows() >= 1){
@@ -2888,9 +2890,9 @@ sub removepairedbrackets{
 	my $temp;
 	do{
 		$temp = $sent;
-		$sent =~ s#\(([^\(\)]*?)\)#\1#g; #remove paired brackets
-		$sent =~ s#\[([^\[\]]*?)\]#\1#g;
-		$sent =~ s#\{([^\{\}]*?)\}#\1#g;
+		$sent =~ s#\(([^\(\)]*?)\)#$1#g; #remove paired brackets
+		$sent =~ s#\[([^\[\]]*?)\]#$1#g;
+		$sent =~ s#\{([^\{\}]*?)\}#$1#g;
 	}while($temp ne $sent);
 	return $sent;
 }
@@ -3010,7 +3012,7 @@ sub pronouncharactersubject{
 	my($sth, $pronptn, $charptn, $propptn, $sentid, $lead, $modifier, $tag, $sentence, $sth1, $sentcopy);
 	#character cases
 	#$tag = "ditto"; $modifier=""; #3/26/09
-	my $t = "(?:<\/?[A-Z]>)?";
+	#my $t = "(?:<\/?[A-Z]>)?";
 	my $t = "(?:<\/?[A-Z]+>)?"; #3/21/09
 	$charptn = '('.$CHARACTER.')';
 	$sth = $dbh->prepare("select sentid, lead, modifier, tag, sentence from ".$prefix."_sentence where (tag != 'ignore' or isnull(tag)) and lead rlike '(^| )$charptn( |\$)' or tag rlike '(^| )$charptn( |\$)' ");
@@ -3222,7 +3224,7 @@ sub remainnulltag{
 #pattern: one word sentence => boundary e.g. alternate; x x x pl cases
 #3/26/09
 sub markupbypos{
-	my ($sth, $sth1, $sentid, $sentence, @words, $ptn, $sth1, $modifier, $tag, $sign, $boundary);
+	my ($sth, $sth1, $sentid, $sentence, @words, $ptn, $modifier, $tag, $sign, $boundary);
 
 	print "::::::::::::::::::::::::::Markupbypos:\n" if $debug;
 	do{
@@ -3552,8 +3554,8 @@ sub tagallsentences{
 	while(($sentid, $sent) = $sth->fetchrow_array()){
 		$sent =~ s#<\S+?>##g; #remove any existing tag
 		$sent =~ tr/A-Z/a-z/;
-		$sent =~ s#\s*-\s*([a-z])#_\1#g;                   #cup_shaped, 3_nerved, 3-5 (-7)_nerved
-		$sent =~ s#(\W)# \1 #g;                            #add space around nonword char
+		$sent =~ s#\s*-\s*([a-z])#_$1#g;                   #cup_shaped, 3_nerved, 3-5 (-7)_nerved
+		$sent =~ s#(\W)# $1 #g;                            #add space around nonword char
     	$sent =~ s#\s+# #g;                                #multiple spaces => 1 space
     	$sent =~ s#^\s*##;                                 #trim
     	$sent =~ s#\s*$##;
@@ -3584,7 +3586,7 @@ sub tagallsentences{
 sub annotateSent{
 	my ($sent, $n, $o, $m, $b, $b1, $z) = @_;
 	#$b contains boundarywords, stopwords, numbers, and brackets.
-	$b =~ s#\b(_[a-z]+)\b#(?\:\\b\\d+)\1#g; #_nerved => (?:\b\d+)_nerved
+	$b =~ s#\b(_[a-z]+)\b#(?\:\\b\\d+)$1#g; #_nerved => (?:\b\d+)_nerved
 	$n =~ s#\b($NONS)\b##g; #4/20/09 "laterals" becomes lateral in tag, but lateral is a mb, not a n.
 	$o =~ s#\b($NONS)\b##g; #4/20/09
 	$n =~ s#\|+#|#g; #4/20/09
@@ -3605,23 +3607,23 @@ sub annotateSent{
 	$b =~ s#\|+#|#g; #4/20/09
 	$b1 =~ s#\|+#|#g; #4/20/09
 		
-	$sent =~ s#\b($z)\b#<Z>\1</Z>#g if $z =~ /\w/; #6/02/09
-	$sent =~ s#\b($o)\b#<O>\1</O>#g if $o =~ /\w/;
-	$sent =~ s#\b($n)\b#<N>\1</N>#g if $n =~ /\w/;
-	$sent =~ s#\b($m)\b#<M>\1</M>#g if $m =~ /\w/; #order matters, first tag <m>
-	$sent =~ s#\b($b)\b#<B>\1</B>#g if $b =~ /\w/; #then <b> so when double tagged <m><b>basal</b></m>
-	$sent =~ s#($b1)#<B>\1</B>#g if length $b1 > 0 ; #then <b> so when double tagged <m><b>basal</b></m>
+	$sent =~ s#\b($z)\b#<Z>$1</Z>#g if $z =~ /\w/; #6/02/09
+	$sent =~ s#\b($o)\b#<O>$1</O>#g if $o =~ /\w/;
+	$sent =~ s#\b($n)\b#<N>$1</N>#g if $n =~ /\w/;
+	$sent =~ s#\b($m)\b#<M>$1</M>#g if $m =~ /\w/; #order matters, first tag <m>
+	$sent =~ s#\b($b)\b#<B>$1</B>#g if $b =~ /\w/; #then <b> so when double tagged <m><b>basal</b></m>
+	$sent =~ s#($b1)#<B>$1</B>#g if length $b1 > 0 ; #then <b> so when double tagged <m><b>basal</b></m>
 	#$sent =~ s#([\(\)\[\]\{\}])#<b>\1</b>#gi; #tag parentheses <b>
 	#$sent =~ s#((?:\(? ?\d+\W*)+)# <b>\1</b> #gi; # tag all numbers <b>. Not here. Need to tag tokens one by one
 
-	$sent =~ s#<(\w)>\s*</\1>##g; #remove <></> and <> </>
-	$sent =~ s#(?:<[^<]+>)+($FORBIDDEN)(?:</[^<]+>)+#\1#g;
+	$sent =~ s#<(\w)>\s*</$1>##g; #remove <></> and <> </>
+	$sent =~ s#(?:<[^<]+>)+($FORBIDDEN)(?:</[^<]+>)+#$1#g;
 	return $sent;
 }
 
 
 sub separatemodifiertag{
-  my ($sth,$sth1, $tag, $ntag, $sth1, $sentid, @words, $modifier, $i, $j, $tmp, $sentence);
+  my ($sth,$sth1, $tag, $ntag, $sentid, @words, $modifier, $i, $j, $tmp, $sentence);
   $sth = $dbh->prepare("select sentid, tag, sentence from ".$prefix."_sentence where tag like '% %'"); #4/29/09
   #$sth = $dbh->prepare("select sentid, tag, sentence from ".$prefix."_sentence where (tag != 'ignore' or isnull(tag)) and !isnull(tag)");
   $sth->execute() or print STDOUT "$sth->errstr\n";
@@ -4318,13 +4320,15 @@ sub wrapupmarkup{
 #escape [] {} and () for mysql regexp, not perl regrexp.
 sub escape{
 	my $line = shift;
-	$line =~ s#([\(\)\[\]\{\}\.\|\-\+\?\'\*])#\\\\\1#g;
+	#$line =~ s#([\(\)\[\]\{\}\.\|\-\+\?\'\*])#\\\\\1#g;
+	$line =~ s#([\(\)\[\]\{\}\.\|\-\+\?\'\*])#\\\\$1#g;	
 	return $line;
 }
 
 sub escapePerlRegexp{
 	my $line = shift;
-	$line=~ s#([\(\)\[\]\{\}\.\|\-\+\?\*])#\\\1#g;
+	#$line=~ s#([\(\)\[\]\{\}\.\|\-\+\?\*])#\\\1#g;
+	$line=~ s#([\(\)\[\]\{\}\.\|\-\+\?\*])#\\$1#g;
 	return $line;
 }
 
@@ -4371,7 +4375,7 @@ sub assigndefaulttag{
   #take the first noun/nnp as default tag
   splice(@words, 4);
   my ($tag1, $tag2);
-  my $ptn = getPOSptn(@words);
+  $ptn = getPOSptn(@words);
   my $n1 = 5; #my $n2 = 5;
   if($ptn =~ /^(.*?[psn]).*/){
     $n1 = length($1);
@@ -5897,7 +5901,7 @@ sub plural{
 
 sub hideBrackets{
 	my $text = shift;
-	$text =~ s/([\(\)\[\]\{\}])/ \1 /g;
+	$text =~ s/([\(\)\[\]\{\}])/ $1 /g;
 
 	my $lround=0;
 	my $lsquare=0;
@@ -6038,7 +6042,7 @@ foreach my $info (@allsents){
   	$text =~ s# & # and #g;
   	$text = hideBrackets($text);#implemented in DeHyphenAFolder.java
   	$text =~ s#_#-#g;   #_ to -
-  	$text =~ s#\s+([:;\.])#\1#g;     #absent ; => absent;
+  	$text =~ s#\s+([:;\.])#$1#g;     #absent ; => absent;
   	$text =~ s#(\w)([:;\.])(\w)#$1$2 $3#g; #absent;blade => absent; blade
   	$text =~ s#(\d\s*\.)\s+(\d)#$1$2#g; #1 . 5 => 1.5
   	$text =~ s#(\sdiam)\s+(\.)#$1$2#g; #diam . =>diam.
@@ -6069,8 +6073,8 @@ foreach my $info (@allsents){
   		s#\[[^\]\[]*?[a-zA-Z][^\]\[]*?\]# #g;  #remove [.a.]
   		s#{[^{}]*?[a-zA-Z][^{}]*?}# #g; #remove {.a.}
     	#s#([^\d])\s*-\s*([^\d])#\1_\2#g;         #hyphened words: - =>_ to avoid space padding in the next step
-		s#\s*[-]+\s*([a-z])#_\1#g;                #cup_shaped, 3_nerved, 3-5 (-7)_nerved #5/30/09 add+
-		s#(\W)# \1 #g;                            #add space around nonword char
+		s#\s*[-]+\s*([a-z])#_$1#g;                #cup_shaped, 3_nerved, 3-5 (-7)_nerved #5/30/09 add+
+		s#(\W)# $1 #g;                            #add space around nonword char
     	#s#& (\w{1,5}) ;#&\1;#g;
     	s#\s+# #g;                                #multiple spaces => 1 space
     	s#^\s*##;                                 #trim
@@ -6236,8 +6240,7 @@ sub getOriginal{
 	}
 
 	my $pattern1 = $line;
-	$pattern1 =~ s#([)(\[\]}{.+?*])#\\\1#g; #escape )([]{}.+*?
-
+	$pattern1 =~ s#([)(\[\]}{.+?*])#\\$1#g; #escape )([]{}.+*?
 	$pattern1 =~ s/([-_])/ [-_]+ \\s*/g; #deal with _-, leave a space here for later conversion
 
 	$pattern1 =~s#[^-()\[\]<>_!`~\#$%^&/\\.,*;:0-9a-zA-Z?="'+@ ]#.#g; #replace non-word non-punc char with a .

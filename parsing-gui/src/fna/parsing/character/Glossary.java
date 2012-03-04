@@ -272,9 +272,8 @@ public class Glossary {
 	}
 	*/
 
-	@SuppressWarnings("unchecked")
-	public static ArrayList getCharacter(String state){
-		ArrayList chs = new ArrayList();
+	public static ArrayList<String> getCharacter(String state){
+		ArrayList<String> chs = new ArrayList<String>();
 		try{
 			Statement stmt = conn.createStatement();
 			String query = "select distinct category from "+tablename+" where term =\""+state+"\"";
@@ -305,9 +304,8 @@ public class Glossary {
 		return chs.toString().replaceFirst("\\|$", "");
 	}
 
-	@SuppressWarnings("unchecked")
-	public static void addInducedPair(String term, ArrayList categories){
-		Iterator it = categories.iterator();
+	public static void addInducedPair(String term, ArrayList<?> categories){
+		Iterator<?> it = categories.iterator();
 		while(it.hasNext()){
 			String cat = (String)it.next();
 			try{

@@ -4,8 +4,7 @@
 package conceptmapping;
 
 import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * @author Hong Updates
@@ -26,7 +25,7 @@ public class Test {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Test t = new Test();
+		//Test t = new Test();
 
 	}
 

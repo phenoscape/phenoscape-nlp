@@ -11,11 +11,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -162,8 +159,7 @@ public class SegmentIntegrator {
 		}
 	}
 	*/
-	
-	@SuppressWarnings("unused")
+
 	private void integrator() {
 		try{
 			Statement stmt = conn.createStatement();
@@ -213,9 +209,9 @@ public class SegmentIntegrator {
 				System.out.println(sentid[i]);
 				Document next = builder.build(this.projectfolder+"\\TestCase_Benchmark\\"+sentid[i]+".xml");
 				Element nextroot = next.getRootElement();
-				List testli = testroot.getChildren("structure");
-				List nextli = nextroot.getChildren("structure");
-				List testrel = testroot.getChildren("relation");
+				List<Element> testli = testroot.getChildren("structure");
+				List<Element> nextli = nextroot.getChildren("structure");
+				List<Element> testrel = testroot.getChildren("relation");
 				int flag = 0;
 				for(int j = 0; j < testli.size(); j++){ 
 					Element nextele = (Element)nextli.get(0);
@@ -225,18 +221,18 @@ public class SegmentIntegrator {
 							flag = 1;
 							testele.addContent(nextele.cloneContent());
 							String id = testele.getAttributeValue("id");
-							List nextrel = nextroot.getChildren("relation");
+							List<Element> nextrel = nextroot.getChildren("relation");
 							for(int k = 0; k < nextrel.size(); k++){
 								Element nextrelele = (Element)nextrel.get(k);
 								if(nextrelele.getAttributeValue("from").compareTo("o1")==0){
 									nextrelele.setAttribute("from", id);
 								}
 							}
-							List nextlistruct = nextroot.getChildren("structure");
+							List<Element> nextlistruct = nextroot.getChildren("structure");
 							for(int l = 1; l < nextlistruct.size(); l++){
 								Element nextstructele = (Element)nextlistruct.get(l);
 								nextstructele.setAttribute("id", "o"+(l+testli.size()));
-								List nextlirel = nextroot.getChildren("relation");
+								List<Element> nextlirel = nextroot.getChildren("relation");
 								for(int m = 0; m < nextlirel.size(); m++){
 									Element nextlirelele = (Element)nextlirel.get(m);
 									if(nextlirelele.getAttributeValue("from").compareTo("o"+(l+1))==0){
@@ -260,18 +256,18 @@ public class SegmentIntegrator {
 							flag = 1;
 							testele.addContent(nextele.cloneContent());
 							String id = testele.getAttributeValue("id");
-							List nextrel = nextroot.getChildren("relation");
+							List<Element> nextrel = nextroot.getChildren("relation");
 							for(int k = 0; k < nextrel.size(); k++){
 								Element nextrelele = (Element)nextrel.get(k);
 								if(nextrelele.getAttributeValue("from").compareTo("o1")==0){
 									nextrelele.setAttribute("from", id);
 								}
 							}
-							List nextlistruct = nextroot.getChildren("structure");
+							List<Element> nextlistruct = nextroot.getChildren("structure");
 							for(int l = 1; l < nextlistruct.size(); l++){
 								Element nextstructele = (Element)nextlistruct.get(l);
 								nextstructele.setAttribute("id", "o"+(l+testli.size()));
-								List nextlirel = nextroot.getChildren("relation");
+								List<Element> nextlirel = nextroot.getChildren("relation");
 								for(int m = 0; m < nextlirel.size(); m++){
 									Element nextlirelele = (Element)nextlirel.get(m);
 									if(nextlirelele.getAttributeValue("from").compareTo("o"+(l+1))==0){
@@ -294,11 +290,11 @@ public class SegmentIntegrator {
 					}
 				}
 				if(flag == 0){
-					List nextlistruct = nextroot.getChildren("structure");
+					List<Element> nextlistruct = nextroot.getChildren("structure");
 					for(int l = 0; l < nextlistruct.size(); l++){
 						Element nextstructele = (Element)nextlistruct.get(l);
 						nextstructele.setAttribute("id", "o"+(l+1+testli.size()));
-						List nextlirel = nextroot.getChildren("relation");
+						List<Element> nextlirel = nextroot.getChildren("relation");
 						for(int m = 0; m < nextlirel.size(); m++){
 							Element nextlirelele = (Element)nextlirel.get(m);
 							if(nextlirelele.getAttributeValue("from").compareTo("o"+(l+1))==0){
@@ -309,7 +305,7 @@ public class SegmentIntegrator {
 							}	
 						}
 					}
-					List nextrel = nextroot.getChildren("relation");
+					List<Element> nextrel = nextroot.getChildren("relation");
 					for(int n = 0; n < nextrel.size(); n++){
 						Element nextrelele = (Element)nextrel.get(n);
 						nextrelele.setAttribute("id", "R"+(n+1+testrel.size()));

@@ -57,7 +57,7 @@ public class VolumeTransformer extends Thread {
 	private String conservednamestatement ="(name conserved|nom. cons.)";
 	private static final Logger LOGGER = Logger.getLogger(VolumeTransformer.class);
 	private VolumeTransformerDbAccess vtDbA = null;	
-	private Hashtable ranks;
+	//private Hashtable<?, ?> ranks;
 
 	private String taxontable = null;
 	private String authortable = null;
@@ -122,7 +122,7 @@ public class VolumeTransformer extends Thread {
 	}
 	public void transform() throws ParsingException {
 		//add start
-		List idlist = new ArrayList();
+		List<String> idlist = new ArrayList<String>();
 		int iteratorcount = 0;
 		String state = "", preid = "", id = "", nextstep = "";
 		String split[] = new String[3];
@@ -154,12 +154,12 @@ public class VolumeTransformer extends Thread {
 
 				Element treatment = new Element("treatment");
 				Element e2 = new Element("key");
-				List plist = XPath.selectNodes(root, "/treatment/paragraph");
+				List<Element> plist = XPath.selectNodes(root, "/treatment/paragraph");
 				int textcount = 0, nextstepid = 0;
 				String ptexttag ="";
 				String idstorage = "1";
 				
-				for (Iterator iter = plist.iterator(); iter.hasNext();) {
+				for (Iterator<Element> iter = plist.iterator(); iter.hasNext();) {
 					Element pe = (Element) iter.next();
 					String style = pe.getChildText("style");
 					String text = getChildText(pe, "text");
@@ -321,7 +321,7 @@ public class VolumeTransformer extends Thread {
 				// output the description part to Registry.descriptions 08/04/09
 				List<Element> textList = XPath.selectNodes(treatment, "./description");
 				StringBuffer buffer = new StringBuffer("");
-				for (Iterator ti = textList.iterator(); ti.hasNext();) {
+				for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 					Element wt = (Element) ti.next();
 					buffer.append(wt.getText()).append(" ");
 				}
@@ -331,7 +331,7 @@ public class VolumeTransformer extends Thread {
 				// output the habitat part to Registry.habitat 08/04/09
 				textList = XPath.selectNodes(treatment, "./habitat");
 				buffer = new StringBuffer("");
-				for (Iterator ti = textList.iterator(); ti.hasNext();) {
+				for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 					Element wt = (Element) ti.next();
 					buffer.append(wt.getText()).append(" ");
 				}
@@ -551,7 +551,7 @@ public class VolumeTransformer extends Thread {
 		// TODO Auto-generated method stub
 		StringBuffer buffer=new StringBuffer();
 		List<Element> textList = XPath.selectNodes(pe, "./"+string);
-		for (Iterator ti = textList.iterator(); ti.hasNext();) {
+		for (Iterator <Element> ti = textList.iterator(); ti.hasNext();) {
 			Element wt = (Element) ti.next();
 			buffer.append(wt.getText()).append(" ");
 		}

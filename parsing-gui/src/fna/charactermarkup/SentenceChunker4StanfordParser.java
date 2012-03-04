@@ -1122,7 +1122,7 @@ end procedure
 				if(!CC.getAttributeValue("text").matches("(and|or|plus)")){
 					isList = false;
 				}
-				List<Element> CCs = StanfordParser.path19.selectNodes(NP, "CC");
+				List<Element> CCs = StanfordParser.path19.selectNodes(NP);
 				if(CCs.size() > 1){
 					isList = false;
 				}

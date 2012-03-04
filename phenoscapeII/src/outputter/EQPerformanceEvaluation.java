@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**
@@ -25,6 +23,7 @@ import java.util.regex.Pattern;
  * 
  * notes: basibranchial 2 absent => basibranchial 2 cartilage absent + basibranchial 2 bone absent
  */
+@SuppressWarnings("unused")
 public class EQPerformanceEvaluation {
 
 	private Connection conn;
@@ -358,7 +357,6 @@ public class EQPerformanceEvaluation {
 	 * @param astate: EQs in answer key for a state
 	 * @throws SQLException 
 	 */
-	@SuppressWarnings("unchecked")
 	private void compareEQs() throws SQLException {
 		//raw
 		int totalrawgenerated = 0;
@@ -695,7 +693,7 @@ public class EQPerformanceEvaluation {
 	public static void main(String[] args) {
 		String database = "biocreative2012";
 		//String testtable = "run0_result";
-		String testtable = "xml2eq_result";
+		String testtable = "test2_xml2eq_result";
 		String answertable = "internalworkbench";
 		String prtable = "evaluationrecords";
 		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);

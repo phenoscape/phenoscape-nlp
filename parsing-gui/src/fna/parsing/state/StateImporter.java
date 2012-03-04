@@ -11,9 +11,8 @@ public class StateImporter {
 			this.states.add(new State((String)it.next()));
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
-	public Set getStates(){
+
+	public Set<State> getStates(){
 		return states;
 	}
 }

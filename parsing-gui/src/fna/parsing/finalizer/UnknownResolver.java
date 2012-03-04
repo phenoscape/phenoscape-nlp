@@ -20,7 +20,6 @@ import fna.parsing.character.CharacterLearner;
  * 
  * run this class to resolve the unknown tags applied to some of the clauses
  */
-@SuppressWarnings("unchecked")
 public class UnknownResolver {
 	private static String sentencetable;
 	//private static String structuretable;
@@ -28,7 +27,7 @@ public class UnknownResolver {
 	//private static String glosstable;
 	private static String postable;
 	
-	private Hashtable unmarked = new Hashtable();
+	private Hashtable<String, String> unmarked = new Hashtable<String, String>();
 //	private static String username = ApplicationUtilities.getProperty("database.username");
 //	private static String password = ApplicationUtilities.getProperty("database.password");
 	private Connection conn = null;
@@ -83,7 +82,7 @@ public class UnknownResolver {
 			LOGGER.error("Error in UnknownResolver: markupUnknows", e);
 			e.printStackTrace();
 		}
-		Enumeration en = unmarked.keys();
+		Enumeration<String> en = unmarked.keys();
 		while(en.hasMoreElements()){
 			System.out.println(en.nextElement().toString());
 		}

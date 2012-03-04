@@ -67,7 +67,6 @@ import org.eclipse.swt.widgets.Display;
  *markup character: may need to merge saved stategroups and checked states. eg. > entire or with 3 broad ,
  */
 
-@SuppressWarnings({ "unchecked", "static-access" })
 public class StateCollector  {
 	static protected Connection conn = null;
 	//static protected String database = null;
@@ -96,7 +95,7 @@ public class StateCollector  {
 	StateCollector(Connection conn, String tableprefix, String glosstable, Display display, StyledText charLog){
 		this.statematrix = new StateMatrix(conn, tableprefix,glosstable);
 		this.tableprefix = tableprefix;
-		this.conn = conn;
+		StateCollector.conn = conn;
 		this.glosstable = glosstable;
 		//this.database = database;
 		//collect(database);
@@ -110,7 +109,7 @@ public class StateCollector  {
 			this.statematrix = new StateMatrix(conn, tableprefix, si.getStates(),glosstable);
 		}
 		this.tableprefix = tableprefix;
-		this.conn = conn;
+		StateCollector.conn = conn;
 		this.glosstable = glosstable;
 		//this.database = database;
 		//collect(database);
@@ -134,7 +133,7 @@ public class StateCollector  {
 			e.printStackTrace();
 		}
 		
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(this.conn, this.tableprefix, this.glosstable, true, display, charLog);//tag organ names
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(StateCollector.conn, this.tableprefix, this.glosstable, true, display, charLog);//tag organ names
 		this.sentences = sosm.markSentences();
 		parseSentences();//create StateGroups 
 		//System.out.println(statematrix.toString());
@@ -173,7 +172,7 @@ public class StateCollector  {
 	}
 
 	protected String doToList(String source, String sent){
-		Pattern tolistp = Pattern.compile(this.tolist);
+		Pattern tolistp = Pattern.compile(StateCollector.tolist);
 		Matcher m = tolistp.matcher(sent);
 		if(m.find()){
 			String seg = sent.substring(m.start(), m.end());
@@ -197,13 +196,13 @@ public class StateCollector  {
 			    }
 			    System.out.println(t1+" and "+t2+" are in the same group [tolist] in ["+sent+"]\n");
 		    }
-		    sent = sent.replaceFirst(this.tolist, "");
+		    sent = sent.replaceFirst(StateCollector.tolist, "");
 		}
 	    return sent;
 	}
 	
 	protected String doTo(String source, String sent){
-		Pattern top = Pattern.compile(this.to);
+		Pattern top = Pattern.compile(StateCollector.to);
 		Matcher m = top.matcher(sent);
 		if(m.find()){
 			String seg = sent.substring(m.start(), m.end());
@@ -233,14 +232,14 @@ public class StateCollector  {
 			    }
 			
 			}
-			sent = sent.replaceFirst(this.to, "");
+			sent = sent.replaceFirst(StateCollector.to, "");
 		}
 	    return sent;
 	}
 	
 	protected String doList(String source, String sent){
 
-		Pattern listp = Pattern.compile(this.list);
+		Pattern listp = Pattern.compile(StateCollector.list);
 		Matcher m = listp.matcher(sent);
 		if(m.find()){
 			String seg = sent.substring(m.start(), m.end());
@@ -269,7 +268,7 @@ public class StateCollector  {
 			    	}
 			    }
 			}
-			sent = sent.replaceFirst(this.list, "");
+			sent = sent.replaceFirst(StateCollector.list, "");
 		}
 	    return sent;
 	}
@@ -281,7 +280,7 @@ public class StateCollector  {
 	 * @return
 	 */
 	protected String doSimple(String source, String sent){
-		Pattern simplep = Pattern.compile(this.simple);
+		Pattern simplep = Pattern.compile(StateCollector.simple);
 		Matcher m = simplep.matcher(sent);
 		if(m.find()){
 			String seg = sent.substring(m.start(), m.end());
@@ -310,7 +309,7 @@ public class StateCollector  {
 			    }
 				System.out.println(" are in the same group [simple] in ["+sent+"]\n");
 			}
-	        sent = sent.replaceFirst(this.simple, "");
+	        sent = sent.replaceFirst(StateCollector.simple, "");
 		}
 	    return sent;
 	}

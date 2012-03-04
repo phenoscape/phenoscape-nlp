@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import fna.parsing.ApplicationUtilities;
-@SuppressWarnings("unchecked")
+
 public class HabitatParserDbAccessor {
 
 	/**
@@ -93,7 +93,7 @@ public class HabitatParserDbAccessor {
 		
 	}
 
-	public ArrayList selectRecords(String select, String where, String groupby, String orderby) {
+	public ArrayList<String> selectRecords(String select, String where, String groupby, String orderby) {
 		ArrayList<String> results= new ArrayList<String>();
 		String query = "select  "+select+" from "+this.prefix+"_habitat ";
 		if(where.length()>0){

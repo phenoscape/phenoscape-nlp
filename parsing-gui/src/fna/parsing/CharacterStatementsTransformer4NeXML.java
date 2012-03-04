@@ -34,7 +34,7 @@ public class CharacterStatementsTransformer4NeXML extends
 	 * @param seeds
 	 */
 	public CharacterStatementsTransformer4NeXML(ProcessListener listener,
-			Display display, Text perllog, ArrayList seeds) {
+			Display display, Text perllog, ArrayList<String> seeds) {
 		super(listener, display, perllog, seeds);
 		// TODO Auto-generated constructor stub
 	}
@@ -56,6 +56,7 @@ public class CharacterStatementsTransformer4NeXML extends
 	 * @param folder
 	 * @param fname
 	 */
+	@SuppressWarnings("unchecked")
 	protected void outputTo(File desfolder, File chafolder, File trafolder, File file) {
 		try{
 			String fname = file.getName();

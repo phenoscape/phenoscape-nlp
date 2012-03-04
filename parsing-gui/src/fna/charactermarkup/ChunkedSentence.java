@@ -65,7 +65,6 @@ public class ChunkedSentence {
 	public static Hashtable<String, String> eqcharacters = new Hashtable<String, String>();
 	private boolean inSegment = false;
 	private boolean rightAfterSubject = false;
-	@SuppressWarnings("unused")
 	private int sentid = -1;
 	private ArrayList<String> pastpointers = new ArrayList<String>();
 
@@ -239,7 +238,7 @@ public class ChunkedSentence {
 		for(int i = 0; i < this.chunkedtokens.size(); i++){
 			String t = this.chunkedtokens.get(i);
 			if(t.contains("-")) continue; //check 751
-			if(!t.contains("[") && this.verbs.contains(t)){
+			if(!t.contains("[") && ChunkedSentence.verbs.contains(t)){
 				recoverVPChunk(i);
 			}else if(!t.contains("[") && (t.endsWith("ing")|| t.endsWith("ing}"))){
 				 if(connects2organs(i)){
@@ -581,7 +580,7 @@ public class ChunkedSentence {
 				int indexOfthose = m.group(1).split("\\s+").length;
 				//in case there are to~12~cm, need to adjust indexOfthose
 				String textbeforethose = m.group(1);
-				Pattern pt = Pattern.compile("(.*?)\\b(to~\\d+~(?:"+this.units+").*?)\\b(.*)");
+				Pattern pt = Pattern.compile("(.*?)\\b(to~\\d+~(?:"+ChunkedSentence.units+").*?)\\b(.*)");
 				Matcher mt = pt.matcher(textbeforethose);
 				while(mt.matches()){
 					textbeforethose = mt.group(3);
@@ -663,6 +662,7 @@ public class ChunkedSentence {
 	 * ==>
 	 * l[(mid) and (distal) (cauline)] {smaller}
 	 */
+	@SuppressWarnings("unused")
 	private void removeStateFromList() {
 		for(int i = 0; i<this.chunkedtokens.size(); i++){
 			String t = this.chunkedtokens.get(i);
@@ -864,7 +864,7 @@ public class ChunkedSentence {
 		String chunk = "to~"+this.chunkedtokens.get(i+1)+"~"; //"to"
 		if(this.chunkedtokens.size()>i+2){
 			String unit = this.chunkedtokens.get(i+2).replaceAll("\\W", " ").trim();
-			if(unit.matches("("+this.units+")")){
+			if(unit.matches("("+ChunkedSentence.units+")")){
 				chunk += unit;
 				this.chunkedtokens.set(i+2, chunk);
 				this.chunkedtokens.set(i+1, "");
@@ -1291,6 +1291,7 @@ public class ChunkedSentence {
 	 * PrepChunk, IVerbChunk (Intransitive verb chunk, followed by a preposition), VerbChunk, ADJChunk
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public Chunk getNextChunk(){
 		Chunk chunk = null;
 		String token = this.chunkedtokens.get(pointer);////a token may be a word or a chunk of text
@@ -1466,6 +1467,7 @@ public class ChunkedSentence {
 	}
 	
 	
+	@SuppressWarnings("rawtypes")
 	private Chunk composeChunk() {
 		Chunk chunk;
 		String token;
@@ -2118,6 +2120,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 	 * @param group: {loosely} {arachnoid}
 	 * @return:m[loosely] architecture[arachnoid]
 	 */
+	@SuppressWarnings("unused")
 	private String reformCharacterState(String charstring) {
 		String result = "";
 		String first = "";
@@ -2337,6 +2340,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 	 * @param taggedtext
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private String formatSubject(String subject, String taggedtext) {
 		String[] tokens = subject.split("\\s+");
 		String formatted = "";
@@ -2378,7 +2382,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 	 * @param sentmod basal [leaf]
 	 * @return
 	 */
-	private String addSentmod(String subject, String sentmod) {
+	/*private String addSentmod(String subject, String sentmod) {
 		if(sentmod.indexOf("[")>=0){
 			String[] tokens = subject.split("\\s+");
 			String substring = "";
@@ -2392,7 +2396,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			return substring;
 		}
 		return subject;
-	}
+	}*/
 	/**
 	 * 
 	 * @param begainindex (inclusive)

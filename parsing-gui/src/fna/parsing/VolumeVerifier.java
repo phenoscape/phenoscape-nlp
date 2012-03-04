@@ -175,11 +175,11 @@ public class VolumeVerifier extends Thread {
 				Element root = doc.getRootElement();
 
 				// find all <style> tags
-				List styleList = XPath.selectNodes(root,
+				List<Element> styleList = XPath.selectNodes(root,
 						"/treatment/paragraph/style");
 
 				// iterate over the <style> tags
-				for (Iterator iter = styleList.iterator(); iter.hasNext();) {
+				for (Iterator<Element> iter = styleList.iterator(); iter.hasNext();) {
 					Element se = (Element) iter.next();
 					String style = se.getText();
 					String mapping = props.getProperty(style);
@@ -377,7 +377,7 @@ public class VolumeVerifier extends Thread {
 			List<Element> textList = XPath.selectNodes(pe, "./text");
 			List<Element> additionalList = XPath.selectNodes(pe, "./text[@case='"+Registry.TribeGenusNameCase+"']");
 			textList.addAll(additionalList);
-			for (Iterator ti = textList.iterator(); ti.hasNext();) {
+			for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 				Element wt = (Element) ti.next();
 				buffer.append(wt.getText()).append(" ");
 			}

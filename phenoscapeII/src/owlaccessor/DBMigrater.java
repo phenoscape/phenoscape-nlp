@@ -49,7 +49,7 @@ public class DBMigrater {
 	 * @param ontoURI
 	 *            the ontology uri
 	 */
-	public void migrate(String dbName, String tabName, String ontoURI) {
+	public void migrate(String dbName, String tabName, String ontoURI) throws Exception {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
@@ -177,8 +177,11 @@ public class DBMigrater {
 //		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
 //		String tname = "ontoVAO";
 	
-
-		dbm.migrate("biocreative2012", tname, url);
+		try{
+			dbm.migrate("biocreative2012", tname, url);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		//dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
 		//System.out.println("DONE!");

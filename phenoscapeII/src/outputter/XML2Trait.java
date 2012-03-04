@@ -42,6 +42,7 @@ public class XML2Trait {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void outputTraits(){
 		File[] xmlfiles = this.source.listFiles();
 		try{

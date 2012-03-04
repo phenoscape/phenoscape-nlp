@@ -42,12 +42,6 @@
 	<classpathentry kind="lib" path="lib/baseline.jar"/>
 	<classpathentry kind="lib" path="lib/formattedtext-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.6.1.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/com.ibm.icu_4.4.2.v20110208.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding_1.4.0.I20110111-0800.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.beans_1.2.100.I20100824-0800.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.observable_1.4.0.I20110222-0800.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.core.databinding.property_1.4.0.I20110222-0800.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/eclipse/plugins/org.eclipse.jface.databinding_1.5.0.I20100907-0800.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/PhenoscapeII"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

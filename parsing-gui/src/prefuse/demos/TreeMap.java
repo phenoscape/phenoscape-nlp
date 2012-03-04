@@ -299,7 +299,7 @@ public class TreeMap extends Display {
         }
         @SuppressWarnings("unchecked")
 		public void run(double frac) {
-            Iterator iter = m_vis.items(m_group);
+            Iterator<DecoratorItem> iter = m_vis.items(m_group);
             while ( iter.hasNext() ) {
                 DecoratorItem item = (DecoratorItem)iter.next();
                 VisualItem node = item.getDecoratedItem();

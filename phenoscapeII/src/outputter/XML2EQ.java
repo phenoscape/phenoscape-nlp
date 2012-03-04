@@ -135,9 +135,10 @@ public class XML2EQ {
 	}
 
 	
-	public void outputEQs(){
+	@SuppressWarnings("unchecked")
+	public void outputEQs() throws Exception{
 		File[] xmlfiles = this.source.listFiles();
-		try{
+		//try{
 			for(File f: xmlfiles){
 				String src = f.getName();
 				SAXBuilder builder = new SAXBuilder();
@@ -167,9 +168,9 @@ public class XML2EQ {
 				outputEQs4CharacterUnit();
 			}
 			discardNonTestCharacterUnits();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		//}catch(Exception e){
+		//	e.printStackTrace();
+		//}
 	}
 	
 	/**
@@ -179,8 +180,8 @@ public class XML2EQ {
 	 * @param root
 	 */
 	@SuppressWarnings("unchecked")
-	private void removeCategoricalRanges(Element root) {
-		try{
+	private void removeCategoricalRanges(Element root) throws Exception{
+		
 			List<Element> charas = this.path14.selectNodes(root);
 			for(Element chara: charas){
 				if(!chara.getAttributeValue("from").matches("[\\d\\.]+") && !chara.getAttributeValue("to").matches("[\\d\\.]+")){
@@ -217,10 +218,6 @@ public class XML2EQ {
 					}				
 				}
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
 	}
 
 
@@ -230,8 +227,7 @@ public class XML2EQ {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private void with2partof(Element root) {
-		try{
+	private void with2partof(Element root) throws Exception {
 			List<Element> withs = path13.selectNodes(root);
 			for(Element with: withs){
 				String to = with.getAttributeValue("to");
@@ -240,23 +236,15 @@ public class XML2EQ {
 				with.setAttribute("to", from);
 				with.setAttribute("from", to);
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 
 	/**
 	 * use workbench to select/keep only the ones in the workbench
 	 */
-	private void discardNonTestCharacterUnits() {
-		try{
+	private void discardNonTestCharacterUnits() throws Exception {
 			Statement stmt = conn.createStatement();
-			stmt.execute("delete from "+this.outputtable+" where source not in (select source from "+this.benchmarktable+ ")");			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
+			stmt.execute("delete from "+this.outputtable+" where source not in (select source from "+this.benchmarktable+ ")");					
 	}
 
 
@@ -267,9 +255,10 @@ public class XML2EQ {
 	 * @param characterstatements: character statements that contain 1 structure "whole_organism". This should not be possible. Remark it as structure/entity
 	 * @param root
 	 */
+	@SuppressWarnings("unchecked")
 	private void repairWholeOrganismOnlyCharacterStatements(
-			List<Element> characterstatements, Element root) {
-		try{
+			List<Element> characterstatements, Element root) throws Exception{
+		
 			for(Element statement: characterstatements){
 				List<Element> structures = path3.selectNodes(statement);
 				if(structures.size()==0){
@@ -291,9 +280,6 @@ public class XML2EQ {
 					}
 				}
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 		
 	}
 
@@ -322,7 +308,7 @@ public class XML2EQ {
 	
 	
 	 */
-	private void outputEQs4CharacterUnit() {
+	private void outputEQs4CharacterUnit() throws Exception {
 		//sanity check has problems
 		
 		/*for(String stateid: stateids){
@@ -422,6 +408,7 @@ public class XML2EQ {
 	 * EQ::[E]lateral wall [Q]ridge [just slight] [EL]metapterygoid channel
 	 * @param problems: EQs failed the sanity check
 	 */
+	@SuppressWarnings("unused")
 	private void repairProblemEQs(ArrayList<Hashtable<String,String>> problems) {
 		//to repair the first EQ
 		//EQ #2 in the above example
@@ -461,8 +448,9 @@ public class XML2EQ {
 	 * @return
 	 * 
 	 */
-	private void integrateWholeOrganism4CharacterStatements(List<Element> characterstatements, Element root) {
-		try{
+	@SuppressWarnings("unchecked")
+	private void integrateWholeOrganism4CharacterStatements(List<Element> characterstatements, Element root) throws Exception {
+		
 			for(Element statement: characterstatements){
 				List<Element> wholeOrgans = path5.selectNodes(statement);
 				if(wholeOrgans.size()>0 && statement.getChildren("structure").size()>wholeOrgans.size()){
@@ -471,7 +459,7 @@ public class XML2EQ {
 					ArrayList<String> woids = new ArrayList<String>();
 					for(Element wo: wholeOrgans){
 						woids.add(wo.getAttributeValue("id"));
-						chars.addAll(wo.getChildren("character"));
+						chars.addAll((List<Element>)wo.getChildren("character"));
 						wo.detach();
 					}
 					//integration
@@ -488,9 +476,7 @@ public class XML2EQ {
 					}
 				}
 			}	
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 	}
 
 
@@ -524,7 +510,7 @@ public class XML2EQ {
     </statement>
 	 * @param statements
 	 */
-	private void createEQs4CharacterUnit(List<Element> charstatements, List<Element> states, String src, Element root) {
+	private void createEQs4CharacterUnit(List<Element> charstatements, List<Element> states, String src, Element root) throws Exception {
 	
 		this.addEQ4CharacterStatement(src, charstatements);
 		//step 0: decide if a character is a binary (yes/no, true/false, rarely/usually types of states)
@@ -570,8 +556,8 @@ public class XML2EQ {
 	@SuppressWarnings("unchecked")
 	private void createEQs4CharacterUnitInSerenoStyle(
 			List<Element> charstatements, List<Element> states, String src,
-			Element root) {
-		try{
+			Element root) throws Exception {
+		
 			//collect category="character" terms from the glossarytable
 			if(this.characters==null){
 				Statement stmt = conn.createStatement();
@@ -701,9 +687,6 @@ public class XML2EQ {
 				//deal with other structures
 				
 			}			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 
@@ -725,9 +708,9 @@ public class XML2EQ {
 	 * @return all character value as a string
 	 */
 	@SuppressWarnings("unchecked")
-	private String charactersAsString(Element root, Element firststruct) {
+	private String charactersAsString(Element root, Element firststruct) throws Exception{
 		String chstring = "";
-		try{
+		
 			List<Element> chars = path8.selectNodes(firststruct);
 			for(Element chara : chars){
 				String m = chara.getAttribute("modifier")==null? "" : chara.getAttributeValue("modifier");
@@ -737,9 +720,7 @@ public class XML2EQ {
 				}
 			}
 			chstring.trim();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		return chstring;
 	}
 
@@ -789,6 +770,7 @@ public class XML2EQ {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private void createEQsFromBinaryStates(List<Element> states, String src,
 			ArrayList<Hashtable<String, String>> EQs) {
 		//copy or negate the EQ for each state
@@ -844,12 +826,12 @@ public class XML2EQ {
 	 */
 	@SuppressWarnings("unchecked")
 	private ArrayList<Hashtable<String, String>> processBinaryCharacter(
-			List<Element> chars, String src, Element root) {
+			List<Element> chars, String src, Element root) throws Exception{
 		//these EQs will be transformed into state EQs
 		ArrayList<Hashtable<String, String>> EQs = new ArrayList<Hashtable<String, String>>();
 		Hashtable<String, String> EQ = new Hashtable<String, String>();
 		initEQHash(EQ);
-		try{
+		
 			//get the first structure element
 			Element firststruct = (Element)path3.selectSingleNode(chars.get(0));
 			//TODO: what if firststruct == null?
@@ -878,7 +860,8 @@ public class XML2EQ {
 				toname = toname+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
 				toname = toname.replaceFirst(",$", "");
 				if(relname.matches("\\(("+positionprep+")\\).*")){
-					EQ.put("entitylocator", toname);//TODO chained part_of relations??
+					if(relname.contains("between")) EQ.put("entitylocator", "between "+toname);//TODO chained part_of relations??
+					else EQ.put("entitylocator", toname);
 					this.keyentitylocator = toname;
 				}else if(EQ.get("quality").compareTo("")==0){//quality not found, turn relation to quality, toid to qualitymodifier
 					relationalquality += relname+"+";
@@ -895,9 +878,7 @@ public class XML2EQ {
 						EQs.add((Hashtable<String, String>)EQ.clone());
 				}
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		return EQs;
 	}
 
@@ -932,9 +913,9 @@ public class XML2EQ {
 	 * @param states
 	 * @return
 	 */
-	private boolean isBinary(List<Element> states) {
+	private boolean isBinary(List<Element> states) throws Exception{
 		if(states.size()==0) return false;
-		try{
+		
 		for(Element state: states){
 			Element text = (Element)path9.selectSingleNode(state);
 			String value = text.getTextTrim();
@@ -942,9 +923,7 @@ public class XML2EQ {
 				return false;
 			}
 		}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		return true;
 	}
 
@@ -957,10 +936,10 @@ public class XML2EQ {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private Element processCharacter(List<Element> chars, String src, Element root) {
+	private Element processCharacter(List<Element> chars, String src, Element root) throws Exception{
 		Element key = null;
 		//ArrayList<Element> purge = new ArrayList<Element>();
-		try{
+		
 			key = (Element)path3.selectSingleNode(chars.get(0));
 			//TODO: what if key is null
 			keyentity = this.getStructureName(root, key.getAttributeValue("id"));
@@ -996,9 +975,7 @@ public class XML2EQ {
 				List<Element> relations = path10.selectNodes(statement);
 				createEQsfromStatement(src, root, text, structures, relations, true);
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		
 		return key;
 	}
@@ -1012,8 +989,8 @@ public class XML2EQ {
 	 * @param states
 	 */
 	@SuppressWarnings("unchecked")
-	private void createEQsFromStateStatements(Element key, List<Element> states, String src, Element root) {
-		try{
+	private void createEQsFromStateStatements(Element key, List<Element> states, String src, Element root) throws Exception{
+		
 			for(Element statement : states){
 				//fill whole_organism place-holder with a real structure
 				List<Element> whole_organism = path5.selectNodes(statement);
@@ -1030,13 +1007,11 @@ public class XML2EQ {
 				//List<Element> structures = path6.selectNodes(statement, ".//structure");
 				List<Element> structures = selectEntityStructures(statement);
 				//relations should include those in this state statement and those in character statement
-				List<Element> relations = path10.selectNodes(statement,".//relation"); 
+				List<Element> relations = path10.selectNodes(statement); 
 				relations.addAll(path11.selectNodes(root));
 				createEQsfromStatement(src, root, text, structures, relations, false);
 			}			
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}		
+	
 	}
 
 
@@ -1046,9 +1021,9 @@ public class XML2EQ {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private List<Element> selectEntityStructures(Element statement) {
+	private List<Element> selectEntityStructures(Element statement) throws Exception {
 		ArrayList<Element> selected = new ArrayList<Element>();
-		try{
+		
 			List<Element> allstructs = path12.selectNodes(statement);
 			for(Element struct: allstructs){
 				if(struct.getChildren().size()>0) selected.add(struct);
@@ -1058,9 +1033,7 @@ public class XML2EQ {
 					if(from.size()>0) selected.add(struct);
 				}
 			}						
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		return selected;
 	}
 
@@ -1073,17 +1046,13 @@ public class XML2EQ {
 	 */
 	@SuppressWarnings("unchecked")
 	private void changeIdsInRelations(String oldid,
-			String newid, Element root) {
-		try{
+			String newid, Element root) throws Exception {
+		
 			List<Element> rels = XPath.selectNodes(root, "//relation[@to='"+oldid+"'|@from='"+oldid+"']");
 			for(Element rel : rels){
 				if(rel.getAttributeValue("to").compareTo(oldid)==0) rel.setAttribute("to", newid);
 				if(rel.getAttributeValue("from").compareTo(oldid)==0) rel.setAttribute("from", newid);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
+			}		
 	}
 
 
@@ -1097,7 +1066,7 @@ public class XML2EQ {
 	 * @param keyelement if true, save its entitylocator info in the field entitylocator
 	 */
 	private void createEQsfromStatement(String src, Element root,  Element textelement, List<Element> structures,
-			List<Element> relations, boolean keyelement) {
+			List<Element> relations, boolean keyelement) throws Exception{
 		String text = textelement.getText();
 		//System.out.println("text::"+text);
 		
@@ -1134,9 +1103,9 @@ public class XML2EQ {
 		return rels;
 	}
 
-	private void insertEQs2Table(Hashtable<String, String> EQ) {
+	private void insertEQs2Table(Hashtable<String, String> EQ) throws Exception {
 		Enumeration<String> fields = EQ.keys();
-		try{
+		
 			//print
 			String entity = EQ.get("entity");
 			EQ.put("entity", format(entity));
@@ -1190,9 +1159,7 @@ public class XML2EQ {
 					"("+valuestring+")";
 			Statement stmt = conn.createStatement();
 			stmt.execute(q);			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 	}
 	
 	
@@ -1380,9 +1347,10 @@ public class XML2EQ {
 	 * @param xpath: "//relation[@name='part_of'][@from='"+structid+"']"
 	 * @return
 	 */
-	private String getStructureChain(Element root, String xpath){
+	@SuppressWarnings("unchecked")
+	private String getStructureChain(Element root, String xpath) throws Exception{
 		String path = "";
-		try{
+		
 			List<Element> relations = XPath.selectNodes(root, xpath);
 			xpath = "";
 			for(Element r: relations){
@@ -1399,9 +1367,6 @@ public class XML2EQ {
 			}else{
 				return path.replaceFirst(",$", "");
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 		return path.replaceFirst(",$", "");
 	}
 
@@ -1411,9 +1376,9 @@ public class XML2EQ {
 	 * @param structids: 1 or more structids
 	 * @return
 	 */
-	private String getStructureName(Element root, String structids) {
+	private String getStructureName(Element root, String structids) throws Exception {
 		String result = "";
-		try{
+		
 			String[] ids = structids.split("\\s+");
 			for(String structid: ids){
 				Element structure = (Element)XPath.selectSingleNode(root, "//structure[@id='"+structid+"']");
@@ -1425,9 +1390,7 @@ public class XML2EQ {
 				}
 				result += sname+",";
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+
 		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
 		return result;
 	}
@@ -1441,7 +1404,7 @@ public class XML2EQ {
 	 * @param keyelement TODO
 	 */
 	@SuppressWarnings({ "unchecked", "static-access" })
-	private void createEQs4Structure(String src, Element root, String text, Element struct, Hashtable<String, String> relations, boolean keyelement) {
+	private void createEQs4Structure(String src, Element root, String text, Element struct, Hashtable<String, String> relations, boolean keyelement) throws Exception{
 		if(keyelement) 		System.out.println("text::"+text);
 		Hashtable<String, String> srcids = getStateId(root, struct);
 		String characterid = srcids.get("characterid");
@@ -1452,7 +1415,7 @@ public class XML2EQ {
 		String arelation = relations.get(structid);
 		if(arelation!=null) rels = arelation.split("#");
 		String structname = this.getStructureName(root, structid);
-		try{
+		
 			List<Element> chars = path8.selectNodes(struct, ".//character");
 			Iterator<Element> it = chars.iterator();
 			//structure has both characters and relations
@@ -1477,8 +1440,9 @@ public class XML2EQ {
 						String toname = this.getStructureName(root, toid);
 						toname = toname+","+this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
 						toname = toname.replaceFirst(",$", "");
-						if(r.matches("\\(("+positionprep+")\\).*")){ //entitylocator							
-							entitylocator += toname+",";
+						if(r.matches("\\(("+positionprep+")\\).*")){ //entitylocator
+							if(r.contains("between")) entitylocator += "between "+ toname+",";
+							else entitylocator += toname+",";
 						}else if(r.matches("\\(with\\).*")){							
 							continue;
 						}else if(r.matches("\\(without\\).*")){							
@@ -1529,7 +1493,8 @@ public class XML2EQ {
 						String toname = this.getStructureName(root, toid);
 						toname = toname +","+ this.getStructureChain(root, "//relation[@name='part_of'][@from='"+toid+"']");
 						toname = toname.replaceFirst(",$", "");
-						entitylocator +=toname+",";
+						if(rel.contains("between")) entitylocator +="between "+toname+",";
+						else entitylocator +=toname+",";
 					}
 				}
 				entitylocator = entitylocator.replaceFirst(",$", "");
@@ -1605,10 +1570,7 @@ public class XML2EQ {
 					EQ.put("type", keyelement? "character" : "state");
 					allEQs.add(EQ);
 				}				
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}		
+			}	
 	}
 
 
@@ -1665,7 +1627,11 @@ public class XML2EQ {
 		String prefix = "test";
 		String glosstable="fishglossaryfixed";
 		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, benchmarktable, prefix, glosstable);
-		x2e.outputEQs();
+		try{
+			x2e.outputEQs();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -168,7 +168,7 @@ public class TermOutputer {
 	 * @param term
 	 * @return
 	 */
-	private String[] searchOntologies(String term, String type) {
+	private String[] searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
 		String[] results = new String[]{"", "", ""};
 		boolean added = false;
@@ -266,7 +266,7 @@ public class TermOutputer {
 		return results;
 	}
 
-	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
+	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type)throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();

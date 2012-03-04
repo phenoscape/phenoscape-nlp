@@ -18,11 +18,8 @@ import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,7 +30,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -46,8 +42,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.DeviceData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
@@ -82,18 +76,14 @@ import fna.charactermarkup.Utilities;
 import fna.db.CharacterStateDBAccess;
 import fna.db.MainFormDbAccessor;
 import fna.db.VolumeMarkupDbAccessor;
-import fna.parsing.character.CoOccurrenceGraph;
 import fna.parsing.character.GraphNode;
 import fna.parsing.character.LearnedTermsReport;
 import fna.parsing.character.ManipulateGraphML;
 import fna.parsing.state.GraphMLOutputter;
 import fna.parsing.state.StateCollectorTest;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("unused")
 public class MainForm {
-
-
-	@SuppressWarnings("unused")
 
 	private Hashtable<String, String> categorizedtermsS = new Hashtable<String, String>();
 	private Hashtable<String, String> categorizedtermsC = new Hashtable<String, String>();
@@ -2369,6 +2359,7 @@ public class MainForm {
 		tab5_others_loadFromLastTimeButton.setText(ApplicationUtilities.getProperty("termCurationLoad"));
 		tab5_others_loadFromLastTimeButton.setToolTipText(ApplicationUtilities.getProperty("termCurationLoadTTT"));
 		tab5_others_loadFromLastTimeButton.addSelectionListener(new SelectionAdapter() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void widgetSelected(SelectionEvent e) {	
 				ArrayList<String> words = null;
@@ -2956,7 +2947,7 @@ public class MainForm {
 		
 		CharacterStatementsTransformer preMarkUp = 
 				new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
-						null, new ArrayList());
+						null, new ArrayList<String>());
 		preMarkUp.start();
 	}
 	
@@ -2981,6 +2972,7 @@ public class MainForm {
 		}
 		transformer.start();
 	}
+
 	private void clearTransformation() {
 		transformationTable.removeAll();
 	}
@@ -3178,9 +3170,7 @@ public class MainForm {
 			 mainDb.loadTagsData(tagListCombo, modifierListCombo);
 			 if(XMLFileCount==0)
 			 {
-				@SuppressWarnings("unused")
 				String messageHeader = ApplicationUtilities.getProperty("popup.header.info");
-				@SuppressWarnings("unused")
 				String message = ApplicationUtilities.getProperty("popup.load.nodata");				
 					
 			//	 ApplicationUtilities.showPopUpWindow(message, messageHeader,SWT.ICON_INFORMATION );
@@ -3290,8 +3280,7 @@ public class MainForm {
 		//reset context box
 		//contextStyledText.setText("");
 	}
-	
-	@SuppressWarnings("unused")
+
 	private void reportGlossary() {
 		
 		LearnedTermsReport ltr = new LearnedTermsReport(ApplicationUtilities.getProperty("database.name") + "_corpus");
@@ -3501,6 +3490,7 @@ public class MainForm {
 		
 	}
 	
+
 	private void loadProcessedGroups() {
 		try {
 			ArrayList<String> processedGroupsList = charDb.getProcessedGroups();
@@ -3788,7 +3778,7 @@ public class MainForm {
 		groupsCombo.setText(newGroup);
 		groupsCombo.select(groupsCombo.getItemCount()-1);
 		/*Generate the graph XML*/
-		ArrayList <ArrayList> groups = null;
+		ArrayList <ArrayList<ArrayList<String>>> groups = null;
 		/* Create the arraylist to create new terms list*/
 		terms = getRemovedTerms(newGroupNumber);	
 		/* Create the arraylist for Graph Visualization*/
@@ -3805,7 +3795,6 @@ public class MainForm {
 		sortedBy = newSortedBy;
 
 		if (terms.size() > 5) {
-			
 			RowData rowdata = (RowData)termsGroup.getLayoutData();
 			rowdata.height = terms.size() * 36;
 			termsGroup.setLayoutData(new RowData(rowdata.width, rowdata.height));
@@ -3934,11 +3923,11 @@ public class MainForm {
 	 * @param terms
 	 * @return
 	 */
-	private ArrayList<ArrayList> createGraphML(ArrayList<TermsDataBean> terms) {
-		ArrayList<ArrayList> group = new ArrayList<ArrayList>();
-		ArrayList<ArrayList> groups = new ArrayList<ArrayList>();
+	private ArrayList<ArrayList<ArrayList<String>>> createGraphML(ArrayList<TermsDataBean> terms) {
+		ArrayList<ArrayList<ArrayList<String>>> group = new ArrayList<ArrayList<ArrayList<String>>>();
+		ArrayList<ArrayList<String>> groups = new ArrayList<ArrayList<String>>();
 		for (TermsDataBean tbean : terms){
-			ArrayList coTerms = new ArrayList();
+			ArrayList<String> coTerms = new ArrayList<String>();
 			if(tbean.getTerm1() != null) {
 				coTerms.add(tbean.getTerm1());
 			} else {
@@ -3997,7 +3986,7 @@ public class MainForm {
 				if (!bean.getTerm1().isTogglePosition()) {
 					String t1 = bean.getTerm1().getTermText().getText();
 					words = words.replaceFirst("\\|$", "");
-					if(!t1.matches("("+words+")") && !Utilities.inGlossary(t1, conn, this.glossaryPrefixCombo.getText(), this.dataPrefixCombo.getText())){
+					if(!t1.matches("("+words+")") && !Utilities.inGlossary(t1, conn, MainForm.glossaryPrefixCombo.getText(), MainForm.dataPrefixCombo.getText())){
 						words +=t1+"|";
 						TermsDataBean tbean = new TermsDataBean();
 						tbean.setFrequency(Integer.parseInt(bean.getFrequency().getText()));
@@ -4016,7 +4005,7 @@ public class MainForm {
 				if (!bean.getTerm2().isTogglePosition()) {
 					String t2 = bean.getTerm2().getTermText().getText();
 					words = words.replaceFirst("\\|$", "");
-					if(!t2.matches("("+words+")")&& !Utilities.inGlossary(t2, conn, this.glossaryPrefixCombo.getText(), this.dataPrefixCombo.getText())){
+					if(!t2.matches("("+words+")")&& !Utilities.inGlossary(t2, conn, MainForm.glossaryPrefixCombo.getText(), MainForm.dataPrefixCombo.getText())){
 						words +=t2+"|";
 						TermsDataBean tbean = new TermsDataBean();
 						tbean.setFrequency(Integer.parseInt(bean.getFrequency().getText()));
@@ -4113,7 +4102,6 @@ public class MainForm {
 	 * This function checks if there are terms remaining that are not yet grouped.
 	 * @return boolean
 	 */
-	
 	private boolean isTermsNotGrouped(){
 		boolean returnValue = false;
 		Set <String>
@@ -4519,7 +4507,7 @@ public class MainForm {
 	private void setType4XML(String schema){
 		this.type4xml = schema;
 	}
-	
+
 	private String getType4XML(){
 		return this.type4xml;
 	}
