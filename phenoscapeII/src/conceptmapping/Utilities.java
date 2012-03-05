@@ -22,18 +22,21 @@ public class Utilities {
 	public static ArrayList<OWLAccessorImpl> OWLqualityOntoAPIs = new ArrayList<OWLAccessorImpl>();;
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
+	@SuppressWarnings("unused")
+	private static String ontologyfolder;
 
-	static{
-		try{
+	public Utilities(String ontologyfolder){
+		Utilities.ontologyfolder = ontologyfolder;
 		excluded.add("cellular quality");
 		
+		try{
 		String [] entityontologies = new String[]{
- 		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\tao.owl",
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\vertebrate_anatomy.obo",
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\amniote_draft.obo",
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\bspo.owl"};
+ 		ontologyfolder+"\\tao.owl",
+		ontologyfolder+"\\vertebrate_anatomy.obo",
+		ontologyfolder+"\\amniote_draft.obo",
+		ontologyfolder+"\\bspo.owl"};
 		String [] qualityontologies = new String[]{
-		"C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\ontologies\\pato.owl"};
+		ontologyfolder+"\\pato.owl"};
 		 
 		/*
 		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
@@ -74,8 +77,9 @@ public class Utilities {
 			e.printStackTrace();
 		}
 	}
+
 	
-	public static String[] retreiveParentInfoFromPATO (String classlabel){
+	public String[] retreiveParentInfoFromPATO (String classlabel){
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -107,7 +111,7 @@ public class Utilities {
 	 * @param type: entity or quality
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public static ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
+	public ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
 		ArrayList<String[]> results = new ArrayList<String[]>();
 		//boolean added = false;
@@ -150,7 +154,7 @@ public class Utilities {
 		//}
 	}
 
-	private static String[] searchOBOOntology(String term, OBO2DB o2d, String type) {
+	private String[] searchOBOOntology(String term, OBO2DB o2d, String type) {
 		String [] result = new String[3]; //an array with three elements: type, id, and label
 		String[] match = o2d.getID(term);
 		if(match !=null){
@@ -170,7 +174,7 @@ public class Utilities {
 	 * @param type
 	 * @return array of 3 elements: 0: type; 1:ID; 2:label
 	 */
-	private static String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
+	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = owlapi.retrieveConcept(term);
 		Iterator<OWLClass> it = matches.iterator();

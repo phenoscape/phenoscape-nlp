@@ -101,8 +101,9 @@ public class VolumeFinalizer extends Thread {
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		String csv = xmldir+"\\"+dataPrefix+"_EQ.csv";
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, csv);
+		String csv = (Registry.TargetDirectory+"\\"+dataPrefix+"_EQ.csv").replaceAll("\\\\", "/");
+		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv);
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
 			this.showOutputMessage("Check result file in "+csv);

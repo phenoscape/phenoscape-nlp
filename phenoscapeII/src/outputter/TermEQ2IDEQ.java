@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -31,18 +32,20 @@ public class TermEQ2IDEQ {
 	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
 	private ArrayList<String> spatialterms = new ArrayList<String>();
 	private String prefix;
-	
+	private String ontologyfolder;
+	private Utilities ontoutil;
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = false;
 	
 	/**
 	 * 
 	 */
-	public TermEQ2IDEQ(String database, String outputtable, String prefix, String csv) throws Exception {
+	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
+		this.ontologyfolder = ontologyfolder;
+		this.ontoutil = new Utilities(ontologyfolder);
 		this.outputtable = outputtable+"_result";
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
-		
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
@@ -71,6 +74,8 @@ public class TermEQ2IDEQ {
 					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
 				//export the table to a csv file
+				File csvfile = new File(csv);
+				if(csvfile.exists()) csvfile.delete();
 				String fieldlist ="source, characterid, stateid, description, entity, entitylabel, entityid, " +
 						"quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, " +
 						"qualitymodifier, qualitymodifierlabel, qualitymodifierid, " +
@@ -78,9 +83,10 @@ public class TermEQ2IDEQ {
 				String header = "'"+fieldlist.replaceAll("\\s*,\\s*", "','")+"'";
 				String export = "SELECT * "+
 						" INTO OUTFILE '"+csv+"' FIELDS TERMINATED BY ',' "+
-						" OPTIONALLY ENCLOSED BY '\"' "+
-						" ESCAPED BY '\\' LINES TERMINATED BY '\n' FROM ("+
-						" SELECT "+header+ " UNION SELECT "+fieldlist+ " From "+ this.outputtable+") a";					
+						" OPTIONALLY ENCLOSED BY '\\\"' "+
+						" ESCAPED BY '\\\\' LINES TERMINATED BY '\\n' FROM ("+
+						" SELECT "+header+ " UNION SELECT "+fieldlist+ " From "+ this.outputtable+") a";	
+				stmt.execute(export);
 			}			
 	}
 	
@@ -169,7 +175,7 @@ public class TermEQ2IDEQ {
 		if(result!=null){
 			qualitynegatedlabel = "not("+result[2]+")";
 			qualityid = result[1];
-			String [] parentinfo = Utilities.retreiveParentInfoFromPATO(result[2]);
+			String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result[2]);
 			qnparentids = parentinfo[0];
 			qnparentlabels = parentinfo[1];
 			
@@ -591,7 +597,7 @@ public class TermEQ2IDEQ {
 		//search ontologies
 
 		//first search the original word
-		ArrayList<String[]> results = Utilities.searchOntologies(term, type);
+		ArrayList<String[]> results = ontoutil.searchOntologies(term, type);
 		String[] exactmatch = null;
 		if(results.size()>0) exactmatch = results.get(0);
 		if(exactmatch!=null){
@@ -603,7 +609,7 @@ public class TermEQ2IDEQ {
 		//if landed here, the first try has failed				 
 		if(term.indexOf("-")>0){ //caudal-fin
 			term = term.replaceAll("-", " ");
-			results = Utilities.searchOntologies(term, type);
+			results = ontoutil.searchOntologies(term, type);
 			exactmatch = null;
 			if(results.size()>0) exactmatch = results.get(0);
 			if(exactmatch!=null){
@@ -617,7 +623,7 @@ public class TermEQ2IDEQ {
 		if(term.indexOf("/")>0){ //bone/tendon
 			String[] tokens = term.split("/");
 			for(String token: tokens){
-				results = Utilities.searchOntologies(token, type);
+				results = ontoutil.searchOntologies(token, type);
 				exactmatch = null;
 				if(results.size()>0) exactmatch = results.get(0);
 				if(exactmatch!=null){
@@ -735,7 +741,8 @@ public class TermEQ2IDEQ {
 	 */
 	public static void main(String[] args) {
 		try{
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test", "eqs");
+			String csv = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/trash_EQ.csv";
+			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test", csv);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
