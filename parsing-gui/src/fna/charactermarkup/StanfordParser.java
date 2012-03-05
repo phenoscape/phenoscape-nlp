@@ -252,10 +252,10 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             System.out.println("ExitValue: " + exitVal);
 
 			//format
-            if(headings.size() != trees.size()){
-            	System.err.println("Error reading parsing results");
-            	throw new Exception("Parsing error. System terminates.");
-            }
+            //if(headings.size() != trees.size()){
+            //	System.err.println("Error reading parsing results");
+            //	throw new Exception("Parsing error. System terminates.");
+            //}
             StringBuffer sb = new StringBuffer();
             for(int i = 0; i<headings.size(); i++){
             	sb.append(headings.get(i)+System.getProperty("line.separator"));
@@ -626,8 +626,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "test", "fishglossaryfixed", false);
 
 		
-		//sp.POSTagging();
-		//sp.parsing();
+		sp.POSTagging();
+		sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);

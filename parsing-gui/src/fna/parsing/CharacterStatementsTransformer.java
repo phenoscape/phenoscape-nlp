@@ -103,7 +103,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 		if(nfile.mkdir()){
 			return nfile;
 		}else{
-			nfile.renameTo(new File(nfile.getName()+""+System.currentTimeMillis()));
+			nfile.renameTo(new File(target, nfile.getName()+""+System.currentTimeMillis()));
 			if(nfile.mkdir()){
 				return nfile;
 			}

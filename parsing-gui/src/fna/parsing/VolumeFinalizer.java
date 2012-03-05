@@ -31,7 +31,7 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = true;
+    private static boolean standalone = false;
     private static String standalonefolder = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source";
     private Text finalLog;
     private Display display;
@@ -95,13 +95,13 @@ public class VolumeFinalizer extends Thread {
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
 		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
-		String xmldir = Registry.TargetDirectory+"/final/";
+		String xmldir = Registry.TargetDirectory+"\\final\\";
 		String outputtable = this.dataPrefix+"_xml2eq";
 		String benchmarktable = "internalworkbench";
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, benchmarktable, dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		String csv = xmldir+"/"+dataPrefix+"_EQ.csv";
+		String csv = xmldir+"\\"+dataPrefix+"_EQ.csv";
 		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, csv);
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");

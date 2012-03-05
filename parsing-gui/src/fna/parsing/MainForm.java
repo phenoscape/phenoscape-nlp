@@ -2987,7 +2987,7 @@ public class MainForm {
 					project= new File("treatiseproject.conf");
 				else
 			if(type.trim().equals("type3"))
-				project= new File("bhlproject.conf");
+				project= new File("fishproject.conf");
 				else 
 			if(type.trim().equals("type4"))
 				project= new File("taxonproject.conf");
