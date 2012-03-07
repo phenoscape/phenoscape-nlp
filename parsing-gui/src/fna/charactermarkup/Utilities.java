@@ -247,7 +247,6 @@ public class Utilities {
 	private static void add2table(String phrase, Connection conn, String prefix) {
 		try{
 			Statement stmt = conn.createStatement();
-			stmt.execute("create table if not exists "+prefix+"_prepphrases (phrase varchar(100))");
 			stmt.execute("insert into "+prefix+"_prepphrases values ('"+phrase+"')");
 		}catch(Exception e){
 			e.printStackTrace();

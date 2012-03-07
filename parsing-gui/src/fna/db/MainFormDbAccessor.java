@@ -1195,6 +1195,20 @@ public class MainFormDbAccessor {
 		pstmt.setString(2, cat);
 		pstmt.execute();		
 	}
+
+	public void createPrepphraseTable() {
+		try{
+			Statement stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+MainForm.dataPrefixCombo.getText()+"_"+ApplicationUtilities.getProperty("NONEQTERMSTABLE"));
+			stmt.execute("create table if not exists "+MainForm.dataPrefixCombo.getText()+"_prepphrases (phrase varchar(100))");
+			stmt.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+
+		
+	}
 	
 	
 

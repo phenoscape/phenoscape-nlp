@@ -3070,7 +3070,7 @@ public class MainForm {
 	}
 	
 	private void startMarkup() {
-
+		mainDb.createPrepphraseTable();
 		mainDb.createWordRoleTable();//roles are: op for plural organ names, os for singular, c for character, v for verb
 		mainDb.createNonEQTable();
 		mainDb.createTermCategoryTable();

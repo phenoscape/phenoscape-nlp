@@ -10,8 +10,12 @@ public class Test{
 
 
 	public static void main(String[] args) {
-		String csv = "C:\\Program Files\\test_EQ.csv".replaceAll("\\\\", "/");
-		System.out.println(csv);
+		String content = "basihyal bone , bone and cartilage";
+		if(!content.endsWith(")")){//format it
+			content = content.replaceAll(" +(?=(,|and\\b|or\\b))", ") ")+")";
+			content = content.replaceAll(" +(?=\\w+\\))", " (");					
+		}
+		System.out.println(content);
 
 	}
 }

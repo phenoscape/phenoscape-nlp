@@ -135,7 +135,7 @@ public class CharacterAnnotatorChunked {
 		while(token.length()==0){
 			token = cs.getTokenAt(i++);
 		}
-		if(token.startsWith("z[")){
+		if(token.startsWith("z[") || token.startsWith("l[") || token.startsWith("u[")){
 			annotateByChunk(cs, false);
 		}else{
 			establishSubject("(whole_organism)");
@@ -544,8 +544,13 @@ public class CharacterAnnotatorChunked {
 			}else if(ck instanceof ChunkCHPP){//t[c/r[p/o]] this chunk is converted internally and not shown in the parsing output
 				String content = ck.toString().replaceFirst("^t\\[", "").replaceFirst("\\]$", "");
 				processCHPP(content);
-			}else if(ck instanceof ChunkNPList){
-				establishSubject(ck.toString().replaceFirst("^l\\[", "").replaceFirst("\\]$", "")/*, false*/);				
+			}else if(ck instanceof ChunkNPList){//NPList as a seperate chunk
+				String content = ck.toString().replaceFirst("^l\\[", "").replaceFirst("\\]$", "");
+				if(!content.endsWith(")")){//format it
+					content = content.replaceAll(" +(?=(,|and\\b|or\\b))", ") ")+")";
+					content = content.replaceAll(" +(?=\\w+\\))", " (");					
+				}
+				establishSubject(content/*, false*/);				
 			}else if(ck instanceof ChunkSimpleCharacterState){
 				String content = ck.toString().replaceFirst("^a\\[", "").replaceFirst("\\]$", "");
 				//ArrayList<Element> chars = processSimpleCharacterState(content, lastStructures());//with teeth closely spaced

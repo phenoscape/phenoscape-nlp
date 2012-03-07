@@ -41,10 +41,11 @@ import org.jdom.xpath.XPath;
  */
 public class XML2EQ {
 	private File source;
+	private int unknownid = 0;
 	private String outputtable;
 	private String tableprefix;
 	private String glosstable;
-	private String benchmarktable;
+	//private String benchmarktable;
 	private Connection conn;
 	private String username = "root";
 	private String password = "root";
@@ -85,12 +86,60 @@ public class XML2EQ {
 	/**
 	 * 
 	 */
-	public XML2EQ(String sourcedir, String database, String outputtable, String benchmarktable, String prefix, String glosstable) {
+	/*public XML2EQ(String sourcedir, String database, String outputtable, String benchmarktable, String prefix, String glosstable) {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
 		this.benchmarktable = benchmarktable;
+		try{
+			if(conn == null){
+				Class.forName("com.mysql.jdbc.Driver");
+				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
+				conn = DriverManager.getConnection(URL);
+				Statement stmt = conn.createStatement();
+				//label and id fields are ontology-related fields
+				//other fields are raw text
+				//entity and quality fields are atomic
+				//qualitynegated fields are alternative to quality and is composed as "not quality" for qualitynegated, "not(quality)" for qualitynegatedlabel, the "quality" has id qualityid
+				//qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
+				stmt.execute("drop table if exists "+ outputtable);
+				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, " +
+						"entity varchar(200), entitylabel varchar(200), entityid varchar(200), " +
+						"quality varchar(200), qualitylabel varchar(200), qualityid varchar(200), " +
+						"qualitynegated varchar(200), qualitynegatedlabel varchar(200), " +
+						"qnparentlabel varchar(200), qnparentid varchar(200), " +
+						"qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(200), " +
+						"entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " +
+						"countt varchar(200))");
+				
+					
+				path1 = XPath.newInstance(".//statement[@statement_type='character']");
+				path2 = XPath.newInstance(".//statement[@statement_type='character_state']");
+				path3 = XPath.newInstance(".//structure[@name!='whole_organism']");
+				path4 = XPath.newInstance(".//text");
+				path5 = XPath.newInstance(".//structure[@name='whole_organism']");
+				path6 = XPath.newInstance(".//structure");
+				path7 = XPath.newInstance(".//structure[@name='whole_organism']/character");
+				path8 = XPath.newInstance(".//character");
+				path9 = XPath.newInstance(".//text");
+				path10 = XPath.newInstance(".//relation");
+				path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
+				path12 = XPath.newInstance(".//structure");
+				path13 = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
+				path14 = XPath.newInstance("//character[@char_type='range_value']");
+				path15 = XPath.newInstance("//structure[character[@name='count']]");
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}*/
+
+	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) {
+		this.source = new File(sourcedir);
+		this.outputtable = outputtable;
+		this.tableprefix = prefix;
+		this.glosstable = glosstable;
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -167,7 +216,7 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}
-			discardNonTestCharacterUnits();
+			//discardNonTestCharacterUnits();
 		//}catch(Exception e){
 		//	e.printStackTrace();
 		//}
@@ -242,10 +291,10 @@ public class XML2EQ {
 	/**
 	 * use workbench to select/keep only the ones in the workbench
 	 */
-	private void discardNonTestCharacterUnits() throws Exception {
+	/*private void discardNonTestCharacterUnits() throws Exception {
 			Statement stmt = conn.createStatement();
 			stmt.execute("delete from "+this.outputtable+" where source not in (select source from "+this.benchmarktable+ ")");					
-	}
+	}*/
 
 
 	/**
@@ -941,6 +990,13 @@ public class XML2EQ {
 		//ArrayList<Element> purge = new ArrayList<Element>();
 		
 			key = (Element)path3.selectSingleNode(chars.get(0));
+			if(key==null){
+				key = new Element("structure");
+				key.setAttribute("name", "unknown");
+				key.setAttribute("id", "unknown"+unknownid);
+				unknownid++;
+			}
+			
 			//TODO: what if key is null
 			keyentity = this.getStructureName(root, key.getAttributeValue("id"));
 			//boolean findstructure = false;
@@ -1623,10 +1679,10 @@ public class XML2EQ {
 		String database = "biocreative2012";
 		//String outputtable = "biocreative_nexml2eq";
 		String outputtable = "xml2eq";
-		String benchmarktable = "internalworkbench";
+		//String benchmarktable = "internalworkbench";
 		String prefix = "test";
 		String glosstable="fishglossaryfixed";
-		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, benchmarktable, prefix, glosstable);
+		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /*benchmarktable,*/ prefix, glosstable);
 		try{
 			x2e.outputEQs();
 		}catch(Exception e){
