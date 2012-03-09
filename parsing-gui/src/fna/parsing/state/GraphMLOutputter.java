@@ -110,7 +110,7 @@ public class GraphMLOutputter {
 	private void output2file(int id, String text) {
 		try {
 			String path = Registry.TargetDirectory;
-			File file = new File(path, ApplicationUtilities.getProperty("CHARACTER-STATES") + "/" +"Group_"+id+".xml");
+			File file = new File(path, ApplicationUtilities.getProperty("CHARACTER-STATES") + System.getProperty("file.separator") +"Group_"+id+".xml");
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(text);
 			out.close(); // don't forget to close the output stream!!!

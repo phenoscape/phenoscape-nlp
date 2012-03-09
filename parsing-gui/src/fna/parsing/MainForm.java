@@ -877,7 +877,7 @@ public class MainForm {
 		transformationTable.addMouseListener(new MouseListener () {
 			public void mouseDoubleClick(MouseEvent event) {
 				String filePath = Registry.TargetDirectory + 
-				ApplicationUtilities.getProperty("TRANSFORMED")+ "\\" +
+				ApplicationUtilities.getProperty("TRANSFORMED")+ System.getProperty("file.separator") +
 				transformationTable.getSelection()[0].getText(1).trim();
 				if (filePath.indexOf("xml") != -1) {
 					try {
@@ -2149,7 +2149,7 @@ public class MainForm {
 		finalizerTable.addMouseListener(new MouseListener () {
 			public void mouseDoubleClick(MouseEvent event) {
 				String filePath = Registry.TargetDirectory + 
-				ApplicationUtilities.getProperty("FINAL")+ "\\" +
+				ApplicationUtilities.getProperty("FINAL")+ System.getProperty("file.separator") +
 				finalizerTable.getSelection()[0].getText(1).trim();				
 				
 				if (filePath.indexOf("xml") != -1) {
@@ -2855,19 +2855,17 @@ public class MainForm {
         		directory =directory+dirsep;
         	}
         	
-        String path = 	directory;
+        String path = (new File(directory)).getAbsolutePath();;
         
-        projectDirectory.setText(directory);
-        makeReqDirectories(path);
-        
-       
+        projectDirectory.setText(path);
+        makeReqDirectories(path);               
         }
 	}
 	
 	private void makeReqDirectories(String path) {
-		File confFldr = new File(path+"/conf/");
-		File srcFldr = new File(path+"/source/");
-		File targetFldr = new File(path+"/target/");
+		File confFldr = new File(path, "conf");
+		File srcFldr = new File(path, "source");
+		File targetFldr = new File(path, "target");
 	        
 	      
         if(!confFldr.exists())
@@ -2877,34 +2875,21 @@ public class MainForm {
         if(!targetFldr.exists())
         	targetFldr.mkdir();
         String targetPath= targetFldr.getAbsolutePath();
-	        
-        File cooccur = new File(targetPath+"/co-occurrence");
-        File descriptions = new File(targetPath+"/descriptions");
-        //File desc_dehyphened = new File(targetPath+"/descriptions-dehyphened");
-        //File extracted = new File(targetPath+"/extracted");
-        //File extractedword = new File(targetPath+"/extractedword");
-        File final_dir = new File(targetPath+"/final");
-        File habitats = new File(targetPath+"/habitats");
-        //File markedup = new File(targetPath+"/markedup");
-        File transformed = new File(targetPath+"/transformed");
+        File cooccur = new File(targetPath, "co-occurrence");
+        File descriptions = new File(targetPath, "descriptions");
+        File final_dir = new File(targetPath, "final");
+        File habitats = new File(targetPath, "habitats");
+        File transformed = new File(targetPath, "transformed");
 	        
         cooccur.mkdir();
         descriptions.mkdir();
-        //desc_dehyphened.mkdir();
-        //extracted.mkdir();
-        //extractedword.mkdir();
         final_dir.mkdir();
         habitats.mkdir();
-        //markedup.mkdir();
         transformed.mkdir();
-        
-        //configurationText.setText(confFldr.getAbsolutePath());
-        //sourceText.setText(srcFldr.getAbsolutePath());
-        //targetText.setText(targetFldr.getAbsolutePath());
-          
-        Registry.ConfigurationDirectory = confFldr.getAbsolutePath()+"\\";
-        Registry.SourceDirectory=srcFldr.getAbsolutePath()+"\\";
-        Registry.TargetDirectory=targetFldr.getAbsolutePath()+"\\";
+
+        Registry.ConfigurationDirectory = confFldr.getAbsolutePath();
+        Registry.SourceDirectory=srcFldr.getAbsolutePath();
+        Registry.TargetDirectory=targetFldr.getAbsolutePath();
 	}
 
 	private void startExtraction() throws Exception {
@@ -3008,7 +2993,7 @@ public class MainForm {
         target = target == null ? "" : target;
         //targetText.setText(target);
         Registry.TargetDirectory = target;
-        step3_desc.append(Registry.TargetDirectory+ApplicationUtilities.getProperty("TRANSFORMED"));
+        step3_desc.append(Registry.TargetDirectory+System.getProperty("file.separator")+ApplicationUtilities.getProperty("TRANSFORMED"));
         
         String projDir = in.readLine();
         projDir = projDir==null?"":projDir;
@@ -3353,7 +3338,7 @@ public class MainForm {
 	 * This function will prepare the character tab for display of co-occured terms
 	 */
 	private void setCharactertabGroups() {
-		File directory = new File(Registry.TargetDirectory+"\\"+
+		File directory = new File(Registry.TargetDirectory+System.getProperty("file.separator")+
 				ApplicationUtilities.getProperty("CHARACTER-STATES"));
 		File [] files = directory.listFiles();
 		/**Update the global variable with number of groups**/
@@ -3695,8 +3680,8 @@ public class MainForm {
 					String [] nodes = edgeNodes.split(",");
 					if(nodes[0] != null && !nodes[0].equals("") && nodes[1] != null && !nodes[1].equals("") ) {
 						ManipulateGraphML.insertEdge(new GraphNode(nodes[0]), new GraphNode(nodes[1]), 
-								Registry.TargetDirectory+
-									ApplicationUtilities.getProperty("CHARACTER-STATES")+ "\\"+ group + ".xml");
+								Registry.TargetDirectory+System.getProperty("file.separator")+
+									ApplicationUtilities.getProperty("CHARACTER-STATES")+ System.getProperty("file.separator")+ group + ".xml");
 					}
 
 				}

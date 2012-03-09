@@ -85,8 +85,7 @@ public class VolumeTransformer extends Thread {
 		styleMappings = new Properties();
 		try {
 			styleMappings.load(new FileInputStream(
-					Registry.ConfigurationDirectory
-							+ "/style-mapping.properties"));
+					Registry.ConfigurationDirectory+System.getProperty("file.separator")+"style-mapping.properties"));
 		} catch (IOException e) {
 			throw new ParsingException(
 					"Failed to load the style mapping file!", e);
@@ -313,7 +312,7 @@ public class VolumeTransformer extends Thread {
 				
 				// output the treatment to transformed
 				File xml = new File(Registry.TargetDirectory,
-						ApplicationUtilities.getProperty("TRANSFORMED") + "/" + count + ".xml");
+						ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + count + ".xml");
 				ParsingUtil.outputXML(treatment, xml ,null);
 				//String error = (String)errors.get(count+"");
 				//error = error ==null? "":error;
@@ -705,7 +704,7 @@ public class VolumeTransformer extends Thread {
 		String name = ti.getName(index);
 		if(name==null ||name.compareTo("") == 0){
 			File xml = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty("TRANSFORMED") + "/" + (index+1) + ".xml");
+					ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + (index+1) + ".xml");
 			listener.info("no name found in: ", xml.getPath());
 			//errors.put((index+1)+"","no name found in: "+line);
 			return "";
@@ -911,7 +910,7 @@ public class VolumeTransformer extends Thread {
 			if(debug) System.out.println((index+1)+"unparsed: "+text);
 			addElement("unparsed", text, treatment);
 			File xml = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty("TRANSFORMED") + "/" + (index+1) + ".xml");
+					ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + (index+1) + ".xml");
 			listener.info("unparsed: "+text, xml.getPath());
 			//errors.put((index+1)+"","still left: "+text);
 		}
@@ -1007,7 +1006,7 @@ public class VolumeTransformer extends Thread {
 		//elementname = "DESCRIPTIONS"
 		try {
 			File file = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty(elementname) + "/" + count + ".txt");
+					ApplicationUtilities.getProperty(elementname) + System.getProperty("file.separator")+ count + ".txt");
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(text);
 			out.close(); // don't forget to close the output stream!!!

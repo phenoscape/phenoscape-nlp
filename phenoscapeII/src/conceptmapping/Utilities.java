@@ -31,12 +31,12 @@ public class Utilities {
 		
 		try{
 		String [] entityontologies = new String[]{
- 		ontologyfolder+"\\tao.owl",
-		ontologyfolder+"\\vertebrate_anatomy.obo",
-		ontologyfolder+"\\amniote_draft.obo",
-		ontologyfolder+"\\bspo.owl"};
+ 		ontologyfolder+System.getProperty("file.separator")+"tao.owl",
+		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
+		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
+		ontologyfolder+System.getProperty("file.separator")+"bspo.owl"};
 		String [] qualityontologies = new String[]{
-		ontologyfolder+"\\pato.owl"};
+		ontologyfolder+System.getProperty("file.separator")+"pato.owl"};
 		 
 		/*
 		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");

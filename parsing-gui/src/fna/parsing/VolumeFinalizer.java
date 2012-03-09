@@ -79,8 +79,8 @@ public class VolumeFinalizer extends Thread {
     public void outputFinal() throws Exception {
     	if(!standalone) this.showOutputMessage("System is starting the annotation step [could take hours on large collections]...");
 		
-		String posedfile = Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
-		String parsedfile =Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
+		String posedfile = Registry.TargetDirectory+System.getProperty("file.separator")+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
+		String parsedfile =Registry.TargetDirectory+System.getProperty("file.separator")+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
 		String database = ApplicationUtilities.getProperty("database.name");
 		String glosstable = this.glossaryPrefix;
 		
@@ -95,13 +95,13 @@ public class VolumeFinalizer extends Thread {
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
 		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
-		String xmldir = Registry.TargetDirectory+"\\final\\";
+		String xmldir = Registry.TargetDirectory+System.getProperty("file.separator")+"final"+System.getProperty("file.separator");
 		String outputtable = this.dataPrefix+"_xml2eq";
 		//String benchmarktable = "internalworkbench";
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		String csv = (Registry.TargetDirectory+"\\"+dataPrefix+"_EQ.csv").replaceAll("\\\\+", "/");
+		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_EQ.csv").replaceAll("\\\\+", "/");
 		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
 		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv);
 		if(!standalone){
@@ -113,7 +113,7 @@ public class VolumeFinalizer extends Thread {
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {
 		File target = null;
 		if(!standalone) target = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty(targetstring));
-		if(standalone) target = new File(standalonefolder+"\\target\\final");
+		if(standalone) target = new File(standalonefolder+System.getProperty("file.separator")+"target"+System.getProperty("file.separator")+"final");
 		File result = new File(target, fileindex + ".xml");
 		Comment comment = new Comment("produced by "+VolumeFinalizer.version+System.getProperty("line.separator"));
 		//Comment comment = null;
