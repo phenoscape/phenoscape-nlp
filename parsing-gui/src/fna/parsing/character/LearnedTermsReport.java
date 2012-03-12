@@ -21,7 +21,6 @@ import fna.parsing.MainForm;
  *
  */
 
-@SuppressWarnings("unchecked")
 public class LearnedTermsReport {
 	static private String gtablename = "fnaglossary";
 	static private String stablename = "learnedstates";
@@ -34,17 +33,17 @@ public class LearnedTermsReport {
 	static private Connection conn = null;
 	//static private String username = ApplicationUtilities.getProperty("database.username");
 	//static private String password = ApplicationUtilities.getProperty("database.password");
-	private ArrayList overlappedstructures = new ArrayList();
-	private ArrayList newstructures = new ArrayList();
-	private ArrayList modifiedstructures = new ArrayList();
-	private ArrayList overlappedstates = new ArrayList();
-	private ArrayList newstates = new ArrayList();
-	private ArrayList modifiedstates = new ArrayList();
+	private ArrayList<String> overlappedstructures = new ArrayList<String>();
+	private ArrayList<String> newstructures = new ArrayList<String>();
+	private ArrayList<String> modifiedstructures = new ArrayList<String>();
+	private ArrayList<String> overlappedstates = new ArrayList<String>();
+	private ArrayList<String> newstates = new ArrayList<String>();
+	private ArrayList<String> modifiedstates = new ArrayList<String>();
 	//private ArrayList unusedstructures = new ArrayList();
 	//private ArrayList unusedstates = new ArrayList();
-	private HashSet learnedstructures = new HashSet();
-	private HashSet learnedstates = new HashSet();
-	private Hashtable donestates = new Hashtable();
+	private HashSet<String> learnedstructures = new HashSet<String>();
+	private HashSet<String> learnedstates = new HashSet<String>();
+	private Hashtable<String, String> donestates = new Hashtable<String, String>();
 	
 	
 	
@@ -139,7 +138,7 @@ public class LearnedTermsReport {
 		compareStructureTerms();
 		sb.append("\t Learned Structure Names Overlap with Glossary: "+this.overlappedstructures.size()+ls);
 		sb.append("\t Learned Modified Structure Names: "+this.modifiedstructures.size()+ls);
-		Iterator it = modifiedstructures.iterator();
+		Iterator<String> it = modifiedstructures.iterator();
 		while(it.hasNext()){
 			String name = (String) it.next();
 			sb.append("\t\t "+name+ls);
@@ -171,7 +170,7 @@ public class LearnedTermsReport {
 		}
 		statesAssignedCharacters();
 		sb.append("\t Learned State Assigned Characters: "+this.donestates.size()+ls);
-		Enumeration en = donestates.keys();
+		Enumeration<String> en = donestates.keys();
 		while(en.hasMoreElements()){
 			String name = (String) en.nextElement();
 			String chara = (String) donestates.get(name);
@@ -214,9 +213,9 @@ public class LearnedTermsReport {
 
 	
 	@SuppressWarnings("unused")
-	private ArrayList unusedStructures(){
-		ArrayList unused = new ArrayList();
-		ArrayList sents = new ArrayList();
+	private ArrayList<String> unusedStructures(){
+		ArrayList<String> unused = new ArrayList<String>();
+		ArrayList<String> sents = new ArrayList<String>();
 		try{
 			Statement stmt = conn.createStatement();
 			String query = "select sentence from "+otablename1;
@@ -230,7 +229,7 @@ public class LearnedTermsReport {
 			while(rs.next()){
 				String term = rs.getString("term");
 				boolean used = false;
-				Iterator it = sents.iterator();
+				Iterator<String> it = sents.iterator();
 				while(it.hasNext()){//TODO: match singular with pl. 
 					String sent = ((String) it.next()).toLowerCase();
 					if(sent.indexOf(term)>=0){
@@ -243,12 +242,12 @@ public class LearnedTermsReport {
 				}
 			}
 			int size = unused.size();
-			HashSet toremove = new HashSet();
+			HashSet<String> toremove = new HashSet<String>();
 			for(int i = 0; i<size; i++){
 				String term = (String)unused.get(i);
 				rs = stmt.executeQuery("select term from "+gtablename+" where definition in (select definition from "+gtablename+" where term = '"+term+"')");
 				boolean used = false;
-				ArrayList terms = new ArrayList();
+				ArrayList<String> terms = new ArrayList<String>();
 				while(rs.next()){
 					String tprime = rs.getString("term").trim();
 					terms.add(tprime);
@@ -275,9 +274,9 @@ public class LearnedTermsReport {
 	}
 	
 	@SuppressWarnings("unused")
-	private ArrayList unusedStates(){
-		ArrayList unused = new ArrayList();
-		ArrayList sents = new ArrayList();
+	private ArrayList<String> unusedStates(){
+		ArrayList<String> unused = new ArrayList<String>();
+		ArrayList<String> sents = new ArrayList<String>();
 		try{
 			Statement stmt = conn.createStatement();
 			String query = "select sentence from "+otablename1;
@@ -291,7 +290,7 @@ public class LearnedTermsReport {
 			while(rs.next()){
 				String term = rs.getString("term");
 				boolean used = false;
-				Iterator it = sents.iterator();
+				Iterator<String> it = sents.iterator();
 				while(it.hasNext()){
 					String sent = ((String) it.next()).toLowerCase();
 					if(sent.indexOf(term)>=0){
@@ -326,7 +325,7 @@ public class LearnedTermsReport {
 	}
 	
 	private void compareStructureTerms(){
-		Iterator it = learnedstructures.iterator();
+		Iterator<String> it = learnedstructures.iterator();
 		while(it.hasNext()){
 			String name = (String)it.next();
 			String[] parts = name.split(" ");
@@ -340,7 +339,7 @@ public class LearnedTermsReport {
 		}
 	}
 	private void compareStateTerms(){
-		Iterator it = learnedstates.iterator();
+		Iterator<String> it = learnedstates.iterator();
 		while(it.hasNext()){
 			String name = (String)it.next();
 			String[] parts = name.split(" ");

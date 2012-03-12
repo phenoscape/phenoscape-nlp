@@ -16,7 +16,7 @@ import org.jdom.Element;
  * @author Hong Updates
  *
  */
-@SuppressWarnings("unchecked")
+
 public class FloweringTimeParser4FNA extends EnumerativeElementParser{
 	static Hashtable<String, String> m2smapping = new Hashtable<String, String>();
 	static Hashtable<String, String> s2mmapping = new Hashtable<String, String>();
@@ -156,7 +156,7 @@ public class FloweringTimeParser4FNA extends EnumerativeElementParser{
 	 */
 	
 	private ArrayList<String> allValuesInRange(String[] times) {
-		ArrayList results = new ArrayList();
+		ArrayList<String> results = new ArrayList<String>();
 		String s = times[0];
 		String e = times[times.length-1];
 		String[] ss = s.split("\\s+");
@@ -179,7 +179,7 @@ public class FloweringTimeParser4FNA extends EnumerativeElementParser{
 		return results;
 	}
 
-	private void dump2ArrayList(String[] array, ArrayList arrayList) {
+	private void dump2ArrayList(String[] array, ArrayList<String> arrayList) {
 		for(int i = 0; i <array.length; i++){
 			arrayList.add(array[i]);
 		}
@@ -190,7 +190,7 @@ public class FloweringTimeParser4FNA extends EnumerativeElementParser{
 	 */
 	private String getSeasons(ArrayList<String> values) {
 		String seasons = "";
-		Iterator it = values.iterator();
+		Iterator<String> it = values.iterator();
 		while(it.hasNext()){
 			String v = ((String)it.next()).trim();
 			String[] t = v.split("\\s+");
@@ -206,7 +206,7 @@ public class FloweringTimeParser4FNA extends EnumerativeElementParser{
 	 */
 	private String getMonths(ArrayList<String> values) {
 		String months = "";
-		Iterator it = values.iterator();
+		Iterator<String> it = values.iterator();
 		while(it.hasNext()){
 			String v = ((String)it.next()).trim();
 			String[] t = v.split("\\s+");

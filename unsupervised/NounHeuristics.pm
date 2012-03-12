@@ -177,7 +177,7 @@ sub getnouns{
 	my @n = ();
 	my @list = split(/\s+/, $l);
 	@list = sort bylength @list;
-	my $string, $tmp;
+	my ($string, $tmp);
 	foreach (@list){
 	  if($_ =~ /$NENDINGS/){
 	  	push(@n, $_."[s]");

@@ -3,35 +3,24 @@
  */
 package fna.parsing;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.apache.log4j.Logger;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-
 import org.jdom.Comment;
-
-import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.xpath.XPath;
-
+import outputter.TermEQ2IDEQ;
+import outputter.XML2EQ;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
 
 /**
  * @author chunshui
  */
-@SuppressWarnings({ "unchecked", "static-access" })
+@SuppressWarnings("unused")
 public class VolumeFinalizer extends Thread {
     /*glossary established in VolumeDehyphenizer
     private String glossary;*/
@@ -42,13 +31,13 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = true;
+    private static boolean standalone = false;
     private static String standalonefolder = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source";
     private Text finalLog;
     private Display display;
     
     public VolumeFinalizer(ProcessListener listener, Text finalLog, String dataPrefix, Connection conn, String glossaryPrefix, Display display) {
-        if(!standalone) this.listener = listener;
+        if(!standalone) VolumeFinalizer.listener = listener;
     	if(!standalone) this.finalLog = finalLog;
     	if(!standalone) this.display = display;
     	this.dataPrefix = dataPrefix;
@@ -66,7 +55,8 @@ public class VolumeFinalizer extends Thread {
 			e.printStackTrace();
 		}
         //check for final result errors
-        File finalFileList= null;
+		//no final folder for EQ application
+        /*File finalFileList= null;
         File transformedFileList = null;
         if(!standalone){
         	finalFileList = new File(Registry.TargetDirectory+"\\final\\");
@@ -79,7 +69,7 @@ public class VolumeFinalizer extends Thread {
         if(finalFileList.list().length != transformedFileList.list().length)
         {
     		if(!standalone) this.showOutputMessage("System terminates with errors. Annotated files are not completed.");
-        }
+        }*/
     }
 	
     /**
@@ -87,12 +77,16 @@ public class VolumeFinalizer extends Thread {
      * @throws ParsingException
      */
     public void outputFinal() throws Exception {
-    	if(!standalone) this.showOutputMessage("System is starting finalization step [could take hours]...");
+    	if(!standalone) this.showOutputMessage("System is starting the annotation step [could take hours on large collections]...");
 		
-		String posedfile = Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
-		String parsedfile =Registry.TargetDirectory+"/"+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
+		String posedfile = Registry.TargetDirectory+System.getProperty("file.separator")+this.dataPrefix + "_"+ApplicationUtilities.getProperty("POSED");
+		String parsedfile =Registry.TargetDirectory+System.getProperty("file.separator")+this.dataPrefix + "_"+ApplicationUtilities.getProperty("PARSED");
 		String database = ApplicationUtilities.getProperty("database.name");
 		String glosstable = this.glossaryPrefix;
+		
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, this.dataPrefix, glosstable, true, null, null);
+		if(!standalone) this.showOutputMessage("System is pre-tagging sentences...");
+		sosm.markSentences();
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, this.dataPrefix,glosstable, false);
 		if(!standalone) this.showOutputMessage("System is POS-tagging sentences...");
 		sp.POSTagging();
@@ -100,13 +94,26 @@ public class VolumeFinalizer extends Thread {
 		sp.parsing();
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
-
+		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
+		String xmldir = Registry.TargetDirectory+System.getProperty("file.separator")+"final"+System.getProperty("file.separator");
+		String outputtable = this.dataPrefix+"_xml2eq";
+		//String benchmarktable = "internalworkbench";
+		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
+		x2e.outputEQs();
+		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
+		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_EQ.csv").replaceAll("\\\\+", "/");
+		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv);
+		if(!standalone){
+			this.showOutputMessage("Operations completed.");
+			this.showOutputMessage("Check result file in "+csv);
+		}
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {
 		File target = null;
 		if(!standalone) target = new File(Registry.TargetDirectory, ApplicationUtilities.getProperty(targetstring));
-		if(standalone) target = new File(standalonefolder+"\\target\\final");
+		if(standalone) target = new File(standalonefolder+System.getProperty("file.separator")+"target"+System.getProperty("file.separator")+"final");
 		File result = new File(target, fileindex + ".xml");
 		Comment comment = new Comment("produced by "+VolumeFinalizer.version+System.getProperty("line.separator"));
 		//Comment comment = null;

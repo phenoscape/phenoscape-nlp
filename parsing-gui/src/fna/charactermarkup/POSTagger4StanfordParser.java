@@ -40,7 +40,7 @@ public class POSTagger4StanfordParser {
 	private String countp = "more|fewer|less|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 
-	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?)?)");
+	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?!%))?)");
 	private ArrayList<String> prepphrases = new ArrayList<String>();
 	private String positions = "equal|subequal"; //initialized with two values that are not positions for convenience
 	private Pattern positionptn2;
@@ -61,7 +61,7 @@ public class POSTagger4StanfordParser {
 			
 			rs= stmt.executeQuery("select distinct term from "+tableprefix+"_term_category where category='position' union select distinct term from "+this.glosstable+" where category='position'");
 			while(rs.next()){
-				positions += rs.getString(1)+"|";
+				positions += rs.getString(1).replaceAll("\\(.*?\\)", "")+"|";
 			}
 			positions = positions.replaceFirst("\\|$", "");
 			positionptn2 = Pattern.compile("(.*?)([<{]?\\b(?:"+this.positions+")\\b[}>]?\\s+to)(\\b.*)");			
@@ -105,6 +105,13 @@ public class POSTagger4StanfordParser {
 				System.out.println();
 			}
 			
+			//make a position to [anterior to] a single token
+			m = this.positionptn2.matcher(str);
+			while(m.matches()){
+				str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+				m = this.positionptn2.matcher(str);
+			}
+			
 			str = str.replaceAll("(?<=> [\\d"+this.romandigits+"]{1,3})-(?=<)", " - "); //<metacarpal> 2-<metacarpal> 1 {length} {ratio}
 			this.chunkedtokens = new ArrayList<String>(Arrays.asList(str.split("\\s+")));
 			str = normalizePositionList(str);
@@ -125,6 +132,15 @@ public class POSTagger4StanfordParser {
 	        if(str.matches(".*? as\\s+[\\w{}<>]+\\s+as .*")){
 	           str = normalizeAsAs(str);
 	        }
+	        
+	        if(str.matches(".*\\bsame\\b.*?\\bas\\b.*")){
+	        	str = normalizeSameAs(str);
+	        }
+	        
+	        if(str.matches(".*?\\bin\\b.*?\\bassociation\\W+(with|to)\\b.*")){
+	        	str = normalizeAssociationWith(str);
+	        }
+	        
 	        
 	        if(str.matches(".*?(?<=[a-z])/(?=[a-z]).*")){
 	        	str = str.replaceAll("(?<=[a-z])/(?=[a-z])", "-");
@@ -183,11 +199,11 @@ public class POSTagger4StanfordParser {
 				}		
 				
 				//make a position to [anterior to] a single token
-				m = this.positionptn2.matcher(str);
-				while(m.matches()){
-					str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
-					m = this.positionptn2.matcher(str);
-				}
+				//m = this.positionptn2.matcher(str);
+				//while(m.matches()){
+				//	str = m.group(1)+m.group(2).replaceAll("[<{}>]", "").replaceAll("\\s+", "-")+"-PPP"+m.group(3);
+				//	m = this.positionptn2.matcher(str);
+				//}
 										
 				if(str.indexOf("×")>0){
 					containsArea = true;
@@ -197,11 +213,11 @@ public class POSTagger4StanfordParser {
 				}
 
 				str = handleBrackets(str);
-				if(type.compareTo("character")==0){
+				if(type.compareTo("character")==0){//{postorbital} , {form} of {dorsal} <surface>
 					String temp = str;
-					str = str.replaceFirst("^[^<]*\\}? of ", "").trim();
+					str = str.replaceFirst("(?<=^|,\\s)\\{?\\w+\\}? of ", "").trim(); //shape of 
 					String ch = temp.replace(str, "").replace("\\s+of\\s+", "").replaceAll("[{}]", "").trim();
-					StanfordParser.characters.put(ch, "1"); //to keep only the unique characters
+					StanfordParser.characterRstates.put(ch, "1"); //to keep only the unique characters
 				}
 				
 				stmt.execute("update "+this.tableprefix+"_markedsentence set rmarkedsent ='"+str.replaceAll("-PPP", "")+"' where source='"+src+"'");	
@@ -264,6 +280,8 @@ public class POSTagger4StanfordParser {
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("at-least")==0){
 	        		   sb.append(word+"/RB ");
+	        	   }else if(word.compareTo("one_another")==0){
+	        		   sb.append(word+"/NNS ");
 	        	   }else if(word.compareTo("plus")==0){
 	        		   sb.append(word+"/CC ");
 	        	   }else if(word.matches("\\d+[cmd]?m\\d+[cmd]?m")){ //area turned into 32cm35mm
@@ -272,7 +290,11 @@ public class POSTagger4StanfordParser {
 	        	   }else if(word.matches("("+ChunkedSentence.units+")")){
 	       			   sb.append(word+"/NNS ");
 	       		   }else if(word.matches("as-\\S+")){ //as-wide-as
-	       		   	   sb.append(word+"/RB ");
+	       		   	   sb.append(word+"/IN "); //changed from RB to IN 2/22/02 by Hong
+	       		   }else if(word.matches("same-\\S+")){ //same-as
+	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
+	       		   }else if(word.matches("in-\\S+")){ //in-association-with/to
+	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
 	       		   }else if(p.contains("op")){ //<inner> larger.
 	       				//System.out.println(rs1.getString(2));
 	       			   sb.append(word+"/NNS ");
@@ -694,8 +716,49 @@ public class POSTagger4StanfordParser {
 		
 		return result.trim();
 	}
-	
+		
+	/**
+	 * the same as => same-as/IN
+	 * as wide as or/to wider than inner
+	 * as wide as inner
+	 * as wide as long
+	 * @return
+	 */	
+	private String normalizeAssociationWith(String str) {
+		String result = "";
+		Pattern p = Pattern.compile("(.*?\\b)(in\\b.*?\\bassociation\\W+(?:with|to))(\\b.*)");
+		Matcher m = p.matcher(str);
+		while(m.matches()){
+			result+=m.group(1);
+			result+="{"+m.group(2).replaceAll("\\s+", "-").replaceAll("[{}<>]", "")+"}";
+			str = m.group(3);
+			m = p.matcher(str);
+		}
+		result+=str;
+		return result.replaceAll("\\{+", "{").replaceAll("\\}+", "}").trim();
+	}
 
+
+	/**
+	 * the same as => same-as/IN
+	 * as wide as or/to wider than inner
+	 * as wide as inner
+	 * as wide as long
+	 * @return
+	 */	
+	private String normalizeSameAs(String str) {
+		String result = "";
+		Pattern p = Pattern.compile("(.*?\\b)(same\\b[ \\w{}<>]+\\s+as)(\\b.*)");
+		Matcher m = p.matcher(str);
+		while(m.matches()){
+			result+=m.group(1);
+			result+="{"+m.group(2).replaceAll("\\s+", "-").replaceAll("[{}<>]", "")+"}";
+			str = m.group(3);
+			m = p.matcher(str);
+		}
+		result+=str;
+		return result.replaceAll("\\{+", "{").replaceAll("\\}+", "}").trim();
+	}
 
 	/**
 	 * as wide as => as-wide-as/IN

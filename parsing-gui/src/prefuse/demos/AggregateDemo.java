@@ -165,7 +165,7 @@ public class AggregateDemo extends Display {
         
         // add nodes to aggregates
         // create an aggregate for each 3-clique of nodes
-        Iterator nodes = vg.nodes();
+        Iterator<VisualItem> nodes = vg.nodes();
         for ( int i=0; i<3; ++i ) {
             AggregateItem aitem = (AggregateItem)at.addItem();
             aitem.setInt("id", i);
@@ -218,7 +218,7 @@ class AggregateLayout extends Layout {
         
         // update buffers
         int maxsz = 0;
-        for ( Iterator aggrs = aggr.tuples(); aggrs.hasNext();  )
+        for ( Iterator<AggregateItem> aggrs = aggr.tuples(); aggrs.hasNext();  )
             maxsz = Math.max(maxsz, 4*2*
                     ((AggregateItem)aggrs.next()).getAggregateSize());
         if ( m_pts == null || maxsz > m_pts.length ) {
@@ -226,14 +226,14 @@ class AggregateLayout extends Layout {
         }
         
         // compute and assign convex hull for each aggregate
-        Iterator aggrs = m_vis.visibleItems(m_group);
+        Iterator<AggregateItem> aggrs = m_vis.visibleItems(m_group);
         while ( aggrs.hasNext() ) {
             AggregateItem aitem = (AggregateItem)aggrs.next();
 
             int idx = 0;
             if ( aitem.getAggregateSize() == 0 ) continue;
             VisualItem item = null;
-            Iterator iter = aitem.items();
+            Iterator<VisualItem> iter = aitem.items();
             while ( iter.hasNext() ) {
                 item = (VisualItem)iter.next();
                 if ( item.isVisible() ) {
@@ -360,7 +360,7 @@ class AggregateDragControl extends ControlAdapter {
     @SuppressWarnings("unchecked")
 	protected static void setFixed(VisualItem item, boolean fixed) {
         if ( item instanceof AggregateItem ) {
-            Iterator items = ((AggregateItem)item).items();
+            Iterator<VisualItem> items = ((AggregateItem)item).items();
             while ( items.hasNext() ) {
                 setFixed((VisualItem)items.next(), fixed);
             }
@@ -372,7 +372,7 @@ class AggregateDragControl extends ControlAdapter {
     @SuppressWarnings("unchecked")
 	protected static void move(VisualItem item, double dx, double dy) {
         if ( item instanceof AggregateItem ) {
-            Iterator items = ((AggregateItem)item).items();
+            Iterator<VisualItem> items = ((AggregateItem)item).items();
             while ( items.hasNext() ) {
                 move((VisualItem)items.next(), dx, dy);
             }

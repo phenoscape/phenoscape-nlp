@@ -1,12 +1,9 @@
 package owlaccessor;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLClass;
+
 
 public class TestOWLAccessorImpl {
 	
@@ -85,18 +82,19 @@ public class TestOWLAccessorImpl {
 //	}
 	
 	@Test
-	public void testGetAnnotationProperties(){
-		OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));
-		for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
-			System.out.println(oa.toString());
-		}
+	public void testGetAnnotationProperties() throws Exception{
+		//OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
+		OWLAccessorImpl a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl", new ArrayList<String>());
+		//System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));
+		//for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
+		//	System.out.println(oa.toString());
+		//}
 		
 		List<String> s = new ArrayList<String>();
-		System.out.println(a.retrieveConcept("ploidy", s).size());
+		System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
 		
 		s.add("cellular quality");
-		System.out.println(a.retrieveConcept("ploidy", s).size());
+		System.out.println(a.retrieveConcept("ploidy").size());
 		
 	}
 	

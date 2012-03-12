@@ -2,13 +2,13 @@ package fna.parsing.character;
 
 import java.util.*;
 
-@SuppressWarnings("unchecked")
+
 public class StateGroup {
-	private ArrayList list = null;
+	private ArrayList<State> list = null;
 	private int count = 1;
 	
 	public StateGroup() {
-		this.list = new ArrayList();
+		this.list = new ArrayList<State>();
 	}
 	
 	public void addState(State s){
@@ -34,7 +34,7 @@ public class StateGroup {
 	
 	public int numberOfAssociated(){
 		int c = 0;
-		Iterator it = list.iterator();
+		Iterator<State> it = list.iterator();
 		while(it.hasNext()){
 			if(((State)it.next()).associatedWithCharacter()){
 				c++;
@@ -51,9 +51,9 @@ public class StateGroup {
 		return count;
 	}
 	
-	public ArrayList freeStates(){
-		ArrayList freestates = new ArrayList();
-		Iterator it = list.iterator();
+	public ArrayList<State> freeStates(){
+		ArrayList<State> freestates = new ArrayList<State>();
+		Iterator<State> it = list.iterator();
 		//int i = 0;
 		while(it.hasNext()){
 			State s = (State)it.next();
@@ -64,9 +64,9 @@ public class StateGroup {
 		return freestates;
 	}
 	
-	public ArrayList nonCategoryStates(String category){
-		ArrayList alist = new ArrayList();
-		Iterator it = list.iterator();
+	public ArrayList<State> nonCategoryStates(String category){
+		ArrayList<State> alist = new ArrayList<State>();
+		Iterator<State> it = list.iterator();
 		//int i = 0;
 		while(it.hasNext()){
 			State s = (State)it.next();
@@ -78,9 +78,9 @@ public class StateGroup {
 	}
 	
 	public String mostFreqCategory(){
-		ArrayList categories = seenCategories();
-		Hashtable counter = new Hashtable();
-		Iterator it = categories.iterator();
+		ArrayList<String> categories = seenCategories();
+		Hashtable<String, String> counter = new Hashtable<String, String>();
+		Iterator<String> it = categories.iterator();
 		while(it.hasNext()){
 			String cat = (String)it.next();
 			String count = (String) counter.get(cat);
@@ -94,7 +94,7 @@ public class StateGroup {
 		int max = 0;
 		String thecat = "";
 		String thecount = "";
-		Enumeration en = counter.keys();
+		Enumeration<String> en = counter.keys();
 		while(en.hasMoreElements()){
 			String cat = (String)en.nextElement();
 			String count = (String)counter.get(cat);
@@ -107,9 +107,9 @@ public class StateGroup {
 		return thecat+"#"+thecount;
 	}
 	
-	public ArrayList seenCategories(){
-		ArrayList seen = new ArrayList();
-		Iterator it = list.iterator();
+	public ArrayList<String> seenCategories(){
+		ArrayList<String> seen = new ArrayList<String>();
+		Iterator<State> it = list.iterator();
 		//int i = 0;
 		while(it.hasNext()){
 			State s = (State)it.next();
@@ -120,7 +120,7 @@ public class StateGroup {
 	
 	public String toString(){
 		String [] names = new String[list.size()];
-		Iterator it = list.iterator();
+		Iterator<State> it = list.iterator();
 		int i = 0;
 		while(it.hasNext()){
 			State s = (State)it.next();

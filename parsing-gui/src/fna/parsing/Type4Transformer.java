@@ -164,7 +164,7 @@ public abstract class Type4Transformer extends Thread {
 
 	protected void writeDescription2Descriptions(String textNormalize, String fn) {
 		try {
-			File file = new File(target+"/descriptions", fn+ ".txt");
+			File file = new File(target+System.getProperty("file.separator")+"descriptions", fn+ ".txt");
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(textNormalize);
@@ -179,7 +179,7 @@ public abstract class Type4Transformer extends Thread {
 
 	protected void writeTreatment2Transformed(Element root, int fn, int count) {
 		// TODO Auto-generated method stub
-		ParsingUtil.outputXML(root, new File(target+"/transformed", fn+"_"+count+".xml"), null);
+		ParsingUtil.outputXML(root, new File(target+System.getProperty("file.separator")+"transformed", fn+"_"+count+".xml"), null);
 	}
 
 	/**

@@ -198,7 +198,7 @@ public class FisheyeMenu extends Display {
         public void run(double frac) {
             // first pass
             double w = 0, h = 0;
-            Iterator iter = m_vis.items();
+            Iterator<VisualItem> iter = m_vis.items();
             while ( iter.hasNext() ) {
                 VisualItem item = (VisualItem)iter.next();
                 item.setSize(1.0);

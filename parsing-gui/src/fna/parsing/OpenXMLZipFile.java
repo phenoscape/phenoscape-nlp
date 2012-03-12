@@ -84,7 +84,7 @@ public class OpenXMLZipFile
 			ZipFile zipFile = new ZipFile(sourceZipFile,ZipFile.OPEN_READ);
 
 			//Get the entries
-			Enumeration en = zipFile.entries();
+			Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
 
 
 			while(en.hasMoreElements())

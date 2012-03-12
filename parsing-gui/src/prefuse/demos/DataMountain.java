@@ -176,7 +176,7 @@ public class DataMountain extends Display {
         }
 
         public void reset() {
-            Iterator iter = m_vis.visibleItems(m_nodeGroup);
+            Iterator<VisualItem> iter = m_vis.visibleItems(m_nodeGroup);
             while ( iter.hasNext() ) {
                 VisualItem item = (VisualItem)iter.next();
                 ForceItem aitem = (ForceItem)item.get(ANCHORITEM);
@@ -193,7 +193,7 @@ public class DataMountain extends Display {
             t.addColumns(ANCHORITEM_SCHEMA);
             t.addColumns(FORCEITEM_SCHEMA);
             
-            Iterator iter = m_vis.visibleItems(m_nodeGroup);
+            Iterator <VisualItem> iter = m_vis.visibleItems(m_nodeGroup);
             while ( iter.hasNext() ) {
                 VisualItem item = (VisualItem)iter.next();
                 // get force item

@@ -106,7 +106,7 @@ public void open () {
 	shell.setSize (size.x / 2, size.y / 2);
 	shell.open ();
 }
-
+@SuppressWarnings("unused")
 void refreshLabel () {
 	int colors = 0, cursors = 0, fonts = 0, gcs = 0, images = 0, regions = 0;
 	for (int i=0; i<objects.length; i++) {
@@ -263,7 +263,7 @@ void refreshAll () {
 
 void layout () {
 	Rectangle rect = shell.getClientArea ();
-	String [] strings = new String [objects.length];
+	//String [] strings = new String [objects.length];
 	int width = 0;
 	String [] items = list.getItems ();
 	GC gc = new GC (list);

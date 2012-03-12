@@ -23,7 +23,6 @@ public class CharacterDescriptionReader {
 	private File source;
 	private File output;
 	private Connection conn;
-	private String database;
 	private String tableprefix;
 	private static String username="phenoscape";
 	private static String password="pheno!scape";
@@ -38,7 +37,6 @@ public class CharacterDescriptionReader {
 	public CharacterDescriptionReader(String source, String output, String database, String tableprefix) {
 		this.source = new File(source);
 		this.output = new File(output);
-		this.database = database;
 		this.tableprefix = tableprefix;
 		try{
 			if(conn == null){
@@ -82,7 +80,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 		}
 		try{
 			FileWriter wrt = new FileWriter(output);
-		    wrt.append(this.text.toString());
+		    wrt.append(CharacterDescriptionReader.text.toString());
 		    wrt.flush();
 		    wrt.close();
 		}catch(Exception e){
@@ -132,7 +130,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 	}
 	private void insertSentence(String sentence, int sentid, String source, int charid) {
 		String clean = sentence.replaceFirst("^\\d+:", "").replaceAll("\\([^)]*\\)", "").trim();
-		this.text.append(clean.replaceFirst("\\W\\s*$", "")+"; ");
+		CharacterDescriptionReader.text.append(clean.replaceFirst("\\W\\s*$", "")+"; ");
 		try{
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+this.tableprefix+"_sentence (sentid, source, sentence, originalsent, charid) values ("+sentid+",'"+source+"','"+clean+"','"+sentence+"',"+charid+")");

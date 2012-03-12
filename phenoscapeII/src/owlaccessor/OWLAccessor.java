@@ -24,8 +24,9 @@ public interface OWLAccessor {
 	 * When there is no such a term, return and empty list.
 	 * @param con - the given concept
 	 * @return a list of matched or related terms (synonyms)
+	 * @throws Exception 
 	 */
-	public List<OWLClass> retrieveConcept(String con, List<String> eliminatedWords);
+	public List<OWLClass> retrieveConcept(String con) throws Exception;
 	
 	/**
 	 * Retrieve a set of keywords in a term's definition.

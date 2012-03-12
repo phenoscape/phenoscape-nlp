@@ -104,10 +104,11 @@ public class Utilities {
 			if(debugPOS) System.out.println(word+" is sureVerb");
 			return true;
 		}
+		if(!v) return false;
 		try{
 			Statement stmt = conn.createStatement();
 			String q = "select * from "+prefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE")+" " +
-					"where originalsent like '%does not "+word+"%'";
+					"where originalsent rlike '(does|do) not "+word+"'";
 			ResultSet rs = stmt.executeQuery(q);
 			if(rs.next()){
 				sureVerbs.add(word);
@@ -246,7 +247,6 @@ public class Utilities {
 	private static void add2table(String phrase, Connection conn, String prefix) {
 		try{
 			Statement stmt = conn.createStatement();
-			stmt.execute("create table if not exists "+prefix+"_prepphrases (phrase varchar(100))");
 			stmt.execute("insert into "+prefix+"_prepphrases values ('"+phrase+"')");
 		}catch(Exception e){
 			e.printStackTrace();
@@ -266,10 +266,16 @@ public class Utilities {
 
 	public static String toSingular(String word){
 		String s = "";
-		word = word.toLowerCase().replaceAll("\\W", "");
+		word = word.toLowerCase().replaceAll("[(){}]", "").trim(); //bone/tendon
 
 		s = singulars.get(word);
 		if(s!=null) return s;
+		
+		if(word.matches("\\w+_[ivx]+")){
+			singulars.put(word, word);
+			plurals.put(word, word);
+			return word;
+		}
 		
 		//adverbs
 		if(word.matches("[a-z]{3,}ly")){

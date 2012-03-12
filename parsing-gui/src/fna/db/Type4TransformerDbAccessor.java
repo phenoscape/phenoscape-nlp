@@ -17,7 +17,6 @@ import fna.parsing.ApplicationUtilities;
  * @author hongcui
  *
  */
-@SuppressWarnings({ "unchecked" })
 public class Type4TransformerDbAccessor {
 
 	/**
@@ -58,7 +57,7 @@ public class Type4TransformerDbAccessor {
 	}
 	
 	
-	public void addRecords(Hashtable files){
+	public void addRecords(Hashtable<String, String> files){
 		
 		try{
 			conn = DriverManager.getConnection(url);

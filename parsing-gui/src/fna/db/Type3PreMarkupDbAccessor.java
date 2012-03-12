@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 
 import fna.parsing.ApplicationUtilities;
 
-@SuppressWarnings("unchecked")
+
 public class Type3PreMarkupDbAccessor {
 
 	/**
@@ -39,7 +39,7 @@ public class Type3PreMarkupDbAccessor {
 		
 	}
 	
-	public ArrayList selectRecords(String select, String from, String where){
+	public ArrayList<String> selectRecords(String select, String from, String where){
 		ArrayList<String> results = new ArrayList<String>();
 		try{
 			conn = DriverManager.getConnection(url);

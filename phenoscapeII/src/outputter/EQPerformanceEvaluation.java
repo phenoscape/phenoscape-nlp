@@ -5,6 +5,7 @@ package outputter;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -12,11 +13,17 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+
 /**
  * @author Hong Updates
  * compare raw EQ table to EQ answer table
  * obtain precision/recall measurements 
+ * 
+ * 
+ * 
+ * notes: basibranchial 2 absent => basibranchial 2 cartilage absent + basibranchial 2 bone absent
  */
+@SuppressWarnings("unused")
 public class EQPerformanceEvaluation {
 
 	private Connection conn;
@@ -27,10 +34,12 @@ public class EQPerformanceEvaluation {
 	private String prtablefields;
 	private String prtableEQs;
 	private String prtableTranslations;
-	private boolean printfields = true;
+	private boolean printfields = false;
 	private boolean printEQs = true;
 	private boolean printTranslations = true;
-	
+	private ArrayList<ArrayList<Hashtable<String,String>>> astates;
+	private ArrayList<ArrayList<Hashtable<String,String>>> tstates;
+	private ArrayList<String> states = new ArrayList<String>(); 
 	//init
 	Hashtable<String, String> counts;
 	ArrayList<String> fields = new ArrayList<String>();
@@ -116,7 +125,7 @@ public class EQPerformanceEvaluation {
 	 * recall = #matched/#inanswer
 	 */
 	public void evaluate(){	
-		ArrayList<String> states = new ArrayList<String>(); 
+		
 		//tallying 
 		try{
 			//collect all unique state ids
@@ -129,44 +138,54 @@ public class EQPerformanceEvaluation {
 					states.add(stateid);
 				}
 			}
-			//pair up answer and test states
-			ArrayList<ArrayList<Hashtable<String,String>>> astates = new ArrayList<ArrayList<Hashtable<String,String>>>();
-			ArrayList<ArrayList<Hashtable<String,String>>> tstates = new ArrayList<ArrayList<Hashtable<String,String>>>();			
-			Iterator<String> it = states.iterator();
-			while(it.hasNext()){
-				String stateid = it.next();
-				ArrayList<Hashtable<String, String>> astate = new ArrayList<Hashtable<String, String>>();
-				rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
-					this.answertable+" where stateid = '"+stateid+"'");
-				while(rs.next()){
-					Hashtable<String, String> EQ = new Hashtable<String, String> ();
-					for(String field: this.fields){
-						String v = rs.getString(field);
-						EQ.put(field, v);
-					}		
-					astate.add(EQ);
-				}
-				System.out.println("added ["+stateid+"] from answer");
-				astates.add(astate);
-				ArrayList<Hashtable<String, String>> tstate = new ArrayList<Hashtable<String, String>>();
-				rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
-					this.testtable+" where stateid = '"+stateid+"'");
-				while(rs.next()){
-					Hashtable<String, String> EQ = new Hashtable<String, String> ();
-					for(String field: this.fields){
-						String v = rs.getString(field);
-						EQ.put(field, v);
-					}
-					tstate.add(EQ);
-				}
-				tstates.add(tstate);
-				System.out.println("added ["+stateid+"] from test");
-			}
-			compareFields(tstates, astates);//precision and recall for each of the fields
-			compareEQs(tstates, astates); //for raw/labeled EQ statements
+			stmt.close();
+			
+			readResultsfromDatabase();
+			compareFields();//precision and recall for each of the fields
+			readResultsfromDatabase();
+			compareEQs(); //for raw/labeled EQ statements
+			readResultsfromDatabase();
 			compareTranslations(); //translation from raw to labels/Ids
 		}catch(Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	private void readResultsfromDatabase() throws SQLException {
+		ResultSet rs;
+		Statement stmt = conn.createStatement();
+		//pair up answer and test states
+		astates = new ArrayList<ArrayList<Hashtable<String,String>>>();
+		tstates = new ArrayList<ArrayList<Hashtable<String,String>>>();			
+		Iterator<String> it = states.iterator();
+		while(it.hasNext()){
+			String stateid = it.next();
+			ArrayList<Hashtable<String, String>> astate = new ArrayList<Hashtable<String, String>>();
+			rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
+				this.answertable+" where stateid = '"+stateid+"'");
+			while(rs.next()){
+				Hashtable<String, String> EQ = new Hashtable<String, String> ();
+				for(String field: this.fields){
+					String v = rs.getString(field);
+					EQ.put(field, v);
+				}		
+				astate.add(EQ);
+			}
+			//System.out.println("added ["+stateid+"] from answer");
+			astates.add(astate);
+			ArrayList<Hashtable<String, String>> tstate = new ArrayList<Hashtable<String, String>>();
+			rs = stmt.executeQuery("select entity, entitylabel, entityid, quality, qualitylabel, qualityid, qualitynegated, qualitynegatedlabel, qnparentlabel, qnparentid, qualitymodifier, qualitymodifierlabel, qualitymodifierid, entitylocator, entitylocatorlabel, entitylocatorid, countt from "+
+				this.testtable+" where stateid = '"+stateid+"'");
+			while(rs.next()){
+				Hashtable<String, String> EQ = new Hashtable<String, String> ();
+				for(String field: this.fields){
+					String v = rs.getString(field);
+					EQ.put(field, v);
+				}
+				tstate.add(EQ);
+			}
+			tstates.add(tstate);
+			//System.out.println("added ["+stateid+"] from test");
 		}
 	}
 
@@ -176,8 +195,7 @@ public class EQPerformanceEvaluation {
 	 * @param tstate
 	 * @param astate
 	 */
-	private void compareFields(ArrayList<ArrayList<Hashtable<String, String>>> tstates,
-			ArrayList<ArrayList<Hashtable<String, String>>> astates) {
+	private void compareFields() {
 		if(counts == null){
 			 counts = new Hashtable<String, String> ();
 			 //init
@@ -201,7 +219,7 @@ public class EQPerformanceEvaluation {
 			for(int i = 0; i < astates.size(); i++){
 				ArrayList<String> avalues = new ArrayList<String>();
 				for(Hashtable<String, String> EQ :astates.get(i)){
-					String v = EQ.get(field);
+					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*,\\s*");
 						for(String v1 : vs){
@@ -213,47 +231,58 @@ public class EQPerformanceEvaluation {
 							
 				ArrayList<String> tvalues = new ArrayList<String>();
 				for(Hashtable<String, String> EQ :tstates.get(i)){
-					String v = EQ.get(field);
+					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*,\\s*");
 						for(String v1 : vs){
-							if(v1.length()>0)tvalues.add(v1);
+							if(v1.length()>0) tvalues.add(v1);
 						}
 					}
 				}
 				
-				if(field.compareTo("entity")==0){
+				if(this.printfields && field.compareTo("entity")==0){
 					tcount += tvalues.size();
 					acount += avalues.size();
-					System.out.println("t +"+tvalues.size()+"at state "+i);
-					System.out.println("a +"+avalues.size()+"at state "+i);
+				//	System.out.println("t +"+tvalues.size()+"at state "+i);
+				//	System.out.println("a +"+avalues.size()+"at state "+i);
 				}
 				for(int j = 0; j<tvalues.size(); j++){
 					for(int k = 0; k < avalues.size(); k++){
 						String v = tvalues.get(j);
 						String a = avalues.get(k);
 						if(a.length()>0 && v.length()>0 && (a.contains(v) || v.contains(a))){
-							if(this.printfields && field.compareTo("entity")==0){								
-								wcount++;
+							wcount++;
+							/*if(this.printfields && field.compareTo("entitylabel")==0){								
 								System.out.println("total t:"+tcount);
 								System.out.println("total a:"+acount);
 								System.out.println("total m:"+wcount);
-								System.out.println(wcount+":["+v+"]=["+avalues.toString()+"]");
+								System.out.println(wcount+":["+v+"]=["+a+"]");
 								
-							}
+							}*/
 							counts.put("matched"+field, ""+(Integer.parseInt(counts.get("matched"+field))+1));
 							tvalues.set(j, ""); //remove matched
 							avalues.set(k, "");
 							break;
 						}else{ //not matched
 							//if(this.printfields && field.compareTo("entity")==0){
-							//	System.out.println("["+v+"]x["+avalues.toString()+"]");
+							//	System.out.println("["+v+"]x["+a+"]");
 							//}
 						}
 					}
 				}
+				if(this.printfields && field.compareTo("entity")==0){
+					System.out.println("unmatched in the answer:");
+					for(String a : avalues){
+						if(a.length()>0) System.out.println(a);
+					}
+					System.out.println("unmatched in the result:");
+					for(String t : tvalues){
+						if(t.length()>0) System.out.println(t);
+					}
+				}
+				
 			}
-			if(field.compareTo("entity")==0){
+			if(this.printfields && field.compareTo("entity")==0){
 				System.out.println("total t:"+tcount);
 				System.out.println("total a:"+acount);
 				System.out.println("total m:"+wcount);
@@ -326,9 +355,9 @@ public class EQPerformanceEvaluation {
 	 * 
 	 * @param tstate: EQs generated by the algorithm for a state
 	 * @param astate: EQs in answer key for a state
+	 * @throws SQLException 
 	 */
-	private void compareEQs(ArrayList<ArrayList<Hashtable<String, String>>> tstates,
-			ArrayList<ArrayList<Hashtable<String, String>>> astates) {
+	private void compareEQs() throws SQLException {
 		//raw
 		int totalrawgenerated = 0;
 		int totalrawinanswer = 0;
@@ -362,6 +391,8 @@ public class EQPerformanceEvaluation {
 				partialrawp +","+ partialrawr+",";
 		
 		//labeled
+		
+		readResultsfromDatabase();
 		int totallabeledgenerated = 0;
 		int totallabeledinanswer = 0;
 		int partiallabeledmatches = 0;
@@ -381,6 +412,15 @@ public class EQPerformanceEvaluation {
 				int[] matchingresult = matchAstates(entity, entitylocator, quality, qualitymodifier, astates.get(i), "label");
 				exactlabeledmatches += matchingresult[0];
 				partiallabeledmatches += matchingresult[0] + matchingresult[1];
+				if(this.printEQs && matchingresult[0]==0 && matchingresult[1]==0){
+					//unmatched result
+					System.out.println("unmatched result=E:"+entity+" Q:"+quality+" QM:"+qualitymodifier+" EL:"+entitylocator);
+				}
+			}
+			if(this.printEQs){
+				for(Hashtable<String, String> aEQ : astates.get(i)){
+					System.out.println("unmatched answer=E:"+aEQ.get("entitylabel")+" Q:"+aEQ.get("qualitylabel")+" QM:"+aEQ.get("qualitymodifierlabel")+" EL:"+aEQ.get("entitylocatorlabel"));
+				}
 			}
 		}		
 		fieldstring+= "formalexactp, formalexactr, formalpartialp, formalpartialr";
@@ -404,12 +444,13 @@ public class EQPerformanceEvaluation {
 	 * @param quality
 	 * @param qualitymodifier
 	 * @param aState
-	 * @param postfix
+	 * @param postfix: "label" or ""
 	 * @return 2-element int array: the first element is 1 (0) if there is (not) an exact match, the second element is 1 (0) if there is (not) an partial match
 	 */
 	private int[] matchAstates(String entity, String entitylocator,
 			String quality, String qualitymodifier,
 			ArrayList<Hashtable<String, String>> aState, String suffix) {
+		//one state may have N EQs
 		int[] matches = new int[]{0, 0};
 		int matchsize = 0;
 		int index = -1;
@@ -421,13 +462,13 @@ public class EQPerformanceEvaluation {
 			}
 		}
 		if(matchsize == 4){
-			matches[0] = 1;
-			matches[1] = 0;
+			matches[0] = 1; //exact
+			matches[1] = 0; //partial
 			aState.remove(index);
 			return matches;
 		}else if(matchsize >=2 && matchsize < 4){
-			matches[0] = 0;
-			matches[1] = 1;
+			matches[0] = 0; //exact
+			matches[1] = 1; //partial
 			aState.remove(index);
 			return matches;
 		}else{
@@ -457,16 +498,17 @@ public class EQPerformanceEvaluation {
 		if(!e.contains(entity) && !entity.contains(e) && !q.contains(quality) && !quality.contains(q)){
 			return 0;
 		}
-
-		if(e.compareTo(entity) ==0){
+		if(e.length()==0 || q.length()==0 || entity.length()==0 || quality.length()==0) return 0;
+		
+		if(e.compareTo(entity) ==0 && e.length()!=0 && entity.length()!=0 ){
 			exact++;
-		}else if(e.contains(entity) || entity.contains(e)){
+		}else if((e.contains(entity) || entity.contains(e)) && e.length()!=0 && entity.length()!=0){
 			partial++;
 		}
 		
-		if(q.compareTo(quality)==0){
+		if(q.compareTo(quality)==0 && q.length()!=0 && quality.length()!=0){
 			exact++;
-		}else if(q.contains(quality) || quality.contains(q)){
+		}else if((q.contains(quality) || quality.contains(q)) && q.length()!=0 && quality.length()!=0){
 			partial++;
 		}
 		
@@ -491,6 +533,8 @@ public class EQPerformanceEvaluation {
 			}else if(aqms.length == tqms.length && thisexact == aqms.length){
 				exact++; 
 			}
+		}else if(qualitymodifier.length()==0 && EQ.get("qualitymodifier"+suffix).length()==0){
+			exact++;
 		}
 		//compare entitylocator
 		if(entitylocator.length()>0 && EQ.get("entitylocator"+suffix).length()>0){
@@ -512,6 +556,8 @@ public class EQPerformanceEvaluation {
 			}else if(aels.length == tels.length && thisexact == aels.length){
 				exact++; 
 			}
+		}else if(entitylocator.length()==0 && EQ.get("entitylocator"+suffix).length()==0){
+			exact++;
 		}
 		return exact+partial;
 	}
@@ -541,7 +587,8 @@ public class EQPerformanceEvaluation {
 			//collecting entity pairs
 			for(String entitypair : entities){
 				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.answertable+" where length(stateid)>0");
+				//ResultSet rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.answertable+" where stateid!=''");
+				ResultSet rs = stmt.executeQuery("select "+entitypair+" from "+this.answertable+" where stateid!=''");
 				while(rs.next()){					
 					String[] raws = rs.getString(1).split("\\s*,\\s*");
 					String[] labels = rs.getString(2).split("\\s*,\\s*");
@@ -552,11 +599,13 @@ public class EQPerformanceEvaluation {
 							aentitytranslations.put(raw, label);
 						}
 					}
-				}				
-				rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.testtable + " where length(stateid)>0");
+				}		
+				//rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.testtable + " where stateid !=''");
+				rs = stmt.executeQuery("select "+entitypair+" from "+this.testtable + " where stateid !=''");
 				while(rs.next()){					
 					String[] raws = rs.getString(1).split("\\s*,\\s*");
-					String[] labels = new String[raws.length];
+					//String[] labels = new String[raws.length];
+					String[] labels = rs.getString(2).split("\\s*,\\s*");
 					labels = rs.getString(2).split("\\s*,\\s*");
 					for(int i = 0; i<raws.length; i++){
 						String raw = raws[i].trim();
@@ -570,21 +619,25 @@ public class EQPerformanceEvaluation {
 			//collecting quality pairs
 			for(String qualitypair : qualities){
 				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery("select distinct "+qualitypair+" from "+this.answertable + " where length(stateid)>0");
+				//ResultSet rs = stmt.executeQuery("select distinct "+qualitypair+" from "+this.answertable + " where stateid!=''");
+				ResultSet rs = stmt.executeQuery("select "+qualitypair+" from "+this.answertable + " where stateid!=''");
 				while(rs.next()){					
-					String[] raws = rs.getString(1).split("\\s*,\\s*");
-					String[] labels = rs.getString(2).split("\\s*,\\s*");
-					for(int i = 0; i<raws.length; i++){
-						aqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
-					}
+					//String[] raws = rs.getString(1).split("\\s*,\\s*");
+					//String[] labels = rs.getString(2).split("\\s*,\\s*");
+					//for(int i = 0; i<raws.length; i++){
+					//	aqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
+					//}
+					aqualitytranslations.put(rs.getString(1).trim(), rs.getString(2).trim());
 				}				
-				rs = stmt.executeQuery("select distinct "+qualitypair+" from "+this.testtable + " where length(stateid)>0");
+				//rs = stmt.executeQuery("select distinct "+qualitypair+" from "+this.testtable + " where length(stateid)!=''");
+				rs = stmt.executeQuery("select "+qualitypair+" from "+this.testtable + " where length(stateid)!=''");
 				while(rs.next()){					
-					String[] raws = rs.getString(1).split("\\s*,\\s*");
-					String[] labels = rs.getString(2).split("\\s*,\\s*");
-					for(int i = 0; i<raws.length; i++){
-						tqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
-					}
+					//String[] raws = rs.getString(1).split("\\s*,\\s*");
+					//String[] labels = rs.getString(2).split("\\s*,\\s*");
+					//for(int i = 0; i<raws.length; i++){
+					//	tqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
+					//}
+					tqualitytranslations.put(rs.getString(1).trim(), rs.getString(2).trim());
 				}											
 			}
 			//matching and calculating entity translations
@@ -598,11 +651,14 @@ public class EQPerformanceEvaluation {
 				String traw = trawentities.nextElement();
 				String tlabel = tentitytranslations.get(traw);
 				String alabel = aentitytranslations.get(traw);
-				if(alabel !=null && tlabel !=null && alabel.compareToIgnoreCase(tlabel)==0){
+				//if(alabel !=null && tlabel !=null && alabel.compareToIgnoreCase(tlabel)==0){
+				if(alabel !=null && tlabel !=null && alabel.length()>0 && tlabel.length() >0 && (alabel.contains(tlabel)|| tlabel.contains(alabel))){
 					matchedentities++;
 				}
 			}
 			fieldstring +="entityp, entityr,";
+			
+			//matching and calculating quality translations
 			float p = totalentitypairgenerated ==0? -1 : (float)matchedentities/totalentitypairgenerated;
 			float r = totalentitypairinanswer ==0? -1 : (float)matchedentities/totalentitypairinanswer;
 			prstring += p + ","+ r+",";			
@@ -614,7 +670,8 @@ public class EQPerformanceEvaluation {
 				String traw = trawqualities.nextElement();
 				String tlabel = tqualitytranslations.get(traw);
 				String alabel = aqualitytranslations.get(traw);
-				if(alabel !=null && tlabel !=null && alabel.compareToIgnoreCase(tlabel)==0){
+				//if(alabel !=null && tlabel !=null && alabel.compareToIgnoreCase(tlabel)==0){
+				if(alabel !=null && tlabel !=null && alabel.length()>0 && tlabel.length() >0 && (alabel.contains(tlabel)|| tlabel.contains(alabel))){
 					matchedqualities++;
 				}
 			}
@@ -627,12 +684,16 @@ public class EQPerformanceEvaluation {
 				e.printStackTrace();
 		}				
 	}
+	
+	
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		String database = "biocreative2012";
-		String testtable = "run0";
+		//String testtable = "run0_result";
+		String testtable = "test2_xml2eq_result";
 		String answertable = "internalworkbench";
 		String prtable = "evaluationrecords";
 		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);

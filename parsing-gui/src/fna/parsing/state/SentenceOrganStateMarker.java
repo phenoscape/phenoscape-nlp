@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +28,7 @@ import fna.parsing.ApplicationUtilities;
  * last stable version: 653
  * this version: try to find additional nouns from unknown words, and mark them with <>. 
  */
-
-@SuppressWarnings("unchecked")
+@SuppressWarnings("unused")
 public class SentenceOrganStateMarker {
 	private Hashtable<String, String> sentences = new Hashtable<String, String>();
 	private Connection conn = null;
@@ -45,13 +43,14 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of|";
+	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
 	private StyledText charLog;
 	/**
 	 * 
 	 */
+
 	public SentenceOrganStateMarker(Connection conn, String tableprefix, String glosstable, boolean fixadjnn, Display display, StyledText charLog) {
 		this.display = display;
 		this.charLog = charLog;
@@ -70,7 +69,7 @@ public class SentenceOrganStateMarker {
 		}
 
 		//preparing...
-		this.adjnounsent = new Hashtable(); //source ->adjnoun (e.g. inner)
+		this.adjnounsent = new Hashtable<String, String>(); //source ->adjnoun (e.g. inner)
 		ArrayList<String> adjnouns = new ArrayList<String>();//all adjnouns
 		try{
 			Statement stmt = conn.createStatement();
@@ -163,7 +162,7 @@ public class SentenceOrganStateMarker {
 		return text;
 	}
 
-	public Hashtable markSentences(){
+	public Hashtable<String, String> markSentences(){
 		if(this.marked){
 			loadMarked();
 		}else{
@@ -180,7 +179,7 @@ public class SentenceOrganStateMarker {
 					String[] splits = sent.split("##");
 					String modifier = splits[0];
 					String tag = splits[1];
-					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+")\\b", "");
+					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
 					taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
 				
@@ -353,8 +352,7 @@ public class SentenceOrganStateMarker {
 	 * @param taggedsent
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private String fixAdjNouns(ArrayList adjnouns, String adjnoun, String taggedsent) {
+	private String fixAdjNouns(/*ArrayList<?> adjnouns,*/ String adjnoun, String taggedsent) {
 		adjnoun = adjnoun.replaceAll("\\s+", "\\\\W+");
 		taggedsent = Pattern.compile("[<{]*\\b"+adjnoun+"\\b[}>]*", Pattern.CASE_INSENSITIVE).matcher(taggedsent).replaceFirst("<"+adjnoun+">").replaceAll("W\\+", "> <").replaceAll("<and>", "and").replaceAll("<or>", "or");
 		return taggedsent;
@@ -531,7 +529,7 @@ public class SentenceOrganStateMarker {
 		return colors.toString().replaceFirst("\\|$", "");
 	}
 	
-    private void resetOutputMessage() {
+	private void resetOutputMessage() {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
 			public void run() {
@@ -559,7 +557,7 @@ public class SentenceOrganStateMarker {
 		//String database="plaziants_benchmark";//TODO
 		//String database="annotationevaluation";
 		//String database ="phenoscape";
-		String database="markedupdatasets";
+		String database="biocreative2012";
 		String username="root";
 		String password="root";
 		try{
@@ -574,7 +572,7 @@ public class SentenceOrganStateMarker {
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "biocreative_test", "fishglossaryfixed", true, null, null);
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "test", "fishglossaryfixed", true, null, null);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 		sosm.markSentences();

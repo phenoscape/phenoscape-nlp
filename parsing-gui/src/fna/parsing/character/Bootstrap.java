@@ -10,11 +10,11 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 import fna.parsing.ApplicationUtilities;
-@SuppressWarnings("unchecked")
+
 public class Bootstrap implements Comparator<StateGroup>{
 	
 	
-	private ArrayList source;
+	private ArrayList<StateGroup> source;
 	private Glossary glossary;
 	//private String tablename; //save the discoveries made from bootstrapping iterations
 	static private Connection conn = null;
@@ -26,7 +26,7 @@ public class Bootstrap implements Comparator<StateGroup>{
 	@SuppressWarnings("unused")
 	private static final Logger LOGGER = Logger.getLogger(Bootstrap.class);
 	
-	public Bootstrap(ArrayList source, Glossary glossary, String database) {
+	public Bootstrap(ArrayList<StateGroup> source, Glossary glossary, String database) {
 	//public Bootstrap(ArrayList source, String database) {
 		try{
 			if(conn == null){
@@ -62,7 +62,7 @@ public class Bootstrap implements Comparator<StateGroup>{
 		do{
 			count = 0;
 			Collections.sort(source, this);//resort the source
-			Iterator it = source.iterator();
+			Iterator<StateGroup> it = source.iterator();
 			while(it.hasNext()){
 				StateGroup sg = (StateGroup)it.next();
 				count += inferCharacters(sg);//add discoveries (term, category) to glossary
@@ -89,11 +89,11 @@ public class Bootstrap implements Comparator<StateGroup>{
 		//A/B ? :return 0
 		//A ?: ?=A
 		if(sg.size() == 2 && sg.numberOfAssociated() == 1 && sg.getCount() > 3){
-			ArrayList cats = sg.seenCategories();
+			ArrayList<String> cats = sg.seenCategories();
 			if(cats.size() >1){
 				return count;
 			}
-			ArrayList unknowns = sg.nonCategoryStates((String)cats.get(0));
+			ArrayList<?> unknowns = sg.nonCategoryStates((String)cats.get(0));
 			glossary.addInducedPair(((State)unknowns.get(0)).toString(), cats);
 			count++;
 			System.out.println(((State)unknowns.get(0)).toString()+" is labeled as ["+(String)cats.get(0)+"], in group "+sg.toString()+"--a new discovery========");
@@ -109,13 +109,13 @@ public class Bootstrap implements Comparator<StateGroup>{
 			String cat = mf[0];
 			int freq = mf[1].length();
 			if(freq ==sg.numberOfAssociated()){ //found shared by all
-				ArrayList unknowns = sg.nonCategoryStates(cat);
-				Iterator it = unknowns.iterator();
+				ArrayList<?> unknowns = sg.nonCategoryStates(cat);
+				Iterator<?> it = unknowns.iterator();
 				while(it.hasNext()){
 					State s = (State)it.next();
 					int pos = sg.getIndex(s);
 					if(pos != 0){
-						ArrayList cats = new ArrayList();
+						ArrayList<String> cats = new ArrayList<String>();
 						cats.add(cat);
 						glossary.addInducedPair(s.toString(), cats);
 						count++;
@@ -132,11 +132,11 @@ public class Bootstrap implements Comparator<StateGroup>{
 			mf = mostfreq.split("#");// "position#111";
 			cat = mf[0];
 			freq = mf[1].length();
-			ArrayList unknowns = sgnew.nonCategoryStates(cat);
-			Iterator it = unknowns.iterator();
+			ArrayList<?> unknowns = sgnew.nonCategoryStates(cat);
+			Iterator<?> it = unknowns.iterator();
 			while(it.hasNext()){
 				State s = (State)it.next();
-				ArrayList cats = new ArrayList();
+				ArrayList<String> cats = new ArrayList<String>();
 				cats.add(cat);
 				glossary.addInducedPair(s.toString(), cats);
 				count++;

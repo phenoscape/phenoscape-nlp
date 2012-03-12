@@ -14,7 +14,7 @@ import fna.db.HabitatParserDbAccessor;
  * @author Hong Updates
  *
  */
-@SuppressWarnings("unchecked")
+
 public class HabitatParser4FNA implements Learn2Parse{
 	private HabitatParserDbAccessor hpDbA = null;
 	private String seedNList = "|";
@@ -44,7 +44,7 @@ public class HabitatParser4FNA implements Learn2Parse{
 	private void bootstrap() {
 		// TODO Auto-generated method stub
 		int discovery = 0;
-		ArrayList todos =null;
+		ArrayList<String> todos =null;
 		do{
 			discovery = 0;
 			todos = hpDbA.selectRecords("source, habitat_string", "isnull(habitat_values)", "", "");
@@ -80,7 +80,7 @@ public class HabitatParser4FNA implements Learn2Parse{
 	 * find new {}s
 	 */
 
-	private int findNew(ArrayList todos) {
+	private int findNew(ArrayList<String> todos) {
 		int discovery = 0;
 		Pattern p = Pattern.compile("(.*?)(\\w+)(\\s+<.*)");
 		Iterator<String> it  = todos.iterator();
@@ -112,7 +112,7 @@ public class HabitatParser4FNA implements Learn2Parse{
 	 * @return a regexp consisting a list of seeds
 	 */
 	private void collectSeeds() {
-		ArrayList text = hpDbA.selectRecords("source, habitat_string", "", "", "");
+		ArrayList<String> text = hpDbA.selectRecords("source, habitat_string", "", "", "");
 		Iterator<String> it = text.iterator();
 		while(it.hasNext()){
 			String r = (String)it.next().trim().toLowerCase();
@@ -144,7 +144,7 @@ public class HabitatParser4FNA implements Learn2Parse{
 		}										
 	}
 	
-	private int tagHabitatStrings(ArrayList text) {
+	private int tagHabitatStrings(ArrayList<String> text) {
 		int discovery = 0;
 		Pattern p = Pattern.compile("(.*?)(\\w+)(\\s+<.*)");
 		Iterator<String> it = text.iterator();
@@ -192,7 +192,7 @@ public class HabitatParser4FNA implements Learn2Parse{
 		return s;
 	}
 	
-	public ArrayList getMarkedDescription(String src){
+	public ArrayList<String> getMarkedDescription(String src){
 		ArrayList<String> list = new ArrayList<String>();
 		
 		ArrayList<String> h = hpDbA.selectRecords("habitat_values", "source='"+src+"'", "", "");

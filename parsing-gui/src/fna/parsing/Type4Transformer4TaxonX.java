@@ -28,6 +28,7 @@ public class Type4Transformer4TaxonX extends Type4Transformer {
 		// TODO Auto-generated constructor stub
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void transformXML(File[] files) {
 		int number = 0;
 		try{

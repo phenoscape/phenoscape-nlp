@@ -53,19 +53,18 @@ public class GraphMLOutputter {
 	 * @param sets
 	 */
 
-	@SuppressWarnings("unchecked")
-	public void output(ArrayList<ArrayList> groups, int initialgroupnumber){		
+	public void output(ArrayList<ArrayList<ArrayList<String>>> groups, int initialgroupnumber){		
 		int gcount = initialgroupnumber;
-		Iterator<ArrayList> sets = groups.iterator();
+		Iterator<ArrayList<ArrayList<String>>> sets = groups.iterator();
 		while(sets.hasNext()){
 			String graphXML = GraphMLOutputter.header+nl;
-			ArrayList<ArrayList> group = (ArrayList)sets.next();
+			ArrayList<ArrayList<String>> group = (ArrayList<ArrayList<String>>)sets.next();
 			System.out.println("Group "+gcount+ ":");
 			Hashtable<String, String> nodes = new Hashtable<String, String>();
 			int nid = 1;
 			for(int i = 0; i < group.size(); i++){
-				String t1 =(String)((ArrayList)group.get(i)).get(0);
-				String t2 =(String)((ArrayList)group.get(i)).get(1);
+				String t1 =(String)((ArrayList<String>)group.get(i)).get(0);
+				String t2 =(String)((ArrayList<String>)group.get(i)).get(1);
 				String t1id = null, t2id = null;
 				if (t1 != null && !t1.equals("")) {
 					t1id = nodes.get(t1);
@@ -111,7 +110,7 @@ public class GraphMLOutputter {
 	private void output2file(int id, String text) {
 		try {
 			String path = Registry.TargetDirectory;
-			File file = new File(path, ApplicationUtilities.getProperty("CHARACTER-STATES") + "/" +"Group_"+id+".xml");
+			File file = new File(path, ApplicationUtilities.getProperty("CHARACTER-STATES") + System.getProperty("file.separator") +"Group_"+id+".xml");
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(text);
 			out.close(); // don't forget to close the output stream!!!

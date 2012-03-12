@@ -14,7 +14,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
-
+@SuppressWarnings("unused")
 public class CompareXML {
 
 	protected static Connection conn = null;
@@ -172,8 +172,8 @@ public class CompareXML {
 	public void validatestruct(Element ansroot, Element testroot) {
 		String exact = "";
 		String ansexact = "";
-		List ansli = ansroot.getChildren("structure");
-		List testli = testroot.getChildren("structure");
+		List<Element> ansli = ansroot.getChildren("structure");
+		List<Element> testli = testroot.getChildren("structure");
 		totmachinest = testli.size();
 		tothumanst = ansli.size();
 		for(int i = 0; i < testli.size(); i++){
@@ -268,12 +268,12 @@ public class CompareXML {
 	public void validatecharacter(Element ansroot, Element testroot) {
 		String exact = "";
 		String ansliexact = "";
-		ArrayList<List> myansli = new ArrayList<List> ();
-		ArrayList<List> mytestli = new ArrayList<List> ();
-		List ansli = null, testli = null;
-		List structansli = ansroot.getChildren("structure");
-		List structtestli = testroot.getChildren("structure");
-		for( Iterator l = structansli.iterator(); l.hasNext();){
+		ArrayList<List<Element>> myansli = new ArrayList<List<Element>> ();
+		ArrayList<List<Element>> mytestli = new ArrayList<List<Element>> ();
+		List<Element> ansli = null, testli = null;
+		List<Element> structansli = ansroot.getChildren("structure");
+		List<Element> structtestli = testroot.getChildren("structure");
+		for( Iterator<Element> l = structansli.iterator(); l.hasNext();){
 			Element structans = (Element)l.next();
 			if(!structans.getChildren().isEmpty()){
 					ansli = structans.getChildren();
@@ -281,7 +281,7 @@ public class CompareXML {
 					tothumanch += ansli.size();
 			}
 		}
-		for( Iterator l = structtestli.iterator(); l.hasNext();){
+		for( Iterator<Element> l = structtestli.iterator(); l.hasNext();){
 			Element structtest = (Element)l.next();
 			if(!structtest.getChildren().isEmpty()){
 					testli = structtest.getChildren();
@@ -291,14 +291,14 @@ public class CompareXML {
 		}
 
 		if(myansli!=null && mytestli!=null){
-			for(Iterator tli = mytestli.iterator(); tli.hasNext();){
-				testli = (List)tli.next();
+			for(Iterator<List<Element>> tli = mytestli.iterator(); tli.hasNext();){
+				testli = (List<Element>)tli.next();
 				for(int i = 0; i < testli.size(); i++){
 					int flag = 0;
 					Element test = (Element)testli.get(i);
-					for(Iterator ali = myansli.iterator(); ali.hasNext();){
+					for(Iterator<List<Element>> ali = myansli.iterator(); ali.hasNext();){
 						int aliflag = 0;
-						ansli = (List)ali.next();
+						ansli = (List<Element>)ali.next();
 						for(int j = 0; j < ansli.size(); j++){
 							flag = 0;
 							Element ans = (Element)ansli.get(j);
@@ -306,9 +306,9 @@ public class CompareXML {
 							//System.out.println(ans.getParentElement().getAttributeValue("id"));
 							//find matching structure
 							if (test.getParentElement().getAttributeValue("name").compareTo(ans.getParentElement().getAttributeValue("name"))==0){
-								List testattr = test.getAttributes();
-								List ansattr = ans.getAttributes(); //ans: a character element; ansattr: att/value pairs
-								for(Iterator k = testattr.iterator(); k.hasNext();){
+								List<Attribute> testattr = test.getAttributes();
+								List<Attribute> ansattr = ans.getAttributes(); //ans: a character element; ansattr: att/value pairs
+								for(Iterator<Attribute> k = testattr.iterator(); k.hasNext();){
 									Attribute a = (Attribute)k.next();
 									//System.out.println(ansattr.toString());
 									//System.out.println(a.toString());
@@ -336,22 +336,22 @@ public class CompareXML {
 				}
 			}
 			
-			for(Iterator tli = mytestli.iterator(); tli.hasNext();){
-				testli = (List)tli.next();			
+			for(Iterator<List<Element>> tli = mytestli.iterator(); tli.hasNext();){
+				testli = (List<Element>)tli.next();			
 				for(int i = 0; i < testli.size(); i++){
 					int flag = 0;
 					Element test = (Element)testli.get(i);
 					if(!exact.contains(test.getAttributes().toString())){
-						for(Iterator ali = myansli.iterator(); ali.hasNext();){
+						for(Iterator<List<Element>> ali = myansli.iterator(); ali.hasNext();){
 							int aliflag = 0;
-							ansli = (List)ali.next();
+							ansli = (List<Element>)ali.next();
 							for(int j = 0; j < ansli.size(); j++){
 								int ansliflag = 0;
 								Element ans = (Element)ansli.get(j);
 								if(!ansliexact.contains(ans.getAttributes().toString())){
 									if (test.getParentElement().getAttributeValue("name").compareTo(ans.getParentElement().getAttributeValue("name"))==0){
-										List testattr = test.getAttributes();
-										List ansattr = ans.getAttributes();//one character element
+										List<Attribute> testattr = test.getAttributes();
+										List<Attribute> ansattr = ans.getAttributes();//one character element
 										int missattr = 0;
 										boolean goodv = false;
 										boolean goodf = false;
@@ -418,8 +418,8 @@ public class CompareXML {
 	@SuppressWarnings("unchecked")
 	public void validaterelation(Element ansroot, Element testroot) {
 		String exact = "";
-		List ansli = ansroot.getChildren("relation");
-		List testli = testroot.getChildren("relation");
+		List<Element> ansli = ansroot.getChildren("relation");
+		List<Element> testli = testroot.getChildren("relation");
 		totmachinerel = testli.size();
 		tothumanrel = ansli.size();
 		for(int i = 0; i < testli.size(); i++){
@@ -428,16 +428,16 @@ public class CompareXML {
 			for(int j = 0; j < ansli.size(); j++){
 				flag = 0;
 				Element ans = (Element)ansli.get(j);
-				List testattr = test.getAttributes();
-				List ansattr = ans.getAttributes();
+				List<Attribute> testattr = test.getAttributes();
+				List<Attribute> ansattr = ans.getAttributes();
 				for(int k = 0; k < testattr.size(); k++){
 					Attribute a = (Attribute)testattr.get(k);
 					//System.out.println(ansattr.toString());
 					//System.out.println(a.toString());
 					if(a.getName().compareTo("name")==0|a.getName().compareTo("from")==0|a.getName().compareTo("to")==0|a.getName().compareTo("negation")==0){
 						if(a.getName().compareTo("from")==0|a.getName().compareTo("to")==0){
-							List ansstruct = ansroot.getChildren("structure");
-							List teststruct = testroot.getChildren("structure");
+							List<Element> ansstruct = ansroot.getChildren("structure");
+							List<Element> teststruct = testroot.getChildren("structure");
 							String teststname = "";
 							for(int m = 0; m < teststruct.size(); m++){
 								Element testst = (Element)teststruct.get(m);
@@ -492,8 +492,8 @@ public class CompareXML {
 				for(int j = 0; j < ansli.size(); j++){
 					int flag = 0;
 					Element ans = (Element)ansli.get(j);
-					List testattr = test.getAttributes();
-					List ansattr = ans.getAttributes();
+					List<Attribute> testattr = test.getAttributes();
+					List<Attribute> ansattr = ans.getAttributes();
 					for(int k = 0; k < testattr.size(); k++){
 						Attribute atest = (Attribute)testattr.get(k);
 						if(atest.getName().compareTo("name")==0|atest.getName().compareTo("from")==0|atest.getName().compareTo("to")==0|atest.getName().compareTo("negation")==0){	
@@ -501,8 +501,8 @@ public class CompareXML {
 								Attribute aans = (Attribute)ansattr.get(l);
 								if(atest.getName().toString().compareTo(aans.getName().toString())==0){
 									if(atest.getName().compareTo("from")==0|atest.getName().compareTo("to")==0){
-										List ansstruct = ansroot.getChildren("structure");
-										List teststruct = testroot.getChildren("structure");
+										List<Element> ansstruct = ansroot.getChildren("structure");
+										List<Element> teststruct = testroot.getChildren("structure");
 										String teststname = "";
 										for(int m = 0; m < teststruct.size(); m++){
 											Element testst = (Element)teststruct.get(m);

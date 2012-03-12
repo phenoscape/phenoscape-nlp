@@ -63,7 +63,6 @@ import fna.parsing.Learn2Parse;
  *tag sentence: should organ names only be tagged when they appear at the beginning of a sentence? e.g. , rounded or with single <groove> [ or change simple pattern?]
  *markup character: may need to merge saved stategroups and checked states. eg. > entire or with 3 broad ,
  */
-@SuppressWarnings("unchecked")
 
 public class CharacterLearner  implements Learn2Parse{
 	
@@ -100,10 +99,10 @@ public class CharacterLearner  implements Learn2Parse{
 	static private String tolist ="((?:(?:^|,|>) (?:[_a-z]+\\s))*), to ((?:[_a-z]+\\s){1,}?)"+"(?=$|,|;|:|\\.|<|"+stop+")";
 
 	
-	private ArrayList stategroups = null;
-	private Hashtable sentences = null;
+	private ArrayList<StateGroup> stategroups = null;
+	private Hashtable<Integer, String> sentences = null;
 	private Glossary glossary = null;
-	private Hashtable groups = null; 
+	private Hashtable<String, StateGroup> groups = null; 
 	private String statespatterns = "";
 	private String organnames = null;
 	private String tablePrefix = "";
@@ -115,7 +114,7 @@ public class CharacterLearner  implements Learn2Parse{
 		// bootstrap StateGroups
 		this.tablePrefix = tablePrefix;
 		CharacterLearner.database = database;
-		this.groups = new Hashtable();
+		this.groups = new Hashtable<String, StateGroup>();
 		try{
 			if(conn == null){
 				String URL = ApplicationUtilities.getProperty("database.url");
@@ -134,8 +133,8 @@ public class CharacterLearner  implements Learn2Parse{
 		//glossary is created in VolumeDehyphenizer
 	//	this.glossary = new Glossary(new File(Registry.ConfigurationDirectory + "FNAGloss.txt"), true, this.database, this.tablePrefix);
 		
-		this.stategroups =  new ArrayList();
-		this.sentences = new Hashtable();
+		this.stategroups =  new ArrayList<StateGroup>();
+		this.sentences = new Hashtable<Integer, String>();
 		this.organnames = collectOrganNames();
 
 		markSentences();//tag organ names
@@ -208,8 +207,8 @@ public class CharacterLearner  implements Learn2Parse{
 			e.printStackTrace();
 		}
 	}
-	public ArrayList getMarkedDescription(String filename){
-		ArrayList results = new ArrayList();
+	public ArrayList<String> getMarkedDescription(String filename){
+		ArrayList<String> results = new ArrayList<String>();
 		try{
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select filename, endindex from "+this.tablePrefix+"_fileclauselink where filename=\""+filename+"\"");
@@ -276,7 +275,7 @@ public class CharacterLearner  implements Learn2Parse{
 		//TODO sort atts, 
 		//TODO no duplicated atts are allowed in an xml tag
 		//TODO deal with comparisons between two organs.
-		Hashtable atts = new Hashtable(); //collect attributes then sort them alphabetically
+		Hashtable<String, String> atts = new Hashtable<String, String>(); //collect attributes then sort them alphabetically
 		//deal with numbers:size
 		Pattern p = Pattern.compile("(.*?) ("+num+")(cm|mm|m|dm|meters|meter)\\b(.*)");
 		Matcher m = p.matcher(sent);
@@ -332,9 +331,9 @@ public class CharacterLearner  implements Learn2Parse{
 		while(m.find()){
 			String state = m.group(2);
 			String value = m.group(1);
-			ArrayList chars = Glossary.getCharacter(state);
+			ArrayList<?> chars = Glossary.getCharacter(state);
 			if(chars.size() >0){
-				Iterator it = chars.iterator();
+				Iterator<?> it = chars.iterator();
 				String att = "";
 				while(it.hasNext()){
 					att += ((String)it.next()).replaceAll("\\s+", "_")+"_or_";
@@ -349,7 +348,7 @@ public class CharacterLearner  implements Learn2Parse{
 			}
 		}
 		//sort atts
-		Set keys = atts.keySet();
+		Set<String> keys = atts.keySet();
 		String[] keyarray = (String[])keys.toArray(new String[]{});
 		Arrays.sort(keyarray);
 		for(int i = 0; i<keyarray.length; i++){
@@ -365,7 +364,7 @@ public class CharacterLearner  implements Learn2Parse{
 	 * save patterns in a sorted collection 
 	 */
 	private void parseSentences(){
-		Enumeration en = sentences.keys();
+		Enumeration<Integer> en = sentences.keys();
 		while(en.hasMoreElements()){
 			Integer key = (Integer)en.nextElement();
 			int sentid = key.intValue();
@@ -401,8 +400,8 @@ public class CharacterLearner  implements Learn2Parse{
 		    String t1 = normalize(m.group(1));
 		    String t2 = normalize(m.group(2));
 		    String [] terms = t1.split("\\s*,\\s*");
-		    List list = Arrays.asList(terms);
-		    ArrayList alist = new ArrayList(list);
+		    List<String> list = Arrays.asList(terms);
+		    ArrayList<String> alist = new ArrayList<String>(list);
 		    alist.add(t2);
 		    //if(alist.size() > 1){
 		    	group(alist, sentid, seg);
@@ -423,7 +422,7 @@ public class CharacterLearner  implements Learn2Parse{
 			String t1 = normalize(m.group(1));
 			String t2 = normalize(m.group(2));
 			//if(t1.compareTo("") != 0 && t2.compareTo("") != 0){
-				ArrayList<String> list = new ArrayList();
+				ArrayList<String> list = new ArrayList<String>();
 				list.add(t1);
 				System.out.print("["+t1+"] ");
 				String[] t2s = t2.split("\\b(to|or)\\b");
@@ -450,8 +449,8 @@ public class CharacterLearner  implements Learn2Parse{
 			String t1 = m.group(1);
 			String t2 = m.group(2);
 	        String [] terms = t1.split("\\s*,\\s*");
-	        List list = Arrays.asList(terms);
-	        ArrayList alist = new ArrayList(list);
+	        List<String> list = Arrays.asList(terms);
+	        ArrayList<String> alist = new ArrayList<String>(list);
 			if (alist.size() >= 3){
 				alist.remove(0); //be conservative to avoid sessile, rhomic, lanceolate, or oblanceolate
 			}
@@ -480,7 +479,7 @@ public class CharacterLearner  implements Learn2Parse{
 			String t2 = normalize(m.group(2));
 			if(t2.length()<30){
 			//if(t1.compareTo("") != 0 && t2.compareTo("") != 0){
-				ArrayList<String> list = new ArrayList();
+				ArrayList<String> list = new ArrayList<String>();
 				list.add(t1);
 				System.out.print("["+t1+"] "); 
 				String[] t2s = t2.split("\\b(to|or)\\b");
@@ -510,7 +509,7 @@ public class CharacterLearner  implements Learn2Parse{
 			String t1 = normalize(m.group(1));
 			String t2 = normalize(m.group(3));
 			String[] terms = t2.split("\\s*(\\bor\\b|,)\\s*");
-			List list = Arrays.asList(terms);
+			List<String> list = Arrays.asList(terms);
 			list.add(t1);
 			//if(list.size() > 1){
 				group(list, sentid, seg);
@@ -526,8 +525,8 @@ public class CharacterLearner  implements Learn2Parse{
 	/**
 	 * check against glossary
 	 */
-	private void group(List terms, int clauseid, String matchedseg){
-		Iterator it = terms.iterator();
+	private void group(List<String> terms, int clauseid, String matchedseg){
+		Iterator<String> it = terms.iterator();
 		StateGroup g = new StateGroup();
 		while(it.hasNext()){
 			String term = ((String) it.next()).trim();

@@ -355,7 +355,7 @@ public class Congress extends JPanel {
             double total = 0;
             int count = 0;
             VisualItem item = null;
-            Iterator items = m_vis.visibleItems(m_group);
+            Iterator<VisualItem> items = m_vis.visibleItems(m_group);
             while ( items.hasNext() ) {
                 item = (VisualItem)items.next();
                 total += item.getDouble("Total Receipts");
