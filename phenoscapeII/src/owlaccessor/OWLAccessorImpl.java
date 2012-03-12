@@ -42,18 +42,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The ont. */
 	private OWLOntology ont;
 
-	/** The allclasses. */
-	private Set<OWLClass> allclasses;
-
-	/** The excluded. */
+	private Set<OWLClass> allclasses; 
+	
 	private boolean excluded = false;
-
-	/** The search cache. */
+	
 	private Hashtable<String, OWLClass> searchCache;
-
-	/** The source. */
+	
 	private String source;
-
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -61,46 +56,40 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @param eliminate the eliminate
 	 * @throws Exception the exception
 	 */
-	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate)
-			throws Exception {
+	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate)throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
 		source = ontoURL;
-
-		ont = manager.loadOntologyFromOntologyDocument(iri);
-		allclasses = ont.getClassesInSignature();
-		// eliminate branches
-		allclasses.removeAll(this.getWordsToEliminate(eliminate));
+		
+			ont = manager.loadOntologyFromOntologyDocument(iri);
+			allclasses = ont.getClassesInSignature();
+			//eliminate branches
+			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
 	}
 
 	/**
 	 * Instantiates a new oWL accessor impl.
-	 *
+	 * 
 	 * @param file the file
 	 * @param eliminate the eliminate
 	 * @throws Exception the exception
 	 */
-	public OWLAccessorImpl(File file, ArrayList<String> eliminate)
-			throws Exception {
+
+	public OWLAccessorImpl(File file, ArrayList<String> eliminate) throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		source = file.getAbsolutePath();
 
-		ont = manager.loadOntologyFromOntologyDocument(file);
-		allclasses = ont.getClassesInSignature();
-		// eliminate branches
-		allclasses.removeAll(this.getWordsToEliminate(eliminate));
+			ont = manager.loadOntologyFromOntologyDocument(file);
+			allclasses = ont.getClassesInSignature();
+			//eliminate branches
+			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
 	}
-
-	/**
-	 * Gets the source.
-	 *
-	 * @return the source
-	 */
-	public String getSource() {
+	
+	public String getSource(){
 		return source;
 	}
 
@@ -155,24 +144,22 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public List<OWLClass> retrieveConcept(String con) throws Exception {
 		con = con.trim();
-		List<OWLClass> result = new ArrayList<OWLClass>();
-
-		for (OWLClass c : allclasses) {
-			// match class concepts and also the synonyms
-			List<String> syns = this.getSynonymLabels(c);
-			String label = this.getLabel(c).toLowerCase();
-			boolean syn = matchSyn(con, syns, "e");
-			// if (label.contains(con) || label.equals(con) || syn) {
-			if (label.equals(con) || syn) {
-
-				result.add(c);
-				// if (syn && !label.contains(con)) {
-				// System.out.println("syn+:" + con);
-				// }
-				// break;
+		List<OWLClass> result = new ArrayList<OWLClass>();		
+			for (OWLClass c : allclasses) {
+				// match class concepts and also the synonyms
+				List<String> syns = this.getSynonymLabels(c);
+				String label = this.getLabel(c).toLowerCase();
+				boolean syn = matchSyn(con, syns, "e");
+				//if (label.contains(con) || label.equals(con) || syn) {
+				if (label.equals(con) || syn) {
+					
+					result.add(c);
+					//if (syn && !label.contains(con)) {
+						// System.out.println("syn+:" + con);
+					//}
+					// break;
+				}
 			}
-		}
-
 		return result;
 	}
 
@@ -208,10 +195,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 */
 	public Set<OWLClass> getWordsToEliminate(List<String> eliminate) {
 		Set<OWLClass> er = new HashSet<OWLClass>();
-		for (String s : eliminate) {
+
+		for (String s:eliminate){
 			OWLClass c = this.getClassByLabel(s);
-			er.add(c);// add itself to the set first
-			er.addAll(this.getAllOffsprings(c));// add all its offsprings
+			er.add(c);//add itself to the set first
+			er.addAll(this.getAllOffsprings(c));//add all its offsprings
 		}
 		return er;
 	}
@@ -219,9 +207,14 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/**
 	 * Remove the non-readable or non-meaningful characters in the retrieval
 	 * from OWL API, and return the refined output.
+<<<<<<< HEAD
 	 * 
 	 * @param origin
 	 *            the origin??? what does it look like?
+=======
+	 *
+	 * @param origin the origin??? what does it look like?
+>>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
 	 * @return the refined output ??? what does it look like??
 	 */
 	public String getRefinedOutput(String origin) {
@@ -412,7 +405,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public Set<OWLClass> getAllOffsprings(OWLClass c) {
 		Set<OWLClass> r = new HashSet<OWLClass>();
-		if (c != null) {
+		if(c!=null){
 			for (OWLClassExpression ch : c.getSubClasses(ont)) {
 				OWLClass o = ch.asOWLClass();
 				r.add(o);
