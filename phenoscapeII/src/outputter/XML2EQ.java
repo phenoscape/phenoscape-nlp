@@ -47,8 +47,8 @@ public class XML2EQ {
 	private String glosstable;
 	//private String benchmarktable;
 	private Connection conn;
-	private String username = "root";
-	private String password = "root";
+	private String username = "biocreative";
+	private String password = "biocreative";
 	private int count = 0;
 	private String keyentity = null;
 	private String keyentitylocator = null;
@@ -135,12 +135,12 @@ public class XML2EQ {
 		}
 	}*/
 
-	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) {
+	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) throws Exception {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
-		try{
+		
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
@@ -178,9 +178,6 @@ public class XML2EQ {
 				path14 = XPath.newInstance("//character[@char_type='range_value']");
 				path15 = XPath.newInstance("//structure[character[@name='count']]");
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	
@@ -1682,8 +1679,9 @@ public class XML2EQ {
 		//String benchmarktable = "internalworkbench";
 		String prefix = "test";
 		String glosstable="fishglossaryfixed";
-		XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /*benchmarktable,*/ prefix, glosstable);
 		try{
+			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /*benchmarktable,*/ prefix, glosstable);
+	
 			x2e.outputEQs();
 		}catch(Exception e){
 			e.printStackTrace();

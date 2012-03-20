@@ -43,7 +43,7 @@ public class TermEQ2IDEQ {
 	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
 		this.ontologyfolder = ontologyfolder;
-		this.ontoutil = new Utilities(ontologyfolder);
+		this.ontoutil = new Utilities(ontologyfolder, database);
 		this.outputtable = outputtable+"_result";
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
 			if(conn == null){

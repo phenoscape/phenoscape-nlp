@@ -236,7 +236,7 @@ public class TermOutputer {
 		
 	}
 
-	private String[] searchOBOOntology(String term, String ontofile, String type) {
+	private String[] searchOBOOntology(String term, String ontofile, String type) throws Exception{
 		String [] result = new String[3];
 		int i = ontofile.lastIndexOf("/");
 		int j = ontofile.lastIndexOf("\\");
