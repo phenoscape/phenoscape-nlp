@@ -252,6 +252,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
              
             //Currently there are four threads: 
             //main thread(this), standfordParser running by cmdtext and two stream gobbler threads
+            
             //wait for stanfordParser to finish running
             int exitVal = proc.waitFor();
             //any error
