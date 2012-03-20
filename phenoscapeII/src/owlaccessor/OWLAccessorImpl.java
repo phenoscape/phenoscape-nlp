@@ -35,10 +35,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/** The manager. */
 	private OWLOntologyManager manager;
-	
+
 	/** The df. */
 	private OWLDataFactory df;
-	
+
 	/** The ont. */
 	private OWLOntology ont;
 
@@ -53,6 +53,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * Instantiates a new oWL accessor impl.
 	 *
 	 * @param ontoURL the onto url
+	 * @param eliminate the eliminate
+	 * @throws Exception the exception
 	 */
 	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate)throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
@@ -71,7 +73,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * Instantiates a new oWL accessor impl.
 	 * 
 	 * @param file the file
+	 * @param eliminate the eliminate
+	 * @throws Exception the exception
 	 */
+
 	public OWLAccessorImpl(File file, ArrayList<String> eliminate) throws Exception {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
@@ -90,15 +95,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the keywords.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the keywords
 	 */
 	@Override
 	public Set<String> getKeywords(OWLClass c) {
 		WordFilter wf = new WordFilter();
-		Set<OWLAnnotation> ds = this.getAnnotationByIRI(c, "http://purl.obolibrary.org/obo/IAO_0000115");
-		
+		Set<OWLAnnotation> ds = this.getAnnotationByIRI(c,
+				"http://purl.obolibrary.org/obo/IAO_0000115");
+
 		if (ds.isEmpty()) {
 			return new HashSet<String>();
 		} else {
@@ -127,16 +134,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Retrieve concept.
-	 *
-	 * @param con the concept
-	 * @param eliminate the words whose offsprings are to be eliminated
+	 * 
+	 * @param con
+	 *            the concept
 	 * @return the list
+	 * @throws Exception
+	 *             the exception
 	 */
 	@Override
 	public List<OWLClass> retrieveConcept(String con) throws Exception {
 		con = con.trim();
-		List<OWLClass> result = new ArrayList<OWLClass>();
-		
+		List<OWLClass> result = new ArrayList<OWLClass>();		
 			for (OWLClass c : allclasses) {
 				// match class concepts and also the synonyms
 				List<String> syns = this.getSynonymLabels(c);
@@ -152,16 +160,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 					// break;
 				}
 			}
-
 		return result;
 	}
-	
+
 	/**
 	 * Match syn.
-	 *
-	 * @param label the label
-	 * @param synlabels the synlabels
-	 * @param mode : exact="e" or partial="p"
+	 * 
+	 * @param label
+	 *            the label
+	 * @param synlabels
+	 *            the synlabels
+	 * @param mode
+	 *            : exact="e" or partial="p"
 	 * @return true, if successful
 	 */
 	private boolean matchSyn(String label, List<String> synlabels, String mode) {
@@ -177,8 +187,15 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return false;
 	}
 
-	public Set<OWLClass> getWordsToEliminate(List<String> eliminate){
+	/**
+	 * Gets the words to eliminate.
+	 *
+	 * @param eliminate the eliminate
+	 * @return the words to eliminate
+	 */
+	public Set<OWLClass> getWordsToEliminate(List<String> eliminate) {
 		Set<OWLClass> er = new HashSet<OWLClass>();
+
 		for (String s:eliminate){
 			OWLClass c = this.getClassByLabel(s);
 			er.add(c);//add itself to the set first
@@ -186,12 +203,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 		return er;
 	}
-	
+
 	/**
 	 * Remove the non-readable or non-meaningful characters in the retrieval
 	 * from OWL API, and return the refined output.
+<<<<<<< HEAD
+	 * 
+	 * @param origin
+	 *            the origin??? what does it look like?
+=======
 	 *
 	 * @param origin the origin??? what does it look like?
+>>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
 	 * @return the refined output ??? what does it look like??
 	 */
 	public String getRefinedOutput(String origin) {
@@ -211,8 +234,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Recursively return all the ancestors of a term.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the parents
 	 */
 	// public Set<String> getAncestors(OWLClass c) {
@@ -256,24 +280,25 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return c.getAnnotations(ont,
 				df.getOWLAnnotationProperty(IRI.create(iri)));
 	}
-	
+
 	/**
 	 * Gets the annotation by iri.
-	 *
-	 * @param c the c
-	 * @param iri the iri
+	 * 
+	 * @param c
+	 *            the c
+	 * @param iri
+	 *            the iri
 	 * @return the annotation by iri
 	 */
 	public Set<OWLAnnotation> getAnnotationByIRI(OWLClass c, IRI iri) {
-		return c.getAnnotations(ont,
-				df.getOWLAnnotationProperty(iri));
+		return c.getAnnotations(ont, df.getOWLAnnotationProperty(iri));
 	}
-
 
 	/**
 	 * Return the exact synonyms of a term represented by an OWLClass object.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the exact synonyms
 	 */
 	public Set<OWLAnnotation> getExactSynonyms(OWLClass c) {
@@ -283,8 +308,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Return the related synonyms of a term represented by an OWLClass object.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the related synonyms
 	 */
 	public Set<OWLAnnotation> getRelatedSynonyms(OWLClass c) {
@@ -292,11 +318,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 				.getAnnotationByIRI(c,
 						"http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym");
 	}
-	
+
 	/**
 	 * Return the labels of a term represented by an OWLClass object.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the labels
 	 */
 	public Set<OWLAnnotation> getLabels(OWLClass c) {
@@ -305,8 +332,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the parents labels.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the parents labels
 	 */
 	@Override
@@ -320,8 +348,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the label.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the label
 	 */
 	@Override
@@ -336,8 +365,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the synonym labels.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the synonym labels
 	 */
 	@Override
@@ -356,7 +386,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the all classes.
-	 *
+	 * 
 	 * @return the all classes
 	 */
 	@Override
@@ -367,8 +397,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets all offsprings of the given class.
-	 *
-	 * @param c the given class
+	 * 
+	 * @param c
+	 *            the given class
 	 * @return a set of all offsprings
 	 */
 	@Override
@@ -386,8 +417,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the all offspring lables.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the all offspring lables
 	 */
 	@Override
@@ -401,8 +433,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the class by label.
-	 *
-	 * @param l the l
+	 * 
+	 * @param l
+	 *            the l
 	 * @return the class by label
 	 */
 	@Override
@@ -418,8 +451,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Gets the iD.
-	 *
-	 * @param c the c
+	 * 
+	 * @param c
+	 *            the c
 	 * @return the iD
 	 */
 	@Override

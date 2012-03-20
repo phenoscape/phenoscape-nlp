@@ -1,0 +1,24 @@
+================================
+acute
+================================
+acute<>degenerate : 0.945845795925573
+acute<>shattered : 0.945610439243178
+acute<>mobile : 0.924912593987527
+acute<>undamaged : 0.923987678148832
+acute<>setose : 0.923413822554934
+================================
+squamous
+================================
+squamous<>amplitude : 0.968438731064056
+squamous<>herbaceous : 0.966736682460097
+squamous<>phase : 0.965672072227688
+squamous<>latency : 0.964224922880359
+squamous<>dentated : 0.961330043599354
+================================
+zipperlike
+================================
+zipperlike<>lateralized : 0.996000867655864
+zipperlike<>ventralized : 0.336449645153118
+zipperlike<>height : 0.256604037881893
+zipperlike<>banded : 0.219783337511327
+zipperlike<>elevation : 0.215505081245949
