@@ -27,7 +27,7 @@ public class ApplicationUtilities {
 	static {
 		try {
 			fstream = new FileInputStream(System.getProperty("user.dir")
-					+"\\application.properties");
+					+System.getProperty("file.separator")+"application.properties");
 		} catch (FileNotFoundException e) {
 			LOGGER.error("couldn't open file in ApplicationUtilities:getProperties", e);
 		}

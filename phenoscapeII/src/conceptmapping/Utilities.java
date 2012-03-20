@@ -24,12 +24,14 @@ public class Utilities {
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
 	private static String ontologyfolder;
+	private String database;
 
-	public Utilities(String ontologyfolder){
+	public Utilities(String ontologyfolder, String database)throws Exception{
 		Utilities.ontologyfolder = ontologyfolder;
 		excluded.add("cellular quality");
+		this.database = database;
 		
-		try{
+		
 		String [] entityontologies = new String[]{
  		ontologyfolder+System.getProperty("file.separator")+"tao.owl",
 		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
@@ -55,7 +57,7 @@ public class Utilities {
 				int j = onto.lastIndexOf("\\");
 				i = i>j? i:j;
 				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
-				OBO2DB o2d = new OBO2DB("obo", onto ,ontoname);
+				OBO2DB o2d = new OBO2DB(database, onto ,ontoname);
 				OBOentityOntoAPIs.add(o2d);
 			}
 		}
@@ -69,12 +71,9 @@ public class Utilities {
 				int j = onto.lastIndexOf("\\");
 				i = i>j? i:j;
 				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
-				OBO2DB o2d = new OBO2DB("obo", onto ,ontoname);
+				OBO2DB o2d = new OBO2DB(database, onto ,ontoname);
 				OBOqualityOntoAPIs.add(o2d);
 			}
-		}
-		}catch(Exception e){
-			e.printStackTrace();
 		}
 	}
 
@@ -154,7 +153,7 @@ public class Utilities {
 		//}
 	}
 
-	private String[] searchOBOOntology(String term, OBO2DB o2d, String type) {
+	private String[] searchOBOOntology(String term, OBO2DB o2d, String type) throws Exception{
 		String [] result = new String[3]; //an array with three elements: type, id, and label
 		String[] match = o2d.getID(term);
 		if(match !=null){
