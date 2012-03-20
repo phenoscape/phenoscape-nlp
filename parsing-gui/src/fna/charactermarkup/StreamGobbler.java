@@ -21,7 +21,7 @@ class StreamGobbler extends Thread
     ArrayList<String> trees = new ArrayList<String>();
     static int h = 0;
     static int t = 0;
-    static boolean debug = false;
+    static boolean debug = true;
     
     StreamGobbler(InputStream is, String type, ArrayList<String> headings, ArrayList<String> trees)
     {
@@ -31,31 +31,32 @@ class StreamGobbler extends Thread
         this.trees = trees;
     }
     
-    public void run()
-    {
-        try
-        {  	
-        	PrintWriter pw = null;
-            if (os != null)
-                pw = new PrintWriter(os);
-                
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String line=null;
-            StringBuffer sb = new StringBuffer();
+	public void run() {
+	//public void gobble(){	
+		//Synchronized by Zilong
+		//synchronized (this) {
+			try {
+				PrintWriter pw = null;
+				if (os != null)
+					pw = new PrintWriter(os);
 
-            while ( (line = br.readLine()) != null)
-            {	
-            	sb = gobbleLine(line, sb);
-            }
-            if(sb.toString().trim().length()>0){
-            	trees.add(sb.toString());
-            }
-        } catch (IOException ioe)
-            {
-            ioe.printStackTrace();  
-            }
-    }
+				InputStreamReader isr = new InputStreamReader(is);
+				BufferedReader br = new BufferedReader(isr);
+				String line = null;
+				StringBuffer sb = new StringBuffer();
+
+				while ((line = br.readLine()) != null) {
+					sb = gobbleLine(line, sb);
+				}
+				//last line, part of last tree
+				if (sb.toString().trim().length() > 0) {
+					trees.add(sb.toString());
+				}
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		//}
+	}
 
 	protected StringBuffer gobbleLine(String line, StringBuffer sb) {
 		if(debug) System.out.println(type+">"+line);

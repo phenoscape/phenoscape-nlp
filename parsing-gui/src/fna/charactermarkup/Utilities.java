@@ -369,7 +369,9 @@ public class Utilities {
 	                
 	            // kick them off
 	            //errorGobbler.start();
+	            
 	            outputGobbler.start();
+	            //outputGobbler.gobble();
 	                                    
 	            // any error???
 	            int exitVal = proc.waitFor();

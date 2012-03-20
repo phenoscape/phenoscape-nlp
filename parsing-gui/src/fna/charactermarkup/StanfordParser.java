@@ -242,16 +242,25 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             // any output?
             StreamGobbler outputGobbler = new 
                 StreamGobbler(proc.getInputStream(), "OUTPUT", headings, trees);
-                
+            //TODO    
             // kick them off
             errorGobbler.start();
             outputGobbler.start();
-                                    
-            // any error???
+            
+//            errorGobbler.gobble();
+//            outputGobbler.gobble();
+             
+            //Currently there are four threads: 
+            //main thread(this), standfordParser running by cmdtext and two stream gobbler threads
+            //wait for stanfordParser to finish running
             int exitVal = proc.waitFor();
+            //any error
             System.out.println("ExitValue: " + exitVal);
 
-			//format
+			//wait until the two StreamGobbler threads complete running by Zilong
+            while(errorGobbler.isAlive()||outputGobbler.isAlive()){}
+            
+            //format
             if(headings.size() != trees.size()){
             	System.err.println("Error reading parsing results");
             	throw new Exception("Parsing error. System terminates.");
@@ -610,8 +619,11 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
 
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
+
+		String posedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\testThread\\target\\testThr_posedsentences.txt";
+		String parsedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\testThread\\target\\testThr_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
@@ -623,7 +635,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "test", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "testThr", "fishglossaryfixed", false);
 
 		
 		//sp.POSTagging();
