@@ -2265,6 +2265,9 @@ public class CharacterAnnotatorChunked {
 	 */
 	private ArrayList<Element> createStructureElements(String listofstructures/*, boolean makeconstraint*/){
 		ArrayList<Element> results = new ArrayList<Element>();	
+		if(listofstructures.startsWith("l[")){
+			listofstructures = listofstructures.replaceFirst("^l\\[", "").replaceFirst("\\]$", "");
+		}
 		//special case: pronouns like them: resolve to the last structure
 		if(listofstructures.matches(".*?\\b("+ChunkedSentence.pronouns+")\\b.*") && listofstructures.indexOf(" ")<0){
 			for(int e = this.elementlog.size() -1 ; e >=0; e--){
@@ -2276,6 +2279,7 @@ public class CharacterAnnotatorChunked {
 			}
 		}
 		
+
 		//String[] organs = listofstructures.replaceAll(" (and|or|plus) ", " , ").split("\\)\\s*,\\s*"); //TODO: flower and leaf blades???
 		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); //TODO: flower and leaf blades???		
 		//mohan 28/10/2011. If the first organ is a preposition then join the preposition with the following organ
@@ -2305,7 +2309,7 @@ public class CharacterAnnotatorChunked {
 					break; //take the last organ name
 				}
 			}
-			o = o.replaceAll("(\\w\\[|\\]|\\(|\\))", "").trim();
+			o = o.replaceAll("(\\w\\[|\\]|\\(|\\)|\\}|\\{)", "").trim();
 			if(o.length() == 0) return results;
 			//create element, 
 			Element e = new Element("structure");
