@@ -247,10 +247,13 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             errorGobbler.start();
             outputGobbler.start();
                                     
-            // any error???
+            // wait for Stanford parser to complete
             int exitVal = proc.waitFor();
             System.out.println("ExitValue: " + exitVal);
-
+            
+            //wait for both gobblers to exit
+            while(errorGobbler.isAlive() || outputGobbler.isAlive()) {}
+            
 			//format
             if(headings.size() != trees.size()){
             	System.err.println("Error reading parsing results");
