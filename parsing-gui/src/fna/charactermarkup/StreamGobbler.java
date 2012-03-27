@@ -21,7 +21,7 @@ class StreamGobbler extends Thread
     ArrayList<String> trees = new ArrayList<String>();
     static int h = 0;
     static int t = 0;
-    static boolean debug = true;
+    static boolean debug = false;
     
     StreamGobbler(InputStream is, String type, ArrayList<String> headings, ArrayList<String> trees)
     {

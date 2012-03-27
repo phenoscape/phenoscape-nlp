@@ -246,22 +246,20 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             // kick them off
             errorGobbler.start();
             outputGobbler.start();
-            
-//            errorGobbler.gobble();
-//            outputGobbler.gobble();
-             
+
             //Currently there are four threads: 
             //main thread(this), standfordParser running by cmdtext and two stream gobbler threads
             
             //wait for stanfordParser to finish running
+
             int exitVal = proc.waitFor();
             //any error
             System.out.println("ExitValue: " + exitVal);
-
-			//wait until the two StreamGobbler threads complete running by Zilong
-            while(errorGobbler.isAlive()||outputGobbler.isAlive()){}
             
-            //format
+            //wait for both gobblers to exit
+            while(errorGobbler.isAlive() || outputGobbler.isAlive()) {}
+            
+			//format
             if(headings.size() != trees.size()){
             	System.err.println("Error reading parsing results");
             	throw new Exception("Parsing error. System terminates.");

@@ -1672,7 +1672,7 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/final";
+		String srcdir = "C:\\Users\\Zilong Chang\\Documents\\WORK\\GStest\\target\\final";
 		String database = "biocreative2012";
 		//String outputtable = "biocreative_nexml2eq";
 		String outputtable = "xml2eq";

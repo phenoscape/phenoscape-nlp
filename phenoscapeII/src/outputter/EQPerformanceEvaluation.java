@@ -36,7 +36,7 @@ public class EQPerformanceEvaluation {
 	private String prtableTranslations;
 	private boolean printfields = false;
 	private boolean printEQs = true;
-	private boolean printTranslations = true;
+	private boolean printTranslations = false;
 	private ArrayList<ArrayList<Hashtable<String,String>>> astates;
 	private ArrayList<ArrayList<Hashtable<String,String>>> tstates;
 	private ArrayList<String> states = new ArrayList<String>(); 
@@ -167,6 +167,7 @@ public class EQPerformanceEvaluation {
 				Hashtable<String, String> EQ = new Hashtable<String, String> ();
 				for(String field: this.fields){
 					String v = rs.getString(field);
+					if(v==null){v="";}
 					EQ.put(field, v);
 				}		
 				astate.add(EQ);
@@ -180,6 +181,7 @@ public class EQPerformanceEvaluation {
 				Hashtable<String, String> EQ = new Hashtable<String, String> ();
 				for(String field: this.fields){
 					String v = rs.getString(field);
+					if(v==null){v="";}
 					EQ.put(field, v);
 				}
 				tstate.add(EQ);
@@ -373,13 +375,28 @@ public class EQPerformanceEvaluation {
 				String entitylocator = tEQ.get("entitylocator");
 				String qualitymodifier = tEQ.get("qualitymodifier");
 				String quality = tEQ.get("quality");
+				
 				if(quality==null || quality.length()==0){
 					quality = tEQ.get("qualitynegated");
 				}
+				
+				quality=quality.replaceAll("\\[.*\\]", "").trim();
+				
 				int[] matchingresult = matchAstates(entity, entitylocator, quality, qualitymodifier, astates.get(i), "");
 				exactrawmatches += matchingresult[0];
 				partialrawmatches += matchingresult[0] + matchingresult[1];
+				if(this.printEQs && matchingresult[0]==0 && matchingresult[1]==0){
+					//unmatched result
+					System.out.println("unmatched raw result=E:"+entity+" Q:"+quality+" QM:"+qualitymodifier+" EL:"+entitylocator);
+				}
 			}
+//			if(this.printEQs){
+//				for(Hashtable<String, String> aEQ : astates.get(i)){
+//					System.out.println("unmatched raw answer=E:"+aEQ.get("entity")+" Q:"+aEQ.get("quality")+" QM:"+aEQ.get("qualitymodifier")+" EL:"+aEQ.get("entitylocator")+"\n=============");
+//				}
+//			}
+			
+			
 		}
 		
 		fieldstring+= "rawexactp, rawexactr, rawpartialp, rawpartialr,";
@@ -589,9 +606,11 @@ public class EQPerformanceEvaluation {
 				Statement stmt = conn.createStatement();
 				//ResultSet rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.answertable+" where stateid!=''");
 				ResultSet rs = stmt.executeQuery("select "+entitypair+" from "+this.answertable+" where stateid!=''");
-				while(rs.next()){					
-					String[] raws = rs.getString(1).split("\\s*,\\s*");
-					String[] labels = rs.getString(2).split("\\s*,\\s*");
+				while(rs.next()){
+					String r = (rs.getString(1)==null?"":rs.getString(1));
+					String[] raws = r.split("\\s*,\\s*");
+					String l = (rs.getString(2)==null?"":rs.getString(2));
+					String[] labels = l.split("\\s*,\\s*");
 					for(int i = 0; i<raws.length; i++){
 						String raw = raws[i].trim();
 						String label = i<labels.length ? labels[i].trim(): "";
@@ -602,11 +621,13 @@ public class EQPerformanceEvaluation {
 				}		
 				//rs = stmt.executeQuery("select distinct "+entitypair+" from "+this.testtable + " where stateid !=''");
 				rs = stmt.executeQuery("select "+entitypair+" from "+this.testtable + " where stateid !=''");
-				while(rs.next()){					
-					String[] raws = rs.getString(1).split("\\s*,\\s*");
+				while(rs.next()){
+					String r = (rs.getString(1)==null?"":rs.getString(1));
+					String[] raws = r.split("\\s*,\\s*");
 					//String[] labels = new String[raws.length];
-					String[] labels = rs.getString(2).split("\\s*,\\s*");
-					labels = rs.getString(2).split("\\s*,\\s*");
+					String l = (rs.getString(2)==null?"":rs.getString(2));
+					String[] labels = l.split("\\s*,\\s*");
+					//labels = rs.getString(2).split("\\s*,\\s*");
 					for(int i = 0; i<raws.length; i++){
 						String raw = raws[i].trim();
 						String label = i<labels.length? labels[i].trim(): "";
@@ -627,7 +648,7 @@ public class EQPerformanceEvaluation {
 					//for(int i = 0; i<raws.length; i++){
 					//	aqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
 					//}
-					aqualitytranslations.put(rs.getString(1).trim(), rs.getString(2).trim());
+					aqualitytranslations.put((rs.getString(1)==null?"":rs.getString(1)).trim(), (rs.getString(2)==null?"":rs.getString(2)).trim());
 				}				
 				//rs = stmt.executeQuery("select distinct "+qualitypair+" from "+this.testtable + " where length(stateid)!=''");
 				rs = stmt.executeQuery("select "+qualitypair+" from "+this.testtable + " where length(stateid)!=''");
@@ -637,7 +658,7 @@ public class EQPerformanceEvaluation {
 					//for(int i = 0; i<raws.length; i++){
 					//	tqualitytranslations.put(raws[i].trim(), i<labels.length? labels[i].trim() : "");
 					//}
-					tqualitytranslations.put(rs.getString(1).trim(), rs.getString(2).trim());
+					tqualitytranslations.put((rs.getString(1)==null?"":rs.getString(1)).trim(), (rs.getString(2)==null?"":rs.getString(2)).trim());
 				}											
 			}
 			//matching and calculating entity translations
@@ -693,9 +714,9 @@ public class EQPerformanceEvaluation {
 	public static void main(String[] args) {
 		String database = "biocreative2012";
 		//String testtable = "run0_result";
-		String testtable = "test2_xml2eq_result";
-		String answertable = "internalworkbench";
-		String prtable = "evaluationrecords";
+		String testtable = "charaparserzilong";
+		String answertable = "gstable1";
+		String prtable = "eval03262012";
 		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);
 		pe.evaluate();
 		
