@@ -19,6 +19,22 @@ import conceptmapping.Utilities;
  * @author Hong Updates
  * This class finds IDs from ontologies for Entity and Quality terms
  * and fill in the blank ID columns in the outputtable
+ * 
+ * list of relational qualities that are symmetrical:
+ *ARTICULATED_WITH = "PATO:0002278"
+ *ASSOCIATED_WITH = "PATO:0001668"
+ *ATTACHED_TO = "PATO:0001667"
+ *DETACHED_FROM = "PATO:0001453"
+ *DISSOCIATED_FROM = "PATO:0001738"
+ *FUSED_WITH = "PATO:0000642"
+ *IN_CONTACT_WITH = "PATO:0001961"
+ *OVERLAP_WITH = "PATO:0001590"
+ *SEPARATED_FROM = "PATO:0001505"
+ *UNFUSED_FROM = "PATO:0000651"
+ *STRUCTURE = "PATO:0000141"
+ * 
+ *unsymmetrical ones  are marked as 'relational' in PATO obo file
+ * 
  */
 @SuppressWarnings("unused")
 public class TermEQ2IDEQ {
