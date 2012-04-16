@@ -621,8 +621,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
 
-		String posedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\testThread\\target\\testThr_posedsentences.txt";
-		String parsedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\testThread\\target\\testThr_parsedsentences.txt";
+		String posedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\GStest\\target\\gstest_posedsentences.txt";
+		String parsedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\GStest\\target\\gstest_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
@@ -634,7 +634,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "testThr", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "GStest", "fishglossaryfixed", false);
 
 		
 		//sp.POSTagging();
