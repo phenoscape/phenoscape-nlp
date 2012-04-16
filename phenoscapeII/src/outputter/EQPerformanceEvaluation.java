@@ -706,21 +706,58 @@ public class EQPerformanceEvaluation {
 		}				
 	}
 	
+	public static void work(String database, String testtable, String answertable, String prtable){
+		
+		System.out.println("=================================================");
+		System.out.println(prtable);
+		System.out.println("=================================================");
+		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);		
+		pe.evaluate();
+	}
 	
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String database = "biocreative2012";
-		//String testtable = "run0_result";
-		String testtable = "charaparserzilong";
-		String answertable = "gstable1";
-		String prtable = "eval03262012";
-		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, testtable, answertable, prtable);
-		pe.evaluate();
+	String database = "biocreative2012";
 		
-
+//		String testtable = "termcery";
+//		String answertable = "gstermcery";
+//		String prtable = "eval_term_cery";
+		
+	
+		//CharaParser Evaluation
+	
+//		work(database, "chpcery", "gstablefin", "eval_chp_cery");
+//		work(database, "chpmelissa", "gstablefin", "eval_chp_melissa");
+//		work(database, "chppaula", "gstablefin", "eval_chp_paula");
+//		work(database, "charaparserzilong", "gstablefin", "eval_chp_zilong");
+		
+		//human curated term based
+//		work(database, "termcery", "gstermcery", "eval_term_cery");
+//		work(database, "termmelissa", "gstermmelissa", "eval_term_melissa");
+//		work(database, "termpaula", "gstermpaula", "eval_term_paula");
+//		
+//		//Phenex alone
+//		work(database, "labelcery_phenexalone", "gssecond25", "eval_labelphenex_cery");
+//		work(database, "labelmelissa_phenexalone", "gssecond25", "eval_labelphenex_melissa");
+//		work(database, "labelpaula_phenexalone", "gsfirst25", "eval_labelphenex_paula");
+//		
+//		//Phenex+CharaParser
+//		work(database, "labelcery_phenexchp", "gsfirst25", "eval_labelphenexchp_cery");
+//		work(database, "labelmelissa_phenexchp", "gsfirst25", "eval_labelphenexchp_melissa");
+//		work(database, "labelpaula_phenexchp", "gssecond25", "eval_labelphenexchp_paula");
+	
+	
+		//charaparser<->gs  first 25 and second 25
+//	work(database, "zilongchpfirst25", "gsfirst25", "eval_zilongchp_f25");
+//	work(database, "zilongchpsecond25", "gssecond25", "eval_zilongchp_s25");
+	
+		//w/ w/out "*"
+		
+	work(database, "chpzlstar", "gstablestar", "eval_zilongchp_star");
+	work(database, "chpzlnostar", "gstablenostar", "eval_zilongchp_nostar");
 	}
 
 }
