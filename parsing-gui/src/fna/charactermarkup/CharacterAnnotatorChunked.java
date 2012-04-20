@@ -244,8 +244,9 @@ public class CharacterAnnotatorChunked {
 			 * 
 			 * 
 			 * <text>no circuli present on posterior surface of scales</text>
-			 * <structure id="o357" name="circulus"> <character name="presence"
-			 * value="no" /> </structure> <structure id="o358" name="surface"
+			 * <structure id="o357" name="circulus">
+			 * <character name="presence"value="no" />
+			 * </structure> <structure id="o358" name="surface"
 			 * constraint="posterior" /> <relation id="r130" name="present on"
 			 * from="o357" to="o358" negation="false" />
 			 * 
