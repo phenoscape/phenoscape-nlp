@@ -417,6 +417,8 @@ public class CharacterAnnotatorChunked {
 	}
 
 	/**
+	 * 
+	 * by Zilong
 	 * Handle different relationships such as "connected to", "associate with"..
 	 * 
 	 *Original statement: 
