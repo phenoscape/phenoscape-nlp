@@ -35,7 +35,7 @@ public class EQPerformanceEvaluation {
 	private String prtableEQs;
 	private String prtableTranslations;
 	private boolean printfields = false;
-	private boolean printEQs = true;
+	private boolean printEQs = false;
 	private boolean printTranslations = false;
 	private ArrayList<ArrayList<Hashtable<String,String>>> astates;
 	private ArrayList<ArrayList<Hashtable<String,String>>> tstates;
@@ -43,6 +43,7 @@ public class EQPerformanceEvaluation {
 	//init
 	Hashtable<String, String> counts;
 	ArrayList<String> fields = new ArrayList<String>();
+	private boolean nowislabel=false;
 
 	/**
 	 * 
@@ -100,6 +101,7 @@ public class EQPerformanceEvaluation {
 	}
 
 	private void initFields() {
+		//this.fields.add("stateid");
 		this.fields.add("entity");
 		this.fields.add("entitylabel");
 		this.fields.add("entityid");
@@ -165,6 +167,7 @@ public class EQPerformanceEvaluation {
 				this.answertable+" where stateid = '"+stateid+"'");
 			while(rs.next()){
 				Hashtable<String, String> EQ = new Hashtable<String, String> ();
+				EQ.put("stateid", stateid);
 				for(String field: this.fields){
 					String v = rs.getString(field);
 					if(v==null){v="";}
@@ -361,6 +364,8 @@ public class EQPerformanceEvaluation {
 	 */
 	private void compareEQs() throws SQLException {
 		//raw
+		nowislabel=false;
+		
 		int totalrawgenerated = 0;
 		int totalrawinanswer = 0;
 		int partialrawmatches = 0;
@@ -415,6 +420,7 @@ public class EQPerformanceEvaluation {
 		int partiallabeledmatches = 0;
 		int exactlabeledmatches = 0;
 
+		nowislabel=true;
 		for(int i = 0; i<astates.size(); i++){
 			totallabeledinanswer += astates.get(i).size();
 			totallabeledgenerated += tstates.get(i).size();
@@ -473,10 +479,15 @@ public class EQPerformanceEvaluation {
 		int index = -1;
 		for(int i = 0; i < aState.size(); i++){
 			int matchedfields = matchInState(entity, entitylocator, quality, qualitymodifier, aState.get(i), suffix);
-			if(matchedfields > matchsize){
+			if(matchedfields > matchsize){//max of all states as the character's matchsize 
 				matchsize = matchedfields;
 				index = i;
 			}
+		}
+		
+		if(matchsize == 0){
+			System.out.print(matchsize+"TEST; ");
+			System.out.println((aState.isEmpty()?"none":aState.get(0).get("stateid"))+"; entity"+suffix+": "+entity+"; entitylocator"+suffix+": "+entitylocator+"; quality"+suffix+": "+quality+"; qualitymodifier"+suffix+": "+qualitymodifier);
 		}
 		if(matchsize == 4){
 			matches[0] = 1; //exact
@@ -486,6 +497,12 @@ public class EQPerformanceEvaluation {
 		}else if(matchsize >=2 && matchsize < 4){
 			matches[0] = 0; //exact
 			matches[1] = 1; //partial
+			
+			System.out.print(matchsize+"TEST; ");
+			System.out.println(aState.get(index).get("stateid")+"; entity"+suffix+": "+entity+"; entitylocator"+suffix+": "+entitylocator+"; quality"+suffix+": "+quality+"; qualitymodifier"+suffix+": "+qualitymodifier);
+			System.out.print(matchsize+"ANSWER; ");
+			System.out.println(aState.get(index).get("stateid")+"; entity"+suffix+": "+aState.get(index).get("entity"+suffix)+"; entitylocator"+suffix+": "+aState.get(index).get("entitylocator"+suffix)+"; quality"+suffix+": "+aState.get(index).get("quality"+suffix)+"; qualitymodifier"+suffix+": "+aState.get(index).get("qualitymodifierl"+suffix));	
+	
 			aState.remove(index);
 			return matches;
 		}else{
@@ -512,7 +529,7 @@ public class EQPerformanceEvaluation {
 		String q = EQ.get("quality"+suffix);
 		int exact = 0;
 		int partial = 0;
-		if(!e.contains(entity) && !entity.contains(e) && !q.contains(quality) && !quality.contains(q)){
+		if((!e.contains(entity) && !entity.contains(e)) || (!q.contains(quality) && !quality.contains(q))){
 			return 0;
 		}
 		if(e.length()==0 || q.length()==0 || entity.length()==0 || quality.length()==0) return 0;
@@ -528,6 +545,13 @@ public class EQPerformanceEvaluation {
 		}else if((q.contains(quality) || quality.contains(q)) && q.length()!=0 && quality.length()!=0){
 			partial++;
 		}
+		
+		//start
+		//replace null with ""
+		if(EQ.get("qualitymodifier"+suffix).trim().equals("null")){
+			EQ.put("qualitymodifier"+suffix, "");
+		}
+		//End by Zilong 
 		
 		//compare qualitymodifier
 		if(qualitymodifier.length()>0 && EQ.get("qualitymodifier"+suffix).length()>0){
@@ -755,9 +779,11 @@ public class EQPerformanceEvaluation {
 //	work(database, "zilongchpsecond25", "gssecond25", "eval_zilongchp_s25");
 	
 		//w/ w/out "*"
-		
-	work(database, "chpzlstar", "gstablestar", "eval_zilongchp_star");
-	work(database, "chpzlnostar", "gstablenostar", "eval_zilongchp_nostar");
+//		
+//	work(database, "chpzlstar", "gstablestar", "eval_zilongchp_star");
+//	work(database, "chpzlnostar", "gstablenostar", "eval_zilongchp_nostar");
+	
+	work(database, "gstestnew_xml2eq_result","gstablefin", "eval_gstestnew");
 	}
 
 }
