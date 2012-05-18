@@ -1531,7 +1531,8 @@ public class ChunkedSentence {
 				continue;
 			}
 			//token = NumericalHandler.originalNumForm(token); //turn -LRB-/-LRB-2
-			if(token.matches("^\\w+\\[.*")){ //modifier +  a chunk: m[usually] n[size[{shorter}] constraint[than or {equaling} (phyllaries)]]
+			if(token.matches("^\\w+\\[.*")){ 
+				//modifier +  a chunk: m[usually] n[size[{shorter}] constraint[than or {equaling} (phyllaries)]]
 				//if(scs.matches("\\w{2,}\\[.*") && token.matches("\\w{2,}\\[.*")){ // scs: position[{adaxial}] token: pubescence[{pubescence~list~glabrous~or~villous}]
 				if(scs.matches(".*?\\bo\\[\\w+\\s.*")){
 					pointer = i;
@@ -1644,9 +1645,23 @@ public class ChunkedSentence {
 					}else if(founds && chara!=null && scs.matches(".*?"+chara+"\\[.*")){ //coloration coloration: dark blue
 						scs += token+" ";
 					}else if(founds){
-						this.pointer = i;
+						//By Zilong
+						/*orig:a[{more} ventrally] a[{directed}]*/
+						/*should be:a[more ventrally directed] */
+						
+						if(scs.matches("^comparison\\[more\\]\\s+m\\[\\w+\\s+$")){
+						//now it only handles the simplest case, only consider "more"	
+							this.pointer = i+1;
+							scs = scs.replaceFirst("comparison\\[", "m\\[");
+							scs = scs.replaceFirst("\\] m\\[", " ").trim()+"] ";
+							scs += chara+"["+token+" ";
+						}else{
+						//By Zilong End
+							this.pointer = i;
+						}
 						scs = scs.replaceFirst("^\\]\\s+", "").trim()+"]";
 						return new ChunkSimpleCharacterState("a["+scs.trim()+"]");
+						
 					}else if(chara==null){
 						if(Utilities.isVerb(token, verbs, notverbs) && !founds){//construct ChunkVP or ChunkCHPP
 							scs = (scs.trim().length()>0? scs.trim()+"] ": "")+"v["+token+" ";
@@ -2457,7 +2472,18 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 
 	}
 	public String getTokenAt(int i) {
-		return this.chunkedtokens.get(i);
+		//if out of bound
+//		if(i<0 || i>=this.chunkedtokens.size()){
+//			return null;
+//		}else{
+//			return this.chunkedtokens.get(i);
+//		}
+		
+		try{
+			return this.chunkedtokens.get(i);
+		}catch(Exception e){
+			return null;
+		}
 	}
 	public void setClauseModifierConstraint(String modifier, String constraintId) {
 		this.clauseModifierConstraint = modifier;		

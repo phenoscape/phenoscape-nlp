@@ -32,36 +32,12 @@ public class CharacterAnnotatorChunked {
 
 	private Element statement = null;
 	private ChunkedSentence cs = null;
-	private static ArrayList<Element> subjects = new ArrayList<Element>();// static
-																			// so
-																			// a
-																			// ditto
-																			// sent
-																			// can
-																			// see
-																			// the
-																			// last
-																			// subject
-	private ArrayList<Element> latestelements = new ArrayList<Element>();// save
-																			// the
-																			// last
-																			// set
-																			// of
-																			// elements
-																			// added.
-																			// independent
-																			// from
-																			// adding
-																			// elements
-																			// to
-																			// <Statement>
-	private ArrayList<Element> elementlog = new ArrayList<Element>();// log the
-																		// sequence
-																		// in
-																		// which
-																		// elements
-																		// were
-																		// created
+	private static ArrayList<Element> subjects = new ArrayList<Element>();
+	// static so a ditto sent can see the last subject
+	private ArrayList<Element> latestelements = new ArrayList<Element>();
+	// save the last set of elements added. independent from adding elements to <Statement>
+	private ArrayList<Element> elementlog = new ArrayList<Element>();
+	// log the sequence in which elements were created
 	private String delims = "comma|or";
 	private static int structid = 1;
 	private static int relationid = 1;
@@ -81,10 +57,8 @@ public class CharacterAnnotatorChunked {
 	private boolean partofinference = false;
 	private ArrayList<Element> pstructures = new ArrayList<Element>();
 	private ArrayList<Element> cstructures = new ArrayList<Element>();
-	private boolean attachToLast = false; // this switch controls where a
-											// character will be attached to.
-											// "true": attach to last organ
-											// seen. "false":attach to the
+	private boolean attachToLast = false; // this switch controls where a character will be attached to.
+											// "true": attach to last organ seen. "false":attach to the
 											// subject of a clause
 	private boolean printAnnotation = true;
 	private boolean debugNum = false;
@@ -206,10 +180,16 @@ public class CharacterAnnotatorChunked {
 		// if(this.partofinference){
 		// puncBasedPartOfRelation();
 		// }
+		
+		/*Normalization*/
 		removeIsolatedCharacters();
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
+		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
+		decomposeMultipleStructures();
 		standardization();
+		
+		
 		if (printAnnotation) {
 			XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());
 			System.out.println();
@@ -436,17 +416,91 @@ public class CharacterAnnotatorChunked {
 		}
 	}
 
-	//
+	/**
+	 * Handle different relationships such as "connected to", "associate with"..
+	 * 
+	 *Original statement: 
+	 * 	<statement statement_type="character_state" character_id="975551bf-c0d8-4d97-9cbc-f7c5b7b38b99" state_id="14e6ee40-450d-4d5f-9573-3c04d8dc0954" seg_id="0">
+     * 		<text>loss of connection between pseudobranchial and suprabranchial arteries</text>
+     *		<structure id="o234" name="whole_organism">
+     *   		<character name="presence" value="loss" constraint="of connection" constraintid="o235" />
+     * 		</structure>
+     * 		<structure id="o235" name="connection" />
+     * 		<structure id="o236" name="artery" constraint="pseudobranchial" />
+     * 		<structure id="o237" name="artery" constraint="suprabranchial" />
+     * 		<relation id="r72" name="between" from="o235" to="o236 o237" negation="false" />
+     *	</statement>
+	 * 
+	 * @param reltype
+	 * @throws JDOMException
+	 */
+	private void relationHandler(String reltype) throws JDOMException {
+		List<Element> rs = XPath.newInstance(".//structure[@name='"+reltype+"']").selectNodes(statement);
+		if(rs.isEmpty()){
+			return;//no such relationship, return
+		}
+		
+		String id = rs.get(0).getAttributeValue("id");
+		//detach the structure "connection" 
+		rs.get(0).detach();
+		
+		List<Element> preps = XPath.selectNodes(statement, ".//relation[@from='" + id + "']");
+		for(Element prep:preps){
+			String to=prep.getAttributeValue("to");
+			String[] tos = to.trim().split("//s+");
+			
+			List<Element> characters = XPath.selectNodes(statement, ".//chracter[@name='presence']");
+			//presence of the relationship
+			if(characters.isEmpty()){
+				return;
+			}
+			
+			Element character=characters.get(0);
+			
+			String constraintStr = "";
+			if(tos.length>1){
+				//get all the constraint entities (from the second "to" entities of the relation element)
+				for(int i=1;i<tos.length;i++){
+					constraintStr+=tos[i]+" ";//concatenate the "to" entities from the second one 
+				}
+				
+				//replace the current constraintid which refers to structure "connection" with
+				//the new contraintStr.
+				character.setAttribute("constraintid", constraintStr);
+				
+				//first "to" structure in the relation
+				List<Element> first = XPath.selectNodes(statement, ".//structure[@id='"+tos[0]+"']");
+				if(!first.isEmpty()){
+					first.get(0).addContent(character);
+				} 
+			}
+			
+		}
+				
+	}
+	
+	/**
+	 * This method is called to decompose an entity such as "manus digits i-iii"
+	 * into several entities "manus digit i", "manus digit ii", and "manus digit iii"
+	 * 
+	 * @throws JDOMException
+	 */
 	private void decomposeMultipleStructures() throws JDOMException {
-		List<Element> mss = XPath.newInstance(".//structure[matches(@name,'.*?_[\\divx]+-[\\divx]+')]").selectNodes(statement);
+		List<Element> mss = XPath.newInstance(".//structure[@type='multi']").selectNodes(statement);
 
 		Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 
 		for (Element e : mss) {
+			boolean isRoman=false;
 			String entity = e.getAttributeValue("name");
-			String organ = entity.substring(0, entity.indexOf("_"));
+			//organ->singular
+			String organ = Utilities.toSingular(entity.substring(0, entity.indexOf("_")));
+			entity.replaceFirst(entity.substring(0, entity.indexOf("_")), organ);
 
 			if (entity.matches(".*?_[\\divx]+-[\\divx]+")) {// abc_1-3
+				if(entity.matches(".*?_[ivx]+-[ivx]+")){
+					isRoman=true;
+				}
 				entity = entity.replaceAll("-", "_to_");// before
 														// reformatRomans,replace
 														// "-" with "_to_"
@@ -479,10 +533,8 @@ public class CharacterAnnotatorChunked {
 					int from = Integer.parseInt(m.group(2));
 					int to = Integer.parseInt(m.group(3));
 					for (int i = from; i <= to; i++) {
-						String temp1 = organ + " " + i;
-						this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + i);// id
-																								// =
-																								// i
+						String temp1 = organ + " " + (isRoman?RomanConversion.binaryToRoman(i):i);
+						this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + i);// id=i
 					}
 
 					// abc 1, 2 to 5;
@@ -490,10 +542,8 @@ public class CharacterAnnotatorChunked {
 					if (part1.length() > 0) {
 						String[] nums = part1.split("\\s+");
 						for (String n : nums) {
-							String temp1 = organ + " " + n;
-							this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + n);// id
-																									// =
-																									// i
+							String temp1 = organ + " " + (isRoman?RomanConversion.binaryToRoman(Integer.parseInt(n)):n);
+							this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + n);// id=i
 
 						}
 					}
@@ -674,16 +724,8 @@ public class CharacterAnnotatorChunked {
 				ck = cs.nextChunk();
 				if (ck != null && last.getName().compareTo("character") == 0) {
 					String cname = last.getAttributeValue("name");
-					if (!(ck instanceof ChunkSimpleCharacterState) && !(ck instanceof ChunkNumericals)) {// these
-																											// cases
-																											// can
-																											// be
-																											// handled
-																											// by
-																											// the
-																											// normal
-																											// annoation
-																											// procedure
+					if (!(ck instanceof ChunkSimpleCharacterState) && !(ck instanceof ChunkNumericals)) {
+						// these cases can be handled by the normal annotation procedure
 						Element e = new Element("character");
 						if (this.inbrackets) {
 							e.setAttribute("note", "in_bracket");
@@ -1562,7 +1604,19 @@ public class CharacterAnnotatorChunked {
 		String state = "";
 		String[] tokens = content.split("\\]\\s*");
 		for (int i = 0; i < tokens.length; i++) {
-			if (tokens[i].matches("^m\\[.*")) {
+			//Changed by Zilong
+			//more ventrally->more should be modifier of ventrally
+			//however, parsed as adj[more] adv[ventrally]
+			if(tokens[i].matches("^comparison\\[.*")){
+				if(i<tokens.length-1){//only if not the last token
+					if(tokens[i+1].matches("^m\\[.*")){//next token is a modifier.
+						modifier +=tokens[i].replaceAll("^comparison\\[", "").trim()+" "+tokens[i+1]+" ";
+						i++;
+						continue;
+					}
+				}
+			//changed by Zilong
+			}else if (tokens[i].matches("^m\\[.*")) {
 				modifier += tokens[i] + " ";
 			} else if (tokens[i].matches("^\\w+\\[.*")) {
 				String[] parts = tokens[i].split("\\[");
@@ -2910,11 +2964,9 @@ public class CharacterAnnotatorChunked {
 
 		// String[] organs = listofstructures.replaceAll(" (and|or|plus) ",
 		// " , ").split("\\)\\s*,\\s*"); //TODO: flower and leaf blades???
-		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); // TODO:
-																										// flower
-																										// and
-																										// leaf
-																										// blades???
+		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); 
+		// TODO: flower and leaf blades???
+
 		// mohan 28/10/2011. If the first organ is a preposition then join the
 		// preposition with the following organ
 		for (int i = 0; i < organs.length; i++) {
@@ -2922,6 +2974,7 @@ public class CharacterAnnotatorChunked {
 				organs[i] = organs[i].replaceAll("\\]\\]\\}\\s\\{", "]]}-{");
 			}
 		}
+		
 		String[] sharedcharacters = null;
 		for (int i = 0; i < organs.length; i++) {
 			String[] organ = organs[i].trim().split("\\s+");
@@ -2954,11 +3007,17 @@ public class CharacterAnnotatorChunked {
 			this.structid++;
 			e.setAttribute("id", strid);
 			// e.setAttribute("name", o.trim()); //must have.
-			e.setAttribute("name", Utilities.toSingular(o.trim())); // must
-																	// have.
-																	// //corolla
-																	// lobes
-			// this.statement.addContent(e);
+			e.setAttribute("name", Utilities.toSingular(o.trim()));
+			
+			//Changed by Zilong
+			if(o.trim().matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
+			//handle abc_i-iii, abc_2_to_5, abc_3_and_5, abc_3,4-5... 
+				e.setAttribute("type","multi");
+			}
+			//Changed by Zilong End
+			
+			// must have.
+			//corolla lobes
 			addContent(this.statement, e);
 			results.add(e); // results only adds e
 
