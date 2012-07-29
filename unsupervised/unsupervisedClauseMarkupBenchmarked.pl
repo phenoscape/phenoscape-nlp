@@ -171,7 +171,8 @@ my $debugp = 0; #debug pattern
 my $debugnouns = 0; #debug heuristic nouns for phenoscape
 
 #my $kb = "fnaknowledgebase";
-my $kb = "biocreative2012";
+#my $kb = "biocreative2012";
+my $kb = "phenoscape";
 
 my $taglength = 150;
 
@@ -3618,8 +3619,8 @@ sub annotateSent{
 	$sent =~ s#($b1)#<B>$1</B>#g if length $b1 > 0 ; #then <b> so when double tagged <m><b>basal</b></m>
 	#$sent =~ s#([\(\)\[\]\{\}])#<b>\1</b>#gi; #tag parentheses <b>
 	#$sent =~ s#((?:\(? ?\d+\W*)+)# <b>\1</b> #gi; # tag all numbers <b>. Not here. Need to tag tokens one by one
-
-	$sent =~ s#<(\w)>\s*</$1>##g; #remove <></> and <> </>
+	#print "$sent\n";
+	if($sent=~/>\s*</){$sent =~ s#<(\w)>\s*</$1>##g;} #remove <></> and <> </>
 	$sent =~ s#(?:<[^<]+>)+($FORBIDDEN)(?:</[^<]+>)+#$1#g;
 	return $sent;
 }
