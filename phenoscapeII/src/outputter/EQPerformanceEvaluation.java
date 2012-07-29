@@ -512,7 +512,7 @@ public class EQPerformanceEvaluation {
 		String q = EQ.get("quality"+suffix);
 		int exact = 0;
 		int partial = 0;
-		if(!e.contains(entity) && !entity.contains(e) && !q.contains(quality) && !quality.contains(q)){
+		if((!e.contains(entity) && !entity.contains(e)) || (!q.contains(quality) && !quality.contains(q))){
 			return 0;
 		}
 		if(e.length()==0 || q.length()==0 || entity.length()==0 || quality.length()==0) return 0;

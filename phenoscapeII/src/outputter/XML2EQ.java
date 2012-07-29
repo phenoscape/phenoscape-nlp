@@ -81,6 +81,7 @@ public class XML2EQ {
 	static{
 		serenostyle.add("sereno");
 		serenostyle.add("martinez");
+		serenostyle.add("earlyevolutionofarchosaurs");
 	}
 	
 	/**
