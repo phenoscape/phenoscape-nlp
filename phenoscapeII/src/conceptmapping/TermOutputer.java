@@ -16,6 +16,8 @@ import oboaccessor.OBO2DB;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
+import fna.charactermarkup.Utilities;
+
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -302,7 +304,21 @@ public class TermOutputer {
 		}
 	}
 	
-	
+	//Before adding the term to the terms list, some prep work need to be done
+	private void addNewTerm(final List<String> terms, String word){
+		
+		//replace the underscores with spaces
+		word = word.replaceAll("_", " ");
+		
+		//transform plural to singular
+		if(Utilities.isPlural(word)){
+			word=Utilities.toSingular(word);
+		}
+		
+		if(!terms.contains(word)){
+			terms.add(word);
+		}
+	}
 
 	private ArrayList<String> getQterms() {
 		ArrayList<String> qterms = new ArrayList<String>();
@@ -317,14 +333,15 @@ public class TermOutputer {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
-				qterms.add(rs.getString("word"));
+				String word = rs.getString("word");
+				this.addNewTerm(qterms, word);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return qterms;
 	}
-
+	
 	private ArrayList<String> getEterms() {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
@@ -339,7 +356,8 @@ public class TermOutputer {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
-				eterms.add(rs.getString("word"));
+				String word = rs.getString("word");
+				this.addNewTerm(eterms, word);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -360,8 +378,8 @@ public class TermOutputer {
 		ArrayList<String> eOntoPaths = new ArrayList<String>();
 		//changed
 		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vertebrate_anatomy.obo");
-		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AAO.obo");
-		eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AA.obo");
+		//eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AAO.obo");
+		//eOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\AA.obo");
 		
 		ArrayList<String> qOntoPaths = new ArrayList<String>();
 		qOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\pato.owl");
