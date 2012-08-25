@@ -38,15 +38,21 @@ import conceptmapping.Utilities;
  */
 @SuppressWarnings("unused")
 public class TermEQ2IDEQ {
+
+	//name of the ouput table
 	private String outputtable;
+	
 	private Connection conn;
 	private String username="root";
 	private String password="root";
 	//private TreeSet<String> entityterms = new TreeSet<String>();
 	//private TreeSet<String> qualityterms = new TreeSet<String>();
+	
 	private Hashtable<String, String[]> entityIDCache = new Hashtable<String, String[]>(); //term=> {id, label}
 	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
+	
 	private ArrayList<String> spatialterms = new ArrayList<String>();
+	
 	private String prefix;
 	private String ontologyfolder;
 	private Utilities ontoutil;
@@ -61,6 +67,7 @@ public class TermEQ2IDEQ {
 		this.ontologyfolder = ontologyfolder;
 		this.ontoutil = new Utilities(ontologyfolder, database);
 		this.outputtable = outputtable+"_result";
+		//put process in the cache?
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -413,9 +420,9 @@ public class TermEQ2IDEQ {
 			}
 			finalentitylocatorids = finalentitylocatorids.replaceFirst(",$", "");
 			finalentitylocatorlabels = finalentitylocatorlabels.replaceFirst(",$", "");
-			finalentitylocatorresult[0] = finalentitylocatorids;
-			finalentitylocatorresult[1] = finalentitylocatorlabels;
 		}
+		finalentitylocatorresult[0] = finalentitylocatorids;
+		finalentitylocatorresult[1] = finalentitylocatorlabels;
 	}
 
 	
@@ -757,8 +764,9 @@ public class TermEQ2IDEQ {
 	 */
 	public static void main(String[] args) {
 		try{
-			String csv = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/trash_EQ.csv";
-			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "test", csv);
+			//String csv = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/trash_EQ.csv";
+			String csv = "C:/Users/Zilong Chang/Documents/WORK/getestNew/target/aftersereno.csv";
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "gstestnew", "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\ontologies",csv);
 		}catch(Exception e){
 			e.printStackTrace();
 		}

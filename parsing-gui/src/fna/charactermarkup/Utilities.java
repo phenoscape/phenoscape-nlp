@@ -271,7 +271,7 @@ public class Utilities {
 		s = singulars.get(word);
 		if(s!=null) return s;
 		
-		if(word.matches("\\w+_[ivx]+")){
+		if(word.matches("\\w+_[ivx-]+")){
 			singulars.put(word, word);
 			plurals.put(word, word);
 			return word;

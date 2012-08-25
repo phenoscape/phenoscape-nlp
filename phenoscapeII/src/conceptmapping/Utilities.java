@@ -17,9 +17,9 @@ import owlaccessor.OWLAccessorImpl;
  */
 public class Utilities {
 	
-	public static ArrayList<OBO2DB> OBOqualityOntoAPIs = new ArrayList<OBO2DB>();;
+	public static ArrayList<OBO2DB> OBOqualityOntoAPIs = new ArrayList<OBO2DB>();
 	public static ArrayList<OBO2DB> OBOentityOntoAPIs  = new ArrayList<OBO2DB>();
-	public static ArrayList<OWLAccessorImpl> OWLqualityOntoAPIs = new ArrayList<OWLAccessorImpl>();;
+	public static ArrayList<OWLAccessorImpl> OWLqualityOntoAPIs = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
@@ -28,10 +28,10 @@ public class Utilities {
 
 	public Utilities(String ontologyfolder, String database)throws Exception{
 		Utilities.ontologyfolder = ontologyfolder;
-		excluded.add("cellular quality");
+		excluded.add("cellular quality");//exclude "cellular quality"
 		this.database = database;
 		
-		
+		//create a list of relative path of the ontologies
 		String [] entityontologies = new String[]{
  		ontologyfolder+System.getProperty("file.separator")+"tao.owl",
 		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
@@ -48,6 +48,7 @@ public class Utilities {
 		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
 		*/
 		
+		//for each entity ontology
 		for(String onto: entityontologies){
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
