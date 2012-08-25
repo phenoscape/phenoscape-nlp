@@ -1,8 +1,10 @@
 package owlaccessor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLClass;
 
 
 public class TestOWLAccessorImpl {
@@ -83,27 +85,35 @@ public class TestOWLAccessorImpl {
 	
 	@Test
 	public void testGetAnnotationProperties() throws Exception{
+		File phenoscape = new File("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\phenoscape-ext.owl");
+		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
+		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
+		
 		//OWLAccessorImpl a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl");
-		OWLAccessorImpl a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl", new ArrayList<String>());
+		//OWLAccessorImpl a = new OWLAccessorImpl("http://purl.obolibrary.org/obo/tao.owl", new ArrayList<String>());
 		//System.out.println(a.getLabel(a.getClassByLabel("cellular quality")));
 		//for(OWLAnnotation oa : a.getExactSynonyms(a.getClassByLabel("color"))){
 		//	System.out.println(oa.toString());
 		//}
 		
-		List<String> s = new ArrayList<String>();
-		System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
+		//List<String> s = new ArrayList<String>();
+		//System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
+		List<OWLClass> results = a.retrieveConcept("phalanges");
+		for(OWLClass c : results){
+			System.out.println(c.toString());
+		}
 		
-		s.add("cellular quality");
-		System.out.println(a.retrieveConcept("ploidy").size());
+		//s.add("cellular quality");
+		//System.out.println(a.retrieveConcept("ploidy").size());
 		
 	}
 	
-//	public static void main(String[] args) {
-//		TestOWLAccessorImpl to = new TestOWLAccessorImpl();
-//		String path="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
-//		to.searchOntology("aorta", path, "TAO");
-//		
-//	}
+	//public static void main(String[] args) {
+	//	TestOWLAccessorImpl to = new TestOWLAccessorImpl();
+	//	String path="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
+	//	to.searchOntology("aorta", path, "TAO");
+		
+	//}
 	
 
 }

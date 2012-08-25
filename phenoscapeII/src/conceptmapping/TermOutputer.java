@@ -23,7 +23,7 @@ import owlaccessor.OWLAccessorImpl;
 /**
  * @author Hong Updates
  * This class output extracted terms and their mapping PATO concepts to a table, including source info.
- * 
+ * Run this class after completing CharaParser(4Phenoscape).step2 (2.1, 2.2, 2.3, and 2.4)
  * 11/23: rewrite to accommodate OBO format
  * 
  * 
@@ -33,6 +33,7 @@ import owlaccessor.OWLAccessorImpl;
  */
 public class TermOutputer {
 	private Connection conn;
+	private String database;
 	private String username = "root";
 	private String password = "root";
 	private String entitytable = "entity";
@@ -53,6 +54,7 @@ public class TermOutputer {
 		this.qualityOntosPath = qOntoPaths;
 		this.glosstable = glosstable;
 		this.sourceprefix = sourceprefix;
+		this.database = database;
 		//String PATOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/pato.owl";
 		//String TAOURL="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
 		//this.patoapi = new OWLAccessorImpl(new File(PATOURL));
@@ -98,7 +100,23 @@ public class TermOutputer {
 					ontoid = ontoidinfo[1];
 					ontolabel = ontoidinfo[2];
 				}
-				rs = stmt.executeQuery("select distinct pdf, charnumber, characterr, sentence from "+this.sourceprefix+"_original where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)' or characterr rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
+				
+				rs = stmt.executeQuery("select distinct source, sentence, type from "+this.sourceprefix+"_sentence where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
+				String sourcelist = "sourcelist|"; //this is so that the first source is not to match "()".
+				String source = "";
+				String sentence = "";
+				String character = "";
+				while(rs.next()){
+					source=rs.getString("source");
+					if(!source.matches("("+sourcelist.replaceFirst("\\|$", "")+")")){
+						sourcelist +=rs.getString("source")+"|";						
+						character = rs.getString("type");
+						sentence = rs.getString("sentence");
+						type = type.replaceFirst(";+$", "");
+						addrecord(term, ontoid, ontolabel, source.toString(), character, sentence, type);
+					}
+				}
+				/*rs = stmt.executeQuery("select distinct pdf, charnumber, characterr, sentence from "+this.sourceprefix+"_original where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)' or characterr rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
 				String sourcelist = "sourcelist|"; //this is so that the first source is not to match "()".
 				String source = "";
 				String sentence = "";
@@ -112,7 +130,9 @@ public class TermOutputer {
 						type = type.replaceFirst(";+$", "");
 						addrecord(term, ontoid, ontolabel, source.toString(), character, sentence, type);
 					}
-				}
+				}*/
+				
+				
 			}
 			rs.close();
 			stmt.close();
@@ -141,13 +161,14 @@ public class TermOutputer {
 		String qualitylabel = "";
 		String entitylabel="";
 		try{
+			//check annotated record
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select qualityontoid from "+this.sourceprefix+"_original where qualitylabel='"+term+"'");
+			ResultSet rs = stmt.executeQuery("select qualityontoid from phenoscape.fish_original_1st_all where qualitylabel='"+term+"'");
 			if(rs.next()){
 				qualityid = rs.getString("qualityontoid");			
 				qualitylabel = term;
 			}
-			rs = stmt.executeQuery("select entityontoid from "+this.sourceprefix+"_original where entitylabel='"+term+"'");
+			rs = stmt.executeQuery("select entityontoid from phenoscape.fish_original_1st_all where entitylabel='"+term+"'");
 			if(rs.next()){
 				entityid = rs.getString("entityontoid");
 				entitylabel = term;
@@ -280,7 +301,7 @@ public class TermOutputer {
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|VAO|AMAO|AAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
+				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|VAO|AMAO|AAO|UBERON)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
 				result[2] = label;
 				return result;
 			}
@@ -292,7 +313,7 @@ public class TermOutputer {
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			result[0] = type;
-			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|VAO|AMAO|AAO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
+			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|VAO|AMAO|AAO|UBERON)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
 			result[2] += label+";";
 		}
 		if(result[1].length()>0){
@@ -323,13 +344,13 @@ public class TermOutputer {
 	private ArrayList<String> getQterms() {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
+			String q = "SELECT distinct word FROM "+this.sourceprefix+"_unknownwords where "+
 //<<<<<<< HEAD
 //			"word in (select term from phenoscape."+this.glosstable+" where category !='structure') or "+
 //=======
-			"word in (select term from markedupdatasets."+this.glosstable+" where category !='structure') or "+
-			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
-			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category !='structure')";
+			"word in (select term from "+this.glosstable+" where category !='structure') or "+
+			"word in (select word from "+this.sourceprefix+"_wordroles p where semanticrole ='c') or "+
+			"word in (select term from "+this.sourceprefix+"_term_category where category !='structure')";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
@@ -345,14 +366,14 @@ public class TermOutputer {
 	private ArrayList<String> getEterms() {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
-			String q = "SELECT distinct word FROM markedupdatasets."+this.sourceprefix+"_unknownwords where "+
+			String q = "SELECT distinct word FROM "+this.sourceprefix+"_unknownwords where "+
 //<<<<<<< HEAD
 //			"word in (select term from phenoscape."+this.glosstable+" where category ='structure') or "+
 //=======
-			"word in (select term from markedupdatasets."+this.glosstable+" where category ='structure') or "+
+			"word in (select term from "+this.glosstable+" where category ='structure') or "+
 //>>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
-			"word in (select word from markedupdatasets."+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
-			"word in (select term from markedupdatasets."+this.sourceprefix+"_term_category where category ='structure')";
+			"word in (select word from "+this.sourceprefix+"_wordroles p where semanticrole in ('os', 'op')) or "+
+			"word in (select term from "+this.sourceprefix+"_term_category where category ='structure')";
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
@@ -370,6 +391,7 @@ public class TermOutputer {
 	 */
 	public static void main(String[] args) {
 		//need an database "obo" (may be empty) if search obo ontologies
+		/*
 		String database = "phenoscape";
 		String outputtableprefix = "pheno_amphibia";
 		String glosstable = "fishglossaryfixed";
@@ -383,6 +405,22 @@ public class TermOutputer {
 		
 		ArrayList<String> qOntoPaths = new ArrayList<String>();
 		qOntoPaths.add("C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\pato.owl");
+
+		*/
+		//The three xml files sent by Alex on July 23, 2012
+		String database = "biocreative2012";
+		String outputtableprefix = "pheno_alex";
+		String glosstable = "fishglossaryfixed";
+		//changed to amphibia (was archosaur)
+		String sourceprefix = "phenoalex";
+
+		ArrayList<String> eOntoPaths = new ArrayList<String>();
+		//changed
+		eOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\merged.owl");
+		
+		ArrayList<String> qOntoPaths = new ArrayList<String>();
+		qOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\pato.owl");
+		qOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\bspo.owl");
 		
 		TermOutputer to = new TermOutputer(database, outputtableprefix, eOntoPaths, qOntoPaths, glosstable, sourceprefix);
 		to.output();

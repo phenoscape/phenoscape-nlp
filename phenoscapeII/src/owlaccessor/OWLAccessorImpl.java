@@ -63,7 +63,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		source = ontoURL;
 		
 			ont = manager.loadOntologyFromOntologyDocument(iri);
-			allclasses = ont.getClassesInSignature();
+			allclasses = ont.getClassesInSignature(true);
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
@@ -83,7 +83,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		source = file.getAbsolutePath();
 
 			ont = manager.loadOntologyFromOntologyDocument(file);
-			allclasses = ont.getClassesInSignature();
+			allclasses = ont.getClassesInSignature(true);
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
@@ -147,6 +147,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		List<OWLClass> result = new ArrayList<OWLClass>();		
 			for (OWLClass c : allclasses) {
 				// match class concepts and also the synonyms
+				/*if(c.getIRI().toString().contains("UBERON_0003221")){
+					System.out.println("find it");
+				}*/
 				List<String> syns = this.getSynonymLabels(c);
 				String label = this.getLabel(c).toLowerCase();
 				boolean syn = matchSyn(con, syns, "e");
@@ -277,8 +280,24 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @return the annotation property by iri
 	 */
 	public Set<OWLAnnotation> getAnnotationByIRI(OWLClass c, String iri) {
-		return c.getAnnotations(ont,
-				df.getOWLAnnotationProperty(IRI.create(iri)));
+		Set<OWLOntology> onts = ont.getImports(); 
+		onts.addAll(ont.getDirectImports());
+		onts.addAll(ont.getImportsClosure());
+		
+		Set<OWLAnnotation> allAnnotations = null;
+		for(OWLOntology onto: onts){
+			if(allAnnotations == null){
+				allAnnotations = c.getAnnotations(onto,
+					df.getOWLAnnotationProperty(IRI.create(iri)));
+			}else{
+				allAnnotations.addAll(c.getAnnotations(onto,
+						df.getOWLAnnotationProperty(IRI.create(iri))));
+			}
+				
+		}
+		return allAnnotations;
+		/*return c.getAnnotations(ont,
+				df.getOWLAnnotationProperty(IRI.create(iri)));*/
 	}
 
 	/**
@@ -317,6 +336,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return this
 				.getAnnotationByIRI(c,
 						"http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym");
+	}
+	
+	public Set<OWLAnnotation> getNarrowSynonyms(OWLClass c) {
+		return this
+				.getAnnotationByIRI(c,
+						"http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym");
+	}
+	
+	public Set<OWLAnnotation> getBroadSynonyms(OWLClass c) {
+		return this
+				.getAnnotationByIRI(c,
+						"http://www.geneontology.org/formats/oboInOwl#hasBroadSynonym");
 	}
 
 	/**
@@ -375,12 +406,20 @@ public class OWLAccessorImpl implements OWLAccessor {
 		ArrayList<String> labels = new ArrayList<String>();
 		Set<OWLAnnotation> anns = getExactSynonyms(c);
 		anns.addAll(this.getRelatedSynonyms(c));
+		anns.addAll(this.getNarrowSynonyms(c));
+		anns.addAll(this.getBroadSynonyms(c));
+		//if(c.getIRI().toString().contains("UBERON_0003221")){
+		//	System.out.println("Syns for 0003221:"+anns.size());
 		Iterator<OWLAnnotation> it = anns.iterator();
 		while (it.hasNext()) {
 			// Annotation(<http://www.geneontology.org/formats/oboInOwl#hasExactSynonym>
 			// W)
-			labels.add(this.getRefinedOutput(it.next().toString()));
+			String label = this.getRefinedOutput(it.next().toString());
+			//System.out.println("Syns:" + label);
+			labels.add(label);
 		}
+		
+		//}
 		return labels;
 	}
 
