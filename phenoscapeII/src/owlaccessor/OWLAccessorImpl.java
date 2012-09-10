@@ -39,10 +39,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The df. */
 	private OWLDataFactory df;
 
-	/** The ont. */
-	private OWLOntology ont;
+	/** A set of ontologies. */
+	private Set<OWLOntology> onts;
 
-	private Set<OWLClass> allclasses; 
+	private Set<OWLClass> allclasses=new HashSet<OWLClass>(); 
 	
 	private boolean excluded = false;
 	
@@ -61,9 +61,14 @@ public class OWLAccessorImpl implements OWLAccessor {
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
 		source = ontoURL;
+		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(iri);
 		
-			ont = manager.loadOntologyFromOntologyDocument(iri);
-			allclasses = ont.getClassesInSignature(true);
+		
+			onts=rootOnt.getImportsClosure();
+			for (OWLOntology ont:onts){
+				allclasses.addAll(ont.getClassesInSignature(true));
+			}
+			
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
@@ -81,11 +86,16 @@ public class OWLAccessorImpl implements OWLAccessor {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		source = file.getAbsolutePath();
-
-			ont = manager.loadOntologyFromOntologyDocument(file);
-			allclasses = ont.getClassesInSignature(true);
-			//eliminate branches
-			allclasses.removeAll(this.getWordsToEliminate(eliminate));
+		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(file);
+		
+		
+		onts=rootOnt.getImportsClosure();
+		for (OWLOntology ont:onts){
+			allclasses.addAll(ont.getClassesInSignature(true));
+		}
+		
+		//eliminate branches
+		allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
 	}
 	
@@ -263,9 +273,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 */
 	public List<OWLClass> getParents(OWLClass c) {
 		List<OWLClass> parent = new ArrayList<OWLClass>();
-		for (OWLClassExpression ce : c.getSuperClasses(ont)) {
-			if (!ce.isAnonymous())
-				parent.add(ce.asOWLClass());
+		for(OWLOntology ont:onts){
+			for (OWLClassExpression ce : c.getSuperClasses(ont)) {
+				if (!ce.isAnonymous())
+					parent.add(ce.asOWLClass());
+			}
 		}
 		return parent;
 	}
@@ -280,9 +292,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @return the annotation property by iri
 	 */
 	public Set<OWLAnnotation> getAnnotationByIRI(OWLClass c, String iri) {
-		Set<OWLOntology> onts = ont.getImports(); 
-		onts.addAll(ont.getDirectImports());
-		onts.addAll(ont.getImportsClosure());
+//		Set<OWLOntology> onts = ont.getImports(); 
+//		onts.addAll(ont.getDirectImports());
+//		onts.addAll(ont.getImportsClosure());
 		
 		Set<OWLAnnotation> allAnnotations = null;
 		for(OWLOntology onto: onts){
@@ -310,7 +322,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @return the annotation by iri
 	 */
 	public Set<OWLAnnotation> getAnnotationByIRI(OWLClass c, IRI iri) {
-		return c.getAnnotations(ont, df.getOWLAnnotationProperty(iri));
+		Set<OWLAnnotation> result = new HashSet<OWLAnnotation>();
+		for(OWLOntology ont:onts){
+				result.addAll(c.getAnnotations(ont, df.getOWLAnnotationProperty(iri)));
+		}
+		
+		return result;
 	}
 
 	/**
@@ -445,10 +462,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public Set<OWLClass> getAllOffsprings(OWLClass c) {
 		Set<OWLClass> r = new HashSet<OWLClass>();
 		if(c!=null){
-			for (OWLClassExpression ch : c.getSubClasses(ont)) {
-				OWLClass o = ch.asOWLClass();
-				r.add(o);
-				r.addAll(this.getAllOffsprings(o));
+			for(OWLOntology ont: onts){
+				for (OWLClassExpression ch : c.getSubClasses(ont)) {
+					OWLClass o = ch.asOWLClass();
+					r.add(o);
+					r.addAll(this.getAllOffsprings(o));
+				}
 			}
 		}
 		return r;
@@ -498,12 +517,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public String getID(OWLClass c) {
 
-		Set<OWLAnnotation> ids = c
-				.getAnnotations(
-						ont,
-						df.getOWLAnnotationProperty(IRI
-								.create("http://www.geneontology.org/formats/oboInOwl#id")));
-
+		Set<OWLAnnotation> ids = new HashSet<OWLAnnotation>();
+		for (OWLOntology ont:onts){		
+			ids.addAll(c.getAnnotations(ont, df.getOWLAnnotationProperty(IRI.create("http://www.geneontology.org/formats/oboInOwl#id"))));
+		}
+		
 		if (ids.isEmpty()) {
 			return "";// no id, return empty string
 		} else {

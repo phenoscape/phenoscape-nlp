@@ -85,7 +85,7 @@ public class TestOWLAccessorImpl {
 	
 	@Test
 	public void testGetAnnotationProperties() throws Exception{
-		File phenoscape = new File("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\phenoscape-ext.owl");
+		File phenoscape = new File("C:\\Users\\Zilong Chang\\Downloads\\phenoscape-ext.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
 		
@@ -98,9 +98,9 @@ public class TestOWLAccessorImpl {
 		
 		//List<String> s = new ArrayList<String>();
 		//System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
-		List<OWLClass> results = a.retrieveConcept("phalanges");
+		List<OWLClass> results = a.retrieveConcept("anal fin");
 		for(OWLClass c : results){
-			System.out.println(c.toString());
+			System.out.println(c.getIRI());
 		}
 		
 		//s.add("cellular quality");

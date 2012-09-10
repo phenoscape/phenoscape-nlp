@@ -16,8 +16,6 @@ import oboaccessor.OBO2DB;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
-import fna.charactermarkup.Utilities;
-
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -332,8 +330,8 @@ public class TermOutputer {
 		word = word.replaceAll("_", " ");
 		
 		//transform plural to singular
-		if(Utilities.isPlural(word)){
-			word=Utilities.toSingular(word);
+		if(TermOutputerUtilities.isPlural(word)){
+			word=TermOutputerUtilities.toSingular(word);
 		}
 		
 		if(!terms.contains(word)){
