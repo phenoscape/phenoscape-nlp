@@ -53,7 +53,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 		File target = new File(Registry.TargetDirectory);
 		Utilities.resetFolder(target, "descriptions");
 		Utilities.resetFolder(target, "transformed");
-		//Utilities.resetFolder(target, "descriptions-dehyphened");
+		//TermOutputerUtilities.resetFolder(target, "descriptions-dehyphened");
 		Utilities.resetFolder(target, "markedup");
 		Utilities.resetFolder(target, "final");
 		Utilities.resetFolder(target, "co-occurrence");

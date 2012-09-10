@@ -4154,8 +4154,8 @@ public class MainForm {
 			words = vmdb.structureTags4Curation(words);
 			for(String word: words){
 				//before structure terms are set, partOfPrepPhrases can not be reliability determined
-				if(Utilities.mustBeVerb(word, this.conn, prefix) || Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
-					//if(Utilities.mustBeAdv(word) /*|| Utilities.partOfPrepPhrase(word, this.conn, prefix)*/){
+				if(Utilities.mustBeVerb(word, this.conn, prefix) || Utilities.mustBeAdv(word) /*|| TermOutputerUtilities.partOfPrepPhrase(word, this.conn, prefix)*/){
+					//if(TermOutputerUtilities.mustBeAdv(word) /*|| TermOutputerUtilities.partOfPrepPhrase(word, this.conn, prefix)*/){
 						noneqwords.add(word);
 						contextText.append(word+" is excluded\n");						
 						//sentences with those tags should be marked as unknown for later review

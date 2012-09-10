@@ -27,7 +27,7 @@ import fna.parsing.Registry;
 import fna.parsing.VolumeFinalizer;
 import fna.parsing.state.SentenceOrganStateMarker;
 
-
+import conceptmapping.*;
 /**
  * @author hongcui
  * updates April 2011
@@ -558,12 +558,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String text = "<inflorescences> {terminal} and {axillary} , {terminal} usually occupying {distal} 1 / 5 – 1 / 3 of <stem> , rather {lax} , {interrupted} in {proximal} 1 / 2 , or almost to top , usually narrowly {paniculate} .";
 		/*String text = "<petals> {lavender} or {white} , {often} {spatulate} , sometimes {oblanceolate} or {obovate} , 6 – 9 ( – 10 ) × ( 1 . 5 – ) 2 – 3 ( – 3 . 5 ) mm , <margins> not {crisped} , <claw> strongly {differentiated} from <blade> , ( {slender} , 2 – 3 . 5 ( – 4 ) mm , {narrowest} at <base> ) ;";
 		text = StanfordParser.normalizeSpacesRoundNumbers(text);
-		String str = Utilities.threeingSentence(text);
+		String str = TermOutputerUtilities.threeingSentence(text);
 		String p1 ="\\([^()]*?[a-zA-Z][^()]*?\\)";
   		String p2 = "\\[[^\\]\\[]*?[a-zA-Z][^\\]\\[]*?\\]";
   		//String p3 = "\\{[^{}]*?[a-zA-Z][^{}]*?\\}";				
 		if(str.matches(".*?"+p1+".*") || str.matches(".*?"+p2+".*")){ 
-			str = Utilities.threeingSentence(str);
+			str = TermOutputerUtilities.threeingSentence(str);
 			str = str.replaceAll(p1, "").replaceAll(p2, "").replaceAll("\\s+", " ").trim();					
 		}*/
 		//String text = "ovary more than two to three-fourths to one half superior. ";

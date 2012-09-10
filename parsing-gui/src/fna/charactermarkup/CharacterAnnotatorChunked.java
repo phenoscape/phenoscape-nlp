@@ -20,6 +20,7 @@ import org.jdom.JDOMException;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
+import conceptmapping.*;
 
 /**
  * @author hongcui fnaglossaryfixed: move verbs such as comprising from the
@@ -496,7 +497,7 @@ public class CharacterAnnotatorChunked {
 			boolean isRoman=false;
 			String entity = e.getAttributeValue("name");
 			//organ->singular
-			String organ = Utilities.toSingular(entity.substring(0, entity.indexOf("_")));
+			String organ = TermOutputerUtilities.toSingular(entity.substring(0, entity.indexOf("_")));
 			entity.replaceFirst(entity.substring(0, entity.indexOf("_")), organ);
 
 			if (entity.matches(".*?_[\\divx]+-[\\divx]+")) {// abc_1-3
@@ -1568,7 +1569,7 @@ public class CharacterAnnotatorChunked {
 		 * character //relation: v[{present}] regardless o[r[p[of] String v =
 		 * relation.substring(0,
 		 * relation.indexOf("]")).replaceAll("(v\\[|\\{|\\}|\\])", ""); String
-		 * character = Utilities.lookupCharacter(v, conn,
+		 * character = TermOutputerUtilities.lookupCharacter(v, conn,
 		 * ChunkedSentence.characterhash, glosstable, tableprefix); if(character
 		 * !=null){ this.createCharacterElement(this.subjects, results, "", v,
 		 * character, ""); } return results; }
@@ -1686,7 +1687,7 @@ public class CharacterAnnotatorChunked {
 		 * (the lookupcharacter step determines the logic) String eqcharacter =
 		 * ChunkedSentence.eqcharacters.get(state); if(eqcharacter != null){
 		 * state = eqcharacter; character =
-		 * Utilities.lookupCharacter(eqcharacter, conn,
+		 * TermOutputerUtilities.lookupCharacter(eqcharacter, conn,
 		 * ChunkedSentence.characterhash, this.glosstable, this.tableprefix);
 		 * if(character ==null){ state = statecp; character = charactercp; } }
 		 * if(character.compareToIgnoreCase("character")==0 && modifier.length()
@@ -2548,7 +2549,7 @@ public class CharacterAnnotatorChunked {
 			 * o[groups]] , coloration[{coloration~list~white~to~tan}] ,
 			 * {wholly} or {distally} {plumose} //get tokens for the new
 			 * chunkedsentence ArrayList<String>tokens =
-			 * Utilities.breakText(twoparts[0]); twoparts[0]=twoparts[0].trim();
+			 * TermOutputerUtilities.breakText(twoparts[0]); twoparts[0]=twoparts[0].trim();
 			 * if(!twoparts[0].matches(".*?[,;\\.:]$")){ twoparts[0] +=" .";
 			 * tokens.add("."); } ChunkedSentence newcs = new
 			 * ChunkedSentence(tokens, twoparts[0], conn, glosstable);
@@ -2568,7 +2569,7 @@ public class CharacterAnnotatorChunked {
 				String firstorgans = twoparts[1].substring(0, twoparts[1].indexOf(") plus")); // (teeth
 				String lastorganincluded = firstorgans.substring(firstorgans.lastIndexOf("(") + 1);
 				for (int i = structures.size() - 1; i >= 0; i--) {
-					if (!structures.get(i).getAttributeValue("name").equals(Utilities.toSingular(lastorganincluded))) {
+					if (!structures.get(i).getAttributeValue("name").equals(TermOutputerUtilities.toSingular(lastorganincluded))) {
 						structures.remove(i);
 					}
 				}
@@ -2763,8 +2764,8 @@ public class CharacterAnnotatorChunked {
 					// String pattern = a+"[ ]+of[ ]+[0-9]+.*"+b+"[,\\.]";
 					// //consists-of
 					if (a.length() > 0 && b.length() > 0) {
-						String pb = Utilities.plural(b);
-						String pa = Utilities.plural(a);
+						String pb = TermOutputerUtilities.plural(b);
+						String pa = TermOutputerUtilities.plural(a);
 						String pattern = "(" + b + "|" + pb + ")" + "[ ]+of[ ]+[0-9]+.*" + "(" + a + "|" + pa + ")" + "[ ]?(,|;|\\.|and|or|plus)"; // consists-of
 						String query = "select * from " + this.tableprefix + "_sentence where sentence rlike '" + pattern + "'";
 						ResultSet rs = stmt.executeQuery(query);
@@ -3009,7 +3010,7 @@ public class CharacterAnnotatorChunked {
 			this.structid++;
 			e.setAttribute("id", strid);
 			// e.setAttribute("name", o.trim()); //must have.
-			e.setAttribute("name", Utilities.toSingular(o.trim()));
+			e.setAttribute("name", TermOutputerUtilities.toSingular(o.trim()));
 			
 			//Changed by Zilong
 			if(o.trim().matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
@@ -3371,7 +3372,7 @@ public class CharacterAnnotatorChunked {
 		String ch = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, this.glosstable, tableprefix);
 		if (ch != null && ch.matches(".*?_?(position|insertion|structure_type|life_stage|functionality)_?.*") && w.compareTo("low") != 0)
 			return "type";
-		String sw = Utilities.toSingular(w);
+		String sw = TermOutputerUtilities.toSingular(w);
 		try {
 			Statement stmt = conn.createStatement();
 			// Nov 30th 2011. Considered to use glossary, term_category,
