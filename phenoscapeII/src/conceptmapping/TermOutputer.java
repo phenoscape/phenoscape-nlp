@@ -409,16 +409,16 @@ public class TermOutputer {
 		String database = "biocreative2012";
 		String outputtableprefix = "pheno_alex";
 		String glosstable = "fishglossaryfixed";
-		//changed to amphibia (was archosaur)
+		
 		String sourceprefix = "phenoalex";
 
 		ArrayList<String> eOntoPaths = new ArrayList<String>();
 		//changed
-		eOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\merged.owl");
+		eOntoPaths.add("C:\\Users\\Zilong Chang\\Desktop\\onto\\phenoscape-ext.owl");
 		
 		ArrayList<String> qOntoPaths = new ArrayList<String>();
-		qOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\pato.owl");
-		qOntoPaths.add("Z:\\RESEARCH\\PROJECTS\\Phenoscape\\bspo.owl");
+		qOntoPaths.add("C:\\Users\\Zilong Chang\\Desktop\\onto\\pato.owl");
+		qOntoPaths.add("C:\\Users\\Zilong Chang\\Desktop\\onto\\bspo.owl");
 		
 		TermOutputer to = new TermOutputer(database, outputtableprefix, eOntoPaths, qOntoPaths, glosstable, sourceprefix);
 		to.output();
