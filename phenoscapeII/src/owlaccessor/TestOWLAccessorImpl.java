@@ -98,10 +98,25 @@ public class TestOWLAccessorImpl {
 		
 		//List<String> s = new ArrayList<String>();
 		//System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
-		List<OWLClass> results = a.retrieveConcept("anal fin");
+		List<OWLClass> results = a.retrieveConcept("tuber");
 		for(OWLClass c : results){
 			System.out.println(c.getIRI());
 		}
+		
+//		List<OWLClass> results1 = a.retrieveConcept("face");
+//		for(OWLClass c : results1){
+//			System.out.println(c.getIRI());
+//		}
+//		
+//		List<OWLClass> results2 = a.retrieveConcept("extensor");
+//		for(OWLClass c : results2){
+//			System.out.println(c.getIRI());
+//		}
+//		
+//		List<OWLClass> results3 = a.retrieveConcept("articulation");
+//		for(OWLClass c : results3){
+//			System.out.println(c.getIRI());
+//		}
 		
 		//s.add("cellular quality");
 		//System.out.println(a.retrieveConcept("ploidy").size());

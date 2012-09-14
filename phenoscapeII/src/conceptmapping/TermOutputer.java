@@ -18,7 +18,10 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import owlaccessor.OWLAccessorImpl;
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class TermOutputer.
+ *
  * @author Hong Updates
  * This class output extracted terms and their mapping PATO concepts to a table, including source info.
  * Run this class after completing CharaParser(4Phenoscape).step2 (2.1, 2.2, 2.3, and 2.4)
@@ -30,20 +33,47 @@ import owlaccessor.OWLAccessorImpl;
  * AAO(Amniote Anatomy Ontology): https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo
  */
 public class TermOutputer {
+	
+	/** The conn. */
 	private Connection conn;
+	
+	/** The database. */
 	private String database;
+	
+	/** The username. */
 	private String username = "root";
+	
+	/** The password. */
 	private String password = "root";
+	
+	/** The entitytable. */
 	private String entitytable = "entity";
+	
+	/** The qualitytable. */
 	private String qualitytable = "quality";
+	
+	/** The entity ontos path. */
 	private ArrayList<String> entityOntosPath =null;
+	
+	/** The quality ontos path. */
 	private ArrayList<String> qualityOntosPath =null;
+	
+	/** The glosstable. */
 	private String glosstable = null;
+	
+	/** The sourceprefix. */
 	private String sourceprefix = null;
 
 	
 	/**
-	 * 
+	 * Instantiates a new term outputer.
+	 *
+	 * @param database the database
+	 * @param outputtableprefix the outputtableprefix
+	 * @param eOntoPaths the e onto paths
+	 * @param qOntoPaths the q onto paths
+	 * @param glosstable the glosstable
+	 * @param sourceprefix the sourceprefix
 	 */
 	public TermOutputer(String database, String outputtableprefix, ArrayList<String> eOntoPaths, ArrayList<String> qOntoPaths, String glosstable, String sourceprefix) {
 		this.entitytable = outputtableprefix+"_"+entitytable;
@@ -63,8 +93,8 @@ public class TermOutputer {
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
-				stmt.execute("drop table if exists "+ entitytable);
-				stmt.execute("create table if not exists "+entitytable+" (id int(11) not null unique auto_increment primary key, term varchar(100), ontoid text, ontolabel text, characterr text, characterstate text, source text)");
+				//stmt.execute("drop table if exists "+ entitytable); TODO uncomment
+				//stmt.execute("create table if not exists "+entitytable+" (id int(11) not null unique auto_increment primary key, term varchar(100), ontoid text, ontolabel text, characterr text, characterstate text, source text)"); TODO uncomment
 				stmt.execute("drop table if exists "+qualitytable);
 				stmt.execute("create table if not exists "+qualitytable+" (id int(11) not null unique auto_increment primary key, term varchar(100), ontoid text, ontolabel text, characterr text, characterstate text, source text)");
 			}
@@ -73,14 +103,44 @@ public class TermOutputer {
 		}
 	}
 
+	/**
+	 * Output.
+	 */
 	public void output(){
 		ArrayList<String> entities =getEterms();
 		ArrayList<String> qualities = getQterms();
-		outputTerms(entities, entitytable);
+		//outputTerms(entities, entitytable); TODO, uncomment
 		outputTerms(qualities, qualitytable);
 	}
 	
 	
+	/**
+	 * Process term before look it up in ontology and insert into database.
+	 *
+	 * @param term the original form of the term
+	 * @param type 
+	 * @return the processed term
+	 */
+	private String processTerm(String term, String type){
+		String termProcessed = term;
+		
+		//Step 1: replace all underscores with hyphens. Universal for entities and qualities.
+		termProcessed = termProcessed.replaceAll("_", "-");
+		
+		//Step 2: transform plurals to singular. Only for entities. 
+		if(type.compareTo(this.entitytable)==0 && TermOutputerUtilities.isPlural(termProcessed)){
+			termProcessed=TermOutputerUtilities.toSingular(termProcessed);
+		}
+		
+		return termProcessed;
+	}
+	
+	/**
+	 * Output terms.
+	 *
+	 * @param entities the entities
+	 * @param type the type
+	 */
 	private void outputTerms(ArrayList<String> entities, String type) {
 		Iterator<String> it = entities.iterator();
 		String outtableo = type;
@@ -90,7 +150,9 @@ public class TermOutputer {
 			while(it.hasNext()){
 				String term = it.next();
 				type = outtableo;
-				String[] ontoidinfo = findID(term, type);
+				//use the pre-processed term for ontology looking up
+				String termProcessed = this.processTerm(term, type);
+				String[] ontoidinfo = findID(termProcessed, type);
 				String ontoid = "";
 				String ontolabel = "";
 				if(ontoidinfo !=null){
@@ -99,6 +161,7 @@ public class TermOutputer {
 					ontolabel = ontoidinfo[2];
 				}
 				
+				//we are using the original form of the term to look up sources, don't make changes to the original form before this point.
 				rs = stmt.executeQuery("select distinct source, sentence, type from "+this.sourceprefix+"_sentence where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
 				String sourcelist = "sourcelist|"; //this is so that the first source is not to match "()".
 				String source = "";
@@ -111,7 +174,8 @@ public class TermOutputer {
 						character = rs.getString("type");
 						sentence = rs.getString("sentence");
 						type = type.replaceFirst(";+$", "");
-						addrecord(term, ontoid, ontolabel, source.toString(), character, sentence, type);
+						//insert the prcessed term 
+						addrecord(termProcessed, ontoid, ontolabel, source.toString(), character, sentence, type);
 					}
 				}
 				/*rs = stmt.executeQuery("select distinct pdf, charnumber, characterr, sentence from "+this.sourceprefix+"_original where sentence rlike '(^|[^a-z])"+term+"([^a-z]|$)' or characterr rlike '(^|[^a-z])"+term+"([^a-z]|$)'" );
@@ -139,6 +203,17 @@ public class TermOutputer {
 		}
 	}
 
+	/**
+	 * Addrecord.
+	 *
+	 * @param term the term
+	 * @param ontoid the ontoid
+	 * @param ontolabel the ontolabel
+	 * @param source the source
+	 * @param character the character
+	 * @param sentence the sentence
+	 * @param outtable the outtable
+	 */
 	private void addrecord(String term, String ontoid, String ontolabel, String source, String character,
 			String sentence, String outtable) {
 		try{
@@ -153,6 +228,13 @@ public class TermOutputer {
 		}
 	}
 
+	/**
+	 * Find id.
+	 *
+	 * @param term the term
+	 * @param type the type
+	 * @return the string[]
+	 */
 	private String[] findID(String term, String type) {
 		String qualityid = "";
 		String entityid = "";
@@ -185,9 +267,12 @@ public class TermOutputer {
 	}
 		
 	/**
-	 * use OWL API
-	 * @param term
-	 * @return
+	 * use OWL API.
+	 *
+	 * @param term the term
+	 * @param type the type
+	 * @return the string[]
+	 * @throws Exception the exception
 	 */
 	private String[] searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
@@ -257,6 +342,15 @@ public class TermOutputer {
 		
 	}
 
+	/**
+	 * Search obo ontology.
+	 *
+	 * @param term the term
+	 * @param ontofile the ontofile
+	 * @param type the type
+	 * @return the string[]
+	 * @throws Exception the exception
+	 */
 	private String[] searchOBOOntology(String term, String ontofile, String type) throws Exception{
 		String [] result = new String[3];
 		int i = ontofile.lastIndexOf("/");
@@ -275,6 +369,13 @@ public class TermOutputer {
 		return result;
 	}
 
+	/**
+	 * Adds the.
+	 *
+	 * @param results the results
+	 * @param result the result
+	 * @return the string[]
+	 */
 	private String[] add(String[] results, String[] result) {
 		if(result == null) return results;
 		int start = 1;
@@ -287,6 +388,15 @@ public class TermOutputer {
 		return results;
 	}
 
+	/**
+	 * Search owl ontology.
+	 *
+	 * @param term the term
+	 * @param owlapi the owlapi
+	 * @param type the type
+	 * @return the string[]
+	 * @throws Exception the exception
+	 */
 	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type)throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = owlapi.retrieveConcept(term);
@@ -321,24 +431,13 @@ public class TermOutputer {
 		}else{
 			return null;
 		}
-	}
-	
-	//Before adding the term to the terms list, some prep work need to be done
-	private void addNewTerm(final List<String> terms, String word){
-		
-		//replace the underscores with spaces
-		word = word.replaceAll("_", " ");
-		
-		//transform plural to singular
-		if(TermOutputerUtilities.isPlural(word)){
-			word=TermOutputerUtilities.toSingular(word);
-		}
-		
-		if(!terms.contains(word)){
-			terms.add(word);
-		}
-	}
+	}	
 
+	/**
+	 * Gets the qterms.
+	 *
+	 * @return the qterms
+	 */
 	private ArrayList<String> getQterms() {
 		ArrayList<String> qterms = new ArrayList<String>();
 		try{
@@ -353,7 +452,9 @@ public class TermOutputer {
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String word = rs.getString("word");
-				this.addNewTerm(qterms, word);
+				if(!qterms.contains(word)){
+					qterms.add(word);
+				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -361,6 +462,11 @@ public class TermOutputer {
 		return qterms;
 	}
 	
+	/**
+	 * Gets the eterms.
+	 *
+	 * @return the eterms
+	 */
 	private ArrayList<String> getEterms() {
 		ArrayList<String> eterms = new ArrayList<String>();
 		try{
@@ -376,7 +482,9 @@ public class TermOutputer {
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String word = rs.getString("word");
-				this.addNewTerm(eterms, word);
+				if(!eterms.contains(word)){
+					eterms.add(word);
+				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -385,7 +493,9 @@ public class TermOutputer {
 	}
 
 	/**
-	 * @param args
+	 * The main method.
+	 *
+	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
 		//need an database "obo" (may be empty) if search obo ontologies
