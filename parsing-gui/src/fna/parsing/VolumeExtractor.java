@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
@@ -109,12 +108,12 @@ public class VolumeExtractor extends Thread {
 			Element root = doc.getRootElement();
 
 			// find all <w:p> tags
-			List wpList = XPath.selectNodes(root, "/w:document/w:body/w:p");
+			List<Element> wpList = XPath.selectNodes(root, "/w:document/w:body/w:p");
 
 			// iterate over the <w:p> tags
 			count = 1;
 			int total = wpList.size();
-			for (Iterator iter = wpList.iterator(); iter.hasNext();) {
+			for (Iterator<Element> iter = wpList.iterator(); iter.hasNext();) {
 				// Element test = (Element)iter.next();
 				// System.out.println(test.getName());//new added
 				processParagraph((Element) iter.next());
@@ -259,9 +258,9 @@ public class VolumeExtractor extends Thread {
 	private void extractNameParagraph(Element wp, Element pe)
 			throws JDOMException {
 		String acase = "";
-		List rList = XPath.selectNodes(wp, "./w:r");
+		List<Element> rList = XPath.selectNodes(wp, "./w:r");
 
-		for (Iterator ti = rList.iterator(); ti.hasNext();) {
+		for (Iterator <Element>ti = rList.iterator(); ti.hasNext();) {
 			Element re = (Element) ti.next();
 			// find smallCaps
 			Element rpr = (Element) XPath.selectSingleNode(re, "./w:rPr"); // Genus,
@@ -279,8 +278,8 @@ public class VolumeExtractor extends Thread {
 			}
 			// collect text
 			StringBuffer buffer = new StringBuffer();
-			List textList = XPath.selectNodes(re, "./w:t");
-			for (Iterator it = textList.iterator(); it.hasNext();) {
+			List<Element> textList = XPath.selectNodes(re, "./w:t");
+			for (Iterator<Element> it = textList.iterator(); it.hasNext();) {
 				Element wt = (Element) it.next();
 				String tmp = wt.getText();
 				buffer.append(tmp).append(" ");
@@ -311,8 +310,8 @@ public class VolumeExtractor extends Thread {
 			throws JDOMException {
 		StringBuffer buffer = new StringBuffer();
 
-		List textList = XPath.selectNodes(wp, "./w:r/w:t");
-		for (Iterator ti = textList.iterator(); ti.hasNext();) {
+		List<Element> textList = XPath.selectNodes(wp, "./w:r/w:t");
+		for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 			Element wt = (Element) ti.next();
 			buffer.append(wt.getText()).append("#");
 		}

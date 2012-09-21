@@ -84,8 +84,8 @@ public class Type2Transformer extends Thread {
 			
 			for(int i = 0; i<total; i++){
 				File f = files[i];		
-				String tgt = target.getAbsolutePath()+"\\transformed";
-				File newFile = new File(tgt+"\\"+f.getName());
+				String tgt = target.getAbsolutePath()+System.getProperty("file.separator")+"transformed";
+				File newFile = new File(tgt+System.getProperty("file.separator")+f.getName());
 				if(!newFile.exists())
 					newFile.createNewFile();
 				FileChannel inputChannel = new FileInputStream(f).getChannel();
@@ -109,7 +109,7 @@ public class Type2Transformer extends Thread {
 	
 	private void writeDescription2Descriptions(String textNormalize, String fn) {
 		try {
-			File file = new File(target+"/descriptions", fn);
+			File file = new File(target+System.getProperty("file.separator")+"descriptions", fn);
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(textNormalize);

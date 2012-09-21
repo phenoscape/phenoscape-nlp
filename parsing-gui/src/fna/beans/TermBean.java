@@ -98,9 +98,9 @@ public class TermBean {
 						String term1 = cbean.getTerm1().getTermText().getText();
 						String term2 = cbean.getTerm2().getTermText().getText();
 						if (termText.equals(cbean.getTerm1().getTermText()) || termText.equals(cbean.getTerm2().getTermText())) {
-							String groupPath = Registry.TargetDirectory+
-							ApplicationUtilities.getProperty("CHARACTER-STATES")+ "\\"
-							+ characterBean.getGroupName() + ".xml";
+							String groupPath = Registry.TargetDirectory+System.getProperty("file.separator")+
+							ApplicationUtilities.getProperty("CHARACTER-STATES")+ System.getProperty("file.separator")+
+						    characterBean.getGroupName() + ".xml";
 							ManipulateGraphML.removeEdge(new GraphNode(term1), new GraphNode(term2), groupPath, characterBean.getGroupName());
 							if(!canDelete) {
 								/* If the terms paired is not present in the group then

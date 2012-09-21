@@ -57,7 +57,7 @@ public class VolumeTransformer extends Thread {
 	private String conservednamestatement ="(name conserved|nom. cons.)";
 	private static final Logger LOGGER = Logger.getLogger(VolumeTransformer.class);
 	private VolumeTransformerDbAccess vtDbA = null;	
-	private Hashtable ranks;
+	//private Hashtable<?, ?> ranks;
 
 	private String taxontable = null;
 	private String authortable = null;
@@ -85,8 +85,7 @@ public class VolumeTransformer extends Thread {
 		styleMappings = new Properties();
 		try {
 			styleMappings.load(new FileInputStream(
-					Registry.ConfigurationDirectory
-							+ "/style-mapping.properties"));
+					Registry.ConfigurationDirectory+System.getProperty("file.separator")+"style-mapping.properties"));
 		} catch (IOException e) {
 			throw new ParsingException(
 					"Failed to load the style mapping file!", e);
@@ -122,7 +121,7 @@ public class VolumeTransformer extends Thread {
 	}
 	public void transform() throws ParsingException {
 		//add start
-		List idlist = new ArrayList();
+		List<String> idlist = new ArrayList<String>();
 		int iteratorcount = 0;
 		String state = "", preid = "", id = "", nextstep = "";
 		String split[] = new String[3];
@@ -154,12 +153,12 @@ public class VolumeTransformer extends Thread {
 
 				Element treatment = new Element("treatment");
 				Element e2 = new Element("key");
-				List plist = XPath.selectNodes(root, "/treatment/paragraph");
+				List<Element> plist = XPath.selectNodes(root, "/treatment/paragraph");
 				int textcount = 0, nextstepid = 0;
 				String ptexttag ="";
 				String idstorage = "1";
 				
-				for (Iterator iter = plist.iterator(); iter.hasNext();) {
+				for (Iterator<Element> iter = plist.iterator(); iter.hasNext();) {
 					Element pe = (Element) iter.next();
 					String style = pe.getChildText("style");
 					String text = getChildText(pe, "text");
@@ -313,7 +312,7 @@ public class VolumeTransformer extends Thread {
 				
 				// output the treatment to transformed
 				File xml = new File(Registry.TargetDirectory,
-						ApplicationUtilities.getProperty("TRANSFORMED") + "/" + count + ".xml");
+						ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + count + ".xml");
 				ParsingUtil.outputXML(treatment, xml ,null);
 				//String error = (String)errors.get(count+"");
 				//error = error ==null? "":error;
@@ -321,7 +320,7 @@ public class VolumeTransformer extends Thread {
 				// output the description part to Registry.descriptions 08/04/09
 				List<Element> textList = XPath.selectNodes(treatment, "./description");
 				StringBuffer buffer = new StringBuffer("");
-				for (Iterator ti = textList.iterator(); ti.hasNext();) {
+				for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 					Element wt = (Element) ti.next();
 					buffer.append(wt.getText()).append(" ");
 				}
@@ -331,7 +330,7 @@ public class VolumeTransformer extends Thread {
 				// output the habitat part to Registry.habitat 08/04/09
 				textList = XPath.selectNodes(treatment, "./habitat");
 				buffer = new StringBuffer("");
-				for (Iterator ti = textList.iterator(); ti.hasNext();) {
+				for (Iterator<Element> ti = textList.iterator(); ti.hasNext();) {
 					Element wt = (Element) ti.next();
 					buffer.append(wt.getText()).append(" ");
 				}
@@ -551,7 +550,7 @@ public class VolumeTransformer extends Thread {
 		// TODO Auto-generated method stub
 		StringBuffer buffer=new StringBuffer();
 		List<Element> textList = XPath.selectNodes(pe, "./"+string);
-		for (Iterator ti = textList.iterator(); ti.hasNext();) {
+		for (Iterator <Element> ti = textList.iterator(); ti.hasNext();) {
 			Element wt = (Element) ti.next();
 			buffer.append(wt.getText()).append(" ");
 		}
@@ -705,7 +704,7 @@ public class VolumeTransformer extends Thread {
 		String name = ti.getName(index);
 		if(name==null ||name.compareTo("") == 0){
 			File xml = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty("TRANSFORMED") + "/" + (index+1) + ".xml");
+					ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + (index+1) + ".xml");
 			listener.info("no name found in: ", xml.getPath());
 			//errors.put((index+1)+"","no name found in: "+line);
 			return "";
@@ -911,7 +910,7 @@ public class VolumeTransformer extends Thread {
 			if(debug) System.out.println((index+1)+"unparsed: "+text);
 			addElement("unparsed", text, treatment);
 			File xml = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty("TRANSFORMED") + "/" + (index+1) + ".xml");
+					ApplicationUtilities.getProperty("TRANSFORMED") + System.getProperty("file.separator") + (index+1) + ".xml");
 			listener.info("unparsed: "+text, xml.getPath());
 			//errors.put((index+1)+"","still left: "+text);
 		}
@@ -1007,7 +1006,7 @@ public class VolumeTransformer extends Thread {
 		//elementname = "DESCRIPTIONS"
 		try {
 			File file = new File(Registry.TargetDirectory,
-					ApplicationUtilities.getProperty(elementname) + "/" + count + ".txt");
+					ApplicationUtilities.getProperty(elementname) + System.getProperty("file.separator")+ count + ".txt");
 			BufferedWriter out = new BufferedWriter(new FileWriter(file));
 			out.write(text);
 			out.close(); // don't forget to close the output stream!!!

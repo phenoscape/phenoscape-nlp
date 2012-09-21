@@ -16,15 +16,16 @@ public class V8_Extractor {
 	Element treatment = new Element("treatment");
 	//protected XMLOutputter outputter;
 
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		int count = 1, i=0;
 		V8_Extractor extractor = new V8_Extractor();
 		SAXBuilder builder = new SAXBuilder();
 		Document doc = builder.build("C:/Users/Li Chen/Desktop/Library Project/Library Project/document.xml");
 		Element root = doc.getRootElement();
-		List wpList = XPath.selectNodes(root, "/w:document/w:body/w:p");
+		List<Element> wpList = XPath.selectNodes(root, "/w:document/w:body/w:p");
 
-		Iterator iter = wpList.iterator();
+		Iterator<Element> iter = wpList.iterator();
 		while (iter.hasNext()) {
 			extractor.processParagraph((Element) iter.next());
 			count++;
@@ -44,6 +45,7 @@ public class V8_Extractor {
 		//outputter.output(doc1, out);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void processParagraph(Element wp) throws Exception {
 		Element pe = new Element("paragraph");
 		Attribute att = (Attribute) XPath.selectSingleNode(wp,"./w:pPr/w:pStyle/@w:val");
@@ -59,8 +61,8 @@ public class V8_Extractor {
 		
 		Element rowtag = (Element)XPath.selectSingleNode(wp,"./w:r");
 		if (rowtag != null) {
-			List wrlist = XPath.selectNodes(wp, "./w:r");
-			Iterator riter = wrlist.iterator();
+			List<Element> wrlist = XPath.selectNodes(wp, "./w:r");
+			Iterator<Element> riter = wrlist.iterator();
 			while (riter.hasNext()) {
 				Element r = (Element) riter.next();
 

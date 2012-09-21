@@ -4,7 +4,6 @@
 package fna.beans;
 
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Label;
 
 /**

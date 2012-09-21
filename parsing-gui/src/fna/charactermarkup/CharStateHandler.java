@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@SuppressWarnings("unused")
 public class CharStateHandler {
 	static protected Connection conn = null;
 	static protected String database = null;
@@ -361,7 +361,7 @@ public class CharStateHandler {
         	plaincharset = matcher2.replaceAll("#");
         	matcher2.reset();
         
-        	int countct = 0+0;
+        	int countct = 0;
         	//Pattern pattern15 = Pattern.compile("([\\[]?[±]?[\\d]+[\\]]?[\\s]?[\\[]?[\\–\\-][\\]]?[\\s]?[\\[]?[\\d]+[+]?[\\]]?|[\\[]?[±]?[\\d]+[+]?[\\]]?[\\s]?)[\\–\\–\\-]+[a-zA-Z]+");
         	Pattern pattern15 = Pattern.compile("([\\[]?[±]?[\\d]+[\\]]?[\\s]?[\\[]?[\\–\\-][\\]]?[\\s]?[\\[]?[\\d]+[+]?[\\]]?|[\\[]?[±]?[\\d]+[+]?[\\]]?[\\s]?)[\\–\\–\\-]+[a-zA-Z]+");
         	matcher2 = pattern15.matcher(plaincharset);

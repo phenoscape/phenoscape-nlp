@@ -27,7 +27,7 @@ import fna.parsing.Registry;
 import fna.parsing.VolumeFinalizer;
 import fna.parsing.state.SentenceOrganStateMarker;
 
-
+import conceptmapping.*;
 /**
  * @author hongcui
  * updates April 2011
@@ -52,12 +52,68 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private POSTagger4StanfordParser tagger = null;
 	private String tableprefix = null;
 	private String glosstable = null;
-	static public Hashtable<String, String> characters = new Hashtable<String, String>();
+	static public Hashtable<String, String> characterRstates = new Hashtable<String, String>();
+	private String characters;
 	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
 	private boolean printProgress = true;
 	private boolean evaluation = false;
+	static public XPath path1;
+	static public XPath path2;
+	static public XPath path3;
+	static public XPath path4;
+	static public XPath path5;
+	static public XPath path6;
+	static public XPath path7;
+	static public XPath path8;
+	static public XPath path9;
+	static public XPath path10;
+	static public XPath path11;
+	static public XPath path12;
+	static public XPath path13;
+	static public XPath path14;
+	static public XPath path15;
+	static public XPath path16;
+	static public XPath path17;
+	static public XPath path18;
+	static public XPath path19;
+	static public XPath path20;
+	static public XPath path21;
+	static public XPath path22;
+	static public XPath path23;
+	static{
+		try{
+			path1 = XPath.newInstance(".//character[@value='none']");
+			path2 = XPath.newInstance(".//character[@name='presence'][@value='no']");
+			path3 = XPath.newInstance(".//character[@name='presence'][@value='present']");
+			path4 = XPath.newInstance(".//relation[starts-with(@name, 'present']");
+			path5 = XPath.newInstance(".//character[@name='character']");
+			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
+			path7 = XPath.newInstance(".//structure");
+			path8 = XPath.newInstance(".//character[@name='count']");
+
+			path9 = XPath.newInstance(".//QP");
+			path10 = XPath.newInstance(".//PP/IN");
+			path11 = XPath.newInstance(".//VP/VBD|.//VP/VBG|.//VP/VBN|.//VP/VBP|.//VP/VBZ|.//VP/VB");
+			path12 = XPath.newInstance(".//NP/NN|.//NP/NNS");
+			//path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that']");
+			path13 = XPath.newInstance(".//SBAR/WHNP/*[@text='that'] | .//SBAR/*[@text='that']" );//(SBAR (RB so) (IN that)
+			path14 = XPath.newInstance(".//SBAR/WHNP/*[@text='which']");
+			path15 = XPath.newInstance(".//SBAR/WHADVP/*[@text='where']");
+			path16 = XPath.newInstance(".//*[@text='when']");
+			path17 = XPath.newInstance(".//VBD|.//VBG|.//VBN|.//VBP|.//VBZ|.//VB");
+			path18 = XPath.newInstance(".//NP/CC");
+			path19 = XPath.newInstance("CC");
+			path20 = XPath.newInstance(".//ADJP");
+			path21 = XPath.newInstance(".//PP");
+			path22 = XPath.newInstance(".//PP/CC");
+			path23 = XPath.newInstance(".//NN|.//NNS");
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * 
 	 */
@@ -72,13 +128,22 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-			    String URL = "jdbc:mysql://localhost/"+database+"?user=termsuser&password=termspassword";
-				//String URL = ApplicationUtilities.getProperty("database.url");
+			    //String URL = "jdbc:mysql://localhost/"+database+"?user=termsuser&password=termspassword";
+				String URL = ApplicationUtilities.getProperty("database.url");
 				conn = DriverManager.getConnection(URL);
 			}
 			Statement stmt = conn.createStatement();
 			stmt.execute("create table if not exists "+this.tableprefix+"_"+this.POSTaggedSentence+"(source varchar(100) NOT NULL, posedsent TEXT, PRIMARY KEY(source))");
 			stmt.execute("delete from "+this.tableprefix+"_"+this.POSTaggedSentence);
+			
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+ " where category='character' " +
+					"union "+
+					"select distinct term from "+this.tableprefix+ "_term_category where category='character' ");
+			while(rs.next()){
+				this.characters += rs.getString(1)+"|";
+			}
+			this.characters = characters.replaceFirst("\\|$", "");
 			stmt.close();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -104,7 +169,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				String str = rs.getString(2);
 				String type = rs.getString(3);
 				//TODO: may need to fix "_"
-				//if(src.compareTo("56.txt-7")!=0) continue;
+				//if(src.compareTo("Sereno_2009.xml_8999df54-5901-456e-9250-06c795e0b1bc_85751e91-7e17-4adf-b8b1-84236d41c2f0.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
@@ -177,15 +242,23 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
             // any output?
             StreamGobbler outputGobbler = new 
                 StreamGobbler(proc.getInputStream(), "OUTPUT", headings, trees);
-                
+            //TODO    
             // kick them off
             errorGobbler.start();
             outputGobbler.start();
-                                    
-            // any error???
-            int exitVal = proc.waitFor();
-            System.out.println("ExitValue: " + exitVal);
 
+            //Currently there are four threads: 
+            //main thread(this), standfordParser running by cmdtext and two stream gobbler threads
+            
+            //wait for stanfordParser to finish running
+
+            int exitVal = proc.waitFor();
+            //any error
+            System.out.println("ExitValue: " + exitVal);
+            
+            //wait for both gobblers to exit
+            while(errorGobbler.isAlive() || outputGobbler.isAlive()) {}
+            
 			//format
             if(headings.size() != trees.size()){
             	System.err.println("Error reading parsing results");
@@ -222,12 +295,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			String text = "";
 			int i = 0;
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select source, rmarkedsent from "+this.tableprefix+"_markedsentence order by sentid");//(source+0)"); //+0 so sort as numbers
+			ResultSet rs = stmt.executeQuery("select source, rmarkedsent, type from "+this.tableprefix+"_markedsentence order by sentid");//(source+0)"); //+0 so sort as numbers
 			Pattern ptn = Pattern.compile("^Parsing \\[sent\\. (\\d+) len\\. \\d+\\]:(.*)");
 			Matcher m = null;
 			Tree2XML t2x = null;
 			Document doc = null;
-			CharacterAnnotatorChunked cac = new CharacterAnnotatorChunked(conn, this.tableprefix, glosstable, this.evaluation);
+			CharacterAnnotatorChunked cac = new CharacterAnnotatorChunked(conn, this.tableprefix, glosstable,characters, this.evaluation);
 			SentenceChunker4StanfordParser ex = null;
 			Element statement = null;
 			ChunkedSentence cs = null;
@@ -254,15 +327,16 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 						doc = t2x.xml();
 						if(rs.relative(i)){
 							//1. annotate a sentence in XML format
-							String sent = rs.getString(2);
-							String src = rs.getString(1);
+							String sent = rs.getString("rmarkedsent");
+							String src = rs.getString("source");
+							String type = rs.getString("type");
 							if(!sent.matches(".*? [;\\.]\\s*$")){//at 30x. => at 30x. .
 								sent = sent+" .";
 							}
 							sent = sent.replaceAll("<\\{?times\\}?>", "times");
 							sent = sent.replaceAll("<\\{?diam\\}?>", "diam");
 							sent = sent.replaceAll("<\\{?diams\\}?>", "diams");
-							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, this.tableprefix, conn, glosstable);
+							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, type, this.tableprefix, conn, glosstable, characters);
 							cs = ex.chunkIt();
 							if(this.printSent){
 								System.out.println();
@@ -316,7 +390,9 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
     }
 
 	public static String normalizeSpacesRoundNumbers(String sent) {
+		sent = sent.replaceAll("one another", "one_another");
 		sent = ratio2number(sent);//bhl
+		sent = sent.replaceAll("<?\\{?\\ba\\}?>? <?\\{?pair\\b?\\}?>?", "1 <pair>");
 		sent = sent.replaceAll("(?<=\\d)\\s*/\\s*(?=\\d)", "/");
 		sent = sent.replaceAll("(?<=\\d)\\s+(?=\\d)", "-"); //bhl: two numbers connected by a space
 		sent = sent.replaceAll("at least", "at-least");
@@ -482,12 +558,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String text = "<inflorescences> {terminal} and {axillary} , {terminal} usually occupying {distal} 1 / 5 – 1 / 3 of <stem> , rather {lax} , {interrupted} in {proximal} 1 / 2 , or almost to top , usually narrowly {paniculate} .";
 		/*String text = "<petals> {lavender} or {white} , {often} {spatulate} , sometimes {oblanceolate} or {obovate} , 6 – 9 ( – 10 ) × ( 1 . 5 – ) 2 – 3 ( – 3 . 5 ) mm , <margins> not {crisped} , <claw> strongly {differentiated} from <blade> , ( {slender} , 2 – 3 . 5 ( – 4 ) mm , {narrowest} at <base> ) ;";
 		text = StanfordParser.normalizeSpacesRoundNumbers(text);
-		String str = Utilities.threeingSentence(text);
+		String str = TermOutputerUtilities.threeingSentence(text);
 		String p1 ="\\([^()]*?[a-zA-Z][^()]*?\\)";
   		String p2 = "\\[[^\\]\\[]*?[a-zA-Z][^\\]\\[]*?\\]";
   		//String p3 = "\\{[^{}]*?[a-zA-Z][^{}]*?\\}";				
 		if(str.matches(".*?"+p1+".*") || str.matches(".*?"+p2+".*")){ 
-			str = Utilities.threeingSentence(str);
+			str = TermOutputerUtilities.threeingSentence(str);
 			str = str.replaceAll(p1, "").replaceAll(p2, "").replaceAll("\\s+", " ").trim();					
 		}*/
 		//String text = "ovary more than two to three-fourths to one half superior. ";
@@ -539,22 +615,30 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\pheno_fish_NeXML_parsedsentences.txt";
 		
-		String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
-		String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\biocreative_NeXML_parsedsentences.txt";
+
+		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
+		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
+
+		String posedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\target\\gstestnew_posedsentences.txt";
+		String parsedfile="C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\target\\gstestnew_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
-		String database = "markedupdatasets";
+		String database = "biocreative2012";
 		
 
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "plazi_ant_first", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
+		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "gstestnew", "fishglossaryfixed", false);
 
-		//sp.POSTagging();
-		//sp.parsing();
+		
+//		sp.POSTagging();
+//		sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);

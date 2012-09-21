@@ -25,13 +25,13 @@ public class OBO2DB {
 	/**
 	 * 
 	 */
-	public OBO2DB(String database, String ontoPath, String ontoname) {
+	public OBO2DB(String database, String ontoPath, String ontoname) throws Exception{
 		this.ontoname = ontoname;
 		this.onto = new File(ontoPath);
-		try{
+		
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-			    String URL = "jdbc:mysql://localhost/"+database+"?user=root&password=root";
+			    String URL = "jdbc:mysql://localhost/"+database+"?user=biocreative&password=biocreative";
 				//String URL = ApplicationUtilities.getProperty("database.url");
 				conn = DriverManager.getConnection(URL);
 			}
@@ -50,9 +50,8 @@ public class OBO2DB {
 				stmt.close();
 				export2DB();
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		
+		
 	}
 
 	private void export2DB() throws Exception{
@@ -97,8 +96,8 @@ public class OBO2DB {
 	 * @param term
 	 * @return 0: ONTO ID  1:matched term
 	 */
-	public String[] getID(String term) {
-		try{
+	public String[] getID(String term) throws Exception{
+		
 			String[] result = new String[]{"", ""};
 			Statement stmt = conn.createStatement();
 			String q = "select ontoid, term from "+this.ontoname+" where term =\""+term+"\"";
@@ -108,22 +107,20 @@ public class OBO2DB {
 				result[1] = rs.getString("term");
 				return result;
 			}
-			q = "select ontoid, term from "+this.ontoname+" where term like \"%"+term+"%\"";
+			/*q = "select ontoid, term from "+this.ontoname+" where term like \"%"+term+"%\"";
 			rs = stmt.executeQuery(q);
 			if(rs.next()){
 				result[0] += rs.getString("ontoid")+";";
 				result[1] += rs.getString("term")+";";
 				return result;
-			}			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+			}*/		
+
 		return null;
 	}
 	
-	private void insert2db(String term, String id, String excsyn, String relsyn) {
+	private void insert2db(String term, String id, String excsyn, String relsyn) throws Exception {
 		if(id==null) return;
-		try{
+		
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into " +this.ontoname+" values (\""+id+"\", \""+term+"\",\"label\")");
 			if(excsyn!=null && excsyn.length()>0){
@@ -139,9 +136,7 @@ public class OBO2DB {
 				}
 			}
 			stmt.close();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		
 		
 	}
 
@@ -151,8 +146,8 @@ public class OBO2DB {
 	public static void main(String[] args) {
 		//String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\vertebrate_anatomy.obo";
 		//OBO2DB o2d = new OBO2DB("obo", file ,"vertebrate_anatomy");
-		String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo";
-		OBO2DB o2d = new OBO2DB("obo", file ,"amniote_draft");	
+		//String file = "C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\archosaur\\amniote_draft.obo";
+		//OBO2DB o2d = new OBO2DB("obo", file ,"amniote_draft");	
 	}
 
 

@@ -3,30 +3,13 @@
  */
 package preprocessing;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-
-import org.jdom.Element;
-import org.jdom.Document;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-
-
-
-
 /**
  * @author Hong Updates
- *This class reads character statements from database, 
- *output XML files, one for each character statement
- *<treatment><character><description> 
- *The XML files will be used as Type 3 source files for the Parser 
  */
 public class OntologyMappingChecker4Ant {
 	private Connection conn;

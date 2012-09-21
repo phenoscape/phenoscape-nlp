@@ -311,7 +311,7 @@ public class RadialGraphView extends Display {
             
             Graph g = (Graph)m_vis.getGroup(m_group);
             Node f = null;
-            Iterator tuples = focus.tuples();
+            Iterator<Node> tuples = focus.tuples();
             while (tuples.hasNext() && !g.containsTuple(f=(Node)tuples.next()))
             {
                 f = null;

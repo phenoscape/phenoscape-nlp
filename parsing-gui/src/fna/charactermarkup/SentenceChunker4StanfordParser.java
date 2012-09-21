@@ -64,19 +64,20 @@ public class SentenceChunker4StanfordParser {
 	private String glosstable = null;
 	private Document tree = null;
 	private Document treecp = null;
+	private String characters;
 	private String markedsent = null;
 	private String [] tokensinsent = null;
 	private String [] posoftokens = null;
-	private static final String QPpathstr = ".//QP";
-	private static final String PPINpathstr = ".//PP/IN";
+	//private static final String path9 = ".//QP";
+	//private static final String path10 = ".//PP/IN";
 	//private static final String PPTOpathstr = ".//PP/TO";
-	private static final String Vpathstr = ".//VP/VBD|.//VP/VBG|.//VP/VBN|.//VP/VBP|.//VP/VBZ|.//VP/VB";
-	private static final String NNpathstr = ".//NP/NN|.//NP/NNS";
-	private static XPath QPpath = null;
-	private static XPath PPINpath = null;
-	private static XPath PPTOpath = null;
-	private static XPath Vpath = null;
-	private static XPath NNpath = null;
+	//private static final String path11 = ".//VP/VBD|.//VP/VBG|.//VP/VBN|.//VP/VBP|.//VP/VBZ|.//VP/VB";
+	//private static final String path12 = ".//NP/NN|.//NP/NNS";
+	//private static XPath path9 = null;
+	//private static XPath path10 = null;
+	//private static XPath path15 = null;
+	//private static XPath path11 = null;
+	//private static XPath path12 = null;
 	private int sentindex = -1;
 	private Pattern p = Pattern.compile("(.*?)((?:\\w+ )+)\\2(.*)");
 	private String conjunctions = "and|or|plus";
@@ -84,15 +85,18 @@ public class SentenceChunker4StanfordParser {
 	private boolean printPP = false;
 	private boolean printNPlist = false;
 	private boolean debug = false;
+	private String type;
 	//private boolean printPPTO = true;
 	/**
 	 * 
 	 */
-	public SentenceChunker4StanfordParser(int index, Document parsingTree, String markedsent, String sentsrc, String tableprefix,Connection conn, String glosstable) {
+	public SentenceChunker4StanfordParser(int index, Document parsingTree, String markedsent, String sentsrc, String type, String tableprefix,Connection conn, String glosstable, String characters) {
+		this.type = type;
 		this.sentsrc = sentsrc;
 		this.tableprefix = tableprefix;
 		this.conn = conn;
 		this.glosstable = glosstable;
+		this.characters = characters;
 		this.sentindex = index;
 		this.tree = parsingTree;
 		this.treecp = (Document)tree.clone();
@@ -113,15 +117,15 @@ public class SentenceChunker4StanfordParser {
 			}
 		}		
 		
-		try{
-			SentenceChunker4StanfordParser.QPpath = XPath.newInstance(QPpathstr);
-			SentenceChunker4StanfordParser.PPINpath = XPath.newInstance(PPINpathstr);
+		/*try{
+			SentenceChunker4StanfordParser.path13 = XPath.newInstance(path9);
+			SentenceChunker4StanfordParser.path14 = XPath.newInstance(path10);
 			//SentenceChunker.PPTOpath = XPath.newInstance(PPTOpathstr);
-			SentenceChunker4StanfordParser.Vpath = XPath.newInstance(Vpathstr);
-			SentenceChunker4StanfordParser.NNpath = XPath.newInstance(NNpathstr);			
+			SentenceChunker4StanfordParser.path16 = XPath.newInstance(path11);
+			SentenceChunker4StanfordParser.path17 = XPath.newInstance(path12);			
 		}catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public ChunkedSentence chunkIt() throws Exception{
@@ -143,16 +147,16 @@ public class SentenceChunker4StanfordParser {
 				collapsePPList();
 				
 				//get All PP/IN
-				List<Element> PPINs = PPINpath.selectNodes(root);
+				List<Element> PPINs = StanfordParser.path10.selectNodes(root);
 				do{
 					ArrayList<Element> lPPINs = new ArrayList<Element>();
 					//PPINs = XPath.selectNodes(root, "//PP/IN");
-					PPINs = sortById(PPINpath.selectNodes(root));
+					PPINs = sortById(StanfordParser.path10.selectNodes(root));
 					Iterator<Element> it = PPINs.iterator();
 					while(it.hasNext()){
 						Element PPIN = it.next();
 						//List<Element> temp = XPath.selectNodes(PPIN, "//PP/IN");
-						List<Element> temp = PPINpath.selectNodes(PPIN.getParentElement());
+						List<Element> temp = StanfordParser.path10.selectNodes(PPIN.getParentElement());
 						if(temp.size() == 0){
 							lPPINs.add(PPIN);
 						}
@@ -161,14 +165,14 @@ public class SentenceChunker4StanfordParser {
 				}while (PPINs.size() > 0);	
 				
 				//get remaining VBs
-				List<Element> VBs = Vpath.selectNodes(root);
+				List<Element> VBs = StanfordParser.path11.selectNodes(root);
 				do{
-					VBs = Vpath.selectNodes(root);
+					VBs = StanfordParser.path11.selectNodes(root);
 					Iterator<Element> it = VBs.iterator();
 					ArrayList<Element> lVBs = new ArrayList<Element>();
 					while(it.hasNext()){
 						Element VB = it.next();
-						if(Vpath.selectNodes(VB).size() == 0 && VB.getChild("PP") == null){ //VP/PP should have been processed in PPINs
+						if(StanfordParser.path11.selectNodes(VB).size() == 0 && VB.getChild("PP") == null){ //VP/PP should have been processed in PPINs
 							lVBs.add(VB);
 						}
 					}
@@ -181,7 +185,7 @@ public class SentenceChunker4StanfordParser {
 		collapseWhereClause();//where
 		collapseWhenClause(); //when
 		
-		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.tableprefix,this.conn, this.glosstable);
+		ChunkedSentence cs = new ChunkedSentence(this.sentindex , tree, treecp, this.markedsent, this.sentsrc, this.type, this.tableprefix,this.conn, this.glosstable, this.characters);
 		return cs;
 			}catch(Exception e){
 				e.printStackTrace();
@@ -240,8 +244,8 @@ end procedure
 	private void collapseThatClause() {
 		try{
 			Element root  = tree.getRootElement();
-			List<Element> thatclauses = XPath.selectNodes(root, ".//SBAR/WHNP/*[@text='that']"); //select WHNP elements
-			thatclauses.addAll(XPath.selectNodes(root, ".//SBAR/WHNP/*[@text='which']"));
+			List<Element> thatclauses = StanfordParser.path13.selectNodes(root); //select WHNP elements
+			thatclauses.addAll(StanfordParser.path14.selectNodes(root));
 			Iterator<Element> it = thatclauses.iterator();
 			while(it.hasNext()){
 				Element WHNP = it.next();
@@ -271,7 +275,7 @@ end procedure
 	private void collapseWhereClause() {
 		try{
 			Element root  = tree.getRootElement();
-			List<Element> whereclauses = XPath.selectNodes(root, ".//SBAR/WHADVP/*[@text='where']"); //select WHNP elements
+			List<Element> whereclauses = StanfordParser.path15.selectNodes(root); //select WHNP elements
 			Iterator<Element> it = whereclauses.iterator();
 			while(it.hasNext()){
 				Element WHNP = it.next();
@@ -345,7 +349,7 @@ end procedure
 	private void collapseWhenClause() {
 		try{
 			Element root  = tree.getRootElement();
-			List<Element> whenclauses = XPath.selectNodes(root, ".//*[@text='when']"); //select any element containing "when"
+			List<Element> whenclauses = StanfordParser.path16.selectNodes(root); //select any element containing "when"
 			for(int i = 0; i < whenclauses.size(); i++){
 				Element WHEN = whenclauses.get(i);
 				//collect words/leaf nodes after "when" until a [,.] is found
@@ -535,7 +539,7 @@ end procedure
 		}else if(ptag.compareTo("VP") == 0){
 			boolean trueVP = false;
 			try{			
-				if(XPath.selectSingleNode(parent, ".//VBD|.//VBG|.//VBN|.//VBP|.//VBZ|.//VB") != null){
+				if(StanfordParser.path17.selectSingleNode(parent) != null){
 					trueVP = true;
 				}
 			}catch(Exception e){
@@ -1109,7 +1113,7 @@ end procedure
 	private void collapseNPList(){
 		Element root = tree.getRootElement();
 		try{
-			List<Element> candidates = XPath.selectNodes(root, ".//NP/CC");
+			List<Element> candidates = StanfordParser.path18.selectNodes(root);
 			Iterator<Element> it = candidates.iterator();
 			while(it.hasNext()){
 				Element CC = (Element)it.next();
@@ -1122,7 +1126,7 @@ end procedure
 				if(!CC.getAttributeValue("text").matches("(and|or|plus)")){
 					isList = false;
 				}
-				List<Element> CCs = XPath.selectNodes(NP, "CC");
+				List<Element> CCs = StanfordParser.path19.selectNodes(NP);
 				if(CCs.size() > 1){
 					isList = false;
 				}
@@ -1142,7 +1146,7 @@ end procedure
 							isList=false;
 						}
 					}
-					if(XPath.selectSingleNode(e, ".//ADJP")!=null ||XPath.selectSingleNode(e, ".//PP")!=null){
+					if(StanfordParser.path20.selectSingleNode(e)!=null ||StanfordParser.path21.selectSingleNode(e)!=null){
 						isList=false;
 					}
 				}
@@ -1211,7 +1215,7 @@ end procedure
 	private void collapsePPList(){
 		Element root = tree.getRootElement();
 		try{
-			List<Element> candidates = XPath.selectNodes(root, ".//PP/CC");
+			List<Element> candidates = StanfordParser.path22.selectNodes(root);
 			Iterator<Element> it = candidates.iterator();
 			while(it.hasNext()){
 				Element CC = (Element)it.next();
@@ -1223,7 +1227,7 @@ end procedure
 				if(!CC.getAttributeValue("text").matches("(and|or)")){
 					isList = false;
 				}
-				List<Element> CCs = XPath.selectNodes(PP, "CC");
+				List<Element> CCs = StanfordParser.path19.selectNodes(PP);
 				if(CCs.size() > 1){
 					isList = false;
 				}
@@ -1290,7 +1294,7 @@ end procedure
 	 */
 	private String getOrganFrom(Element e) {
 		try{
-			List<Element> nouns = XPath.selectNodes(e, ".//NN|.//NNS");
+			List<Element> nouns = StanfordParser.path23.selectNodes(e);
 			Iterator<Element> it = nouns.iterator();
 			while(it.hasNext()){
 				Element noun = it.next();

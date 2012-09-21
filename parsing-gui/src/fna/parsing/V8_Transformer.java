@@ -14,7 +14,8 @@ public class V8_Transformer {
 	String keystorage = "";
 	int keydetecter = 0;
 	static int partdetecter, count;
-	static Hashtable hashtable = new Hashtable();
+	static Hashtable<String, String> hashtable = new Hashtable<String, String>();
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception{
 		File extracted = new File("C:/Users/Li Chen/Desktop/Library Project/Library Project/Extracted");	
 		File[] files = extracted.listFiles();
@@ -23,7 +24,7 @@ public class V8_Transformer {
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build("C:/Users/Li Chen/Desktop/Library Project/Library Project/Extracted/" + i + ".xml");
 			Element root = doc.getRootElement();
-			List paralist = XPath.selectNodes(root, "/treatment/paragraph");
+			List<Element> paralist = XPath.selectNodes(root, "/treatment/paragraph");
 			//System.out.println(paralist.get(4).toString());
 			V8_Transformer transformer = new V8_Transformer();
 			transformer.createtreatment();
@@ -35,14 +36,15 @@ public class V8_Transformer {
 			transformer.output(i);
 		} 
 	}
-	private void processparagraph(List paralist) throws Exception{
-		Iterator paraiter = paralist.iterator();
+	@SuppressWarnings("unchecked")
+	private void processparagraph(List<Element> paralist) throws Exception{
+		Iterator<Element> paraiter = paralist.iterator();
 		int familydetecter = 0;
 		while(paraiter.hasNext()){
 			int bolddetecter = 0;
 			Element pe = (Element)paraiter.next();
-			List contentlist = pe.getChildren();
-			Iterator contentiter = contentlist.iterator();
+			List<Element> contentlist = pe.getChildren();
+			Iterator<Element> contentiter = contentlist.iterator();
 			String text = "";
 			while(contentiter.hasNext()){
 				Element te = (Element)contentiter.next();
@@ -96,7 +98,7 @@ public class V8_Transformer {
 				Element conservation = new Element("Conservation");
 				Element elevation = new Element("Elevation");
 				Element distribution = new Element("Distribution");
-				String flowtime = null, habi = null, eleva=null, distri=null, conserv=null, fh = null;
+				String flowtime = null, habi = null, eleva=null, distri=null, conserv=null;
 				String[] semi = new String[4];
 				String[] dot = new String[3];
 				semi = text.split(";");
@@ -181,12 +183,13 @@ public class V8_Transformer {
 			}
 		}
 	}
-	private void processparagraph2(List paralist) throws Exception{
-		Iterator paraiter = paralist.iterator();
+	@SuppressWarnings("unchecked")
+	private void processparagraph2(List<Element> paralist) throws Exception{
+		Iterator<Element> paraiter = paralist.iterator();
 		while(paraiter.hasNext()){
 			Element pe = (Element)paraiter.next();
-			List contentlist = pe.getChildren();
-			Iterator contentiter = contentlist.iterator();
+			List<Element> contentlist = pe.getChildren();
+			Iterator<Element> contentiter = contentlist.iterator();
 			String text = "";
 			while(contentiter.hasNext()){
 				Element te = (Element)contentiter.next();
@@ -213,7 +216,7 @@ public class V8_Transformer {
 				hashtable.put(shortname, fullname);
 			}else{
 				Element reference = new Element("Reference");
-				for(Iterator itr = hashtable.keySet().iterator(); itr.hasNext();){
+				for(Iterator<String> itr = hashtable.keySet().iterator(); itr.hasNext();){
 					String key = (String) itr.next();
 					String value = (String) hashtable.get(key);
 					if(text.contains(key)){

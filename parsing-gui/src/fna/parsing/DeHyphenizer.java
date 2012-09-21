@@ -17,15 +17,14 @@ import fna.parsing.character.Glossary;
  * @author hongcui
  *
  */
-@SuppressWarnings({ "unchecked", "unused" })
 public class DeHyphenizer {
 	private String tablename;
 	private String columnname;
 	private String countcolumn;
 	private String hyphen; 
 	static private Connection conn = null;
-	static private String username = ApplicationUtilities.getProperty("database.username");
-	static private String password = ApplicationUtilities.getProperty("database.password");
+	//static private String username = ApplicationUtilities.getProperty("database.username");
+	//static private String password = ApplicationUtilities.getProperty("database.password");
 	private static final Logger LOGGER = Logger.getLogger(DeHyphenizer.class);
 	private String glossTable = null;
 	private Glossary glossary;
@@ -97,7 +96,7 @@ public class DeHyphenizer {
 	protected void collectTerms(String[] segs, String[] terms, int[][] matrix) {
 		//rank rows
 		int max = 0;
-		Hashtable rank = new Hashtable();
+		Hashtable<String, String> rank = new Hashtable<String, String>();
 		for(int i = 0; i < segs.length; i++){
 			int ones = countOnes(matrix[i]);
 			if(ones > max){
@@ -160,11 +159,11 @@ public class DeHyphenizer {
 	}
 	
 	private int otherEndIndex(int [] array, int theotherindex){
-		boolean self = false;
+		//boolean self = false;
 		int index = -1;
 		for(int i = 0; i< array.length; i++){
 			if(array[i]==1 && i == theotherindex){
-				self = true;
+				//self = true;
 			}else if(array[i]==1){//take the greatest index, may cause problem here.
 				index = i;
 			}

@@ -4,14 +4,10 @@
 package fna.parsing;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Text;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
@@ -64,6 +60,7 @@ public class Type4Transformer4Phenoscape extends Type4Transformer {
 		}
 
 	}
+	@SuppressWarnings("unchecked")
 	protected void getDescriptionFrom(Element root, int fn,  int count) {
 
 		try{

@@ -16,9 +16,6 @@
 
 package fna.db;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -52,6 +49,8 @@ public class VolumeMarkupDbAccessor {
 	private String tablePrefix = null ;
 	private String glossarytable;
 	private Connection conn = null;
+
+
    
     
     public VolumeMarkupDbAccessor(String dataPrefix, String glossarytable){
@@ -60,29 +59,11 @@ public class VolumeMarkupDbAccessor {
     	try {
     			Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
     			conn = DriverManager.getConnection(url);
-    			//createAllWordsTable();
-    			
     	} catch (Exception e) {
-    				// TODO Auto-generated catch block
     			LOGGER.error("Couldn't find Class in MainFormDbAccessor" + e);
     			e.printStackTrace();
-    	}
-    		
-	
+    	}    		
     }
-    
-    
-//	private void createAllWordsTable(){
-//        try{
-//            Statement stmt = conn.createStatement();
-//            stmt.execute("drop table if exists "+this.tablePrefix+"_allwords");
-//            String query = "create table if not exists "+this.tablePrefix+"_allwords (word varchar(150) unique not null primary key, count int, word varchar(150), inbrackets int default 0)";
-//            stmt.execute(query);	           
-//        }catch(Exception e){
-//        	LOGGER.error("Problem in VolumeDehyphenizer:createWordTable", e);
-//            e.printStackTrace();
-//        }
-//    }
 	
     /**
      * check for unmatched brackets too.
@@ -188,10 +169,17 @@ public class VolumeMarkupDbAccessor {
 			"order by structure"; 		
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
+			String structurelist = "";
 			while (rs.next()) {
 				String tag = rs.getString("structure");
+				structurelist += "'"+tag+"',";
 				populateCurationList(tagList, tag); //select tags for curation
 			}
+
+			//terms that will be shown as "structures" should not be shown as "descriptors"			
+			structurelist = structurelist.replaceFirst(",$", "");
+			stmt.execute("update "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" set saved_flag = 'red' where word in ("+structurelist+")");		
+
 			sql = "select distinct word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where pos in ('p', 's', 'n') and saved_flag !='red' "+
 			filter3+/*" and word in (select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+") "+*/
 			" order by word";
@@ -201,7 +189,8 @@ public class VolumeMarkupDbAccessor {
 				String tag = rs.getString("word");
 				populateCurationList(tagList, tag); //select tags for curation
 			}
-			return deduplicateSort(tagList);
+			ArrayList<String> words = deduplicateSort(tagList);
+			return words;
 		} catch (SQLException sqlexe) {
 			LOGGER.error("Couldn't update sentence table in VolumeMarkupDbAccessor:updateData", sqlexe);
 			sqlexe.printStackTrace();
@@ -253,11 +242,13 @@ public class VolumeMarkupDbAccessor {
 	 		
 	 		String sql = "select word from "+this.tablePrefix+"_"+ApplicationUtilities.getProperty("ALLWORDS")+
 			//" where count>=3 and inbrackets=0 and word not like '%\\_%' and " +
-			" where word not like '%\\_%' and " +		
+			" where word not like '%\\_shaped' and word not like '%\\_size'  and " +		
 			" word not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" where saved_flag='red')"+
 			filter +
-			" and word not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+") order by word";
-			stmt = conn.prepareStatement(sql);
+			//" and word not in (select word from "+ this.tablePrefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+") " +
+					"order by word";
+			//add all words except those has been shown in the structure/descriptor list and in the gloss
+	 		stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
 				String word = rs.getString("word");
@@ -341,7 +332,8 @@ public class VolumeMarkupDbAccessor {
 					populateDescriptorList(words, rset.getString("word"));
 				}	
 			}
-			words = deduplicateSort(words);
+			words = deduplicateSort(words);	
+			return words;
 		} catch (SQLException exe) {
 			LOGGER.error("Error in getting words as descriptors: " +
 					"mainFormDbAccessor.descriptorTerms4Curation", exe);
@@ -460,11 +452,11 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 	}
 
 
-	public ArrayList<ArrayList> getUnSavedDescriptorWords() throws SQLException {
+	public ArrayList<ArrayList<String>> getUnSavedDescriptorWords() throws SQLException {
 		
 		ArrayList<String> words = new ArrayList<String>();
 		ArrayList<String> flag = new ArrayList<String>();
-		ArrayList<ArrayList> wordsAndFlag = new ArrayList<ArrayList>();
+		ArrayList<ArrayList<String>> wordsAndFlag = new ArrayList<ArrayList<String>>();
 		
 		PreparedStatement stmt = null;
 		ResultSet rset = null;

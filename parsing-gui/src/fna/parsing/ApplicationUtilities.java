@@ -9,7 +9,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.ProgressBar;
@@ -28,7 +27,7 @@ public class ApplicationUtilities {
 	static {
 		try {
 			fstream = new FileInputStream(System.getProperty("user.dir")
-					+"\\application.properties");
+					+System.getProperty("file.separator")+"application.properties");
 		} catch (FileNotFoundException e) {
 			LOGGER.error("couldn't open file in ApplicationUtilities:getProperties", e);
 		}

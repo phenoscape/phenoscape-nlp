@@ -34,6 +34,7 @@ org.semanticweb.owlapi.rdf.syntax
 org.semanticweb.owlapi.rdf.util
 org.semanticweb.owlapi.reasoner
 org.semanticweb.owlapi.reasoner.impl
+org.semanticweb.owlapi.reasoner.knowledgeexploration
 org.semanticweb.owlapi.reasoner.structural
 org.semanticweb.owlapi.util
 org.semanticweb.owlapi.vocab

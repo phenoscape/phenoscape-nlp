@@ -14,15 +14,15 @@ import fna.parsing.ApplicationUtilities;
  * @author hongcui
  *
  */
-@SuppressWarnings({ "unchecked", "unused" })
+@SuppressWarnings({"unused" })
 public class DeHyphenizer {
 	private String tablename;
 	private String columnname;
 	private String countcolumn;
 	private String hyphen; 
 	static private Connection conn = null;
-	static private String username = "termsuser";
-	static private String password = "termspassword";
+	//static private String username = "termsuser";
+	//static private String password = "termspassword";
 	
 	public DeHyphenizer(String database, String table, String column, String countcolumn, String hyphen) {
 		// TODO Auto-generated constructor stub
@@ -77,7 +77,7 @@ public class DeHyphenizer {
 		}
 		//rank rows
 		int max = 0;
-		Hashtable rank = new Hashtable();
+		Hashtable<String, String> rank = new Hashtable<String, String>();
 		for(int i = 0; i < segs.length; i++){
 			int ones = countOnes(matrix[i]);
 			if(ones > max){

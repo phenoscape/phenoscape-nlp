@@ -19,7 +19,6 @@ import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
 
 
-@SuppressWarnings("unchecked")
 public class StateMatrix {
 	
 	private ArrayList<State> states = null;
@@ -332,9 +331,9 @@ public class StateMatrix {
 		*/
 		//4. Voltage Clustering: 21  groups of varied sizes
 		System.out.println("Voltage Clustering");
-		Collection clusters = null;
+		Collection<Set<State>> clusters = null;
 		if(g.getEdgeCount()>4){ //the voltage clustering algorithm works only when this condition is met
-			VoltageClusterer vc = new VoltageClusterer(g, 50);
+			VoltageClusterer<State, MyLink> vc = new VoltageClusterer<State, MyLink>(g, 50);
 			if(g.getEdgeCount()>4)
 				clusters = vc.cluster(50);
 			else
@@ -365,6 +364,8 @@ public class StateMatrix {
 			if(coocur.length()>0){
 					q += " and word not in ("+coocur+")";
 			}
+			
+			q += " order by word";
 			System.out.println(q);
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
@@ -492,7 +493,7 @@ public class StateMatrix {
 		StringBuffer statestring = new StringBuffer();
 		if(states.size()==0)
 			return null;
-		HashMap stateCategoryCountMap = new HashMap<String,Integer>();
+		HashMap<String, Integer> stateCategoryCountMap = new HashMap<String,Integer>();
 		while(sit.hasNext()){
 			State s = sit.next();
 			String term = s.getName();
@@ -550,8 +551,8 @@ public class StateMatrix {
 			}					
 		*/}
 		//check the max count of mapvalues
-		Collection values = stateCategoryCountMap.values();
-		ArrayList valueList = new ArrayList(values);
+		Collection<Integer> values = stateCategoryCountMap.values();
+		ArrayList<Integer> valueList = new ArrayList<Integer>(values);
 		//Collections.sort(valueList);
 		if(!valueList.contains(new Integer(states.size()))){
 			//there is not one category that is common to all terms
@@ -600,7 +601,7 @@ public class StateMatrix {
 	public int output2GraphML() {
 		GraphMLOutputter gmo = new GraphMLOutputter();
 		//from saved grouped_terms
-		ArrayList<ArrayList> groups = new ArrayList<ArrayList>();
+		ArrayList<ArrayList<ArrayList<String>>> groups = new ArrayList<ArrayList<ArrayList<String>>>();
 		int gnumber = 0;		
 		try{
 			Statement stmt = conn.createStatement();
@@ -612,7 +613,7 @@ public class StateMatrix {
 			for(int i = 1; i<=gnumber; i++){
 				q = "select term, cooccurTerm, frequency from "+this.tableprefix+"_grouped_terms where groupId='"+i+"'";
 				rs = stmt.executeQuery(q);
-				ArrayList<ArrayList> group = new ArrayList<ArrayList>();
+				ArrayList<ArrayList<String>> group = new ArrayList<ArrayList<String>>();
 				while(rs.next()){
 					ArrayList<String> row = new ArrayList<String>();
 					row.add(rs.getString("term"));

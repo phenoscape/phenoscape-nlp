@@ -69,12 +69,12 @@ public class NativeXMLSourceFileCreator {
 			Element root = new Element("treatment"); //save all in one file to reduce I/O overhead for subsequent process
 			while(rs.next()){
 				String src = rs.getString("source");
-				if(src.matches("("+this.nonEnglish+").*")) continue;
+				if(src.matches("("+NativeXMLSourceFileCreator.nonEnglish+").*")) continue;
 				Statement stmt1 = conn.createStatement();
 				String q = "select distinct characterr, sentence from "+this.sourcetable+" where source='"+src+"'";
 				ResultSet rs1 = stmt1.executeQuery(q);
 				boolean ch = false;
-				StringBuffer sb = new StringBuffer();
+				//StringBuffer sb = new StringBuffer();
 				int count = 1;
 				while(rs1.next()){//one character + n sentences
 					if(!ch){
@@ -176,11 +176,14 @@ public class NativeXMLSourceFileCreator {
 		
 		String source = "original";
 		String database = "phenoscape";*/
-		String output = "Z:\\DATA\\phenotype\\source";
-		String tableprefix = "phenotype";
+//		String output = "Z:\\DATA\\phenotype\\source";
+//		String tableprefix = "phenotype";
 		
-		String source = "test";
-		String database = "markedupdatasets";
+		String output = "C:\\Users\\Zilong Chang\\Documents\\WORK\\amphibia\\source";
+		String tableprefix = "pheno_amphibia";
+		
+		String source = "original";
+		String database = "phenoscape";
 		NativeXMLSourceFileCreator sfc = new NativeXMLSourceFileCreator(source, output, database, tableprefix);
 		sfc.outputXMLFile();
 	}

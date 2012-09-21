@@ -20,7 +20,9 @@ public class V27_Transformer {
 	String keystorage = "";
 	int keydetecter = 0;
 	static int partdetecter, count;
-	static Hashtable hashtable = new Hashtable();
+	static Hashtable<String, String> hashtable = new Hashtable<String, String>();
+	
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception{
 		File extracted = new File("C:/Users/Li Chen/Desktop/FNA/v27/Extracted");	
 		File[] files = extracted.listFiles();
@@ -29,7 +31,7 @@ public class V27_Transformer {
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build("C:/Users/Li Chen/Desktop/FNA/v27/Extracted/" + i + ".xml");
 			Element root = doc.getRootElement();
-			List paralist = XPath.selectNodes(root, "/treatment/paragraph");
+			List<Element> paralist = XPath.selectNodes(root, "/treatment/paragraph");
 			//System.out.println(paralist.get(4).toString());
 			V27_Transformer transformer = new V27_Transformer();
 			transformer.createtreatment();
@@ -44,16 +46,17 @@ public class V27_Transformer {
 			transformer.output(i);
 		} 
 	}
-	private void processparagraph(List paralist) throws Exception{
+	@SuppressWarnings("unchecked")
+	private void processparagraph(List<Element> paralist) throws Exception{
 		File habitatout = new File("C:/Users/Li Chen/Desktop/FNA/v27/habitat/" + count + ".txt");
 		File distriout = new File("C:/Users/Li Chen/Desktop/FNA/v27/distribution/" + count + ".txt");
-		Iterator paraiter = paralist.iterator();
-		int familydetecter = 0;
+		Iterator<Element> paraiter = paralist.iterator();
+		//int familydetecter = 0;
 		while(paraiter.hasNext()){
 			int bolddetecter = 0;
 			Element pe = (Element)paraiter.next();
-			List contentlist = pe.getChildren();
-			Iterator contentiter = contentlist.iterator();
+			List<Element> contentlist = pe.getChildren();
+			Iterator<Element> contentiter = contentlist.iterator();
 			String text = "";
 			while(contentiter.hasNext()){
 				Element te = (Element)contentiter.next();
@@ -87,7 +90,7 @@ public class V27_Transformer {
 					hashtable.put(shortname, fullname);
 				}else{
 					Element reference = new Element("Reference");
-					for(Iterator itr = hashtable.keySet().iterator(); itr.hasNext();){
+					for(Iterator<String> itr = hashtable.keySet().iterator(); itr.hasNext();){
 						String key = (String) itr.next();
 						String value = (String) hashtable.get(key);
 						if(text.contains(key)){
@@ -110,7 +113,7 @@ public class V27_Transformer {
 					author.setText(text);
 					treatment.addContent(author);
 					//System.out.println(text);
-					familydetecter = 0;
+					//familydetecter = 0;
 				}
 				else if(bolddetecter == 1&!text.matches("[0-9]+\\..+")){//Description
 					Element description = new Element("Description");
@@ -207,6 +210,7 @@ public class V27_Transformer {
 			}		
 		}
 	}
+	
 	private void output(int i) throws Exception {
 		XMLOutputter outputter = new XMLOutputter();
 		String file = "C:/Users/Li Chen/Desktop/FNA/v27/Transformed/" + i + ".xml";

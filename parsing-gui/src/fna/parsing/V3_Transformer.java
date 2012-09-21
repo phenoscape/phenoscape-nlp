@@ -17,6 +17,7 @@ import org.jdom.xpath.XPath;
 
 public class V3_Transformer {
 	Element treatment = new Element("treatment");
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args)throws Exception{
 		final JFileChooser fc = new JFileChooser();
 		fc.setDialogTitle("Transformer");
@@ -34,7 +35,7 @@ public class V3_Transformer {
 			SAXBuilder builder = new SAXBuilder();
 			doc = builder.build(files[i]);
 			Element root = doc.getRootElement();
-			List paralist = XPath.selectNodes(root, "/treatment/paragraph");
+			List<Element> paralist = XPath.selectNodes(root, "/treatment/paragraph");
 			V3_Transformer transformer = new V3_Transformer();
 			transformer.createtreatment();
 			transformer.processparagraph(paralist,filename);
@@ -42,8 +43,8 @@ public class V3_Transformer {
 		} 
 	}
 
-	private void processparagraph(List paralist, String filename)throws Exception{
-		Iterator paraiter = paralist.iterator();
+	private void processparagraph(List<Element> paralist, String filename)throws Exception{
+		Iterator<Element> paraiter = paralist.iterator();
 		int familydetecter = 0;
 		while(paraiter.hasNext()){
 			int bolddetecter = 0;
@@ -98,7 +99,7 @@ public class V3_Transformer {
 				Element conservation = new Element("Conservation");
 				Element elevation = new Element("Elevation");
 				Element distribution = new Element("Distribution");
-				String flowtime = null, habi = null, eleva=null, distri=null, conserv=null, fh = null;
+				String flowtime = null, habi = null, eleva=null, distri=null, conserv=null;
 				String[] semi = new String[4];
 				String[] dot = new String[3];
 				semi = text.split(";");

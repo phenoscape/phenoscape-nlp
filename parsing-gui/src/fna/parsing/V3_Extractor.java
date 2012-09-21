@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 
 import org.jdom.*;
 import org.jdom.output.XMLOutputter;
-
+@SuppressWarnings("unused")
 public class V3_Extractor {
 	static Element treatment = new Element("treatment");
 

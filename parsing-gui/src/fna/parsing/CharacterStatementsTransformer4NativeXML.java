@@ -33,7 +33,7 @@ public class CharacterStatementsTransformer4NativeXML extends
 	 * @param seeds
 	 */
 	public CharacterStatementsTransformer4NativeXML(ProcessListener listener,
-			Display display, Text perllog, ArrayList seeds) {
+			Display display, Text perllog, ArrayList<String> seeds) {
 		super(listener, display, perllog, seeds);
 		// TODO Auto-generated constructor stub
 	}
@@ -54,9 +54,10 @@ public class CharacterStatementsTransformer4NativeXML extends
 	 * @param folder
 	 * @param fname
 	 */
+	@SuppressWarnings("unchecked")
 	protected void outputTo(File desfolder, File chafolder, File trafolder, File file) {
 		try{
-			String fname = file.getName();
+			//String fname = file.getName();
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(file);
 			Element root = doc.getRootElement();

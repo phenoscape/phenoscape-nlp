@@ -55,7 +55,6 @@ import prefuse.visual.VisualTable;
  * 
  * @author <a href="http://jheer.org">jeffrey heer</a>
  */
-@SuppressWarnings("unchecked")
 public class ZipDecode extends Display implements Constants {
 
     /**
@@ -80,7 +79,8 @@ public class ZipDecode extends Display implements Constants {
         
         public StateLookupFunction() { super(1); }
         public String getName() { return "STATE"; }
-        public Class getType(Schema s) { return String.class; }
+        @SuppressWarnings("rawtypes")
+		public Class getType(Schema s) { return String.class; }
         public Object get(Tuple t) {
             int code = s_states.index("code").get(param(0).getInt(t));
             return s_states.getString(code, "alpha");
