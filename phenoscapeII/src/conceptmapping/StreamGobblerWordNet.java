@@ -2,7 +2,7 @@
 /**
  * 
  */
-package fna.charactermarkup;
+package conceptmapping;
 
 import java.io.InputStream;
 import java.util.ArrayList;

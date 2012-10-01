@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import conceptmapping.Utilities;
+import conceptmapping.TermOutputerUtilities;
 
 
 /**
@@ -55,7 +55,7 @@ public class TermEQ2IDEQ {
 	
 	private String prefix;
 	private String ontologyfolder;
-	private Utilities ontoutil;
+	private TermOutputerUtilities ontoutil;
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = false;
 	
@@ -65,7 +65,7 @@ public class TermEQ2IDEQ {
 	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
 		this.ontologyfolder = ontologyfolder;
-		this.ontoutil = new Utilities(ontologyfolder, database);
+		this.ontoutil = new TermOutputerUtilities(ontologyfolder, database);
 		this.outputtable = outputtable+"_result";
 		//put process in the cache?
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});

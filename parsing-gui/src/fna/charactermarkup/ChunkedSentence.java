@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
+import conceptmapping.*;
 
 
 
@@ -387,7 +388,7 @@ public class ChunkedSentence {
 			if(t.length()>0){
 				String[] states = t.split("\\s+");
 				for(int k = 0; k < states.length; k++){
-					String ch = Utilities.lookupCharacter(states[k], conn, characterhash, glosstable);
+					String ch = TermOutputerUtilities.lookupCharacter(states[k], conn, characterhash, glosstable);
 					if(ch!=null){
 						scs = (scs.trim().length()>0? scs.trim()+"] ": "")+ch+"["+states[k].replaceAll("[{}]", "")+" ";
 					}else{
@@ -1106,7 +1107,7 @@ public class ChunkedSentence {
 					
 					if(!foundorgan && Utilities.isNoun(t, nouns, notnouns)){ //t may have []<>{}
 						startn = true; //won't affect the value of foundorgan, after foundorgan is true, "plus" problem
-						if(Utilities.isPlural(t)){
+						if(TermOutputerUtilities.isPlural(t)){
 							foundorgan = true;
 							np = np.trim();
 							if(np.lastIndexOf(" ")>0){
@@ -1121,13 +1122,13 @@ public class ChunkedSentence {
 				/*
 				 for(int j = i+1; j<this.chunkedtokens.size(); j++){
 					String t = this.chunkedtokens.get(j).trim();
-					if(startn && t.indexOf('<')<0 && !Utilities.isNoun(t, nouns)){ //test whole t, not the last word once a noun has been found
+					if(startn && t.indexOf('<')<0 && !TermOutputerUtilities.isNoun(t, nouns)){ //test whole t, not the last word once a noun has been found
 						break; //break, the end of the search is reached
 					}
 					np +=t+" ";
 					this.chunkedtokens.set(j, "");
 					
-					if(t.indexOf('<')>=0 ||t.indexOf('(')>=0 || Utilities.isNoun(t, nouns)){ //t may have []<>{}
+					if(t.indexOf('<')>=0 ||t.indexOf('(')>=0 || TermOutputerUtilities.isNoun(t, nouns)){ //t may have []<>{}
 						startn = true; //not break yet, may be the next token is a noun
 						ns += t+" ";
 					}
@@ -1633,7 +1634,7 @@ public class ChunkedSentence {
 						return null;
 					}
 				}else{
-					//String chara = Utilities.lookupCharacter(token, conn, characterhash, glosstable, tableprefix);
+					//String chara = TermOutputerUtilities.lookupCharacter(token, conn, characterhash, glosstable, tableprefix);
 					if(!founds && chara!=null){
 						scs = (scs.trim().length()>0? scs.trim()+"] ": "")+chara+"["+token+" ";
 						founds = true;
@@ -2299,7 +2300,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 								String[] stokens = subject.split("\\s+");
 								subject = "";
 								for(int i = 0; i < stokens.length; i++){
-									String singular = Utilities.toSingular(stokens[i]);
+									String singular = TermOutputerUtilities.toSingular(stokens[i]);
 									if(singular.matches("("+organs+")")){
 										stokens[i] = singular;
 									}
@@ -2314,7 +2315,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 						
 					}else{
 						for(int i = 0; i<tokens.length; i++){
-							if(Utilities.toSingular(tokens[i]).compareTo(senttag.replaceAll("_", ""))==0){
+							if(TermOutputerUtilities.toSingular(tokens[i]).compareTo(senttag.replaceAll("_", ""))==0){
 								subject = subject.replaceAll("\\s+-\\s+", "-");
 								subject += tokens[i]+ " ";
 								//subject = "{"+subject.trim().replaceAll("[\\[\\]{}()]", "").replaceAll(" ", "} {")+"}";

@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fna.parsing.ApplicationUtilities;
+import conceptmapping.*;
 
 
 
@@ -376,7 +377,7 @@ public class POSTagger4StanfordParser {
 		if(position.contains(" ") || position.contains("-")){
 			multiplepositions = true;
 		}		
-		if(Utilities.isPlural(organ)){
+		if(TermOutputerUtilities.isPlural(organ)){
 			pluralorgan = true;
 		}
 		if(pluralorgan && !multiplepositions) return false;

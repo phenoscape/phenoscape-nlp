@@ -488,6 +488,7 @@ public class EQPerformanceEvaluation {
 		if(matchsize == 0){
 			System.out.print(matchsize+"TEST; ");
 			System.out.println((aState.isEmpty()?"none":aState.get(0).get("stateid"))+"; entity"+suffix+": "+entity+"; entitylocator"+suffix+": "+entitylocator+"; quality"+suffix+": "+quality+"; qualitymodifier"+suffix+": "+qualitymodifier);
+			//aState might have multiple values in it, which could be irrelevant to the test data, so don't output the answer here. 
 		}
 		if(matchsize == 4){
 			matches[0] = 1; //exact

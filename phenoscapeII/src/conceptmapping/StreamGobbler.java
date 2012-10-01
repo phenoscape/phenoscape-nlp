@@ -2,7 +2,7 @@
 /**
  * 
  */
-package fna.charactermarkup;
+package conceptmapping;
 
 /**
  * @author Hong Updates
@@ -12,6 +12,7 @@ import java.util.*;
 
 import java.io.*;
 @SuppressWarnings({ "unused" })
+public
 class StreamGobbler extends Thread
 {
     InputStream is;
@@ -23,7 +24,7 @@ class StreamGobbler extends Thread
     static int t = 0;
     static boolean debug = false;
     
-    StreamGobbler(InputStream is, String type, ArrayList<String> headings, ArrayList<String> trees)
+    public StreamGobbler(InputStream is, String type, ArrayList<String> headings, ArrayList<String> trees)
     {
         this.is = is;
         this.type = type;

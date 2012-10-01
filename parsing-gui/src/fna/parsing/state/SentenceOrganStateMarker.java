@@ -23,6 +23,8 @@ import fna.charactermarkup.ChunkedSentence;
 import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
 
+import conceptmapping.*;
+
 /**
  * @author hongcui
  * last stable version: 653
@@ -271,7 +273,7 @@ public class SentenceOrganStateMarker {
 						tag = getParentTag(source);//tag may be null, remove before return
 					}
 					organ = organ.replaceFirst("\\s*of\\s*$", "").replaceAll("\\W", "");
-					if(Utilities.toSingular(organ).compareTo(tag)==0 || 
+					if(TermOutputerUtilities.toSingular(organ).compareTo(tag)==0 || 
 						(organ.matches("(apex|apices)") && tag.compareTo("base")==0)){
 						String b = source.substring(0, source.indexOf("-")+1);
 						String nsource = b +(Integer.parseInt(source.substring(source.indexOf("-")+1))-1);
