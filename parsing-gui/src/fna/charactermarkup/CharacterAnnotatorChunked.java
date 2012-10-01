@@ -544,7 +544,7 @@ public class CharacterAnnotatorChunked {
 					if (part1.length() > 0) {
 						String[] nums = part1.split("\\s+");
 						for (String n : nums) {
-							String temp1 = organ + " " + (isRoman?RomanConversion.binaryToRoman(Integer.parseInt(n)):n);
+							String temp1 = organ + " " + (isRoman? RomanConversion.binaryToRoman(Integer.parseInt(n)):n);
 							this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + n);// id=i
 
 						}
