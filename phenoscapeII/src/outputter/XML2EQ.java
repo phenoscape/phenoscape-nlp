@@ -77,6 +77,10 @@ public class XML2EQ {
 	private String binaryTvalues = "true|yes|usually";
 	private String binaryFvalues = "false|no|rarely";
 	private String positionprep = "of|part_of|in|on|between";
+	private String selfReference = "counterpart";//Extendible
+	private String contact="connection|contact|interconnection";//Extendible
+	private Hashtable<String, String> ossification = new Hashtable<String,String>();
+	//populate in constructor, <"Q","E,Q"> eg. <"unossified", "ossification,absent">;
 
 	static {
 		serenostyle.add("sereno");
@@ -146,6 +150,8 @@ public class XML2EQ {
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
 		this.keyentities = new ArrayList<String>();
+		this.ossification.put("unossified", "ossification,absent");
+		
 		if (conn == null) {
 			Class.forName("com.mysql.jdbc.Driver");
 			String URL = "jdbc:mysql://localhost/" + database + "?user=" + username + "&password=" + password;
@@ -408,6 +414,57 @@ public class XML2EQ {
 			 * EQ::[E]mesial wall [Q]taller [much]
 			 */
 			String entitylocator = EQ.get("entitylocator");
+			String entity=EQ.get("entity");
+			String qualitymodifier=EQ.get("qualitymodifier");
+			String quality=EQ.get("quality");
+			
+			/*
+			 * Changed by Zilong: change any self-reference word to the keyentity(es)
+			 * To add any new self-reference word, please modify the instance variable
+			 * "selfReference." 
+			 * 
+			 * */
+			
+			if(entity.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("entity", this.keyentities.get(0));
+			}
+			if(entitylocator.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("entitylocator", this.keyentities.get(0));
+			}
+			if(qualitymodifier.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("qualitymodifier", this.keyentities.get(0));
+			}
+			/*End dealing with self reference terms*/
+			
+			
+			/*
+			 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
+			 * Transform the result from CharaParser which is of the form:
+			 * connection[E] between A[EL] and B[EL] <some text>[Q] -the quality could be misidentified
+			 * to the form:
+			 * A[E] is in connection with[Q] B[QM]
+			 * 
+			 * */
+			if(entity.toLowerCase().trim().matches("("+this.contact+")")){
+				EQ.put("entity", entitylocator.split(",")[0]);//the first EL as E
+				EQ.put("quality", "in contact with"); //"in contact with" can be found in ontos
+				EQ.put("qualitymodifier", entitylocator.replaceFirst("[^,]*,?", "").trim());//the rest of EL is QM
+				EQ.put("entitylocator", "");//empty the EL
+			}
+			/*End handling the "contact" type relation*/
+			
+			/*
+			 * Changed by Zilong: deal with terms like "unossified" 
+			 * Transform the result from 
+			 * */
+			quality = quality.toLowerCase().trim();
+			if(ossification.containsKey(quality)){
+				EQ.put("entity", entity+" "+ossification.get(quality).split(",")[0]);
+				EQ.put("quality", ossification.get(quality).split(",")[1]);
+			}
+			/*end handling the "unossified" like term*/
+			
+			
 			if (EQ.get("type").compareTo("state") == 0 && this.keyentitylocator != null) {
 				// EQ based on a state statement
 				// this is not a binarystate statement
