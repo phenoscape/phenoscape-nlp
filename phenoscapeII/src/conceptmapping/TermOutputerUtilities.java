@@ -85,6 +85,7 @@ public class TermOutputerUtilities {
 		
 		//create a list of relative path of the ontologies
 		String [] entityontologies = new String[]{
+
  		ontologyfolder+System.getProperty("file.separator")+"phenoscape-ext.owl",
 //		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
 //		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
@@ -144,14 +145,16 @@ public class TermOutputerUtilities {
 		String [] result = null; 
 		if(pato!=null){
 			OWLClass c = pato.getClassByLabel(classlabel);
-			List<OWLClass> pcs = pato.getParents(c);
-			result = new String[2]; //0: ID; 1:label
-			for(OWLClass pc: pcs){
-				result[0] += pato.getID(pc)+",";
-				result[1] += pato.getLabel(pc)+",";
+			if(c!=null){
+				List<OWLClass> pcs = pato.getParents(c);
+				result = new String[2]; //0: ID; 1:label
+				for(OWLClass pc: pcs){
+					result[0] += pato.getID(pc)+",";
+					result[1] += pato.getLabel(pc)+",";
+				}
+				result[0] = result[0].replaceFirst(",$", "");
+				result[1] = result[1].replaceFirst(",$", "");
 			}
-			result[0] = result[0].replaceFirst(",$", "");
-			result[1] = result[1].replaceFirst(",$", "");
 		}		
 		return result;
 	}

@@ -1384,12 +1384,13 @@ public class ChunkedSentence {
 		if(token.startsWith("-LRB-/-LRB-")){
 			ArrayList<String> tokens = new ArrayList<String>();
 			String text = "";
-			if(token.indexOf("-RRB-/-RRB-")<0+0){
+			if(token.indexOf("-RRB-/-RRB-")<0){
 				String t = this.chunkedtokens.get(++this.pointer);
 				while(!t.endsWith("-RRB-/-RRB-")){
 					tokens.add(t);
 					text += t+ " ";
-					t = this.chunkedtokens.get(++this.pointer);
+					if(this.pointer+1 < this.chunkedtokens.size()) t = this.chunkedtokens.get(++this.pointer); //missing RRB
+					else break;
 				}
 			}
 			text=text.trim();

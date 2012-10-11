@@ -55,7 +55,7 @@ public class TermEQ2IDEQ {
 	
 	private String prefix;
 	private String ontologyfolder;
-	private TermOutputerUtilities ontoutil;
+	private static TermOutputerUtilities ontoutil;
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = false;
 	
@@ -65,7 +65,7 @@ public class TermEQ2IDEQ {
 	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
 		this.ontologyfolder = ontologyfolder;
-		this.ontoutil = new TermOutputerUtilities(ontologyfolder, database);
+		ontoutil = new TermOutputerUtilities(ontologyfolder, database);
 		this.outputtable = outputtable+"_result";
 		//put process in the cache?
 		this.entityIDCache.put("process", new String[]{"entity", "VAO:0000180", "process"});
@@ -199,9 +199,10 @@ public class TermEQ2IDEQ {
 			qualitynegatedlabel = "not("+result[2]+")";
 			qualityid = result[1];
 			String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result[2]);
-			qnparentids = parentinfo[0];
-			qnparentlabels = parentinfo[1];
-			
+			if(parentinfo != null){
+				qnparentids = parentinfo[0];
+				qnparentlabels = parentinfo[1];
+			}			
 		}
 		updateQualitynegatedIDs(srcid, qualitynegatedlabel, qualityid, qnparentlabels, qnparentids);
 		
@@ -765,8 +766,14 @@ public class TermEQ2IDEQ {
 	public static void main(String[] args) {
 		try{
 			//String csv = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/trash_EQ.csv";
-			String csv = "C:/Users/Zilong Chang/Documents/WORK/getestNew/target/aftersereno.csv";
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "gstestnew", "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\ontologies",csv);
+			//String csv = "C:/Users/Zilong Chang/Documents/WORK/getestNew/target/aftersereno.csv";
+			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "gstestnew", "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\ontologies",csv);
+			
+			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
+			String csv = "C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\output.csv";
+			String ontologies = "C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\ontologies";
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "test4_xml2eq", "test4", ontologies, csv);
+		
 		}catch(Exception e){
 			e.printStackTrace();
 		}
