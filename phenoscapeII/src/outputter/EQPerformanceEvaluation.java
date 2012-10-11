@@ -784,7 +784,7 @@ public class EQPerformanceEvaluation {
 //	work(database, "chpzlstar", "gstablestar", "eval_zilongchp_star");
 //	work(database, "chpzlnostar", "gstablenostar", "eval_zilongchp_nostar");
 	
-	work(database, "gstestnew_xml2eq_result","gstablefin", "eval_gstestnew");
+	work(database, "201209_xml2eq_result","gstablefin", "eval_201209");
 	}
 
 }
