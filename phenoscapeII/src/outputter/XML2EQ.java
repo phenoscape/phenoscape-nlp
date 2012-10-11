@@ -56,27 +56,31 @@ public class XML2EQ {
 	private HashSet<String> stateids = new HashSet<String>();
 	private static ArrayList<String> serenostyle = new ArrayList<String>();
 	private String characters = null;
-	private XPath path1;
-	private XPath path2;
-	private XPath path3;
-	private XPath path4;
-	private XPath path5;
-	private XPath path6;
-	private XPath path7;
-	private XPath path8;
-	private XPath path9;
-	private XPath path10;
-	private XPath path11;
-	private XPath path12;
-	private XPath path13;
-	private XPath path14;
-	private XPath path15;
+	private XPath pathCharacterStatement;
+	private XPath pathStateStatement;
+	private XPath pathNonWholeOrganismStructure;
+	private XPath pathText;
+	private XPath pathWholeOrganismStructure;
+	private XPath pathStructure;
+	private XPath pathWholeOrgStrucChar;
+	private XPath pathCharacter;
+	private XPath pathText2;
+	private XPath pathRelation;
+	private XPath pathRelationUnderCharacter;
+	private XPath pathStructure2;
+	private XPath pathWithHaveHasRelation;
+	private XPath pathRnageValueCharacter;
+	private XPath pathCountStructure;
 	private Hashtable<String, String> entityhash = new Hashtable<String, String>();
 	private Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 	private Pattern p1 = Pattern.compile("(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
 	private String binaryTvalues = "true|yes|usually";
 	private String binaryFvalues = "false|no|rarely";
 	private String positionprep = "of|part_of|in|on|between";
+	private String selfReference = "counterpart";//Extendible
+	private String contact="connection|contact|interconnection";//Extendible
+	private Hashtable<String, String> ossification = new Hashtable<String,String>();
+	//populate in constructor, <"Q","E,Q"> eg. <"unossified", "ossification,absent">;
 
 	static {
 		serenostyle.add("sereno");
@@ -118,21 +122,21 @@ public class XML2EQ {
 	 * "countt varchar(200))");
 	 * 
 	 * 
-	 * path1 = XPath.newInstance(".//statement[@statement_type='character']");
-	 * path2 = XPath.newInstance(".//statement[@statement_type='character_state']");
-	 * path3 = XPath.newInstance(".//structure[@name!='whole_organism']");
-	 * path4 = XPath.newInstance(".//text");
-	 * path5 = XPath.newInstance(".//structure[@name='whole_organism']");
-	 * path6 = XPath.newInstance(".//structure");
+	 * pathCharacterStatement = XPath.newInstance(".//statement[@statement_type='character']");
+	 * pathStateStatement = XPath.newInstance(".//statement[@statement_type='character_state']");
+	 * pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='whole_organism']");
+	 * pathText = XPath.newInstance(".//text");
+	 * pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='whole_organism']");
+	 * pathStructure = XPath.newInstance(".//structure");
 	 * path7 = XPath.newInstance(".//structure[@name='whole_organism']/character");
-	 * path8 = XPath.newInstance(".//character");
-	 * path9 = XPath.newInstance(".//text");
-	 * path10 = XPath.newInstance(".//relation");
-	 * path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
-	 * path12 = XPath.newInstance(".//structure");
-	 * path13 = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
-	 * path14 = XPath.newInstance("//character[@char_type='range_value']");
-	 * path15 = XPath.newInstance("//structure[character[@name='count']]");
+	 * pathCharacter = XPath.newInstance(".//character");
+	 * pathText2 = XPath.newInstance(".//text");
+	 * pathRelation = XPath.newInstance(".//relation");
+	 * pathRelationUnderCharacter = XPath.newInstance(".//statement[@statement_type='character']/relation");
+	 * pathStructure2 = XPath.newInstance(".//structure");
+	 * pathWithHaveHasRelation = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
+	 * pathRnageValueCharacter = XPath.newInstance("//character[@char_type='range_value']");
+	 * pathCountStructure = XPath.newInstance("//structure[character[@name='count']]");
 	 * }
 	 * }catch(Exception e){
 	 * e.printStackTrace();
@@ -146,6 +150,8 @@ public class XML2EQ {
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
 		this.keyentities = new ArrayList<String>();
+		this.ossification.put("unossified", "ossification,absent");
+		
 		if (conn == null) {
 			Class.forName("com.mysql.jdbc.Driver");
 			String URL = "jdbc:mysql://localhost/" + database + "?user=" + username + "&password=" + password;
@@ -165,21 +171,21 @@ public class XML2EQ {
 					+ "qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(200), "
 					+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
 
-			path1 = XPath.newInstance(".//statement[@statement_type='character']");
-			path2 = XPath.newInstance(".//statement[@statement_type='character_state']");
-			path3 = XPath.newInstance(".//structure[@name!='whole_organism']");
-			path4 = XPath.newInstance(".//text");
-			path5 = XPath.newInstance(".//structure[@name='whole_organism']");
-			path6 = XPath.newInstance(".//structure");
-			path7 = XPath.newInstance(".//structure[@name='whole_organism']/character");
-			path8 = XPath.newInstance(".//character");
-			path9 = XPath.newInstance(".//text");
-			path10 = XPath.newInstance(".//relation");
-			path11 = XPath.newInstance(".//statement[@statement_type='character']/relation");
-			path12 = XPath.newInstance(".//structure");
-			path13 = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
-			path14 = XPath.newInstance("//character[@char_type='range_value']");
-			path15 = XPath.newInstance("//structure[character[@name='count']]");
+			pathCharacterStatement = XPath.newInstance(".//statement[@statement_type='character']");
+			pathStateStatement = XPath.newInstance(".//statement[@statement_type='character_state']");
+			pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='whole_organism']");
+			pathText = XPath.newInstance(".//text");
+			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='whole_organism']");
+			pathStructure = XPath.newInstance(".//structure");
+			pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='whole_organism']/character");
+			pathCharacter = XPath.newInstance(".//character");
+			pathText2 = XPath.newInstance(".//text");
+			pathRelation = XPath.newInstance(".//relation");
+			pathRelationUnderCharacter = XPath.newInstance(".//statement[@statement_type='character']/relation");
+			pathStructure2 = XPath.newInstance(".//structure");
+			pathWithHaveHasRelation = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
+			pathRnageValueCharacter = XPath.newInstance("//character[@char_type='range_value']");
+			pathCountStructure = XPath.newInstance("//structure[character[@name='count']]");
 		}
 	}
 
@@ -195,8 +201,11 @@ public class XML2EQ {
 			with2partof(root);
 			removeCategoricalRanges(root);
 			// expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
-			List<Element> characterstatements = path1.selectNodes(root);
-			List<Element> statestatements = path2.selectNodes(root);
+			//characterstatements are character descriptions
+			List<Element> characterstatements = pathCharacterStatement.selectNodes(root);
+			//statestatements are state descriptions
+			List<Element> statestatements = pathStateStatement.selectNodes(root);
+			
 			integrateWholeOrganism4CharacterStatements(characterstatements, root);
 			repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
 			// if(count!= 67){ count++; continue;}
@@ -232,7 +241,7 @@ public class XML2EQ {
 	@SuppressWarnings("unchecked")
 	private void removeCategoricalRanges(Element root) throws Exception {
 
-		List<Element> charas = this.path14.selectNodes(root);
+		List<Element> charas = this.pathRnageValueCharacter.selectNodes(root);
 		for (Element chara : charas) {
 			if (!chara.getAttributeValue("from").matches("[\\d\\.]+") && !chara.getAttributeValue("to").matches("[\\d\\.]+")) {
 				chara.detach(); // remove
@@ -248,7 +257,7 @@ public class XML2EQ {
 			}
 		}
 
-		List<Element> structs = this.path15.selectNodes(root);
+		List<Element> structs = this.pathCountStructure.selectNodes(root);
 		for (Element struct : structs) {
 			charas = struct.getChildren();
 			int i = 0;
@@ -276,7 +285,7 @@ public class XML2EQ {
 	 */
 	@SuppressWarnings("unchecked")
 	private void with2partof(Element root) throws Exception {
-		List<Element> withs = path13.selectNodes(root);
+		List<Element> withs = pathWithHaveHasRelation.selectNodes(root);
 		for (Element with : withs) {
 			String to = with.getAttributeValue("to");
 			String from = with.getAttributeValue("from");
@@ -309,10 +318,10 @@ public class XML2EQ {
 	private void repairWholeOrganismOnlyCharacterStatements(List<Element> characterstatements, Element root) throws Exception {
 
 		for (Element statement : characterstatements) {
-			List<Element> structures = path3.selectNodes(statement);
+			List<Element> structures = pathNonWholeOrganismStructure.selectNodes(statement);
 			if (structures.size() == 0) {
 				// repair
-				Element etext = (Element) path4.selectSingleNode(statement);
+				Element etext = (Element) pathText.selectSingleNode(statement);
 				String text = etext.getTextTrim().replaceAll("\\[.*?\\]", "");
 				String struct = text.replaceFirst(".* ", "");
 				String constraint = text.replace(struct, "").trim();
@@ -405,6 +414,57 @@ public class XML2EQ {
 			 * EQ::[E]mesial wall [Q]taller [much]
 			 */
 			String entitylocator = EQ.get("entitylocator");
+			String entity=EQ.get("entity");
+			String qualitymodifier=EQ.get("qualitymodifier");
+			String quality=EQ.get("quality");
+			
+			/*
+			 * Changed by Zilong: change any self-reference word to the keyentity(es)
+			 * To add any new self-reference word, please modify the instance variable
+			 * "selfReference." 
+			 * 
+			 * */
+			
+			if(entity.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("entity", this.keyentities.get(0));
+			}
+			if(entitylocator.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("entitylocator", this.keyentities.get(0));
+			}
+			if(qualitymodifier.toLowerCase().trim().matches("("+this.selfReference+")")){
+				EQ.put("qualitymodifier", this.keyentities.get(0));
+			}
+			/*End dealing with self reference terms*/
+			
+			
+			/*
+			 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
+			 * Transform the result from CharaParser which is of the form:
+			 * connection[E] between A[EL] and B[EL] <some text>[Q] -the quality could be misidentified
+			 * to the form:
+			 * A[E] is in connection with[Q] B[QM]
+			 * 
+			 * */
+			if(entity.toLowerCase().trim().matches("("+this.contact+")")){
+				EQ.put("entity", entitylocator.split(",")[0]);//the first EL as E
+				EQ.put("quality", "in contact with"); //"in contact with" can be found in ontos
+				EQ.put("qualitymodifier", entitylocator.replaceFirst("[^,]*,?", "").trim());//the rest of EL is QM
+				EQ.put("entitylocator", "");//empty the EL
+			}
+			/*End handling the "contact" type relation*/
+			
+			/*
+			 * Changed by Zilong: deal with terms like "unossified" 
+			 * Transform the result from 
+			 * */
+			quality = quality.toLowerCase().trim();
+			if(ossification.containsKey(quality)){
+				EQ.put("entity", entity+" "+ossification.get(quality).split(",")[0]);
+				EQ.put("quality", ossification.get(quality).split(",")[1]);
+			}
+			/*end handling the "unossified" like term*/
+			
+			
 			if (EQ.get("type").compareTo("state") == 0 && this.keyentitylocator != null) {
 				// EQ based on a state statement
 				// this is not a binarystate statement
@@ -504,7 +564,7 @@ public class XML2EQ {
 	private void integrateWholeOrganism4CharacterStatements(List<Element> characterstatements, Element root) throws Exception {
 
 		for (Element statement : characterstatements) {
-			List<Element> wholeOrgans = path5.selectNodes(statement);
+			List<Element> wholeOrgans = pathWholeOrganismStructure.selectNodes(statement);
 			if (wholeOrgans.size() > 0 && statement.getChildren("structure").size() > wholeOrgans.size()) {
 				// collect ids and chars from wholeOrgans
 				ArrayList<Element> chars = new ArrayList<Element>();
@@ -515,7 +575,7 @@ public class XML2EQ {
 					wo.detach();
 				}
 				// integration
-				Element firststructure = (Element) path3.selectSingleNode(statement);
+				Element firststructure = (Element) pathNonWholeOrganismStructure.selectSingleNode(statement);
 				String sid = firststructure.getAttributeValue("id");
 				// add characters
 				for (Element chara : chars) {
@@ -534,30 +594,33 @@ public class XML2EQ {
 	/**
 	 * For example, 1 character statement with 3 state statements
 	 * <statement statement_type="character" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" seg_id="0">
-	 * <text>Shape of ancistrine opercle (ordered )</text>
-	 * <structure id="o650" name="whole_organism">
-	 * <character name="shape" value="shape" constraint="of ancistrine opercle" constraintid="o651" />
-	 * </structure>
-	 * <structure id="o651" name="opercle" constraint="ancistrine" />
+	 * 	<text>Shape of ancistrine opercle (ordered )</text>
+	 * 	<structure id="o650" name="whole_organism">
+	 * 		<character name="shape" value="shape" constraint="of ancistrine opercle" constraintid="o651" />
+	 * 	</structure>
+	 * 	<structure id="o651" name="opercle" constraint="ancistrine" />
 	 * </statement>
+	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="4a99e866-54d9-4875-8b5e-385427db1245" seg_id="0">
-	 * <text>sickle-shaped (&lt;i&gt;Peckoltia&lt;/i&gt;-type )</text>
-	 * <structure id="o652" name="whole_organism">
-	 * <character name="shape" value="sickle-shaped" />
-	 * </structure>
+	 * 	<text>sickle-shaped (&lt;i&gt;Peckoltia&lt;/i&gt;-type )</text>
+	 * 	<structure id="o652" name="whole_organism">
+	 * 		<character name="shape" value="sickle-shaped" />
+	 * 	</structure>
 	 * </statement>
+	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="d53ba92f-0865-4456-9111-c6ff37fc624a" seg_id="0">
-	 * <text>barshaped (&lt;i&gt;Ancistrus&lt;/i&gt;-type )</text>
-	 * <structure id="o653" name="whole_organism">
-	 * <character name="shape" value="barshaped" />
-	 * </structure>
+	 * 	<text>barshaped (&lt;i&gt;Ancistrus&lt;/i&gt;-type )</text>
+	 * 	<structure id="o653" name="whole_organism">
+	 * 		<character name="shape" value="barshaped" />
+	 * 	</structure>
 	 * </statement>
+	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="f56a9b6a-9720-437c-a1f4-60f01cd1bb15" seg_id="0">
-	 * <text>oval or triangular</text>
-	 * <structure id="o654" name="whole_organism">
-	 * <character name="shape" value="oval" />
-	 * <character name="shape" value="triangular" />
-	 * </structure>
+	 * 	<text>oval or triangular</text>
+	 * 	<structure id="o654" name="whole_organism">
+	 * 		<character name="shape" value="oval" />
+	 * 		<character name="shape" value="triangular" />
+	 * 	</structure>
 	 * </statement>
 	 * 
 	 * @param statements
@@ -624,7 +687,7 @@ public class XML2EQ {
 		System.out.println(chtext);
 		chtext = chtext.replaceAll("\\(.*?\\)", "");
 		String[] chparts = chtext.toLowerCase().split("\\s*,\\s*");
-		List<Element> structs = path6.selectNodes(charstatements.get(0));
+		List<Element> structs = pathStructure.selectNodes(charstatements.get(0));
 		ArrayList<String> snames = new ArrayList<String>();
 		for (Element struct : structs) {
 			snames.add(this.getStructureName(root, struct.getAttributeValue("id")).replaceFirst("(?<=\\w)_(?=\\d+$)", " "));
@@ -697,7 +760,7 @@ public class XML2EQ {
 				}
 			} else {
 				// collecting all characters of whole_organism
-				List<Element> chars = path7.selectNodes(state);
+				List<Element> chars = pathWholeOrgStrucChar.selectNodes(state);
 				for (Element chara : chars) {
 					Hashtable<String, String> EQi = (Hashtable<String, String>) EQc.clone();
 					EQi.put("quality", chara.getAttributeValue("value"));
@@ -712,7 +775,7 @@ public class XML2EQ {
 					this.allEQs.add(EQi);
 				}
 				// collecting relations of whole_organism
-				List<Element> wos = path5.selectNodes(state);
+				List<Element> wos = pathWholeOrganismStructure.selectNodes(state);
 				for (Element wo : wos) {
 					String id = wo.getAttributeValue("id");
 					List<Element> rels = XPath.selectNodes(state, ".//relation[@from='" + id + "']");
@@ -760,7 +823,7 @@ public class XML2EQ {
 	private String charactersAsString(Element root, Element firststruct) throws Exception {
 		String chstring = "";
 
-		List<Element> chars = path8.selectNodes(firststruct);
+		List<Element> chars = pathCharacter.selectNodes(firststruct);
 		for (Element chara : chars) {
 			String m = chara.getAttribute("modifier") == null ? "" : chara.getAttributeValue("modifier");
 			chstring += chara.getAttributeValue("value") + " ";
@@ -891,7 +954,7 @@ public class XML2EQ {
 		initEQHash(EQ);
 
 		// //get the first structure element
-		// Element firststruct = (Element)path3.selectSingleNode(chars.get(0));
+		// Element firststruct = (Element)pathNonWholeOrganismStructure.selectSingleNode(chars.get(0));
 		// //TODO: what if firststruct == null?
 		// String sid = firststruct.getAttributeValue("id");
 		// String sname =this.getStructureName(root, sid);
@@ -899,7 +962,7 @@ public class XML2EQ {
 
 		List<Element> firststructs = new ArrayList<Element>();
 		for (Element e : chars) {
-			firststructs.addAll(path3.selectNodes(e));
+			firststructs.addAll(pathNonWholeOrganismStructure.selectNodes(e));
 		}
 
 		for (Element e : firststructs) {
@@ -910,7 +973,7 @@ public class XML2EQ {
 			this.keyentities.add(sname);
 		
 			// take the first character
-			Element chara = (Element) path8.selectSingleNode(firststruct);
+			Element chara = (Element) pathCharacter.selectSingleNode(firststruct);
 			if (chara != null) {
 				String q = formQualityValueFromCharacter(chara).replaceAll("\\[[^\\]]*?\\]", "");
 				EQ.put("quality", q);
@@ -990,7 +1053,7 @@ public class XML2EQ {
 			return false;
 
 		for (Element state : states) {
-			Element text = (Element) path9.selectSingleNode(state);
+			Element text = (Element) pathText2.selectSingleNode(state);
 			String value = text.getTextTrim();
 			if (!value.matches("(" + binaryTvalues + "|" + binaryFvalues + ")")) {
 				return false;
@@ -1021,9 +1084,11 @@ public class XML2EQ {
 		// Element key = null;
 		List<Element> keys = new ArrayList<Element>();
 		// //ArrayList<Element> purge = new ArrayList<Element>();
-		// key = (Element)path3.selectSingleNode(chars.get(0));
+		// key = (Element)pathNonWholeOrganismStructure.selectSingleNode(chars.get(0));
+		
+		//add all structures which are not "whole organism" to key structures
 		for (Element e : chars) {
-			keys.addAll(path3.selectNodes(e));
+			keys.addAll(pathNonWholeOrganismStructure.selectNodes(e));
 			// if(key==null){
 			// key = new Element("structure");
 			// key.setAttribute("name", "unknown");
@@ -1033,6 +1098,7 @@ public class XML2EQ {
 			//
 		}
 
+		//no key structures found
 		if (keys.size() == 0) {
 			Element key = new Element("structure");
 			key.setAttribute("name", "unknown");
@@ -1041,6 +1107,7 @@ public class XML2EQ {
 			keys.add(key);
 		}
 
+		//populate keyentities
 		for(Element key:keys){
 			keyentities.add(this.getStructureName(root, key.getAttributeValue("id")));
 		}
@@ -1073,9 +1140,9 @@ public class XML2EQ {
 			
 			//generate other EQ statements from this statement
 			//for(Element e: purge) e.detach();
-			Element text = (Element)path9.selectSingleNode(statement);
-			structures = path6.selectNodes(statement);
-			List<Element> relations = path10.selectNodes(statement);
+			Element text = (Element)pathText2.selectSingleNode(statement);
+			structures = pathStructure.selectNodes(statement);
+			List<Element> relations = pathRelation.selectNodes(statement);
 			createEQsfromStatement(src, root, text, structures, relations, true);
 		}
 		return keys;
@@ -1095,7 +1162,7 @@ public class XML2EQ {
 
 		for (Element statement : states) {
 			// fill whole_organism place-holder with a real structure
-			List<Element> whole_organism = path5.selectNodes(statement);
+			List<Element> whole_organism = pathWholeOrganismStructure.selectNodes(statement);
 			for (Element origwo : whole_organism) {
 				for(Element key:keys){
 					Element wo=(Element) origwo.clone();
@@ -1110,12 +1177,12 @@ public class XML2EQ {
 				origwo.detach();
 			}
 			// generate other EQ statements from this statement
-			Element text = (Element) path9.selectSingleNode(statement);
-			// List<Element> structures = path6.selectNodes(statement, ".//structure");
+			Element text = (Element) pathText2.selectSingleNode(statement);
+			// List<Element> structures = pathStructure.selectNodes(statement, ".//structure");
 			List<Element> structures = selectEntityStructures(statement);
 			// relations should include those in this state statement and those in character statement
-			List<Element> relations = path10.selectNodes(statement);
-			relations.addAll(path11.selectNodes(root));
+			List<Element> relations = pathRelation.selectNodes(statement);
+			relations.addAll(pathRelationUnderCharacter.selectNodes(root));
 			createEQsfromStatement(src, root, text, structures, relations, false);
 		}
 
@@ -1131,7 +1198,7 @@ public class XML2EQ {
 	private List<Element> selectEntityStructures(Element statement) throws Exception {
 		ArrayList<Element> selected = new ArrayList<Element>();
 
-		List<Element> allstructs = path12.selectNodes(statement);
+		List<Element> allstructs = pathStructure2.selectNodes(statement);
 		for (Element struct : allstructs) {
 			if (struct.getChildren().size() > 0)
 				selected.add(struct);
@@ -1168,10 +1235,10 @@ public class XML2EQ {
 	/**
 	 * 
 	 * @param src
-	 * @param root
-	 * @param textelement
-	 * @param structures
-	 * @param relations
+	 * @param root 
+	 * @param textelement - text nodes
+	 * @param structures - all structure nodes
+	 * @param relations - all relation nodes
 	 * @param keyelement
 	 *            if true, save its entitylocator info in the field entitylocator
 	 */
@@ -1542,7 +1609,7 @@ public class XML2EQ {
 	 * @param src
 	 * @param root
 	 * @param text
-	 * @param struct
+	 * @param struct - structure node
 	 * @param keyelement
 	 *            TODO
 	 */
@@ -1562,7 +1629,7 @@ public class XML2EQ {
 			rels = arelation.split("#");
 		String structname = this.getStructureName(root, structid);
 
-		List<Element> chars = path8.selectNodes(struct, ".//character");
+		List<Element> chars = pathCharacter.selectNodes(struct, ".//character");
 		Iterator<Element> it = chars.iterator();
 		// structure has both characters and relations
 		boolean hascharacter = false;
