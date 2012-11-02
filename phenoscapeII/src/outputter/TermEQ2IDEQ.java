@@ -36,6 +36,7 @@ import conceptmapping.TermOutputerUtilities;
  *unsymmetrical ones  are marked as 'relational' in PATO obo file
  * 
  */
+
 @SuppressWarnings("unused")
 public class TermEQ2IDEQ {
 
@@ -59,12 +60,21 @@ public class TermEQ2IDEQ {
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	private boolean debug = false;
 	
+	//this instance var is used to map spatial terms that are not in ontology to terms that are.
+	private Hashtable<String, String> spatialMaps = new Hashtable<String, String>(); 
+	
 	/**
 	 * 
 	 */
 	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
 		this.ontologyfolder = ontologyfolder;
+		
+		/*populate spatial map here*/
+		spatialMaps.put("portion", "region");
+		//more..
+		/*end*/
+		
 		ontoutil = new TermOutputerUtilities(ontologyfolder, database);
 		this.outputtable = outputtable+"_result";
 		//put process in the cache?
@@ -85,6 +95,7 @@ public class TermEQ2IDEQ {
 				while(rs.next()){
 					String src = rs.getString("source");
 					String srcid = rs.getString("id");
+					/*entitylabel and entity are the same at this point*/
 					String entitylabel = rs.getString("entitylabel");
 					String entitylocatorlabel = rs.getString("entitylocatorlabel");
 					String quality = rs.getString("quality");
@@ -600,6 +611,19 @@ public class TermEQ2IDEQ {
 	}
 
 
+	
+	/**
+	 * Map spatial term.
+	 *
+	 * @param term the term
+	 * @return the mapped term
+	 */
+	private String mapSpatialTerm(String term){
+		String mappedTerm = this.spatialMaps.get(term);
+		return mappedTerm==null?term:mappedTerm;
+		
+	}
+	
 	/**
 	 * preopercular latero-sensory canal =>	preopercular sensory canal
 	 * pectoral-fin spine => pectoral fin spine
@@ -608,6 +632,7 @@ public class TermEQ2IDEQ {
 	 */
 	private String[] searchTerm(String term, String type) throws Exception{	
 		if(term.trim().length()==0) return null;
+				
 		//search in cache
 		if(type.compareTo("entity")==0){
 			String[] result = this.entityIDCache.get(term);
@@ -630,7 +655,31 @@ public class TermEQ2IDEQ {
 			return exactmatch;
 		}
 
-		//if landed here, the first try has failed				 
+		/*if landed here, the first try has failed*/
+		//spatial term
+		//Limitation: designated to handle two-word spatial terms 
+		for (String st:this.spatialterms){
+			if(term.startsWith(st+" ")){
+				String newTerm = term;
+				
+				String repl=null;
+				
+				if((repl=this.spatialMaps.get(term.replaceFirst(st, "").trim()))!=null){
+					newTerm=st+" "+repl;
+				}
+				
+				results = ontoutil.searchOntologies(newTerm, type);
+				exactmatch = null;
+				if(results.size()>0) exactmatch = results.get(0);
+				if(exactmatch!=null){
+					if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+					if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+					return exactmatch;
+				}
+			}
+		}
+		
+		//term with hyphen, replace hyphen with space
 		if(term.indexOf("-")>0){ //caudal-fin
 			term = term.replaceAll("-", " ");
 			results = ontoutil.searchOntologies(term, type);

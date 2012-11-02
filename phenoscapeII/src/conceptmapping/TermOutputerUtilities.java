@@ -85,10 +85,10 @@ public class TermOutputerUtilities {
 		
 		//create a list of relative path of the ontologies
 		String [] entityontologies = new String[]{
- 		/*ontologyfolder+System.getProperty("file.separator")+"tao.owl",
-		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
-		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",*/
-		ontologyfolder+System.getProperty("file.separator")+"phenoscape-ext.owl",
+
+ 		ontologyfolder+System.getProperty("file.separator")+"phenoscape-ext.owl",
+//		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
+//		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
 		ontologyfolder+System.getProperty("file.separator")+"bspo.owl"};
 		String [] qualityontologies = new String[]{
 		ontologyfolder+System.getProperty("file.separator")+"pato.owl"};
