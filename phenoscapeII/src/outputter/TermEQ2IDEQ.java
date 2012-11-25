@@ -515,18 +515,20 @@ public class TermEQ2IDEQ {
 
 		//having gone through all of the above, still hasn't find a good entityid
 		//deal with spatial expressions here
-		if(finalentityid.length()==0){
-			String tokens[] = entitylabel.split("\\s+");
-			if(tokens.length==2 && this.spatialterms.contains(tokens[0])){
-				tokens[1] = "region";
-				entitylabel = this.join(tokens, 0, 1, " ");
-				String[] result = searchTerm(entitylabel, "entity");
-				if(result!=null){
-					finalentityid = result[1];
-					finalentitylabel = result[2];
-				}
-			}
-		}
+//		if(finalentityid.length()==0){
+//			String tokens[] = entitylabel.split("\\s+");
+//			if(tokens.length==2 && this.spatialterms.contains(tokens[0])){
+//				tokens[1] = "region";
+//				entitylabel = this.join(tokens, 0, 1, " ");
+//				String[] result = searchTerm(entitylabel, "entity");
+//				if(result!=null){
+//					finalentityid = result[1];
+//					finalentitylabel = result[2];
+//				}
+//			}
+//		}
+		
+		//fill in the finals
 		finals[0] = finalentityid;
 		finals[1] = finalentitylabel;
 		finals[2] = finalentitylocator;
@@ -548,9 +550,15 @@ public class TermEQ2IDEQ {
 		//last rule
 		//still not find a match, remove the last term in the entitylabel 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"
+		
+		//Changed by Zilong:
+		//enhanced entity format condition to exclude the spatial terms: in order to solve the problem that 
+		//"rostral tubule" will match "anterior side" because rostral is synonymous with anterior
+		
 		if(finalentityid.length()==0){
 			String[] tokens = entitylabel.split("\\s+");
-			if(tokens.length>=2){
+			if(tokens.length>=2 && !this.spatialterms.contains(tokens[tokens.length-2])){
+			//enhanced condition	
 				String last2 = "<"+join(tokens, tokens.length-2, tokens.length-1, " ").replace(" ", "> <")+">";
 				if(valid(last2)){
 					String shortened = entitylabel.substring(0, entitylabel.lastIndexOf(" ")).trim();
@@ -656,7 +664,7 @@ public class TermEQ2IDEQ {
 		}
 
 		/*if landed here, the first try has failed*/
-		//spatial term
+		//Changed by Zilong: spatial term
 		//Limitation: designated to handle two-word spatial terms 
 		for (String st:this.spatialterms){
 			if(term.startsWith(st+" ")){
@@ -819,9 +827,9 @@ public class TermEQ2IDEQ {
 			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "gstestnew", "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\ontologies",csv);
 			
 			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
-			String csv = "C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\output.csv";
-			String ontologies = "C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\ontologies";
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "test4_xml2eq", "test4", ontologies, csv);
+			String csv = "C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\target\\output.csv";
+			String ontologies = "C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies";
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "gstestNew_xml2eq", "gstestNew", ontologies, csv);
 		
 		}catch(Exception e){
 			e.printStackTrace();

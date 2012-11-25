@@ -163,6 +163,12 @@ public class XML2EQ {
 		this.keyentities = new ArrayList<String>();
 		this.ossification.put("unossified", "ossification,absent");
 		
+		//populate spatialHeadNoun here:
+		this.spatialHeadNoun.add("coronoid");
+		this.spatialHeadNoun.add("process");
+		this.spatialHeadNoun.add("coracoid");
+		//TODO
+		
 		if (conn == null) {
 			Class.forName("com.mysql.jdbc.Driver");
 			String URL = "jdbc:mysql://localhost/" + database + "?user=" + username + "&password=" + password;
@@ -185,7 +191,7 @@ public class XML2EQ {
 					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
 					+ "entity varchar(200), entitylabel varchar(200), entityid varchar(200), " + "quality varchar(200), qualitylabel varchar(200), qualityid varchar(200), "
 					+ "qualitynegated varchar(200), qualitynegatedlabel varchar(200), " + "qnparentlabel varchar(200), qnparentid varchar(200), "
-					+ "qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(200), "
+					+ "qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(300), "
 					+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
 
 			pathCharacterStatement = XPath.newInstance(".//statement[@statement_type='character']");
@@ -438,6 +444,34 @@ public class XML2EQ {
 			String qualitymodifier=EQ.get("qualitymodifier");
 			String quality=EQ.get("quality");
 			
+			if (EQ.get("type").compareTo("state") == 0 && this.keyentitylocator != null) {
+				// EQ based on a state statement
+				// this is not a binarystate statement
+				if (EQ.get("entitylocator").compareTo(this.keyentitylocator) != 0 && isRelated2KeyEntities(EQ.get("entity"))) {
+					// to inhere the entitylocator, this entity must be somewhat related to this.keyentity
+					// "lateral wall" is related to "walls" of ...
+					entitylocator += "," + this.keyentitylocator;
+				}
+			}
+			entitylocator = entitylocator.trim().replaceAll("(^,|,$)", "");
+			EQ.put("entitylocator", entitylocator);
+
+			// 2. negation
+			if (EQ.get("quality").startsWith("not ")) {
+				EQ.put("qualitynegated", EQ.get("quality"));
+				EQ.put("quality", "");
+			}
+
+			// finally
+			if (EQ.get("description").compareTo(text) != 0) {
+				System.out.println("text::" + EQ.get("description"));
+				text = EQ.get("description");
+			}
+			
+			/**
+			 * Start adjusting results based on identified patterns
+			 * */
+			
 			/*
 			 * Changed by Zilong: change any self-reference word to the keyentity(es)
 			 * To add any new self-reference word, please modify the instance variable
@@ -499,43 +533,26 @@ public class XML2EQ {
 				}
 			}
 			
-			String[] qualityTerms=quality.toLowerCase().trim().replaceAll("[\\[\\]]", "").split("\\s+");
-			if(this.spatialterms.contains(qualityTerms[qualityTerms.length-1].replaceFirst("ly$", ""))){
-				//if the quality contains the spatial term's adverb form.
-				String ne = qualityTerms[qualityTerms.length-1].replaceFirst("ly$", "")+" region";
-				String nel = entity+((entitylocator==null||entitylocator.equals(""))?"":(","+entitylocator));
-				String nq = quality.toLowerCase().trim().replaceAll("\\[.*\\]", "");
-				
-				EQ.put("entity", ne);
-				EQ.put("entitylocator", nel);
-				EQ.put("quality", nq);
-				
-			}
-			/*end handling spatial terms*/
 			
-			if (EQ.get("type").compareTo("state") == 0 && this.keyentitylocator != null) {
-				// EQ based on a state statement
-				// this is not a binarystate statement
-				if (EQ.get("entitylocator").compareTo(this.keyentitylocator) != 0 && isRelated2KeyEntities(EQ.get("entity"))) {
-					// to inhere the entitylocator, this entity must be somewhat related to this.keyentity
-					// "lateral wall" is related to "walls" of ...
-					entitylocator += "," + this.keyentitylocator;
-				}
-			}
-			entitylocator = entitylocator.trim().replaceAll("(^,|,$)", "");
-			EQ.put("entitylocator", entitylocator);
-
-			// 2. negation
-			if (EQ.get("quality").startsWith("not ")) {
-				EQ.put("qualitynegated", EQ.get("quality"));
-				EQ.put("quality", "");
-			}
-
-			// finally
-			if (EQ.get("description").compareTo(text) != 0) {
-				System.out.println("text::" + EQ.get("description"));
-				text = EQ.get("description");
-			}
+			
+			
+			/*case: Mesethmoid flares anteriorly-> E: anterior region(part_of(mesethmoid bone)), Q: decreased width*/
+			/*need more supporting cases. For now, comment it out to avoid interference with cases like ventrally directed*/
+			//String[] qualityTerms=quality.toLowerCase().trim().replaceAll("[\\[\\]]", "").split("\\s+");
+//			if(this.spatialterms.contains(qualityTerms[qualityTerms.length-1].replaceFirst("ly$", ""))){
+//				//if the quality contains the spatial term's adverb form.
+//				String ne = qualityTerms[qualityTerms.length-1].replaceFirst("ly$", "")+" region";
+//				String nel = entity+((entitylocator==null||entitylocator.equals(""))?"":(","+entitylocator));
+//				String nq = quality.toLowerCase().trim().replaceAll("\\[.*\\]", "");
+//				
+//				EQ.put("entity", ne);
+//				EQ.put("entitylocator", nel);
+//				EQ.put("quality", nq);
+//				
+//			}
+			/*end handling spatial terms*/
+			EQ.put("quality", quality.toLowerCase().trim().replaceAll("[\\[\\]]", ""));
+			
 			this.insertEQs2Table(EQ);
 		}
 
@@ -811,7 +828,7 @@ public class XML2EQ {
 				List<Element> chars = pathWholeOrgStrucChar.selectNodes(state);
 				for (Element chara : chars) {
 					Hashtable<String, String> EQi = (Hashtable<String, String>) EQc.clone();
-					EQi.put("quality", chara.getAttributeValue("value"));
+					EQi.put("quality", charactersAsString(root, firststruct));
 					if (chara.getAttribute("constraintid") != null) {
 						String names = this.getStructureName(root, chara.getAttributeValue("constraintid"));
 						names = names + "," + this.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid") + "']");
@@ -873,7 +890,7 @@ public class XML2EQ {
 
 		List<Element> chars = pathCharacter.selectNodes(firststruct);
 		for (Element chara : chars) {
-			String m = chara.getAttribute("modifier") == null ? "" : chara.getAttributeValue("modifier");
+			String m = (chara.getAttribute("modifier") == null ? "" : chara.getAttributeValue("modifier"));
 			chstring += chara.getAttributeValue("value") + " ";
 			if (m.length() > 0) {
 				chstring += "[" + m + "] ";
@@ -912,7 +929,7 @@ public class XML2EQ {
 		if (snames.size() == 0)
 			return null;
 		String textc = text;
-		text = text.replaceFirst("\\[.*$", "") + " ";
+		text = text.replaceFirst("\\[.*$", "") + " ";//remove the character term
 		do {
 			for (String sname : snames) {
 				sname = sname.toLowerCase().replaceAll("_", " ");
@@ -929,7 +946,7 @@ public class XML2EQ {
 						snames.remove(sname);
 						return textc.trim();
 					}
-					return sname;
+					return textc.trim();
 				}
 			}
 			text = text.replaceFirst("^.*?\\s+", "");
@@ -1627,6 +1644,7 @@ public class XML2EQ {
 	}
 
 	/**
+	 * Get structure name from the XML results of CharaParser.
 	 * 
 	 * @param root
 	 * @param structids
@@ -1880,12 +1898,12 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\target\\final1";
+		String srcdir = "C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\target\\final";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";
-		String outputtable = "xml2eq";
+		String outputtable = "gstestNew_xml2eq";
 		// String benchmarktable = "internalworkbench";
-		String prefix = "gstestnew";
+		String prefix = "gstestNew";
 		String glosstable = "fishglossaryfixed";
 		try {
 			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);

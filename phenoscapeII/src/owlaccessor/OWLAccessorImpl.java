@@ -156,21 +156,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();		
 			for (OWLClass c : allclasses) {
-				// match class concepts and also the synonyms
-				/*if(c.getIRI().toString().contains("UBERON_0003221")){
-					System.out.println("find it");
-				}*/
 				List<String> syns = this.getSynonymLabels(c);
 				String label = this.getLabel(c).toLowerCase();
 				boolean syn = matchSyn(con, syns, "e");
-				//if (label.contains(con) || label.equals(con) || syn) {
 				if (label.equals(con) || syn) {
 					
 					result.add(c);
-					//if (syn && !label.contains(con)) {
-						// System.out.println("syn+:" + con);
-					//}
-					// break;
 				}
 			}
 		return result;
@@ -525,6 +516,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		if (ids.isEmpty()) {
 			return "";// no id, return empty string
 		} else {
+			//Should return only one id, assuming each class only has one id
 			return this.getRefinedOutput(((OWLAnnotation) ids.toArray()[0])
 					.toString());
 		}

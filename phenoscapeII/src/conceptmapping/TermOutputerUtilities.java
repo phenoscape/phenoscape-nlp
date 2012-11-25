@@ -238,22 +238,25 @@ public class TermOutputerUtilities {
 		while(it.hasNext()){
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
+			String id = owlapi.getID(c);
 			if(label.compareToIgnoreCase(term)==0){
 				result= new String[3];
 				result[0] = type;
-				result[1] = c.toString().replaceFirst("http.*?(?=(PATO|TAO|AMAO|VAO|BSPO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "");//id
+				result[1] = id;//id
 				result[2] = label;
 				return result;
 			}
 		}
+		
 		//otherwise, append all possible matches
 		it = matches.iterator();
 		result = new String[]{"", "", ""};
 		while(it.hasNext()){
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
+			String id = owlapi.getID(c);
 			result[0] = type;
-			result[1] += c.toString().replaceFirst(".*http.*?(?=(PATO|TAO|AMAO|VAO|BSPO)_)", "").replaceFirst("_", ":").replaceAll("[<>]", "")+";";
+			result[1] += id+";";
 			result[2] += label+";";
 		}
 		if(result[1].length()>0){
