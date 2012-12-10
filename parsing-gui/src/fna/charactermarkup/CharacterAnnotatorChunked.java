@@ -187,7 +187,7 @@ public class CharacterAnnotatorChunked {
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
 		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
-		decomposeMultipleStructures();
+		decomposeMultipleStructures();//Changed by Zilong
 		standardization();
 		
 		

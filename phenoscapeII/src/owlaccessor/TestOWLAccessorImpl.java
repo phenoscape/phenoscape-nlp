@@ -86,7 +86,7 @@ public class TestOWLAccessorImpl {
 	@Test
 	public void testGetAnnotationProperties() throws Exception{
 		//File phenoscape = new File("C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\ontologies\\phenoscape-ext.owl");
-		File phenoscape = new File("C:\\Users\\Zilong Chang\\Downloads\\phenoscape-ext.owl");
+		File phenoscape = new File("C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies\\pato.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
 		
@@ -99,10 +99,10 @@ public class TestOWLAccessorImpl {
 		
 		//List<String> s = new ArrayList<String>();
 		//System.out.println(a.retrieveConcept("pterotic-supracleithrum").size());
-		List<OWLClass> results = a.retrieveConcept("rostral tubule");
-		for(OWLClass c : results){
-			System.out.println(c.getIRI());
-		}
+//		List<OWLClass> results = a.retrieveConcept("rostral tubule");
+//		for(OWLClass c : results){
+//			System.out.println(c.getIRI());
+//		}
 		
 //		List<OWLClass> results1 = a.retrieveConcept("face");
 //		for(OWLClass c : results1){

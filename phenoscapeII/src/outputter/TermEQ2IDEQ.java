@@ -15,56 +15,93 @@ import java.util.regex.Pattern;
 import conceptmapping.TermOutputerUtilities;
 
 
+// TODO: Auto-generated Javadoc
 /**
+ * The Class TermEQ2IDEQ.
+ *
  * @author Hong Updates
  * This class finds IDs from ontologies for Entity and Quality terms
  * and fill in the blank ID columns in the outputtable
  * 
  * list of relational qualities that are symmetrical:
- *ARTICULATED_WITH = "PATO:0002278"
- *ASSOCIATED_WITH = "PATO:0001668"
- *ATTACHED_TO = "PATO:0001667"
- *DETACHED_FROM = "PATO:0001453"
- *DISSOCIATED_FROM = "PATO:0001738"
- *FUSED_WITH = "PATO:0000642"
- *IN_CONTACT_WITH = "PATO:0001961"
- *OVERLAP_WITH = "PATO:0001590"
- *SEPARATED_FROM = "PATO:0001505"
- *UNFUSED_FROM = "PATO:0000651"
- *STRUCTURE = "PATO:0000141"
+ * ARTICULATED_WITH = "PATO:0002278"
+ * ASSOCIATED_WITH = "PATO:0001668"
+ * ATTACHED_TO = "PATO:0001667"
+ * DETACHED_FROM = "PATO:0001453"
+ * DISSOCIATED_FROM = "PATO:0001738"
+ * FUSED_WITH = "PATO:0000642"
+ * IN_CONTACT_WITH = "PATO:0001961"
+ * OVERLAP_WITH = "PATO:0001590"
+ * SEPARATED_FROM = "PATO:0001505"
+ * UNFUSED_FROM = "PATO:0000651"
+ * STRUCTURE = "PATO:0000141"
  * 
- *unsymmetrical ones  are marked as 'relational' in PATO obo file
- * 
+ * unsymmetrical ones  are marked as 'relational' in PATO obo file
  */
 
 @SuppressWarnings("unused")
 public class TermEQ2IDEQ {
 
+	//sub groups of ontology 
+	/** The Constant RELATIONAL_SLIM. */
+	public static final int RELATIONAL_SLIM=1;
+	
 	//name of the ouput table
+	/** The outputtable. */
 	private String outputtable;
 	
+	/** The conn. */
 	private Connection conn;
+	
+	/** The username. */
 	private String username="root";
+	
+	/** The password. */
 	private String password="root";
 	//private TreeSet<String> entityterms = new TreeSet<String>();
 	//private TreeSet<String> qualityterms = new TreeSet<String>();
 	
+	/** The entity id cache. */
 	private Hashtable<String, String[]> entityIDCache = new Hashtable<String, String[]>(); //term=> {id, label}
+	
+	/** The quality id cache. */
 	private Hashtable<String, String[]> qualityIDCache = new Hashtable<String, String[]>();
 	
+	/** The spatialterms. */
 	private ArrayList<String> spatialterms = new ArrayList<String>();
 	
+	/** The prefix. */
 	private String prefix;
+	
+	/** The ontologyfolder. */
 	private String ontologyfolder;
+	
+	/** The ontoutil. */
 	private static TermOutputerUtilities ontoutil;
+	
+	/** The process. */
 	private String process="crest|ridge|process|tentacule|shelf|flange|ramus";
+	
+	/** The debug. */
 	private boolean debug = false;
 	
 	//this instance var is used to map spatial terms that are not in ontology to terms that are.
-	private Hashtable<String, String> spatialMaps = new Hashtable<String, String>(); 
+	/** The spatial maps. */
+	private Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
+	
+	/**by Zilong: a flag indicates if the quality term of current state should be looked up in relational slim. 
+	 * when both entity and quality modifier present, this should be true.*/
+	private boolean isInRelationalSlim=false;
 	
 	/**
-	 * 
+	 * Instantiates a new term e q2 ideq.
+	 *
+	 * @param database the database
+	 * @param outputtable the outputtable
+	 * @param prefix the prefix
+	 * @param ontologyfolder the ontologyfolder
+	 * @param csv the csv
+	 * @throws Exception the exception
 	 */
 	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
 		this.prefix = prefix;
@@ -105,6 +142,13 @@ public class TermEQ2IDEQ {
 					entitylabel = knowntransformation(entitylabel);
 					entitylocatorlabel= knowntransformation(entitylocatorlabel);
 					qualitymodifierlabel = knowntransformation(qualitymodifierlabel);
+					//determine if the current case should have a quality term in relational slim. by Zilong 
+					if(entitylabel!=null&&!entitylabel.equals("")&&!entitylabel.equals("null")&&qualitymodifierlabel!=null&&!qualitymodifierlabel.equals("")&&!qualitymodifierlabel.equals("null")){
+						this.isInRelationalSlim=true;
+					}else{
+						this.isInRelationalSlim=false;
+					}
+					
 					fillInIDs(srcid, entitylabel, entitylocatorlabel, quality, qualitynegated, qualitymodifierlabel);
 				}
 				//export the table to a csv file
@@ -124,6 +168,12 @@ public class TermEQ2IDEQ {
 			}			
 	}
 	
+	/**
+	 * Knowntransformation.
+	 *
+	 * @param entitylabel the entitylabel
+	 * @return the string
+	 */
 	private String knowntransformation(String entitylabel) {
 		entitylabel = entitylabel.replaceAll("latero-sensory", "sensory");
 		entitylabel = entitylabel.replaceAll("laterosensory", "sensory");
@@ -131,13 +181,15 @@ public class TermEQ2IDEQ {
 	}
 
 	/**
-	 * 
+	 * Fill in i ds.
+	 *
 	 * @param srcid used to insert IDs back into the output table
 	 * @param entitylabel will be updated to a label that matches an ID
 	 * @param entitylocatorlabel will be updated to labels that match a set of IDs
 	 * @param quality used to find an qualityID and qualitylabel
 	 * @param qualitynegated used to find an qualityID, qualitynegatedlabel, qnparentlabel, and qnparentid
 	 * @param qualitymodifierlabel will be updated to labels that match a set of IDs
+	 * @throws Exception the exception
 	 */
 	public void fillInIDs(String srcid, String entitylabel, String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel) throws Exception{
 		//deal with special case first: between
@@ -146,17 +198,27 @@ public class TermEQ2IDEQ {
 		
 		fillInIDs4Entity(srcid, entitylabel, entitylocatorlabel); //0: label; 1:id
 		fillInIDs4QualityModifier(srcid, qualitymodifierlabel);
-		if(quality.length()>0){//rounded dorsally
-			fillInIDs4Quality(srcid, quality);
-		}else if(qualitynegated.length()>0){
-			fillInIDs4Qualitynegated(srcid, qualitynegated);
+		if(this.isInRelationalSlim){
+			if(quality.length()>0){//rounded dorsally
+				fillInIDs4Quality(srcid, quality,RELATIONAL_SLIM);
+			}else if(qualitynegated.length()>0){
+				fillInIDs4Qualitynegated(srcid, qualitynegated,RELATIONAL_SLIM);
+			}
+		}else{
+			if(quality.length()>0){//rounded dorsally
+				fillInIDs4Quality(srcid, quality);
+			}else if(qualitynegated.length()>0){
+				fillInIDs4Qualitynegated(srcid, qualitynegated);
+			}
 		}
 	}
-	
+
 	/**
-	 * update qualitymodifierlabel and qualitymodifierid
-	 * @param srcid
-	 * @param qualitymodifierlabel
+	 * update qualitymodifierlabel and qualitymodifierid.
+	 *
+	 * @param srcid the srcid
+	 * @param qualitymodifierlabel the qualitymodifierlabel
+	 * @throws Exception the exception
 	 */
 	private void fillInIDs4QualityModifier(String srcid,
 			String qualitymodifierlabel) throws Exception{
@@ -185,6 +247,14 @@ public class TermEQ2IDEQ {
 		updateQualityModifierIDs(srcid, finalqualitymodifierlabels, finalqualitymodifierids);
 	}
 
+	/**
+	 * Update quality modifier i ds.
+	 *
+	 * @param srcid the srcid
+	 * @param qualitymodifierlabels the qualitymodifierlabels
+	 * @param qualitymodifierids the qualitymodifierids
+	 * @throws Exception the exception
+	 */
 	private void updateQualityModifierIDs(String srcid, String qualitymodifierlabels,
 			String qualitymodifierids) throws Exception {
 			Statement stmt = conn.createStatement();
@@ -195,9 +265,11 @@ public class TermEQ2IDEQ {
 	}
 
 	/**
-	 * update qualitynegatedlabel, qualityid, qnparentlabel, qnparentid
-	 * @param srcid
-	 * @param qualitynegated
+	 * update qualitynegatedlabel, qualityid, qnparentlabel, qnparentid.
+	 *
+	 * @param srcid the srcid
+	 * @param qualitynegated the qualitynegated
+	 * @throws Exception the exception
 	 */
 	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated) throws Exception{
 		String term = qualitynegated.replaceFirst("not ", "").trim();
@@ -219,6 +291,35 @@ public class TermEQ2IDEQ {
 		
 	}
 
+	private void fillInIDs4Qualitynegated(String srcid, String qualitynegated, int subgroup) throws Exception {
+		String term = qualitynegated.replaceFirst("not ", "").trim();
+		String qualitynegatedlabel="";
+		String qualityid="";
+		String qnparentlabels="";
+		String qnparentids="";
+		String[] result = this.searchTerm(term, "quality", subgroup);//3-element array: 0:type; 1:id; 2:label
+		if(result!=null){
+			qualitynegatedlabel = "not("+result[2]+")";
+			qualityid = result[1];
+			String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result[2]);
+			if(parentinfo != null){
+				qnparentids = parentinfo[0];
+				qnparentlabels = parentinfo[1];
+			}			
+		}
+		updateQualitynegatedIDs(srcid, qualitynegatedlabel, qualityid, qnparentlabels, qnparentids);
+	}
+	
+	/**
+	 * Update qualitynegated i ds.
+	 *
+	 * @param srcid the srcid
+	 * @param qualitynegatedlabel the qualitynegatedlabel
+	 * @param qualityid the qualityid
+	 * @param qnparentlabels the qnparentlabels
+	 * @param qnparentids the qnparentids
+	 * @throws Exception the exception
+	 */
 	private void updateQualitynegatedIDs(String srcid,
 			String qualitynegatedlabel, String qualityid,
 			String qnparentlabels, String qnparentids) throws Exception{
@@ -232,9 +333,11 @@ public class TermEQ2IDEQ {
 
 
 	/**
-	 * update qualitylabel, qualityid
-	 * @param srcid
-	 * @param quality
+	 * update qualitylabel, qualityid.
+	 *
+	 * @param srcid the srcid
+	 * @param term the term
+	 * @throws Exception the exception
 	 */
 	private void fillInIDs4Quality(String srcid, String term) throws Exception {
 		term = term.replaceAll("\\[.*?\\]", "").trim();
@@ -278,6 +381,56 @@ public class TermEQ2IDEQ {
 		}
 	}
 	
+	
+	private void fillInIDs4Quality(String srcid, String term, int subgroup) throws Exception {
+		term = term.replaceAll("\\[.*?\\]", "").trim();
+		//if(this.debug){
+		//	System.out.println("quality term:["+term+"]");
+		//}
+		//heuristics: numerical
+		if(term.startsWith("present ")){//present regardless of ...
+			term = "present";
+		}else if(term.matches(".*?\\d+.*")){
+			updateCount(srcid, term);
+			if(term.indexOf("%")>0 && term.matches(".*?\\d\\.\\d.*")){//80% or 1.2
+				term = "size";
+			}else if(term.indexOf("°")>0 ){
+				term = "orientation";
+			}else{
+				term = "count";
+			}
+		}else if(term.matches("zero")){
+			updateCount(srcid, term);
+			term = "count";
+		}else if(term.matches("^\\w+er\\b.*") || term.endsWith("^\\w+est\\b.*")){//heuristics: comparative/superlative adjective
+			term = term.replaceFirst(" .*", "");
+			term = checkWN4base(term);
+		}else if(term.matches(".*?\\b(width|wide|widen|long|length|\\w+-sized)\\b.*")){
+			term = "size";
+		}else if(term.matches(".*?equal.*")){
+			term = "size";
+		}		
+		String[] result = this.searchTerm(term, "quality", subgroup);//consider subgroups like relational slim 
+		if(result!=null){
+			//if(this.debug){
+			//	System.out.println("qulity label:["+result[2]+"/"+result[1]+"]");
+			//}
+			updateQualityIDs(srcid, result[2], result[1]);
+		}else{
+			if(this.debug){
+				System.out.println("quality term:["+term+"]");
+				System.out.println("qulity label:[/]");
+			}
+		}		
+	}
+	
+	/**
+	 * Update count.
+	 *
+	 * @param srcid the srcid
+	 * @param term the term
+	 * @throws Exception the exception
+	 */
 	private void updateCount(String srcid, String term) throws Exception{
 
 			Statement stmt = conn.createStatement();
@@ -286,6 +439,14 @@ public class TermEQ2IDEQ {
 	}
 	
 
+	/**
+	 * Update quality i ds.
+	 *
+	 * @param srcid the srcid
+	 * @param qualitylabel the qualitylabel
+	 * @param qualityid the qualityid
+	 * @throws Exception the exception
+	 */
 	private void updateQualityIDs(String srcid, String qualitylabel, String qualityid) throws Exception{
 
 			Statement stmt = conn.createStatement();
@@ -297,11 +458,13 @@ public class TermEQ2IDEQ {
 
 	/**
 	 * search entities
-	 * then lookup IDs for other terms in entitylocators                                  	
-	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid using srcid
-	 * @param srcid
-	 * @param entitylabel
-	 * @param entitylocatorlabel
+	 * then lookup IDs for other terms in entitylocators
+	 * update entitylabel, entityid, entitylocatorlabel, entitylocatorid using srcid.
+	 *
+	 * @param srcid the srcid
+	 * @param entitylabel the entitylabel
+	 * @param entitylocatorlabel the entitylocatorlabel
+	 * @throws Exception the exception
 	 */
 	
 	
@@ -334,16 +497,20 @@ public class TermEQ2IDEQ {
 
 	
 	/**
-	 * this deals with a transformation of the pattern similar to this: 
+	 * this deals with a transformation of the pattern similar to this:
 	 * original: contact between A and B / present / absent
 	 * results: A in contact with B/A separated from B
 	 * 
-	 * very prelimary/specific at this time
-	 * @param srcid
-	 * @param entitylabel
-	 * @param entitylocatorlabel
-	 * @return
-	 * @throws Exception 
+	 * very prelimary/specific at this time.
+	 *
+	 * @param srcid the srcid
+	 * @param entitylabel the entitylabel
+	 * @param entitylocatorlabel the entitylocatorlabel
+	 * @param quality the quality
+	 * @param qualitynegated the qualitynegated
+	 * @param qualitymodifierlabel the qualitymodifierlabel
+	 * @return true, if successful
+	 * @throws Exception the exception
 	 */
 	private boolean fillInIDs4ContactBetween(String srcid, String entitylabel,
 			String entitylocatorlabel, String quality, String qualitynegated, String qualitymodifierlabel) throws Exception {
@@ -398,6 +565,20 @@ public class TermEQ2IDEQ {
 		return complete;
 	}
 
+	/**
+	 * Update eqi ds.
+	 *
+	 * @param srcid the srcid
+	 * @param entitylabel the entitylabel
+	 * @param entityid the entityid
+	 * @param qualitylabel the qualitylabel
+	 * @param qualityid the qualityid
+	 * @param qualitymodifierlabels the qualitymodifierlabels
+	 * @param qualitymodifierids the qualitymodifierids
+	 * @param entitylocatorlabels the entitylocatorlabels
+	 * @param entitylocatorids the entitylocatorids
+	 * @throws Exception the exception
+	 */
 	private void updateEQIDs(String srcid, String entitylabel,
 			String entityid, String qualitylabel, String qualityid, String qualitymodifierlabels, String qualitymodifierids, String entitylocatorlabels,
 			String entitylocatorids) throws Exception{
@@ -409,6 +590,13 @@ public class TermEQ2IDEQ {
 					" entitylocatorid='"+entitylocatorids+"' where id="+srcid);
 	}
 
+	/**
+	 * Search entity locator.
+	 *
+	 * @param finalentitylocator the finalentitylocator
+	 * @param finalentitylocatorresult the finalentitylocatorresult
+	 * @throws Exception the exception
+	 */
 	private void searchEntityLocator(String finalentitylocator,
 			String[] finalentitylocatorresult) throws Exception {
 		String finalentitylocatorids = "";
@@ -439,23 +627,26 @@ public class TermEQ2IDEQ {
 
 	
 	/**
-	 * 	 * Search a phrase A B C
+	 * * Search a phrase A B C
 	 * search A B C
 	 * if succeeds, search the parent entity locator + A B C [tooth => ceratobranchial 5 tooth]
-	 *             if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
-	 *             if fails, entitylabel = A B C, entitylocator = entitylocator
+	 * if succeeds, entitylabel = p.e.l + A B C, entitylocator = entitylocator - p.e.l
+	 * if fails, entitylabel = A B C, entitylocator = entitylocator
 	 * if fails, search B C
-	 *             if succeeds, entitylabel = B C, entitylocator = (entitylabel - B C), entitylocator
-	 *             if fails, search C
-	 *             			 if succeeds, entitylabel = C, entitylocator = (entitylabel - C), entitylocator
-	 *             			 if fails, search the parent entity locator
-	 *                                 if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
-	 *                                 if fails, search the next parent entity locator
-	 *                                 ....
-	 * @param entitylabel
-	 * @param entitylocatorlabel
-	 * @param entityWithLocator
-	 * @return
+	 * if succeeds, entitylabel = B C, entitylocator = (entitylabel - B C), entitylocator
+	 * if fails, search C
+	 * if succeeds, entitylabel = C, entitylocator = (entitylabel - C), entitylocator
+	 * if fails, search the parent entity locator
+	 * if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
+	 * if fails, search the next parent entity locator
+	 * ....
+	 *
+	 * @param entitylabel the entitylabel
+	 * @param entitylocatorlabel the entitylocatorlabel
+	 * @param entityWithLocator the entity with locator
+	 * @param originalentitylabel the originalentitylabel
+	 * @return the string[]
+	 * @throws Exception the exception
 	 */
 	private String[] searchEntity(String entitylabel, String entitylocatorlabel, boolean entityWithLocator, String originalentitylabel) throws Exception{
 		//System.out.println("search entity: "+entitylabel);
@@ -570,9 +761,11 @@ public class TermEQ2IDEQ {
 	}
 
 	/**
-	 * 
-	 * @param two word structure phrase marked with <>, like <process> <apex>
-	 * @return
+	 * Valid.
+	 *
+	 * @param organphrase the organphrase
+	 * @return true, if successful
+	 * @throws Exception the exception
 	 */
 	private boolean valid(String organphrase) throws Exception{
 
@@ -592,12 +785,13 @@ public class TermEQ2IDEQ {
 
 
 	/**
-	 * like array join function in Perl
-	 * @param entitylabeltokens
-	 * @param i
-	 * @param size
-	 * @param string
-	 * @return
+	 * like array join function in Perl.
+	 *
+	 * @param tokens the tokens
+	 * @param start the start
+	 * @param end the end
+	 * @param delimiter the delimiter
+	 * @return the string
 	 */
 	private String join(String[] tokens, int start, int end,
 			String delimiter) {
@@ -607,6 +801,16 @@ public class TermEQ2IDEQ {
 	}
 
 
+	/**
+	 * Update entity i ds.
+	 *
+	 * @param srcid the srcid
+	 * @param entitylabel the entitylabel
+	 * @param entityid the entityid
+	 * @param entitylocatorlabels the entitylocatorlabels
+	 * @param entitylocatorids the entitylocatorids
+	 * @throws Exception the exception
+	 */
 	private void updateEntityIDs(String srcid, String entitylabel,
 			String entityid, String entitylocatorlabels,
 			String entitylocatorids) throws Exception{
@@ -633,14 +837,18 @@ public class TermEQ2IDEQ {
 	}
 	
 	/**
+	 * Search term in the whole ontology (of a particular type)
 	 * preopercular latero-sensory canal =>	preopercular sensory canal
-	 * pectoral-fin spine => pectoral fin spine
-	 * @param term
+	 * pectoral-fin spine => pectoral fin spine.
+	 *
+	 * @param term the term
+	 * @param type the type
 	 * @return 3-element array: type, id, label
+	 * @throws Exception the exception
 	 */
-	private String[] searchTerm(String term, String type) throws Exception{	
+	private String[] searchTerm(String term, String type) throws Exception{
 		if(term.trim().length()==0) return null;
-				
+		
 		//search in cache
 		if(type.compareTo("entity")==0){
 			String[] result = this.entityIDCache.get(term);
@@ -664,6 +872,7 @@ public class TermEQ2IDEQ {
 		}
 
 		/*if landed here, the first try has failed*/
+		
 		//Changed by Zilong: spatial term
 		//Limitation: designated to handle two-word spatial terms 
 		for (String st:this.spatialterms){
@@ -717,10 +926,102 @@ public class TermEQ2IDEQ {
 		return null;
 	}
 	
+	
 	/**
-	 * 
-	 * @param results
-	 * @return
+	 * Search term within a sub group of an ontology (of a particular type).
+	 *
+	 * @param term the term
+	 * @param type the term type
+	 * @param subgroup the sub group
+	 * @return the string[]
+	 * @throws Exception the exception
+	 */
+	private String[] searchTerm(String term, String type, int subgroup) throws Exception{	
+		if(term.trim().length()==0) return null;
+				
+		//search in cache
+		if(type.compareTo("entity")==0){
+			String[] result = this.entityIDCache.get(term);
+			if(result!=null) return result;
+		}
+		if(type.compareTo("quality")==0){
+			String[] result = this.qualityIDCache.get(term);
+			if(result!=null) return result;
+		}
+		
+		//search ontologies
+
+		//first search the original word
+		ArrayList<String[]> results = ontoutil.searchOntologies(term, type, subgroup);
+		String[] exactmatch = null;
+		if(results.size()>0) exactmatch = results.get(0);
+		if(exactmatch!=null){
+			if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+			if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+			return exactmatch;
+		}
+
+		/*if landed here, the first try has failed*/
+		
+		//Changed by Zilong: spatial term
+		//Limitation: designated to handle two-word spatial terms 
+		for (String st:this.spatialterms){
+			if(term.startsWith(st+" ")){
+				String newTerm = term;
+				
+				String repl=null;
+				
+				if((repl=this.spatialMaps.get(term.replaceFirst(st, "").trim()))!=null){
+					newTerm=st+" "+repl;
+				}
+				
+				results = ontoutil.searchOntologies(newTerm, type, subgroup);
+				exactmatch = null;
+				if(results.size()>0) exactmatch = results.get(0);
+				if(exactmatch!=null){
+					if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+					if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+					return exactmatch;
+				}
+			}
+		}
+		
+		//term with hyphen, replace hyphen with space
+		if(term.indexOf("-")>0){ //caudal-fin
+			term = term.replaceAll("-", " ");
+			results = ontoutil.searchOntologies(term, type, subgroup);
+			exactmatch = null;
+			if(results.size()>0) exactmatch = results.get(0);
+			if(exactmatch!=null){
+				if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+				if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+				return exactmatch;
+			}
+		}		
+		
+		//if landed here, the 2nd try was not successful either
+		if(term.indexOf("/")>0){ //bone/tendon
+			String[] tokens = term.split("/");
+			for(String token: tokens){
+				results = ontoutil.searchOntologies(token, type, subgroup);
+				exactmatch = null;
+				if(results.size()>0) exactmatch = results.get(0);
+				if(exactmatch!=null){
+					if(type.compareTo("entity")==0) this.entityIDCache.put(term, exactmatch);
+					if(type.compareTo("quality")==0) this.qualityIDCache.put(term, exactmatch);				
+					return exactmatch;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Retrieve exact match.
+	 *
+	 * @param results the results
+	 * @param term the term
+	 * @return the string[]
 	 */
 
 	private String[] retrieveExactMatch(ArrayList<String[]> results, String term) {
@@ -734,10 +1035,11 @@ public class TermEQ2IDEQ {
 
 
 	/**
-	 * 
-	 * @param entityterm
-	 * @param results: a two dimensional array holding multiple mappings, 
-	 * each mapping contains 3 elements: type, id, and label
+	 * Insert quality results2 table.
+	 *
+	 * @param qualityterm the qualityterm
+	 * @param results the results
+	 * @throws Exception the exception
 	 */
 	private void insertQualityResults2Table(String qualityterm, ArrayList<String[]>  results) throws Exception {
 			String id = results.get(0)[1]+":"+results.get(0)[2];
@@ -746,10 +1048,11 @@ public class TermEQ2IDEQ {
 	}
 
 	/**
-	 * 
-	 * @param entityterm
-	 * @param results: a two dimensional array holding multiple mappings, 
-	 * each mapping contains 3 elements: type, id, and label
+	 * Insert entity results2 table.
+	 *
+	 * @param entityterm the entityterm
+	 * @param results the results
+	 * @throws Exception the exception
 	 */
 	private void insertEntityResults2Table(String entityterm, ArrayList<String[]> results) throws Exception{
 		
@@ -760,6 +1063,13 @@ public class TermEQ2IDEQ {
 			stmt.execute("update "+this.outputtable+" set qualitymodifierid='"+id+"' where qualitymodifier='"+entityterm+"'");			
 	}
 
+	/**
+	 * Check w n4base.
+	 *
+	 * @param word the word
+	 * @return the string
+	 * @throws Exception the exception
+	 */
 	public static String checkWN4base(String word) throws Exception{
 		
 		String result = checkWN("wn "+word+" -over");
@@ -787,6 +1097,13 @@ public class TermEQ2IDEQ {
 		return word;
 	}
 	 
+	/**
+	 * Check wn.
+	 *
+	 * @param cmdtext the cmdtext
+	 * @return the string
+	 * @throws Exception the exception
+	 */
 	public static String checkWN(String cmdtext) throws Exception{
 		
  	  		Runtime r = Runtime.getRuntime();	
@@ -817,19 +1134,22 @@ public class TermEQ2IDEQ {
             }
             return sb.toString();
 	}
+	
 	/**
-	 * @param args
+	 * The main method.
+	 *
+	 * @param args the arguments
 	 */
 	public static void main(String[] args) {
 		try{
 			//String csv = "C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/target/trash_EQ.csv";
 			//String csv = "C:/Users/Zilong Chang/Documents/WORK/getestNew/target/aftersereno.csv";
 			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "xml2eq", "gstestnew", "C:\\Users\\Zilong Chang\\Documents\\WORK\\getestNew\\ontologies",csv);
+			String csv = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\target\\output.csv";
+			String ontologies = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\ontologies";
 			
-			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
-			String csv = "C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\target\\output.csv";
-			String ontologies = "C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies";
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "gstestNew_xml2eq", "gstestNew", ontologies, csv);
+			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv)
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "bspo1209_swatz_xml2eq", "bspotest_swatz", ontologies, csv);
 		
 		}catch(Exception e){
 			e.printStackTrace();
