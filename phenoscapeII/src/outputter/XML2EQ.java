@@ -1899,10 +1899,10 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\target\\final";
+		String srcdir = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\target\\final1";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";
-		String outputtable = "bspo1209_swatz_xml2eq";
+		String outputtable = "solvenull_xml2eq";
 		// String benchmarktable = "internalworkbench";
 		String prefix = "bspotest_swatz";
 		String glosstable = "fishglossaryfixed";

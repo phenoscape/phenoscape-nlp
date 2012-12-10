@@ -1152,7 +1152,7 @@ public class TermEQ2IDEQ {
 			String ontologies = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\ontologies";
 			
 			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv)
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "bspo1209_swatz_xml2eq", "bspotest_swatz", ontologies, csv);
+			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "solvenull_xml2eq", "bspotest_swatz", ontologies, csv);
 		
 		}catch(Exception e){
 			e.printStackTrace();

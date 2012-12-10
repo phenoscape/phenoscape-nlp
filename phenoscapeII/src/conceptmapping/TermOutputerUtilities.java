@@ -142,12 +142,11 @@ public class TermOutputerUtilities {
 			}
 		}
 		//find parent
-		String [] result = null; 
+		String [] result = {"",""}; 
 		if(pato!=null){
 			OWLClass c = pato.getClassByLabel(classlabel);
 			if(c!=null){
 				List<OWLClass> pcs = pato.getParents(c);
-				result = new String[2]; //0: ID; 1:label
 				for(OWLClass pc: pcs){
 					result[0] += pato.getID(pc)+",";
 					result[1] += pato.getLabel(pc)+",";
