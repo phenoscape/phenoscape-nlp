@@ -42,7 +42,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** A set of ontologies. */
 	private Set<OWLOntology> onts;
 
-	private Set<OWLClass> allclasses=new HashSet<OWLClass>(); 
+	private Set<OWLClass> allclasses=new HashSet<OWLClass>();
+	
+	private Set<OWLClass> relationalSlim = new HashSet<OWLClass>();
 	
 	private boolean excluded = false;
 	
@@ -72,8 +74,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 			//eliminate branches
 			allclasses.removeAll(this.getWordsToEliminate(eliminate));
 
+			for (OWLClass c: allclasses){
+				System.out.println(c.toString()+" : "+isRelationalSlim(c));
+			}
 	}
 
+		
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 * 
@@ -96,6 +102,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 		
 		//eliminate branches
 		allclasses.removeAll(this.getWordsToEliminate(eliminate));
+		
+		for (OWLClass c: allclasses){
+			if(isRelationalSlim(c)){
+				this.relationalSlim.add(c);
+			}
+		}
 
 	}
 	
@@ -155,18 +167,40 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public List<OWLClass> retrieveConcept(String con) throws Exception {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();		
-			for (OWLClass c : allclasses) {
-				List<String> syns = this.getSynonymLabels(c);
-				String label = this.getLabel(c).toLowerCase();
-				boolean syn = matchSyn(con, syns, "e");
-				if (label.equals(con) || syn) {
-					
-					result.add(c);
-				}
+		for (OWLClass c : allclasses) {
+			List<String> syns = this.getSynonymLabels(c);
+			String label = this.getLabel(c).toLowerCase();
+			boolean syn = matchSyn(con, syns, "e");
+			if (label.equals(con) || syn) {
+				result.add(c);
 			}
+		}
 		return result;
 	}
 
+	@Override
+	public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception {
+		con = con.trim();
+		List<OWLClass> result = new ArrayList<OWLClass>();
+		Set<OWLClass> classes = null;
+		if(subgroup==outputter.TermEQ2IDEQ.RELATIONAL_SLIM){
+			classes=this.relationalSlim;
+		}else{
+			classes=this.allclasses;
+		}
+		//maybe other slims
+		
+		for (OWLClass c : classes) {
+			List<String> syns = this.getSynonymLabels(c);
+			String label = this.getLabel(c).toLowerCase();
+			boolean syn = matchSyn(con, syns, "e");
+			if (label.equals(con) || syn) {
+				result.add(c);
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * Match syn.
 	 * 
@@ -274,7 +308,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 
 	/**
-	 * Gets the annotation property by iri.
+	 * Gets the annotation property by an iri string.
 	 * 
 	 * @param c
 	 *            the owl class
@@ -321,6 +355,16 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return result;
 	}
 
+	
+	public boolean isRelationalSlim(OWLClass c){
+		
+		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
+			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#relational_slim"))
+				return true;
+		}
+		
+		return false;
+	}
 	/**
 	 * Return the exact synonyms of a term represented by an OWLClass object.
 	 * 
@@ -415,7 +459,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 		Set<OWLAnnotation> anns = getExactSynonyms(c);
 		anns.addAll(this.getRelatedSynonyms(c));
 		anns.addAll(this.getNarrowSynonyms(c));
-		anns.addAll(this.getBroadSynonyms(c));
+		
+		//Changed by ZILONG
+		//anns.addAll(this.getBroadSynonyms(c));//DO NOT return Broad Synonyms now
+		//END
+		
 		//if(c.getIRI().toString().contains("UBERON_0003221")){
 		//	System.out.println("Syns for 0003221:"+anns.size());
 		Iterator<OWLAnnotation> it = anns.iterator();
@@ -521,4 +569,5 @@ public class OWLAccessorImpl implements OWLAccessor {
 					.toString());
 		}
 	}
+
 }

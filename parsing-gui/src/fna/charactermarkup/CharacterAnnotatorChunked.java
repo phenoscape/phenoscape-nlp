@@ -187,7 +187,7 @@ public class CharacterAnnotatorChunked {
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
 		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
-		decomposeMultipleStructures();
+		decomposeMultipleStructures();//Changed by Zilong
 		standardization();
 		
 		
@@ -2398,7 +2398,12 @@ public class CharacterAnnotatorChunked {
 				do {
 					p--;
 					lasttoken = cs.getTokenAt(p);
+					if(lasttoken == null){
+						lasttoken="";
+						break;
+					}
 				} while (lasttoken.compareTo("") == 0 || lasttoken.startsWith("r[p[of]"));
+				
 				if (lasttoken.matches("\\w+\\[.*")) {// is a chunk
 					ArrayList<Element> targets = retrieveMatchingElement(lasttoken);
 					for (Element target : targets) {
