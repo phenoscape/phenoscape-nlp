@@ -42,14 +42,22 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** A set of ontologies. */
 	private Set<OWLOntology> onts;
 
+	/** The allclasses. */
 	private Set<OWLClass> allclasses=new HashSet<OWLClass>();
 	
+	/** The relational slim. */
 	private Set<OWLClass> relationalSlim = new HashSet<OWLClass>();
 	
+	/** The obsolete. */
+	private Set<OWLClass> obsolete = new HashSet<OWLClass>();
+	
+	/** The excluded. */
 	private boolean excluded = false;
 	
+	/** The search cache. */
 	private Hashtable<String, OWLClass> searchCache;
 	
+	/** The source. */
 	private String source;
 	/**
 	 * Instantiates a new oWL accessor impl.
@@ -65,18 +73,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		source = ontoURL;
 		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(iri);
 		
-		
-			onts=rootOnt.getImportsClosure();
-			for (OWLOntology ont:onts){
-				allclasses.addAll(ont.getClassesInSignature(true));
-			}
-			
-			//eliminate branches
-			allclasses.removeAll(this.getWordsToEliminate(eliminate));
-
-			for (OWLClass c: allclasses){
-				System.out.println(c.toString()+" : "+isRelationalSlim(c));
-			}
+		constructorHelper(rootOnt, eliminate);
 	}
 
 		
@@ -94,7 +91,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 		source = file.getAbsolutePath();
 		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(file);
 		
+		constructorHelper(rootOnt, eliminate);
 		
+	}
+	
+	
+	/**
+	 * Constructor helper: the common part of the two constructors.
+	 *
+	 * @param rootOnt the root ont
+	 * @param eliminate the eliminate
+	 */
+	private void constructorHelper(OWLOntology rootOnt, ArrayList<String> eliminate){
 		onts=rootOnt.getImportsClosure();
 		for (OWLOntology ont:onts){
 			allclasses.addAll(ont.getClassesInSignature(true));
@@ -103,14 +111,28 @@ public class OWLAccessorImpl implements OWLAccessor {
 		//eliminate branches
 		allclasses.removeAll(this.getWordsToEliminate(eliminate));
 		
+		//add all relational slim terms to a list
+		//also add all obsolete terms to a list
 		for (OWLClass c: allclasses){
 			if(isRelationalSlim(c)){
 				this.relationalSlim.add(c);
 			}
+			if(this.isObsolete(c)){
+				this.obsolete.add(c);
+			}
 		}
-
+		
+		//remove all obosolete classes
+		relationalSlim.removeAll(obsolete);
+		allclasses.removeAll(obsolete);
+		
 	}
 	
+	/**
+	 * Gets the source.
+	 *
+	 * @return the source
+	 */
 	public String getSource(){
 		return source;
 	}
@@ -178,6 +200,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see owlaccessor.OWLAccessor#retrieveConcept(java.lang.String, int)
+	 */
 	@Override
 	public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception {
 		con = con.trim();
@@ -245,14 +270,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/**
 	 * Remove the non-readable or non-meaningful characters in the retrieval
 	 * from OWL API, and return the refined output.
-<<<<<<< HEAD
-	 * 
-	 * @param origin
-	 *            the origin??? what does it look like?
-=======
+	 * <<<<<<< HEAD
 	 *
 	 * @param origin the origin??? what does it look like?
->>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
+	 * >>>>>>> branch 'master' of ssh://git@github.com/zilongchang/phenoscape-nlp.git
 	 * @return the refined output ??? what does it look like??
 	 */
 	public String getRefinedOutput(String origin) {
@@ -355,7 +376,27 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return result;
 	}
 
+	/**
+	 * Checks if is obsolete.
+	 *
+	 * @param c the c
+	 * @return true, if is obsolete
+	 */
+	public boolean isObsolete(OWLClass c){
+		if(this.getLabel(c).startsWith("obsolete")){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	
+	/**
+	 * Checks if is relational slim.
+	 *
+	 * @param c the c
+	 * @return true, if is relational slim
+	 */
 	public boolean isRelationalSlim(OWLClass c){
 		
 		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
@@ -390,12 +431,24 @@ public class OWLAccessorImpl implements OWLAccessor {
 						"http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym");
 	}
 	
+	/**
+	 * Gets the narrow synonyms.
+	 *
+	 * @param c the c
+	 * @return the narrow synonyms
+	 */
 	public Set<OWLAnnotation> getNarrowSynonyms(OWLClass c) {
 		return this
 				.getAnnotationByIRI(c,
 						"http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym");
 	}
 	
+	/**
+	 * Gets the broad synonyms.
+	 *
+	 * @param c the c
+	 * @return the broad synonyms
+	 */
 	public Set<OWLAnnotation> getBroadSynonyms(OWLClass c) {
 		return this
 				.getAnnotationByIRI(c,

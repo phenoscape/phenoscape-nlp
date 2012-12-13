@@ -86,7 +86,7 @@ public class TestOWLAccessorImpl {
 	@Test
 	public void testGetAnnotationProperties() throws Exception{
 		//File phenoscape = new File("C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\ontologies\\phenoscape-ext.owl");
-		File phenoscape = new File("C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies\\pato.owl");
+		File phenoscape = new File("C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies\\phenoscape-ext.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
 		
