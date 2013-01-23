@@ -16,6 +16,9 @@ import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
+import java.sql.Timestamp;
+import java.util.Date;
+
 
 /**
  * @author chunshui
@@ -101,9 +104,14 @@ public class VolumeFinalizer extends Thread {
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
 		x2e.outputEQs();
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_EQ.csv").replaceAll("\\\\+", "/");
+		//Appending new date to the csv and txt output - Hariharan task1
+		Date d = new Date();
+		String time = new Timestamp(d.getTime())+"";
+		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_EQ.csv").replaceAll("\\\\+", "/");
+		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");
+		
 		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv);
+		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
 			this.showOutputMessage("Check result file in "+csv);

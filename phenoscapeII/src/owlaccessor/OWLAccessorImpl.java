@@ -55,7 +55,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private boolean excluded = false;
 	
 	/** The search cache. */
-	private Hashtable<String, OWLClass> searchCache;
+	private Hashtable<String, List<OWLClass>> searchCache;
 	
 	/** The source. */
 	private String source;
@@ -74,6 +74,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(iri);
 		
 		constructorHelper(rootOnt, eliminate);
+		
+		// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
+		this.retrieveAllConcept();
 	}
 
 		
@@ -92,7 +95,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 		OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(file);
 		
 		constructorHelper(rootOnt, eliminate);
-		
+		// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
+				this.retrieveAllConcept();
 	}
 	
 	
@@ -176,6 +180,37 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 	}
 
+	//Below is the code for populating all the synonyms and labels with their classes into a hashtable searchCache!! task2
+		public void retrieveAllConcept() throws Exception {
+			searchCache = new Hashtable<String, List<OWLClass>>();
+			int flag =0;
+			for (OWLClass c : allclasses) {
+				List<String> syns = this.getSynonymLabels(c);
+				syns.add(this.getLabel(c).toLowerCase().trim());	
+				Iterator<String> i=syns.iterator();
+				while(i.hasNext())
+				{
+					String label = (String) i.next();
+					if(searchCache.containsKey(label.trim()))
+					{
+						List<OWLClass> temp = searchCache.get(label.trim());
+						temp.add(c);
+						flag=1;
+					}
+					else
+					{
+						List<OWLClass> clas = new ArrayList<OWLClass>();
+						clas.add(c);
+						searchCache.put(label.trim(), clas);
+						
+					}			
+					if(flag==1)
+					System.out.println(flag--);
+				}
+		
+			}
+		}
+		
 	/**
 	 * Retrieve concept.
 	 * 
@@ -186,7 +221,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 *             the exception
 	 */
 	@Override
-	public List<OWLClass> retrieveConcept(String con) throws Exception {
+	/*Old code
+	 * public List<OWLClass> retrieveConcept(String con) throws Exception {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();		
 		for (OWLClass c : allclasses) {
@@ -199,6 +235,14 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 		return result;
 	}
+	*/
+	//@see owlaccessor.OWLAccessor#retrieveConcept(java.lang.String, int)
+	// returns the arraylist of owl classes for a particular label Task 2
+
+		public List<OWLClass> retrieveConcept(String con) throws Exception {
+			
+			return this.searchCache.get(con);
+		}
 
 	/* (non-Javadoc)
 	 * @see owlaccessor.OWLAccessor#retrieveConcept(java.lang.String, int)
@@ -622,5 +666,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 					.toString());
 		}
 	}
+	
+	//added by Hariharan to return Manager that was created by constructor Task1
+		public OWLOntologyManager getManager() {
+			return manager;
+		}
 
 }

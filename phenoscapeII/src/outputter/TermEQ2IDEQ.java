@@ -4,15 +4,26 @@
 package outputter;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import conceptmapping.TermOutputerUtilities;
+
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import owlaccessor.OWLAccessorImpl;
+import conceptmapping.TermOutputerUtilities;
+import java.io.BufferedWriter;
+import java.sql.Timestamp;
 
 
 // TODO: Auto-generated Javadoc
@@ -57,7 +68,7 @@ public class TermEQ2IDEQ {
 	private String username="root";
 	
 	/** The password. */
-	private String password="root";
+	private String password="forda444";
 	//private TreeSet<String> entityterms = new TreeSet<String>();
 	//private TreeSet<String> qualityterms = new TreeSet<String>();
 	
@@ -103,7 +114,11 @@ public class TermEQ2IDEQ {
 	 * @param csv the csv
 	 * @throws Exception the exception
 	 */
-	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv) throws Exception {
+	//Extra function parameters textfile name, version added by hariharan for Task 1
+	public TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv, String txt, String version) throws Exception {
+		//Date today = new Date();
+		
+		//long current_time1 = System.currentTimeMillis();
 		this.prefix = prefix;
 		this.ontologyfolder = ontologyfolder;
 		
@@ -168,8 +183,41 @@ public class TermEQ2IDEQ {
 						" ESCAPED BY '\\\\' LINES TERMINATED BY '\\n' FROM ("+
 						" SELECT "+header+ " UNION SELECT "+fieldlist+ " From "+ this.outputtable+") a";	
 				stmt.execute(export);
-			}			
+			}		
+			// This call is to create a version file along with the csv file - Hariharan Task1
+			version(ontoutil,txt,version);
+		//	long current_time2 = System.currentTimeMillis();
+			//System.out.println(current_time2-current_time1+ "In Minutes"+ (current_time2-current_time1)/6000);
 	}
+	
+	//Changed by Hariharan to include ontology version textfile in the output Task2
+		public void version(TermOutputerUtilities out, String txt, String version) throws IOException, OWLOntologyCreationException
+		{
+			FileWriter f = new FileWriter(txt);
+			PrintWriter textout = new PrintWriter(f);
+			
+			OWLOntology temp;
+			textout.println("ontology versions");
+			for(OWLAccessorImpl api: TermOutputerUtilities.OWLqualityOntoAPIs)
+			{
+				String S[]=api.getSource().split("[\\\\.]");
+				textout.print((S[S.length-2].toUpperCase())+"\t\t\t\t");
+				temp = api.getManager().getOntologies().iterator().next();
+				textout.println((temp.getOntologyID().getVersionIRI()));
+			}
+			
+			for(OWLAccessorImpl api1: TermOutputerUtilities.OWLentityOntoAPIs)
+			{
+				String S[]=api1.getSource().split("[\\\\.]");
+				textout.print((S[S.length-2].toUpperCase())+"\t\t\t\t");
+				temp = api1.getManager().getOntologies().iterator().next();
+			    textout.println((temp.getOntologyID().getVersionIRI()));
+			}
+			
+			textout.println("charparser version\t\t\t\t"+ version);
+			textout.close();
+		}
+		
 	
 	/**
 	 * Knowntransformation.
@@ -1152,7 +1200,7 @@ public class TermEQ2IDEQ {
 			String ontologies = "C:\\Users\\Zilong Chang\\Desktop\\BSPOTest\\ontologies";
 			
 			//TermEQ2IDEQ(String database, String outputtable, String prefix, String ontologyfolder, String csv)
-			TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "solvenull_xml2eq", "bspotest_swatz", ontologies, csv);
+			//TermEQ2IDEQ t2id = new TermEQ2IDEQ("biocreative2012", "solvenull_xml2eq", "bspotest_swatz", ontologies, csv);
 		
 		}catch(Exception e){
 			e.printStackTrace();

@@ -275,7 +275,12 @@ public class TermOutputerUtilities {
 	
 	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) throws Exception {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term);
+		List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
+		
+		//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
+
+				if(matches!=null)
+				{
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
@@ -310,6 +315,8 @@ public class TermOutputerUtilities {
 		}else{
 			return null;
 		}
+				}
+				return null;
 	}
 	/**
 	 * 
@@ -320,7 +327,11 @@ public class TermOutputerUtilities {
 	 */
 	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term);
+		List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
+		
+		//Task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
+				if(matches!=null)
+				{
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first
@@ -355,6 +366,8 @@ public class TermOutputerUtilities {
 		}else{
 			return null;
 		}
+				}
+				return null;
 	}
 
 	
