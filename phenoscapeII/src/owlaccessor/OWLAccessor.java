@@ -3,6 +3,7 @@
  */
 package owlaccessor;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public interface OWLAccessor {
 	 * @return a list of matched or related terms (synonyms)
 	 * @throws Exception 
 	 */
-	public List<OWLClass> retrieveConcept(String con) throws Exception;
+	public Hashtable<String, List<OWLClass>> retrieveConcept(String con) throws Exception;
 	
 	/**
 	 * Retrieve the classes representing exact matched or related terms (synonyms) of the given concept from PATO 

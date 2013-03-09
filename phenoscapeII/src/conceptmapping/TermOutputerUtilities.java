@@ -34,6 +34,8 @@ public class TermOutputerUtilities {
 	public static boolean debug = false;
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
+	private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> ();
+
 	static{
 		//check cache
 		singulars.put("axis", "axis");
@@ -78,14 +80,16 @@ public class TermOutputerUtilities {
 		plurals.put("iii", "iii");
 	}
 	
-	public TermOutputerUtilities(String ontologyfolder, String database)throws Exception{
+	public TermOutputerUtilities(String ontologyfolder, String database){
 		TermOutputerUtilities.ontologyfolder = ontologyfolder;
 		excluded.add("cellular quality");//exclude "cellular quality"
 		this.database = database;
 		
 		//create a list of relative path of the ontologies
 		String [] entityontologies = new String[]{
-
+				//TODO:add GO:bioprocess
+				//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
+				//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
  		ontologyfolder+System.getProperty("file.separator")+"phenoscape-ext.owl",
 //		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
 //		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
@@ -106,6 +110,7 @@ public class TermOutputerUtilities {
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
+				this.alladjectiveorgans.add(api.adjectiveorgans);
 			}else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
 				int j = onto.lastIndexOf("\\");
@@ -160,12 +165,12 @@ public class TermOutputerUtilities {
 	
 
 	/**
-	 * 
+	 * merged to  searchOntologies(String term, String type, String ingroup)
 	 * @param term
 	 * @param type: entity or quality
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
+/*	public ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
 		ArrayList<String[]> results = new ArrayList<String[]>();
 		//boolean added = false;
@@ -201,64 +206,78 @@ public class TermOutputerUtilities {
 			}
 		}
 		return results;
-		//if(added){
-		//	return results;
-		//}else{
-		//	return null;
-		//}
-	}
 
+	}*/
+
+	public String searchAdjectiveOrgan(String term, String type) {
+		if(type.compareTo("entity")==0){
+			for(Hashtable<String, String> adjective : this.alladjectiveorgans){
+				String id = adjective.get(term);
+				if(id!=null) return id;
+			}
+		}
+		return null;
+	}
 	/**
 	 * Search a term in a subgroup of an ontology
-	 * Currently, only applies to PATO relational slim
+	 * subgroup only applies to PATO relational slim //TODO complete this part.
 	 * @param term
 	 * @param type: entity or quality
+	 * @param subgroup: inRelationalSlim
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public ArrayList<String[]> searchOntologies(String term, String type, int subgroup) throws Exception {
-		//search quality ontologies
-		ArrayList<String[]> results = new ArrayList<String[]>();
-		//boolean added = false;
+	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, int subgroup) {
+		//search quality or entity ontologies, depending on the type
+		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
+		
+		//quality
 		if(type.compareTo("quality")==0){
 			for(OWLAccessorImpl api: OWLqualityOntoAPIs){
-				String[] result = searchOWLOntology(term, api, type, subgroup);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
 				if(result!=null){
-					//added = true;
 					results.add(result);
 				}
 			}			
-			for(OBO2DB o2d: OBOqualityOntoAPIs){
-				String[] result = searchOBOOntology(term, o2d, type);
+			/*TODO need review : result format should be the same as OWL search
+			 * for(OBO2DB o2d: OBOqualityOntoAPIs){
+				Hashtable<String, String> result = searchOBOOntology(term, o2d, type);
 				if(result!=null){
 					//added = true;
 					results.add(result);
 				}
-			}
-		}else if(type.compareTo("entity")==0){
+			}*/			
+		}
+		
+		
+		//entity
+		if(type.compareTo("entity")==0){
 			for(OWLAccessorImpl api: OWLentityOntoAPIs){
-				String[] result = searchOWLOntology(term, api, type);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
 				if(result!=null){
-					//added = true;
 					results.add(result);
 				}
 			}			
-			for(OBO2DB o2d: OBOentityOntoAPIs){
-				String[] result = searchOBOOntology(term, o2d, type);
+			/*TODO need review
+			 * for(OBO2DB o2d: OBOentityOntoAPIs){
+				Hashtable<String, String> result = searchOBOOntology(term, o2d, type);
 				if(result!=null){
 					//added = true;
 					results.add(result);
 				}
-			}
+			}*/
 		}
 		return results;
-		//if(added){
-		//	return results;
-		//}else{
-		//	return null;
-		//}
+
 	}
 	
-	
+	/**
+	 * 
+	 * @param term
+	 * @param o2d
+	 * @param type
+	 * @return  4-key hashtable: term, querytype, id, label, matchtype
+	 * @throws Exception
+	 */
 	private String[] searchOBOOntology(String term, OBO2DB o2d, String type) throws Exception{
 		String [] result = new String[3]; //an array with three elements: type, id, and label
 		String[] match = o2d.getID(term);
@@ -272,103 +291,136 @@ public class TermOutputerUtilities {
 		return result;
 	}
 
-	
-	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) throws Exception {
-		String[] result = null;
-		List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
-		
-		//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
-
-				if(matches!=null)
-				{
-		Iterator<OWLClass> it = matches.iterator();
-		
-		//exact match first
-		while(it.hasNext()){
-			OWLClass c = it.next();
-			String label = owlapi.getLabel(c);
-			String id = owlapi.getID(c);
-			if(label.compareToIgnoreCase(term)==0){
-				result= new String[3];
-				result[0] = type;
-				result[1] = id;//id
-				result[2] = label;
-				return result;
-			}
-		}
-		
-		//otherwise, append all possible matches
-		it = matches.iterator();
-		result = new String[]{"", "", ""};
-		while(it.hasNext()){
-			OWLClass c = it.next();
-			String label = owlapi.getLabel(c);
-			String id = owlapi.getID(c);
-			result[0] = type;
-			result[1] += id+";";
-			result[2] += label+";";
-		}
-		if(result[1].length()>0){
-			result[1] = result[1].replaceFirst(";$", "");
-			result[2] = result[2].replaceFirst(";$", "");
-			return result;
-		}else{
-			return null;
-		}
-				}
-				return null;
-	}
 	/**
 	 * 
 	 * @param term
 	 * @param owlapi
 	 * @param type
-	 * @return array of 3 elements: 0: type; 1:ID; 2:label
+	 * @param subgroup ?? 
+	 * @return 4-key hashtable: term, querytype, id, label, matchtype
 	 */
-	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
+	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) {
+		Hashtable<String, String> result = null;
+		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
+		//should be
+		Hashtable<String, List<OWLClass>> matches = (Hashtable<String, List<OWLClass>>)owlapi.retrieveConcept(term);
+		if(matches == null || matches.size() ==0){
+			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
+			//TODO: update other copies of the method
+			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
+		}else{
+			List<OWLClass> matchclass = matches.get("original");
+			if(matchclass!=null && matchclass.size()==0){
+				result = collectResult(term, matchclass, type, "original", owlapi);
+				return result;
+			}
+			
+			matchclass = matches.get("exact");
+			if(matchclass!=null && matchclass.size()==0){
+				result = collectResult(term, matchclass, type, "exact", owlapi);
+				return result;
+			}
+			
+			matchclass = matches.get("narrow");
+			if(matchclass!=null && matchclass.size()==0){
+				result = collectResult(term, matchclass, type, "narrow", owlapi);
+				return result;
+			}
+			
+			matchclass = matches.get("related");
+			if(matchclass!=null && matchclass.size()==0){
+				result = collectResult(term, matchclass, type, "related", owlapi);
+				return result;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 
+	 * @param term
+	 * @param matches
+	 * @param querytype
+	 * @param matchtype
+	 * @param owlapi
+	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 */
+	private Hashtable<String, String> collectResult(String term, List<OWLClass> matches, String querytype, String matchtype, OWLAccessorImpl owlapi){
+		if(matches == null || matches.size() ==0) return null;
+		Hashtable<String, String> result = new Hashtable<String, String>();
+		result.put("term",  term);
+		result.put("querytype",  querytype);
+		result.put("matchtype", matchtype);
+		result.put("id", "");
+		result.put("label", "");
+		boolean haveresult = false;
+		Iterator<OWLClass> it = matches.iterator();
+		while(it.hasNext()){
+			OWLClass c = it.next();
+			String label = owlapi.getLabel(c);
+			String id = owlapi.getID(c);
+			result.put("id", result.get("id")+ id+";");
+			result.put("label", result.get("label")+ label+";");
+			haveresult = true;
+		}
+		if(haveresult){
+			result.put("id", result.get("id").replaceFirst(";$", ""));
+			result.put("label", result.get("label").replaceFirst(";$", ""));
+		}
+		if(haveresult) return result;
+		return null;
+	}
+	/**
+	 * merged to  searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, String ingroup)
+	 * @param term
+	 * @param owlapi
+	 * @param type
+	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 */
+	/*private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		
 		//Task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
-				if(matches!=null)
-				{
-		Iterator<OWLClass> it = matches.iterator();
-		
-		//exact match first
-		while(it.hasNext()){
-			OWLClass c = it.next();
-			String label = owlapi.getLabel(c);
-			String id = owlapi.getID(c);
-			if(label.compareToIgnoreCase(term)==0){
-				result= new String[3];
+		if(matches!=null)
+		{
+			Iterator<OWLClass> it = matches.iterator();
+			
+			//exact match first
+			while(it.hasNext()){
+				OWLClass c = it.next();
+				String label = owlapi.getLabel(c);
+				String id = owlapi.getID(c);
+				if(label.compareToIgnoreCase(term)==0){
+					result= new String[3];
+					result[0] = type;
+					result[1] = id;//id
+					result[2] = label;
+					return result;
+				}
+			}
+			
+			//otherwise, append all possible matches
+			it = matches.iterator();
+			result = new String[]{"", "", ""};
+			while(it.hasNext()){
+				OWLClass c = it.next();
+				String label = owlapi.getLabel(c);
+				String id = owlapi.getID(c);
 				result[0] = type;
-				result[1] = id;//id
-				result[2] = label;
+				result[1] += id+";";
+				result[2] += label+";";
+			}
+			if(result[1].length()>0){
+				result[1] = result[1].replaceFirst(";$", "");
+				result[2] = result[2].replaceFirst(";$", "");
 				return result;
+			}else{
+				return null;
 			}
 		}
-		
-		//otherwise, append all possible matches
-		it = matches.iterator();
-		result = new String[]{"", "", ""};
-		while(it.hasNext()){
-			OWLClass c = it.next();
-			String label = owlapi.getLabel(c);
-			String id = owlapi.getID(c);
-			result[0] = type;
-			result[1] += id+";";
-			result[2] += label+";";
-		}
-		if(result[1].length()>0){
-			result[1] = result[1].replaceFirst(";$", "");
-			result[2] = result[2].replaceFirst(";$", "");
-			return result;
-		}else{
-			return null;
-		}
-				}
-				return null;
-	}
+		return null;
+	}*/
 
 	
 	/*
@@ -553,5 +605,8 @@ public class TermOutputerUtilities {
 		// TODO Auto-generated method stub
 
 	}
+
+
+
 
 }
