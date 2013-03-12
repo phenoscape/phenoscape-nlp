@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.jdom.Comment;
 import org.jdom.Element;
-import outputter.TermEQ2IDEQ;
+//import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
@@ -101,21 +101,22 @@ public class VolumeFinalizer extends Thread {
 		String xmldir = Registry.TargetDirectory+System.getProperty("file.separator")+"final"+System.getProperty("file.separator");
 		String outputtable = this.dataPrefix+"_xml2eq";
 		//String benchmarktable = "internalworkbench";
+		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
 		x2e.outputEQs();
-		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
+
 		//Appending new date to the csv and txt output - Hariharan task1
 		Date d = new Date();
 		String time = new Timestamp(d.getTime())+"";
 		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_EQ.csv").replaceAll("\\\\+", "/");
 		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");
-		
-		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
 			this.showOutputMessage("Check result file in "+csv);
 		}
+		//String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
+		//TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);
+
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {
