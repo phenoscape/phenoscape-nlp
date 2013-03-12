@@ -49,6 +49,16 @@ public class SentenceOrganStateMarker {
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
 	private StyledText charLog;
+	private String termprefix = "basi|hypo";
+	
+	
+	private Connection con;
+	private String url;
+	private String dburl = "jdbc:mysql://localhost:3306/";
+	private String uname = "root";
+	private String upw = "forda444";
+	private String dbname = "biocreative2012";
+
 	/**
 	 * 
 	 */
@@ -89,6 +99,9 @@ public class SentenceOrganStateMarker {
 				text = text.replaceAll("&#176;", "°");
 				text = text.replaceAll("\\bca\\s*\\.", "ca");
 				text = rs.getString("modifier")+"##"+tag+"##"+text;
+		//text.matches(".*?("+termprefix+").*")
+				
+				
 				sentences.put(source, text);
 				}
 			}
@@ -145,6 +158,60 @@ public class SentenceOrganStateMarker {
 		this.statenames = collectStateNames();
 	}
 	
+	/*
+	 * The normalize prefix method is used to expand the prefix of a sentence.
+	 * Example : {basi}- and <hypobranchial> <ossifications> will be expanded to 
+	 * 			<basibranchial> and <hypobranchial> <ossifications>
+	 */
+	
+	
+	
+	String normalizePrefix(String text) throws ClassNotFoundException, SQLException
+	{
+String[] splittext = text.split("\\s");
+		
+		for(int i=0;i<splittext.length;i++)
+		{
+			if(splittext[i].matches("\\{?("+termprefix+")\\}?-.*"))
+					{
+					if(((i+2)<=splittext.length) && ((splittext[i+1].equals("and")||(splittext[i+1].equals("or")))))
+						 {
+						String termprefix1[] = termprefix.split("\\|");
+						
+						for(int z=0;z<termprefix1.length;z++)
+							 if(splittext[i+2].contains(termprefix1[z]))
+								 {
+								 splittext[i] ="<"+splittext[i].substring(1, splittext[i].lastIndexOf("-")-1)+splittext[i+2].substring(termprefix1[z].length()+1, splittext[i+2].length());
+								 inserttotable(splittext[i]);
+								 break;
+								 }
+						break;
+						 }
+					}
+		}
+		// combine splittext to form a single text.
+		 text="";
+		for(int i=0,j=0;i<splittext.length;i++,j++)	
+			{
+			text+=splittext[i];
+		    if(j<splittext.length-1)
+		    	text+=' ';
+			}	
+	return text;
+	}
+	
+	// The normalized prefix is inserterted into term category table as a structure term
+	void inserttotable(String term) throws ClassNotFoundException, SQLException
+	{
+
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(dburl + dbname, uname, upw);
+
+				// Drop table if exists
+				Statement stmt0 = con.createStatement();
+				System.out.println("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+				stmt0.executeUpdate("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+	}
 	/**
 	 * turn reddish purple to reddish-purple
 	 * @param replaceAll
@@ -164,7 +231,7 @@ public class SentenceOrganStateMarker {
 		return text;
 	}
 
-	public Hashtable<String, String> markSentences(){
+	public Hashtable<String, String> markSentences() throws Exception{
 		if(this.marked){
 			loadMarked();
 		}else{
@@ -185,7 +252,7 @@ public class SentenceOrganStateMarker {
 					taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
 				
-				System.out.println(taggedsent);
+			//	System.out.println(taggedsent);
 				sentences.put(source, taggedsent);
 				try{
 					Statement stmt1 = conn.createStatement();
@@ -218,7 +285,9 @@ public class SentenceOrganStateMarker {
 		}
 	}
 	
-	public String markASentence(String source, String modifier, String tag, String sent) {
+	public String markASentence(String source, String modifier, String tag, String sent) throws ClassNotFoundException, SQLException {
+		
+		
 		String taggedsent = markthis(source, sent, organnames, "<", ">");
 		taggedsent = markthis(source, taggedsent, statenames, "{", "}");
 		taggedsent = taggedsent.replaceAll("[<{]or[}>]", "or"); //make sure to/or are left untagged
@@ -237,6 +306,11 @@ public class SentenceOrganStateMarker {
 			//	taggedsent = fixInner(source, taggedsent, modifier, true);//@TODO: debug: need to put tag in after the modifier inner
 			//}
 		}
+		
+		if(taggedsent.matches("\\{?("+termprefix+")\\}?-.*")){
+			taggedsent = normalizePrefix(taggedsent); //basi_ and hypobranchial => basibranchial and hypobranchial
+		}
+		
  		return taggedsent;
 	}
 	
@@ -314,7 +388,7 @@ public class SentenceOrganStateMarker {
 		}
 		fixed +=taggedsent;
 		if(needfix){
-			System.out.println("fixed "+fixedcount+":["+source+"] "+fixed);
+			//System.out.println("fixed "+fixedcount+":["+source+"] "+fixed);
 			fixedcount++;
 		}
 		if(fixed.trim().length()<1){
@@ -561,7 +635,7 @@ public class SentenceOrganStateMarker {
 		//String database ="phenoscape";
 		String database="biocreative2012";
 		String username="root";
-		String password="root";
+		String password="forda444";
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -574,10 +648,10 @@ public class SentenceOrganStateMarker {
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "test", "fishglossaryfixed", true, null, null);
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "concepttest", "fishglossaryfixed", true, null, null);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
-		sosm.markSentences();
+		//sosm.markSentences();
 
 	}
 
