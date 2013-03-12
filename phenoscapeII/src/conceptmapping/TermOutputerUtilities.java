@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import oboaccessor.OBO2DB;
 import org.semanticweb.owlapi.model.OWLClass;
 
+import outputter.ApplicationUtilities;
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -28,13 +29,15 @@ public class TermOutputerUtilities {
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
-	private static String ontologyfolder;
+	private static String ontologyfolder = ApplicationUtilities.getProperty("ontology.dir");
+	private static String[] entityontologies;
+	private static String[] qualityontologies;
 	private String database;
 
 	public static boolean debug = false;
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
-	private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> ();
+	private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
 
 	static{
 		//check cache
@@ -78,32 +81,24 @@ public class TermOutputerUtilities {
 		plurals.put("i", "i"); //could add more roman digits
 		plurals.put("ii", "ii");
 		plurals.put("iii", "iii");
+		
+		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
+		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
+		
+		//TODO:add GO:bioprocess
+		entityontologies = new String[]{
+				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
+				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
+				};
+		qualityontologies = new String[]{
+				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
+		};
 	}
 	
 	public TermOutputerUtilities(String ontologyfolder, String database){
 		TermOutputerUtilities.ontologyfolder = ontologyfolder;
 		excluded.add("cellular quality");//exclude "cellular quality"
 		this.database = database;
-		
-		//create a list of relative path of the ontologies
-		String [] entityontologies = new String[]{
-				//TODO:add GO:bioprocess
-				//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
-				//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
- 		ontologyfolder+System.getProperty("file.separator")+"phenoscape-ext.owl",
-//		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
-//		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
-		ontologyfolder+System.getProperty("file.separator")+"bspo.owl"};
-		String [] qualityontologies = new String[]{
-		ontologyfolder+System.getProperty("file.separator")+"pato.owl"};
-		 
-		/*
-		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
-		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/skeletal/obo/vertebrate_anatomy.obo");
-		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo");
-		entityOntoPaths.add("http://www.berkeleybop.org/ontologies/bspo.owl");
-		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
-		*/
 		
 		//for each entity ontology
 		for(String onto: entityontologies){
@@ -297,26 +292,26 @@ public class TermOutputerUtilities {
 	 * @param owlapi
 	 * @param type
 	 * @param subgroup ?? 
-	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
 	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
-		Hashtable<String, List<OWLClass>> matches = (Hashtable<String, List<OWLClass>>)owlapi.retrieveConcept(term);
+		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
 			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
 			//TODO: update other copies of the method
 			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
 		}else{
 			List<OWLClass> matchclass = matches.get("original");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()>0){
 				result = collectResult(term, matchclass, type, "original", owlapi);
 				return result;
 			}
 			
 			matchclass = matches.get("exact");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()>0){
 				result = collectResult(term, matchclass, type, "exact", owlapi);
 				return result;
 			}
@@ -343,7 +338,7 @@ public class TermOutputerUtilities {
 	 * @param querytype
 	 * @param matchtype
 	 * @param owlapi
-	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
 	private Hashtable<String, String> collectResult(String term, List<OWLClass> matches, String querytype, String matchtype, OWLAccessorImpl owlapi){
 		if(matches == null || matches.size() ==0) return null;
