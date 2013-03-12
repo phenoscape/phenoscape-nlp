@@ -237,6 +237,35 @@ public class SentenceOrganStateMarker {
 			//	taggedsent = fixInner(source, taggedsent, modifier, true);//@TODO: debug: need to put tag in after the modifier inner
 			//}
 		}
+		
+		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>
+		if(taggedsent.contains("} and ")){
+			String sentcopy = taggedsent;
+			boolean changed = false;
+			Pattern p = Pattern.compile("(.*?)\\{(\\w+)\\} and ([^\\d]*) (<\\w+> *)+(.*)");
+			Matcher m = p.matcher(taggedsent);
+			while(m.matches()){
+				String lead = m.group(1).trim()+ " ";
+				String m1 = m.group(2).trim();
+				String m2 = m.group(3).trim();
+				String organ = taggedsent.substring(m.end(3), m.start(5)).trim();
+				String rest = m.group(5);
+				if(Utilities.isPosition(m1, conn, this.glosstable) && m2.matches("(<?\\{\\w+\\}>? *)+")){ //m2 can not have numbers, puncts, or stopword/prep
+					taggedsent = lead +"{"+ m1 +"} " + organ + " and " +m2+" "+organ +" "+ rest;
+					m = p.matcher(taggedsent);
+					changed = true;
+				}else{
+					taggedsent = lead +"{"+ m1 +"}### and " +m2+" "+organ +" "+ rest; //avoid infinite loop
+					m = p.matcher(taggedsent);
+				}
+			}
+			taggedsent = taggedsent.replaceAll("\\}###", "}");
+			if(changed){
+				System.out.println("before inserting organ: "+sentcopy);
+				System.out.println("after  inserting organ: "+taggedsent);
+			}
+		}
+		
  		return taggedsent;
 	}
 	
@@ -560,8 +589,8 @@ public class SentenceOrganStateMarker {
 		//String database="annotationevaluation";
 		//String database ="phenoscape";
 		String database="biocreative2012";
-		String username="root";
-		String password="root";
+		String username="biocreative";
+		String password="biocreative";
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
@@ -574,7 +603,7 @@ public class SentenceOrganStateMarker {
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "test", "fishglossaryfixed", true, null, null);
+		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "swartz", "fishglossaryfixed", true, null, null);
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 		sosm.markSentences();

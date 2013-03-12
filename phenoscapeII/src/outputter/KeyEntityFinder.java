@@ -4,6 +4,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.jdom.Element;
@@ -19,21 +20,26 @@ import org.jdom.Element;
  * 
  * 
  * TODO: complicated cases such as joints Junction between metapterygoid and hyomandibular, 300+ examples at SELECT * FROM fish_original_1st WHERE entitylabel LIKE "%joint%"
+ *  "Quadratojugal squamosal and preopercular fused"
+ *  "Contact between postorbital and lacrimal" => "joint" or "associated with"?
+ *  "(organ name)"
  */
 public class KeyEntityFinder {
-	private List<Element> chars;
+/*	private List<Element> chars;
 	private List<Element> states;
 	private List<String> keyentities;
-	private Element root;
+	private Element root;*/
+	private EntitySearcher es;
 	
 	
 	/**
 	 */
-	public KeyEntityFinder(List<Element> chars, List<Element> states, Element root, List<String> keyentities) {
-		this.chars = chars;
+	public KeyEntityFinder(EntitySearcher es) {
+		this.es = es;
+/*		this.chars = chars;
 		this.states = states;
 		this.root = root;
-		this.keyentities = keyentities;
+		this.keyentities = keyentities;*/
 	}
 
 	/**
@@ -45,14 +51,31 @@ public class KeyEntityFinder {
 	 * EQ::[E]lateral wall [Q]absent
 	 * text::mesial wall much taller
 	 * EQ::[E]mesial wall [Q]taller [much]
+	 * 
+	 * @return an arraylist of hashtables with keys: name|structid|entityid, each hashtable is a keyentity
+	 * 
+	 * when contructing a new entity (post-composed entity such as a joint), 
+	 * adjust 'root' to normalize it, for example, Junction between metapterygoid and hyomandibular
+	 * 
+	 * change structure 'junction' to 'metapterygoid-hyomandibular joint' (so characters/relations of junction now are associated with metapterygoid-hyomandibular joint"
+	 * remove relation "between", if metapterygoid and hyomandibular have no characters, remove them too, (what if they have?). 
+	 * 
+	 * save onto-id of a structure in the new 'ontoid' attribute of <structure>
+	 * 
+	 * do not deal with entity locators for key entities.
+	 * 
 	 */
-	public List<Element> getKeyEntities() throws Exception{
+	public List<Element> getKeyEntities(List<Element> chars, List<Element> states, Element root, List<String> keyentities){
+
 		List<Element> keys = new ArrayList<Element>();
-		
 		//add all structures which are not "whole organism" to key structures
 		//TODO should to-structure involved in a relation be considered key?
 		for (Element e : chars) {
-			keys.addAll(XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e));
+			try{
+				keys.addAll(XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e));
+			}catch(Exception ex){
+				ex.printStackTrace();
+			}
 		}
 		
 		//no key structures found
@@ -67,9 +90,16 @@ public class KeyEntityFinder {
 		//populate keyentities
 		for(Element key:keys){
 			//TODO ontology lookup for key entities
-			keyentities.add(Utilities.getStructureName(root, key.getAttributeValue("id")));
+			String structid = key.getAttributeValue("id");
+			String structname = Utilities.getStructureName(root, structid);
+			Hashtable<String, String> result = es.searchEntity(root, structid, structname, "", structname, "", 0);
+			if(result!=null){
+				key.setAttribute("ontoid", result.get("entityid"));
+			}
+			keyentities.add(structname);
 		}
 		return keys;
+
 	
 	}
 	/**

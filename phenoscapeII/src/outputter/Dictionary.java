@@ -12,8 +12,8 @@ public class Dictionary {
 	//spatial terms form BSPO
 	public ArrayList<String> spatialterms;
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
-	public static String binaryTvalues = "true|yes|usually";
-	public static String binaryFvalues = "false|no|rarely";
+	public static String binaryTvalues = "present|true|yes|usually";//added present/absent
+	public static String binaryFvalues = "absent|false|no|rarely";
 	public static String positionprep = "of|part_of|in|on|between";
 	//Changed by Zilong
 	public static String selfReference = "counterpart";//Extendible

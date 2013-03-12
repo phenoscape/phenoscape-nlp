@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.io.*;
@@ -57,13 +58,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 	
 	/** The search cache. */
 	
-	private Hashtable<String, Hashtable<String, List<OWLClass>>> ontologyHash; //syn type => {term => classes}
-	public Hashtable<String, String> adjectiveorgans; //adj => classID
+	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> ontologyHash = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>();; //syn type => {term => classes}
+	public Hashtable<String, String> adjectiveorgans; //adj => classID#label
 	
 	/** The source. */
 	private String source;
 
-	private Hashtable<String, Hashtable<String, List<OWLClass>>> searchCache; //con => {syn type => classes}
+	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -102,12 +103,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 		source = file.getAbsolutePath();
 		try{
 			OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(file);
-			
 			constructorHelper(rootOnt, eliminate);
 			// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
 			this.retrieveAllConcept();
 		}catch(Exception e){
 			System.out.println("can't load ontology:"+file.getPath());
+			e.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -115,6 +116,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 	
 	/**
 	 * Constructor helper: the common part of the two constructors.
+	 * filtering obsolete classes
+	 * grouping classes, such as relationalSlim in PATO
 	 *
 	 * @param rootOnt the root ont
 	 * @param eliminate the eliminate
@@ -131,10 +134,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 		//add all relational slim terms to a list
 		//also add all obsolete terms to a list
 		for (OWLClass c: allclasses){
-			if(isRelationalSlim(c)){
+			if(isRelationalSlim(c, rootOnt)){
 				this.relationalSlim.add(c);
 			}
-			if(this.isObsolete(c)){
+			if(this.isObsolete(c, rootOnt)){
 				this.obsolete.add(c);
 			}
 		}
@@ -195,50 +198,92 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	//Below is the code for populating all the synonyms and labels with their classes into a hashtable searchCache!! task2
 		public void retrieveAllConcept() {
-			ontologyHash = new Hashtable<String, Hashtable<String, List<OWLClass>>>();
+
 			//TODO: searchCache = new Hashtable<String, Hashtable<String, List<OWLClass>>>();
 			//label => {"original|exact|related|narrow" => List<OWLClass>}
+
+
+
+			
 			int flag =0;//TODO why it's needed?
 			for (OWLClass c : allclasses) {
+
+				String label =this.getLabel(c).toLowerCase().trim();
+				Hashtable<String, ArrayList<OWLClass>> matches = ontologyHash.get(label);
+				if(matches == null){
+					matches = initTypedClasses();
+				}
 				//add original
-				Hashtable<String, List<OWLClass>> original = new Hashtable<String, List<OWLClass>>();
-				List<OWLClass> oc = new ArrayList<OWLClass>();
-				oc.add(c);
-				original.put(this.getLabel(c).toLowerCase().trim(), oc);
-				ontologyHash.put("original", original);
-				//add typed syns
-				ontologyHash.put("exact", getTypedSyns("exact", c));
-				ontologyHash.put("narrow", getTypedSyns("narrow", c));
-				ontologyHash.put("related", getTypedSyns("related", c));
+				ArrayList<OWLClass> list = matches.get("original");
+				list.add(c); 
+				matches.put("original", (ArrayList<OWLClass>) list.clone());
+				ontologyHash.put(label, matches);
+				//add others
+				 hashTypedSyns(c, "exact");
+				 hashTypedSyns(c, "narrow");
+				 hashTypedSyns(c, "related");
 			}
+		}
+
+
+		private Hashtable<String, ArrayList<OWLClass>> initTypedClasses(){
+			ArrayList<OWLClass> classes = new ArrayList<OWLClass>();
+			Hashtable<String, ArrayList<OWLClass>> typedclasses = new Hashtable<String, ArrayList<OWLClass>>();
+			typedclasses.put("original", (ArrayList<OWLClass>) classes.clone());
+			typedclasses.put("exact", (ArrayList<OWLClass>) classes.clone());
+			typedclasses.put("related", (ArrayList<OWLClass>) classes.clone());
+			typedclasses.put("narrow", (ArrayList<OWLClass>) classes.clone());
+			return typedclasses;
+		}
+		private void hashTypedSyns(OWLClass c, String type) {
+			Hashtable<String, List<OWLClass>> syns = getTypedSyns(type, c);
+			 Enumeration<String> en = syns.keys();
+			 while(en.hasMoreElements()){
+				 String synlabel = en.nextElement();
+				 Hashtable<String, ArrayList<OWLClass>> temp = ontologyHash.get(synlabel);
+					if(temp == null){
+						temp = initTypedClasses();
+					}
+					ArrayList<OWLClass> templist = temp.get(type);
+					templist.add(c);
+					temp.put(type, templist);
+					ontologyHash.put(synlabel, temp);
+			 }
 		}
 		
 		private Hashtable<String, List<OWLClass>> getTypedSyns(String type, OWLClass c){
-			int flag = 0;
-			Hashtable<String, List<OWLClass>> exact = new Hashtable<String, List<OWLClass>>();
+			//int flag = 0;
+			Hashtable<String, List<OWLClass>> result = new Hashtable<String, List<OWLClass>>();
 			List<OWLClass> ec = new ArrayList<OWLClass>();
-			List<String> syns = this.getExactSynonyms(c);
+			List<String> syns = new ArrayList<String>();
+			if(type.compareTo("exact") == 0) syns = this.getExactSynonyms(c);
+			if(type.compareTo("narrow") == 0) syns = this.getNarrowSynonyms(c);
+			if(type.compareTo("related") == 0) syns = this.getRelatedSynonyms(c);
+			
+			//if(syns.size()>0){
+			//	System.out.print("");
+			//}
 			Iterator<String> i=syns.iterator();
 			while(i.hasNext())
 			{
 				String label = (String) i.next();
-				if(exact.containsKey(label.trim()))
+				if(result.containsKey(label.trim()))
 				{
-					List<OWLClass> temp = exact.get(label.trim());
+					List<OWLClass> temp = result.get(label.trim());
 					temp.add(c);
-					flag=1;
+					//flag=1;
 				}
 				else
 				{
 					List<OWLClass> clas = new ArrayList<OWLClass>();
 					clas.add(c);
-					exact.put(label.trim(), clas);
+					result.put(label.trim(), clas);
 					
 				}			
-				if(flag==1)
-				System.out.println(flag--);
+				//if(flag==1)
+				//System.out.println(flag--);
 			}
-			return exact;
+			return result;
 		}
 	/**
 	 * Retrieve concept.
@@ -270,48 +315,52 @@ public class OWLAccessorImpl implements OWLAccessor {
 		/**
 		 * @param: con: class label (e.g. 'dorsal fin' or 'epibranchial .*')
 		 */
-		public Hashtable<String, List<OWLClass>> retrieveConcept(String con){
-			Hashtable<String, List<OWLClass>> result = this.searchCache.get(con);
+		public Hashtable<String, ArrayList<OWLClass>> retrieveConcept(String con){
+			Hashtable<String, ArrayList<OWLClass>> result = this.searchCache.get(con);
 			if(result != null) return result;
 			
-			if(con.indexOf("*")<0){
-				Hashtable<String, List<OWLClass>> output =new Hashtable<String, List<OWLClass>> ();
+			if(con.indexOf("*")<0){//exact match
+					return this.ontologyHash.get(con);
+			}else{//reg exp
+				Hashtable<String, ArrayList<OWLClass>> output =new Hashtable<String, ArrayList<OWLClass>> ();
 				Enumeration<String> en = this.ontologyHash.keys();
 				while(en.hasMoreElements()){
-					String type = en.nextElement(); //over type: original, exact, narrow, related
-					Hashtable<String, List<OWLClass>> matches = this.ontologyHash.get(type); //con =>classes
-					Enumeration<String> terms = matches.keys();
-					List<OWLClass> results = new ArrayList<OWLClass>();
-					while(terms.hasMoreElements()){
-						String term = terms.nextElement();
-						if(term.compareTo(con) ==0){
-							results.addAll(matches.get(term));
-						}						
-					}
-					output.put(type, results);					
-				}
-				this.searchCache.put(con, output);
-				return output;
-				//return this.searchCache.get(con);
-			}else{
-				Hashtable<String, List<OWLClass>> output =new Hashtable<String, List<OWLClass>> ();
-				Enumeration<String> en = this.ontologyHash.keys();
-				while(en.hasMoreElements()){
-					String type = en.nextElement(); //over type: original, exact, narrow, related
-					Hashtable<String, List<OWLClass>> matches = this.ontologyHash.get(type); //con =>classes
-					Enumeration<String> terms = matches.keys();
-					List<OWLClass> results = new ArrayList<OWLClass>();
-					while(terms.hasMoreElements()){
-						String term = terms.nextElement();
-						if(term.matches(con)){
-							results.addAll(matches.get(term));
-						}						
-					}
-					output.put(type, results);					
-				}
+					String term = en.nextElement(); //over type: original, exact, narrow, related
+					if(term.matches(con)){
+						Hashtable<String, ArrayList<OWLClass>> temp = ontologyHash.get(term);
+						merge(output, temp);
+					}						
+				}	
 				this.searchCache.put(con, output);
 				return output;
 			}
+		}
+	
+	/**
+	 * add part to whole, deduplicate
+	 * @param whole
+	 * @param part
+	 */
+		private void merge(Hashtable<String, ArrayList<OWLClass>> whole, Hashtable<String, ArrayList<OWLClass>> part){
+			TreeSet<OWLClass> temp = new TreeSet<OWLClass>();
+			temp.addAll(whole.get("original"));
+			temp.addAll(part.get("original"));
+			whole.put("original", new ArrayList<OWLClass>(temp));
+			
+			temp = new TreeSet<OWLClass>();
+			temp.addAll(whole.get("exact"));
+			temp.addAll(part.get("exact"));
+			whole.put("exact", new ArrayList<OWLClass>(temp));
+			
+			temp = new TreeSet<OWLClass>();
+			temp.addAll(whole.get("narrow"));
+			temp.addAll(part.get("narrow"));
+			whole.put("narrow", new ArrayList<OWLClass>(temp));
+			
+			temp = new TreeSet<OWLClass>();
+			temp.addAll(whole.get("related"));
+			temp.addAll(part.get("related"));
+			whole.put("related", new ArrayList<OWLClass>(temp));			
 		}
 //
 //	public Hashtable<String, List<OWLClass>> retrieveConcept(String con) throws Exception {
@@ -499,17 +548,18 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	/**
 	 * Checks if is obsolete.
-	 *
+	 * owl:deprecated = true
 	 * @param c the c
 	 * @return true, if is obsolete
 	 */
-	public boolean isObsolete(OWLClass c){
-		if(this.getLabel(c).startsWith("obsolete")){
-			return true;
+	public boolean isObsolete(OWLClass c, OWLOntology ontology){
+		
+		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.w3.org/2002/07/owl#deprecated")){
+			if(a.getValue().toString().contains("\"true\""))
+				return true;
 		}
-		else{
-			return false;
-		}
+		return false;
+
 	}
 	
 	/**
@@ -518,7 +568,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @param c the c
 	 * @return true, if is relational slim
 	 */
-	public boolean isRelationalSlim(OWLClass c){
+	public boolean isRelationalSlim(OWLClass c, OWLOntology ontology){
 		
 		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
 			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#relational_slim"))
@@ -682,7 +732,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 		Set<OWLClass> r = new HashSet<OWLClass>();
 		if(c!=null){
 			for(OWLOntology ont: onts){
-				for (OWLClassExpression ch : c.getSubClasses(ont)) {
+				Set<OWLClassExpression> subclasses = c.getSubClasses(ont);
+				for (OWLClassExpression ch : subclasses) {
 					OWLClass o = ch.asOWLClass();
 					r.add(o);
 					r.addAll(this.getAllOffsprings(o));
@@ -736,18 +787,21 @@ public class OWLAccessorImpl implements OWLAccessor {
 	@Override
 	public String getID(OWLClass c) {
 
-		Set<OWLAnnotation> ids = new HashSet<OWLAnnotation>();
+		String id = c.getIRI().toString();//<http://purl.obolibrary.org/obo/UBERON_4000163>
+		return id.substring(id.lastIndexOf('/')+1).replace('_', ':');
+		/*Set<OWLAnnotation> ids = new HashSet<OWLAnnotation>();
 		for (OWLOntology ont:onts){		
 			ids.addAll(c.getAnnotations(ont, df.getOWLAnnotationProperty(IRI.create("http://www.geneontology.org/formats/oboInOwl#id"))));
 		}
 		
 		if (ids.isEmpty()) {
-			return "";// no id, return empty string
+			String id = c.toString();//<http://purl.obolibrary.org/obo/UBERON_4000163>
+			return id.substring(id.lastIndexOf('/')+1).replace('_', ':').replaceFirst(">$", "");
 		} else {
 			//Should return only one id, assuming each class only has one id
 			return this.getRefinedOutput(((OWLAnnotation) ids.toArray()[0])
 					.toString());
-		}
+		}*/
 	}
 	
 	//added by Hariharan to return Manager that was created by constructor Task1

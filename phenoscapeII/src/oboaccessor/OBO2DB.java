@@ -25,10 +25,10 @@ public class OBO2DB {
 	/**
 	 * 
 	 */
-	public OBO2DB(String database, String ontoPath, String ontoname) throws Exception{
+	public OBO2DB(String database, String ontoPath, String ontoname){
 		this.ontoname = ontoname;
 		this.onto = new File(ontoPath);
-		
+		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 			    String URL = "jdbc:mysql://localhost/"+database+"?user=biocreative&password=biocreative";
@@ -50,7 +50,10 @@ public class OBO2DB {
 				stmt.close();
 				export2DB();
 			}
-		
+		}catch(Exception e){
+			System.out.println("can't load ontology: "+ontoPath);
+			System.exit(1);
+		}
 		
 	}
 

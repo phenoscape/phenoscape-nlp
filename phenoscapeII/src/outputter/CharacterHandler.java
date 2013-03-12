@@ -53,9 +53,9 @@ public class CharacterHandler {
 				String conid = chara.getAttributeValue("constraintid");
 				try{
 					String qualitymodifier = Utilities.getStructureName(root, conid);
-					qmIDs += es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier,"", 0).get("entity")+",";
+					qmIDs += es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier,"", 0).get("entityid")+",";
 					qualitymodifier = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
-					qmIDs += es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier, "", 0).get("entity");
+					qmIDs += es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier, "", 0).get("entityid");
 				}catch(Exception e){
 					e.printStackTrace();
 				}

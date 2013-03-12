@@ -49,7 +49,7 @@ public class EntitySearcher {
 	 */
 	public EntitySearcher(Dictionary dict) {
 		this.dict = dict;
-		TermSearcher ts = new TermSearcher(dict);
+		ts = new TermSearcher(dict);
 	}
 
 	/**
@@ -71,26 +71,35 @@ public class EntitySearcher {
 	 * @param elocatorphrase the elocatorphras
 	 * @param originalentityphrase the originalentityphrase
 	 * @param preposition used between entityphrase and elocatorphrase
-	 * @return 4-key Hashtable<String, String>: keys: entity, entitylocator values: ids of entity and entitylocator
+	 * @return null or 6-key Hashtable<String, String>: keys: entity, entityid, entitylabel, entitylocator, entitylocatorid, entitylocatorlabel
 	 * @throws Exception the exception
 	 */
 	public Hashtable<String, String> searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup){
 		//System.out.println("search entity: "+entityphrase);
 		Hashtable<String, String> result = new Hashtable<String, String>();
-		result.put("entity", "");//TODo, change to entity, taking ID for a value
+		result.put("entity", "");
 		result.put("entitylocator", "");
+		result.put("entityid", "");
+		result.put("entitylocatorid", "");
+		result.put("entitylabel", "");
+		result.put("entitylocatorlabel", "");
 		//entityresults.put("entitylocatorphrase", elocatorphrase);
 		//TODO create and maintain a cache for entity search?
 	
+		
+		entityphrase = Utilities.transform(entityphrase);
+		elocatorphrase = Utilities.transform(elocatorphrase);
+		
 		//special case: dealing with process
 		entityphrase = entityphrase.replaceAll("("+Dictionary.process+")", "process");
 		elocatorphrase = elocatorphrase.replaceAll("("+Dictionary.process+")", "process");
 		entityphrase = entityphrase.replaceAll("latero-sensory", "sensory");
 		elocatorphrase = elocatorphrase.replaceAll("laterosensory", "sensory");
 		
-		String finalentitylocator = "";
-		String finalentityphrase = "";
-		String finalentityid = "";
+
+		
+		
+		
 		String[] entitylocators = null;
 		if(elocatorphrase.length()>0) entitylocators = elocatorphrase.split("\\s*,\\s*");
 		String[] entityphrasetokens = entityphrase.split("\\s+");
@@ -114,34 +123,49 @@ public class EntitySearcher {
 			if(goodphrase){//perfect match for a pre-composed term
 				Hashtable<String, String> r = ts.searchTerm(phrase, "entity", ingroup);
 				if(r!=null){
-					result.put("entity", r.get("id")); // entitylocator = "";
+					result.put("entity", phrase); // entitylocator = "";
+					result.put("entityid", r.get("id"));
+					result.put("entitylabel", r.get("label"));			
 					return result;
 				}
 			}			
 		}
 		
-		//search entity and entity locator separately
-		
-		Hashtable<String, String> er = ts.searchTerm(entityphrase, "entity", ingroup);
-		result.put("entitylocator", searchEntityLocator(elocatorphrase, entitylocators, ingroup));
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
-
-
+		
+		//search entity and entity locator separately
+		if(entitylocators!=null) {
+			Hashtable<String, String> elr =  ts.searchTerm(elocatorphrase, "entity", ingroup);
+			if(elr!=null){
+				result.put("entitylocator", elocatorphrase); 
+				result.put("entitylocatorid", elr.get("id"));
+				result.put("entitylocatorlabel", elr.get("label"));	
+			}else{ //entity locator not matched
+				//TODO
+			}
+		}
+		Hashtable<String, String> er = ts.searchTerm(entityphrase, "entity", ingroup);
 		if(er!=null){//if entity matches
-			result.put("entity",  er.get("id"));			
+			result.put("entity", entityphrase); 
+			result.put("entityid", er.get("id"));
+			result.put("entitylabel", er.get("label"));	
 			return result;
 		}
 		
 		//re-arranging word in entity, first search for entity locator
 				
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
-		String adjID = ts.adjectiveOrganSearch(entityphrasetokens[0]);
-		if(adjID!=null){
-			result.put("entitylocator", adjID);
+		String adjIDlabel = ts.adjectiveOrganSearch(entityphrasetokens[0]);
+		if(adjIDlabel!=null){
+			result.put("entitylocator", entityphrasetokens[0]);
+			result.put("entitylocatorlabel", adjIDlabel.substring(adjIDlabel.indexOf("#")+1));
+			result.put("entitylocatorid", adjIDlabel.substring(0, adjIDlabel.indexOf("#")));
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " ");
 			er = ts.searchTerm(newentity, "entity", ingroup);
 			if(er!=null){
-				result.put("entity", er.get("id"));
+				result.put("entity", newentity); 
+				result.put("entityid", er.get("id"));
+				result.put("entitylabel", er.get("label"));	
 				return result;
 			}else{
 				//TODO
@@ -154,17 +178,73 @@ public class EntitySearcher {
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //process
 			er = ts.searchTerm(newentity, "entity", ingroup);
 			if(er!=null){
-				result.put("entity", er.get("id"));
+				result.put("entity", newentity); 
+				result.put("entityid", er.get("id"));
+				result.put("entitylabel", er.get("label"));	
 				er = ts.searchTerm(entityphrasetokens[0]+" region", "entity", ingroup);//anterior + region
 				if(er!=null){
-					String locators = (er.get("id")+","+result.get("entitylocator")).replaceFirst(",$", ""); //anterior region, maxilla
-					result.put("entitylocator", locators);
+					String locatorids = (er.get("id")+","+result.get("entitylocatorid")).replaceFirst(",$", ""); //anterior region, maxilla
+					String locatorlabels = (er.get("label")+","+result.get("entitylocatorlabel")).replaceFirst(",$", ""); //anterior region, maxilla
+					String locators = (entityphrasetokens[0]+" region,"+result.get("entitylocator")).replaceFirst(",$", ""); //anterior region, maxilla
+					result.put("entitylocator", locators); 
+					result.put("entitylocatorid", locatorids);
+					result.put("entitylocatorlabel", locatorlabels);	
 					return result;
 				}				
 			}else{
 				//TODO
 			}
 		}
+		
+		//TODO
+		/*
+		 * Changed by Zilong: deal with spatial terms. 
+		 */
+		//String[] entityTerms=entity.toLowerCase().trim().split("\\s+");
+		//if contains spatial terms
+		//if(this.dictionary.spatialterms.contains(entityTerms[0])){
+			//if the entity contains the spatial head noun 
+		//	if(dictionary.spatialHeadNoun.contains(entityTerms[entityTerms.length-1])){
+		//		String ne=entityTerms[0]+" region";//spatial term + region
+		//		String nel=entityTerms[entityTerms.length-1]+","+entitylocator;
+		//		EQ.put("entity", ne);
+		//		EQ.put("entitylocator", nel);
+		//	}
+		//}
+
+		/*case: Mesethmoid flares anteriorly-> E: anterior region(part_of(mesethmoid bone)), Q: decreased width*/
+		/*need more supporting cases. For now, comment it out to avoid interference with cases like ventrally directed*/
+		//String[] qualityTerms=quality.toLowerCase().trim().replaceAll("[\\[\\]]", "").split("\\s+");
+//		if(this.spatialterms.contains(qualityTerms[qualityTerms.length-1].replaceFirst("ly$", ""))){
+//			//if the quality contains the spatial term's adverb form.
+//			String ne = qualityTerms[qualityTerms.length-1].replaceFirst("ly$", "")+" region";
+//			String nel = entity+((entitylocator==null||entitylocator.equals(""))?"":(","+entitylocator));
+//			String nq = quality.toLowerCase().trim().replaceAll("\\[.*\\]", "");
+//			
+//			EQ.put("entity", ne);
+//			EQ.put("entitylocator", nel);
+//			EQ.put("quality", nq);
+//			
+//		}
+		/*end handling spatial terms*/
+		
+		/* TODO
+		 * Changed by Zilong: change any self-reference word to the keyentity(es)
+		 * To add any new self-reference word, please modify the instance variable
+		 * "selfReference." 
+		 * 
+		 * */
+		
+		//if(entity.toLowerCase().trim().matches("("+Dictionary.selfReference+")")){
+		//	EQ.put("entity", this.keyentities.get(0));
+		//}
+		//if(entitylocator.toLowerCase().trim().matches("("+Dictionary.selfReference+")")){
+		//	EQ.put("entitylocator", this.keyentities.get(0));
+		//}
+		//if(qualitymodifier.toLowerCase().trim().matches("("+Dictionary.selfReference+")")){
+		//	EQ.put("qualitymodifier", this.keyentities.get(0));
+		//}
+		/*End dealing with self reference terms*/
 		
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
@@ -184,7 +264,9 @@ public class EntitySearcher {
 			//search headnouns in the context 
 			String noun = searchContext(root, structid, headnouns); //bone, cartilaginous
 			if(noun != null){
-				result.put("entity", headnouns.get(noun));
+				result.put("entity", entityphrase); 
+				result.put("entityid", headnouns.get(noun));
+				result.put("entitylabel", entityphrase);	
 				return result;
 			}
 		}	
@@ -203,7 +285,9 @@ public class EntitySearcher {
 			if(!shortened.matches(".*?\\b("+dict.spatialtermptn+")$")){
 				er = ts.searchTerm(shortened, "entity", ingroup);
 				if(er!=null){
-					result.put("entity", er.get("id"));
+					result.put("entity", shortened);
+					result.put("entityid", er.get("id"));
+					result.put("entitylabel", er.get("label"));
 					return result;
 				}else{
 					//TODO
@@ -255,7 +339,7 @@ public class EntitySearcher {
 		}*/		
 		
 		
-		return result;
+		return null;
 	}
 	
 	/**
@@ -289,17 +373,6 @@ public class EntitySearcher {
 		return null;
 	}
 	
-	private String searchEntityLocator(String elocatorphrase, String[] entitylocators, int ingroup){
-		if(entitylocators!=null) {
-			Hashtable<String, String> elr =  ts.searchTerm(elocatorphrase, "entity", ingroup);
-			if(elr!=null){
-				return elr.get("id");
-			}else{ //entity locator not matched
-				//TODO
-			}
-		}
-		return "";
-	}
 
 	/**
 	 * Valid.

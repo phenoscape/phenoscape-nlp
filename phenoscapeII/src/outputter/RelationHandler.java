@@ -34,7 +34,7 @@ public class RelationHandler {
 	 * @param root of the description
 	 * @param relationstrings, each with a format of "fromid relation_string toid"
 	 * @param structurename the from_structure
-	 * @return key: "qualitymodifier|entitylocator|entity|relationalquality|extraEQs" element: Arraylist of qualitymodifier|entitylocator_ID|entity_ID|relationalquality_ID|EQ_hashtable_list"
+	 * @return key: "qualitymodifier|entitylocator|entity|relationalquality|extraEQs" element:  qualitymodifier|entitylocator_ID|entity_ID|relationalquality_ID|EQ_hashtable_list"
 	 */
 	public Hashtable<String, Object> handle(Element root, String[] relationstrings, String structurename, String structid, boolean keyelement){
 		Hashtable<String, Object> results = new Hashtable<String, Object> ();
@@ -58,11 +58,11 @@ public class RelationHandler {
 					if(results.get("relationalquality") == null){
 						results.put("relationalquality", relationalqualityID);
 						//toname is then a qualitymodifier, containing an organ and its optional parent organs
-						results.put("qualitymodifier", result.get("entity")+","+result.get("entitylocator")); //use , not ;. ; used to separate qualitymodifiers of different quality
+						results.put("qualitymodifier", result.get("entityid")+","+result.get("entitylocatorid")); //use , not ;. ; used to separate qualitymodifiers of different quality
 					}else{
 						results.put("relationalquality", results.get("relationalquality")+";"+relationalqualityID);
 						//toname is then a qualitymodifier
-						results.put("qualitymodifier", results.get("qualitymodifier")+";"+result.get("entity")+","+result.get("entitylocator")); //use , not ;. ; used to separate qualitymodifiers of different quality
+						results.put("qualitymodifier", results.get("qualitymodifier")+";"+result.get("entityid")+","+result.get("entitylocatorid")); //use , not ;. ; used to separate qualitymodifiers of different quality
 					}
 				}else{//no, the relation should not be considered relational quality
 					//entity locator?
@@ -71,7 +71,7 @@ public class RelationHandler {
 						//	entitylocator += "between " + toname + ",";
 						//else
 						//	entitylocator += toname + ",";
-						String entityid = es.searchEntity(root, toid, toname, "", toname, relation,  0).get("entity");
+						String entityid = es.searchEntity(root, toid, toname, "", toname, relation,  0).get("entityid");
 						if(results.get("entitylocator")==null){
 							results.put("entitylocator", entityid);
 						}else{
@@ -82,7 +82,7 @@ public class RelationHandler {
 						if(!hasCharacters(toid, root) && !keyelement){
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							Utilities.initEQHash(EQ);
-							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entity"));
+							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid"));
 							EQ.put("quality", "present");
 							EQ.put("type", keyelement ? "character" : "state");
 							
@@ -94,14 +94,14 @@ public class RelationHandler {
 						if (!keyelement) {
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							Utilities.initEQHash(EQ);
-							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entity"));
+							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid"));
 							EQ.put("quality", "absent");
 							EQ.put("type", keyelement ? "character" : "state");
 							ArrayList<Hashtable<String, String>> extraEQs = (ArrayList<Hashtable<String, String>>) results.get("extraEQs");
 							extraEQs.add(EQ);
 						}
 					} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
-						String entityid = es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entity");
+						String entityid = es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid");
 						if(results.get("qualitymodifier")==null){
 							results.put("qualitymodifier", entityid);
 						}else{
@@ -140,6 +140,22 @@ public class RelationHandler {
 	 */
 	private String matchInRestrictedRelation(String fromstructure, String relation, String tostructure, boolean hascharacter) {
 		// TODO Auto-generated method stub
+		
+		/*
+		 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
+		 * Transform the result from CharaParser which is of the form:
+		 * connection[E] between A[EL] and B[EL] <some text>[Q] -the quality could be misidentified
+		 * to the form:
+		 * A[E] is in connection with[Q] B[QM]
+		 * 
+		 * */
+		//if(entity.toLowerCase().trim().matches("("+Dictionary.contact+")")){
+		//	EQ.put("entity", entitylocator.split(",")[0]);//the first EL as E
+		//	EQ.put("quality", "in contact with"); //"in contact with" can be found in ontos
+		//	EQ.put("qualitymodifier", entitylocator.replaceFirst("[^,]*,?", "").trim());//the rest of EL is QM
+		//	EQ.put("entitylocator", "");//empty the EL
+		//}
+		/*End handling the "contact" type relation*/
 		return null;
 	}
 

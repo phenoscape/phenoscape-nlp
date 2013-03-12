@@ -51,7 +51,7 @@ public class TermSearcher {
 	 *
 	 * @param phrase the term
 	 * @param phrasetype the type
-	 * @return 3-key hashtable: type, id, label
+	 * @return null or a 4-key hashtable: term, querytype, id, label.
 	 * @throws Exception the exception
 	 */
 	public Hashtable<String, String> searchTerm(String phrase, String phrasetype, int ingroup){
@@ -63,6 +63,7 @@ public class TermSearcher {
 		Hashtable<String, String> result = searchCache(phrase, phrasetype);
 		if(result!=null) return result;
 		
+		phrase = format(phrase);
 		//search ontologies
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]
 		//one result from each ontology that has at least some type of hit
@@ -76,6 +77,17 @@ public class TermSearcher {
 		//if landed here, all matches based on the original phrase are weak matches.
 		candidatematches.addAll(results);
 		results = new ArrayList<Hashtable<String, String>>();
+		
+		/* TODO
+		 * Changed by Zilong: deal with terms like "unossified" 
+		 * Transform the result from an adjective word (binary form) to "noun+present/absent" 
+		 * */
+		/*quality = quality.toLowerCase().trim();
+		if(dictionary.verbalizednouns.containsKey(quality)){
+			EQ.put("entity", entity+" "+dictionary.verbalizednouns.get(quality).split(",")[0]);
+			EQ.put("quality", dictionary.verbalizednouns.get(quality).split(",")[1]);
+		}*/
+		/*end handling the "unossified" like term*/
 		
 		//2. dorsal portion => dorsal region
 		if(phrasetype.compareTo("entity")==0){
@@ -158,6 +170,15 @@ public class TermSearcher {
 		return null;
 	}
 	
+	private String format(String word) {
+		word = word.replaceAll("_", " "); // abc_1
+		word = word.replaceAll("(?<=\\w)- (?=\\w)", "-"); // dorsal- fin
+		// word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
+		word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to dorsal-fin
+		word = word.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal to
+		return word;
+	}
+	
 	public String adjectiveOrganSearch(String term){
 		return XML2EQ.ontoutil.searchAdjectiveOrgan(term, "entity");
 	}
@@ -166,7 +187,7 @@ public class TermSearcher {
 	 * @param term
 	 * @param type
 	 * @param results
-	 * @return match via related synonyms is not considered strong
+	 * @return 4-key hashtable: term, querytype, id, label, including only original and exac synonym matches;  match via related synonyms is not considered strong
 	 * @throws Exception
 	 */
 
