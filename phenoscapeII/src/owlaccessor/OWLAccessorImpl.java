@@ -314,6 +314,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	// returns the arraylist of owl classes for a particular label Task 2
 		/**
 		 * @param: con: class label (e.g. 'dorsal fin' or 'epibranchial .*')
+		 * @result: Hashtable<syn_type(original|exact|narrow|related),  matched_classes>
 		 */
 		public Hashtable<String, ArrayList<OWLClass>> retrieveConcept(String con){
 			Hashtable<String, ArrayList<OWLClass>> result = this.searchCache.get(con);
@@ -378,7 +379,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
 		Set<OWLClass> classes = null;
-		if(subgroup==outputter.TermEQ2IDEQ.RELATIONAL_SLIM){
+		if(subgroup==outputter.XML2EQ.RELATIONAL_SLIM){
 			classes=this.relationalSlim;
 		}else{
 			classes=this.allclasses;

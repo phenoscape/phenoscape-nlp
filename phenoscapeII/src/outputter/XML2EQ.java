@@ -78,6 +78,8 @@ public class XML2EQ {
 	private CharacterHandler ch = new CharacterHandler(ts, es);
 	private RelationHandler rh = new RelationHandler(dictionary, es);
 	private KeyEntityFinder kef = new  KeyEntityFinder(es);
+	
+	public static final int RELATIONAL_SLIM=1;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
