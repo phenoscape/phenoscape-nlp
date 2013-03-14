@@ -3,12 +3,25 @@
  */
 package outputter;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
+
+import edu.mit.jwi.Dictionary;
+import edu.mit.jwi.RAMDictionary;
+import edu.mit.jwi.IDictionary;
+import edu.mit.jwi.item.IIndexWord;
+import edu.mit.jwi.item.ISenseEntry;
+import edu.mit.jwi.item.ISynset;
+import edu.mit.jwi.item.IWord;
+import edu.mit.jwi.item.IWordID;
+import edu.mit.jwi.morph.WordnetStemmer;
 
 /**
  * @author updates
@@ -16,17 +29,33 @@ import org.jdom.xpath.XPath;
  * http://phenoscape.org/wiki/Guide_to_Character_Annotation#Relations_used_for_post-compositions
  */
 public class RelationHandler {
-	private Dictionary dict;
+	private outputter.Dictionary dict;
 	private EntitySearcher es;
+	IDictionary wordnetdict;
 
 	/**
 	 * 
 	 */
-	public RelationHandler(Dictionary dict, EntitySearcher es) {
+	public RelationHandler(outputter.Dictionary dict, EntitySearcher es) {
 		this.dict = dict;
 		this.es =es;
-	}
+		
 	
+		
+	//String path="C:/Users/Murali/Desktop/RA/External jars/wn3.1.dict/dict";
+		//System.out.println(System.getProperty("user.dir")				+System.getProperty("file.separator")+ApplicationUtilities.getProperty("wordnet.dictionary"));
+		//Initializing wordnet dictionary	
+		wordnetdict = new edu.mit.jwi.Dictionary(new File(ApplicationUtilities.getProperty("wordnet.dictionary")));
+		try {
+			wordnetdict.open();			
+		//	String realtion= matchInRestrictedRelation("a","go with","b",true);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * identify entitylocator, qualitymodifier and/or relationalquality (the last is based on restricted relation list) from this relation
 	 * the process may also generate EQ such as xyz:absent from "without" phrases
@@ -91,7 +120,7 @@ public class RelationHandler {
 					}
 				}else{//no, the relation should not be considered relational quality
 					//entity locator?
-					if (r.matches("\\((" + Dictionary.positionprep + ")\\).*")) { // entitylocator
+					if (r.matches("\\((" + outputter.Dictionary.positionprep + ")\\).*")) { // entitylocator
 						//if (r.contains("between"))
 						//	entitylocator += "between " + toname + ",";
 						//else
@@ -218,7 +247,94 @@ public class RelationHandler {
 		//	EQ.put("entitylocator", "");//empty the EL
 		//}
 		/*End handling the "contact" type relation*/
+		String relation_ID=null;
+		//checks if the given relation is present in the identified relationalqualities - Hariharan
+		Hashtable<String, String> relationlist = null;
+		if(dict.relationalqualities.contains(relation))
+		{
+			relationlist = new Hashtable<String, String>();
+			relationlist.put("id", dict.relationalqualities.get(relation));
+			relationlist.put("label", dict.resrelationQ.get(dict.relationalqualities.get(relation)));
+			return relationlist;
+		}
+		//if failed in above steps then it uses wordnet to find the different synonyms of the relation string
+		Hashtable<String, Integer> forms = getdifferentrelationalforms(relation);
+		//of the identified relations, it finds the best equivalent relation else it returns null
+		if(forms!=null)
+			{
+			
+			relation_ID=getbestrelation(forms,relation);
+			if(relation_ID!=null)
+			{
+				relationlist = new Hashtable<String, String>();
+				relationlist.put("id", relation_ID);
+				relationlist.put("label", dict.resrelationQ.get((relation_ID)));
+			}
+			return relationlist;
+			}
+		
+		return relationlist;
+	}
+
+	// decides the best equivalent relation from different identified relations using some semantic measures
+	private String getbestrelation(Hashtable<String, Integer> forms,String  relation) {
+		// TODO 
+		//update this later to find the closest similar relation
+		//int probability =0,maxprobability=0;
+		Set<String> keys;
+		//System.out.println("forms size" +forms.size());
+		keys = forms.keySet();
+		for(String form:keys)
+			if(dict.relationalqualities.containsKey(form))
+				return dict.relationalqualities.get(form);
+		
 		return null;
+	}
+
+	// returns the different relational forms of the current passed string
+	private Hashtable<String,Integer> getdifferentrelationalforms(String relation) {
+		// TODO Auto-generated method stub
+		//Top Synonyms
+		Hashtable<String, Integer> synonyms;
+		synonyms= getallsynonyms(relation);
+		//System.out.println("size == "+synonyms.size());
+		return synonyms;
+	}
+	// This methods get all the possible synonyms with POS of the word passed.
+
+	private Hashtable<String,Integer> getallsynonyms(String word) {
+		// TODO Auto-generated method stub
+		Hashtable<String,Integer> synonyms = new Hashtable<String,Integer>();
+		ISenseEntry senseEntry;
+		WordnetStemmer stemmer = new WordnetStemmer(wordnetdict);
+		
+		for(edu.mit.jwi.item.POS pos : edu.mit.jwi.item.POS.values()) {
+			
+			List<String> stems = stemmer.findStems(word, pos);
+			//System.out.println(stems.size());
+			for(String stem : stems) {		
+				//System.out.println(stem);
+				IIndexWord indexWord = wordnetdict.getIndexWord(stem, pos);
+				if(indexWord!=null) {
+					int count = 0;
+					for(IWordID wordId : indexWord.getWordIDs()) {
+						//System.out.println(wordId);
+						IWord aWord = wordnetdict.getWord(wordId);
+						ISynset synset = aWord.getSynset();
+						
+						for( IWord w : synset.getWords ())
+							{
+							synonyms.put(w.getLemma().replaceAll("_", " ").trim(),wordnetdict.getSenseEntry(aWord.getSenseKey()).getTagCount());
+						//	System.out.println(w.getLemma().replaceAll("_", " ").trim()+ wordnetdict.getSenseEntry(aWord.getSenseKey()).getTagCount());
+							}
+					
+					}
+									
+				}
+			}
+		}	
+		
+		return synonyms;
 	}
 
 	/**
@@ -226,6 +342,8 @@ public class RelationHandler {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		//RelationHandler rh = new RelationHandler(new outputter.Dictionary(new ArrayList<String>()), new EntitySearcher(new outputter.Dictionary(new ArrayList<String>())));
+		
 
 	}
 
