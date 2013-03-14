@@ -34,7 +34,7 @@ public class RelationHandler {
 	 * @param root of the description
 	 * @param relationstrings, each with a format of "fromid relation_string toid"
 	 * @param structurename the from_structure
-	 * @return key: "qualitymodifier|entitylocator|entity|relationalquality|extraEQs" element:  qualitymodifier|entitylocator_ID|entity_ID|relationalquality_ID|EQ_hashtable_list"
+	 * @return key: "qualitymodifier|entitylocator|relationalquality|qualitymodifierid|entitylocatorid|relationalqualityid|qualitymodifierlabel|entitylocatorlabel|relationalqualitylabel|extraEQs(list of hashes)" "
 	 */
 	public Hashtable<String, Object> handle(Element root, String[] relationstrings, String structurename, String structid, boolean keyelement){
 		Hashtable<String, Object> results = new Hashtable<String, Object> ();
@@ -42,27 +42,52 @@ public class RelationHandler {
 		//TODO call EntitySearcher to help with entitylocator identification?
 		//TODO use character info to help with entity identification?
 		//TODO negation
-		String qualitymodifier ="";
-		String entitylocator = "";
+		String temp="";
 		boolean hascharacter = hasCharacters(structid, root);
 		if (relationstrings != null) {
 			for (String r : relationstrings) {
 				String toid = r.replaceFirst(".*?\\)", "").trim();
 				String toname = Utilities.getStructureName(root, toid);
 				String relation = r.replace(toid, "").replaceAll("[()]", "").trim();
-				String relationalqualityID = matchInRestrictedRelation(structurename, relation, toname, hascharacter);
+				Hashtable<String, String> relationalqualityID = matchInRestrictedRelation(structurename, relation, toname, hascharacter);
 				toname = toname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + toid + "']");
 				toname = toname.replaceFirst(",$", "");
 				if(relationalqualityID !=null){ //yes, the relation is a relational quality
 					Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
-					if(results.get("relationalquality") == null){
-						results.put("relationalquality", relationalqualityID);
+					if(results.get("relationalqualityid") == null){
+						results.put("relationalqualityid", relationalqualityID.get("id"));
+						results.put("relationalquality", relation);
+						results.put("relationalqualitylabel", relationalqualityID.get("label"));
 						//toname is then a qualitymodifier, containing an organ and its optional parent organs
-						results.put("qualitymodifier", result.get("entityid")+","+result.get("entitylocatorid")); //use , not ;. ; used to separate qualitymodifiers of different quality
+						results.put("qualitymodifier", toname);
+						if(result!=null){
+							String qm = result.get("entityid")==null? "": result.get("entityid")+","+
+									result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
+							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+								results.put("qualitymodifierid", qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+							}
+							qm = result.get("entitylabel")==null? "": result.get("entitylabel")+","+
+									result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
+							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+								results.put("qualitymodifierlabel", qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+							}
+						}
 					}else{
-						results.put("relationalquality", results.get("relationalquality")+";"+relationalqualityID);
+						results.put("relationalquality", results.get("relationalquality")+";"+relation);
+						results.put("relationalqualityid", results.get("relationalqualityid")+";"+relationalqualityID.get("id"));
+						results.put("relationalqualitylabel", results.get("relationalqualitylabel")+";"+relationalqualityID.get("label"));
 						//toname is then a qualitymodifier
-						results.put("qualitymodifier", results.get("qualitymodifier")+";"+result.get("entityid")+","+result.get("entitylocatorid")); //use , not ;. ; used to separate qualitymodifiers of different quality
+						results.put("qualitymodifier", results.get("qualitymodifier")+";"+toname);
+						String qm = result.get("entityid")==null? "": result.get("entityid")+","+
+								result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
+						if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+							results.put("qualitymodifierid", results.get("qualitymodifierid")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+						}
+						qm = result.get("entitylabel")==null? "": result.get("entitylabel")+","+
+								result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
+						if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+							results.put("qualitymodifierlabel", results.get("qualitymodifierlabel")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+						}
 					}
 				}else{//no, the relation should not be considered relational quality
 					//entity locator?
@@ -71,21 +96,41 @@ public class RelationHandler {
 						//	entitylocator += "between " + toname + ",";
 						//else
 						//	entitylocator += toname + ",";
-						String entityid = es.searchEntity(root, toid, toname, "", toname, relation,  0).get("entityid");
 						if(results.get("entitylocator")==null){
-							results.put("entitylocator", entityid);
+							results.put("entitylocator", toname);
 						}else{
-							results.put("entitylocator", results.get("entitylocator")+","+entityid); // connected by ',' because all entitylocators are related to the same entity: the from structure 
-						}						
+							results.put("entitylocator", results.get("entitylocator")+","+toname); // connected by ',' because all entitylocators are related to the same entity: the from structure 
+						}
+						Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation,  0);
+						if(result!=null){
+							String entityid = result.get("entityid");
+							if(entityid !=null){
+								if(results.get("entitylocatorid")==null){
+									results.put("entitylocatorid", entityid);
+									results.put("entitylocatorlabel", result.get("entitylabel"));
+								}else{
+									results.put("entitylocatorid", results.get("entitylocatorid")+","+entityid); // connected by ',' because all entitylocators are related to the same entity: the from structure 
+									results.put("entitylocatorlabel", results.get("entitylocatorlabel")+","+result.get("entitylabel")); 
+								}
+							}
+						}
 					} else if (r.matches("\\(with\\).*")) {
 						//check to-structure, if to-structure has no character, then generate EQ to_entity:present
 						if(!hasCharacters(toid, root) && !keyelement){
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							Utilities.initEQHash(EQ);
-							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid"));
+							Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
+							EQ.put("entity", toname);
 							EQ.put("quality", "present");
 							EQ.put("type", keyelement ? "character" : "state");
-							
+							if(result!=null){
+								if(result.get("entityid") !=null)
+									EQ.put("entityid", result.get("entityid"));
+								EQ.put("qualityid", "PATO:0000467");
+								if(result.get("entitylabel")!=null)
+									EQ.put("entitylabel", result.get("entitylabel"));
+								EQ.put("qualitylabel", "present");
+							}
 							ArrayList<Hashtable<String, String>> extraEQs = (ArrayList<Hashtable<String, String>>) results.get("extraEQs");
 							extraEQs.add(EQ);
 						}
@@ -94,18 +139,35 @@ public class RelationHandler {
 						if (!keyelement) {
 							Hashtable<String, String> EQ = new Hashtable<String, String>();
 							Utilities.initEQHash(EQ);
-							EQ.put("entity", es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid"));
+							Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
+							EQ.put("entity", toname);
 							EQ.put("quality", "absent");
 							EQ.put("type", keyelement ? "character" : "state");
+							if(result!=null){
+								if(result.get("entityid") !=null)
+									EQ.put("entityid", result.get("entityid"));
+								EQ.put("qualityid", "PATO:0000462");
+								if(result.get("entitylabel")!=null)
+									EQ.put("entitylabel", result.get("entitylabel"));
+								EQ.put("qualitylabel", "absent");
+							}
 							ArrayList<Hashtable<String, String>> extraEQs = (ArrayList<Hashtable<String, String>>) results.get("extraEQs");
 							extraEQs.add(EQ);
 						}
 					} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
-						String entityid = es.searchEntity(root, toid, toname, "", toname, relation, 0).get("entityid");
-						if(results.get("qualitymodifier")==null){
-							results.put("qualitymodifier", entityid);
-						}else{
-							results.put("qualitymodifier", results.get("qualitymodifier")+","+entityid); // connected by ',' because all entitylocators are related to the same entity: the from structure 
+						Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
+						results.put("qualitymodifier", toname);
+						if(result!=null){
+							String entityid =result.get("entityid");
+							if(entityid!=null){
+								if(results.get("qualitymodifierid")==null){
+									results.put("qualitymodifierid", entityid);
+									results.put("qualitymodifierlabel", result.get("entitylabel"));
+								}else{
+									results.put("qualitymodifierid", results.get("qualitymodifierid")+","+entityid); // connected by ',' because all entitylocators are related to the same entity: the from structure 
+									results.put("qualitymodifierlabel", results.get("qualitymodifierlabel")+","+result.get("entitylabel")); // connected by ',' because all entitylocators are related to the same entity: the from structure 
+								}
+							}
 						}
 					}					
 				}
@@ -136,9 +198,9 @@ public class RelationHandler {
 	 * @param relation string
 	 * @param tostructure name, not the chain of names
 	 * @param hascharacter: if false ,then the relation has to be a relationalqaulity as the fromstructure has no characters
-	 * @return if match, return ontologyID, if not, return null
+	 * @return if match, return id and label, if not, return null
 	 */
-	private String matchInRestrictedRelation(String fromstructure, String relation, String tostructure, boolean hascharacter) {
+	private Hashtable<String, String> matchInRestrictedRelation(String fromstructure, String relation, String tostructure, boolean hascharacter) {
 		// TODO Auto-generated method stub
 		
 		/*

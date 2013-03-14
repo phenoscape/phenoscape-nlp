@@ -10,7 +10,7 @@ import java.util.Hashtable;
 public class Dictionary {
 	public Connection conn;
 	//spatial terms form BSPO
-	public ArrayList<String> spatialterms;
+	public ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	public static String binaryTvalues = "present|true|yes|usually";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely";
@@ -18,7 +18,7 @@ public class Dictionary {
 	//Changed by Zilong
 	public static String selfReference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
-	public static String spatialtermptn;
+	public static String spatialtermptn="";
 	//By Zilong:
 	//sometimes, spatial terms could be used as adjectives to modify head nouns. 
 	//Instead of directly using <spatial terms+head nouns> when searching the ontology,
@@ -33,8 +33,8 @@ public class Dictionary {
 	public Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
 
 
-	public Dictionary(ArrayList<String> spatialterms) {
-		this.spatialterms = spatialterms;
+	public Dictionary() {
+
 		try{
 			
 			Class.forName("com.mysql.jdbc.Driver");
@@ -45,8 +45,9 @@ public class Dictionary {
 			//load spatial terms
 			ResultSet rs = stmt.executeQuery("select distinct term from uniquespatialterms");
 			while(rs.next()){
-				String term = rs.getString("term").trim();
-				if(term.length()>0){
+				String term = rs.getString("term");
+				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
+				if(term.length()>0){					
 					this.spatialterms.add(term);
 					this.spatialtermptn += term+"|";
 				}

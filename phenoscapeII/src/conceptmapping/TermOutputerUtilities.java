@@ -37,7 +37,7 @@ public class TermOutputerUtilities {
 	public static boolean debug = false;
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
-	private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
+	//private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
 
 	static{
 		//check cache
@@ -105,7 +105,7 @@ public class TermOutputerUtilities {
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
-				this.alladjectiveorgans.add(api.adjectiveorgans);
+				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
 				int j = onto.lastIndexOf("\\");
@@ -204,12 +204,15 @@ public class TermOutputerUtilities {
 
 	}*/
 
-	public String searchAdjectiveOrgan(String term, String type) {
+	/**
+	 * 
+	 * @param term
+	 * @param type
+	 * @return null or a hashtable (id=>label) containing classes that have term as an relational adjective.
+	 */
+	public Hashtable<String, String> searchAdjectiveOrgan(String term, String type) {
 		if(type.compareTo("entity")==0){
-			for(Hashtable<String, String> adjective : this.alladjectiveorgans){
-				String id = adjective.get(term);
-				if(id!=null) return id;
-			}
+			return OWLAccessorImpl.adjectiveorgans.get(term);
 		}
 		return null;
 	}

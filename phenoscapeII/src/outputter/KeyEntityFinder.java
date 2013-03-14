@@ -8,6 +8,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.jdom.Element;
+import org.jdom.xpath.XPath;
 
 /**
  * @author hong cui
@@ -25,21 +26,13 @@ import org.jdom.Element;
  *  "(organ name)"
  */
 public class KeyEntityFinder {
-/*	private List<Element> chars;
-	private List<Element> states;
-	private List<String> keyentities;
-	private Element root;*/
 	private EntitySearcher es;
-	
+
 	
 	/**
 	 */
 	public KeyEntityFinder(EntitySearcher es) {
-		this.es = es;
-/*		this.chars = chars;
-		this.states = states;
-		this.root = root;
-		this.keyentities = keyentities;*/
+		this.es = es;		
 	}
 
 	/**
@@ -62,17 +55,33 @@ public class KeyEntityFinder {
 	 * 
 	 * save onto-id of a structure in the new 'ontoid' attribute of <structure>
 	 * 
-	 * do not deal with entity locators for key entities.
+	 * do not deal with entity locators for key entities, which will be dealt with when processing the character statement by both non-binary and binary statements..
 	 * 
 	 */
-	public List<Element> getKeyEntities(List<Element> chars, List<Element> states, Element root, List<String> keyentities){
+	public List<Element> getKeyEntities(List<Element> chars, List<Element> states, Element root, ArrayList<Hashtable<String, String>> keyentities){
 
 		List<Element> keys = new ArrayList<Element>();
 		//add all structures which are not "whole organism" to key structures
-		//TODO should to-structure involved in a relation be considered key?
+		//TODO should 
 		for (Element e : chars) {
 			try{
-				keys.addAll(XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e));
+				List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e);
+				for(Element structure: structures){
+					Hashtable<String, String> keyentity = new Hashtable<String, String>();
+					String sid = structure.getAttributeValue("id");
+					if(!isToStructureInRelation(sid, root)){//to-structure involved in a relation are not considered a key
+						String sname = Utilities.getStructureName(root, sid);
+						Hashtable<String, String> result = es.searchEntity(root, sid, sname, "", sname, "", 0);
+						keyentity.put("entity", sname);//TODO try harder to find a match for the key entity
+						if(result!=null){
+							structure.setAttribute("ontoid", result.get("entityid"));
+							keyentity.put("entityid", result.get("entityid"));
+							keyentity.put("entitylabel", result.get("entitylabel"));
+						}
+						keyentities.add(keyentity);
+						keys.add(structure);
+					}					
+				}				
 			}catch(Exception ex){
 				ex.printStackTrace();
 			}
@@ -84,11 +93,14 @@ public class KeyEntityFinder {
 			key.setAttribute("name", "unknown");
 			key.setAttribute("id", "unknown" + XML2EQ.unknownid);
 			XML2EQ.unknownid++;
+			Hashtable<String, String> keyentity = new Hashtable<String, String>();
+			keyentity.put("entity", "unknown");
+			keyentities.add(keyentity);
 			keys.add(key);
 		}
 
 		//populate keyentities
-		for(Element key:keys){
+		/*for(Element key:keys){
 			//TODO ontology lookup for key entities
 			String structid = key.getAttributeValue("id");
 			String structname = Utilities.getStructureName(root, structid);
@@ -97,11 +109,21 @@ public class KeyEntityFinder {
 				key.setAttribute("ontoid", result.get("entityid"));
 			}
 			keyentities.add(structname);
-		}
+		}*/	
 		return keys;
-
-	
 	}
+	
+	private boolean isToStructureInRelation(String sid, Element root) {
+		try{
+			XPath tostructure = XPath.newInstance(".//relation[@to='"+sid+"']");
+			Element rel = (Element)tostructure.selectSingleNode(root);
+			if(rel == null) return false;
+		}catch(Exception e){
+			e.printStackTrace();
+		}		
+		return true;
+	}
+
 	/**
 	 * @param args
 	 */

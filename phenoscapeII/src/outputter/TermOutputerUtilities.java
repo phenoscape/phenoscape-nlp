@@ -110,7 +110,7 @@ public class TermOutputerUtilities {
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
-				this.alladjectiveorgans.add(api.adjectiveorgans);
+				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
 				int j = onto.lastIndexOf("\\");

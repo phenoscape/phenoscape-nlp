@@ -2,8 +2,8 @@
  * 
  */
 package outputter;
-
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,12 +95,14 @@ public class TermSearcher {
 			Matcher m = p.matcher(phrase);//term = dorsal portion
 			String spatials = "";
 			boolean trimed = false;
+			
 			while(m.matches()){
 				spatials += m.group(1)+" ";
 				phrase = m.group(2).trim();
 				trimed = true;
+				m = p.matcher(phrase);
 			}
-			//spatials = dorsal ; term = portion
+			//spatials = dorsal ; phrase = portion
 			String repl = dict.spatialMaps.get(phrase);
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
@@ -180,7 +182,17 @@ public class TermSearcher {
 	}
 	
 	public String adjectiveOrganSearch(String term){
-		return XML2EQ.ontoutil.searchAdjectiveOrgan(term, "entity");
+		Hashtable<String, String> result = XML2EQ.ontoutil.searchAdjectiveOrgan(term, "entity");
+		if(result!=null){
+			//return the first match
+			//TODO 
+			Enumeration<String> en = result.keys();
+			while(en.hasMoreElements()){
+				String id = en.nextElement();
+				return id+"#"+result.get(id);
+			}
+		}
+		return null;
 	}
 	/**
 	 * fill in results, return strong match if there is any
@@ -263,8 +275,16 @@ public class TermSearcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		
+		TermSearcher ts = new TermSearcher(new Dictionary());
+		Hashtable<String, String> result = ts.searchTerm("narrow", "quality", 0);
+		if(result !=null){
+			Enumeration<String> en = result.keys();
+			while(en.hasMoreElements()){
+				String key = en.nextElement();
+				System.out.println(key+"="+result.get(key));
+			}
+		}
 	}
 
 }

@@ -59,10 +59,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The search cache. */
 	
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> ontologyHash = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>();; //syn type => {term => classes}
-	public Hashtable<String, String> adjectiveorgans; //adj => classID#label
+	public static Hashtable<String,Hashtable<String, String>> adjectiveorgans = new Hashtable<String, Hashtable<String, String>>(); //adj => {classID => label}
 	
 	/** The source. */
 	private String source;
+	private OWLOntology rootOnt;
 
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
 	/**
@@ -78,7 +79,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		IRI iri = IRI.create(ontoURL);
 		source = ontoURL;
 		try{
-			OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(iri);
+			rootOnt = manager.loadOntologyFromOntologyDocument(iri);
 			constructorHelper(rootOnt, eliminate);
 			// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
 			this.retrieveAllConcept();
@@ -102,7 +103,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		df = manager.getOWLDataFactory();
 		source = file.getAbsolutePath();
 		try{
-			OWLOntology rootOnt = manager.loadOntologyFromOntologyDocument(file);
+			rootOnt = manager.loadOntologyFromOntologyDocument(file);
 			constructorHelper(rootOnt, eliminate);
 			// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
 			this.retrieveAllConcept();
@@ -113,6 +114,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 	}
 	
+	public Set<OWLOntology> getOntologies(){
+		return onts;
+	}
 	
 	/**
 	 * Constructor helper: the common part of the two constructors.
@@ -201,13 +205,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 			//TODO: searchCache = new Hashtable<String, Hashtable<String, List<OWLClass>>>();
 			//label => {"original|exact|related|narrow" => List<OWLClass>}
-
-
-
-			
 			int flag =0;//TODO why it's needed?
 			for (OWLClass c : allclasses) {
-
+				collectAdjectiveOrgans(c);
 				String label =this.getLabel(c).toLowerCase().trim();
 				Hashtable<String, ArrayList<OWLClass>> matches = ontologyHash.get(label);
 				if(matches == null){
@@ -223,6 +223,29 @@ public class OWLAccessorImpl implements OWLAccessor {
 				 hashTypedSyns(c, "narrow");
 				 hashTypedSyns(c, "related");
 			}
+		}
+
+
+		private void collectAdjectiveOrgans(OWLClass c) {
+			onts=rootOnt.getImportsClosure();
+			ArrayList<OWLAnnotation> annotations = new ArrayList<OWLAnnotation>();
+			for (OWLOntology ont:onts){
+			 annotations.addAll(c.getAnnotations(ont));
+			}
+			for(OWLAnnotation anno : annotations){
+				//System.out.println(anno.toString());
+				//adjectiveorgans//adj => classID#label
+				if(anno.toString().contains("UBPROP_0000007") ){//has_relational_adjective
+					String adj = anno.getValue().toString();//"zeugopodial"^^xsd:string
+					adj = adj.substring(0, adj.indexOf("^^")).replace("\"", "");
+					Hashtable<String, String> organs = this.adjectiveorgans.get(adj);
+					if(organs ==null){
+						organs = new Hashtable<String, String>();
+					}
+					organs.put(this.getID(c), this.getLabel(c));
+					this.adjectiveorgans.put(adj,organs);
+				}
+			}			
 		}
 
 
@@ -344,23 +367,31 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 */
 		private void merge(Hashtable<String, ArrayList<OWLClass>> whole, Hashtable<String, ArrayList<OWLClass>> part){
 			TreeSet<OWLClass> temp = new TreeSet<OWLClass>();
-			temp.addAll(whole.get("original"));
-			temp.addAll(part.get("original"));
+			ArrayList<OWLClass> oneset = whole.get("original");
+			ArrayList<OWLClass> anotherset = part.get("original");
+			if(oneset!=null) temp.addAll(oneset);
+			if(anotherset!=null) temp.addAll(anotherset);
 			whole.put("original", new ArrayList<OWLClass>(temp));
 			
 			temp = new TreeSet<OWLClass>();
-			temp.addAll(whole.get("exact"));
-			temp.addAll(part.get("exact"));
+			oneset = whole.get("exact");
+			anotherset = part.get("exact");
+			if(oneset!=null) temp.addAll(oneset);
+			if(anotherset!=null) temp.addAll(anotherset);
 			whole.put("exact", new ArrayList<OWLClass>(temp));
 			
 			temp = new TreeSet<OWLClass>();
-			temp.addAll(whole.get("narrow"));
-			temp.addAll(part.get("narrow"));
+			oneset = whole.get("narrow");
+			anotherset = part.get("narrow");
+			if(oneset!=null) temp.addAll(oneset);
+			if(anotherset!=null) temp.addAll(anotherset);
 			whole.put("narrow", new ArrayList<OWLClass>(temp));
 			
 			temp = new TreeSet<OWLClass>();
-			temp.addAll(whole.get("related"));
-			temp.addAll(part.get("related"));
+			oneset = whole.get("related");
+			anotherset = part.get("related");
+			if(oneset!=null) temp.addAll(oneset);
+			if(anotherset!=null) temp.addAll(anotherset);
 			whole.put("related", new ArrayList<OWLClass>(temp));			
 		}
 //
@@ -459,7 +490,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		 * Remove the ^^xsd:string tail from the returned annotation value
 		 */
 		return origin.replaceAll("\\^\\^xsd:string", "").replaceAll("\"", "")
-				.replaceAll("\\.", "");
+				.replaceAll("\\.", "").replaceFirst("@.*", ""); //remove lang info @en
 	}
 
 	/**
@@ -766,9 +797,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @param l
 	 *            the l
 	 * @return the class by label
+	 * 
+	 * TODO: deprecate this method, use retrieveconcept(string con) instead
 	 */
 	@Override
 	public OWLClass getClassByLabel(String l) {
+		
 		for (OWLClass c : this.getAllClasses()) {
 			if (this.getLabel(c).trim().toLowerCase()
 					.equals(l.trim().toLowerCase())) {
@@ -810,4 +844,5 @@ public class OWLAccessorImpl implements OWLAccessor {
 			return manager;
 		}
 
+		
 }

@@ -3,11 +3,14 @@ package owlaccessor;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
+import java.util.Hashtable;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
+import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import gnu.getopt.LongOpt;
@@ -47,6 +50,13 @@ import org.semanticweb.HermiT.Reasoner;
  * Date: 17-03-2007<br>
  * <br>
  */
+
+/*public class Distance {
+	
+	OWLClass node;
+	int distance=0;
+	Distance d;
+}*/
 public class SimpleHierarchyExample {
     private static int INDENT = 4;
 
@@ -55,7 +65,9 @@ public class SimpleHierarchyExample {
     private OWLOntology ontology;
 
     private PrintStream out;
+    Hashtable<OWLClass,Integer> distance = new Hashtable<OWLClass,Integer>();
 
+    private static OWLOntologyManager manager;
     public SimpleHierarchyExample(OWLOntologyManager manager, OWLReasonerFactory reasonerFactory)
             throws OWLException, MalformedURLException {
         this.reasonerFactory = reasonerFactory;
@@ -106,7 +118,12 @@ public class SimpleHierarchyExample {
      */
     public void printHierarchy(OWLReasoner reasoner, OWLClass clazz, int level)
             throws OWLException {
-        /*
+        TreeSet<OWLClass> list2 = new TreeSet<OWLClass>();
+        Set<OWLClass> list1;
+        int flag=1;
+       // OWLClass nothing = manager.getOWLDataFactory().getOWLClass(OWLRDFVocabulary.OWL_THING.getIRI());
+
+		/*
          * Only print satisfiable classes -- otherwise we end up with bottom
          * everywhere
          */
@@ -115,13 +132,38 @@ public class SimpleHierarchyExample {
                 out.print(" ");
             }
             out.println(labelFor( clazz ));
+            System.out.println("I am here");
+            list1 = reasoner.getSubClasses(clazz, true).getFlattened();
+           System.out.println(list1.size());
             /* Find the children and recurse */
-                for (OWLClass child : reasoner.getSubClasses(clazz, true).getFlattened()) {
-                    if (!child.equals(clazz)) {
-                        printHierarchy(reasoner, child, level + 1);
+          while(flag==1) 
+          {
+          
+           // System.out.println(list1.size());
+                for (OWLClass child : list1) {
+                    if (!child.isBottomEntity()) {
+                    	System.out.println(labelFor( child ));
+                    	list2.addAll(reasoner.getSubClasses(child, true).getFlattened());
+                    	distance.put(child, level);
+                    }
+                    else
+                    {
+                    	distance.put(child, level);
                     }
                 }
+                list1.clear();
+                if(list2.size()!=0)
+                	{
+                	list1.addAll(list2);
+                	list2.clear();
+                	level +=1;
+                	flag=1;
+                	}
+                else
+                	flag=0;
         }
+          System.out.println(distance.size());
+    }
     }
 
     public static void main(String[] args) {
@@ -163,7 +205,7 @@ public class SimpleHierarchyExample {
             // We first need to obtain a copy of an
             // OWLOntologyManager, which, as the name
             // suggests, manages a set of ontologies. 
-            OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            manager = OWLManager.createOWLOntologyManager();
            
             
             // We load an ontology from the URI specified
@@ -195,14 +237,17 @@ public class SimpleHierarchyExample {
                     manager, reasonerFactoryin);
  
             
-            System.out.println("WTF?");
+           
 	        // Get Thing
             if (classIRI==null) {
                 classIRI = OWLRDFVocabulary.OWL_THING.getIRI();
             	//classIRI.create("http://purl.obolibrary.org/obo/BSPO_0000085");
                 
             }
+           
+            
             OWLClass clazz = manager.getOWLDataFactory().getOWLClass(classIRI);
+           // d1.node = clazz;
             
             System.out.println("Class       : " + classIRI);
 
