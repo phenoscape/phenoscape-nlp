@@ -6041,6 +6041,9 @@ foreach my $info (@allsents){
 	$text =~ s#&lt;i&gt;#<i>#g; #unhide <i>
 	$text =~ s#&lt;/i&gt;#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
 	$text =~ s#^\s*\d+[a-z].\s*##; #remove 2a. (key marks)
+	if($type eq "character"){
+		$text =~ s#^[A-Z]+\s*\d+\s*-\s*##; #remove "INTCLA 3 - ", which is a label for a character statement. 
+	}
 	$original = $text;
   	$text =~ s/&[;#\w\d]+;/ /g; #remove HTML entities
   	$text =~ s# & # and #g;
