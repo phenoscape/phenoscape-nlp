@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -399,7 +400,11 @@ public class TermOutputer {
 	 */
 	private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type)throws Exception {
 		String[] result = null;
-		List<OWLClass> matches = owlapi.retrieveConcept(term);
+		Hashtable<String, ArrayList<OWLClass>> typedmatches = owlapi.retrieveConcept(term);
+		ArrayList<OWLClass> matches = typedmatches.get("original");
+		matches.addAll(typedmatches.get("exact"));
+		//matches.addAll(typedmatches.get("narrow"));
+		//matches.addAll(typedmatches.get("related"));
 		Iterator<OWLClass> it = matches.iterator();
 		
 		//exact match first

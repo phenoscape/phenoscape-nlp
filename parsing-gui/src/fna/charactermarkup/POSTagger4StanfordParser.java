@@ -303,7 +303,7 @@ public class POSTagger4StanfordParser {
 	       			   sb.append(word+"/NN ");
 	       		   }else if(p.contains("c")|| pos.indexOf('{') >=0){
 	       			   	//ResultSet rs3 = stmt1.executeQuery("select word from wordpos4parser where word='"+word+"' and certaintyl>5");
-	       				ResultSet rs2 = stmt1.executeQuery("select word from Brown.wordfreq where word='"+word+"' and freq>79");//1/largest freq in wordpos = 79/largest in brown
+	       				ResultSet rs2 = stmt1.executeQuery("select word from brown_wordfreq where word='"+word+"' and freq>79");//1/largest freq in wordpos = 79/largest in brown
 	       				if(rs2.next()){
 	       					sb.append(word+" ");
 	       				//}else if(word.indexOf("3-")>=0){
