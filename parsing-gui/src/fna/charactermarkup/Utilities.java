@@ -151,6 +151,20 @@ public class Utilities {
 		}
 		return false;
 	}
+	
+	public static boolean isPosition(String term, Connection conn, String glossary) {
+		try{
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select term from "+glossary+" where category in ('position') and term='"+term+"'");		
+			if(rs.next()){
+				if(debugPOS) System.out.println(term+" is a position");
+				return true;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public static boolean mustBeAdv(String word){
 		if(sureAdvs.contains(word)) return true;

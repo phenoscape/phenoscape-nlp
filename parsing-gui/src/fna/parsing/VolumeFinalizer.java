@@ -12,10 +12,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.jdom.Comment;
 import org.jdom.Element;
-import outputter.TermEQ2IDEQ;
+//import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
+import java.sql.Timestamp;
+import java.util.Date;
+
 
 /**
  * @author chunshui
@@ -32,7 +35,7 @@ public class VolumeFinalizer extends Thread {
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
     private static boolean standalone = false;//set to true when running only StanfordParser; false when running with GUI. 
-    private static String standalonefolder = "C:\\Users\\Zilong Chang\\Documents\\WORK\\testThread";
+    private static String standalonefolder = "C:/Users/updates/CharaParserTest/swartz2012";
     private Text finalLog;
     private Display display;
     
@@ -98,16 +101,22 @@ public class VolumeFinalizer extends Thread {
 		String xmldir = Registry.TargetDirectory+System.getProperty("file.separator")+"final"+System.getProperty("file.separator");
 		String outputtable = this.dataPrefix+"_xml2eq";
 		//String benchmarktable = "internalworkbench";
+		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
 		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
 		x2e.outputEQs();
-		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_EQ.csv").replaceAll("\\\\+", "/");
-		String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
-		TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv);
+
+		//Appending new date to the csv and txt output - Hariharan task1
+		Date d = new Date();
+		String time = new Timestamp(d.getTime())+"";
+		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_EQ.csv").replaceAll("\\\\+", "/");
+		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
 			this.showOutputMessage("Check result file in "+csv);
 		}
+		//String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
+		//TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);
+
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {

@@ -134,7 +134,12 @@ public class StateCollector  {
 		}
 		
 		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(StateCollector.conn, this.tableprefix, this.glosstable, true, display, charLog);//tag organ names
-		this.sentences = sosm.markSentences();
+		try {
+			this.sentences = sosm.markSentences();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		parseSentences();//create StateGroups 
 		//System.out.println(statematrix.toString());
 	}
