@@ -9,6 +9,7 @@ import java.util.Hashtable;
 
 public class Dictionary {
 	public Connection conn;
+	public String patoupperclasses = "2-D shape|shape|size|position|closure|structure|count|optical quality|composition|texture|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
@@ -154,5 +155,51 @@ public class Dictionary {
 		relationalqualities.put("project towards", "RO:0002220");
 		relationalqualities.put("reaching", "RO:0002220");
 		
+
+		relationalqualities.put("bearer of","BFO:0000053");
+		relationalqualities.put("adjacent to","RO:0002220");
+		//relationalqualities.put("anterior to","BSPO:0000096");
+		relationalqualities.put("anteriorly connected to","UBERON:anteriorly_connected_to");
+		//relationalqualities.put("attaches to","UBERON:attaches_to");
+		relationalqualities.put("extends from","PHENOSCAPE:extends_from");
+		relationalqualities.put("connected to","RO:0002150");
+		relationalqualities.put("decreased in magnitude relative to","PATO:decreased_in_magnitude_relative_to");
+		relationalqualities.put("deep to","BSPO:0000107");
+		relationalqualities.put("develops from","RO:0002202");
+		relationalqualities.put("distal to","BSPO:0000097");
+		relationalqualities.put("distally connected to","UBERON:distally_connected_to");
+		relationalqualities.put("dorsal to","BSPO:0000098");
+		relationalqualities.put("encloses","UBERON:encloses");
+		relationalqualities.put("extends to","PHENOSCAPE:extends_to");
+		relationalqualities.put("has cross section","PATO:has_cross_section");
+		relationalqualities.put("has muscle insertion","UBERON:has_muscle_insertion");
+		relationalqualities.put("has muscle origin","UBERON:has_muscle_origin");
+		relationalqualities.put("has part","BFO:0000051");
+		relationalqualities.put("in anterior side of","BSPO:0000123");
+		relationalqualities.put("in distal side of","BSPO:0000125");
+		relationalqualities.put("in lateral side of","UBERON:in_lateral_side_of");
+		relationalqualities.put("in left side of","BSPO:0000120");
+		relationalqualities.put("in median plane of","UBERON:in_median_plane_of");
+		relationalqualities.put("in posterior side of","BSPO:0000122");
+		relationalqualities.put("in proximal side of","BSPO:0000124");
+		relationalqualities.put("in right side of","BSPO:0000121");
+		relationalqualities.put("increased in magnitude relative to","PATO:increased_in_magnitude_relative_to");
+		//relationalqualities.put("located in","OBO_REL:located_in");
+		relationalqualities.put("overlaps","RO:0002131");
+		relationalqualities.put("part of","BFO:0000050");
+		relationalqualities.put("passes through","BSPO:passes_through");
+		relationalqualities.put("posterior to","BSPO:0000099");
+		relationalqualities.put("posteriorly connected to","UBERON:posteriorly_connected_to");
+		relationalqualities.put("proximal to","BSPO:0000100");
+		relationalqualities.put("proximally connected to","UBERON:proximally_connected_to");
+		relationalqualities.put("similar in magnitude relative to","PATO:similar_in_magnitude_relative_to");
+		relationalqualities.put("surrounded by","RO:0002219");
+		relationalqualities.put("surrounds","RO:0002221");
+		relationalqualities.put("ventral to","BSPO:0000102");
+		relationalqualities.put("vicinity of","BSPO:0000103");
+		relationalqualities.put("serves as attachment site for","PHENOSCAPE:serves_as_attachment_site_for");
+		relationalqualities.put("inheres in","BFO:0000052");
+		relationalqualities.put("not","PHENOSCAPE:complement_of");
+
 	}
 }
