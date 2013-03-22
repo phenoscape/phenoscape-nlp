@@ -131,6 +131,9 @@ public class TermOutputerUtilities {
 		}
 	}
 
+	/*
+	 * ids and labels of the immediate parent class as stated in PATO
+	 */
 	
 	public String[] retreiveParentInfoFromPATO (String classlabel){
 		//find OWL PATO
@@ -141,7 +144,7 @@ public class TermOutputerUtilities {
 				break;
 			}
 		}
-		//find parent
+		//find parents (may have more than one parent)
 		String [] result = {"",""}; 
 		if(pato!=null){
 			OWLClass c = pato.getClassByLabel(classlabel);

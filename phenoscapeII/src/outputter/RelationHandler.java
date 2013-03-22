@@ -83,39 +83,52 @@ public class RelationHandler {
 				toname = toname.replaceFirst(",$", "");
 				if(relationalqualityID !=null){ //yes, the relation is a relational quality
 					Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
-					if(results.get("relationalqualityid") == null){
+					if(results.get("relationalqualityid") == null){//the key relationalquality doesn't exists in results hash, add
 						results.put("relationalqualityid", relationalqualityID.get("id"));
 						results.put("relationalquality", relation);
 						results.put("relationalqualitylabel", relationalqualityID.get("label"));
 						//toname is then a qualitymodifier, containing an organ and its optional parent organs
 						results.put("qualitymodifier", toname);
-						if(result!=null){
-							String qm = result.get("entityid")==null? "": result.get("entityid")+","+
-									result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
+						if(result!=null){//qualitymodifier matched, add id and label to results
+							String qm = result.get("entityid")==null? "": result.get("entityid");
+							qm+= ","+result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
 							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
 								results.put("qualitymodifierid", qm); //use , not ;. ; used to separate qualitymodifiers of different quality
 							}
-							qm = result.get("entitylabel")==null? "": result.get("entitylabel")+","+
-									result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
+							qm = result.get("entitylabel")==null? "": result.get("entitylabel");
+							qm+= ","+result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
 							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
 								results.put("qualitymodifierlabel", qm); //use , not ;. ; used to separate qualitymodifiers of different quality
 							}
 						}
-					}else{
+						else //add "" so each relationalquality has a corresponding qualitymodifier 
+						{
+							results.put("qualitymodifierid","");
+							results.put("qualitymodifierlabel","");
+						}
+					}else{//the key relationalquality exists in results hash, attach to its value
 						results.put("relationalquality", results.get("relationalquality")+";"+relation);
 						results.put("relationalqualityid", results.get("relationalqualityid")+";"+relationalqualityID.get("id"));
 						results.put("relationalqualitylabel", results.get("relationalqualitylabel")+";"+relationalqualityID.get("label"));
 						//toname is then a qualitymodifier
 						results.put("qualitymodifier", results.get("qualitymodifier")+";"+toname);
-						String qm = result.get("entityid")==null? "": result.get("entityid")+","+
-								result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
-						if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
-							results.put("qualitymodifierid", results.get("qualitymodifierid")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+						if(result!=null)
+						{
+							String qm = result.get("entityid")==null? "": result.get("entityid")+","+
+									result.get("entitylocatorid")==null? "":result.get("entitylocatorid");
+							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+								results.put("qualitymodifierid", results.get("qualitymodifierid")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+							}
+							qm = result.get("entitylabel")==null? "": result.get("entitylabel")+","+
+									result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
+							if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
+								results.put("qualitymodifierlabel", results.get("qualitymodifierlabel")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+							}
 						}
-						qm = result.get("entitylabel")==null? "": result.get("entitylabel")+","+
-								result.get("entitylocatorlabel")==null? "":result.get("entitylocatorlabel");
-						if(qm.replaceFirst("(^,+|,+$)", "").trim().length()>0){
-							results.put("qualitymodifierlabel", results.get("qualitymodifierlabel")+";"+qm); //use , not ;. ; used to separate qualitymodifiers of different quality
+						else //attach "" so each relationalquality has a corresponding qualitymodifier 
+						{
+							results.put("qualitymodifierid", results.get("qualitymodifierid")+";"+"");
+							results.put("qualitymodifierlabel", results.get("qualitymodifierlabel")+";"+"");
 						}
 					}
 				}else{//no, the relation should not be considered relational quality
@@ -185,7 +198,7 @@ public class RelationHandler {
 						}
 					} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
 						Hashtable<String, String> result = es.searchEntity(root, toid, toname, "", toname, relation, 0);
-						results.put("qualitymodifier", toname);
+						results.put("qualitymodifier", results.get("qualitymodifier")+","+toname);
 						if(result!=null){
 							String entityid =result.get("entityid");
 							if(entityid!=null){
@@ -210,7 +223,7 @@ public class RelationHandler {
 	 * @param structureid
 	 * @return true if the structure has character elements, false if not.
 	 */
-	private boolean hasCharacters(String structureid, Element root) {
+	boolean hasCharacters(String structureid, Element root) {
 		try{
 			XPath characters = XPath.newInstance(".//Structure[@id='"+structureid+"']/Character");
 			List<Element> chars = characters.selectNodes(root);
@@ -250,7 +263,7 @@ public class RelationHandler {
 		String relation_ID=null;
 		//checks if the given relation is present in the identified relationalqualities - Hariharan
 		Hashtable<String, String> relationlist = null;
-		if(dict.relationalqualities.contains(relation))
+		if(dict.relationalqualities.containsKey(relation))
 		{
 			relationlist = new Hashtable<String, String>();
 			relationlist.put("id", dict.relationalqualities.get(relation));

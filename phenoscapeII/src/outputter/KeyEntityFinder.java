@@ -77,6 +77,9 @@ public class KeyEntityFinder {
 							structure.setAttribute("ontoid", result.get("entityid"));
 							keyentity.put("entityid", result.get("entityid"));
 							keyentity.put("entitylabel", result.get("entitylabel"));
+							keyentity.put("entitylocator", result.get("entitylocator")); //entity locator info is optional
+							keyentity.put("entitylocatorid", result.get("entitylocatorid"));
+							keyentity.put("entitylocatorlabel", result.get("entitylocatorlabel"));
 						}
 						keyentities.add(keyentity);
 						keys.add(structure);

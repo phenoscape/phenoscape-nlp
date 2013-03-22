@@ -11,25 +11,15 @@ import org.jdom.Element;
 
 /**
  * @author hong cui
+ * Handles the characters of a structure
  * grab character and constrain info from <character> tag
  * return a hashtable:
  * key: "quality" value: qualityID
  * key: "qualitymodifier" value: qualitymodifierID
  * 
- * TODO:(heterocercal tail is a subclass of caudal fin)
- * text::Caudal fin
- * text::heterocercal  
- * text::diphycercal
- *  ==> heterocercal tail: present
- *  ==> diphycercal tail: present
- * TODO: (needs info about other characters to know pit and ridge are not important, regular is important)
- * text::Nature of dermal ornament
- * text::tuberculate
- * text::fairly regular pit and ridge 
- * text::irregular [PATO:irregular spatial pattern, irregular shape, irregular sleep pattern, etc.]
- * text::absent or almost absent
+ *  
  * TODO could character be a relationalquality?
- * 
+ * yes, for example, "fused"
  */
 public class CharacterHandler {
 	private TermSearcher ts = null;

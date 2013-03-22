@@ -6041,6 +6041,14 @@ foreach my $info (@allsents){
 	$text =~ s#&lt;i&gt;#<i>#g; #unhide <i>
 	$text =~ s#&lt;/i&gt;#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
 	$text =~ s#^\s*\d+[a-z].\s*##; #remove 2a. (key marks)
+	if($type eq "character"){
+		#my $tcopy = $text;
+		$text =~ s#^[A-Z]{3,}\s*\d*\s*-\s*##; #remove "INTCLA 3 - ", which is a label for a character statement. 
+		#if($tcopy ne $text){
+		#	print $tcopy."\n";
+		#	print $text."\n";
+		#}
+	}
 	$original = $text;
   	$text =~ s/&[;#\w\d]+;/ /g; #remove HTML entities
   	$text =~ s# & # and #g;
@@ -6078,7 +6086,7 @@ foreach my $info (@allsents){
   		s#{[^{}]*?[a-zA-Z][^{}]*?}# #g; #remove {.a.}
     	#s#([^\d])\s*-\s*([^\d])#\1_\2#g;         #hyphened words: - =>_ to avoid space padding in the next step
 		#s#\s*[-]+\s*([a-z])#_$1#g;                #cup_shaped, 3_nerved, 3-5 (-7)_nerved #5/30/09 add+
-		s#\s*[-]+\s*([a-z])#_ $1#g;					#to fix basi- and hypobranchial 	
+		s#\s*[-]+(\s*[a-z])#_$1#g;					#to fix basi- and hypobranchial, L-shaped 	
 		s#(\W)# $1 #g;                            #add space around nonword char
     	#s#& (\w{1,5}) ;#&\1;#g;
     	s#\s+# #g;                                #multiple spaces => 1 space
