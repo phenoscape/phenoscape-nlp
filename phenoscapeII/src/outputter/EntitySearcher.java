@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -95,7 +96,8 @@ public class EntitySearcher {
 		elocatorphrase = elocatorphrase.replaceAll("("+Dictionary.process+")", "process");
 		entityphrase = entityphrase.replaceAll("latero-sensory", "sensory");
 		elocatorphrase = elocatorphrase.replaceAll("laterosensory", "sensory");
-		
+		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
+		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
 		
 		
@@ -155,6 +157,7 @@ public class EntitySearcher {
 		//re-arranging word in entity, first search for entity locator
 				
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
+		//TODO: process of maxilla case
 		String adjIDlabel = ts.adjectiveOrganSearch(entityphrasetokens[0]);
 		if(adjIDlabel!=null){
 			result.put("entitylocator", entityphrasetokens[0]);
@@ -271,23 +274,48 @@ public class EntitySearcher {
 			}
 		}	
 		
+		//finding the splitting point: body scale => scale of body
+		String[] tokens = entityphrase.split("\\s+");
+		for(int split = 0; split <= tokens.length-2; split++){
+			String part1 = Utilities.join(tokens, 0, split, " ");
+			String part2 = Utilities.join(tokens, split+1, tokens.length-1, " ");
+			Hashtable<String, String> result1 = ts.searchTerm(part1, "entity", 0);
+			Hashtable<String, String> result2 = ts.searchTerm(part2, "entity", 0);
+			if(result1!=null && result2!=null){
+				result.put("entity", part2);
+				result.put("entitylocator", part1);
+				result.put("entityid", result2.get("id"));
+				result.put("entitylocatorid", result1.get("id"));
+				result.put("entitylabel", result2.get("label"));
+				result.put("entitylocatorlabel", result1.get("label"));
+				return result;
+			}
+		}
+		
 		//still not find a match, remove the last term in the entityphrase, when what is left is not just a spatial term 
-		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"		
+		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"	
+		//TODO "some part" of humerus; "some quality"
 		//the last token could be a number (index)
 		//Changed by Zilong:
 		//enhanced entity format condition to exclude the spatial terms: in order to solve the problem that 
 		//"rostral tubule" will match "anterior side" because rostral is synonymous with anterior
 		
 		
-		String[] tokens = entityphrase.split("\\s+");
+		tokens = entityphrase.split("\\s+");
 		if(tokens.length>=2){ //to prevent "rostral tubule" from entering the subsequent process 
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
 			if(!shortened.matches(".*?\\b("+dict.spatialtermptn+")$")){
 				er = ts.searchTerm(shortened, "entity", ingroup);
 				if(er!=null){
-					result.put("entity", shortened);
-					result.put("entityid", er.get("id"));
-					result.put("entitylabel", er.get("label"));
+					if(er.get("label").compareTo("multi-cellular organism")==0){
+						//too general "body scale", try to search for "scale"
+						//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
+						//TODO: change labels to ids
+					}else{
+						result.put("entity", shortened);
+						result.put("entityid", er.get("id"));
+						result.put("entitylabel", er.get("label"));
+					}
 					return result;
 				}else{
 					//TODO
@@ -401,7 +429,6 @@ public class EntitySearcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 	}
 

@@ -277,7 +277,7 @@ public class TermSearcher {
 	public static void main(String[] args) {
 		
 		TermSearcher ts = new TermSearcher(new Dictionary());
-		Hashtable<String, String> result = ts.searchTerm("narrow", "quality", 0);
+		Hashtable<String, String> result = ts.searchTerm("regular", "quality", 0);
 		if(result !=null){
 			Enumeration<String> en = result.keys();
 			while(en.hasMoreElements()){

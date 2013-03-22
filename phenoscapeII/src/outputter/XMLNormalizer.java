@@ -49,7 +49,7 @@ public class XMLNormalizer {
 	
 	public void normalize(){
 		try{
-			with2partof(root);
+			//with2partof(root);
 			removeCategoricalRanges(root);
 			
 			// expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
@@ -64,7 +64,7 @@ public class XMLNormalizer {
 
 	/**
 	 * A with B => B part_of A
-	 * 
+	 * only sometimes A is not a structure: for example: "body scale: rhomboid with internal ridge; rounded"
 	 * @param root
 	 * @return
 	 */
