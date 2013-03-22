@@ -155,6 +155,7 @@ public class Dictionary {
 		relationalqualities.put("project towards", "RO:0002220");
 		relationalqualities.put("reaching", "RO:0002220");
 		
+
 		relationalqualities.put("bearer of","BFO:0000053");
 		relationalqualities.put("adjacent to","RO:0002220");
 		//relationalqualities.put("anterior to","BSPO:0000096");
@@ -199,6 +200,6 @@ public class Dictionary {
 		relationalqualities.put("serves as attachment site for","PHENOSCAPE:serves_as_attachment_site_for");
 		relationalqualities.put("inheres in","BFO:0000052");
 		relationalqualities.put("not","PHENOSCAPE:complement_of");
-		
+
 	}
 }
