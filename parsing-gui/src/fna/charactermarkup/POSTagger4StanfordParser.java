@@ -16,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import fna.parsing.ApplicationUtilities;
+import fna.parsing.state.SentenceOrganStateMarker;
 import conceptmapping.*;
 
 
@@ -36,6 +37,8 @@ public class POSTagger4StanfordParser {
 	private boolean printList = false;
 	private String tableprefix = null;
 	private String glosstable = null;
+	public static String comprepstring = SentenceOrganStateMarker.compoundprep.replaceAll(" ", "-");
+	private static Pattern compreppattern = Pattern.compile("\\{?("+comprepstring+")\\}?");
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
 	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
 	private String countp = "more|fewer|less|\\d+";
@@ -263,9 +266,13 @@ public class POSTagger4StanfordParser {
 		       			   p = rs1.getString("semanticrole");
 		       		   }
 	        	   }
-	       		   
+	        	   
+	        		Matcher mc = compreppattern.matcher(word);
+	        		if(mc.matches()){
+		        		   sb.append(word+"/IN ");
+	        		}
 	        	   //if(word.matches("in-.*?-view")){
-	        	   if(word.matches("in-.*?(-view|profile)")){
+	        		else if(word.matches("in-.*?(-view|profile)")){
 	        		   sb.append(word+"/RB ");
 	        	   }
 	        	   //if(word.matches("in-profile")){

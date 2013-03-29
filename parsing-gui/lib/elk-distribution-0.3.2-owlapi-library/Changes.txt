@@ -1,0 +1,56 @@
+ELK Reasoner 0.3.2:
+-------------------
+Fixed Bugs:
+- Fixed an issue causing a deadlock with many workers in the saturation stage. 
+Changes:
+- Updated dependencies for OWL API to v.3.4.2. 
+
+ELK Reasoner 0.3.1:
+-------------------
+Fixed Bugs:
+- Fixed NoSuchElementException when loading imported ontologies through OWLAPI that have no axioms.  Issue: 7. 
+- Fixed a bug with incorrect handling of lexical errors during parsing of OWL2 FSS files with the native ELK's parser. 
+Changes:
+- An improved testing of class and instance taxonomies via mock taxonomy objects and specific validators (e.g., for acyclicity and transitive reduction). 
+- Updated project configurations to comply with Maven Central requirements. 
+
+ELK Reasoner 0.3.0:
+-------------------
+New features:
+- Reporting of reasoner warnings in Protege user interface. 
+- Support for owl:Nothing and DisjointClasses axioms. 
+- Support for ReflexiveObjectProperty axioms. 
+- Support for individuals in ClassAssertion, ObjectPropertyAssertion, and ObjectHasValue. 
+- Support for consistency checking and instance retrieval queries for named classes. 
+- A new infrastructure for automated testing of ontology loading, printing, generation of taxonomies, and realization. 
+- A mechanism for interruption and restarting of reasoning tasks. 
+Fixed Bugs:
+- Fixed NullPointerException when loading ontologies with ObjectMinCardinality and ObjectExactCardinality constructors that have empty fillers.  Issue: 6. 
+- Fixed NullPointerException when querying the reasoner for a class not occurring in the signature of the ontology.  Issue: 1. 
+Changes:
+- A generic infrastructure for specification and registration of reasoning rules. 
+- A reorganized infrastructure for reasoning tasks, reasoning stages, and reasoning engines. 
+
+ELK Reasoner 0.2.0:
+-------------------
+New features:
+- Support for object property domain axioms. 
+- Support for object property chain inclusion axioms. 
+- Protege plugin: support for Protege 4 auto-update feature. 
+- Automated project distribution management through Apache Maven. 
+Fixed Bugs:
+- Fixed tokenization of IRIs containing reserved words in the built-in parser.  Issue: 5. 
+- Fixed grammar for non-negative integers in the built-in parser.  Issue: 4. 
+- Fixed grammar for ObjectOneOf in the built-in parser.  Issue: 3. 
+- Close all threads immediately when OWLReasoner.dispose() is called.  Issue: 2. 
+Changes:
+- Re-engineering of ELK OWL object hierarchy using interfaces instead of (abstract) classes. 
+
+ELK Reasoner 0.1.0:
+-------------------
+New features:
+- Support for classification of EL ontologies with role hierarchies and transitive roles. 
+- Classification can run concurrently and make use of the available multiple processors and cores. 
+- Preliminary implementation of the OWL API and Protege reasoner interfaces. 
+- OWL API: Support for dynamic loading of changes in ontologies. 
+

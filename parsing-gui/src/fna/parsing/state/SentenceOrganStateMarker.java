@@ -45,6 +45,8 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
+	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|forward of|further to|in addition to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|save for|thanks to|together with|up against|up until|vis-a-vis|with reference to|with regard to";
+	public static Pattern compreppattern = Pattern.compile("(.*?)\\b("+compoundprep+")\\b(.*)");
 	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
@@ -58,6 +60,7 @@ public class SentenceOrganStateMarker {
 	private String uname = "root";
 	private String upw = "forda444";
 	private String dbname = "biocreative2012";
+	private boolean printCompoundPP=false;
 
 	/**
 	 * 
@@ -98,6 +101,7 @@ public class SentenceOrganStateMarker {
 				text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
 				text = text.replaceAll("&#176;", "°");
 				text = text.replaceAll("\\bca\\s*\\.", "ca");
+				text = stringCompoundPP(text);
 				text = rs.getString("modifier")+"##"+tag+"##"+text;
 		//text.matches(".*?("+termprefix+").*")
 				
@@ -652,6 +656,25 @@ String[] splittext = text.split("\\s");
 			}
 		});
 	}
+	
+	/*
+	 * Handles the compound prepositions
+	 */
+	 private String stringCompoundPP(String text) {
+	        boolean did = false;
+	        String result = "";
+	        Matcher m = compreppattern.matcher(text);
+	        while(m.matches()){
+	            String linked = m.group(2).replaceAll("\\s+", "-");
+	            result += m.group(1)+ linked;
+	            text = m.group(3);
+	            m = compreppattern.matcher(text);
+	            did = true;
+	        }
+	        result += text;
+	        if(did && printCompoundPP ) System.out.println("[result]:"+result);
+	        return result;
+	    }
 
 	/**
 	 * @param args
