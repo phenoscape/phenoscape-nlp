@@ -3,6 +3,8 @@ package owlaccessor;
 import java.util.ArrayList;
 import org.junit.Test;
 
+import outputter.Dictionary;
+
 
 public class TestOWLAccessor2 {
 
@@ -79,7 +81,7 @@ public class TestOWLAccessor2 {
 	@Test
 	public void testGetAllOffsprings() throws Exception{
 		OWLAccessor a = new OWLAccessorImpl("http://www.berkeleybop.org/ontologies/pato.owl", new ArrayList<String>());
-		for(String s:a.getAllOffspringLables(a.getClassByLabel("cellular quality"))){
+		for(String s:a.getAllOffspringLables(a.getClassByIRI(Dictionary.cellquality))){
 			System.out.println(s);
 		}
 	}

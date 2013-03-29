@@ -22,13 +22,15 @@ import org.semanticweb.owlapi.model.OWLClass;
 public interface OWLAccessor {
 	
 	/**
-	 * Retrieve the classes representing exact matched or related terms (synonyms) of the given concept from PATO
+	 * Retrieve the classes representing exact matched or related terms (synonyms) of the given concept from an ontology
 	 * When there is no such a term, return and empty list.
 	 * @param con - the given concept
-	 * @return a list of matched or related terms (synonyms)
+	 * @return Hashtable<syn_type(original|exact|narrow|related),  arraylist of matched_classes>
 	 * @throws Exception 
 	 */
 	public Hashtable<String, ArrayList<OWLClass>> retrieveConcept(String con) throws Exception;
+	
+
 	
 	/**
 	 * Retrieve the classes representing exact matched or related terms (synonyms) of the given concept from PATO 
@@ -88,12 +90,12 @@ public interface OWLAccessor {
 	public Set<String> getAllOffspringLables(OWLClass c);
 	
 	/**
-	 * Retrieve OWLClass by label.
-	 *
+	 * This method is flawed as one label may be used by multiple classes
+	 * Retrieve OWLClass by label
 	 * @param l the l
 	 * @return the class by label
 	 */
-	public OWLClass getClassByLabel(String l);
+	//public OWLClass getClassByLabel(String l);
 	
 	/**
 	 * Retrive ID of an OWLClass.
@@ -110,5 +112,9 @@ public interface OWLAccessor {
 	 * @return the all off springs
 	 */
 	public Set<OWLClass> getAllOffsprings(OWLClass c);
+
+
+
+	public OWLClass getClassByIRI(String iri);
 
 }

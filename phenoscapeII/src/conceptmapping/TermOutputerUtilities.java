@@ -15,6 +15,7 @@ import oboaccessor.OBO2DB;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
+import outputter.Dictionary;
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -35,56 +36,11 @@ public class TermOutputerUtilities {
 	private String database;
 
 	public static boolean debug = false;
-	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
-	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
-	//private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
-
-	static{
-		//check cache
-		singulars.put("axis", "axis");
-		singulars.put("axes", "axis");
-		singulars.put("bases", "base");
-		singulars.put("boss", "boss");
-		singulars.put("buttress", "buttress");
-		singulars.put("callus", "callus");
-		singulars.put("frons", "frons");
-		singulars.put("grooves", "groove");
-		singulars.put("interstices", "interstice");
-		singulars.put("lens", "len");
-		singulars.put("media", "media");
-		singulars.put("midnerves", "midnerve");
-		singulars.put("process", "process");
-		singulars.put("series", "series");
-		singulars.put("species", "species");
-		singulars.put("teeth", "tooth");
-		singulars.put("valves", "valve");
-		singulars.put("i", "i"); //could add more roman digits
-		singulars.put("ii", "ii");
-		singulars.put("iii", "iii");
-		
-		plurals.put("axis", "axes");
-		plurals.put("base", "bases");		
-		plurals.put("groove", "grooves");
-		plurals.put("interstice", "interstices");
-		plurals.put("len", "lens");
-		plurals.put("media", "media");
-		plurals.put("midnerve", "midnerves");
-		plurals.put("tooth", "teeth");
-		plurals.put("valve", "valves");
-		plurals.put("boss", "bosses");
-		plurals.put("buttress", "buttresses");
-		plurals.put("callus", "calluses");
-		plurals.put("frons", "fronses");
-		plurals.put("process", "processes");
-		plurals.put("series", "series");
-		plurals.put("species", "species");
-		plurals.put("i", "i"); //could add more roman digits
-		plurals.put("ii", "ii");
-		plurals.put("iii", "iii");
+	
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
 		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
-		
+	static{
 		//TODO:add GO:bioprocess
 		entityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
@@ -97,7 +53,8 @@ public class TermOutputerUtilities {
 	
 	public TermOutputerUtilities(String ontologyfolder, String database){
 		TermOutputerUtilities.ontologyfolder = ontologyfolder;
-		excluded.add("cellular quality");//exclude "cellular quality"
+		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
+	
 		this.database = database;
 		
 		//for each entity ontology
@@ -135,7 +92,7 @@ public class TermOutputerUtilities {
 	 * ids and labels of the immediate parent class as stated in PATO
 	 */
 	
-	public String[] retreiveParentInfoFromPATO (String classlabel){
+	/*public String[] retreiveParentInfoFromPATO (String classlabel){
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -159,7 +116,7 @@ public class TermOutputerUtilities {
 			}
 		}		
 		return result;
-	}
+	}*/
 	
 
 	/**
@@ -513,19 +470,19 @@ public class TermOutputerUtilities {
 		String s = "";
 		word = word.toLowerCase().replaceAll("[(){}]", "").trim(); //bone/tendon
 
-		s = singulars.get(word);
+		s = Dictionary.singulars.get(word);
 		if(s!=null) return s;
 		
 		if(word.matches("\\w+_[ivx-]+")){
-			singulars.put(word, word);
-			plurals.put(word, word);
+			Dictionary.singulars.put(word, word);
+			Dictionary.plurals.put(word, word);
 			return word;
 		}
 		
 		//adverbs
 		if(word.matches("[a-z]{3,}ly")){
-			singulars.put(word, word);
-			plurals.put(word, word);
+			Dictionary.singulars.put(word, word);
+			Dictionary.plurals.put(word, word);
 			return word;
 		}
 		
@@ -534,8 +491,8 @@ public class TermOutputerUtilities {
 		if(wordcopy != null && wordcopy.length()==0){
 			return word;
 		}else if(wordcopy!=null){
-			singulars.put(word, wordcopy);
-			if(!wordcopy.equals(word)) plurals.put(wordcopy, word);
+			Dictionary.singulars.put(word, wordcopy);
+			if(!wordcopy.equals(word)) Dictionary.plurals.put(wordcopy, word);
 			if(debug) System.out.println("["+word+"]'s singular is "+wordcopy);
 			return wordcopy;
 		}else{//word not in wn
@@ -586,8 +543,8 @@ public class TermOutputerUtilities {
 		  
 		  if(s != null){
 			if(debug) System.out.println("["+word+"]'s singular is "+s);
-			singulars.put(word, s);
-			if(!s.equals(word)) plurals.put(s, word);
+			Dictionary.singulars.put(word, s);
+			if(!s.equals(word)) Dictionary.plurals.put(s, word);
 			return s;
 		  }
 		}
@@ -596,7 +553,7 @@ public class TermOutputerUtilities {
 	}
 	
 	public static String plural(String b) {
-		return TermOutputerUtilities.plurals.get(b);
+		return Dictionary.plurals.get(b);
 	}
 
 	/**

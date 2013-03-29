@@ -8,7 +8,6 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import conceptmapping.TermOutputerUtilities;
 
 /**
  * @author hong cui
@@ -277,7 +276,7 @@ public class TermSearcher {
 	public static void main(String[] args) {
 		
 		TermSearcher ts = new TermSearcher(new Dictionary());
-		Hashtable<String, String> result = ts.searchTerm("regular", "quality", 0);
+		Hashtable<String, String> result = ts.searchTerm("absent", "quality", 0);
 		if(result !=null){
 			Enumeration<String> en = result.keys();
 			while(en.hasMoreElements()){

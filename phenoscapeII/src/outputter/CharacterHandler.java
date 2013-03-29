@@ -24,11 +24,11 @@ import org.jdom.Element;
 public class CharacterHandler {
 	private TermSearcher ts = null;
 	private EntitySearcher es = null;
-	private conceptmapping.TermOutputerUtilities ontoutil;
+	private TermOutputerUtilities ontoutil;
 	/**
 	 * 
 	 */
-	public CharacterHandler(TermSearcher ts, EntitySearcher es, conceptmapping.TermOutputerUtilities ontoutil2) {
+	public CharacterHandler(TermSearcher ts, EntitySearcher es, TermOutputerUtilities ontoutil2) {
 		this.ts = ts;
 		this.es = es;
 		this.ontoutil = ontoutil2;
@@ -63,7 +63,7 @@ public class CharacterHandler {
 					String qualitylabel = result.get("label");
 					if(qualitylabel!=null){
 						results.put("qualitynegatedlabel", "not("+qualitylabel+")");
-						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(qualitylabel);
+						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.get("id"));
 						if(parentinfo != null){
 							results.put("qnparentid", parentinfo[0]);
 							results.put("qnparentlabel", parentinfo[1]);

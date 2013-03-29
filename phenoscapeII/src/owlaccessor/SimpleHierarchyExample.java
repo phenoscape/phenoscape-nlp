@@ -13,9 +13,10 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import gnu.getopt.LongOpt;
-import gnu.getopt.Getopt;
-import org.semanticweb.HermiT.Reasoner;
+//TODO replace HermiT with ELK
+//import gnu.getopt.LongOpt;
+//import gnu.getopt.Getopt;
+//import org.semanticweb.HermiT.Reasoner;
 
 /* 
  * Copyright (C) 2007, University of Manchester
@@ -167,9 +168,9 @@ public class SimpleHierarchyExample {
     }
 
     public static void main(String[] args) {
-        try {
+/*        try {
 
-            /* Handle command line arguments */
+             Handle command line arguments 
             LongOpt[] longopts = new LongOpt[11];
             
             longopts[0] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, '?');
@@ -190,11 +191,11 @@ public class SimpleHierarchyExample {
                     System.out.println("command --reasonerFactoryClassName [--class=URL] URL");
                     System.exit(0);
                 case 'r':
-                    /* Use a reasoner */
+                     Use a reasoner 
                     reasonerFactoryClassName = g.getOptarg();
                     break;
                 case 'c':
-                    /* Class to start from */
+                     Class to start from 
                     classIRI = IRI.create(g.getOptarg());
                     break;
                 }
@@ -230,9 +231,9 @@ public class SimpleHierarchyExample {
             OWLReasonerFactory reasonerFactoryin = new Reasoner.ReasonerFactory();
             
             
-            /*SimpleHierarchyExample simpleHierarchy = new SimpleHierarchyExample(
+            SimpleHierarchyExample simpleHierarchy = new SimpleHierarchyExample(
                     manager, (OWLReasonerFactory) Class.forName(reasonerFactoryClassName).newInstance());
-             */
+             
             SimpleHierarchyExample simpleHierarchy = new SimpleHierarchyExample(
                     manager, reasonerFactoryin);
  
@@ -256,6 +257,6 @@ public class SimpleHierarchyExample {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

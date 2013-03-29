@@ -70,17 +70,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * Instantiates a new oWL accessor impl.
 	 *
 	 * @param ontoURL the onto url
-	 * @param eliminate the eliminate
+	 * @param excludedclasses: arraylist of class IRI string
 	 * @throws Exception the exception
 	 */
-	public OWLAccessorImpl(String ontoURL, ArrayList<String> eliminate) {
+	public OWLAccessorImpl(String ontoURL, ArrayList<String> excludedclasses) {
 		manager = OWLManager.createOWLOntologyManager();
 		df = manager.getOWLDataFactory();
 		IRI iri = IRI.create(ontoURL);
 		source = ontoURL;
 		try{
 			rootOnt = manager.loadOntologyFromOntologyDocument(iri);
-			constructorHelper(rootOnt, eliminate);
+			constructorHelper(rootOnt, excludedclasses);
 			// retrieves all synonyms of every class and store it in search cache - Hariharan Task2
 			this.retrieveAllConcept();
 		}catch(Exception e){
@@ -124,16 +124,16 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * grouping classes, such as relationalSlim in PATO
 	 *
 	 * @param rootOnt the root ont
-	 * @param eliminate the eliminate
+	 * @param excludedclassIRIs 
 	 */
-	private void constructorHelper(OWLOntology rootOnt, ArrayList<String> eliminate){
+	private void constructorHelper(OWLOntology rootOnt, ArrayList<String> excludedclassIRIs){
 		onts=rootOnt.getImportsClosure();
 		for (OWLOntology ont:onts){
 			allclasses.addAll(ont.getClassesInSignature(true));
 		}
 		
 		//eliminate branches
-		allclasses.removeAll(this.getWordsToEliminate(eliminate));
+		allclasses.removeAll(this.classesToExclude(excludedclassIRIs));
 		
 		//add all relational slim terms to a list
 		//also add all obsolete terms to a list
@@ -455,14 +455,14 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/**
 	 * Gets the words to eliminate.
 	 *
-	 * @param eliminate the eliminate
+	 * @param excludedclassIRIs the eliminate
 	 * @return the words to eliminate
 	 */
-	public Set<OWLClass> getWordsToEliminate(List<String> eliminate) {
+	public Set<OWLClass> classesToExclude(List<String> excludedclassIRIs) {
 		Set<OWLClass> er = new HashSet<OWLClass>();
 
-		for (String s:eliminate){
-			OWLClass c = this.getClassByLabel(s);
+		for (String s:excludedclassIRIs){
+			OWLClass c = this.getClassByIRI(s);
 			er.add(c);//add itself to the set first
 			er.addAll(this.getAllOffsprings(c));//add all its offsprings
 		}
@@ -801,13 +801,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * TODO: deprecate this method, use retrieveconcept(string con) instead
 	 */
 	@Override
-	public OWLClass getClassByLabel(String l) {
+	public OWLClass getClassByIRI(String iri) {
 		
 		for (OWLClass c : this.getAllClasses()) {
-			if (this.getLabel(c).trim().toLowerCase()
-					.equals(l.trim().toLowerCase())) {
-				return c;
-			}
+			if(c.getIRI().toString().compareTo(iri)==0) return c;
 		}
 		return null;
 	}

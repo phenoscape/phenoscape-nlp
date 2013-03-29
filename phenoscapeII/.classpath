@@ -10,8 +10,7 @@
 	<classpathentry kind="lib" path="/parsing-gui/lib/jdom.jar"/>
 	<classpathentry kind="lib" path="/parsing-gui/lib/saxpath.jar"/>
 	<classpathentry kind="lib" path="/parsing-gui/lib/mysql-connector-java-5.0.8-bin.jar"/>
-	<classpathentry kind="lib" path="C:/Users/updates/Desktop/Hari-Phenoscape/gnuprologjava-0.2.6.jar"/>
-	<classpathentry kind="lib" path="C:/Users/updates/Desktop/Hari-Phenoscape/HermiT.jar"/>
 	<classpathentry kind="lib" path="/parsing-gui/lib/edu.mit.jwi_2.2.3.jar"/>
+	<classpathentry kind="lib" path="/parsing-gui/lib/elk-distribution-0.3.2-owlapi-library/elk-owlapi.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

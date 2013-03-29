@@ -307,7 +307,7 @@ public class EntitySearcher {
 			if(!shortened.matches(".*?\\b("+dict.spatialtermptn+")$")){
 				er = ts.searchTerm(shortened, "entity", ingroup);
 				if(er!=null){
-					if(er.get("label").compareTo("multi-cellular organism")==0){
+					if(er.get("id").compareTo(dict.mcorganism)==0){
 						//too general "body scale", try to search for "scale"
 						//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
 						//TODO: change labels to ids

@@ -28,82 +28,32 @@ public class TermOutputerUtilities {
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
-	private static String ontologyfolder;
+	private static String ontologyfolder = ApplicationUtilities.getProperty("ontology.dir");
+	private static String[] entityontologies;
+	private static String[] qualityontologies;
 	private String database;
 
 	public static boolean debug = false;
-	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
-	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
-	private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> ();
-
-	static{
-		//check cache
-		singulars.put("axis", "axis");
-		singulars.put("axes", "axis");
-		singulars.put("bases", "base");
-		singulars.put("boss", "boss");
-		singulars.put("buttress", "buttress");
-		singulars.put("callus", "callus");
-		singulars.put("frons", "frons");
-		singulars.put("grooves", "groove");
-		singulars.put("interstices", "interstice");
-		singulars.put("lens", "len");
-		singulars.put("media", "media");
-		singulars.put("midnerves", "midnerve");
-		singulars.put("process", "process");
-		singulars.put("series", "series");
-		singulars.put("species", "species");
-		singulars.put("teeth", "tooth");
-		singulars.put("valves", "valve");
-		singulars.put("i", "i"); //could add more roman digits
-		singulars.put("ii", "ii");
-		singulars.put("iii", "iii");
+	
 		
-		plurals.put("axis", "axes");
-		plurals.put("base", "bases");		
-		plurals.put("groove", "grooves");
-		plurals.put("interstice", "interstices");
-		plurals.put("len", "lens");
-		plurals.put("media", "media");
-		plurals.put("midnerve", "midnerves");
-		plurals.put("tooth", "teeth");
-		plurals.put("valve", "valves");
-		plurals.put("boss", "bosses");
-		plurals.put("buttress", "buttresses");
-		plurals.put("callus", "calluses");
-		plurals.put("frons", "fronses");
-		plurals.put("process", "processes");
-		plurals.put("series", "series");
-		plurals.put("species", "species");
-		plurals.put("i", "i"); //could add more roman digits
-		plurals.put("ii", "ii");
-		plurals.put("iii", "iii");
+		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
+		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
+	static{
+		//TODO:add GO:bioprocess
+		entityontologies = new String[]{
+				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
+				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
+				};
+		qualityontologies = new String[]{
+				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
+		};
 	}
+	
 	
 	public TermOutputerUtilities(String ontologyfolder, String database){
 		TermOutputerUtilities.ontologyfolder = ontologyfolder;
-		excluded.add("cellular quality");//exclude "cellular quality"
+		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
 		this.database = database;
-		
-		//create a list of relative path of the ontologies
-		String [] entityontologies = new String[]{
-				//TODO:add GO:bioprocess
-				//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
-				//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
- 		ontologyfolder+System.getProperty("file.separator")+"ext.owl",
-//		ontologyfolder+System.getProperty("file.separator")+"vertebrate_anatomy.obo",
-//		ontologyfolder+System.getProperty("file.separator")+"amniote_draft.obo",
-		ontologyfolder+System.getProperty("file.separator")+"bspo.owl"};
-		String [] qualityontologies = new String[]{
-		ontologyfolder+System.getProperty("file.separator")+"pato.owl"};
-		 
-		/*
-		entityOntoPaths.add("http://purl.obolibrary.org/obo/tao.owl");
-		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/skeletal/obo/vertebrate_anatomy.obo");
-		entityOntoPaths.add("https://phenoscape.svn.sourceforge.net/svnroot/phenoscape/trunk/vocab/amniote_draft.obo");
-		entityOntoPaths.add("http://www.berkeleybop.org/ontologies/bspo.owl");
-		qualityOntoPaths.add("http://www.berkeleybop.org/ontologies/pato.owl");
-		*/
 		
 		//for each entity ontology
 		for(String onto: entityontologies){
@@ -136,8 +86,12 @@ public class TermOutputerUtilities {
 		}
 	}
 
-	
-	public String[] retreiveParentInfoFromPATO (String classlabel){
+	/**
+	 * 
+	 * @param classlabel
+	 * @return an array with two element: ids and labels of the parents
+	 */
+	public String[] retreiveParentInfoFromPATO (String classid){
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -149,7 +103,7 @@ public class TermOutputerUtilities {
 		//find parent
 		String [] result = {"",""}; 
 		if(pato!=null){
-			OWLClass c = pato.getClassByLabel(classlabel);
+			OWLClass c = pato.getClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
 			if(c!=null){
 				List<OWLClass> pcs = pato.getParents(c);
 				for(OWLClass pc: pcs){
@@ -209,12 +163,16 @@ public class TermOutputerUtilities {
 
 	}*/
 
-	public String searchAdjectiveOrgan(String term, String type) {
+
+	/**
+	 * 
+	 * @param term
+	 * @param type
+	 * @return null or a hashtable (id=>label) containing classes that have term as an relational adjective.
+	 */
+	public Hashtable<String, String> searchAdjectiveOrgan(String term, String type) {
 		if(type.compareTo("entity")==0){
-			for(Hashtable<String, String> adjective : this.alladjectiveorgans){
-				String id = adjective.get(term);
-				if(id!=null) return id;
-			}
+			return OWLAccessorImpl.adjectiveorgans.get(term);
 		}
 		return null;
 	}
@@ -297,7 +255,7 @@ public class TermOutputerUtilities {
 	 * @param owlapi
 	 * @param type
 	 * @param subgroup ?? 
-	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
 	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) {
 		Hashtable<String, String> result = null;
@@ -310,25 +268,25 @@ public class TermOutputerUtilities {
 			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
 		}else{
 			List<OWLClass> matchclass = matches.get("original");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "original", owlapi);
 				return result;
 			}
 			
 			matchclass = matches.get("exact");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "exact", owlapi);
 				return result;
 			}
 			
 			matchclass = matches.get("narrow");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "narrow", owlapi);
 				return result;
 			}
 			
 			matchclass = matches.get("related");
-			if(matchclass!=null && matchclass.size()==0){
+			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "related", owlapi);
 				return result;
 			}
@@ -343,7 +301,7 @@ public class TermOutputerUtilities {
 	 * @param querytype
 	 * @param matchtype
 	 * @param owlapi
-	 * @return 4-key hashtable: term, querytype, id, label, matchtype
+	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
 	private Hashtable<String, String> collectResult(String term, List<OWLClass> matches, String querytype, String matchtype, OWLAccessorImpl owlapi){
 		if(matches == null || matches.size() ==0) return null;
@@ -512,19 +470,19 @@ public class TermOutputerUtilities {
 		String s = "";
 		word = word.toLowerCase().replaceAll("[(){}]", "").trim(); //bone/tendon
 
-		s = singulars.get(word);
+		s = Dictionary.singulars.get(word);
 		if(s!=null) return s;
 		
 		if(word.matches("\\w+_[ivx-]+")){
-			singulars.put(word, word);
-			plurals.put(word, word);
+			Dictionary.singulars.put(word, word);
+			Dictionary.plurals.put(word, word);
 			return word;
 		}
 		
 		//adverbs
 		if(word.matches("[a-z]{3,}ly")){
-			singulars.put(word, word);
-			plurals.put(word, word);
+			Dictionary.singulars.put(word, word);
+			Dictionary.plurals.put(word, word);
 			return word;
 		}
 		
@@ -533,8 +491,8 @@ public class TermOutputerUtilities {
 		if(wordcopy != null && wordcopy.length()==0){
 			return word;
 		}else if(wordcopy!=null){
-			singulars.put(word, wordcopy);
-			if(!wordcopy.equals(word)) plurals.put(wordcopy, word);
+			Dictionary.singulars.put(word, wordcopy);
+			if(!wordcopy.equals(word)) Dictionary.plurals.put(wordcopy, word);
 			if(debug) System.out.println("["+word+"]'s singular is "+wordcopy);
 			return wordcopy;
 		}else{//word not in wn
@@ -585,8 +543,8 @@ public class TermOutputerUtilities {
 		  
 		  if(s != null){
 			if(debug) System.out.println("["+word+"]'s singular is "+s);
-			singulars.put(word, s);
-			if(!s.equals(word)) plurals.put(s, word);
+			Dictionary.singulars.put(word, s);
+			if(!s.equals(word)) Dictionary.plurals.put(s, word);
 			return s;
 		  }
 		}
@@ -595,7 +553,7 @@ public class TermOutputerUtilities {
 	}
 	
 	public static String plural(String b) {
-		return TermOutputerUtilities.plurals.get(b);
+		return Dictionary.plurals.get(b);
 	}
 
 	/**

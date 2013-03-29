@@ -26,7 +26,6 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import owlaccessor.OWLAccessorImpl;
 
-import conceptmapping.TermOutputerUtilities;
 
 /**
  * @author Hong Updates
@@ -77,7 +76,6 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil;
 	private Dictionary dictionary = new Dictionary();
-
 	private EntitySearcher es = new EntitySearcher(dictionary);
 	private TermSearcher ts = new TermSearcher(dictionary);
 	private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
@@ -799,7 +797,7 @@ public class XML2EQ {
 						EQ.put("qualitynegatedlabel", "not("+qualitylabel+")");
 						EQ.put("qnparentlabel", "");
 						EQ.put("qnparentid", "");
-						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(qualitylabel);
+						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(qualityid);
 						if(parentinfo != null){
 							EQ.put("qnparentid", parentinfo[0]);
 							EQ.put("qnparentlabel", parentinfo[1]);

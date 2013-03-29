@@ -9,7 +9,8 @@ import java.util.Hashtable;
 
 public class Dictionary {
 	public Connection conn;
-	public String patoupperclasses = "2-D shape|shape|size|position|closure|structure|count|optical quality|composition|texture|behavioral quality|mobility|mass|quality of a solid";
+	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim
+	public String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
@@ -34,6 +35,78 @@ public class Dictionary {
 	public Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
 	public Hashtable<String, String> relationalqualities = new Hashtable<String, String>();
 	public Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
+	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
+	
+	/** special ontology classes **/
+	public static String mcorganism="UBERON:0000468"; //multi-cellular organism
+	public static String anatprojection = "anatomical projection";
+	public static String cellquality = "http://purl.obolibrary.org/obo/PATO_0001396";
+	public static String patoiri="http://purl.obolibrary.org/obo/";
+	
+	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
+	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
+	//private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
+
+	static{
+		//check cache
+		singulars.put("axis", "axis");
+		singulars.put("axes", "axis");
+		singulars.put("bases", "base");
+		singulars.put("boss", "boss");
+		singulars.put("buttress", "buttress");
+		singulars.put("callus", "callus");
+		singulars.put("frons", "frons");
+		singulars.put("grooves", "groove");
+		singulars.put("interstices", "interstice");
+		singulars.put("lens", "len");
+		singulars.put("media", "media");
+		singulars.put("midnerves", "midnerve");
+		singulars.put("process", "process");
+		singulars.put("series", "series");
+		singulars.put("species", "species");
+		singulars.put("teeth", "tooth");
+		singulars.put("valves", "valve");
+		singulars.put("i", "i"); //could add more roman digits
+		singulars.put("ii", "ii");
+		singulars.put("iii", "iii");
+		
+		plurals.put("axis", "axes");
+		plurals.put("base", "bases");		
+		plurals.put("groove", "grooves");
+		plurals.put("interstice", "interstices");
+		plurals.put("len", "lens");
+		plurals.put("media", "media");
+		plurals.put("midnerve", "midnerves");
+		plurals.put("tooth", "teeth");
+		plurals.put("valve", "valves");
+		plurals.put("boss", "bosses");
+		plurals.put("buttress", "buttresses");
+		plurals.put("callus", "calluses");
+		plurals.put("frons", "fronses");
+		plurals.put("process", "processes");
+		plurals.put("series", "series");
+		plurals.put("species", "species");
+		plurals.put("i", "i"); //could add more roman digits
+		plurals.put("ii", "ii");
+		plurals.put("iii", "iii");
+	}
+	static{
+		parentclass2label.put("PATO:0000186", "behavioral quality");
+		parentclass2label.put("PATO:0001396", "cellular quality");
+		parentclass2label.put("PATO:0000136", "closure");
+		parentclass2label.put("PATO:0000025", "composition");
+		parentclass2label.put("PATO:0000070", "count in organism");
+		parentclass2label.put("PATO:0000125", "mass");
+		parentclass2label.put("PATO:0000004", "mobility");
+		parentclass2label.put("PATO:0001300", "optical quality");
+		parentclass2label.put("PATO:0002062", "physical quality of a process");
+		parentclass2label.put("PATO:0000140", "position");
+		parentclass2label.put("PATO:0001546", "quality of a solid");
+		parentclass2label.put("PATO:0000052", "shape");
+		parentclass2label.put("PATO:0000117", "size");
+		parentclass2label.put("PATO:0000141", "structure");
+		parentclass2label.put("PATO:0000150", "texture");
+	}
 	public Dictionary() {
 
 		try{
@@ -69,6 +142,7 @@ public class Dictionary {
 		spatialMaps.put("portion", "region");
 		resrelationQlist();
 		relationalquality();
+
 				
 	}
 	
