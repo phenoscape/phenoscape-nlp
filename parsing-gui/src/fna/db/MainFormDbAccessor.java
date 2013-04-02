@@ -1082,7 +1082,7 @@ public class MainFormDbAccessor {
 			//Class.forName(driverPath);
 			//conn = DriverManager.getConnection(url);
 			String tablePrefix = MainForm.dataPrefixCombo.getText();
-			String sql = "select source,originalsent from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"'  or tag = '"+word+"'";
+			String sql = "select source,originalsent from "+tablePrefix+"_sentence where sentence like '% "+word+" %' or sentence like '"+word+" %' or sentence like '% "+word+"' or sentence ='"+word+"' or tag = '"+word+"'";
 			stmt = conn.prepareStatement(sql);
 			rs = stmt.executeQuery();
 			context.cut();
