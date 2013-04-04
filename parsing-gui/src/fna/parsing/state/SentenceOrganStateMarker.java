@@ -477,9 +477,10 @@ String[] splittext = text.split("\\s");
 		
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
-		sent = sent.replaceAll("_", "-");
+		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
 		
 		Pattern tagsp = Pattern.compile("(.*?)\\b("+parts+")\\b(.*)", Pattern.CASE_INSENSITIVE);
+		//System.out.println(parts);
 		String taggedsent = "";
 		Matcher m = tagsp.matcher(sent);
 		while(m.matches()){

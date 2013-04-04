@@ -37,6 +37,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 	protected ProcessListener listener;
 	protected Text perlLog;
 	protected XMLOutputter outputter;
+	protected PhraseMarker pm;
 	//protected String prefix;
 	//protected String glossarytable;
 
@@ -48,6 +49,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 		this.perlLog = perllog;
 		//this.prefix = prefix;
 		//this.glossarytable = glossarytable;
+		pm = new PhraseMarker(ApplicationUtilities.getProperty("uberonphrases.bin"));
 		this.outputter = new XMLOutputter(Format.getPrettyFormat());
 		setXPaths();
 		File target = new File(Registry.TargetDirectory);
@@ -90,6 +92,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 		try{
 			BufferedWriter out = new BufferedWriter(
 					new FileWriter(new File(desfolder, fname)));
+			text = pm.markPhrases(text); //phrases are connected via "_" and become words.
 			out.write(text);
 			out.flush();
 			out.close();

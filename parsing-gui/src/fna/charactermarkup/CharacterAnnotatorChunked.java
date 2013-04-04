@@ -3015,7 +3015,11 @@ public class CharacterAnnotatorChunked {
 			this.structid++;
 			e.setAttribute("id", strid);
 			// e.setAttribute("name", o.trim()); //must have.
-			e.setAttribute("name", TermOutputerUtilities.toSingular(o.trim()));
+			if(o.indexOf("_")>0) {
+				e.setAttribute("name", o.trim().replaceAll("_", " ")); //prematched phrases from uberon
+			}else{
+				e.setAttribute("name", TermOutputerUtilities.toSingular(o.trim()));
+			}
 			
 			//Changed by Zilong
 			if(o.trim().matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
