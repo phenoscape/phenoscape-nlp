@@ -284,7 +284,9 @@ public class POSTagger4StanfordParser {
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("becoming")==0 || word.compareTo("about")==0){
 	        		   sb.append(word+"/RB ");
-	        	   }else if(word.compareTo("throughout")==0 && tokens[i+1].matches("(,|or)")){
+	        	   }else if(word.compareTo("throughout")==0 && i+1 < tokens.length && tokens[i+1].matches("(\\.|;|,|or)")){
+	        		   sb.append(word+"/RB ");
+	        	   }else if(word.compareTo("throughout")==0 && i+1 >= tokens.length){
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("at-least")==0){
 	        		   sb.append(word+"/RB ");
