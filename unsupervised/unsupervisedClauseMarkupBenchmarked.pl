@@ -6036,10 +6036,12 @@ foreach my $info (@allsents){
 	#$text =~ s#<i>#[[[i]]]#g; #hide <i> #not useful for NeXML files
 	#$text =~ s#</i>#[[[/i]]]#g; #hide </i>
 	#$text =~ s#<.*?>##g; #remove html tags
-	#$text =~ s#<# less than #g; #remove <
-	#$text =~ s#># greater than #g; #remove >
 	$text =~ s#&lt;i&gt;#<i>#g; #unhide <i>
 	$text =~ s#&lt;/i&gt;#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
+	$text =~ s#<(?=\s*\d)# less than #g; #replace < before a number
+	$text =~ s#>(?=\s*\d)# greater than #g; #replace > before a number
+	$text =~ s#&lt;(?=\s*\d)# less than #g; #replace < before a number
+	$text =~ s#&gt;(?=\s*\d)# greater than #g; #replace > before a number
 	$text =~ s#^\s*\d+[a-z].\s*##; #remove 2a. (key marks)
 	if($type eq "character"){
 		#my $tcopy = $text;
