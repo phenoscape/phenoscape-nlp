@@ -2,7 +2,7 @@ phenoscape-nlp
 ==============
 
 Source for EQ-Generating CharaParser application, which uses unsupervised lexicon learning and natural language processing to propose EQ-based phenotype annotations.
-It is useful for character descriptions written in the style similar to the example below:
+The software is currently being developed as part of the Phenoscape project (http://phenoscape.org/). It is useful for character descriptions written in the style similar to the example below:
 
 Distal end of cleithrum
 
@@ -18,8 +18,6 @@ The input to EQ-Generating CharaParser is
 
 3. ontologies for EQs
 
-The software is currently being developed as part of the Phenoscape project (http://phenoscape.org/). 
-Source is provided with no warranty of any sort. 
 
 Some algorithms used in CharaParser are reported in:
 
