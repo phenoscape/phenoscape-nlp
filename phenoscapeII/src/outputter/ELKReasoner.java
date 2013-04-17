@@ -4,6 +4,7 @@ package outputter;
 * perform reasoning tasks
 **/
 import java.io.File;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
@@ -23,6 +24,7 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -61,7 +63,7 @@ public class ELKReasoner {
 	
 	/**
 	* union of (in_lateral_side_of some Thing) and (part_of some in_lateral_side_of some Thing)
-	* this is used to find paired structures and their parts, for example clavicle blade is prat f clavicle, which is a paired structure: there are left clavicle and right clavicle. 
+	* this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
 	**/
 	Set<OWLClass> getClassesWithLateralSides(){
 	    OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
@@ -124,12 +126,30 @@ public class ELKReasoner {
 		return subClasses;
 	}
 	
+	public  boolean isSubClassOf(String subclassIRI, String superclassIRI){
+		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
+		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(superclass, false); //grab all descendant classes
+		reasoner.dispose();
+		Iterator<OWLClass> it = subClasses.getFlattened().iterator();
+		while(it.hasNext()){
+			OWLClass aclass = it.next();
+			//System.out.println(aclass.getIRI().toString());
+			if(aclass.getIRI().toString().compareTo(subclassIRI)==0){
+				return true;
+			}
+		}
+		return false;
+	}	
+	
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
-			Set<OWLClass> classes = elk.getClassesWithLateralSides();
-			
-			
+			//Set<OWLClass> classes = elk.getClassesWithLateralSides();
+			//String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
+			String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0003098";//optic stalk is not an organ
+			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
+			System.out.println(elk.isSubClassOf(subclassIRI, superclassIRI));		
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
