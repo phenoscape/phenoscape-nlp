@@ -76,7 +76,7 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil;
 	private Dictionary dictionary = new Dictionary();
-	private EntitySearcher es = new EntitySearcher(dictionary);
+	private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	private TermSearcher ts = new TermSearcher(dictionary);
 	private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
 	private RelationHandler rh = new RelationHandler(dictionary, es);

@@ -81,7 +81,7 @@ public class CharacterStatementParser extends Parser {
 				String sid = structure.getAttributeValue("id");
 				if(!isToStructureInRelation(sid, root)){//to-structure involved in a relation are not considered a key
 					String sname = Utilities.getStructureName(root, sid);
-					Entity entity = EntitySearcher.searchEntity(root, sid, sname, "", sname, "", 0);
+					Entity entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "", 0);
 					keyentities.add(entity);//TODO try harder to find a match for the key entity
 					if(entity!=null){
 						//structure.setAttribute("ontoid", entity.getId());

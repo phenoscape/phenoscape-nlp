@@ -26,12 +26,12 @@ import org.jdom.xpath.XPath;
  *  "(organ name)"
  */
 public class KeyEntityFinder {
-	private EntitySearcher es;
+	private EntitySearcherOriginal es;
 
 	
 	/**
 	 */
-	public KeyEntityFinder(EntitySearcher es) {
+	public KeyEntityFinder(EntitySearcherOriginal es) {
 		this.es = es;		
 	}
 
