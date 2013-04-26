@@ -31,26 +31,13 @@ import owlaccessor.OWLAccessorImpl;
 		// = something connecting two bones =>to be handled by KeyEnttityFinder
  */
 public class EntitySearcher {
-	private Dictionary dict;
 	private static XPath textpath;
-	private TermSearcher ts;
 	static{
 		try{
 			textpath = XPath.newInstance(".//text");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-
-
-	/**
-	 * 
-	 * @param entity
-	 * @param entitylocator: may be an empty string
-	 */
-	public EntitySearcher(Dictionary dict) {
-		this.dict = dict;
-		ts = new TermSearcher(dict);
 	}
 
 	/**
@@ -72,18 +59,22 @@ public class EntitySearcher {
 	 * @param elocatorphrase the elocatorphras
 	 * @param originalentityphrase the originalentityphrase
 	 * @param preposition used between entityphrase and elocatorphrase
-	 * @return null or 6-key Hashtable<String, String>: keys: entity, entityid, entitylabel, entitylocator, entitylocatorid, entitylocatorlabel
+	 * @return null or an entity (simple or composite) [6-key Hashtable<String, String>: keys: entity, entityid, entitylabel, entitylocator, entitylocatorid, entitylocatorlabel]
 	 * @throws Exception the exception
 	 */
-	public Hashtable<String, String> searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup){
+	@SuppressWarnings("unchecked")
+	public static Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup){
 		//System.out.println("search entity: "+entityphrase);
-		Hashtable<String, String> result = new Hashtable<String, String>();
+
+		
+		/*Hashtable<String, String> result = new Hashtable<String, String>();
 		result.put("entity", "");
 		result.put("entitylocator", "");
 		result.put("entityid", "");
 		result.put("entitylocatorid", "");
 		result.put("entitylabel", "");
-		result.put("entitylocatorlabel", "");
+		result.put("entitylocatorlabel", "");*/
+		
 		//entityresults.put("entitylocatorphrase", elocatorphrase);
 		//TODO create and maintain a cache for entity search?
 	
@@ -123,12 +114,9 @@ public class EntitySearcher {
 				}
 			}
 			if(goodphrase){//perfect match for a pre-composed term
-				Hashtable<String, String> r = ts.searchTerm(phrase, "entity", ingroup);
-				if(r!=null){
-					result.put("entity", phrase); // entitylocator = "";
-					result.put("entityid", r.get("id"));
-					result.put("entitylabel", r.get("label"));			
-					return result;
+				SimpleEntity entity = (SimpleEntity)TermSearcher.searchTerm(phrase, "entity", ingroup);
+				if(entity!=null){	
+					return entity;
 				}
 			}			
 		}
@@ -136,63 +124,114 @@ public class EntitySearcher {
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
 		
 		//search entity and entity locator separately
+		SimpleEntity entityl = new SimpleEntity();
+		entityl.setString(elocatorphrase);
 		if(entitylocators!=null) {
-			Hashtable<String, String> elr =  ts.searchTerm(elocatorphrase, "entity", ingroup);
-			if(elr!=null){
-				result.put("entitylocator", elocatorphrase); 
-				result.put("entitylocatorid", elr.get("id"));
-				result.put("entitylocatorlabel", elr.get("label"));	
+			SimpleEntity result = (SimpleEntity)TermSearcher.searchTerm(elocatorphrase, "entity", ingroup);
+			if(result!=null){
+				entityl = result;
 			}else{ //entity locator not matched
 				//TODO
 			}
 		}
-		Hashtable<String, String> er = ts.searchTerm(entityphrase, "entity", ingroup);
-		if(er!=null){//if entity matches
-			result.put("entity", entityphrase); 
-			result.put("entityid", er.get("id"));
-			result.put("entitylabel", er.get("label"));	
-			return result;
+		SimpleEntity sentity = (SimpleEntity)TermSearcher.searchTerm(entityphrase, "entity", ingroup);
+		if(sentity!=null){//if entity matches
+			//entity
+			if(entityl.getString().length()>0){
+				//relation & entity locator
+				FormalRelation rel = new FormalRelation();
+				rel.setString("part of");
+				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+				rel.setId("BFO:000050");
+				rel.setConfidenceScore((float)1.0);
+				REntity rentity = new REntity(rel, entityl);
+				//composite entity
+				CompositeEntity centity = new CompositeEntity();
+				centity.addEntity(sentity);
+				centity.addEntity(rentity);
+				return centity;
+			}else{
+				return sentity;
+			}
 		}
 		
 		//re-arranging word in entity, first search for entity locator
 				
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
 		//TODO: process of maxilla case
-		String adjIDlabel = ts.adjectiveOrganSearch(entityphrasetokens[0]);
+		String adjIDlabel = TermSearcher.adjectiveOrganSearch(entityphrasetokens[0]);
 		if(adjIDlabel!=null){
-			result.put("entitylocator", entityphrasetokens[0]);
-			result.put("entitylocatorlabel", adjIDlabel.substring(adjIDlabel.indexOf("#")+1));
-			result.put("entitylocatorid", adjIDlabel.substring(0, adjIDlabel.indexOf("#")));
+			entityl = new SimpleEntity();
+			entityl.setString(entityphrasetokens[0]);
+			entityl.setLabel(adjIDlabel.substring(adjIDlabel.indexOf("#")+1));
+			entityl.setId(adjIDlabel.substring(0, adjIDlabel.indexOf("#")));
+			entityl.setConfidenceScore((float)1);
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " ");
-			er = ts.searchTerm(newentity, "entity", ingroup);
-			if(er!=null){
-				result.put("entity", newentity); 
-				result.put("entityid", er.get("id"));
-				result.put("entitylabel", er.get("label"));	
-				return result;
+			sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
+			if(sentity!=null){
+				//relation & entity locator
+				FormalRelation rel = new FormalRelation();
+				rel.setString("part of");
+				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+				rel.setId("BFO:000050");
+				rel.setConfidenceScore((float)1.0);
+				REntity rentity = new REntity(rel, entityl);
+				//composite entity
+				CompositeEntity centity = new CompositeEntity();
+				centity.addEntity(sentity);
+				centity.addEntity(rentity);
+				return centity;
+				
 			}else{
 				//TODO
-			}
-					
+			}			
 		}
 		
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
-		if(entityphrasetokens[0].matches("("+dict.spatialtermptn+")")){
+		if(entityphrasetokens[0].matches("("+Dictionary.spatialtermptn+")")){
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //process
-			er = ts.searchTerm(newentity, "entity", ingroup);
-			if(er!=null){
-				result.put("entity", newentity); 
-				result.put("entityid", er.get("id"));
-				result.put("entitylabel", er.get("label"));	
-				er = ts.searchTerm(entityphrasetokens[0]+" region", "entity", ingroup);//anterior + region
-				if(er!=null){
-					String locatorids = (er.get("id")+","+result.get("entitylocatorid")).replaceFirst(",$", ""); //anterior region, maxilla
-					String locatorlabels = (er.get("label")+","+result.get("entitylocatorlabel")).replaceFirst(",$", ""); //anterior region, maxilla
-					String locators = (entityphrasetokens[0]+" region,"+result.get("entitylocator")).replaceFirst(",$", ""); //anterior region, maxilla
-					result.put("entitylocator", locators); 
-					result.put("entitylocatorid", locatorids);
-					result.put("entitylocatorlabel", locatorlabels);	
-					return result;
+			sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
+			if(sentity!=null){
+				SimpleEntity sentity1 = (SimpleEntity)TermSearcher.searchTerm(entityphrasetokens[0]+" region", "entity", ingroup);//anterior + region
+				if(sentity1!=null){
+					//nested part_of relation
+					if(entityl.getString().length()>0){ //maxilla
+						//relation & entity locator: inner
+						FormalRelation rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:000050");
+						rel.setConfidenceScore((float)1.0);
+						REntity rentity = new REntity(rel, entityl);
+						//composite entity = entity locator for sentity
+						CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
+						centity.addEntity(sentity1); //anterior region
+						centity.addEntity(rentity);	//^part_of(maxilla)	
+						//relation & entity locator:outer 
+						rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:000050");
+						rel.setConfidenceScore((float)1.0);
+						rentity = new REntity(rel, centity);
+						centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
+						centity.addEntity(sentity); //process
+						centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
+						return centity;
+					}else{//sentity1 be the entity locator
+						//relation & entity locator: 
+						FormalRelation rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:000050");
+						rel.setConfidenceScore((float)1.0);
+						REntity rentity = new REntity(rel, sentity1);
+						//composite entity = entity locator for sentity
+						CompositeEntity centity = new CompositeEntity(); 
+						centity.addEntity(sentity); 
+						centity.addEntity(rentity);	
+						return centity;
+					}	
 				}				
 			}else{
 				//TODO
@@ -258,19 +297,20 @@ public class EntitySearcher {
 		//search with regular expression  "epibranchial .*" to find possible missing headnouns 
 		if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
-			ArrayList<Hashtable<String, String>> regexpresults = ts.regexpSearchTerm(entityphrase+" .*", "entity", ingroup);
+			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity", ingroup);
 			if(regexpresults!=null){
-				for(Hashtable<String, String> regexpresult: regexpresults){
-					headnouns.put(regexpresult.get("label").replace(entityphrase, ""), regexpresult.get("id"));
+				for(FormalConcept regexpresult: regexpresults){
+					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId());
 				}			
 			}
 			//search headnouns in the context 
 			String noun = searchContext(root, structid, headnouns); //bone, cartilaginous
 			if(noun != null){
-				result.put("entity", entityphrase); 
-				result.put("entityid", headnouns.get(noun));
-				result.put("entitylabel", entityphrase);	
-				return result;
+				sentity.setString(entityphrase);
+				sentity.setLabel(entityphrase);
+				sentity.setId(headnouns.get(noun));
+				sentity.setConfidenceScore((float)1.0);
+				return sentity;
 			}
 		}	
 		
@@ -279,16 +319,21 @@ public class EntitySearcher {
 		for(int split = 0; split <= tokens.length-2; split++){
 			String part1 = Utilities.join(tokens, 0, split, " ");
 			String part2 = Utilities.join(tokens, split+1, tokens.length-1, " ");
-			Hashtable<String, String> result1 = ts.searchTerm(part1, "entity", 0);
-			Hashtable<String, String> result2 = ts.searchTerm(part2, "entity", 0);
-			if(result1!=null && result2!=null){
-				result.put("entity", part2);
-				result.put("entitylocator", part1);
-				result.put("entityid", result2.get("id"));
-				result.put("entitylocatorid", result1.get("id"));
-				result.put("entitylabel", result2.get("label"));
-				result.put("entitylocatorlabel", result1.get("label"));
-				return result;
+			entityl = (SimpleEntity)TermSearcher.searchTerm(part1, "entity", 0); //locator
+			SimpleEntity entity = (SimpleEntity)TermSearcher.searchTerm(part2, "entity", 0); //entity
+			if(entityl!=null && entity!=null){
+				//relation & entity locator: 
+				FormalRelation rel = new FormalRelation();
+				rel.setString("part of");
+				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+				rel.setId("BFO:000050");
+				rel.setConfidenceScore((float)1.0);
+				REntity rentity = new REntity(rel, entityl);
+				//composite entity = entity locator for sentity
+				CompositeEntity centity = new CompositeEntity(); 
+				centity.addEntity(entity); 
+				centity.addEntity(rentity);	
+				return centity;
 			}
 		}
 		
@@ -304,19 +349,15 @@ public class EntitySearcher {
 		tokens = entityphrase.split("\\s+");
 		if(tokens.length>=2){ //to prevent "rostral tubule" from entering the subsequent process 
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
-			if(!shortened.matches(".*?\\b("+dict.spatialtermptn+")$")){
-				er = ts.searchTerm(shortened, "entity", ingroup);
-				if(er!=null){
-					if(er.get("id").compareTo(dict.mcorganism)==0){
+			if(!shortened.matches(".*?\\b("+Dictionary.spatialtermptn+")$")){
+				sentity = (SimpleEntity) TermSearcher.searchTerm(shortened, "entity", ingroup);
+				if(sentity!=null){
+					if(sentity.getId().compareTo(Dictionary.mcorganism)==0){
 						//too general "body scale", try to search for "scale"
 						//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
 						//TODO: change labels to ids
-					}else{
-						result.put("entity", shortened);
-						result.put("entityid", er.get("id"));
-						result.put("entitylabel", er.get("label"));
 					}
-					return result;
+					return sentity;
 				}else{
 					//TODO
 				}
@@ -383,7 +424,7 @@ public class EntitySearcher {
 	 * @param target
 	 * @return
 	 */
-	private String searchContext(Element root, String structid, Hashtable<String, String> targets){
+	private static String searchContext(Element root, String structid, Hashtable<String, String> targets){
 		try{
 			Element statement = (Element) XPath.selectSingleNode(root, ".//statement/structure[@id='"+structid+"']");
 			//could perform a content similarity measure between the defintions associated with the targets in ontology and the text of the statement

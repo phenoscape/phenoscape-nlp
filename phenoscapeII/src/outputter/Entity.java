@@ -1,5 +1,5 @@
 package outputter;
 
-public abstract class Entity {
+public class Entity {
 
 }

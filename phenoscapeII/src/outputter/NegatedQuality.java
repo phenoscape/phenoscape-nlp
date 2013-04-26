@@ -16,7 +16,7 @@ public class NegatedQuality extends Quality {
 	 * 
 	 */
 	public NegatedQuality() {
-		negation.setConfidenceScore((float)1.0);
+		negation.setConfidenceScore(1);
 	}
 
 	/**
@@ -25,11 +25,18 @@ public class NegatedQuality extends Quality {
 	 * @param id
 	 * @param iri
 	 */
-	public NegatedQuality(String string, String label, String id, String iri, Quality parentQuality) {
-		super(string, label, id, iri);
+	public NegatedQuality(String string, String label, String id, Quality parentQuality) {
+		super(string, label, id);
 		this.parentQuality = parentQuality;
-		negation.setConfidenceScore((float)1.0);
+		negation.setConfidenceScore(1);
 	}
+
+	public NegatedQuality(Quality quality, Quality parentQuality) {
+		super(quality.getString(), quality.getLabel(), quality.getId());
+		this.parentQuality = parentQuality;
+		negation.setConfidenceScore(1);
+	}
+	
 	
 	public void setParentQuality(Quality parentQuality){
 		this.parentQuality = parentQuality;
@@ -38,6 +45,7 @@ public class NegatedQuality extends Quality {
 	public Quality getParentQuality(){
 		return this.parentQuality;
 	}
+
 
 	/**
 	 * @param args

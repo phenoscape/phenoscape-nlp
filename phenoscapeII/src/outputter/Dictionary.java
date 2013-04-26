@@ -1,5 +1,7 @@
 package outputter;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -7,12 +9,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import edu.mit.jwi.IDictionary;
+
 public class Dictionary {
-	public Connection conn;
+	public static Connection conn;
 	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim
 	public String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
-	public ArrayList<String> spatialterms = new ArrayList<String>();
+	public static ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
 	public static String binaryTvalues = "present|true|yes|usually";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely";
@@ -27,14 +31,14 @@ public class Dictionary {
 	//the program should interpret the pattern as a part_of relation. 
 	//eg. "anterior coracoid process" should be interpreted as "anterior region(part_of(coracoid))"
 	//This list contains all identified head nouns
-	public ArrayList<String> spatialHeadNoun = new ArrayList<String>();
+	public static ArrayList<String> spatialHeadNoun = new ArrayList<String>();
 	//eg. <"unossified", "ossification,absent">; ossified => with ossification => ossification = present
-	public Hashtable<String, String> verbalizednouns = new Hashtable<String,String>();
+	public static Hashtable<String, String> verbalizednouns = new Hashtable<String,String>();
 	//this instance var is used to map spatial terms that are not in ontology to terms that are.
 	/** The spatial maps. */
-	public Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
-	public Hashtable<String, String> relationalqualities = new Hashtable<String, String>();
-	public Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
+	public static Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
+	public static Hashtable<String, String> relationalqualities = new Hashtable<String, String>();
+	public static Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
 	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
 	
 	/** special ontology classes **/
@@ -46,7 +50,9 @@ public class Dictionary {
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
 	//private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
-
+	public static IDictionary wordnetdict = new edu.mit.jwi.Dictionary(new File(ApplicationUtilities.getProperty("wordnet.dictionary")));
+	
+	//special cases for singulars and plurals
 	static{
 		//check cache
 		singulars.put("axis", "axis");
@@ -90,6 +96,7 @@ public class Dictionary {
 		plurals.put("ii", "ii");
 		plurals.put("iii", "iii");
 	}
+	//upper level quality classes 
 	static{
 		parentclass2label.put("PATO:0000186", "behavioral quality");
 		parentclass2label.put("PATO:0001396", "cellular quality");
@@ -107,8 +114,8 @@ public class Dictionary {
 		parentclass2label.put("PATO:0000141", "structure");
 		parentclass2label.put("PATO:0000150", "texture");
 	}
-	public Dictionary() {
-
+	//load spatial terms and construct spatial term pattern
+	static{
 		try{
 			
 			Class.forName("com.mysql.jdbc.Driver");
@@ -122,32 +129,31 @@ public class Dictionary {
 				String term = rs.getString("term");
 				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
 				if(term.length()>0){					
-					this.spatialterms.add(term);
-					this.spatialtermptn += term+"|";
+					spatialterms.add(term);
+					spatialtermptn += term+"|";
 				}
 			}
-			this.spatialtermptn = this.spatialtermptn.replaceFirst("\\|$", "");
+			spatialtermptn = spatialtermptn.replaceFirst("\\|$", "");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		spatialterms.add("accessory");
+		
+	}
+	//other spatial related info
+	static{
 		//spatialHeadNoun: TODO make it more flexible
-		this.spatialHeadNoun.add("coronoid");
-		this.spatialHeadNoun.add("process");
-		this.spatialHeadNoun.add("coracoid");
+		spatialHeadNoun.add("coronoid");
+		spatialHeadNoun.add("process");
+		spatialHeadNoun.add("coracoid");
 		
 		//un-ed pattern, TODO make it more flexible
-		this.verbalizednouns.put("unossified", "ossification,absent");
+		verbalizednouns.put("unossified", "ossification,absent");
 		
-		spatialMaps.put("portion", "region");
-		resrelationQlist();
-		relationalquality();
-
-				
+		spatialMaps.put("portion", "region");				
 	}
-	
-	private void resrelationQlist() {
-		
+	//legal relational qualities
+	static{	
 		resrelationQ.put("BFO:0000053","bearer_of");
 		resrelationQ.put("RO:0002220","adjacent_to");
 		resrelationQ.put("BSPO:0000096","anterior_to");
@@ -191,13 +197,10 @@ public class Dictionary {
 		resrelationQ.put("BSPO:0000103","vicinity_of");
 		resrelationQ.put("PHENOSCAPE:serves_as_attachment_site_for","serves_as_attachment_site_for");
 		resrelationQ.put("BFO:0000052","inheres_in");
-		resrelationQ.put("PHENOSCAPE:complement_of","not");
-
-		
+		resrelationQ.put("PHENOSCAPE:complement_of","not");		
 	}
-
-	void relationalquality()
-	{
+	//syn phrases mapping to relational qualities
+	static{
 		relationalqualities.put("anterior to", "BSPO:0000096");
 		relationalqualities.put("ahead of", "BSPO:0000096");
 		relationalqualities.put("not extending to", "BSPO:0000096");
@@ -274,6 +277,13 @@ public class Dictionary {
 		relationalqualities.put("serves as attachment site for","PHENOSCAPE:serves_as_attachment_site_for");
 		relationalqualities.put("inheres in","BFO:0000052");
 		relationalqualities.put("not","PHENOSCAPE:complement_of");
-
+	}
+	//wordnet 
+	static{
+		try {
+			wordnetdict.open();					
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

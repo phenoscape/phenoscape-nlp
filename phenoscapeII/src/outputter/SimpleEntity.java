@@ -13,6 +13,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	String id; //id of the class representing the phrase in an ontology
 	String classIRI; //class iri of the class representing the phrase in an ontology
 	float confidenceScore; //the confidence the system has in the id and classIRI represent the semantics of the string.
+
 	
 	public SimpleEntity(){
 		
@@ -98,6 +99,12 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	public float getConfidienceScore() {
 	
 		return this.confidenceScore;
+	}
+
+
+	@Override
+	public boolean isOntologized() {
+		return this.id != null;
 	}
 
 

@@ -8,7 +8,6 @@ public class FormalRelation implements FormalConcept {
 	float confidenceScore; //the confidence the system has in the id and classIRI represent the semantics of the string.
 
 	public FormalRelation() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -91,6 +90,11 @@ public class FormalRelation implements FormalConcept {
 	public float getConfidienceScore() {
 	
 		return this.confidenceScore;
+	}
+
+	@Override
+	public boolean isOntologized() {
+		return this.id != null;
 	}
 
 

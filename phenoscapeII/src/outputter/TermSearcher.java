@@ -20,28 +20,19 @@ import java.util.regex.Pattern;
 public class TermSearcher {
 
 	/** The entity id cache. */
-	public static Hashtable<String, Hashtable<String, String>> entityIDCache = new Hashtable<String, Hashtable<String, String>>(); //term=> {id, label}
+	public static Hashtable<String, FormalConcept> entityIDCache = new Hashtable<String, FormalConcept>(); //term=> {id, label}
 	
 	/** The quality id cache. */
-	public static Hashtable<String, Hashtable<String, String>> qualityIDCache = new Hashtable<String, Hashtable<String, String>>();
+	public static Hashtable<String, FormalConcept> qualityIDCache = new Hashtable<String, FormalConcept>();
 	
 	/** The entity id cache. */
-	public static Hashtable<String, ArrayList<Hashtable<String, String>>> regexpEntityIDCache = new Hashtable<String, ArrayList<Hashtable<String, String>>>(); //term=> {id, label}
+	public static Hashtable<String, ArrayList<FormalConcept>> regexpEntityIDCache = new Hashtable<String, ArrayList<FormalConcept>>(); //term=> {id, label}
 	
 	/** The quality id cache. */
-	public static Hashtable<String, ArrayList<Hashtable<String, String>>> regexpQualityIDCache = new Hashtable<String, ArrayList<Hashtable<String, String>>>();
-	private static Pattern p;
-	
-	private Dictionary dict;
+	public static Hashtable<String, ArrayList<FormalConcept>> regexpQualityIDCache = new Hashtable<String, ArrayList<FormalConcept>>();
+	private static Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")(\\b.*)");
 	
 	
-	/**
-	 * 
-	 */
-	public TermSearcher(Dictionary dict) {
-		this.dict = dict;	
-		p = Pattern.compile("^("+dict.spatialtermptn+")(\\b.*)");
-	}
 
 	/**
 	 * Search term in the whole ontology (of a particular type)
@@ -50,16 +41,16 @@ public class TermSearcher {
 	 *
 	 * @param phrase the term
 	 * @param phrasetype the type
-	 * @return null or a 4-key hashtable: term, querytype, id, label.
+	 * @return null or FormalConcept [a 4-key hashtable: term, querytype, id, label.]
 	 * @throws Exception the exception
 	 */
-	public Hashtable<String, String> searchTerm(String phrase, String phrasetype, int ingroup){
+	public static FormalConcept searchTerm(String phrase, String phrasetype, int ingroup){
 		if(phrase.trim().length()==0) return null;
 		//the first strong match based on the original phrase is returned right away. Other matches are saved in candidate matches
 		//strong match = a match to a class lable or an exact synonym
 		ArrayList<Hashtable<String, String>> candidatematches = new ArrayList<Hashtable<String, String>> (); 
 		
-		Hashtable<String, String> result = searchCache(phrase, phrasetype);
+		FormalConcept result = searchCache(phrase, phrasetype);
 		if(result!=null) return result;
 		
 		phrase = format(phrase);
@@ -70,7 +61,7 @@ public class TermSearcher {
 		
 		//1. search the original phrase
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
-		Hashtable<String, String> strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
+		FormalConcept strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
 		if(strongmatch != null) return strongmatch;
 		
 		//if landed here, all matches based on the original phrase are weak matches.
@@ -102,7 +93,7 @@ public class TermSearcher {
 				m = p.matcher(phrase);
 			}
 			//spatials = dorsal ; phrase = portion
-			String repl = dict.spatialMaps.get(phrase);
+			String repl = Dictionary.spatialMaps.get(phrase);
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
 			
@@ -171,7 +162,7 @@ public class TermSearcher {
 		return null;
 	}
 	
-	private String format(String word) {
+	private static String format(String word) {
 		word = word.replaceAll("_", " "); // abc_1
 		word = word.replaceAll("(?<=\\w)- (?=\\w)", "-"); // dorsal- fin
 		// word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
@@ -180,7 +171,7 @@ public class TermSearcher {
 		return word;
 	}
 	
-	public String adjectiveOrganSearch(String term){
+	public static String adjectiveOrganSearch(String term){
 		Hashtable<String, String> result = XML2EQ.ontoutil.searchAdjectiveOrgan(term, "entity");
 		if(result!=null){
 			//return the first match
@@ -202,15 +193,30 @@ public class TermSearcher {
 	 * @throws Exception
 	 */
 
-	private Hashtable<String, String> getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results, int ingroup) {
+	private static FormalConcept getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results, int ingroup) {
 		results = XML2EQ.ontoutil.searchOntologies(term, type, ingroup);
 		if(results !=null && results.size() > 0){
 			//loop through results to find the closest match
 			//return original or exact match
 			for(Hashtable<String, String> aresult : results){
 				if(aresult.get("matchtype").contains("original") || aresult.get("matchtype").contains("exact")){
-					cacheIt(term, aresult, type);
-					return aresult;				
+					if(type.compareTo("entity")==0){
+						SimpleEntity entity = new SimpleEntity();
+						entity.setString(aresult.get("term"));
+						entity.setLabel(aresult.get("label"));
+						entity.setId(aresult.get("id"));
+						entity.setConfidenceScore((float)1);
+						cacheIt(term, entity, type);
+						return entity;
+					}else{
+						Quality quality = new Quality();
+						quality.setString(aresult.get("term"));
+						quality.setLabel(aresult.get("label"));
+						quality.setId(aresult.get("id"));
+						quality.setConfidenceScore((float)1);
+						cacheIt(term, quality, type);
+						return quality;
+					}		
 				} 
 			}			
 		}
@@ -226,8 +232,8 @@ public class TermSearcher {
 	 * @throws Exception
 	 */
 
-	public ArrayList<Hashtable<String, String>> regexpSearchTerm(String phrase, String phrasetype, int ingroup){
-		ArrayList<Hashtable<String, String>> result = null;
+	public static ArrayList<FormalConcept> regexpSearchTerm(String phrase, String phrasetype, int ingroup){
+		ArrayList<FormalConcept> result = null;
 		if(phrasetype.compareTo("entity")==0){
 			 result = TermSearcher.regexpEntityIDCache.get(phrase);
 		}
@@ -235,8 +241,26 @@ public class TermSearcher {
 			result = TermSearcher.regexpQualityIDCache.get(phrase);
 		}		
 		if(result !=null ) return result;
-		result = XML2EQ.ontoutil.searchOntologies(phrase, phrasetype, ingroup);
-		if(result !=null && result.size() > 0){	
+		ArrayList<Hashtable<String, String>> searchresult = XML2EQ.ontoutil.searchOntologies(phrase, phrasetype, ingroup);
+		if(searchresult !=null && searchresult.size() > 0){
+			result = new ArrayList<FormalConcept>();
+			for(Hashtable<String, String> item: searchresult){
+				if(phrasetype.compareTo("entity")==0){
+					SimpleEntity entity = new SimpleEntity();
+					entity.setString(item.get("term"));
+					entity.setLabel(item.get("label"));
+					entity.setId(item.get("id"));
+					entity.setConfidenceScore((float)1);
+					result.add(entity);
+				}else{
+					Quality quality = new Quality();
+					quality.setString(item.get("term"));
+					quality.setLabel(item.get("label"));
+					quality.setId(item.get("id"));
+					quality.setConfidenceScore((float)1);
+					result.add(quality);
+				}		
+			}			
 			if(phrasetype.compareTo("entity")==0) TermSearcher.regexpEntityIDCache.put(phrase, result);
 			if(phrasetype.compareTo("quality")==0) TermSearcher.regexpQualityIDCache.put(phrase, result);
 			return result;
@@ -252,38 +276,32 @@ public class TermSearcher {
 	 * @param type
 	 * @return
 	 */
-	private Hashtable<String, String>  searchCache(String term, String type) {
-		Hashtable<String, String> result = null;
+	private static FormalConcept  searchCache(String term, String type) {
+		FormalConcept result = null;
 		if(type.compareTo("entity")==0){
-			 result = this.entityIDCache.get(term);
+			 result = entityIDCache.get(term);
 		}
 		if(type.compareTo("quality")==0){
-			result = this.qualityIDCache.get(term);
+			result = qualityIDCache.get(term);
 		}
 		return result;
 	}
 
-	private void cacheIt(String term, Hashtable<String, String> aresult, String type) {
+	private static void cacheIt(String term, FormalConcept aresult, String type) {
 		if(type.compareTo("entity")==0) TermSearcher.entityIDCache.put(term, aresult);
 		if(type.compareTo("quality")==0) TermSearcher.qualityIDCache.put(term, aresult);
 	}
 
-
-	
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) {	
+		FormalConcept result = TermSearcher.searchTerm("absent", "quality", 0);
+		System.out.println("string = "+result.getString());
+		System.out.println("label = "+result.getLabel());
+		System.out.println("id = "+result.getId());
+		System.out.println("confidence = "+result.getConfidienceScore());
 		
-		TermSearcher ts = new TermSearcher(new Dictionary());
-		Hashtable<String, String> result = ts.searchTerm("absent", "quality", 0);
-		if(result !=null){
-			Enumeration<String> en = result.keys();
-			while(en.hasMoreElements()){
-				String key = en.nextElement();
-				System.out.println(key+"="+result.get(key));
-			}
-		}
 	}
 
 }

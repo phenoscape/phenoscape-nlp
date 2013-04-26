@@ -27,6 +27,22 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
+	
+	/**
+	 * 
+	 * @param structureid
+	 * @return true if the structure has character elements, false if not.
+	 */
+	public static boolean hasCharacters(String structureid, Element root) {
+		try{
+			XPath characters = XPath.newInstance(".//Structure[@id='"+structureid+"']/Character");
+			List<Element> chars = characters.selectNodes(root);
+			if(chars.size()>0) return true;
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+		return false;
+	}
 
 	/**
 	 * search in all relations in root and replace oldid with newid for all from and to attributes

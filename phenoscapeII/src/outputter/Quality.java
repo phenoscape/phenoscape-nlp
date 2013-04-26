@@ -15,11 +15,10 @@ public class Quality implements FormalConcept {
 	/**
 	 * 
 	 */
-	public Quality(String string, String label, String id, String iri) {
+	public Quality(String string, String label, String id) {
 		this.string = string;
 		this.label = label;
 		this.id = id;
-		this.classIRI = iri;	
 	}
 
 	/* (non-Javadoc)
@@ -102,6 +101,11 @@ public class Quality implements FormalConcept {
 
 	public String getType(){
 		return this.type;
+	}
+
+	@Override
+	public boolean isOntologized() {
+		return this.id != null;
 	}
 
 }

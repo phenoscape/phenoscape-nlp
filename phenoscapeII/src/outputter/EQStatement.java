@@ -8,11 +8,12 @@ package outputter;
  * store and access information about an EQ statement
  */
 public class EQStatement {
+	String sourceFile;
 	String characterSource;
 	String stateSource;
 	Entity entity;
 	Quality quality;
-	Entity relatedEntity;
+	//Entity relatedEntity;
 	
 
 	/**
@@ -20,7 +21,11 @@ public class EQStatement {
 	 */
 	public EQStatement() {
 	}
-
+	
+	public void setSource(String source){
+		this.sourceFile = source;
+	}
+	
 	public void setCharacterSource(String characterSource){
 		this.characterSource = characterSource;
 	}
@@ -37,10 +42,13 @@ public class EQStatement {
 		this.quality = quality;
 	}
 	
-	public void setRelatedEntity(Entity entity){
+	/*public void setRelatedEntity(Entity entity){
 		this.relatedEntity = entity;
-	}
+	}*/
 	
+	public String getSource(){
+		return this.sourceFile;
+	}
 	public String getCharacterSource(){
 		return this.characterSource;
 	}
@@ -57,9 +65,9 @@ public class EQStatement {
 		return this.quality  ;
 	}
 	
-	public Entity getRelatedEntity( ){
+	/*public Entity getRelatedEntity( ){
 		return this.relatedEntity  ;
-	}
+	}*/
 	
 	public float calculateConfidenceScore(){
 		//TODO

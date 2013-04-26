@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -22,100 +23,133 @@ import org.jdom.Element;
  * yes, for example, "fused"
  */
 public class CharacterHandler {
-	private TermSearcher ts = null;
-	private EntitySearcher es = null;
 	private TermOutputerUtilities ontoutil;
+	Element root;
+	Element chara;
+	Entity entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
+	ArrayList<Quality> qualities = new ArrayList<Quality>(); //the quality result will be saved here. May be relationalquality, simple quality, or negated quality
+	ArrayList<Entity> entityparts = new ArrayList<Entity>();
 	/**
 	 * 
 	 */
-	public CharacterHandler(TermSearcher ts, EntitySearcher es, TermOutputerUtilities ontoutil2) {
-		this.ts = ts;
-		this.es = es;
-		this.ontoutil = ontoutil2;
+	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil) {
+		this.root = root;
+		this.chara = chara;
+		this.ontoutil = ontoutil;
 	}
 
 	/**
 	 * 
 	 * @param root
-	 * @param chars
+	 * @param chara
 	 * @return two-key hashtable: quality|qualitymodifier, elements are IDs separated by ';'
 	 */
-	public Hashtable<String, String> handle(Element root, List<Element> chars){
-		Hashtable<String, String> results = new Hashtable<String, String> ();
-		
-		Iterator<Element> it = chars.iterator();
-		while (it.hasNext()) { //loop through characters one by one
-			Element chara = it.next();
-			// characters = quality
-			String quality = Utilities.formQualityValueFromCharacter(chara);
-			boolean negated = false;
-			if(quality.startsWith("not ")){
-				negated = true;
-				quality = quality.substring(quality.indexOf(" ")+1).trim(); //TODO: deal with negated quality here
-			}
-			Hashtable<String, String> result = ts.searchTerm(quality, "quality", 0);
-			if(result!=null){
-				if(negated){
-					results.put("quality", "not "+quality);
-					results.put("qualityid","not("+result.get("id")+")");
-					results.put("qualitylabel", "not("+result.get("label")+")");
-					results.put("qualitynegated", "not "+quality);
-					String qualitylabel = result.get("label");
-					if(qualitylabel!=null){
-						results.put("qualitynegatedlabel", "not("+qualitylabel+")");
-						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.get("id"));
-						if(parentinfo != null){
-							results.put("qnparentid", parentinfo[0]);
-							results.put("qnparentlabel", parentinfo[1]);
-						}else{
-							System.err.println("should not landed here");
-						}
-					}
-				}else{
-					results.put("quality", quality);
-					results.put("qualityid", result.get("id"));
-					results.put("qualitylabel", result.get("label"));
+	public void handle(){
+		parseEntity();
+		parseQuality();
+		resolve();
+	}
+	
+	
+	public void parseEntity(){
+		Element structure = chara.getParentElement();
+		String structurename = structure.getAttributeValue("name");
+		String structureid = structure.getAttributeValue("id");
+		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
+			//parents separated by comma (,).
+			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
+			this.entity = EntitySearcher.searchEntity(root, structureid, structurename, "", parents,"", 0);				
+		}		
+	}
+	
+	public void parseQuality(){
+		// characters => quality
+		//get quality candidate
+		String quality = Utilities.formQualityValueFromCharacter(chara);
+		boolean negated = false;
+		if(quality.startsWith("not ")){
+			negated = true;
+			quality = quality.substring(quality.indexOf(" ")+1).trim(); //TODO: deal with negated quality here
+		}
+		//is the candidate a relational quality?
+		Quality relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		if(relationalquality!=null){
+			//attempts to find related entity in contraints
+			// constraints = qualitymodifier if quality is a relational quality
+			if (chara.getAttribute("constraintid") != null) {
+				ArrayList<Entity> relatedentities = findEntityInConstraints();
+				for(Entity relatedentity: relatedentities){
+					this.qualities.add(new RelationalQuality(relationalquality, relatedentity));
 				}
-				// constraints = qualitymodifier
-				String qms = ""; 
-				String qmIDs = ""; 
-				String qmlabels = ""; 
-				if (chara.getAttribute("constraintid") != null) {
-					String conid = chara.getAttributeValue("constraintid");
-					try{
-						String qualitymodifier = Utilities.getStructureName(root, conid);
-						qms += qualitymodifier+",";
-						Hashtable<String, String> r = es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier,"", 0);
-						if(r!=null){
-							qmIDs += r.get("entityid")==null? "" : r.get("entityid")+",";
-							qmlabels += r.get("entitylabel")==null? "" : r.get("entitylabel")+",";
-						}
-
-						qualitymodifier = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
-						qms += qualitymodifier+",";
-						r = es.searchEntity(root, conid, qualitymodifier, "", qualitymodifier, "", 0);
-						if(r!=null){
-							qmIDs += r.get("entityid")==null? "" : r.get("entityid")+",";
-							qmlabels += r.get("entitylabel")==null? "" : r.get("entitylabel")+",";
-						}
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-				}
-				qms = qms.replaceAll("(^,+|,+$)", "").trim();
-				if(qms.length()>0)
-					results.put("qualitymodifier", qms);
-				qmIDs = qms.replaceAll("(^,+|,+$)", "").trim();
-				if(qmIDs.length()>0)
-					results.put("qualitymodifierid", qmIDs);
-				qmlabels = qmlabels.replaceAll("(^,+|,+$)", "").trim();
-				if(qmlabels.length()>0)
-					results.put("qualitymodifierlabel", qmlabels);
+				return;
 			}else{
-				//TODO
+				//TODO check if the subject entity is a bilateral paired organ
+				return;
 			}
-		}	
-		return results;
+		}
+		
+		
+		//constarints may yield entity parts such as entity locator, save those, resolve them later
+		if (chara.getAttribute("constraintid") != null) {
+			ArrayList<Entity> entities = findEntityInConstraints();
+			for(Entity entity: entities){
+				this.entityparts.add(entity);
+			}
+		}
+		
+		//not a relational quality, is this a simple quality or a negated quality?
+		Quality result = (Quality)TermSearcher.searchTerm(quality, "quality", 0);
+		if(result!=null){
+			if(negated){
+				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
+				Quality parentquality = new Quality();
+				parentquality.setString(parentinfo[1]);
+				parentquality.setLabel(parentinfo[1]);
+				parentquality.setId(parentinfo[0]);
+				
+				this.qualities.add(new NegatedQuality(result, parentquality));
+				return;
+			}else{
+				this.qualities.add(result);
+				return;
+			}
+		}else{
+			//TODO
+		}
+	}
+	
+	
+	
+	private ArrayList<Entity> findEntityInConstraints() {
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		if (chara.getAttribute("constraintid") != null) {
+			String[] conids = chara.getAttributeValue("constraintid").split("\\s+");
+			try{
+				for(String conid: conids){
+					String qualitymodifier = Utilities.getStructureName(root, conid);
+					//parents separated by comma (,).
+					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
+					Entity result = EntitySearcher.searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"", 0);	
+					if(result!=null) entities.add(result);
+				}
+				return entities;
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public void resolve(){
+		//TODO
+	}
+	
+	public ArrayList<Quality> getQualities(){
+		return this.qualities;
+	}
+
+	public Entity getEntity(){
+		return this.entity;
 	}
 	/**
 	 * @param args
