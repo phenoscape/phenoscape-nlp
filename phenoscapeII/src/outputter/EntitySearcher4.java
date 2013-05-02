@@ -85,10 +85,9 @@ public class EntitySearcher4 extends EntitySearcher {
 						return centity;
 					}	
 				}				
-			}else{
-				//TODO
 			}
 		}
+		return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
 	}
 
 	/**

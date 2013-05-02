@@ -28,6 +28,7 @@ public class StateStatementParser extends Parser {
 	String src;
 	String characterid;
 	String stateid;
+	String qualityclue;
 	ArrayList<Entity> keyentities;
 	
 	static XPath pathText2;
@@ -49,9 +50,10 @@ public class StateStatementParser extends Parser {
 	/**
 	 * 
 	 */
-	public StateStatementParser(ArrayList<Entity> keyentities) {
+	public StateStatementParser(ArrayList<Entity> keyentities, String qualityclue) {
 		super();
 		this.keyentities = keyentities;
+		this.qualityclue = qualityclue;
 	}
 
 	/* Parse out entities and qualities. 
@@ -102,8 +104,8 @@ public class StateStatementParser extends Parser {
 					eq.setEntity(entity);
 					eq.setQuality(rh.getQuality());
 					eq.setSource(this.src);
-					eq.setCharacterSource(this.characterid);
-					eq.setStateSource(this.stateid);
+					eq.setCharacterId(this.characterid);
+					eq.setStateId(this.stateid);
 					this.EQStatements.add(eq);
 				}
 				this.EQStatements.addAll(rh.otherEQs);
@@ -135,8 +137,8 @@ public class StateStatementParser extends Parser {
 						 eq.setEntity(e);
 						 eq.setQuality(quality);
 						 eq.setSource(this.src);
-						 eq.setCharacterSource(this.characterid);
-						 eq.setStateSource(this.stateid);
+						 eq.setCharacterId(this.characterid);
+						 eq.setStateId(this.stateid);
 						 this.EQStatements.add(eq);						 
 					 }
 				 }

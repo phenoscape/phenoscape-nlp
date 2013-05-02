@@ -59,7 +59,7 @@ public class XML2EQ {
 	// private String keyentity = null;
 	private ArrayList<Hashtable<String, String>> keyentities;
 	//private String keyentitylocator = null;
-	private ArrayList<Hashtable<String, String>> allEQs = null;
+	private ArrayList<EQStatement> allEQs = null;
 	private HashSet<String> stateids = new HashSet<String>();
 	private static ArrayList<String> serenostyle = new ArrayList<String>();
 	private String characters = null;
@@ -76,22 +76,22 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil;
 	private Dictionary dictionary = new Dictionary();
-	private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
-	private TermSearcher ts = new TermSearcher(dictionary);
-	private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
-	private RelationHandler rh = new RelationHandler(dictionary, es);
-	private KeyEntityFinder kef = new  KeyEntityFinder(es);
+	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
+	//private TermSearcher ts = new TermSearcher(dictionary);
+	//private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
+	//private RelationHandler rh = new RelationHandler(dictionary, es);
+	//private KeyEntityFinder kef = new  KeyEntityFinder(es);
 	
 	public static final int RELATIONAL_SLIM=1;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
-	static {
+	/*static {
 		serenostyle.add("sereno");
 		serenostyle.add("martinez");
 		serenostyle.add("earlyevolutionofarchosaurs");
 		ontoutil = new TermOutputerUtilities(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("database.name"));
-	}
+	}*/
 
 
 	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) throws Exception {
@@ -99,7 +99,7 @@ public class XML2EQ {
 		this.outputtable = outputtable;
 		this.tableprefix = prefix;
 		this.glosstable = glosstable;
-		this.keyentities = new ArrayList<Hashtable<String,String>>();
+		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
 		
 		if(dictionary.conn == null){
@@ -135,40 +135,43 @@ public class XML2EQ {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void outputEQs() throws Exception {
+	public void outputEQs() {
 		File[] xmlfiles = this.source.listFiles();
-		// try{
 		for (File f : xmlfiles) {
-			String src = f.getName();
-			SAXBuilder builder = new SAXBuilder();
-			Document xml = builder.build(f);
-			Element root = xml.getRootElement();
-			new XMLNormalizer(root).normalize();
-			// if(count!= 67){ count++; continue;}
-			System.out.println();
-			System.out.println("[" + count + "]" + src);
-			count++;
-			// reset for this file
-			keyentities = new ArrayList<Hashtable<String, String>>();
-			//keyentitylocator = null;
-			allEQs = new ArrayList<Hashtable<String, String>>();// used to hold all EQ statement generated from this character unit (1 file holds 1 character unit)
-			String author = src.replaceFirst("_.*$", "").toLowerCase();
-			// expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
-			//characterstatements are character descriptions
-			List<Element> characterstatements = XMLNormalizer.pathCharacterStatement.selectNodes(root);
-			//statestatements are state descriptions
-			List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
-			if (XML2EQ.serenostyle.contains(author)) {
-				createEQs4CharacterUnitInSerenoStyle(characterstatements, statestatements, src, root);
-			} else {
-				createEQs4CharacterUnit(characterstatements, statestatements, src, root); // the set of statements related to a character (one of the statement is the character)																				// itself)
+			try{
+				String src = f.getName();
+				SAXBuilder builder = new SAXBuilder();
+				Document xml = builder.build(f);
+				Element root = xml.getRootElement();
+				new XMLNormalizer(root).normalize();
+				// if(count!= 67){ count++; continue;}
+				System.out.println();
+				System.out.println("[" + count + "]" + src);
+				count++;
+				allEQs = new ArrayList<EQStatement>();
+				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectNodes(root);
+				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
+				if(isBinary(statestatements)){
+					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser();
+					bcsp.parse(characterstatement, root);
+					allEQs = bcsp.getEQStatements();
+				}else{
+					CharacterStatementParser csp = new CharacterStatementParser();
+					csp.parse(characterstatement, root);
+					ArrayList<Entity> keyentities = csp.getKeyEntities();
+					String qualityclue = csp.getQualityClue();
+					StateStatementParser ssp = new StateStatementParser(keyentities, qualityclue);
+					for(Element statestatement: statestatements){
+						ssp.parse(statestatement, root);
+						allEQs.addAll(ssp.getEQStatements());
+					}
+					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
+				}
+				outputEQs4CharacterUnit();
+			}catch(Exception e){
+				e.printStackTrace();
 			}
-			outputEQs4CharacterUnit();
 		}
-		// discardNonTestCharacterUnits();
-		// }catch(Exception e){
-		// e.printStackTrace();
-		// }
 	}
 
 
@@ -212,23 +215,10 @@ public class XML2EQ {
 		/** 
 		 * NORMALIZATION PROCESS
 		 **/
-		for (Hashtable<String, String> EQ : allEQs) {
+		for (EQStatement EQ : allEQs) {
 			
-			this.insertEQs2Table(EQ);
-			/*
-			// 2. negation
-			if (EQ.get("quality").startsWith("not ")) {
-				EQ.put("qualitynegated", EQ.get("quality"));
-				EQ.put("quality", "");
-			}
-
-			// finally
-			if (EQ.get("description").compareTo(text) != 0) {
-				System.out.println("text::" + EQ.get("description"));
-				text = EQ.get("description");
-			}*/
-			
-
+			//this.insertEQs2Table(EQ);
+			EQ.toString();
 		}
 
 	}
@@ -258,7 +248,7 @@ public class XML2EQ {
 	 * @param problems
 	 *            : EQs failed the sanity check
 	 */
-	@SuppressWarnings("unused")
+
 	/*private void repairProblemEQs(ArrayList<Hashtable<String, String>> problems) {
 		// to repair the first EQ
 		// EQ #2 in the above example
@@ -310,44 +300,6 @@ public class XML2EQ {
 	 * 
 	 * @param statements
 	 */
-	private void createEQs4CharacterUnit(List<Element> charstatements, List<Element> states, String src, Element root) throws Exception {
-
-		this.addEQ4CharacterStatement(src, charstatements);//first empty eq added here
-		// step 0: decide if a character is a binary (yes/no, true/false, rarely/usually types of states)
-		if (isBinary(states)) {
-			// the yes state = character description
-			// the no state = negated character description
-			// a negation may be to a relation (verb [A "not contact" B] or prep [A "not with" B]) or to a character state ("not expanded")
-
-			// compose n EQs from character statement, because a character statement can describe two equally weighted characters ( A exits B and enters C)
-			Element charactertext = null;
-			try{
-				charactertext = (Element)pathCharacterText.selectSingleNode(root);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-			String text =  charactertext==null? "" : charactertext.getTextNormalize();
-			System.out.println("text::" + text);
-			processBinaryCharacter(charstatements, states, src, root, text);
-
-		} else {
-			// on the first try, assuming the simple model:
-			// 1 char statement holding 1 organ/process/entity
-			// n states provide quality
-			String temp = "";
-			// step 1: process Character Statements
-			// the set of character statements is expected to generate an E that is the subject for the state statements
-			// while it may also generate additional EQ statements
-			// also set keyentities and keyentitylocator fields
-			List<Element> keys = processCharacterStatements(charstatements, states, src, root);
-			// step 2: process State Statements
-			// Use E to replace the "whole_organism" placeholder in the state statements and generate EQ statements
-			// the state statements may also generate additional EQ statements
-			if (!keys.isEmpty()) {
-				createEQsFromStateStatements(keys, states, src, root);
-			}
-		}
-	}
 
 	/**
 	 * character: L1, L2, ..., Ln, V q(may contain QM, eg. length relative to eyes)
@@ -360,7 +312,7 @@ public class XML2EQ {
 	 * @param src
 	 * @param root
 	 */
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	private void createEQs4CharacterUnitInSerenoStyle(List<Element> charstatements, List<Element> states, String src, Element root) throws Exception {
 
 		// collect category="character" terms from the glossarytable
@@ -493,19 +445,7 @@ public class XML2EQ {
 			// deal with other structures
 
 		}
-	}
-
-	private void addEQ4CharacterStatement(String src, List<Element> charstatements) {
-		Hashtable<String, String> EQ = new Hashtable<String, String>();
-		Utilities.initEQHash(EQ);
-		String chtext = charstatements.get(0).getChild("text").getTextTrim();
-		String characterid = charstatements.get(0).getAttributeValue("character_id");
-		EQ.put("source", src);
-		EQ.put("description", chtext);
-		EQ.put("characterid", characterid);
-		EQ.put("type", "character");
-		allEQs.add(EQ);
-	}
+	}*/
 
 	/**
 	 * 
@@ -629,192 +569,7 @@ public class XML2EQ {
 	 * @return an arraylist of EQs, each is an EQ-hashtable. Only  
 	 */
 	@SuppressWarnings("unchecked")
-	private void processBinaryCharacter(List<Element> chars, List<Element> states,  String src, Element root, String charactertext) throws Exception {
-		//identify primary entities, which may not correspond directly to one <structure> (e.g., junction between A and B => A-B joint)
-		List<Element> entities = kef.getKeyEntities(chars, states, root, keyentities);
-		for(Element state: states){
-			System.out.println("text::"+state.getChild("text").getTextNormalize());
-		}
-		
-		//List<Element> entities  = this.kef.getKeyEntities(chars, states, root, keyentities);
-		
-		//loop through entities and their character statements to generate EQs
-		for (Element e : entities) {
-			String sid = e.getAttributeValue("id");
-			String ontoid = e.getAttribute("ontoid") !=null? e.getAttributeValue("ontoid") : "";
-			String sname=Utilities.getStructureName(root, sid);
-			//this.keyentities.add(sname);
-		
-			//collect <character> and <relation> associated with the entity (being the subject)
-			List<Element> chara = (List<Element>) pathCharacter.selectNodes(e);
-			List<Element> relations = XPath.selectNodes(root, "//relation[@from='" + sid + "']");
-			String rq = null;
-			String rqm = null;
-			String el = null;
-			String elid = null;
-			String ellabel = null;
-			Hashtable<String, Object> relationresults = null;
-			if(relations !=null && relations.size()>0){
-				String[] relationstrings = relationHash(relations).get(sid).split("#");
-				relationresults = rh.handle(root, relationstrings, sname, sid, true);
-				if(relationresults!=null){
-					rq = (String) relationresults.get("relationalquality");
-					rqm = (String)  relationresults.get("qualitymodifier");
-					el = (String) relationresults.get("entitylocator");
-					elid = (String) relationresults.get("entitylocatorid");
-					ellabel = (String) relationresults.get("entitylocatorlabel");
-				}
-			}
-			String nq = "";
-			String q = "";
-			String qualitylabel = "";
-			String qualityid = "";
-			
-			boolean presentabsent =false;
-			boolean outputnegated = false; //default to return two EQs corresponding to the binary statements; but return 1 EQ for complicated cases (case 2 example)
-			//case 1: there is one character or one relation
-			if(rq !=null && rq.indexOf(",") < 0 && rq.indexOf(";")<0){
-				outputnegated = true;
-				if(rq.startsWith("not ")){
-					nq = rq;
-					q = rq.replaceFirst("^not ", "");
-				}else{
-					nq = "not "+rq;
-				}					
-				//TODO: synch output 
-				if(relationresults!=null){
-					qualitylabel = (String) relationresults.get("relationalqualitylabel");
-					qualityid = (String) relationresults.get("relationalqualityid");
-				}				
-			}else{
-				outputnegated = true;
-				//string all rqs together to form one quality, if too complicated, search for broader category in PATO
-				if(relationresults!=null){
-					qualityid = (String) relationresults.get("relationalqualityid");
-					if(qualityid!=null && qualityid.length() > 0){
-						//TODO: string together,
-					}else{
-						outputnegated = false;
-						q = "position"; //relations default to "position" TODO other cases?
-					}
-				}			
 
-			}		
-			//q = absent/present
-			if (chara!=null && chara.size()==0) {
-				presentabsent = true;
-				nq = "absent";
-				q = "present";
-				Hashtable<String, String> result = ts.searchTerm(q, "quality", 0);
-				if(result!=null){
-					qualitylabel = result.get("label");
-					qualityid = result.get("id");
-				}
-				
-			}else if (chara!=null && chara.size()==1) {
-				outputnegated = true;
-				q = Utilities.formQualityValueFromCharacter(chara.get(0)).replaceAll("\\[[^\\]]*?\\]", "");
-				if(q.startsWith("not ")){
-					nq = q;
-					q = nq.replaceFirst("^not ", "");
-				}else{
-					nq = "not "+q;
-				}
-				Hashtable<String, String> result = ts.searchTerm(q, "quality", 0);
-				if(result!=null){
-					qualitylabel = result.get("label");
-					qualityid = result.get("id");
-				}
-				
-			}else{
-				outputnegated = true;
-				//string all qs together to form one quality, if too complicated, search for broader category in PATO
-				//TODO
-			}
-			
-							
-			//create e/q 
-			Hashtable<String, String> EQ = new Hashtable<String, String>();
-			Element state = getTrueState(states);
-			if(state != null){
-				String characterid = state.getAttributeValue("character_id");
-				String stateid = state.getAttributeValue("state_id");
-				String stext = state.getChild("text").getTextNormalize();				
-				Utilities.initEQHash(EQ);
-				EQ.put("source", src);
-				EQ.put("characterid", characterid);
-				EQ.put("stateid", stateid);
-				EQ.put("description", charactertext+":"+stext);
-				EQ.put("type", "binary");
-				EQ.put("entity", sname);
-				EQ.put("entityid", ontoid);
-				EQ.put("entitylabel", sname);
-				EQ.put("quality", q);
-				EQ.put("qualitylabel", qualitylabel);
-				EQ.put("qualityid", qualityid==null? "": qualityid);
-				EQ.put("entitylocator", el==null? "":el);
-				EQ.put("entitylocatorid", elid==null? "":elid);
-				EQ.put("entitylocatorlabel", ellabel==null? "":ellabel);
-				allEQs.add((Hashtable<String, String>) EQ.clone());
-			}
-			
-			state = getFalseState(states);
-			if(state!=null){
-				String characterid = state.getAttributeValue("character_id");
-				String stateid = state.getAttributeValue("state_id");
-				String stext = state.getChild("text").getTextNormalize();
-				if(presentabsent){
-					Utilities.initEQHash(EQ);
-					EQ.put("source", src);
-					EQ.put("characterid", characterid);
-					EQ.put("stateid", stateid);
-					EQ.put("description", charactertext+":"+stext);
-					EQ.put("type", "binary");
-					EQ.put("entity", sname);
-					EQ.put("entityid", ontoid);
-					EQ.put("entitylabel", sname);
-					EQ.put("quality", nq);
-					Hashtable<String, String> result = ts.searchTerm(nq, "quality", 0); //"absent"
-					EQ.put("qualitylabel", result.get("label"));
-					EQ.put("qualityid", result.get("id"));
-					EQ.put("entitylocator", el==null? "":el);
-					EQ.put("entitylocatorid", elid==null? "":elid);
-					EQ.put("entitylocatorlabel", ellabel==null? "":ellabel);
-					allEQs.add((Hashtable<String, String>) EQ.clone());
-				}else if(outputnegated){
-					//create e/negated q
-					Utilities.initEQHash(EQ);
-					EQ.put("source", src);
-					EQ.put("characterid", characterid);
-					EQ.put("stateid", stateid);
-					EQ.put("description", charactertext+":"+stext);
-					EQ.put("type", "binary");
-					EQ.put("entity", sname);
-					EQ.put("entityid", ontoid);
-					EQ.put("entitylabel", sname);
-					EQ.put("qualitynegated", nq);
-					if(qualitylabel.length()>0){
-						EQ.put("qualitynegatedlabel", "not("+qualitylabel+")");
-						EQ.put("qnparentlabel", "");
-						EQ.put("qnparentid", "");
-						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(qualityid);
-						if(parentinfo != null){
-							EQ.put("qnparentid", parentinfo[0]);
-							EQ.put("qnparentlabel", parentinfo[1]);
-						}else{
-							System.err.println("should not landed here");
-						}
-					}
-					EQ.put("entitylocator", el==null? "":el);
-					EQ.put("entitylocatorid", elid==null? "":elid);
-					EQ.put("entitylocatorlabel", ellabel==null? "":ellabel);
-					allEQs.add((Hashtable<String, String>) EQ.clone());
-				}			
-			}
-		}
-	}
-	
-	
 	/*
 	 * Fill in the following in EQ
 	 *  EQ.put("quality", "");
@@ -829,89 +584,6 @@ public class XML2EQ {
 		String term = qualitynegated.replaceFirst("not ", "").trim();
 
 	}
-
- 	/**
-	 * BinaryCharacter: those taking yes/no or present/absent as character states.
-	 * @param chars
-	 * @param src
-	 * @param root
-	 * @return a hashtable fieldname => value, if a field does not have a value, set it ""
-	 */
-/*	@SuppressWarnings("unchecked")
-	private ArrayList<Hashtable<String, String>> processBinaryCharacter(List<Element> chars, String src, Element root) throws Exception {
-		// these EQs will be transformed into state EQs
-		ArrayList<Hashtable<String, String>> EQs = new ArrayList<Hashtable<String, String>>();
-		Hashtable<String, String> EQ = new Hashtable<String, String>();
-		Utilities.initEQHash(EQ);
-
-		// //get the first structure element
-		// Element firststruct = (Element)pathNonWholeOrganismStructure.selectSingleNode(chars.get(0));
-		// //TODO: what if firststruct == null?
-		// String sid = firststruct.getAttributeValue("id");
-		// String sname =Utilities.getStructureName(root, sid);
-		// EQ.put("entity", sname);
-
-		List<Element> firststructs = new ArrayList<Element>();
-		for (Element e : chars) {
-			firststructs.addAll(XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e));
-		}
-
-		for (Element e : firststructs) {
-			Element firststruct=e;
-			String sid = firststruct.getAttributeValue("id");
-			String sname=Utilities.getStructureName(root, sid);
-			EQ.put("entity", sname);
-			this.keyentities.add(sname);
-		
-			// take the first character
-			Element chara = (Element) pathCharacter.selectSingleNode(firststruct);
-			if (chara != null) {
-				String q = Utilities.formQualityValueFromCharacter(chara).replaceAll("\\[[^\\]]*?\\]", "");
-				
-				//TODO modifier="not" => negatedquality
-				EQ.put("quality", q);
-				EQs.add((Hashtable<String, String>) EQ.clone());
-			}
-			// keep positional relations associated with the first element
-			// List<Element> rels = XPath.selectNodes(root, "//relation[@to='"+sid+"'|@from='"+sid+"']");
-			List<Element> rels = XPath.selectNodes(root, "//relation[@from='" + sid + "']");
-			String relationalquality = "";
-			String qualitymodifier = "";
-			for (Element rel : rels) {
-				String relname = rel.getAttributeValue("name");
-				String toid = rel.getAttributeValue("to");
-				// String fromid = rel.getAttributeValue("from");
-				// String lid = toid.compareTo("sid")==0? fromid : toid;
-				String toname = Utilities.getStructureName(root, toid);
-				toname = toname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + toid + "']");
-				toname = toname.replaceFirst(",$", "");
-				if (relname.matches("\\((" + Dictionary.positionprep + ")\\).*")) {
-					if (relname.contains("between"))
-						EQ.put("entitylocator", "between " + toname);// TODO chained part_of relations??
-					else
-						EQ.put("entitylocator", toname);
-					this.keyentitylocator = toname;
-				} else if (EQ.get("quality").compareTo("") == 0) {// quality not found, turn relation to quality, toid to qualitymodifier
-					relationalquality += relname + "+";
-					qualitymodifier += toname + "+";
-				}
-			}
-			// quality not found, turn relation to quality, toid to qualitymodifier
-			if (relationalquality.length() > 0) {
-				relationalquality = relationalquality.replaceFirst("\\+$", "");
-				String[] qs = relationalquality.split("\\+");
-				String[] qms = qualitymodifier.split("\\+");
-				for (int i = 0; i < qs.length; i++) {
-					EQ.put("quality", qs[i]);
-					EQ.put("qualitymodifier", qms[i]);
-					EQs.add((Hashtable<String, String>) EQ.clone());
-				}
-			}
-		}
-		return EQs;
-	}
-
- */
 
 	/**
 	 * if all states hold a binary value, return true, otherwise return false
@@ -936,54 +608,6 @@ public class XML2EQ {
 		return true;
 	}
 
-	/**
-	 * Deprecated
-	 * step 1: process Character Statements
-	 * the set of character statements is expected to generate an E that is the subject for the state statements
-	 * while it may also generate additional EQ statements
-	 * 
-	 * Changed by Zilong
-	 * step 1: process Chratcer Statements
-	 * may generate a list of structures which are subjects for the state.
-	 * 
-	 * @param chars
-	 *            : a set of statements with type="character"
-	 * @return
-	 */
-	// @SuppressWarnings("unchecked")
-	// private Element processCharacter(List<Element> chars, String src, Element root) throws Exception{
-	@SuppressWarnings("unchecked")
-	private List<Element> processCharacterStatements(List<Element> chars, List<Element> states, String src, Element root) throws Exception {
-		List<Element> keys = kef.getKeyEntities(chars, states, root, keyentities);
-		for(Element statement: chars){
-			List<Element> structures = statement.getChildren("structure");
-			
-			//generate other EQ statements from this statement
-			Element text = (Element)pathText2.selectSingleNode(statement);
-			//structures = pathStructure.selectNodes(statement); //all <structure> in the statement
-			List<Element> relations = pathRelation.selectNodes(statement); //all <relation> in this statement
-			//structures.removeAll(structures_temp);
-			
-			createEQsfromStatement(src, root, text, structures, relations, true);
-		}
-		return keys;
-	}
-
-	/**
-	 * step 2: process State Statements
-	 * Use the name of E to replace the "whole_organism" placeholder in the state statements and generate EQ statements
-	 * the state statements may also generate additional EQ statements
-	 * If the name of E is also contained in the states, then use the name in the states
-	 * 
-	 * @param key
-	 * @param states
-	 */
-	@SuppressWarnings("unchecked")
-	private void createEQsFromStateStatements(List<Element> keys, List<Element> states, String src, Element root) throws Exception {
-
-		fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
-	}
-
 	//check allEQs to identify the case like
 	//[0]Swartz 2012.xml_states1034.xml
 	//text::Body scale [morphology]
@@ -1002,17 +626,20 @@ public class XML2EQ {
 	private void fixIncompleteStates(String src, Element root) {
 
 		ArrayList<String> incompletestateids = new ArrayList<String>();//not ontologized character state (0 EQ for this state)
-		ArrayList<Hashtable<String,String>> completestateids = new ArrayList<Hashtable<String, String>>();//ontologized E and Q 
+		ArrayList<EQStatement> completestateids = new ArrayList<EQStatement>();//ontologized E and Q 
 		identifyStates(incompletestateids, completestateids);
 		if(incompletestateids.size()!=0){
 			//find qualityids from completed states for the key entities
 			ArrayList<String> qualitylabels = new ArrayList<String>();
-			Hashtable<String, String> keyEQ = null;
-			for(Hashtable<String, String> EQ: completestateids){
-				String entitylabel = EQ.get("entitylabel");
+			EQStatement keyEQ = null;
+			for(EQStatement EQ: completestateids){
+				String entitylabel = null;
+				Entity e = EQ.getEntity();
+				if(e instanceof SimpleEntity) entitylabel = ((SimpleEntity)e).getLabel();
+				else entitylabel = ((CompositeEntity)e).getPrimaryEntity().getLabel();
 				if(matchWithKeyEntities(entitylabel)){
 					keyEQ = EQ;
-					String qlabel = EQ.get("qualitylabel");
+					String qlabel = EQ.getQuality().getLabel();
 					if(qlabel.compareTo("absent")!=0) qualitylabels.add(qlabel); //ignore absent
 				}
 			}
@@ -1031,15 +658,14 @@ public class XML2EQ {
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
 						//TODO consider negation
-						Hashtable<String, String> r = ts.searchTerm(ngram, "quality", 0); 
-						if(r!=null){
-							String qlabel = r.get("label");
+						Quality q = (Quality) TermSearcher.searchTerm(ngram, "quality", 0); 
+						if(q!=null){
+							String qlabel = q.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);
 							if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
-								Hashtable<String, String> EQ = relatedEQ(stateid, ngram);
+								EQStatement EQ = relatedEQ(stateid, ngram);
 								if(EQ==null){ //add one
-									EQ = new Hashtable<String, String>();
-									Utilities.initEQHash(EQ);
+									EQ = new EQStatement();
 									//add metadata
 									String characterid = "";
 									try{
@@ -1048,22 +674,15 @@ public class XML2EQ {
 									}catch(Exception e){
 										e.printStackTrace();
 									}
-									EQ.put("source", src);
-									EQ.put("characterid", characterid);
-									EQ.put("stateid", stateid);
-									EQ.put("description", text);
+									EQ.setSource(src);
+									EQ.setCharacterId(characterid);
+									EQ.setStateId(stateid);
+									EQ.setDescription(text);
 									allEQs.add(EQ);
 								}
 								//accept this result for this stateid
-								EQ.put("entity", keyEQ.get("entity"));
-								EQ.put("entityid", keyEQ.get("entityid"));
-								EQ.put("entitylabel", keyEQ.get("entitylabel"));
-								EQ.put("entitylocator", keyEQ.get("entitylocator"));
-								EQ.put("entitylocatorid", keyEQ.get("entitylocatorid"));
-								EQ.put("entitylocatorlabel", keyEQ.get("entitylocatorlabel"));
-								EQ.put("quality", ngram);
-								EQ.put("qualityid", r.get("id"));
-								EQ.put("qualitylabel", r.get("label"));
+								EQ.setEntity(keyEQ.getEntity());
+								EQ.setQuality(q);
 								solved = true;
 								break;
 							}
@@ -1082,18 +701,13 @@ public class XML2EQ {
 	 * @return the EQ from allEQs with the stateid and included ngram in an element
 	 */
 
-	private Hashtable<String, String> relatedEQ(String stateid, String ngram) {
-		ArrayList<Hashtable<String, String>> EQs = this.getEQsforState(stateid);
-		for(Hashtable<String, String> EQ: EQs){
-			Enumeration<String> en = EQ.keys();
-			while(en.hasMoreElements()){
-				String key = en.nextElement();
-				if(key.compareTo("description")==0) continue;
-				String value = EQ.get(key);
-				if(value!=null && value.length()>0 && (value.contains(ngram) || ngram.contains(value))){
-					return EQ;
-				}
-			}
+	private EQStatement relatedEQ(String stateid, String ngram) {
+		ArrayList<EQStatement> EQs = this.getEQsforState(stateid);
+		for(EQStatement EQ: EQs){
+			String value = EQ.getDescription();
+			if(value!=null && value.length()>0 && (value.contains(ngram) || ngram.contains(value))){
+				return EQ;
+			}			
 		}
 		return null;
 	}
@@ -1173,10 +787,10 @@ public class XML2EQ {
 	 * @param stateid
 	 * @return the EQs in allEQs that have the stateid 
 	 */
-	private ArrayList<Hashtable<String, String>> getEQsforState(String stateid) {
-		ArrayList<Hashtable<String, String>> EQs = new ArrayList<Hashtable<String, String>>();
-		for(Hashtable<String, String> EQ: allEQs){
-			if(EQ.get("stateid").compareTo(stateid)==0) EQs.add(EQ);
+	private ArrayList<EQStatement> getEQsforState(String stateid) {
+		ArrayList<EQStatement> EQs = new ArrayList<EQStatement>();
+		for(EQStatement EQ: allEQs){
+			if(EQ.getStateId().compareTo(stateid)==0) EQs.add(EQ);
 		}
 		return EQs;
 	}
@@ -1187,17 +801,21 @@ public class XML2EQ {
 	 * @param completestateids: EQs of states with keyentity as an entity and with qualityid/label
 	 */
 	private void identifyStates(ArrayList<String> incompletestateids,
-			ArrayList<Hashtable<String, String>> completestateeqs) {
-		for(Hashtable<String, String> EQ: allEQs){
-			if(EQ.get("type").compareTo("state")==0){
-				String stateid = EQ.get("stateid");
-				 ArrayList<Hashtable<String, String>> EQs = getEQsforState(stateid);
+			ArrayList<EQStatement> completestateeqs) {
+		for(EQStatement EQ: allEQs){
+			if(EQ.getType().compareTo("state")==0){
+				String stateid = EQ.getStateId();
+				 ArrayList<EQStatement> EQs = getEQsforState(stateid);
 				 boolean hasentity = false;
 				 boolean hasquality = false;
 				 boolean haskeyentity = false;
-				 for(Hashtable<String, String> aEQ: EQs){
-					 String e = aEQ.get("entitylabel");
-					 String q = aEQ.get("qualitylabel");
+				 for(EQStatement aEQ: EQs){
+					 Entity E = aEQ.getEntity();
+					 String e = null;
+					 if(E instanceof SimpleEntity) e = ((SimpleEntity)E).getLabel();
+					 else e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+					 
+					 String q = aEQ.getQuality().getLabel();
 					 if(e.length()>0) hasentity = true; 
 					 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true;
 					 if(q.length()>0) hasquality = true;
@@ -1242,8 +860,8 @@ public class XML2EQ {
 
 	
 
-	private void insertEQs2Table(Hashtable<String, String> EQ) throws Exception {
-		Enumeration<String> fields = EQ.keys();
+	/*private void insertEQs2Table(EQStatement EQ) throws Exception {
+		
 
 		// print
 		String entitylabel = EQ.get("entitylabel")+"["+EQ.get("entityid")+"]";
@@ -1295,7 +913,7 @@ public class XML2EQ {
 		Statement stmt = dictionary.conn.createStatement();
 		stmt.execute(q);
 
-	}
+	}*/
 
 
 	

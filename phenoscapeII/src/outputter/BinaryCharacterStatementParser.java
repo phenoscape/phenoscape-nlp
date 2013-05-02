@@ -17,7 +17,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 * @param ontologyIRIs
 	 */
 	public BinaryCharacterStatementParser() {
-		super(null);
+		super(null, null);
 	}
 
 	/**
@@ -63,11 +63,11 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	
 	private EQStatement clone(EQStatement eq){
 		EQStatement eq1 = new EQStatement();
-		eq1.setCharacterSource(eq.getCharacterSource());
+		eq1.setCharacterId(eq.getCharacterId());
 		eq1.setEntity(eq.getEntity());
 		eq1.setQuality(eq.getQuality());
 		eq1.setSource(eq.getSource());
-		eq1.setStateSource(eq.getStateSource()); //TODO: change it for states
+		eq1.setStateId(eq.getStateId()); //TODO: change it for states
 		return eq1;
 	}
 	

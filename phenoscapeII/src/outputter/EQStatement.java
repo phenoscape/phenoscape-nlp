@@ -3,16 +3,20 @@
  */
 package outputter;
 
+import java.io.File;
+
 /**
  * @author updates
  * store and access information about an EQ statement
  */
 public class EQStatement {
 	String sourceFile;
-	String characterSource;
-	String stateSource;
+	String characterId;
+	String stateId;
+	String description;
 	Entity entity;
 	Quality quality;
+	private String type;
 	//Entity relatedEntity;
 	
 
@@ -26,12 +30,12 @@ public class EQStatement {
 		this.sourceFile = source;
 	}
 	
-	public void setCharacterSource(String characterSource){
-		this.characterSource = characterSource;
+	public void setCharacterId(String characterId){
+		this.characterId = characterId;
 	}
 	
-	public void setStateSource(String stateSource){
-		this.stateSource = stateSource;
+	public void setStateId(String stateId){
+		this.stateId = stateId;
 	}
 	
 	public void setEntity(Entity entity){
@@ -42,6 +46,14 @@ public class EQStatement {
 		this.quality = quality;
 	}
 	
+	public void setDescription(String description){
+		this.description = description;
+	}
+	
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	/*public void setRelatedEntity(Entity entity){
 		this.relatedEntity = entity;
 	}*/
@@ -49,12 +61,12 @@ public class EQStatement {
 	public String getSource(){
 		return this.sourceFile;
 	}
-	public String getCharacterSource(){
-		return this.characterSource;
+	public String getCharacterId(){
+		return this.characterId;
 	}
 	
-	public String getStateSource( ){
-		return this.stateSource  ;
+	public String getStateId( ){
+		return this.stateId  ;
 	}
 	
 	public Entity getEntity( ){
@@ -65,6 +77,15 @@ public class EQStatement {
 		return this.quality  ;
 	}
 	
+	public String getDescription(){
+		return this.description;
+	}
+	
+	public String getType() {
+		// TODO Auto-generated method stub
+		return this.type;
+	}
+
 	/*public Entity getRelatedEntity( ){
 		return this.relatedEntity  ;
 	}*/
@@ -85,5 +106,8 @@ public class EQStatement {
 		// TODO Auto-generated method stub
 
 	}
+
+
+
 
 }

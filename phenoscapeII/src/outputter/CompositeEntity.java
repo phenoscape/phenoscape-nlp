@@ -15,7 +15,7 @@ import java.util.ArrayList;
  *2. lamina AND (part_of SOME (anterior region and part_of SOME scapula)))
  */
 public class CompositeEntity extends Entity {
-	Entity entity; //the first entity in the post-composed entity
+	SimpleEntity entity; //the first entity in the post-composed entity
     ArrayList<Entity> entities; //relation + entity
  	/**
 	 * 
@@ -24,6 +24,9 @@ public class CompositeEntity extends Entity {
 		// TODO Auto-generated constructor stub
 	}
 
+	public SimpleEntity getPrimaryEntity(){
+		return entity;
+	}
 	/**
 	 * 
 	 * @param entity: simple, rentity, or composite entity
