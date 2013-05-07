@@ -74,7 +74,7 @@ public class XML2EQ {
 
 
 
-	public static TermOutputerUtilities ontoutil;
+	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("database.name"));
 	private Dictionary dictionary = new Dictionary();
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
@@ -149,18 +149,18 @@ public class XML2EQ {
 				System.out.println("[" + count + "]" + src);
 				count++;
 				allEQs = new ArrayList<EQStatement>();
-				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectNodes(root);
+				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
-					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser();
+					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil);
 					bcsp.parse(characterstatement, root);
 					allEQs = bcsp.getEQStatements();
 				}else{
-					CharacterStatementParser csp = new CharacterStatementParser();
+					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					ArrayList<Entity> keyentities = csp.getKeyEntities();
 					String qualityclue = csp.getQualityClue();
-					StateStatementParser ssp = new StateStatementParser(keyentities, qualityclue);
+					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
 						ssp.parse(statestatement, root);
 						allEQs.addAll(ssp.getEQStatements());
@@ -207,18 +207,11 @@ public class XML2EQ {
 	 * 6 EQ::[E]lateral wall [Q]rounded [along entire length] [EL]metapterygoid channel
 	 */
 	private void outputEQs4CharacterUnit() throws Exception {
-		// sanity check has problems
 
-
-		//String text = "";
-		
-		/** 
-		 * NORMALIZATION PROCESS
-		 **/
 		for (EQStatement EQ : allEQs) {
 			
 			//this.insertEQs2Table(EQ);
-			EQ.toString();
+			System.out.println(EQ.toString());
 		}
 
 	}
@@ -1017,15 +1010,17 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
+		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/test";
-		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/final";
+		String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/final";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/test";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";
-		String outputtable = "pattern_xml2eq";
+		//String outputtable = "pattern_xml2eq";
+		String outputtable="swartz_after_xml2eq";
 		// String benchmarktable = "internalworkbench";
-		String prefix = "pattern";
+		//String prefix = "pattern";
+		String prefix ="swartz_after";
 		String glosstable = "fishglossaryfixed";
 		try {
 			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);

@@ -107,6 +107,8 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		return this.id != null;
 	}
 
-
+	public String toString(){
+		return "phrase="+this.string+" entity="+this.label+ " score="+this.confidenceScore;
+	}
 
 }

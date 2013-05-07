@@ -28,6 +28,7 @@ public class StateStatementParser extends Parser {
 	String src;
 	String characterid;
 	String stateid;
+	String text;
 	String qualityclue;
 	ArrayList<Entity> keyentities;
 	
@@ -50,8 +51,8 @@ public class StateStatementParser extends Parser {
 	/**
 	 * 
 	 */
-	public StateStatementParser(ArrayList<Entity> keyentities, String qualityclue) {
-		super();
+	public StateStatementParser(TermOutputerUtilities ontoutil, ArrayList<Entity> keyentities, String qualityclue) {
+		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;
 	}
@@ -72,11 +73,11 @@ public class StateStatementParser extends Parser {
 		this.stateid = statement.getAttribute("state_id") == null ? "" : statement.getAttributeValue("state_id");
 	
 		try {
-			Element text = (Element) pathText2.selectSingleNode(statement);
+			text = ((Element) pathText2.selectSingleNode(statement)).getTextNormalize();
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
-		
+		//parse relations first
 		// relations should include those in this state statement and those in character statement
 		List<Element> relations;
 		try {
@@ -94,18 +95,21 @@ public class StateStatementParser extends Parser {
 				EQStatement eq = new EQStatement();
 				ArrayList<Entity> entities = new ArrayList<Entity>();
 				Entity e = rh.getEntity();
-				//if(e==null && keyentities==null) ??
-				if(e!=null){
+				if(e!=null && this.keyentities!=null){
 					entities = resolve(e, this.keyentities); 
-				}else{
+				}else if(this.keyentities!=null){
 					entities = this.keyentities;
+				}else{
+					continue;
 				}
+				
 				for(Entity entity: entities){
 					eq.setEntity(entity);
 					eq.setQuality(rh.getQuality());
 					eq.setSource(this.src);
 					eq.setCharacterId(this.characterid);
 					eq.setStateId(this.stateid);
+					eq.setDescription(text);
 					this.EQStatements.add(eq);
 				}
 				this.EQStatements.addAll(rh.otherEQs);
@@ -114,6 +118,7 @@ public class StateStatementParser extends Parser {
 			e.printStackTrace();
 		} 
 				
+		//then parse characters
 		List<Element> characters;
 		try {
 			characters = pathCharacter.selectNodes(statement);
@@ -123,14 +128,15 @@ public class StateStatementParser extends Parser {
 				 ArrayList<Quality> qualities = ch.getQualities();
 				 ArrayList<Entity> entities = new ArrayList<Entity>();
 				 Entity entity = ch.getEntity();
-				 if(entity!=null){
+				 if(entity!=null && this.keyentities!=null){
 					 //TODO resolve entity with keyentities
 					 entities = resolve(entity, this.keyentities); 
+				 }else if(this.keyentities!=null){
+					 entities = this.keyentities;
+				 }else{
+					 continue;
 				 }
-				 if(isSpatial(entity)){
-					 entities = integrateSpatial(entity, this.keyentities); 
-					 //TODO integrate entity with keyentities
-				 }
+
 				 for(Entity e: entities){
 					 for(Quality quality: qualities){
 						 EQStatement eq = new EQStatement();
@@ -146,6 +152,9 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
+		
+		//last, standing alone structures (without characters and are not the subject of a relation)
+		//???
 	}
 	
 	private ArrayList<Entity> integrateSpatial(Entity entity,
@@ -156,8 +165,15 @@ public class StateStatementParser extends Parser {
 	}
 
 	private ArrayList<Entity> resolve(Entity e, ArrayList<Entity> keyentities) {
-
-		// TODO resolve entities
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		if(keyentities==null || keyentities.size()==0){
+			entities.add(e);
+			return entities;
+		}
+		if(isSpatial(e)){
+			entities = integrateSpatial(e, this.keyentities); 
+			 //TODO integrate entity with keyentities
+		}
 		return (ArrayList<Entity>) keyentities.clone();
 	}
 

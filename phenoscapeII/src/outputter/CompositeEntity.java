@@ -46,6 +46,14 @@ public class CompositeEntity extends Entity {
 	public Entity getEntity(int index){
 		return entities.get(index);
 	}
+	
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+		for(Entity e: entities){
+			sb.append(e.toString()+" and ");
+		}
+		return sb.toString().trim();
+	}
 	/**
 	 * @param args
 	 */

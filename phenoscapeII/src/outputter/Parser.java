@@ -17,10 +17,10 @@ public abstract class Parser {
 	ArrayList<Entity> entities = new ArrayList<Entity>();
 	String qualityClue;
 	ArrayList<Entity> subjectEntities = new ArrayList<Entity>(); 
-	protected TermOutputerUtilities ontoutil;
+	TermOutputerUtilities ontoutil;
 	
-	public Parser(){
-		ontoutil = new TermOutputerUtilities(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("database.name"));
+	public Parser(TermOutputerUtilities ontoutil){
+		this.ontoutil = ontoutil;
 	}
 
 	protected abstract void parse(Element statement, Element root);

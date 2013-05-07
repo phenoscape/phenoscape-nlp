@@ -27,6 +27,16 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
+	public static boolean isToStructureInRelation(String sid, Element root) {
+		try{
+			XPath tostructure = XPath.newInstance(".//relation[@to='"+sid+"']");
+			Element rel = (Element)tostructure.selectSingleNode(root);
+			if(rel == null) return false;
+		}catch(Exception e){
+			e.printStackTrace();
+		}		
+		return true;
+	}
 	
 	/**
 	 * 

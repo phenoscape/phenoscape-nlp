@@ -91,6 +91,10 @@ public class FormalRelation implements FormalConcept {
 	
 		return this.confidenceScore;
 	}
+	
+	public String toString(){
+		return this.label;
+	}
 
 	@Override
 	public boolean isOntologized() {

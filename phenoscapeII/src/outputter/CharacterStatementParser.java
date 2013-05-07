@@ -23,8 +23,8 @@ public class CharacterStatementParser extends Parser {
 	/**
 	 * 
 	 */
-	public CharacterStatementParser() {
-		super();
+	public CharacterStatementParser(TermOutputerUtilities ontoutil) {
+		super(ontoutil);
 	}
 
 
@@ -73,39 +73,11 @@ public class CharacterStatementParser extends Parser {
 
 
 	public void parseForEntities(Element statement, Element root){
-		//add all structures which are not "whole organism" to key structures
-		try{
-			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
-			for(Element structure: structures){
-				//Hashtable<String, String> keyentity = new Hashtable<String, String>();
-				String sid = structure.getAttributeValue("id");
-				if(!isToStructureInRelation(sid, root)){//to-structure involved in a relation are not considered a key
-					String sname = Utilities.getStructureName(root, sid);
-					Entity entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "", 0);
-					keyentities.add(entity);//TODO try harder to find a match for the key entity
-					if(entity!=null){
-						//structure.setAttribute("ontoid", entity.getId());
-						entities.add(entity);
-					}
-				}					
-			}				
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}	
+		EntityParser ep = new EntityParser(statement, root);
+		entities = ep.getEntities();
+		keyentities = ep.getEntities();
 	}
 	
-	
-	private boolean isToStructureInRelation(String sid, Element root) {
-		try{
-			XPath tostructure = XPath.newInstance(".//relation[@to='"+sid+"']");
-			Element rel = (Element)tostructure.selectSingleNode(root);
-			if(rel == null) return false;
-		}catch(Exception e){
-			e.printStackTrace();
-		}		
-		return true;
-	}
-
 	public String getQualityClue(){
 		return this.qualityClue;
 	}

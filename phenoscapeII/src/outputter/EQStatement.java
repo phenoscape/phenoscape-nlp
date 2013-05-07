@@ -96,8 +96,12 @@ public class EQStatement {
 	}
 	
 	public String toString(){
-		//TODO
-		return "";
+		StringBuffer sb = new StringBuffer();
+		sb.append("text:"+this.description+System.getProperty("line.separator"));
+		sb.append("Entity:"+ entity.toString()+System.getProperty("line.separator"));
+		sb.append("Quality:"+quality.toString()+System.getProperty("line.separator"));
+		return sb.toString();
+		
 	}
 	/**
 	 * @param args

@@ -34,6 +34,13 @@ public class REntity extends Entity{
 	public FormalRelation getRelation(){
 		return this.relation;
 	}
+	
+	/**
+	 * (part_of some clavicle blade)
+	 */
+	public String toString(){
+		return "("+this.relation.toString()+" some "+entity.toString()+")";
+	}
 	/**
 	 * @param args
 	 */

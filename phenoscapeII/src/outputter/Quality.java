@@ -107,7 +107,10 @@ public class Quality implements FormalConcept {
 	public boolean isOntologized() {
 		return this.id != null;
 	}
-
+	
+	public String toString(){
+		return "phrase="+this.string+" quality="+this.label+ " score="+this.confidenceScore;
+	}
 }
 
 

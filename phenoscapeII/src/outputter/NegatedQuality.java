@@ -46,7 +46,12 @@ public class NegatedQuality extends Quality {
 		return this.parentQuality;
 	}
 
-
+	/**
+	 * not waisted => shape and complement_of some waisted
+	 */
+	public String toString(){
+		return "phrase="+this.string+" quality="+parentQuality.getLabel()+" and "+negation.toString()+ " some "+ this.label+" score="+this.confidenceScore;
+	}
 	/**
 	 * @param args
 	 */
