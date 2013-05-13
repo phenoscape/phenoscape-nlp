@@ -518,7 +518,7 @@ end procedure
 		if(ptag.compareTo("NP") == 0 ||ptag.compareTo("NX") == 0||ptag.compareTo("X") == 0|| ptag.compareTo("S") == 0 || 
 				ptag.compareTo("FRAG") == 0 || ptag.compareTo("UCP") == 0 ||
 				ptag.compareTo("PRN") == 0 ||ptag.compareTo("WHNP") == 0 ||ptag.compareTo("SINV") == 0 ||
-				ptag.compareTo("PP") == 0 ||ptag.compareTo("ROOT") == 0 || ptag.compareTo("") == 0){		
+				ptag.compareTo("PP") == 0 ||ptag.compareTo("ROOT") == 0 || ptag.compareTo("") == 0 || ptag.compareTo("SQ")==0){		
 			/**
 			 * (NP
         			(NP (JJ alternate))
