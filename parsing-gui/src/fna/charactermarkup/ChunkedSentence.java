@@ -1950,6 +1950,15 @@ public class ChunkedSentence {
 				pointer++;
 				return new ChunkOrgan(token);
 			}
+			if(token.startsWith("l[")){
+				pointer++;
+				return new ChunkNPList(token);
+			}
+			if(token.startsWith("u[")){
+				pointer++;
+				return new ChunkNonSubjectOrgan(token);
+			}
+			
 			if(token.matches(".*?\\b("+ChunkedSentence.prepositions+")\\b.*") || token.matches(".*?[,;:\\.].*")){
 				break;
 			}
@@ -2021,8 +2030,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				while(nexttoken.length()==0 && i < this.chunkedtokens.size()){
 					nexttoken = this.chunkedtokens.get(i++);
 				}
-				if(nexttoken.matches("r\\[p.*?\\)\\]+")){//merge
-					token = token.replaceFirst("\\] o\\[", "").replaceFirst("\\]+", "");
+				if(nexttoken.matches("r\\[p.*?o\\[.*?\\)\\]+")){//merge
+					token = token.replaceFirst("\\] o\\[", " ").replaceFirst("\\]+", "").replaceAll("\\s+", " ");
 					nexttoken = nexttoken.replaceFirst("r\\[p\\[", "");
 					this.chunkedtokens.set(id, token+" "+nexttoken);
 					this.chunkedtokens.set(i-1, "");
