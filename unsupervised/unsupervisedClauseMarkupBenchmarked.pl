@@ -578,63 +578,63 @@ my ($create, $del);
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_sentence');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_sentence (sentid int(11) not null unique, source varchar(500), sentence text, originalsent text, lead varchar(2000), status varchar(20), tag varchar('.$taglength.'),modifier varchar(150), charsegment varchar(500),type varchar(20), primary key (sentid)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_sentence (sentid int(11) not null unique, source varchar(500), sentence text, originalsent text, lead varchar(2000), status varchar(20), tag varchar('.$taglength.'),modifier varchar(150), charsegment varchar(500),type varchar(20), primary key (sentid)) CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_wordpos');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_wordpos (word varchar(200) not null, pos varchar(2) not null, role varchar(5), certaintyu int, certaintyl int, saved_flag varchar(20) default "", savedid varchar(40), primary key (word, pos)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_wordpos (word varchar(200) not null, pos varchar(2) not null, role varchar(5), certaintyu int, certaintyl int, saved_flag varchar(20) default "", savedid varchar(40), primary key (word, pos))  CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_heuristicnouns');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_heuristicnouns (word varchar(200) not null, type varchar(20))');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_heuristicnouns (word varchar(200) not null, type varchar(20)) CHARACTER SET utf8 ');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 #$del = $dbh->prepare('drop table if exists '.$prefix.'_propernouns');
 #$del->execute() or print STDOUT "$del->errstr\n";
-#$create = $dbh->prepare('create table if not exists '.$prefix.'_propernouns (word varchar(200) not null, primary key (word)) engine=innodb');
+#$create = $dbh->prepare('create table if not exists '.$prefix.'_propernouns (word varchar(200) not null, primary key (word))  CHARACTER SET utf8 engine=innodb');
 #$create->execute() or print STDOUT "$create->errstr\n";
 #
 #$del = $dbh->prepare('drop table if exists '.$prefix.'_taxonnames');
 #$del->execute() or print STDOUT "$del->errstr\n";
-#$create = $dbh->prepare('create table if not exists '.$prefix.'_taxonnames (word varchar(200) not null, primary key (word)) engine=innodb');
+#$create = $dbh->prepare('create table if not exists '.$prefix.'_taxonnames (word varchar(200) not null, primary key (word))  CHARACTER SET utf8 engine=innodb');
 #$create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_sentInFile');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_sentInFile (filename varchar(200) not null unique primary key, endindex int not null) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_sentInFile (filename varchar(200) not null unique primary key, endindex int not null)  CHARACTER SET utf8  engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_modifiers');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_modifiers (word varchar(200) not null unique primary key, count int, istypemodifier tinyint) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_modifiers (word varchar(200) not null unique primary key, count int, istypemodifier tinyint)  CHARACTER SET utf8  engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_isA');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_isA (autoid int not null auto_increment primary key, instance varchar(50), class varchar(50)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_isA (autoid int not null auto_increment primary key, instance varchar(50), class varchar(50))  CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_unknownwords');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_unknownwords (word varchar(200) not null primary key, flag varchar(200)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_unknownwords (word varchar(200) not null primary key, flag varchar(200))  CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_singularplural');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_singularplural (singular varchar(200), plural varchar(200), primary key (singular, plural)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_singularplural (singular varchar(200), plural varchar(200), primary key (singular, plural))  CHARACTER SET utf8  engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_discounted');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_discounted (word varchar(200), discountedpos varchar(5), possiblenewpos varchar(5), primary key (word, discountedpos)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_discounted (word varchar(200), discountedpos varchar(5), possiblenewpos varchar(5), primary key (word, discountedpos))  CHARACTER SET utf8  engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 $del = $dbh->prepare('drop table if exists '.$prefix.'_substructure');
 $del->execute() or print STDOUT "$del->errstr\n";
-$create = $dbh->prepare('create table if not exists '.$prefix.'_substructure (structure varchar(200), substructure varchar(200), count int, primary key (structure, substructure)) engine=innodb');
+$create = $dbh->prepare('create table if not exists '.$prefix.'_substructure (structure varchar(200), substructure varchar(200), count int, primary key (structure, substructure))  CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
 }
@@ -5957,7 +5957,9 @@ sub getCharsSents{
 	my ($file, $text);
 	my @all = ();
 	opendir(DIN, "$dir") || die "$!: $dir\n";#descriptions
-	while(defined ($file=readdir(DIN))){
+	my @filesdir = sort custom_sort readdir(DIN);
+#	while(defined ($file=readdir(DIN))){
+	foreach $file(@filesdir){
 		if($file !~ /\w/){next;}
 		$text = ReadFile::readfile("$dir$file");
 		my $type = type($file);
@@ -5975,6 +5977,67 @@ sub getCharsSents{
 	@all = sort byseg @all;
 	return @all;
 }
+
+
+sub custom_sort{
+my @string1 = split("",$a);
+my @string2 = split("",$b);
+my $size1 = @string1;
+my $size2 = @string2;
+my $length;
+
+if($size1<$size2)
+{
+$length = $size1;
+}
+else
+{
+$length = $size2;
+}
+
+for(my $i=0;$i<$length;$i++)
+{
+
+if(($string1[$i] eq "_")||($string2[$i] eq "_"))
+{
+if(($string1[$i] eq "_")&&($string2[$i] eq "_"))
+{}
+elsif(($string1[$i] eq "_") && ($string2[$i] eq "."))
+{
+return 1;
+}
+elsif(($string1[$i] eq ".") && ($string2[$i] eq "_"))
+{
+return -1;
+}
+else
+{
+if($string1[$i] lt $string2[$i])
+{
+return 1;
+}
+elsif ($string1[$i] gt $string2[$i])
+{
+return -1;
+}
+else{}
+}
+}
+
+if($string1[$i] lt $string2[$i])
+{
+return -1;
+}
+elsif ($string1[$i] gt $string2[$i])
+{
+return 1;
+}
+else{}
+}
+
+return 0;
+}
+
 
 #determine if a file contains a character statement or a character state(description) statement
 sub type{
@@ -6036,12 +6099,14 @@ foreach my $info (@allsents){
 	#$text =~ s#<i>#[[[i]]]#g; #hide <i> #not useful for NeXML files
 	#$text =~ s#</i>#[[[/i]]]#g; #hide </i>
 	#$text =~ s#<.*?>##g; #remove html tags
+	#$text =~ s#<# less than #g; #remove <
+	#$text =~ s#># greater than #g; #remove >
 	$text =~ s#&lt;i&gt;#<i>#g; #unhide <i>
 	$text =~ s#&lt;/i&gt;#</i>#g; #unhide </i>, these will be used by characterHeuristics to collect taxon names
-	$text =~ s#<(?=\s*\d)# less than #g; #replace < before a number
-	$text =~ s#>(?=\s*\d)# greater than #g; #replace > before a number
-	$text =~ s#&lt;(?=\s*\d)# less than #g; #replace < before a number
-	$text =~ s#&gt;(?=\s*\d)# greater than #g; #replace > before a number
+	$text =~ s#&lt;# less than #g;
+	$text =~ s#<# less than #g;
+	$text =~ s#&gt;# greater than #g;
+	$text =~ s#># greater than #g;
 	$text =~ s#^\s*\d+[a-z].\s*##; #remove 2a. (key marks)
 	if($type eq "character"){
 		#my $tcopy = $text;
@@ -6241,7 +6306,7 @@ sub getfirstnwords{
 	return @words;
 }
 
-#extract the segment matching $line from $original, mainly to get original case and parentheses
+#extract the segment matchfing $line from $original, mainly to get original case and parentheses
 #$line: pappi , 20 ï¿œ 40 mm , usually noticeably shorter than corolla .
 #$orginal:... Pappi (white or tawny), 20ï¿œ40mm, usually noticeably shorter than corolla. ...
 #Pollen 70100% 3-porate, mean 25 µm
