@@ -803,6 +803,7 @@ public class CharacterAnnotatorChunked {
 				if (!content.endsWith(")")) {// format it
 					content = content.replaceAll(" +(?=(,|and\\b|or\\b))", ") ") + ")";
 					content = content.replaceAll(" +(?=\\w+\\))", " (");
+					if(!content.startsWith("(")) content="("+content;//added by Hari
 				}
 				establishSubject(content/* , false */);
 			} else if (ck instanceof ChunkSimpleCharacterState) {
@@ -2973,6 +2974,9 @@ public class CharacterAnnotatorChunked {
 		// String[] organs = listofstructures.replaceAll(" (and|or|plus) ",
 		// " , ").split("\\)\\s*,\\s*"); //TODO: flower and leaf blades???
 		String[] organs = listofstructures.replaceAll(",", " , ").split("\\)\\s+(and|or|plus|,)\\s+"); 
+		//Added by Hari
+		for(int i=0;i<organs.length-1;i++)
+			organs[i]=organs[i].trim()+")";
 		// TODO: flower and leaf blades???
 
 		// mohan 28/10/2011. If the first organ is a preposition then join the
