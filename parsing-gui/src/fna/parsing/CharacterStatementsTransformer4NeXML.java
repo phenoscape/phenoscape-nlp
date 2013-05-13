@@ -70,18 +70,27 @@ public class CharacterStatementsTransformer4NeXML extends
 			while(its.hasNext()){
 				Element states = its.next();
 				String statesid = states.getAttributeValue("id");
+				
 				xpathstate.addNamespace("x", root.getNamespaceURI());
 				List<Element> stateels = xpathstate.selectNodes(states);
 				Iterator<Element> it = stateels.iterator();
 				while(it.hasNext()){
 					Element state = it.next();
+					String content;
+					System.out.println(state.getName());
+					System.out.println("state.getAttributeValue(\"id\")"+state.getAttributeValue("id"));
 					String stateid = state.getAttributeValue("id");
-					String content = state.getAttributeValue("label").trim();
+					if(state.getAttributeValue("label")!=null)
+					content = state.getAttributeValue("label").trim();
+					else
+					content ="";
 					content = content.replaceFirst("[,;\\.]+$", ";");
+					//writing the statesid_stateid file contents in description folder
 					write2file(desfolder, fname+"_"+statesid+"_"+stateid+".txt", content);
 				}
 			}
 			//get <character> to put in chafolder
+			
 			xpathchar.addNamespace("x", root.getNamespaceURI());
 			List<Element> chars = xpathchar.selectNodes(root);
 			Iterator<Element> it = chars.iterator();
