@@ -57,7 +57,7 @@ public class XML2EQ {
 	private String glosstable;
 	private int count = 0;
 	// private String keyentity = null;
-	private ArrayList<Hashtable<String, String>> keyentities;
+	private ArrayList<Entity> keyentities;
 	//private String keyentitylocator = null;
 	private ArrayList<EQStatement> allEQs = null;
 	private HashSet<String> stateids = new HashSet<String>();
@@ -74,7 +74,7 @@ public class XML2EQ {
 
 
 
-	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("database.name"));
+	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
 	private Dictionary dictionary = new Dictionary();
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
@@ -158,7 +158,7 @@ public class XML2EQ {
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
-					ArrayList<Entity> keyentities = csp.getKeyEntities();
+					keyentities = csp.getKeyEntities();
 					String qualityclue = csp.getQualityClue();
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
@@ -768,8 +768,10 @@ public class XML2EQ {
 	 * @return true if the entitylabel matches one of the key entities.
 	 */
 	private boolean matchWithKeyEntities(String entitylabel) {
-		for(Hashtable<String, String> keyentity: this.keyentities){
-			String label = keyentity.get("entitylabel");
+		for(Entity keyentity: this.keyentities){
+			String label = null;
+			if(keyentity instanceof SimpleEntity) label = ((SimpleEntity)keyentity).getLabel();
+			if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getPrimaryEntity().getLabel();
 			if(label !=null && label.compareTo(entitylabel)==0) return true;
 		}		
 		return false;
@@ -808,7 +810,9 @@ public class XML2EQ {
 					 if(E instanceof SimpleEntity) e = ((SimpleEntity)E).getLabel();
 					 else e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
 					 
-					 String q = aEQ.getQuality().getLabel();
+					 String q = aEQ.getQuality()!=null?aEQ.getQuality().getLabel():""; //ternary operator added => Hariharan
+					 if(q==null) q="";
+					 
 					 if(e.length()>0) hasentity = true; 
 					 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true;
 					 if(q.length()>0) hasquality = true;
@@ -939,14 +943,16 @@ public class XML2EQ {
 	//if not akeyentity and not key element, may need to constructure new entity and/or inherit entity locators from keyentities.
 	/**
 	 * 
-	 * @param EQ
+	 * @param EQ: to be updated with an entity locator
 	 * @param entitylabel
 	 */
-	private void inheritEntityLocator(Hashtable<String, String>EQ, String entity){
-		String elid = EQ.get("entitylocatorid");
-		for(Hashtable<String, String> keyentity: this.keyentities){
-			String keyentityphrase = keyentity.get("entity");
-			if(keyentityphrase!=null && keyentityphrase.compareTo(entity)==0){
+	private void inheritEntityLocator(EQStatement EQ, String entity){
+		
+		
+	/*	String elid = EQ.get("entitylocatorid");
+		for(Entity keyentity: this.keyentities){
+			String keyentityphrase = keyentity.getPrimaryEntityString();
+			if(keyentityphrase!=null && keyentityphrase.compareTo(entity)==0){ //if entityphrase and keyentityphrase are the same, inherit the entity locator
 				String entitylocator = keyentity.get("entitylocator");
 				String entitylocatorid = keyentity.get("entitylocatorid");
 				String entitylocatorlabel = keyentity.get("entitylocatorlabel");
@@ -960,7 +966,7 @@ public class XML2EQ {
 					EQ.put("entitylocatorlabel", EQ.get("entitylocatorlabel")+","+entitylocatorlabel==null? "":entitylocatorlabel);
 				}
 			}
-		}
+		}*/
 	}
 	
 
@@ -968,7 +974,7 @@ public class XML2EQ {
 	 * if resultsfromrelations.get("entitylocator")!=null
 	 * @param resultsfromrelations
 	 */
-	private void addentitylocator4keyentities(
+/*	private void addentitylocator4keyentities(
 			Hashtable<String, Object> resultsfromrelations, String entitylabel) {
 		if(resultsfromrelations != null && entitylabel !=null){
 			String entitylocator = (String)resultsfromrelations.get("entitylocator");
@@ -987,7 +993,7 @@ public class XML2EQ {
 				}
 			}
 		}		
-	}
+	}*/
 
 	/**
 	 * find the <statement> parent of the struct from the root
@@ -1012,7 +1018,7 @@ public class XML2EQ {
 	public static void main(String[] args) {
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/test";
-		String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/final";
+		String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/final";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/test";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";

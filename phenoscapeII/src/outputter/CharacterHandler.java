@@ -42,7 +42,7 @@ public class CharacterHandler {
 	 * 
 	 * @param root
 	 * @param chara
-	 * @return two-key hashtable: quality|qualitymodifier, elements are IDs separated by ';'
+	 * @return
 	 */
 	public void handle(){
 		parseEntity();
@@ -101,6 +101,7 @@ public class CharacterHandler {
 		Quality result = (Quality)TermSearcher.searchTerm(quality, "quality", 0);
 		if(result!=null){
 			if(negated){
+				/*TODO use parent classes Jim use for parent classes*/
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
 				Quality parentquality = new Quality();
 				parentquality.setString(parentinfo[1]);

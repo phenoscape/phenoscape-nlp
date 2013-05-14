@@ -37,6 +37,7 @@ public class RelationHandler {
 		this.fromstructname = structname;
 		this.fromstructid = structid;
 		this.fromcharacterstatement = keyelement;
+		this.otherEQs = new ArrayList<EQStatement>();
 	}
 	
 	/**
@@ -90,7 +91,7 @@ public class RelationHandler {
 					REntity rentity = new REntity(rel, entity);
 					//update this.entity with the composite entity
 					CompositeEntity centity = new CompositeEntity();
-					centity.addEntity(entity);
+					centity.addEntity(this.entity);
 					centity.addEntity(rentity);
 					this.entity = centity;					
 				}

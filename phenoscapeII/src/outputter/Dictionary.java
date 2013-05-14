@@ -14,7 +14,7 @@ import edu.mit.jwi.IDictionary;
 public class Dictionary {
 	public static Connection conn;
 	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim
-	public String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
+	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";

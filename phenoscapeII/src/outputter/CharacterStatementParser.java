@@ -62,7 +62,7 @@ public class CharacterStatementParser extends Parser {
 	 */
 	@Override
 	public void parse(Element statement, Element root) {
-		parseForEntities(statement, root);
+		parseForEntities(statement, root, true);
 		parseForQualityClue(statement);
 	}
 	
@@ -71,9 +71,13 @@ public class CharacterStatementParser extends Parser {
 		this.qualityClue = "";		
 	}
 
+	/**
 
-	public void parseForEntities(Element statement, Element root){
-		EntityParser ep = new EntityParser(statement, root);
+	 * @param statement
+	 * @param root
+	 */
+	public void parseForEntities(Element statement, Element root, boolean fromcharacterdescription){
+		EntityParser ep = new EntityParser(statement, root, fromcharacterdescription);
 		entities = ep.getEntities();
 		keyentities = ep.getEntities();
 	}

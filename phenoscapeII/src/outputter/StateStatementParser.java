@@ -110,8 +110,11 @@ public class StateStatementParser extends Parser {
 					eq.setCharacterId(this.characterid);
 					eq.setStateId(this.stateid);
 					eq.setDescription(text);
+					if(this instanceof StateStatementParser) eq.setType("state");
+					else eq.setType("character");
 					this.EQStatements.add(eq);
 				}
+				if(rh.otherEQs.size()>0)
 				this.EQStatements.addAll(rh.otherEQs);
 			}
 		} catch (JDOMException e) {
@@ -123,7 +126,7 @@ public class StateStatementParser extends Parser {
 		try {
 			characters = pathCharacter.selectNodes(statement);
 			for(Element character: characters){
-				 CharacterHandler ch = new CharacterHandler(character, root, ontoutil); //may contain relational quality
+				 CharacterHandler ch = new CharacterHandler(root, character, ontoutil); //may contain relational quality
 				 ch.handle();
 				 ArrayList<Quality> qualities = ch.getQualities();
 				 ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -145,6 +148,9 @@ public class StateStatementParser extends Parser {
 						 eq.setSource(this.src);
 						 eq.setCharacterId(this.characterid);
 						 eq.setStateId(this.stateid);
+						 eq.setDescription(text);
+						 if(this instanceof StateStatementParser) eq.setType("state");
+						 else eq.setType("character");
 						 this.EQStatements.add(eq);						 
 					 }
 				 }

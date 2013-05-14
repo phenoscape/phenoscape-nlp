@@ -31,7 +31,7 @@ public class TermOutputerUtilities {
 	private static String ontologyfolder = ApplicationUtilities.getProperty("ontology.dir");
 	private static String[] entityontologies;
 	private static String[] qualityontologies;
-	private String database;
+	//private String database;
 
 	public static boolean debug = false;
 	
@@ -47,13 +47,6 @@ public class TermOutputerUtilities {
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};
-	}
-	
-	
-	public TermOutputerUtilities(String ontologyfolder, String database){
-		TermOutputerUtilities.ontologyfolder = ontologyfolder;
-		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
-		this.database = database;
 		
 		//for each entity ontology
 		for(String onto: entityontologies){
@@ -61,37 +54,47 @@ public class TermOutputerUtilities {
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
-			}else if(onto.endsWith(".obo")){
+			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format
 				int i = onto.lastIndexOf("/");
 				int j = onto.lastIndexOf("\\");
 				i = i>j? i:j;
 				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
 				OBO2DB o2d = new OBO2DB(database, onto ,ontoname);
 				OBOentityOntoAPIs.add(o2d);
-			}
+			}*/
 		}
 		
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), excluded);
 				OWLqualityOntoAPIs.add(api);
-			}else if(onto.endsWith(".obo")){
+			}/*else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
 				int j = onto.lastIndexOf("\\");
 				i = i>j? i:j;
 				String ontoname = onto.substring(i+1).replaceFirst("\\.obo", "");
 				OBO2DB o2d = new OBO2DB(database, onto ,ontoname);
 				OBOqualityOntoAPIs.add(o2d);
-			}
+			}*/
 		}
+		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
+	}
+	
+	
+	/**
+	 * constructor may be needed if we need to exclude different parts of ontology.
+	 * @param ontologyfolder
+	 */
+	public TermOutputerUtilities(/*String ontologyfolder, String database*/){
+
 	}
 
 	/**
-	 * 
+	 * search up the is_a path until one of the parent class is identified. 
 	 * @param classlabel
 	 * @return an array with two element: ids and labels of the parents
 	 */
-	public String[] retreiveParentInfoFromPATO (String classid){
+	/*public String[] retreiveParentInfoFromPATO (String classid){
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -115,8 +118,43 @@ public class TermOutputerUtilities {
 			}
 		}		
 		return result;
+	}*/
+	
+	public static String[] retreiveParentInfoFromPATO (String classid){
+		//find OWL PATO
+		OWLAccessorImpl pato = null;
+		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
+			if(api.getSource().indexOf("pato")>=0){
+				pato = api;
+				break;
+			}
+		}
+		//find parent
+		
+		if(pato!=null){
+			String [] result = {"",""}; 
+			return findTargetParent(pato, classid, result);
+		}		
+		return null;
 	}
 	
+	private static String[] findTargetParent(OWLAccessorImpl pato, String classid, String[] result){
+		OWLClass c = pato.getClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
+		if(c!=null){
+			 if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
+				 result[0] = pato.getID(c);
+				 result[1] = pato.getLabel(c);
+				 return result;
+			}else{
+				List<OWLClass> pcs = pato.getParents(c);
+				for(OWLClass pc: pcs){
+					return findTargetParent(pato, pato.getID(pc), result);
+				}
+			}
+		}
+		//if landed here, need to update Dictionary.patoupperclasses
+		return null; 
+	}
 
 	/**
 	 * merged to  searchOntologies(String term, String type, String ingroup)
@@ -261,6 +299,7 @@ public class TermOutputerUtilities {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
+		
 		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
 			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
@@ -560,8 +599,8 @@ public class TermOutputerUtilities {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		String[] results = retreiveParentInfoFromPATO("PATO:0000402");
+		System.out.println(results[1]);
 	}
 
 

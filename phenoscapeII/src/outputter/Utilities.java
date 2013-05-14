@@ -27,15 +27,15 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public static boolean isToStructureInRelation(String sid, Element root) {
+	public static Element  relationWithStructureAsSubject(String sid, Element root) {
 		try{
-			XPath tostructure = XPath.newInstance(".//relation[@to='"+sid+"']");
+			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");
 			Element rel = (Element)tostructure.selectSingleNode(root);
-			if(rel == null) return false;
+			if(rel != null) return rel;
 		}catch(Exception e){
 			e.printStackTrace();
 		}		
-		return true;
+		return null;
 	}
 	
 	/**
