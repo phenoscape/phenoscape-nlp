@@ -58,7 +58,7 @@ public class CharacterHandler {
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"", 0);				
+			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");				
 		}		
 	}
 	
@@ -98,7 +98,7 @@ public class CharacterHandler {
 		}
 		
 		//not a relational quality, is this a simple quality or a negated quality?
-		Quality result = (Quality)TermSearcher.searchTerm(quality, "quality", 0);
+		Quality result = (Quality) new TermSearcher().searchTerm(quality, "quality");
 		if(result!=null){
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
@@ -134,7 +134,7 @@ public class CharacterHandler {
 					String qualitymodifier = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
 					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
-					Entity result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"", 0);	
+					Entity result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
 					if(result!=null) entities.add(result);
 				}
 				return entities;

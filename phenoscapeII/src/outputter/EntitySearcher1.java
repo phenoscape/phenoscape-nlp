@@ -4,6 +4,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.jdom.Element;
@@ -26,7 +27,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	@Override
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//case of bone of humerus: join entity and entity locator
 		String[] entitylocators = null;
 		if(elocatorphrase.length()>0) entitylocators = elocatorphrase.split("\\s*,\\s*");
@@ -49,13 +50,13 @@ public class EntitySearcher1 extends EntitySearcher {
 				}
 			}
 			if(goodphrase){//perfect match for a pre-composed term
-				SimpleEntity entity = (SimpleEntity)TermSearcher.searchTerm(phrase, "entity", ingroup);
+				SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(phrase, "entity");
 				if(entity!=null){	
 					return entity;
 				}
 			}			
 		}
-		return new EntitySearcher2().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher2().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
 	

@@ -23,7 +23,7 @@ public class EntityParser {
 						Element relation = Utilities.relationWithStructureAsSubject(sid, root);
 						if(relation==null){//the structure is not related to others, form a simple entity
 							String sname = Utilities.getStructureName(root, sid);
-							Entity entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "", 0);
+							Entity entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 							//keyentities.add(entity);//TODO try harder to find a match for the key entity
 							if(entity!=null){
 								entities.add(entity);

@@ -89,7 +89,7 @@ public class KeyEntityFinder {
 						*/
 						
 						//Below changes by Hari
-						Entity result = es.searchEntity(root, sid, sname, "", sname, "", 0);
+						Entity result = es.searchEntity(root, sid, sname, "", sname, "");
 						if(result!=null)
 						{
 						if(result instanceof SimpleEntity)

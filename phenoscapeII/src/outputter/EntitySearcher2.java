@@ -29,7 +29,7 @@ public class EntitySearcher2 extends EntitySearcher {
 	@Override
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
 		
 		//search entity and entity locator separately
@@ -40,14 +40,14 @@ public class EntitySearcher2 extends EntitySearcher {
 		SimpleEntity entityl = new SimpleEntity();
 		entityl.setString(elocatorphrase);
 		if(entitylocators!=null) {
-			SimpleEntity result = (SimpleEntity)TermSearcher.searchTerm(elocatorphrase, "entity", ingroup);
+			SimpleEntity result = (SimpleEntity) new TermSearcher().searchTerm(elocatorphrase, "entity");
 			if(result!=null){
 				entityl = result;
 			}else{ //entity locator not matched
 				//TODO
 			}
 		}
-		SimpleEntity sentity = (SimpleEntity)TermSearcher.searchTerm(entityphrase, "entity", ingroup);
+		SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 		if(sentity!=null){//if entity matches
 			//entity
 			if(entityl.getString().length()>0){
@@ -67,7 +67,7 @@ public class EntitySearcher2 extends EntitySearcher {
 				return sentity;
 			}
 		}
-		return new EntitySearcher3().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher3().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
 }

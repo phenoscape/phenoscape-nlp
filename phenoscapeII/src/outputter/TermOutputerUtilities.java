@@ -226,14 +226,13 @@ public class TermOutputerUtilities {
 	 * @param subgroup: inRelationalSlim
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, int subgroup) {
+	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, ArrayList<Hashtable<String, String>> results) {
 		//search quality or entity ontologies, depending on the type
-		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
 		
 		//quality
 		if(type.compareTo("quality")==0){
 			for(OWLAccessorImpl api: OWLqualityOntoAPIs){
-				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type);
 				if(result!=null){
 					results.add(result);
 				}
@@ -252,7 +251,7 @@ public class TermOutputerUtilities {
 		//entity
 		if(type.compareTo("entity")==0){
 			for(OWLAccessorImpl api: OWLentityOntoAPIs){
-				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type);
 				if(result!=null){
 					results.add(result);
 				}
@@ -296,10 +295,10 @@ public class TermOutputerUtilities {
 	 * @param term
 	 * @param owlapi
 	 * @param type
-	 * @param subgroup ?? 
+	 * @param slim ?? 
 	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
-	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) {
+	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be

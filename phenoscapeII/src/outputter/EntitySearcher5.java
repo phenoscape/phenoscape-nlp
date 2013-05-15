@@ -15,7 +15,7 @@ public class EntitySearcher5 extends EntitySearcher {
 	@Override
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
@@ -25,7 +25,7 @@ public class EntitySearcher5 extends EntitySearcher {
 		//search with regular expression  "epibranchial .*" to find possible missing headnouns 
 		if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
-			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity", ingroup);
+			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
 			if(regexpresults!=null){
 				for(FormalConcept regexpresult: regexpresults){
 					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId());
@@ -42,7 +42,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				return sentity;
 			}
 		}
-		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			
 	}
 

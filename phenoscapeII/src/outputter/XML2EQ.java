@@ -653,7 +653,7 @@ public class XML2EQ {
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
 						//TODO consider negation
-						Quality q = (Quality) TermSearcher.searchTerm(ngram, "quality", 0); 
+						Quality q = (Quality) new TermSearcher().searchTerm(ngram, "quality"); 
 						if(q!=null){
 							String qlabel = q.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);

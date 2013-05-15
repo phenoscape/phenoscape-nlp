@@ -24,7 +24,7 @@ public class EntitySearcher3 extends EntitySearcher {
 	@Override
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//re-arranging word in entity, first search for entity locator
 		
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
@@ -41,7 +41,7 @@ public class EntitySearcher3 extends EntitySearcher {
 			entityl.setId(adjIDlabel.substring(0, adjIDlabel.indexOf("#")));
 			entityl.setConfidenceScore((float)1);
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " ");
-			SimpleEntity sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
+			SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
 			if(sentity!=null){
 				//relation & entity locator
 				FormalRelation rel = new FormalRelation();
@@ -57,7 +57,7 @@ public class EntitySearcher3 extends EntitySearcher {
 				return centity;	
 			}		
 		}
-		return new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
 	/**
