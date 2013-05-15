@@ -26,7 +26,8 @@ public class WordNet {
 			Hashtable<String,Integer> synonyms = new Hashtable<String,Integer>();
 			ISenseEntry senseEntry;
 			WordnetStemmer stemmer = new WordnetStemmer(Dictionary.wordnetdict);
-			
+			if(word.length()>0)
+			{
 			for(edu.mit.jwi.item.POS pos : edu.mit.jwi.item.POS.values()) {
 				
 				List<String> stems = stemmer.findStems(word, pos);
@@ -52,7 +53,7 @@ public class WordNet {
 					}
 				}
 			}	
-			
+			}
 			return synonyms;
 		}
 

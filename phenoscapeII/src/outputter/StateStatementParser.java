@@ -113,6 +113,7 @@ public class StateStatementParser extends Parser {
 					if(this instanceof StateStatementParser) eq.setType("state");
 					else eq.setType("character");
 					this.EQStatements.add(eq);
+					eq=new EQStatement();
 				}
 				if(rh.otherEQs.size()>0)
 				this.EQStatements.addAll(rh.otherEQs);

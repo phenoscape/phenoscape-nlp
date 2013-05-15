@@ -71,7 +71,7 @@ public class KeyEntityFinder {
 					String sid = structure.getAttributeValue("id");
 					if(!isToStructureInRelation(sid, root)){//to-structure involved in a relation are not considered a key
 						String sname = Utilities.getStructureName(root, sid);
-						Hashtable<String, String> result = es.searchEntity(root, sid, sname, "", sname, "", 0);
+						/*Hashtable<String, String> result = es.searchEntity(root, sid, sname, "", sname, "", 0);
 						keyentity.put("entity", sname);//TODO try harder to find a match for the key entity
 						if(result!=null){
 							structure.setAttribute("ontoid", result.get("entityid"));
@@ -83,6 +83,37 @@ public class KeyEntityFinder {
 						}
 						keyentities.add(keyentity);
 						keys.add(structure);
+						
+						Old copy of code
+						*
+						*/
+						
+						//Below changes by Hari
+						Entity result = es.searchEntity(root, sid, sname, "", sname, "", 0);
+						if(result!=null)
+						{
+						if(result instanceof SimpleEntity)
+						{	
+						keyentity.put("entity", sname);//TODO try harder to find a match for the key entity
+							structure.setAttribute("ontoid", ((SimpleEntity) result).getId());
+							keyentity.put("entityid", ((SimpleEntity) result).getId());
+							keyentity.put("entitylabel", ((SimpleEntity) result).getLabel());
+//							keyentity.put("entitylocator", result.get("entitylocator")); //entity locator info is optional
+//							keyentity.put("entitylocatorid", result.get("entitylocatorid"));
+//							keyentity.put("entitylocatorlabel", result.get("entitylocatorlabel"));
+						
+						}
+						else if(result instanceof CompositeEntity)
+						{
+							keyentity.put("entity", sname);//TODO try harder to find a match for the key entity
+							structure.setAttribute("ontoid", ((CompositeEntity) result).getPrimaryEntity().getId());
+							keyentity.put("entityid", ((CompositeEntity) result).getPrimaryEntity().getId());
+							keyentity.put("entitylabel", ((CompositeEntity) result).getPrimaryEntity().getLabel());
+						}
+						else {}
+						keyentities.add(keyentity);
+						keys.add(structure);
+						}						
 					}					
 				}				
 			}catch(Exception ex){

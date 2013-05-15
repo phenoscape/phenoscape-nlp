@@ -52,7 +52,11 @@ public class EntitySearcher6 extends EntitySearcher {
 				}
 			}			
 		}
-		return null;
+		//If not found in Ontology, then return the phrase as simpleentity string
+		SimpleEntity sentity = new SimpleEntity();
+		sentity.setString(entityphrase);
+		sentity.confidenceScore=(float) 1.0;
+		return sentity;
 	}
 
 

@@ -99,7 +99,7 @@ public class EQStatement {
 		StringBuffer sb = new StringBuffer();
 		sb.append("text:"+this.description+System.getProperty("line.separator"));
 		sb.append("Entity:"+ entity.toString()+System.getProperty("line.separator"));
-		sb.append("Quality:"+quality.toString()+System.getProperty("line.separator"));
+		sb.append("Quality:"+(quality!=null?quality.toString():"")+System.getProperty("line.separator"));//Ternary operator to check quality null values => Hariharan
 		return sb.toString();
 		
 	}

@@ -72,7 +72,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 * @param root
 	 */
 	private void parseStandaloneStructures(Element statement, Element root) {
-		EntityParser ep = new EntityParser(statement, root);
+		EntityParser ep = new EntityParser(statement, root, true);
 		ArrayList<Entity> entities = ep.getEntities();
 		for(Entity entity: entities){
 			EQStatement eq = new EQStatement();
@@ -81,6 +81,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			eq.setCharacterId(super.characterid);
 			eq.setStateId(super.stateid);
 			eq.setDescription(super.text);
+			eq.setType("character");
 			this.EQStatements.add(eq);
 		}		
 	}
@@ -93,6 +94,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		eq1.setSource(eq.getSource());
 		eq1.setStateId(eq.getStateId()); //TODO: change it for states
 		eq1.setDescription(eq.getDescription());
+		eq1.setType(eq.getType());
 		return eq1;
 	}
 	

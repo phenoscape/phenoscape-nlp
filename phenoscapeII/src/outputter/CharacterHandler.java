@@ -115,7 +115,11 @@ public class CharacterHandler {
 				return;
 			}
 		}else{
-			//TODO
+			result=new Quality();
+			result.string=quality;
+			result.confidenceScore=(float) 1.0;
+			this.qualities.add(result);
+			return;
 		}
 	}
 	

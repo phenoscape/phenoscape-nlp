@@ -164,6 +164,7 @@ public class XML2EQ {
 					for(Element statestatement: statestatements){
 						ssp.parse(statestatement, root);
 						allEQs.addAll(ssp.getEQStatements());
+						ssp.EQStatements.clear();
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}
@@ -807,14 +808,32 @@ public class XML2EQ {
 				 for(EQStatement aEQ: EQs){
 					 Entity E = aEQ.getEntity();
 					 String e = null;
-					 if(E instanceof SimpleEntity) e = ((SimpleEntity)E).getLabel();
-					 else e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+					 hasentity = false;
+					 hasquality = false;
+					 haskeyentity = false;
+					 if(E instanceof SimpleEntity)
+					 {
+						 e = ((SimpleEntity)E).getLabel();
+						 if(((SimpleEntity)E).isOntologized()==true)
+						 {
+							 if(e.length()>0) hasentity = true; 
+							 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+						 }
+					 }
+					 else
+					{
+						 e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+						 if(((CompositeEntity)E).isOntologized()==true)
+						 {
+							 if(e.length()>0) hasentity = true; 
+							 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+						 }
+					}
 					 
 					 String q = aEQ.getQuality()!=null?aEQ.getQuality().getLabel():""; //ternary operator added => Hariharan
 					 if(q==null) q="";
 					 
-					 if(e.length()>0) hasentity = true; 
-					 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true;
+					
 					 if(q.length()>0) hasquality = true;
 					 if(haskeyentity && hasquality) completestateeqs.add(aEQ);
 				 }				 
@@ -1018,7 +1037,7 @@ public class XML2EQ {
 	public static void main(String[] args) {
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/test";
-		String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/final";
+		String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/test";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/test";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";

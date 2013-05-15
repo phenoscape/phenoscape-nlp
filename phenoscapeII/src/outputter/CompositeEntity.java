@@ -22,10 +22,11 @@ public class CompositeEntity extends Entity {
 	 */
 	public CompositeEntity() {
 		// TODO Auto-generated constructor stub
+		entities = new ArrayList<Entity>();
 	}
 
 	public SimpleEntity getPrimaryEntity(){
-		return entity;
+		return (SimpleEntity) entities.get(0);
 	}
 	/**
 	 * 
@@ -53,6 +54,9 @@ public class CompositeEntity extends Entity {
 			sb.append(e.toString()+" and ");
 		}
 		return sb.toString().trim();
+	}
+	public boolean isOntologized() {
+		return this.getPrimaryEntity().id != null;
 	}
 	/**
 	 * @param args
