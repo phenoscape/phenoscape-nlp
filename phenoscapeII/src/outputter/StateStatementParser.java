@@ -120,9 +120,10 @@ public class StateStatementParser extends Parser {
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
+			System.out.println("");
 		} 
 				
-		//then parse characters
+		///then parse characters
 		List<Element> characters;
 		try {
 			characters = pathCharacter.selectNodes(statement);
