@@ -29,7 +29,7 @@ public class StateStatementParser extends Parser {
 	String characterid;
 	String stateid;
 	String text;
-	String qualityclue;
+	ArrayList<String> qualityclue;
 	ArrayList<Entity> keyentities;
 	
 	static XPath pathText2;
@@ -51,7 +51,7 @@ public class StateStatementParser extends Parser {
 	/**
 	 * 
 	 */
-	public StateStatementParser(TermOutputerUtilities ontoutil, ArrayList<Entity> keyentities, String qualityclue) {
+	public StateStatementParser(TermOutputerUtilities ontoutil, ArrayList<Entity> keyentities, ArrayList<String> qualityclue) {
 		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;

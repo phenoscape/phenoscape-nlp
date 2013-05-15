@@ -83,6 +83,7 @@ public class XML2EQ {
 	//private KeyEntityFinder kef = new  KeyEntityFinder(es);
 	
 	public static final int RELATIONAL_SLIM=1;
+	public static final int ATTRIBUTE_SLIM=2;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
@@ -159,7 +160,7 @@ public class XML2EQ {
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();
-					String qualityclue = csp.getQualityClue();
+					ArrayList<String> qualityclue = csp.getQualityClue();
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
 						ssp.parse(statestatement, root);
@@ -1036,8 +1037,8 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
-		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/test";
-		String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/test";
+		String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/test";
+		//String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/test";
 		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/test";
 		String database = "biocreative2012";
 		// String outputtable = "biocreative_nexml2eq";

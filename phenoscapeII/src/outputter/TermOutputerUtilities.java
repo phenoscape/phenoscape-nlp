@@ -34,6 +34,7 @@ public class TermOutputerUtilities {
 	//private String database;
 
 	public static boolean debug = false;
+	public static String attributes = "";
 	
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
@@ -64,9 +65,12 @@ public class TermOutputerUtilities {
 			}*/
 		}
 		
+		//for each entity ontology
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), excluded);
+				attributes += "|"+api.getLowerCaseAttributeSlimStringPattern();
+				attributes = attributes.replaceAll("(^\\||\\|$)", "");
 				OWLqualityOntoAPIs.add(api);
 			}/*else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");

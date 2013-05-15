@@ -6,8 +6,11 @@ package outputter;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 
 /**
@@ -18,7 +21,15 @@ import org.jdom.xpath.XPath;
 public class CharacterStatementParser extends Parser {
 	ArrayList<Entity> entities = new ArrayList<Entity>();
 	ArrayList<Entity> keyentities = new ArrayList<Entity>();
-	String qualityClue;
+	ArrayList<String> qualityClue;
+	static XPath pathstructure;
+	static{
+		try{
+			pathstructure = XPath.newInstance(".//structure");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * 
@@ -62,13 +73,61 @@ public class CharacterStatementParser extends Parser {
 	 */
 	@Override
 	public void parse(Element statement, Element root) {
+		parseForQualityClue(statement); //this may remove quality elements from statement
 		parseForEntities(statement, root, true);
-		parseForQualityClue(statement);
 	}
 	
+	/**
+	 * turn a statement from 
+	 * <statement statement_type="character" character_id="states694" seg_id="0">
+      <text>Shape of pineal series</text>
+      <structure id="o2558" name="shape" />
+      <structure id="o2559" name="series" constraint="pineal" />
+      <relation id="r454" name="part_of" from="o2558" to="o2559" negation="false" />
+    </statement>
+    
+    to 
+    
+    <statement statement_type="character" character_id="states694" seg_id="0">
+      <text>Shape of pineal series</text>
+      <structure id="o2559" name="series" constraint="pineal" />
+    </statement>
+    
+    and grab "shape" as the qualityclue
+	 * @param statement
+	 */
+	@SuppressWarnings("unchecked")
 	private void parseForQualityClue(Element statement) {
-		// TODO 
-		this.qualityClue = "";		
+		//find <structure>s named with an attribute
+		List<Element> structures;
+		try {
+			structures = pathstructure.selectNodes(statement);
+			for(Element structure: structures){
+				String name = structure.getAttributeValue("name");
+				if(name.matches("("+ontoutil.attributes+")")){
+					//remove the <structure> and related relations
+					structure.detach();
+					String id = structure.getAttributeValue("id");
+					List<Element> relations = XPath.selectNodes(statement, ".//relation[@from='"+id+"']|.//relation[@to='"+id+"'] "); //shape of, in shape
+					for(Element relation: relations){
+						relation.detach();
+					}
+				}
+			}
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+		
+		//record qualityclue which may or may not be marked as a structure
+		String text = statement.getChildText("text").toLowerCase();
+		Pattern p = Pattern.compile(".*?\\b("+ontoutil.attributes+")\\b(.*)");
+		Matcher m = p.matcher(text);
+		//could there be multiple attributes?
+		while(m.matches()){
+			if(this.qualityClue==null) this.qualityClue = new ArrayList<String> ();
+			this.qualityClue.add(m.group(1));
+			m = p.matcher(m.group(2));
+		}
 	}
 
 	/**
@@ -82,7 +141,7 @@ public class CharacterStatementParser extends Parser {
 		keyentities = ep.getEntities();
 	}
 	
-	public String getQualityClue(){
+	public ArrayList<String> getQualityClue(){
 		return this.qualityClue;
 	}
 
