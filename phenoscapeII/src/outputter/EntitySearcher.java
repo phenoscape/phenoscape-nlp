@@ -15,6 +15,7 @@ import org.jdom.xpath.XPath;
 public abstract class EntitySearcher {
 	protected static XPath textpath;
 	static{
+		
 		try{
 			textpath = XPath.newInstance(".//text");
 		}catch(Exception e){
