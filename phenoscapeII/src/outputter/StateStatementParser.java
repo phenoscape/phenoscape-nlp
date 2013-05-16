@@ -68,6 +68,7 @@ public class StateStatementParser extends Parser {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void parse(Element statement, Element root) {
+		ArrayList<String> StructuredQualities = new ArrayList<String>();
 		this.src = root.getAttributeValue(ApplicationUtilities.getProperty("source.attribute.name"));
 		this.characterid = statement.getAttributeValue("character_id");
 		this.stateid = statement.getAttribute("state_id") == null ? "" : statement.getAttributeValue("state_id");
@@ -83,6 +84,18 @@ public class StateStatementParser extends Parser {
 		try {
 			relations = pathRelation.selectNodes(statement);
 			for(Element relation : relations){
+				int flag=1;
+			/*	for(String struct:StructuredQualities)
+					if((relation.getAttributeValue("from").equals(struct))||(relation.getAttributeValue("to").equals(struct)))
+					{
+						//relation.detach();
+						flag=0;
+						break;
+					}
+					else
+						flag=1;*/
+				if(flag==1)
+				{
 				String fromid = relation.getAttributeValue("from");
 				String toid = relation.getAttributeValue("to");
 				String relname = relation.getAttributeValue("name").trim();
@@ -92,9 +105,37 @@ public class StateStatementParser extends Parser {
 
 				RelationHandler rh = new RelationHandler(root, relname, toname, toid, fromname, fromid, neg, false);
 				rh.handle();
+			
 				EQStatement eq = new EQStatement();
 				ArrayList<Entity> entities = new ArrayList<Entity>();
+				
 				Entity e = rh.getEntity();
+				List<Quality> q = new ArrayList<Quality>();
+				q.add(rh.getQuality());
+				//Changes starting => Hariharan
+			//checking if entity is really an entity or it is a quality
+				
+					if(e.getPrimaryEntityLabel()==null)
+					{
+//					Check whether the "to" and "from" names are qualities,
+//						if any are quality then detach the relation, identify the quality, entities are keyentities produce EQ with that.
+//						else, if quality is not present, then dont allow EQ to be formed
+					RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root, relname, toname, toid, fromname, fromid, neg, false,statement,this.keyentities);
+					rq.handle();
+					StructuredQualities.addAll(rq.identifiedqualities);
+	
+					if(rq.qualities.size()>0)
+					{
+					e=null;
+					q.clear();
+					q.addAll(rq.qualities);
+				//	relation.detach();
+					}
+				
+				}
+//Changes Ending => Hariharan	Include flag below	to make sure , to include EQ's only when qualities exist.		
+				if(q.size()>0)
+				{
 				if(e!=null && this.keyentities!=null){
 					entities = resolve(e, this.keyentities); 
 				}else if(this.keyentities!=null){
@@ -103,9 +144,21 @@ public class StateStatementParser extends Parser {
 					continue;
 				}
 				
-				for(Entity entity: entities){
+					for(Quality quality:q)
+						for(Entity entity: entities)
+					{
+							
 					eq.setEntity(entity);
-					eq.setQuality(rh.getQuality());
+					
+					if(quality instanceof RelationalQuality)
+					{
+					eq.setQuality(((RelationalQuality) quality).getQuality());
+					if(entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity.getPrimaryEntityLabel())
+					continue;
+					}
+					else
+					eq.setQuality(quality);
+					
 					eq.setSource(this.src);
 					eq.setCharacterId(this.characterid);
 					eq.setStateId(this.stateid);
@@ -117,6 +170,9 @@ public class StateStatementParser extends Parser {
 				}
 				if(rh.otherEQs.size()>0)
 				this.EQStatements.addAll(rh.otherEQs);
+				}
+				
+			}
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();

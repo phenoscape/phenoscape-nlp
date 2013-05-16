@@ -735,15 +735,18 @@ public class XML2EQ {
 		ArrayList<String> path1 = new ArrayList<String> ();
 		ArrayList<String> path2 = new ArrayList<String> ();
 		String parent = qlabel1;
+		String temp[];
 		while(parent.compareTo("quality")!=0){
-			parent = ontoutil.retreiveParentInfoFromPATO(parent)[1];
-			if(parent.length()==0) break;
+			temp=ontoutil.retreiveParentInfoFromPATO(parent);
+			parent = temp!=null?temp[1]:null;
+			if((parent==null)||(parent.length()==0)) break;
 			path1.add(parent);
 		}
 		parent = qlabel2;
 		while(parent.compareTo("quality")!=0){
-			parent = ontoutil.retreiveParentInfoFromPATO(parent)[1];
-			if(parent.length()==0) break;
+			temp=ontoutil.retreiveParentInfoFromPATO(parent);
+			parent = temp!=null?temp[1]:null;
+			if((parent==null)||(parent.length()==0)) break;
 			path2.add(parent);
 		}
 		if(path1.size()==0 || path2.size()==0) return null;

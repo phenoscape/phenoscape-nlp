@@ -15,6 +15,7 @@ public class PermittedRelations {
 		//TODO: handle negated relations
 		
 		Quality relationalquality = new Quality();
+		relation = Utilities.removeprepositions(relation);
 		/*
 		 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
 		 * Transform the result from CharaParser which is of the form:
@@ -35,15 +36,15 @@ public class PermittedRelations {
 		if(Dictionary.relationalqualities.containsKey(relation))
 		{
 			relationalquality.setString(relation);
-			relationalquality.setId(Dictionary.relationalqualities.get(relation));
-			relationalquality.setLabel(Dictionary.resrelationQ.get(Dictionary.relationalqualities.get(relation)));
+			relationalquality.setId(retrieve_id(relation));
+			relationalquality.setLabel(relation);
 			relationalquality.setConfidenceScore((float)1.0);
 			return relationalquality;
 		}
 		//if failed in above steps then it uses wordnet to find the different synonyms of the relation string
 		Hashtable<String, Integer> forms = getdifferentrelationalforms(relation);
 		//of the identified relations, it finds the best equivalent relation else it returns null
-		if(forms!=null)
+		if((forms.size()!=0))
 		{
 			
 			relation_ID=getbestrelation(forms,relation);
@@ -51,7 +52,7 @@ public class PermittedRelations {
 			{
 				relationalquality.setString(relation);
 				relationalquality.setId(relation_ID);
-				relationalquality.setLabel(Dictionary.resrelationQ.get((relation_ID)));
+				relationalquality.setLabel(relation);
 				relationalquality.setConfidenceScore((float)1.0);
 				return relationalquality;
 			}
@@ -71,7 +72,7 @@ public class PermittedRelations {
 		keys = forms.keySet();
 		for(String form:keys)
 			if(Dictionary.relationalqualities.containsKey(form))
-				return Dictionary.relationalqualities.get(form);
+				return retrieve_id(form);
 		
 		return null;
 	}
@@ -86,6 +87,16 @@ public class PermittedRelations {
 		return synonyms;
 	}
 	
-	
+	public static String retrieve_id(String relation)
+	{
+		Hashtable<String,String> all_possible_relations = Dictionary.relationalqualities.get(relation);
+		Set<String> Keyset= all_possible_relations.keySet();
+		for(String key:Keyset)
+		{
+			//code to choose the best from the list of relational qualities
+			return all_possible_relations.get(key);
+		}
+		return null;
+	}
 	
 }

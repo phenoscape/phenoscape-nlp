@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import edu.mit.jwi.item.IIndexWord;
 import edu.mit.jwi.item.ISenseEntry;
@@ -62,7 +63,12 @@ public class WordNet {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		Hashtable<String,Integer> synonyms = getallsynonyms("meets");
+	Set<String> all_syn = synonyms.keySet();
+	
+	for(String temp:all_syn)
+		System.out.println(temp);
+	
 	}
 
 }

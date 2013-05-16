@@ -9,6 +9,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import org.semanticweb.owlapi.model.OWLClass;
+
+import owlaccessor.OWLAccessorImpl;
+
 import edu.mit.jwi.IDictionary;
 
 public class Dictionary {
@@ -37,7 +41,7 @@ public class Dictionary {
 	//this instance var is used to map spatial terms that are not in ontology to terms that are.
 	/** The spatial maps. */
 	public static Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
-	public static Hashtable<String, String> relationalqualities = new Hashtable<String, String>();
+	public static Hashtable<String,Hashtable<String, String>> relationalqualities = new Hashtable<String,Hashtable<String, String>>();
 	public static Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
 	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
 	
@@ -201,82 +205,26 @@ public class Dictionary {
 	}
 	//syn phrases mapping to relational qualities
 	static{
-		relationalqualities.put("anterior to", "BSPO:0000096");
-		relationalqualities.put("ahead of", "BSPO:0000096");
-		relationalqualities.put("not extending to", "BSPO:0000096");
-		
-		relationalqualities.put("attached to", "UBERON:attaches_to");
-		relationalqualities.put("attach to", "UBERON:attaches_to");
-		relationalqualities.put("attaching to", "UBERON:attaches_to");
-		relationalqualities.put("attaches to", "UBERON:attaches_to");		
-		relationalqualities.put("extends between", "UBERON:attaches_to");
-		relationalqualities.put("inserting on", "UBERON:attaches_to");
-		relationalqualities.put("inserting into", "UBERON:attaches_to");
-		relationalqualities.put("extend between", "UBERON:attaches_to");
-		relationalqualities.put("extended between", "UBERON:attaches_to");
-		relationalqualities.put("extending between", "UBERON:attaches_to");
+	//THis code populates the relationalqualities from Pato - Hariharan	
+		File pato_file = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
+		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
+		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());
+		for(OWLClass b:a.getRelationalSlim())
+			{
+			String root_form = Utilities.removeprepositions(a.getLabel(b).trim());
+			if(relationalqualities.containsKey(root_form))
+			{
+				Hashtable<String,String> list = relationalqualities.get(root_form);
+				list.put(a.getLabel(b).trim(), a.getID(b).trim());
+			}
+			else
+			{
+				Hashtable<String,String> list = new Hashtable<String,String>();
+				list.put(a.getLabel(b).trim(), a.getID(b).trim());
+				relationalqualities.put(root_form,list);
+			}
+			}
 
-		
-		relationalqualities.put("located in", "OBO_REL:located_in");
-		relationalqualities.put("situated on", "OBO_REL:located_in");
-		relationalqualities.put("located", "OBO_REL:located_in");
-		relationalqualities.put("placed on", "OBO_REL:located_in");
-
-		relationalqualities.put("beyond", "BSPO:0000099");
-		
-		relationalqualities.put("as far as", "RO:0002220");
-		relationalqualities.put("along", "RO:0002220");
-		relationalqualities.put("near", "RO:0002220");
-		relationalqualities.put("closer to", "RO:0002220");
-		relationalqualities.put("extends anteriorly to", "RO:0002220");
-		relationalqualities.put("project towards", "RO:0002220");
-		relationalqualities.put("reaching", "RO:0002220");
-		
-
-		relationalqualities.put("bearer of","BFO:0000053");
-		relationalqualities.put("adjacent to","RO:0002220");
-		//relationalqualities.put("anterior to","BSPO:0000096");
-		relationalqualities.put("anteriorly connected to","UBERON:anteriorly_connected_to");
-		//relationalqualities.put("attaches to","UBERON:attaches_to");
-		relationalqualities.put("extends from","PHENOSCAPE:extends_from");
-		relationalqualities.put("connected to","RO:0002150");
-		relationalqualities.put("decreased in magnitude relative to","PATO:decreased_in_magnitude_relative_to");
-		relationalqualities.put("deep to","BSPO:0000107");
-		relationalqualities.put("develops from","RO:0002202");
-		relationalqualities.put("distal to","BSPO:0000097");
-		relationalqualities.put("distally connected to","UBERON:distally_connected_to");
-		relationalqualities.put("dorsal to","BSPO:0000098");
-		relationalqualities.put("encloses","UBERON:encloses");
-		relationalqualities.put("extends to","PHENOSCAPE:extends_to");
-		relationalqualities.put("has cross section","PATO:has_cross_section");
-		relationalqualities.put("has muscle insertion","UBERON:has_muscle_insertion");
-		relationalqualities.put("has muscle origin","UBERON:has_muscle_origin");
-		relationalqualities.put("has part","BFO:0000051");
-		relationalqualities.put("in anterior side of","BSPO:0000123");
-		relationalqualities.put("in distal side of","BSPO:0000125");
-		relationalqualities.put("in lateral side of","UBERON:in_lateral_side_of");
-		relationalqualities.put("in left side of","BSPO:0000120");
-		relationalqualities.put("in median plane of","UBERON:in_median_plane_of");
-		relationalqualities.put("in posterior side of","BSPO:0000122");
-		relationalqualities.put("in proximal side of","BSPO:0000124");
-		relationalqualities.put("in right side of","BSPO:0000121");
-		relationalqualities.put("increased in magnitude relative to","PATO:increased_in_magnitude_relative_to");
-		//relationalqualities.put("located in","OBO_REL:located_in");
-		relationalqualities.put("overlaps","RO:0002131");
-		relationalqualities.put("part of","BFO:0000050");
-		relationalqualities.put("passes through","BSPO:passes_through");
-		relationalqualities.put("posterior to","BSPO:0000099");
-		relationalqualities.put("posteriorly connected to","UBERON:posteriorly_connected_to");
-		relationalqualities.put("proximal to","BSPO:0000100");
-		relationalqualities.put("proximally connected to","UBERON:proximally_connected_to");
-		relationalqualities.put("similar in magnitude relative to","PATO:similar_in_magnitude_relative_to");
-		relationalqualities.put("surrounded by","RO:0002219");
-		relationalqualities.put("surrounds","RO:0002221");
-		relationalqualities.put("ventral to","BSPO:0000102");
-		relationalqualities.put("vicinity of","BSPO:0000103");
-		relationalqualities.put("serves as attachment site for","PHENOSCAPE:serves_as_attachment_site_for");
-		relationalqualities.put("inheres in","BFO:0000052");
-		relationalqualities.put("not","PHENOSCAPE:complement_of");
 	}
 	//wordnet 
 	static{
@@ -286,4 +234,5 @@ public class Dictionary {
 			e.printStackTrace();
 		}
 	}
+	
 }

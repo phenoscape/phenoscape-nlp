@@ -58,7 +58,8 @@ public class CharacterHandler {
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"", 0);				
+			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"", 0);	
+			// call the relationalQualitystrategy here
 		}		
 	}
 	

@@ -133,7 +133,7 @@ public class RelationHandler {
 					}
 				}
 			} else if(relation.matches("\\(between|among|amongst\\).*")){
-				//TODO
+				//TODO between is a preposition too.
 			} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
 				/*Hashtable<String, String> result = EntitySearcher.searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
 				results.put("qualitymodifier", results.get("qualitymodifier")+","+tostructname);

@@ -152,6 +152,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 		
 	}
 	
+	public Set<OWLClass> getRelationalSlim() {
+		return relationalSlim;
+	}
+
+
 	/**
 	 * Gets the source.
 	 *

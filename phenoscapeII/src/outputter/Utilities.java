@@ -20,6 +20,8 @@ public class Utilities {
 
 	private static Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 	private static Pattern p1 = Pattern.compile("(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
+	public static String preposition = "of|in|on|between|with|from|to|into|toward";
+
 	/**
 	 * 
 	 */
@@ -371,7 +373,25 @@ public class Utilities {
 			return "10";
 		return null;
 	}
-
+//code to remove prepositions from starting and ending of strings => Hariharan
+	public static String removeprepositions(String trim) {
+		for(;;)
+		{
+	   if(trim.matches("("+preposition+")\\s.*"))
+		   trim = trim.substring(trim.indexOf(" ")+1);
+	   else
+		   break;
+		}
+		
+		for(;;)
+		{
+			if(trim.matches(".*\\s("+preposition+")"))
+				   trim = trim.substring(0,trim.lastIndexOf(" "));
+			   else
+				   break;
+		}
+		return trim;
+	}
 	/**
 	 * @param args
 	 */
