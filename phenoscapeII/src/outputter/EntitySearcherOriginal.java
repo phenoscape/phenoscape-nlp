@@ -152,6 +152,8 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
 			if(sentity!=null){
 				//relation & entity locator
+							System.out.println("");
+
 				FormalRelation rel = new FormalRelation();
 				rel.setString("part of");
 				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));

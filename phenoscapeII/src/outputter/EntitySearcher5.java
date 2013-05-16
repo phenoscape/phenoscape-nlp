@@ -17,6 +17,7 @@ public class EntitySearcher5 extends EntitySearcher {
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep, int ingroup) {
 		//bone, cartilage,  element
+		
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
 		//Epibranchial 1: (2) absent E: Epibranchial 1 cartilage, Q: absent E: Epibranchial 1 bone, Q: absent

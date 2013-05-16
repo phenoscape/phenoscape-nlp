@@ -38,6 +38,7 @@ public class RelationalQualityStrategy1 {
 		pathCharacterUnderStucture = XPath.newInstance(".//character");
 		this.keyentities = keyentities;
 		identifiedqualities = new ArrayList<String>();
+		
 	}
 
 	public void handle() {

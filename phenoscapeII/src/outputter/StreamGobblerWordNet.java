@@ -30,6 +30,7 @@ public class StreamGobblerWordNet extends StreamGobbler {
 	protected StringBuffer gobbleLine(String line, StringBuffer sb) {
 		if(debug) System.out.println(type+">"+line);
 		sb.append(line+" ");
+		
 		return sb;
 	}
 	/**

@@ -18,4 +18,5 @@ public interface FormalConcept {
 	float getConfidienceScore();
 	String toString();
 	boolean isOntologized();
+	
 }

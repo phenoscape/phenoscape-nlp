@@ -19,6 +19,7 @@ public class Quality implements FormalConcept {
 		this.string = string;
 		this.label = label;
 		this.id = id;
+		
 	}
 
 	/* (non-Javadoc)

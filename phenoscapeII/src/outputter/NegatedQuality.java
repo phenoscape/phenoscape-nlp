@@ -28,6 +28,7 @@ public class NegatedQuality extends Quality {
 	public NegatedQuality(String string, String label, String id, Quality parentQuality) {
 		super(string, label, id);
 		this.parentQuality = parentQuality;
+		
 		negation.setConfidenceScore(1);
 	}
 

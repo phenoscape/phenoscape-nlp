@@ -54,6 +54,7 @@ public class TermSearcher {
 		if(result!=null) return result;
 		
 		phrase = format(phrase);
+		
 		//search ontologies
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]
 		//one result from each ontology that has at least some type of hit

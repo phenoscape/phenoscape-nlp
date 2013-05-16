@@ -16,6 +16,7 @@ public class StructureHandler {
 	 */
 	public StructureHandler() {
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	/**

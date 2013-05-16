@@ -30,6 +30,7 @@ public class XML2Trait {
 		this.outputtable = outputtable;
 		try{
 			if(conn == null){
+				
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
@@ -86,6 +87,7 @@ public class XML2Trait {
 			System.out.println("trait:"+trait);
 		}catch(Exception e){
 			e.printStackTrace();
+			
 		}
 	}
 

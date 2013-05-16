@@ -16,6 +16,7 @@ public class EntityAnchors {
 	 */
 	public EntityAnchors() {
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	/**

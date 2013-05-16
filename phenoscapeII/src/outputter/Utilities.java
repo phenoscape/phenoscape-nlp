@@ -34,6 +34,7 @@ public class Utilities {
 			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");
 			Element rel = (Element)tostructure.selectSingleNode(root);
 			if(rel != null) return rel;
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}		

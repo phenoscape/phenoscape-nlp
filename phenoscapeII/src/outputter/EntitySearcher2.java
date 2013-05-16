@@ -16,6 +16,7 @@ public class EntitySearcher2 extends EntitySearcher {
 	 */
 	public EntitySearcher2() {
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	/**

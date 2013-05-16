@@ -49,6 +49,7 @@ public class CompositeEntity extends Entity {
 	}
 	
 	public String toString(){
+		System.out.println("");
 		StringBuffer sb = new StringBuffer();
 		for(Entity e: entities){
 			sb.append(e.toString()+" and ");

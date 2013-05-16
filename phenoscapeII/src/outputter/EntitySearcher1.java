@@ -18,6 +18,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	 * 
 	 */
 	public EntitySearcher1() {
+		
 	}
 
 	/* (non-Javadoc)

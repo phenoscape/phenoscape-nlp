@@ -52,6 +52,7 @@ public class XMLNormalizer {
 			//with2partof(root);
 			removeCategoricalRanges(root);
 			
+			
 			// expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
 			//characterstatements are character descriptions
 			List<Element> characterstatements = pathCharacterStatement.selectNodes(root);

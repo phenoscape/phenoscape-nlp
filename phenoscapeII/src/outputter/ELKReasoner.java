@@ -42,6 +42,7 @@ public class ELKReasoner {
 	OWLOntologyManager man;
 	
 	public ELKReasoner(String ontologyIRI) throws OWLOntologyCreationException{
+		System.out.println("");
 		man = OWLManager.createOWLOntologyManager();
 		String temp="";
 		dataFactory = man.getOWLDataFactory();

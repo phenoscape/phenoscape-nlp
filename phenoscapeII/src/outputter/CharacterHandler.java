@@ -82,6 +82,7 @@ public class CharacterHandler {
 				ArrayList<Entity> relatedentities = findEntityInConstraints();
 				for(Entity relatedentity: relatedentities){
 					this.qualities.add(new RelationalQuality(relationalquality, relatedentity));
+					System.out.println("");
 				}
 				return;
 			}else{

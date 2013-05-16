@@ -145,7 +145,6 @@ public class XML2EQ {
 				Element root = xml.getRootElement();
 				new XMLNormalizer(root).normalize();
 				// if(count!= 67){ count++; continue;}
-				System.out.println();
 				System.out.println("[" + count + "]" + src);
 				count++;
 				allEQs = new ArrayList<EQStatement>();

@@ -90,6 +90,7 @@ public class FormalRelation implements FormalConcept {
 	public float getConfidienceScore() {
 	
 		return this.confidenceScore;
+		
 	}
 	
 	public String toString(){

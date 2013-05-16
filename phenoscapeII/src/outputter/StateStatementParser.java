@@ -115,6 +115,7 @@ public class StateStatementParser extends Parser {
 				//Changes starting => Hariharan
 			//checking if entity is really an entity or it is a quality
 				
+				
 					if(e.getPrimaryEntityLabel()==null)
 					{
 //					Check whether the "to" and "from" names are qualities,

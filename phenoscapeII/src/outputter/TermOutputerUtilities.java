@@ -44,6 +44,7 @@ public class TermOutputerUtilities {
 				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
 				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
 				};
+		
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};

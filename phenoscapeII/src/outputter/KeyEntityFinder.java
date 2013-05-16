@@ -63,6 +63,7 @@ public class KeyEntityFinder {
 		List<Element> keys = new ArrayList<Element>();
 		//add all structures which are not "whole organism" to key structures
 		//TODO should 
+		
 		for (Element e : chars) {
 			try{
 				List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e);

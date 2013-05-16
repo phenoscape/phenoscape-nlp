@@ -83,6 +83,7 @@ public class PermittedRelations {
 		//Top Synonyms
 		Hashtable<String, Integer> synonyms;
 		synonyms= WordNet.getallsynonyms(relation);
+		
 		//System.out.println("size == "+synonyms.size());
 		return synonyms;
 	}

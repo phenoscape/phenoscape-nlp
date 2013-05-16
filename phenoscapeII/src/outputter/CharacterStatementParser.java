@@ -64,6 +64,7 @@ public class CharacterStatementParser extends Parser {
 	public void parse(Element statement, Element root) {
 		parseForEntities(statement, root, true);
 		parseForQualityClue(statement);
+		System.out.println("");
 	}
 	
 	private void parseForQualityClue(Element statement) {

@@ -38,6 +38,7 @@ public class RelationHandler {
 		this.fromstructid = structid;
 		this.fromcharacterstatement = keyelement;
 		this.otherEQs = new ArrayList<EQStatement>();
+		
 	}
 	
 	/**

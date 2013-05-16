@@ -25,6 +25,7 @@ public class EntitySearcher6 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
+	
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep, int ingroup) {

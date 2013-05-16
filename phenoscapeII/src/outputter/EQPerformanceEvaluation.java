@@ -223,6 +223,7 @@ public class EQPerformanceEvaluation {
 			int acount = 0;
 			for(int i = 0; i < astates.size(); i++){
 				ArrayList<String> avalues = new ArrayList<String>();
+				
 				for(Hashtable<String, String> EQ :astates.get(i)){
 					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){

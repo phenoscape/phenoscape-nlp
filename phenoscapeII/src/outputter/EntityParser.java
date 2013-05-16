@@ -16,6 +16,7 @@ public class EntityParser {
 	public EntityParser(Element statement, Element root, boolean keyelement) {
 		//add all structures which are not "whole organism" to key structures
 		 try{
+			 
 					List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
 					for(Element structure: structures){
 						//Hashtable<String, String> keyentity = new Hashtable<String, String>();

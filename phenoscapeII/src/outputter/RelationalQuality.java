@@ -29,6 +29,7 @@ public class RelationalQuality extends Quality {
 	public RelationalQuality(Quality relationalquality, Entity qualitymodifier) {
 		this.relationalquality = relationalquality;
 		this.relatedentity = qualitymodifier;
+		
 	}
 	public Quality getQuality(){
 		return relationalquality;

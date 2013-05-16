@@ -16,6 +16,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	 */
 	public EntitySearcher4() {
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	/* (non-Javadoc)

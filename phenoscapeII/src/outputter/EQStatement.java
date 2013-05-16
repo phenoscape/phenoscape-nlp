@@ -96,6 +96,7 @@ public class EQStatement {
 	}
 	
 	public String toString(){
+		
 		StringBuffer sb = new StringBuffer();
 		sb.append("text:"+this.description+System.getProperty("line.separator"));
 		sb.append("Entity:"+ entity.toString()+System.getProperty("line.separator"));

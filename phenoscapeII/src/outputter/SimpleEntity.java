@@ -104,6 +104,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 
 	@Override
 	public boolean isOntologized() {
+		
 		return this.id != null;
 	}
 

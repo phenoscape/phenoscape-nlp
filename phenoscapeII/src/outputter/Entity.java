@@ -6,6 +6,7 @@ public class Entity {
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getString(); //return the label
 		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getString(); //return label of the primary entity
 		return null; //return null for other cases
+		
 	}
 	
 	public String getPrimaryEntityLabel(){

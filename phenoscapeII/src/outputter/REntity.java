@@ -17,6 +17,7 @@ public class REntity extends Entity{
 	public REntity(FormalRelation relation, Entity entity) {
 		this.relation = relation;
 		this.entity = entity;
+		
 	}
 
 	public void setEntity(Entity entity){

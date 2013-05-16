@@ -29,6 +29,7 @@ class StreamGobbler extends Thread
         this.type = type;
         this.headings = headings;
         this.trees = trees;
+        
     }
     
     public void run()
