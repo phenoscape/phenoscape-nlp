@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import oboaccessor.OBO2DB;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import owlaccessor.OWLAccessorImpl;
 
@@ -35,6 +36,7 @@ public class TermOutputerUtilities {
 
 	public static boolean debug = false;
 	public static String attributes = "";
+	public static OWLOntology uberon = null;
 	
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
@@ -42,7 +44,7 @@ public class TermOutputerUtilities {
 	static{
 		//TODO:add GO:bioprocess
 		entityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
+				ontologyfolder+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl",
 				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
 				};
 		qualityontologies = new String[]{
@@ -54,6 +56,9 @@ public class TermOutputerUtilities {
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
+				if(onto.endsWith(ApplicationUtilities.getProperty("ontology.uberon")+".owl")){
+					uberon = api.getOntology();
+				}
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format
 				int i = onto.lastIndexOf("/");

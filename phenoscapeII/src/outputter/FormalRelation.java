@@ -46,6 +46,15 @@ public class FormalRelation implements FormalConcept {
 		this.id = id;
 
 	}
+	
+	/* (non-Javadoc)
+	 * @see outputter.FormalConcept#setClassIRI(java.lang.String)
+	 */
+	@Override
+	public void setClassIRI(String IRI) {
+		this.classIRI = IRI;
+
+	}
 
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setConfidenceScore(float)
@@ -81,6 +90,14 @@ public class FormalRelation implements FormalConcept {
 	public String getId() {
 		
 		return this.id;
+	}
+	
+	/* (non-Javadoc)
+	 * @see outputter.FormalConcept#getClassIRI()
+	 */
+	@Override
+	public String getClassIRI() {
+		return this.classIRI;
 	}
 
 	/* (non-Javadoc)

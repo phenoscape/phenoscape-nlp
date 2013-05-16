@@ -33,8 +33,8 @@ public class XMLNormalizer {
 			pathRangeValueCharacter = XPath.newInstance("//character[@char_type='range_value']");
 			pathCountStructure = XPath.newInstance("//structure[character[@name='count']]");
 			pathText = XPath.newInstance(".//text");
-			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='whole_organism']");
-			pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='whole_organism']");
+			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
+			pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -202,7 +202,7 @@ public class XMLNormalizer {
 				String text = etext.getTextTrim().replaceAll("\\[.*?\\]", "");
 				String struct = text.replaceFirst(".* ", "");
 				String constraint = text.replace(struct, "").trim();
-				List<Element> wos = XPath.selectNodes(statement, ".//structure[@name='whole_organism']");
+				List<Element> wos = XPath.selectNodes(statement, ".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 				if (wos.size() > 0) {
 					for (int i = 1; i < wos.size(); i++) {
 						wos.get(i).detach();

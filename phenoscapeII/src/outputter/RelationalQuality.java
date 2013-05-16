@@ -45,6 +45,8 @@ public class RelationalQuality extends Quality {
 	public void setQualityModifier(Entity qualitymodifier){
 		this.relatedentity = qualitymodifier;
 	}
+	
+	
 	/**
 	 * @param args
 	 */

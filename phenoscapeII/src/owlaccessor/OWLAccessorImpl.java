@@ -92,6 +92,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 	}
 
+	public OWLOntology getOntology(){
+		return rootOnt;
+	}
 		
 	/**
 	 * Instantiates a new oWL accessor impl.

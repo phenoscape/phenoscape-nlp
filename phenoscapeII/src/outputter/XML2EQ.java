@@ -75,6 +75,14 @@ public class XML2EQ {
 
 
 	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
+	public static ELKReasoner elk; 
+	static{
+		try{
+			elk = new ELKReasoner(ontoutil.uberon);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	private Dictionary dictionary = new Dictionary();
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
@@ -124,7 +132,7 @@ public class XML2EQ {
 				+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
 		
 		pathStructure = XPath.newInstance(".//structure");
-		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='whole_organism']/character");
+		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
 		pathCharacter = XPath.newInstance(".//character");
 		pathText2 = XPath.newInstance(".//text");
 		pathRelation = XPath.newInstance(".//relation");
