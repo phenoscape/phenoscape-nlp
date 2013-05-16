@@ -43,6 +43,7 @@ public class ELKReasoner {
 	
 	public ELKReasoner(String ontologyIRI) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
+		String temp="";
 		dataFactory = man.getOWLDataFactory();
 		// Load your ontology.
 		ont = man.loadOntology(IRI.create(ontologyIRI));

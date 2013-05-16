@@ -64,6 +64,7 @@ public class CharacterHandler {
 	}
 	
 	public void parseQuality(){
+		String temp="";
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
