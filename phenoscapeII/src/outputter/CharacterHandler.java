@@ -26,16 +26,18 @@ public class CharacterHandler {
 	private TermOutputerUtilities ontoutil;
 	Element root;
 	Element chara;
-	Entity entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
+	Entity entity; //the entity result will be saved here, which may be null, indicating the ke y entities parsed from the character statement should be used for this character
 	ArrayList<Quality> qualities = new ArrayList<Quality>(); //the quality result will be saved here. May be relationalquality, simple quality, or negated quality
 	ArrayList<Entity> entityparts = new ArrayList<Entity>();
+	ArrayList<String> qualityclues;
 	/**
 	 * 
 	 */
-	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil) {
+	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil, ArrayList<String> qualityclues) {
 		this.root = root;
 		this.chara = chara;
 		this.ontoutil = ontoutil;
+		this.qualityclues = qualityclues;
 	}
 
 	/**
@@ -58,13 +60,12 @@ public class CharacterHandler {
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"", 0);	
-			// call the relationalQualitystrategy here
+			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");				
 		}		
 	}
 	
 	public void parseQuality(){
-		String temp="";
+		
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
@@ -82,7 +83,7 @@ public class CharacterHandler {
 				ArrayList<Entity> relatedentities = findEntityInConstraints();
 				for(Entity relatedentity: relatedentities){
 					this.qualities.add(new RelationalQuality(relationalquality, relatedentity));
-					System.out.println("");
+					
 				}
 				return;
 			}else{
@@ -100,9 +101,12 @@ public class CharacterHandler {
 			}
 		}
 		
+		
 		//not a relational quality, is this a simple quality or a negated quality?
-		Quality result = (Quality)TermSearcher.searchTerm(quality, "quality", 0);
-		if(result!=null){
+
+		TermSearcher ts = new TermSearcher();
+		Quality result = (Quality) ts.searchTerm(quality, "quality");
+		if(result!=null){ //has a strong match
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
@@ -118,6 +122,12 @@ public class CharacterHandler {
 				return;
 			}
 		}else{
+			//check other matches
+			for(FormalConcept match: ts.getCandidateMatches()){
+				for(String clue: qualityclues){
+					//TODO
+				}
+			}
 			result=new Quality();
 			result.string=quality;
 			result.confidenceScore=(float) 1.0;
@@ -137,7 +147,7 @@ public class CharacterHandler {
 					String qualitymodifier = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
 					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
-					Entity result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"", 0);	
+					Entity result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
 					if(result!=null) entities.add(result);
 				}
 				return entities;

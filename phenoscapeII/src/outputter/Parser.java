@@ -21,7 +21,6 @@ public abstract class Parser {
 	
 	public Parser(TermOutputerUtilities ontoutil){
 		this.ontoutil = ontoutil;
-		
 	}
 
 	protected abstract void parse(Element statement, Element root);

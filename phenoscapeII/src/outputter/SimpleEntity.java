@@ -57,6 +57,14 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	}
 
 	/* (non-Javadoc)
+	 * @see outputter.FormalConcept#setClassIRI(java.lang.String)
+	 */
+	@Override
+	public void setClassIRI(String IRI) {
+		this.classIRI = IRI;
+	}
+
+	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setConfidenceScore(float)
 	 */
 	@Override
@@ -92,6 +100,14 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		return this.id;
 	}
 
+	/* (non-Javadoc)
+	 * @see outputter.FormalConcept#getClassIRI()
+	 */
+	@Override
+	public String getClassIRI() {		
+		return this.classIRI;
+	}
+	
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#getConfidienceScore()
 	 */

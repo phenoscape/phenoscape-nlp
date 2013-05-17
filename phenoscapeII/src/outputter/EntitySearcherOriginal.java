@@ -56,7 +56,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	 * @throws Exception the exception
 	 */
 	@SuppressWarnings("unchecked")
-	public Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup){
+	public Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
 		//TODO create and maintain a cache for entity search?
 	
@@ -73,7 +73,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
 		
-		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;
 		if(elocatorphrase.length()>0) entitylocators = elocatorphrase.split("\\s*,\\s*");
@@ -152,8 +152,6 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
 			if(sentity!=null){
 				//relation & entity locator
-							System.out.println("");
-
 				FormalRelation rel = new FormalRelation();
 				rel.setString("part of");
 				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));

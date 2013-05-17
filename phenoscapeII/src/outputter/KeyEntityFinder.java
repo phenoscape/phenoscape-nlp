@@ -63,7 +63,6 @@ public class KeyEntityFinder {
 		List<Element> keys = new ArrayList<Element>();
 		//add all structures which are not "whole organism" to key structures
 		//TODO should 
-		
 		for (Element e : chars) {
 			try{
 				List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(e);
@@ -90,7 +89,7 @@ public class KeyEntityFinder {
 						*/
 						
 						//Below changes by Hari
-						Entity result = es.searchEntity(root, sid, sname, "", sname, "", 0);
+						Entity result = es.searchEntity(root, sid, sname, "", sname, "");
 						if(result!=null)
 						{
 						if(result instanceof SimpleEntity)

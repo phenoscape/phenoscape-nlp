@@ -104,7 +104,8 @@ public class RelationalQualityStrategy1 {
 
 		// not a relational quality, is this a simple quality or a negated
 		// quality?
-		Quality result = (Quality) TermSearcher.searchTerm(quality, "quality",0);
+		TermSearcher ts = new TermSearcher();
+		Quality result = (Quality) ts.searchTerm(quality, "quality");
 		if (result != null) {
 			if (negated) {
 				/* TODO use parent classes Jim use for parent classes */

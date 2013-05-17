@@ -127,14 +127,14 @@ public class TestOWLAccessorImpl {
 	}
 	public void fetch_relationalslim()
 	{
-		File phenoscape = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
+	/*	File phenoscape = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
 		for(OWLClass b:a.getRelationalSlim())
 		{
 			System.out.print(a.getLabel(b));
 			System.out.println("   "+a.getID(b));
-		}
+		}*/
 
 	}
 	public static void main(String[] args) {

@@ -61,7 +61,7 @@ public class RelationHandler {
 		if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, "", parents,"", 0);				
+			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, "", parents,"");				
 		}		
 	}
 
@@ -75,13 +75,13 @@ public class RelationHandler {
 		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']");
 		tostructname = tostructname.replaceFirst(",$", "");
 		if(relationalquality !=null){ //yes, the relation is a relational quality
-			Entity qualitymodifier = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
+			Entity qualitymodifier = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 			RelationalQuality rq = new RelationalQuality(relationalquality, qualitymodifier);
 			quality = rq;			
 		}else{//no, the relation should not be considered relational quality
 			//entity locator?
 			if (relation.matches("\\((" + outputter.Dictionary.positionprep + ")\\).*")) { // entitylocator
-				Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation,  0);
+				Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 				if(entity!=null){
 					this.entitylocator = entity;
 					FormalRelation rel = new FormalRelation();
@@ -101,7 +101,7 @@ public class RelationHandler {
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					Utilities.initEQHash(EQ);
-					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
+					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 					if(entity!=null){
 						//construct quality
 						Quality present = new Quality();
@@ -119,7 +119,7 @@ public class RelationHandler {
 				// output absent as Q for tostructid
 				if (!fromcharacterstatement) {
 					
-					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
+					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 					if(entity!=null){
 						//construct quality
 						Quality absent = new Quality();

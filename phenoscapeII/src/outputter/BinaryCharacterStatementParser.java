@@ -28,7 +28,6 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	public void parse(Element statement, Element root){
 		ArrayList<EQStatement> negativestatements = new ArrayList<EQStatement>();
 		super.parse(statement, root);
-		System.out.println("");
 		if(this.EQStatements.size()==0){
 			parseStandaloneStructures(statement, root);
 		}

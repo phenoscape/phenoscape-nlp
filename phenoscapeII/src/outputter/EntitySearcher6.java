@@ -25,10 +25,9 @@ public class EntitySearcher6 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//still not find a match, remove the last term in the entityphrase, when what is left is not just a spatial term 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"	
 		//TODO "some part" of humerus; "some quality"
@@ -42,7 +41,7 @@ public class EntitySearcher6 extends EntitySearcher {
 		if(tokens.length>=2){ //to prevent "rostral tubule" from entering the subsequent process 
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
 			if(!shortened.matches(".*?\\b("+Dictionary.spatialtermptn+")$")){
-				SimpleEntity sentity = (SimpleEntity) TermSearcher.searchTerm(shortened, "entity", ingroup);
+				SimpleEntity sentity = (SimpleEntity) new TermSearcher().searchTerm(shortened, "entity");
 				if(sentity!=null){
 					if(sentity.getId().compareTo(Dictionary.mcorganism)==0){
 						//too general "body scale", try to search for "scale"

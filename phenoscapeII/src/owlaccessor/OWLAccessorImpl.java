@@ -47,8 +47,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The allclasses. */
 	private Set<OWLClass> allclasses=new HashSet<OWLClass>();
 	
-	/** The relational slim. */
+	/** The PATO relational slim. */
 	private Set<OWLClass> relationalSlim = new HashSet<OWLClass>();
+	
+	
+
+	/** The PATO attribute slim. */
+	private Set<OWLClass> attributeSlim = new HashSet<OWLClass>();
 	
 	/** The obsolete. */
 	private Set<OWLClass> obsolete = new HashSet<OWLClass>();
@@ -89,6 +94,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 	}
 
+	public OWLOntology getOntology(){
+		return rootOnt;
+	}
 		
 	/**
 	 * Instantiates a new oWL accessor impl.
@@ -138,8 +146,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 		//add all relational slim terms to a list
 		//also add all obsolete terms to a list
 		for (OWLClass c: allclasses){
-			if(isRelationalSlim(c, rootOnt)){
+			if(inRelationalSlim(c, rootOnt)){
 				this.relationalSlim.add(c);
+			}
+			if(inAttributeSlim(c, rootOnt)){
+				this.attributeSlim.add(c);
 			}
 			if(this.isObsolete(c, rootOnt)){
 				this.obsolete.add(c);
@@ -148,12 +159,23 @@ public class OWLAccessorImpl implements OWLAccessor {
 		
 		//remove all obosolete classes
 		relationalSlim.removeAll(obsolete);
+		attributeSlim.removeAll(obsolete);
 		allclasses.removeAll(obsolete);
 		
 	}
 	
-	public Set<OWLClass> getRelationalSlim() {
-		return relationalSlim;
+	/**
+	 * Checks if is relational slim.
+	 *
+	 * @param c the c
+	 * @return true, if is relational slim
+	 */
+	public boolean inAttributeSlim(OWLClass c, OWLOntology ontology){		
+		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
+			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#attribute_slim"))
+				return true;
+		}
+		return false;
 	}
 
 
@@ -410,13 +432,15 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * 
 	 * TODO make the return type the same as retrieveConcept(String con)
 	 */
-	@Override
-	public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception {
+	//@Override
+	/*public List<OWLClass> retrieveConcept(String con, int slim) throws Exception {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
 		Set<OWLClass> classes = null;
-		if(subgroup==outputter.XML2EQ.RELATIONAL_SLIM){
+		if(slim==outputter.XML2EQ.RELATIONAL_SLIM){
 			classes=this.relationalSlim;
+		}else if(slim==outputter.XML2EQ.ATTRIBUTE_SLIM){
+			classes=this.attributeSlim;
 		}else{
 			classes=this.allclasses;
 		}
@@ -431,8 +455,29 @@ public class OWLAccessorImpl implements OWLAccessor {
 			}
 		}
 		return result;
-	}
+	}*/
 	
+		/**
+		 * construct a regular exp pattern out of attribute classes (such as those in attribute slim in PATO)
+		 * 
+		 * @return an empty string when no attribute in in ontology, or string like "color|shape"
+		 */
+	public String getLowerCaseAttributeSlimStringPattern(){
+		StringBuffer sb = new StringBuffer();
+		for(OWLClass c: this.attributeSlim){
+			//add labels to the pattern string
+			String label = this.getLabel(c).replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim();
+			sb.append(label);
+			sb.append("|");
+			//add syns to the pattern string
+			List<String> syns = this.getSynonymLabels(c);
+			for(String syn: syns){
+				sb.append(syn.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim());
+				sb.append("|");
+			}
+		}
+		return sb.toString().replaceAll("\\|+", "|").replace("\\|$", "").trim();
+	}
 	/**
 	 * Match syn.
 	 * 
@@ -605,7 +650,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @param c the c
 	 * @return true, if is relational slim
 	 */
-	public boolean isRelationalSlim(OWLClass c, OWLOntology ontology){
+	public boolean inRelationalSlim(OWLClass c, OWLOntology ontology){
 		
 		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
 			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#relational_slim"))
@@ -674,6 +719,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return labels;
 	}
 	
+	public Set<OWLClass> getRelationalSlim() {
+		return relationalSlim;
+	}
 	/**
 	 * Gets the broad synonyms.
 	 *
@@ -845,6 +893,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 		public OWLOntologyManager getManager() {
 			return manager;
 		}
+
+		
 
 		
 }

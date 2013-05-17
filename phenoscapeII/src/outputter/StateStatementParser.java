@@ -29,7 +29,7 @@ public class StateStatementParser extends Parser {
 	String characterid;
 	String stateid;
 	String text;
-	String qualityclue;
+	ArrayList<String> qualityclue;
 	ArrayList<Entity> keyentities;
 	
 	static XPath pathText2;
@@ -51,7 +51,7 @@ public class StateStatementParser extends Parser {
 	/**
 	 * 
 	 */
-	public StateStatementParser(TermOutputerUtilities ontoutil, ArrayList<Entity> keyentities, String qualityclue) {
+	public StateStatementParser(TermOutputerUtilities ontoutil, ArrayList<Entity> keyentities, ArrayList<String> qualityclue) {
 		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;
@@ -102,7 +102,13 @@ public class StateStatementParser extends Parser {
 				boolean neg = Boolean.getBoolean(relation.getAttributeValue("negation"));
 				String toname = Utilities.getStructureName(root, toid);
 				String fromname = Utilities.getStructureName(root, fromid);
-
+				boolean maybesubject=false;
+				try {
+					maybesubject = maybeSubject(root, fromid);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} //false if fromid appears in constraintid or toid
 				RelationHandler rh = new RelationHandler(root, relname, toname, toid, fromname, fromid, neg, false);
 				rh.handle();
 			
@@ -137,12 +143,12 @@ public class StateStatementParser extends Parser {
 //Changes Ending => Hariharan	Include flag below	to make sure , to include EQ's only when qualities exist.		
 				if(q.size()>0)
 				{
-				if(e!=null && this.keyentities!=null){
+				if(maybesubject && e!=null && this.keyentities!=null){
 					entities = resolve(e, this.keyentities); 
-				}else if(this.keyentities!=null){
+				}else if(maybesubject && e==null && this.keyentities!=null){
 					entities = this.keyentities;
-				}else{
-					continue;
+				}else if (e!=null) {
+					entities.add(e);
 				}
 				
 					for(Quality quality:q)
@@ -185,18 +191,30 @@ public class StateStatementParser extends Parser {
 		try {
 			characters = pathCharacter.selectNodes(statement);
 			for(Element character: characters){
-				 CharacterHandler ch = new CharacterHandler(root, character, ontoutil); //may contain relational quality
+				// CharacterHandler ch = new CharacterHandler(root, character, ontoutil);
+				 //may contain relational quality
+
+				String structid = character.getParentElement().getAttributeValue("id"+"");
+				boolean maybesubject=false;
+				try {
+					maybesubject = maybeSubject(root, structid);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} //false if fromid appears in constraintid or toid
+				 CharacterHandler ch = new CharacterHandler(root, character, ontoutil, qualityclue); //may contain relational quality
+
 				 ch.handle();
 				 ArrayList<Quality> qualities = ch.getQualities();
 				 ArrayList<Entity> entities = new ArrayList<Entity>();
 				 Entity entity = ch.getEntity();
-				 if(entity!=null && this.keyentities!=null){
+				 if(maybesubject && entity!=null && this.keyentities!=null){
 					 //TODO resolve entity with keyentities
 					 entities = resolve(entity, this.keyentities); 
-				 }else if(this.keyentities!=null){
+				 }else if(maybesubject && entity==null && this.keyentities!=null){
 					 entities = this.keyentities;
-				 }else{
-					 continue;
+				 }else if(entity!= null){
+					 entities.add(entity);
 				 }
 
 				 for(Entity e: entities){
@@ -222,6 +240,19 @@ public class StateStatementParser extends Parser {
 		//???
 	}
 	
+	/**
+	 * if structid appears as a constraintid or toid, then it can't be a subject
+	 * @param root
+	 * @param structid
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean maybeSubject(Element root, String structid) throws Exception {
+		Element e = (Element) XPath.selectSingleNode(root, ".//character[contains(@constraintid,'"+structid+"')]|.//relation[@toid='"+structid+"']");
+		if(e==null) return true;
+		return false;
+	}
+
 	private ArrayList<Entity> integrateSpatial(Entity entity,
 			ArrayList<Entity> keyentities2) {
 		
@@ -239,6 +270,32 @@ public class StateStatementParser extends Parser {
 			entities = integrateSpatial(e, this.keyentities); 
 			 //TODO integrate entity with keyentities
 		}
+
+		if(e.getPrimaryEntityString().compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0){ //if e is whole_organism
+			return (ArrayList<Entity>) keyentities.clone();
+		}
+		//test part_of relations between e and each of the keyentities
+		if(e.isOntologized()){
+			for(Entity keye : keyentities){
+				if(keye.isOntologized()){
+					if(XML2EQ.elk.isPartOf(e.getPrimaryEntityOWLClassIRI(), keye.getPrimaryEntityOWLClassIRI())){
+						//keye is entity locator of e
+						CompositeEntity ce = new CompositeEntity();
+						ce.addEntity(e);
+						FormalRelation rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:000050");
+						rel.setConfidenceScore((float)1.0);
+						REntity rentity = new REntity(rel, keye);
+						ce.addEntity(rentity);
+						keye = ce; //replace keye with the composite entity
+					}
+				}
+			}
+			return (ArrayList<Entity>) keyentities.clone();
+		}
+		
 		return (ArrayList<Entity>) keyentities.clone();
 	}
 

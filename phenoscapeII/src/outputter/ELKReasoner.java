@@ -35,19 +35,17 @@ import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 
 
-public class ELKReasoner {
+public class ELKReasoner{
 	OWLReasoner reasoner;
 	OWLDataFactory dataFactory;
 	OWLOntology ont;
 	OWLOntologyManager man;
 	
-	public ELKReasoner(String ontologyIRI) throws OWLOntologyCreationException{
-		System.out.println("");
+	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
-		String temp="";
 		dataFactory = man.getOWLDataFactory();
 		// Load your ontology.
-		ont = man.loadOntology(IRI.create(ontologyIRI));
+		//ont = man.loadOntology(IRI.create(ontologyIRI));
 		// Create an ELK reasoner.
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
@@ -144,14 +142,34 @@ public class ELKReasoner {
 		return false;
 	}	
 	
+	public boolean isPartOf(String class1IRI, String class2IRI) {
+		OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
+		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(class2IRI)));
+		//is class1 a subclass of partofclass2
+		// Create a fresh name
+		OWLClass newclass = dataFactory.getOWLClass(IRI.create("temp001"));
+		//make newclass equivalent of partofclass2 
+		OWLAxiom axiom = dataFactory.getOWLEquivalentClassesAxiom(newclass,
+				partofclass2);
+		man.addAxiom(ont, axiom);
+		reasoner.flush();
+		return isSubClassOf(class1IRI, newclass.getIRI().toString());
+	}
+	
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
 			//Set<OWLClass> classes = elk.getClassesWithLateralSides();
-			//String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
+			/*String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
 			String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0003098";//optic stalk is not an organ
 			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
 			System.out.println(elk.isSubClassOf(subclassIRI, superclassIRI));		
+			*/
+			String class1IRI = "http://purl.obolibrary.org/obo/UBERON_0000974"; //neck
+			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0000468"; //multi-cellular organism //neck is prt of multi-cellular organism =>true
+			String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0000064"; //organ part, is neck part of organ part? false
+			System.out.println(elk.isPartOf(class1IRI, class2IRI));	
+			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

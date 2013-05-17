@@ -32,7 +32,6 @@ public class ApplicationUtilities {
 		
 		try {
 			String logProperties = System.getProperty("user.dir")+ getProperty("LOG.FILE.LOCATION");
-			System.out.println("");
 			fstream = new FileInputStream(logProperties);
 			Properties properties = new Properties();
 			properties.load(fstream);

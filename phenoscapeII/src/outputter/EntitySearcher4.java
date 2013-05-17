@@ -25,7 +25,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	@Override
 	public Entity searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
-			String originalentityphrase, String prep, int ingroup) {
+			String originalentityphrase, String prep) {
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
 
 		String[] entityphrasetokens = entityphrase.split("\\s+");
@@ -35,7 +35,7 @@ public class EntitySearcher4 extends EntitySearcher {
 		SimpleEntity entityl = new SimpleEntity();
 		entityl.setString(elocatorphrase);
 		if(entitylocators!=null) {
-			SimpleEntity result = (SimpleEntity)TermSearcher.searchTerm(elocatorphrase, "entity", ingroup);
+			SimpleEntity result = (SimpleEntity)new TermSearcher().searchTerm(elocatorphrase, "entity");
 			if(result!=null){
 				entityl = result;
 			}	
@@ -43,9 +43,9 @@ public class EntitySearcher4 extends EntitySearcher {
 		
 		if(entityphrasetokens[0].matches("("+Dictionary.spatialtermptn+")")){
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //process
-			SimpleEntity sentity = (SimpleEntity)TermSearcher.searchTerm(newentity, "entity", ingroup);
+			SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
 			if(sentity!=null){
-				SimpleEntity sentity1 = (SimpleEntity)TermSearcher.searchTerm(entityphrasetokens[0]+" region", "entity", ingroup);//anterior + region
+				SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(entityphrasetokens[0]+" region", "entity");//anterior + region
 				if(sentity1!=null){
 					//nested part_of relation
 					if(entityl.getString().length()>0){ //maxilla
@@ -88,7 +88,7 @@ public class EntitySearcher4 extends EntitySearcher {
 				}				
 			}
 		}
-		return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep, ingroup);
+		return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
 	/**

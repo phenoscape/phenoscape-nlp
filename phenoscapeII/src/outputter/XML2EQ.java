@@ -75,6 +75,14 @@ public class XML2EQ {
 
 
 	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
+	public static ELKReasoner elk; 
+	static{
+		try{
+			elk = new ELKReasoner(ontoutil.uberon);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	private Dictionary dictionary = new Dictionary();
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
@@ -83,6 +91,7 @@ public class XML2EQ {
 	//private KeyEntityFinder kef = new  KeyEntityFinder(es);
 	
 	public static final int RELATIONAL_SLIM=1;
+	public static final int ATTRIBUTE_SLIM=2;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
@@ -123,7 +132,7 @@ public class XML2EQ {
 				+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
 		
 		pathStructure = XPath.newInstance(".//structure");
-		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='whole_organism']/character");
+		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
 		pathCharacter = XPath.newInstance(".//character");
 		pathText2 = XPath.newInstance(".//text");
 		pathRelation = XPath.newInstance(".//relation");
@@ -158,7 +167,7 @@ public class XML2EQ {
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();
-					String qualityclue = csp.getQualityClue();
+					ArrayList<String> qualityclue = csp.getQualityClue();
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
 						ssp.parse(statestatement, root);
@@ -651,7 +660,7 @@ public class XML2EQ {
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
 						//TODO consider negation
-						Quality q = (Quality) TermSearcher.searchTerm(ngram, "quality", 0); 
+						Quality q = (Quality) new TermSearcher().searchTerm(ngram, "quality"); 
 						if(q!=null){
 							String qlabel = q.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);

@@ -31,7 +31,7 @@ public class TermSearcher {
 	/** The quality id cache. */
 	public static Hashtable<String, ArrayList<FormalConcept>> regexpQualityIDCache = new Hashtable<String, ArrayList<FormalConcept>>();
 	private static Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")(\\b.*)");
-	
+	ArrayList<Hashtable<String, String>> candidatematches = new ArrayList<Hashtable<String, String>> (); 
 	
 
 	/**
@@ -44,16 +44,13 @@ public class TermSearcher {
 	 * @return null or FormalConcept [a 4-key hashtable: term, querytype, id, label.]
 	 * @throws Exception the exception
 	 */
-	public static FormalConcept searchTerm(String phrase, String phrasetype, int ingroup){
+	public FormalConcept searchTerm(String phrase, String phrasetype){
 		if(phrase.trim().length()==0) return null;
 		//the first strong match based on the original phrase is returned right away. Other matches are saved in candidate matches
 		//strong match = a match to a class lable or an exact synonym
-		ArrayList<Hashtable<String, String>> candidatematches = new ArrayList<Hashtable<String, String>> (); 
-		
+		phrase = format(phrase);
 		FormalConcept result = searchCache(phrase, phrasetype);
 		if(result!=null) return result;
-		
-		phrase = format(phrase);
 		
 		//search ontologies
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]
@@ -62,7 +59,8 @@ public class TermSearcher {
 		
 		//1. search the original phrase
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
-		FormalConcept strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
+
+		FormalConcept strongmatch = getStrongMatch(phrase+"", phrasetype, results);
 		if(strongmatch != null) return strongmatch;
 		
 		//if landed here, all matches based on the original phrase are weak matches.
@@ -98,7 +96,7 @@ public class TermSearcher {
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
 			
-				strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
+				strongmatch = getStrongMatch(phrase, phrasetype, results);
 				if(strongmatch != null) return strongmatch;
 				
 				//if landed here, all matches based on this spatial reform are weak matches.
@@ -112,7 +110,7 @@ public class TermSearcher {
 		//3. phrase with hyphens, replace hyphens with spaces
 		if(phrase.indexOf("-")>0){ //caudal-fin
 			phrase = phrase.replaceAll("-", " ");
-			strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
+			strongmatch = getStrongMatch(phrase, phrasetype, results);
 			if(strongmatch != null) return strongmatch;
 			
 			//TODO: latero-sensory => sensory
@@ -126,7 +124,7 @@ public class TermSearcher {
 			String replacement = phrase.substring(phrase.indexOf("/")).replaceFirst("^/", ""); //tendon
 			String firstpart = phrase.substring(0, phrase.indexOf("/")); //xyz bone
 			
-			strongmatch = getStrongMatch(firstpart, phrasetype, results, ingroup);
+			strongmatch = getStrongMatch(firstpart, phrasetype, results);
 			if(strongmatch != null) return strongmatch;
 			
 			//if landed here, all matches based on this reform are weak matches.
@@ -135,7 +133,7 @@ public class TermSearcher {
 			
 			while(firstpart.contains(" ")){
 				phrase = firstpart.replaceFirst("\\s\\S+$", replacement);//replace the last word in firstpart with "replacement": now term = xyz tendon
-				strongmatch = getStrongMatch(phrase, phrasetype, results, ingroup);
+				strongmatch = getStrongMatch(phrase, phrasetype, results);
 				if(strongmatch != null) return strongmatch;
 				
 				//if landed here, all matches based on this spatial reform are weak matches.
@@ -169,6 +167,7 @@ public class TermSearcher {
 		// word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
 		word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to dorsal-fin
 		word = word.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal to
+		word = word.replaceAll("(?<=\\w)shaped", "-shaped");
 		return word;
 	}
 	
@@ -194,8 +193,8 @@ public class TermSearcher {
 	 * @throws Exception
 	 */
 
-	private static FormalConcept getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results, int ingroup) {
-		results = XML2EQ.ontoutil.searchOntologies(term, type, ingroup);
+	private FormalConcept getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results) {
+		XML2EQ.ontoutil.searchOntologies(term, type, results);
 		if(results !=null && results.size() > 0){
 			//loop through results to find the closest match
 			//return original or exact match
@@ -233,7 +232,7 @@ public class TermSearcher {
 	 * @throws Exception
 	 */
 
-	public static ArrayList<FormalConcept> regexpSearchTerm(String phrase, String phrasetype, int ingroup){
+	public static ArrayList<FormalConcept> regexpSearchTerm(String phrase, String phrasetype){
 		ArrayList<FormalConcept> result = null;
 		if(phrasetype.compareTo("entity")==0){
 			 result = TermSearcher.regexpEntityIDCache.get(phrase);
@@ -242,7 +241,8 @@ public class TermSearcher {
 			result = TermSearcher.regexpQualityIDCache.get(phrase);
 		}		
 		if(result !=null ) return result;
-		ArrayList<Hashtable<String, String>> searchresult = XML2EQ.ontoutil.searchOntologies(phrase, phrasetype, ingroup);
+		ArrayList<Hashtable<String, String>> searchresult = new ArrayList<Hashtable<String, String>> ();
+		XML2EQ.ontoutil.searchOntologies(phrase, phrasetype, searchresult);
 		if(searchresult !=null && searchresult.size() > 0){
 			result = new ArrayList<FormalConcept>();
 			for(Hashtable<String, String> item: searchresult){
@@ -293,16 +293,52 @@ public class TermSearcher {
 		if(type.compareTo("quality")==0) TermSearcher.qualityIDCache.put(term, aresult);
 	}
 
+
+	public ArrayList<FormalConcept> getCandidateMatches() {
+		ArrayList<FormalConcept> fcs = new ArrayList<FormalConcept>();
+		for(Hashtable<String, String> result: this.candidatematches){
+			/*		result.put("term",  term);
+			result.put("querytype",  querytype);
+			result.put("matchtype", matchtype);
+			result.put("id", "");
+			result.put("label", "");*/
+			if(result.get("querytype").compareTo("entity")==0){
+				SimpleEntity se = new SimpleEntity();
+				se.setConfidenceScore(0.5f); //candidate match is less reliable, will replace hard-coded score with a calculated score
+				se.setString(result.get("term"));
+				se.setLabel(result.get("label"));
+				se.setId(result.get("id"));
+				fcs.add(se);				
+			}
+			if(result.get("querytype").compareTo("quality")==0){
+				Quality q = new Quality();
+				q.setConfidenceScore(0.5f); //candidate match is less reliable, will replace hard-coded score with a calculated score
+				q.setString(result.get("term"));
+				q.setLabel(result.get("label"));
+				q.setId(result.get("id"));
+				fcs.add(q);				
+			}
+			
+		}
+		return fcs;
+	}
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {	
-		FormalConcept result = TermSearcher.searchTerm("absent", "quality", 0);
-		System.out.println("string = "+result.getString());
-		System.out.println("label = "+result.getLabel());
-		System.out.println("id = "+result.getId());
-		System.out.println("confidence = "+result.getConfidienceScore());
-		
+
+		TermSearcher ts = new TermSearcher();
+		FormalConcept result = ts.searchTerm("large", "quality");
+		if(result!=null){
+			System.out.println(result.toString());
+		}else{
+			ArrayList<FormalConcept> fcs = ts.getCandidateMatches();
+			for(FormalConcept fc: fcs){
+				System.out.println(fc.toString());
+			}
+		}		
+
 	}
 
 }

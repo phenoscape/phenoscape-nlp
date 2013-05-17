@@ -27,7 +27,7 @@ public abstract class EntitySearcher {
 	/*whether the request can be handled by this searcher */
 	//public abstract boolean canHandle (Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup);
 	/*handle the request*/
-	public abstract Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup);
+	public abstract Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep);
 	/*otherwise, set another handler to handle the request*/
    //public abstract void  setHandler(EntitySearcher handler, Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup);
 	

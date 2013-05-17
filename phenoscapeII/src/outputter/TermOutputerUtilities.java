@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import oboaccessor.OBO2DB;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import owlaccessor.OWLAccessorImpl;
 
@@ -34,6 +35,8 @@ public class TermOutputerUtilities {
 	//private String database;
 
 	public static boolean debug = false;
+	public static String attributes = "";
+	public static OWLOntology uberon = null;
 	
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
@@ -41,10 +44,9 @@ public class TermOutputerUtilities {
 	static{
 		//TODO:add GO:bioprocess
 		entityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+"ext.owl",
+				ontologyfolder+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl",
 				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
 				};
-		
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};
@@ -54,6 +56,9 @@ public class TermOutputerUtilities {
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), new ArrayList<String>());
 				OWLentityOntoAPIs.add(api);
+				if(onto.endsWith(ApplicationUtilities.getProperty("ontology.uberon")+".owl")){
+					uberon = api.getOntology();
+				}
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format
 				int i = onto.lastIndexOf("/");
@@ -65,9 +70,12 @@ public class TermOutputerUtilities {
 			}*/
 		}
 		
+		//for each entity ontology
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), excluded);
+				attributes += "|"+api.getLowerCaseAttributeSlimStringPattern();
+				attributes = attributes.replaceAll("(^\\||\\|$)", "");
 				OWLqualityOntoAPIs.add(api);
 			}/*else if(onto.endsWith(".obo")){
 				int i = onto.lastIndexOf("/");
@@ -223,14 +231,13 @@ public class TermOutputerUtilities {
 	 * @param subgroup: inRelationalSlim
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, int subgroup) {
+	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, ArrayList<Hashtable<String, String>> results) {
 		//search quality or entity ontologies, depending on the type
-		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
 		
 		//quality
 		if(type.compareTo("quality")==0){
 			for(OWLAccessorImpl api: OWLqualityOntoAPIs){
-				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type);
 				if(result!=null){
 					results.add(result);
 				}
@@ -249,7 +256,7 @@ public class TermOutputerUtilities {
 		//entity
 		if(type.compareTo("entity")==0){
 			for(OWLAccessorImpl api: OWLentityOntoAPIs){
-				Hashtable<String, String> result = searchOWLOntology(term, api, type, subgroup);
+				Hashtable<String, String> result = searchOWLOntology(term, api, type);
 				if(result!=null){
 					results.add(result);
 				}
@@ -293,10 +300,10 @@ public class TermOutputerUtilities {
 	 * @param term
 	 * @param owlapi
 	 * @param type
-	 * @param subgroup ?? 
+	 * @param slim ?? 
 	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
-	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type, int subgroup) {
+	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
