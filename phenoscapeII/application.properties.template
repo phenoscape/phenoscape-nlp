@@ -1,0 +1,20 @@
+#Database related data, use biocreative2012 for phenoscape project related data processing
+#fill in database.name, database.username, and database.password
+database.name=
+database.username=
+database.password=
+database.driverPath=com.mysql.jdbc.Driver
+
+#replace [] with info given above
+database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
+
+#fill in ontology.dir, uberphrases.bin, wordnet.dictionary
+ontology.dir=
+uberonphrases.bin =
+wordnet.dictionary=
+
+####################################DO NOT EDIT THE FOLLOWING######################################
+
+#XML Schema
+source.attribute.name=source_pdf
+unknown.structure.name=whole organism
