@@ -15,4 +15,4 @@ ontology.uberon=ext
 
 #XML Schema
 source.attribute.name=source_pdf
-unknown.structure.name=unknown_structure
+unknown.structure.name=whole organism
