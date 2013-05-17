@@ -1,15 +1,19 @@
 #Database related data, use biocreative2012 for phenoscape project related data processing
-database.name=biocreative2012
+#fill in database.name, database.username, and database.password
+database.name=
+database.username=
+database.password=
 database.driverPath=com.mysql.jdbc.Driver
-database.url=jdbc:mysql://localhost/biocreative2012?user=root&password=forda444
-database.username=root
-database.password=forda444
 
-ontology.dir=C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/ontologies
-uberonphrases.bin = C:/Users/updates/CharaParserTest/Ontologies/ext_terms.bin
-wordnet.dictionary=C:/Users/updates/CharaParserTest/Ontologies/dict
+#replace [] with info given above
+database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
 
+#fill in ontology.dir, uberphrases.bin, wordnet.dictionary
+ontology.dir=
+uberonphrases.bin =
+wordnet.dictionary=
 
+#DO NOT EDIT THE FOLLOWINGs
 
 # Data individual to mark up
 style.mapping=style-mapping.properties

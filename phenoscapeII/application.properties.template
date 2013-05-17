@@ -1,0 +1,18 @@
+#Database related data, use biocreative2012 for phenoscape project related data processing
+database.name=
+database.username=
+database.password=
+
+#driver information
+database.driverPath=com.mysql.jdbc.Driver
+database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
+
+
+#external knowledge sources
+ontology.dir=
+wordnet.dictionary=
+ontology.uberon=ext
+
+#XML Schema
+source.attribute.name=source_pdf
+unknown.structure.name=unknown_structure
