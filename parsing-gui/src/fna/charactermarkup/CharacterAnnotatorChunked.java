@@ -183,13 +183,13 @@ public class CharacterAnnotatorChunked {
 		// }
 		
 		/*Normalization*/
-		removeIsolatedCharacters();
+		/*removeIsolatedCharacters();
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
 		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
 		decomposeMultipleStructures();//Changed by Zilong
 		standardization();
-		
+		*/
 		
 		if (printAnnotation) {
 			XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());
@@ -1575,7 +1575,8 @@ public class CharacterAnnotatorChunked {
 		 * !=null){ this.createCharacterElement(this.subjects, results, "", v,
 		 * character, ""); } return results; }
 		 */
-		object = parenthesis(object);
+		object = parenthesis(object); //o[(fibula) {size}]]]
+		object = object.substring(0,  object.lastIndexOf(")")+1)+"]";
 		if (object.endsWith(")]")) {
 			ArrayList<Element> tostructures = this.processObject(object); // TODO:
 																			// fix
