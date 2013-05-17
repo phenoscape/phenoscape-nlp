@@ -26,16 +26,18 @@ public class CharacterHandler {
 	private TermOutputerUtilities ontoutil;
 	Element root;
 	Element chara;
-	Entity entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
+	Entity entity; //the entity result will be saved here, which may be null, indicating the ke y entities parsed from the character statement should be used for this character
 	ArrayList<Quality> qualities = new ArrayList<Quality>(); //the quality result will be saved here. May be relationalquality, simple quality, or negated quality
 	ArrayList<Entity> entityparts = new ArrayList<Entity>();
+	ArrayList<String> qualityclues;
 	/**
 	 * 
 	 */
-	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil) {
+	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil, ArrayList<String> qualityclues) {
 		this.root = root;
 		this.chara = chara;
 		this.ontoutil = ontoutil;
+		this.qualityclues = qualityclues;
 	}
 
 	/**
@@ -97,9 +99,12 @@ public class CharacterHandler {
 			}
 		}
 		
+		String temp="";
+		
 		//not a relational quality, is this a simple quality or a negated quality?
-		Quality result = (Quality) new TermSearcher().searchTerm(quality, "quality");
-		if(result!=null){
+		TermSearcher ts = new TermSearcher();
+		Quality result = (Quality) ts.searchTerm(quality, "quality");
+		if(result!=null){ //has a strong match
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
@@ -115,6 +120,12 @@ public class CharacterHandler {
 				return;
 			}
 		}else{
+			//check other matches
+			for(FormalConcept match: ts.getCandidateMatches()){
+				for(String clue: qualityclues){
+					//TODO
+				}
+			}
 			result=new Quality();
 			result.string=quality;
 			result.confidenceScore=(float) 1.0;

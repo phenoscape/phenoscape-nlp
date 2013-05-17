@@ -132,7 +132,7 @@ public class StateStatementParser extends Parser {
 			for(Element character: characters){
 				String structid = character.getParentElement().getAttributeValue("id"+"");
 				boolean maybesubject = maybeSubject(root, structid); //false if fromid appears in constraintid or toid
-				 CharacterHandler ch = new CharacterHandler(root, character, ontoutil); //may contain relational quality
+				 CharacterHandler ch = new CharacterHandler(root, character, ontoutil, qualityclue); //may contain relational quality
 				 ch.handle();
 				 ArrayList<Quality> qualities = ch.getQualities();
 				 ArrayList<Entity> entities = new ArrayList<Entity>();

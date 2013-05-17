@@ -60,7 +60,7 @@ public class TermSearcher {
 		
 		//1. search the original phrase
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
-		FormalConcept strongmatch = getStrongMatch(phrase, phrasetype, results);
+		FormalConcept strongmatch = getStrongMatch(phrase+"", phrasetype, results);
 		if(strongmatch != null) return strongmatch;
 		
 		//if landed here, all matches based on the original phrase are weak matches.
@@ -293,7 +293,7 @@ public class TermSearcher {
 		if(type.compareTo("quality")==0) TermSearcher.qualityIDCache.put(term, aresult);
 	}
 
-	private ArrayList<FormalConcept> getCandidateMatches() {
+	public ArrayList<FormalConcept> getCandidateMatches() {
 		ArrayList<FormalConcept> fcs = new ArrayList<FormalConcept>();
 		for(Hashtable<String, String> result: this.candidatematches){
 			/*		result.put("term",  term);
@@ -326,7 +326,7 @@ public class TermSearcher {
 	 */
 	public static void main(String[] args) {	
 		TermSearcher ts = new TermSearcher();
-		FormalConcept result = ts.searchTerm("helixshaped", "quality");
+		FormalConcept result = ts.searchTerm("large", "quality");
 		if(result!=null){
 			System.out.println(result.toString());
 		}else{
