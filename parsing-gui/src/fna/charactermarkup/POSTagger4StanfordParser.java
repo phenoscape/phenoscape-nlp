@@ -291,14 +291,14 @@ public class POSTagger4StanfordParser {
 	        	   }else if(word.compareTo("at-least")==0){
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("one_another")==0){
-	        		   sb.append(word+"/NNS ");
+	        		   sb.append(word+"/NN ");
 	        	   }else if(word.compareTo("plus")==0){
 	        		   sb.append(word+"/CC ");
 	        	   }else if(word.matches("\\d+[cmd]?m\\d+[cmd]?m")){ //area turned into 32cm35mm
 	        		   //sb.append(word+"/CC ");
 	        		   sb.append(word+"/CD ");
 	        	   }else if(word.matches("("+ChunkedSentence.units+")")){
-	       			   sb.append(word+"/NNS ");
+	       			   sb.append(word+"/NN ");
 	       		   }else if(word.matches("as-\\S+")){ //as-wide-as
 	       		   	   sb.append(word+"/IN "); //changed from RB to IN 2/22/02 by Hong
 	       		   }else if(word.matches("same-\\S+")){ //same-as
@@ -307,7 +307,7 @@ public class POSTagger4StanfordParser {
 	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
 	       		   }else if(p.contains("op")){ //<inner> larger.
 	       				//System.out.println(rs1.getString(2));
-	       			   sb.append(word+"/NNS ");
+	       			   sb.append(word+"/NN ");
 	       		   }else if(p.contains("os") || pos.indexOf('<') >=0){
 	       			   sb.append(word+"/NN ");
 	       		   }else if(p.contains("c")|| pos.indexOf('{') >=0){

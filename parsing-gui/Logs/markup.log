@@ -1,3 +1,5 @@
 [2013-03-10 13:42:12,552] main fna.db.MainFormDbAccessor ERROR - Couldn't find Class in MainFormDbAccessorjava.sql.SQLException: Access denied for user 'biocreative'@'localhost' (using password: YES)
 [2013-03-10 17:30:58,810] main fna.parsing.ParsingUtil ERROR - Exception in ParsingUtil:outputXML
 [2013-03-10 17:35:01,686] main fna.parsing.ParsingUtil ERROR - Exception in ParsingUtil:outputXML
+[2013-05-16 22:59:32,223] main fna.parsing.ParsingUtil ERROR - Exception in ParsingUtil:outputXML
+[2013-05-16 23:00:56,769] main fna.parsing.ParsingUtil ERROR - Exception in ParsingUtil:outputXML
