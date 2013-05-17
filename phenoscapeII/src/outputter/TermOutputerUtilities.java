@@ -301,7 +301,7 @@ public class TermOutputerUtilities {
 	 * @param owlapi
 	 * @param type
 	 * @param slim ?? 
-	 * @return 5-key hashtable: term, querytype, id, label, matchtype
+	 * @return 5-key hashtable: term, querytype, id, label, matchtype, iri
 	 */
 	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		Hashtable<String, String> result = null;
@@ -358,19 +358,23 @@ public class TermOutputerUtilities {
 		result.put("matchtype", matchtype);
 		result.put("id", "");
 		result.put("label", "");
+		result.put("iri", "");
 		boolean haveresult = false;
 		Iterator<OWLClass> it = matches.iterator();
 		while(it.hasNext()){
 			OWLClass c = it.next();
 			String label = owlapi.getLabel(c);
 			String id = owlapi.getID(c);
+			String iri = c.getIRI().toString();
 			result.put("id", result.get("id")+ id+";");
 			result.put("label", result.get("label")+ label+";");
+			result.put("iri", result.get("iri")+ iri+";");
 			haveresult = true;
 		}
 		if(haveresult){
 			result.put("id", result.get("id").replaceFirst(";$", ""));
 			result.put("label", result.get("label").replaceFirst(";$", ""));
+			result.put("iri", result.get("iri").replaceFirst(";$", ""));
 		}
 		if(haveresult) return result;
 		return null;
@@ -604,12 +608,41 @@ public class TermOutputerUtilities {
 	}
 
 	/**
+	 * 
+	 * @param classIRI
+	 * @param phrase
+	 * @return true if class1IRI is an offspring of class2IRI
+	 */
+	public boolean isChildQuality(String classIRIc, String classIRIp) {
+		boolean isoffspring = false;
+		for(OWLAccessorImpl qapi : this.OWLqualityOntoAPIs){
+			OWLClass cc = qapi.getClassByIRI(classIRIc);
+			OWLClass cp = qapi.getClassByIRI(classIRIp);
+			if(isOffSpring(cc, cp, qapi)) isoffspring = true;
+		}		
+		return isoffspring;
+	}
+	
+	
+
+	private boolean isOffSpring(OWLClass cc, OWLClass cp, OWLAccessorImpl api) {
+		List<OWLClass> parents = api.getParents(cc);
+		if(parents==null || parents.size()==0) return false;
+		if(parents.contains(cp)) return true;
+		for(OWLClass parent : parents){
+			return isOffSpring(parent, cp, api);
+		}
+		return false;
+	}
+
+	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		String[] results = retreiveParentInfoFromPATO("PATO:0000402");
 		System.out.println(results[1]);
 	}
+
 
 
 

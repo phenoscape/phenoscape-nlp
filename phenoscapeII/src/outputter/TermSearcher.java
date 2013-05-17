@@ -205,7 +205,8 @@ public class TermSearcher {
 						entity.setString(aresult.get("term"));
 						entity.setLabel(aresult.get("label"));
 						entity.setId(aresult.get("id"));
-						entity.setConfidenceScore((float)1);
+						entity.setClassIRI(aresult.get("iri"));
+						entity.setConfidenceScore(1f);
 						cacheIt(term, entity, type);
 						return entity;
 					}else{
@@ -213,7 +214,8 @@ public class TermSearcher {
 						quality.setString(aresult.get("term"));
 						quality.setLabel(aresult.get("label"));
 						quality.setId(aresult.get("id"));
-						quality.setConfidenceScore((float)1);
+						quality.setClassIRI(aresult.get("iri"));
+						quality.setConfidenceScore(1f);
 						cacheIt(term, quality, type);
 						return quality;
 					}		
@@ -308,6 +310,7 @@ public class TermSearcher {
 				se.setString(result.get("term"));
 				se.setLabel(result.get("label"));
 				se.setId(result.get("id"));
+				se.setClassIRI(result.get("iri"));
 				fcs.add(se);				
 			}
 			if(result.get("querytype").compareTo("quality")==0){
@@ -316,6 +319,7 @@ public class TermSearcher {
 				q.setString(result.get("term"));
 				q.setLabel(result.get("label"));
 				q.setId(result.get("id"));
+				q.setClassIRI(result.get("iri"));
 				fcs.add(q);				
 			}
 			
