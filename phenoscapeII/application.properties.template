@@ -8,11 +8,11 @@ database.driverPath=com.mysql.jdbc.Driver
 #replace [] with info given above
 database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
 
-#fill in ontology.dir, uberphrases.bin, wordnet.dictionary
+#fill in ontology.dir, uberphrases.bin, wordnet.dictionary, file name of the uberon ontology without .owl extension.
 ontology.dir=
 uberonphrases.bin =
 wordnet.dictionary=
-
+ontology.uberon=
 ####################################DO NOT EDIT THE FOLLOWING######################################
 
 #XML Schema
