@@ -99,8 +99,6 @@ public class CharacterHandler {
 			}
 		}
 		
-		String temp="";
-		
 		//not a relational quality, is this a simple quality or a negated quality?
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
@@ -111,8 +109,7 @@ public class CharacterHandler {
 				Quality parentquality = new Quality();
 				parentquality.setString(parentinfo[1]);
 				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);
-				
+				parentquality.setId(parentinfo[0]);				
 				this.qualities.add(new NegatedQuality(result, parentquality));
 				return;
 			}else{
@@ -121,18 +118,26 @@ public class CharacterHandler {
 			}
 		}else{
 			//check other matches
-			for(FormalConcept match: ts.getCandidateMatches()){
+			for(FormalConcept aquality: ts.getCandidateMatches()){
 				for(String clue: qualityclues){
-					//TODO
+					Quality qclue = (Quality)ts.searchTerm(clue, "quality");
+					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
+						aquality.setConfidenceScore(1.0f); //increase confidence score
+					}					
 				}
+				//no clue or clue was not helpful
+				this.qualities.add((Quality)aquality); //keep confidence score as is
 			}
-			result=new Quality();
-			result.string=quality;
-			result.confidenceScore=(float) 1.0;
-			this.qualities.add(result);
+			if(this.qualities.size()==0){
+				result=new Quality();
+				result.string=quality;
+				result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
+				this.qualities.add(result);
+			}
 			return;
 		}
 	}
+	
 	
 	
 	

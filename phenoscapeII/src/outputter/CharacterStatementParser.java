@@ -21,7 +21,7 @@ import org.jdom.xpath.XPath;
 public class CharacterStatementParser extends Parser {
 	ArrayList<Entity> entities = new ArrayList<Entity>();
 	ArrayList<Entity> keyentities = new ArrayList<Entity>();
-	ArrayList<String> qualityClue;
+	ArrayList<String> qualityClue = new ArrayList<String> ();
 	static XPath pathstructure;
 	static{
 		try{
@@ -124,7 +124,6 @@ public class CharacterStatementParser extends Parser {
 		Matcher m = p.matcher(text);
 		//could there be multiple attributes?
 		while(m.matches()){
-			if(this.qualityClue==null) this.qualityClue = new ArrayList<String> ();
 			this.qualityClue.add(m.group(1));
 			m = p.matcher(m.group(2));
 		}
