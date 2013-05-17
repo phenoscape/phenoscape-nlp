@@ -1575,9 +1575,9 @@ public class CharacterAnnotatorChunked {
 		 * !=null){ this.createCharacterElement(this.subjects, results, "", v,
 		 * character, ""); } return results; }
 		 */
-		object = parenthesis(object); //o[(fibula) {size}]]]
-		object = object.substring(0,  object.lastIndexOf(")")+1)+"]";
-		if (object.endsWith(")]")) {
+		object = parenthesis(object); //o[(fibula) {size}]]]	
+		if (object.indexOf("(")>=0) {
+			object = object.substring(0,  object.lastIndexOf(")")+1)+"]";
 			ArrayList<Element> tostructures = this.processObject(object); // TODO:
 																			// fix
 																			// content
@@ -2263,16 +2263,18 @@ public class CharacterAnnotatorChunked {
 																			// in
 																			// oval
 																			// outline
-				String cvalue = ckstring.replaceFirst(".*?\\]", "").replaceAll("\\w+\\[", "").replaceAll(lastword, "").replaceAll("[{}\\]\\[]", "");
-				Iterator<Element> it = this.latestelements.iterator();
-				while (it.hasNext()) {
-					lastelement = it.next();
-					Element chara = new Element("character");
-					chara.setAttribute("name", lastword);
-					chara.setAttribute("value", cvalue);
-					this.addContent(lastelement, chara);
+				String cvalue = ckstring.replaceFirst(".*?\\]", "").replaceAll("\\w+\\[", "").replaceAll(lastword, "").replaceAll("[{}\\]\\[]", "").trim();
+				if(!cvalue.endsWith(")")){
+					Iterator<Element> it = this.latestelements.iterator();
+					while (it.hasNext()) {
+						lastelement = it.next();
+						Element chara = new Element("character");
+						chara.setAttribute("name", lastword);
+						chara.setAttribute("value", cvalue);
+						this.addContent(lastelement, chara);
+					}
+					done = true;
 				}
-				done = true;
 			}
 		}
 		return done;

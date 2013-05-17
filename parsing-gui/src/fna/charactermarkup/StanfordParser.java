@@ -53,7 +53,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private String tableprefix = null;
 	private String glosstable = null;
 	static public Hashtable<String, String> characterRstates = new Hashtable<String, String>();
-	private String characters;
+	private String characters="";
 	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
@@ -621,8 +621,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
 
-		String posedfile="C:/Users/updates/CharaParserTest/swartz2012/target/swartz_posedsentences.txt";
-		String parsedfile="C:/Users/updates/CharaParserTest/swartz2012/target/swartz_parsedsentences.txt";
+		String posedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_posedsentences.txt";
+		String parsedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
@@ -634,11 +634,11 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "swartz", "fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "swartz_after", "fishglossaryfixed", false);
 
 		
-		sp.POSTagging();
-		sp.parsing();
+		//sp.POSTagging();
+		//sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);
