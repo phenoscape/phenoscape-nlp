@@ -280,6 +280,7 @@ public class StateStatementParser extends Parser {
 				if(keye.isOntologized()){
 					if(XML2EQ.elk.isPartOf(e.getPrimaryEntityOWLClassIRI(), keye.getPrimaryEntityOWLClassIRI())){
 						//keye is entity locator of e
+						System.out.println("");
 						CompositeEntity ce = new CompositeEntity();
 						ce.addEntity(e);
 						FormalRelation rel = new FormalRelation();
