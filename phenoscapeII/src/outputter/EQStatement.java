@@ -100,7 +100,14 @@ public class EQStatement {
 		StringBuffer sb = new StringBuffer();
 		sb.append("text:"+this.description+System.getProperty("line.separator"));
 		sb.append("Entity:"+ entity.toString()+System.getProperty("line.separator"));
-		sb.append("Quality:"+(quality!=null?quality.toString():"")+System.getProperty("line.separator"));//Ternary operator to check quality null values => Hariharan
+		
+		if(quality instanceof RelationalQuality)
+		{
+			sb.append("Quality:"+(((RelationalQuality) quality).getQuality()!=null?((RelationalQuality) quality).getQuality().toString():"")+System.getProperty("line.separator"));
+			sb.append("Related Entity:"+(((RelationalQuality) quality).getQualityModifier()!=null?((RelationalQuality) quality).getQualityModifier().toString():"")+System.getProperty("line.separator"));
+		}
+		else
+			sb.append("Quality:"+(quality!=null?quality.toString():"")+System.getProperty("line.separator"));
 		return sb.toString();
 		
 	}

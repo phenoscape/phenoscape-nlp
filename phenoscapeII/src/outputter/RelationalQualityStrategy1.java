@@ -11,7 +11,7 @@ import org.jdom.xpath.XPath;
 //RelationalQualityStrategy is used to check whether an entity is a quality and if true will create qualities accordingly.
 public class RelationalQualityStrategy1 {
 
-	Element root, statement;
+	Element root;
 	String relation;
 	String tostructname;
 	String tostructid;
@@ -25,16 +25,12 @@ public class RelationalQualityStrategy1 {
 	ArrayList<Entity> keyentities;
 	ArrayList<String> identifiedqualities;
 
-	public RelationalQualityStrategy1(Element root, String relname,
-			String toname, String toid, String fromname, String fromid,
-			boolean neg, boolean b, Element statement, ArrayList<Entity> keyentities) throws JDOMException {
+	public RelationalQualityStrategy1(Element root,String toname, String toid, String fromname, String fromid, ArrayList<Entity> keyentities) throws JDOMException {
 		this.root = root;
-		this.relation = relname;
 		this.tostructname = toname;
 		this.tostructid = toid;
 		this.fromstructname = fromname;
 		this.fromstructid = fromid;
-		this.fromcharacterstatement = b;
 		pathCharacterUnderStucture = XPath.newInstance(".//character");
 		this.keyentities = keyentities;
 		identifiedqualities = new ArrayList<String>();
@@ -53,6 +49,7 @@ public class RelationalQualityStrategy1 {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void parseforQuality(String quality, String qualityid)
 			throws JDOMException {
 		// characters => quality
@@ -60,8 +57,9 @@ public class RelationalQualityStrategy1 {
 		// handle this later => use below code to look and use all the
 		// characters under a structure
 		List<Element> characters = new ArrayList<Element>();
-		Element Structures;
+		Element Structures,chara_detach=null;
 		boolean negated = false;
+		String qualitycopy=quality;
 		XPath structurewithstructid = XPath.newInstance(".//structure[@id='"+ qualityid + "']");
 		Structures = (Element) structurewithstructid.selectSingleNode(this.root);
 		characters = pathCharacterUnderStucture.selectNodes(Structures);
@@ -70,8 +68,9 @@ public class RelationalQualityStrategy1 {
 			String value = Utilities.formQualityValueFromCharacter(chara);
 			if (value.startsWith("not") || (value.equals("absent"))) {
 				negated = true;
-				quality = quality.substring(quality.indexOf(" ") + 1).trim();
-				chara.detach();
+			//	quality = quality.substring(quality.indexOf(" ") + 1).trim();
+				chara_detach =chara;
+				break;
 				// TODO:// deal// with// negated// quality// here
 			}
 
@@ -81,13 +80,15 @@ public class RelationalQualityStrategy1 {
 		if (relationalquality != null)
 		{
 			//If two entities are there, then the first one is the primary entity and the second one is the related entity
-			if(this.keyentities.size()==2)
+			if((this.keyentities!=null) && (this.keyentities.size()==2))
 			{
 				for(int i=1;i<this.keyentities.size();i++)
 				{
 					RelationalQuality rq = new RelationalQuality(relationalquality, this.keyentities.get(i));
 					this.qualities.add(rq);
 					this.identifiedqualities.add(qualityid);
+					if(chara_detach!=null)
+						chara_detach.detach();
 					return;
 				}
 			}
@@ -103,7 +104,12 @@ public class RelationalQualityStrategy1 {
 		// those, resolve them later
 
 		// not a relational quality, is this a simple quality or a negated
+		//simple quality == quality character value + quality
 		// quality?
+		for(Element chara:characters)
+		{
+			quality=chara.getAttributeValue("value")+" "+quality;
+			quality=quality.trim();
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
 		if (result != null) {
@@ -114,23 +120,22 @@ public class RelationalQualityStrategy1 {
 				parentquality.setString(parentinfo[1]);
 				parentquality.setLabel(parentinfo[1]);
 				parentquality.setId(parentinfo[0]);
-
 				this.qualities.add(new NegatedQuality(result, parentquality));
 				this.identifiedqualities.add(qualityid);
-				return;
+				chara.detach();
+				//return;
 			} else {
 				this.qualities.add(result);
 				this.identifiedqualities.add(qualityid);
-				return;
+				chara.detach();
+				//return;
 			}
-		} else {
-			result = new Quality();
-			result.string = quality;
-			result.confidenceScore = (float) 1.0;
-			this.qualities.add(result);
-			this.identifiedqualities.add(qualityid);
-			return;
+			if(chara_detach!=null)
+				chara_detach.detach();
 		}
+		quality=qualitycopy;
+	}
+		return;
 	}
 
 	public static String formQualityValueFromCharacter(Element chara) {

@@ -47,6 +47,7 @@ public class ELKReasoner{
 		// Load your ontology.
 		//ont = man.loadOntology(IRI.create(ontologyIRI));
 		// Create an ELK reasoner.
+		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
 	}

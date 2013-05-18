@@ -183,13 +183,13 @@ public class CharacterAnnotatorChunked {
 		// }
 		
 		/*Normalization*/
-		/*removeIsolatedCharacters();
+		removeIsolatedCharacters();
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
 		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
 		decomposeMultipleStructures();//Changed by Zilong
 		standardization();
-		*/
+		
 		
 		if (printAnnotation) {
 			XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());

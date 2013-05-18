@@ -1046,24 +1046,21 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/final";
-		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-patterns/target/test";
-		String srcdir = "C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/EQ-swartz12MP/target/test";
-		//String srcdir = "C:/Users/updates/CharaParserTest/EQ-swartz2012/target/test";
-		String database = "biocreative2012";
-		// String outputtable = "biocreative_nexml2eq";
-		//String outputtable = "pattern_xml2eq";
-		String outputtable="swartz_after_xml2eq";
-		// String benchmarktable = "internalworkbench";
-		//String prefix = "pattern";
-		String prefix ="swartz_after";
+		
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
+		String database =ApplicationUtilities.getProperty("database.name");
+		String outputtable=ApplicationUtilities.getProperty("table.output");;
+		String prefix =ApplicationUtilities.getProperty("table.prefix");
 		String glosstable = "fishglossaryfixed";
+
 		try {
 			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);
 			x2e.outputEQs();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 }

@@ -52,7 +52,11 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				negativestatements.add(falseeq);			
 			}else{
 				//generate negated quality
+				if(q.getId()!=null)
+				{
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q.getId()); 
+				if(parentinfo!=null)
+				{
 				Quality parentquality = new Quality();
 				parentquality.setString(parentinfo[1]);
 				parentquality.setLabel(parentinfo[1]);
@@ -60,7 +64,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				NegatedQuality nq = new NegatedQuality(q, parentquality);
 				EQStatement falseeq = clone(eq);
 				falseeq.setQuality(nq);
-				negativestatements.add(falseeq);		
+				negativestatements.add(falseeq);	
+				}
+				}
 			}
 		}
 		this.EQStatements.addAll(negativestatements);
