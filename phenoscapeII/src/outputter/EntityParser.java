@@ -30,8 +30,8 @@ public class EntityParser {
 							}
 						}else{
 							boolean negation = false;
-							if(relation.getAttribute("negation")!=null) negation = Boolean.getBoolean(relation.getAttributeValue("negation"));
-							RelationHandler rh = 	new RelationHandler(root, 
+							if(relation.getAttribute("negation")!=null) negation = Boolean.valueOf(relation.getAttributeValue("negation"));
+							RelationHandler rh = new RelationHandler(root, 
 									relation.getAttributeValue("name"),  
 									Utilities.getStructureName(root,  relation.getAttributeValue("to")), 
 									relation.getAttributeValue("to"),

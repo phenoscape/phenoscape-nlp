@@ -248,7 +248,7 @@ public class StateStatementParser extends Parser {
 	 * @throws Exception
 	 */
 	private boolean maybeSubject(Element root, String structid) throws Exception {
-		Element e = (Element) XPath.selectSingleNode(root, ".//character[contains(@constraintid,'"+structid+"')]|.//relation[@toid='"+structid+"']");
+		Element e = (Element) XPath.selectSingleNode(root, ".//relation[@to='"+structid+"']");
 		if(e==null) return true;
 		return false;
 	}

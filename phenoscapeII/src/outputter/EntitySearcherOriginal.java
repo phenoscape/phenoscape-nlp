@@ -72,7 +72,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
-		
+		//Postaxial process on fibula
 		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;

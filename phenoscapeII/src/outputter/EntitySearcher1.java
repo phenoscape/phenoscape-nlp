@@ -11,7 +11,13 @@ import org.jdom.Element;
 
 /**
  * @author updates
- *
+ * This strategy aims to match a precomposed term in an ontology.
+ * For example: 
+ * input: postaxial process, fibula
+ * generate variations:
+ * 1. (postaxial|syn_ring) (process|crest|syn_ring) of (fibula|fibular|adj)
+ * 2. (fibula|fibular|adj) (postaxial|syn_ring) (process|crest|syn_ring) 
+ * 3. (postaxial|syn_ring) (fibula|fibular|adj) (process|crest|syn_ring)
  */
 public class EntitySearcher1 extends EntitySearcher {
 

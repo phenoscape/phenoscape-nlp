@@ -80,8 +80,9 @@ public class RelationHandler {
 			quality = rq;			
 		}else{//no, the relation should not be considered relational quality
 			//entity locator?
-			if (relation.matches("\\((" + outputter.Dictionary.positionprep + ")\\).*")) { // entitylocator
-				Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+			if (relation.matches("\\b(" + outputter.Dictionary.positionprep + ")\\b.*")) { // entitylocator
+				this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, tostructname, fromstructname, "part_of");
+				/*Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 				if(entity!=null){
 					this.entitylocator = entity;
 					FormalRelation rel = new FormalRelation();
@@ -95,8 +96,8 @@ public class RelationHandler {
 					centity.addEntity(this.entity);
 					centity.addEntity(rentity);
 					this.entity = centity;					
-				}
-			} else if (relation.matches("\\(with\\).*")) {
+				}*/
+			} else if (relation.matches("\\bwith\\b.*")) {
 				//check to-structure, if to-structure has no character, then generate EQ to_entity:present
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
@@ -115,7 +116,7 @@ public class RelationHandler {
 						this.otherEQs.add(eq);
 					}
 				}
-			} else if (relation.matches("\\(without\\).*")) {
+			} else if (relation.matches("without.*")) {
 				// output absent as Q for tostructid
 				if (!fromcharacterstatement) {
 					
@@ -133,7 +134,7 @@ public class RelationHandler {
 						this.otherEQs.add(eq);
 					}
 				}
-			} else if(relation.matches("\\(between|among|amongst\\).*")){
+			} else if(relation.matches("\\b(between|among|amongst)\\b.*")){
 				//TODO between is a preposition too.
 			} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
 				/*Hashtable<String, String> result = EntitySearcher.searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
