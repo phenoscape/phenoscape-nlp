@@ -15,6 +15,7 @@ wordnet.dictionary=
 ontology.uberon=
 
 ####################################DO NOT EDIT THE FOLLOWING######################################
+finalizer.standalone=false
 
 #XML Schema
 source.attribute.name=source_pdf
