@@ -123,6 +123,7 @@ public class CharacterHandler {
 		}else{
 			//check other matches
 			for(FormalConcept aquality: ts.getCandidateMatches()){
+				if(qualityclues!=null)
 				for(String clue: qualityclues){
 					Quality qclue = (Quality)ts.searchTerm(clue, "quality");
 					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
