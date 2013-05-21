@@ -107,7 +107,7 @@ public class StateStatementParser extends Parser {
 					String fromid = relation.getAttributeValue("from");
 					String toid = relation.getAttributeValue("to");
 					String relname = relation.getAttributeValue("name").trim();
-					boolean neg = Boolean.getBoolean(relation
+					boolean neg = Boolean.valueOf(relation
 							.getAttributeValue("negation"));
 					String toname = Utilities.getStructureName(root, toid);
 					String fromname = Utilities.getStructureName(root, fromid);
@@ -120,11 +120,11 @@ public class StateStatementParser extends Parser {
 					RelationHandler rh = new RelationHandler(root, relname,
 							toname, toid, fromname, fromid, neg, false);
 					rh.handle();
-
+				
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					EntityProposals e = rh.getEntity();
 					List<QualityProposals> q = new ArrayList<QualityProposals>();
-					q.add(rh.getQuality());
+					if(rh.getQuality()!=null) q.add(rh.getQuality());
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality

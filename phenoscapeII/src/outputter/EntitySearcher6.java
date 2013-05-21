@@ -50,6 +50,7 @@ public class EntitySearcher6 extends EntitySearcher {
 						//TODO: change labels to ids
 					}
 					EntityProposals entities = new EntityProposals();
+					entities.setPhrase(sentity.getString());//set once for all proposals
 					entities.add(sentity);
 					return entities;
 				}
@@ -60,6 +61,7 @@ public class EntitySearcher6 extends EntitySearcher {
 		sentity.setString(entityphrase);
 		sentity.confidenceScore=(float) 1.0;
 		EntityProposals entities = new EntityProposals();
+		entities.setPhrase(sentity.getString());//set once for all proposals
 		entities.add(sentity);
 		return entities;
 	}

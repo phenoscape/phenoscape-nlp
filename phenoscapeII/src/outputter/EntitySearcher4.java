@@ -73,6 +73,7 @@ public class EntitySearcher4 extends EntitySearcher {
 						centity.addEntity(sentity); //process
 						centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
 						EntityProposals entities = new EntityProposals();
+						entities.setPhrase(sentity.getString()); //use the primary entity's phrase
 						entities.add(centity);
 						return entities;
 					}else{//sentity1 be the entity locator
@@ -88,6 +89,7 @@ public class EntitySearcher4 extends EntitySearcher {
 						centity.addEntity(sentity); 
 						centity.addEntity(rentity);	
 						EntityProposals entities = new EntityProposals();
+						entities.setPhrase(sentity.getString());
 						entities.add(centity);
 						return entities;
 					}	

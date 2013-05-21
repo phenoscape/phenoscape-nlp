@@ -48,6 +48,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
 				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(entityphrase);
 				entities.add(entity);
 				return entities;
 			}

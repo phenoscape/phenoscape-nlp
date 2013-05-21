@@ -15,7 +15,7 @@ public class QualityProposals {
 	}
 	
 	public void add(Quality q){
-		proposals.add(q);
+		if(q!=null) proposals.add(q);
 	}
 	
 	public ArrayList<Quality> getProposals(){

@@ -40,6 +40,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				sentity.setId(headnouns.get(noun));
 				sentity.setConfidenceScore((float)1.0);
 				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
 				entities.add(sentity);
 				return entities;
 			}

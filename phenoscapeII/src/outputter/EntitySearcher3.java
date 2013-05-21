@@ -58,6 +58,7 @@ public class EntitySearcher3 extends EntitySearcher {
 				centity.addEntity(sentity);
 				centity.addEntity(rentity);
 				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
 				entities.add(centity);
 				return entities;	
 			}		
