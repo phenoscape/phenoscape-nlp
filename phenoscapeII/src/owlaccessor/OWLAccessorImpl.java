@@ -512,7 +512,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		Set<OWLClass> er = new HashSet<OWLClass>();
 
 		for (String s:excludedclassIRIs){
-			OWLClass c = this.getClassByIRI(s);
+			OWLClass c = this.getOWLClassByIRI(s);
 			er.add(c);//add itself to the set first
 			er.addAll(this.getAllOffsprings(c));//add all its offsprings
 		}
@@ -854,12 +854,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * TODO: deprecate this method, use retrieveconcept(string con) instead
 	 */
 	@Override
-	public OWLClass getClassByIRI(String iri) {
-		
-		for (OWLClass c : this.getAllClasses()) {
-			if(c.getIRI().toString().compareTo(iri)==0) return c;
-		}
-		return null;
+	public OWLClass getOWLClassByIRI(String iri) {
+		//isn't this more efficient?
+		return df.getOWLClass(IRI.create(iri));
+		//for (OWLClass c : this.getAllClasses()) {
+		//	if(c.getIRI().toString().compareTo(iri)==0) return c;
+		//}
+		//return null;
 	}
 
 	/**

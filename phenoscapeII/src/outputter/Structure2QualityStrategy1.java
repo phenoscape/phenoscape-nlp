@@ -9,11 +9,11 @@ import org.jdom.xpath.XPath;
 
 
 /**
- * RelationalQualityStrategy is used to check whether an entity is a quality (relaitonal or not) and
+ * Structure2QualityStrategy is used to check whether a <structure> is really a quality (relational or not) and
  * if true will create qualities accordingly.
  */
 
-public class RelationalQualityStrategy1 {
+public class Structure2QualityStrategy1 implements AnnotationStrategy {
 
 	Element root;
 	String relation;
@@ -25,17 +25,24 @@ public class RelationalQualityStrategy1 {
 	boolean fromcharacterstatement;
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 	private TermOutputerUtilities ontoutil;
-	XPath pathCharacterUnderStucture;
+	static XPath pathCharacterUnderStucture;
 	ArrayList<EntityProposals> keyentities;
 	ArrayList<String> identifiedqualities;
+	
+	static{
+		try{
+			pathCharacterUnderStucture = XPath.newInstance(".//character");			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 
-	public RelationalQualityStrategy1(Element root,String toname, String toid, String fromname, String fromid, ArrayList<EntityProposals> keyentities) throws JDOMException {
+	public Structure2QualityStrategy1(Element root,String toname, String toid, String fromname, String fromid , ArrayList<EntityProposals> keyentities) throws JDOMException {
 		this.root = root;
 		this.tostructname = toname;
 		this.tostructid = toid;
 		this.fromstructname = fromname;
 		this.fromstructid = fromid;
-		pathCharacterUnderStucture = XPath.newInstance(".//character");
 		this.keyentities = keyentities;
 		identifiedqualities = new ArrayList<String>();
 		
@@ -71,10 +78,8 @@ public class RelationalQualityStrategy1 {
 			String value = chara.getAttribute("value")!=null? chara.getAttributeValue("value"):"";
 			if ((modifier.startsWith("not") && !value.equals("absent")) || (!modifier.startsWith("not") && value.equals("absent"))) {
 				negated = true;
-			//	quality = quality.substring(quality.indexOf(" ") + 1).trim();
 				chara_detach =chara;
 				break;
-				
 			}
 
 		}
@@ -83,6 +88,9 @@ public class RelationalQualityStrategy1 {
 		// TODO:// deal// with// negated// quality// later
 		if (relationalquality != null)
 		{
+			if(negated){
+				//TODO
+			}
 			//If two entities are there, then the first one is the primary entity and the second one is the related entity
 			if((this.keyentities!=null) && (this.keyentities.size()==2))
 			{

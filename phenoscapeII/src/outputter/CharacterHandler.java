@@ -12,7 +12,7 @@ import org.jdom.Element;
 
 /**
  * @author hong cui
- * Handles the characters of a structure
+ * Handles a character of a structure
  * grab character and constrain info from <character> tag
  * 
  *  
@@ -122,8 +122,24 @@ public class CharacterHandler {
 				this.qualities.add(qproposals);
 				return;
 			}
-		}else{
-			//check other matches
+		}else{//no match for quality, could it be something else?
+			//try to match it in entity ontologies	  
+			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
+			//xml: structure: caudal fin, character:heterocercal
+			//=> heterocercal tail: present
+			if(this.entity.hasOntologizedWithHighConfidence()){
+				for(Entity e: entity.getProposals()){
+					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
+					ces.handle();
+					if(ces.getEntity()!=null && ces.getQuality()!=null){
+						this.entity = ces.getEntity();
+						this.qualities.add(ces.getQuality());
+						return;
+					}
+				}
+			}
+
+			//still not successful, check other matches
 			for(FormalConcept aquality: ts.getCandidateMatches()){
 				if(qualityclues!=null)
 				for(String clue: qualityclues){

@@ -254,6 +254,7 @@ public class TermSearcher {
 					entity.setString(item.get("term"));
 					entity.setLabel(item.get("label"));
 					entity.setId(item.get("id"));
+					entity.setClassIRI(item.get("iri"));
 					entity.setConfidenceScore((float)1);
 					result.add(entity);
 				}else{
@@ -261,6 +262,7 @@ public class TermSearcher {
 					quality.setString(item.get("term"));
 					quality.setLabel(item.get("label"));
 					quality.setId(item.get("id"));
+					quality.setClassIRI(item.get("iri"));
 					quality.setConfidenceScore((float)1);
 					result.add(quality);
 				}		

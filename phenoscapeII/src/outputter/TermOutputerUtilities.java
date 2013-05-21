@@ -148,7 +148,7 @@ public class TermOutputerUtilities {
 	}
 	
 	private static String[] findTargetParent(OWLAccessorImpl pato, String classid, String[] result){
-		OWLClass c = pato.getClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
+		OWLClass c = pato.getOWLClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
 		if(c!=null){
 			 if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
 				 result[0] = pato.getID(c);
@@ -616,8 +616,8 @@ public class TermOutputerUtilities {
 	public boolean isChildQuality(String classIRIc, String classIRIp) {
 		boolean isoffspring = false;
 		for(OWLAccessorImpl qapi : this.OWLqualityOntoAPIs){
-			OWLClass cc = qapi.getClassByIRI(classIRIc);
-			OWLClass cp = qapi.getClassByIRI(classIRIp);
+			OWLClass cc = qapi.getOWLClassByIRI(classIRIc);
+			OWLClass cp = qapi.getOWLClassByIRI(classIRIp);
 			if(isOffSpring(cc, cp, qapi)) isoffspring = true;
 		}		
 		return isoffspring;

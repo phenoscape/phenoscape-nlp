@@ -128,6 +128,12 @@ public class ELKReasoner{
 		return subClasses;
 	}
 	
+	/**
+	 * is subclassIRI is a subclass of superclassIRI?
+	 * @param subclassIRI
+	 * @param superclassIRI
+	 * @return
+	 */
 	public  boolean isSubClassOf(String subclassIRI, String superclassIRI){
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
@@ -144,10 +150,15 @@ public class ELKReasoner{
 		return false;
 	}	
 	
+	/**
+	 * is class1 a subclass of partofclass2
+	 * @param class1IRI
+	 * @param class2IRI
+	 * @return
+	 */
 	public boolean isPartOf(String class1IRI, String class2IRI) {
 		OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(class2IRI)));
-		//is class1 a subclass of partofclass2
 		// Create a fresh name
 		OWLClass newclass = dataFactory.getOWLClass(IRI.create("temp001"));
 		//make newclass equivalent of partofclass2 

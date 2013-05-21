@@ -42,6 +42,11 @@ public class EntityProposals implements Proposals {
 	public String getPhrase(){
 		return phrase;
 	}
+
+	public void reset() {
+		this.proposals = new ArrayList<Entity>();
+		this.phrase = "";		
+	}
 	/**
 	 * @param args
 	 */
@@ -49,6 +54,8 @@ public class EntityProposals implements Proposals {
 		// TODO Auto-generated method stub
 
 	}
+
+
 
 
 

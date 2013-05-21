@@ -115,6 +115,6 @@ public interface OWLAccessor {
 
 
 
-	public OWLClass getClassByIRI(String iri);
+	public OWLClass getOWLClassByIRI(String iri);
 
 }

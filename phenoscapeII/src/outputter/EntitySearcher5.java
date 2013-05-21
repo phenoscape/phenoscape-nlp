@@ -6,6 +6,11 @@ import java.util.Hashtable;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
+/**
+ * 
+ * @author Hong Cui
+ *
+ */
 public class EntitySearcher5 extends EntitySearcher {
 
 	public EntitySearcher5() {
@@ -28,21 +33,36 @@ public class EntitySearcher5 extends EntitySearcher {
 			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
 			if(regexpresults!=null){
 				for(FormalConcept regexpresult: regexpresults){
-					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId());
+					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI());
 				}			
 			}
 			//search headnouns in the context 
 			String noun = searchContext(root, structid, headnouns); //bone, cartilaginous
 			if(noun != null){
+				String[] idiri = headnouns.get(noun).split("#");
 				SimpleEntity sentity = new SimpleEntity();
 				sentity.setString(entityphrase);
 				sentity.setLabel(entityphrase);
-				sentity.setId(headnouns.get(noun));
+				sentity.setId(idiri[0]);
 				sentity.setConfidenceScore((float)1.0);
+				sentity.setClassIRI(idiri[1]);
 				EntityProposals entities = new EntityProposals();
 				entities.setPhrase(sentity.getString());
 				entities.add(sentity);
 				return entities;
+			}else{
+				//text::Caudal fin
+				//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
+				//return all matches as candidates
+				if(regexpresults!=null){
+					EntityProposals entities = new EntityProposals();
+					for(FormalConcept regexpresult: regexpresults){
+						Entity e = (Entity) regexpresult;
+						entities.add(e);
+					}			
+					return entities;
+				}
+				
 			}
 		}
 		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);

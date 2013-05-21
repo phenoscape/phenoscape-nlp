@@ -10,7 +10,7 @@ import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public class EntitySearcher6 extends EntitySearcher {
