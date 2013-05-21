@@ -44,6 +44,7 @@ public class ELKReasoner{
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
+		this.ont = ont;
 		// Load your ontology.
 		//ont = man.loadOntology(IRI.create(ontologyIRI));
 		// Create an ELK reasoner.

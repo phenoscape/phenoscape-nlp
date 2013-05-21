@@ -131,7 +131,7 @@ public class Utilities {
 	}
 
 	/**
-	 * Get structure name from the XML results of CharaParser.
+	 * Get structure names for 1 or more structids from the XML results of CharaParser.
 	 * 
 	 * @param root
 	 * @param structids

@@ -19,8 +19,8 @@ import org.jdom.xpath.XPath;
    also identify quality clues from the character statement, such as "size of" "number of", and "fusion of". 
  */
 public class CharacterStatementParser extends Parser {
-	ArrayList<Entity> entities = new ArrayList<Entity>();
-	ArrayList<Entity> keyentities = new ArrayList<Entity>();
+	ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
 	ArrayList<String> qualityClue = new ArrayList<String> ();
 	static XPath pathstructure;
 	static{
@@ -144,15 +144,13 @@ public class CharacterStatementParser extends Parser {
 		return this.qualityClue;
 	}
 
-	public ArrayList<Entity> getEntities(){
+	public ArrayList<EntityProposals> getEntities(){
 		return this.entities;
 	}
 	
-	public ArrayList<Entity> getKeyEntities(){
+	public ArrayList<EntityProposals> getKeyEntities(){
 		return this.keyentities;
 	}
-	
-	
 	/**
 	 * @param args
 	 */

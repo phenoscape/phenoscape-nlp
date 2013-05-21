@@ -56,7 +56,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	 * @throws Exception the exception
 	 */
 	@SuppressWarnings("unchecked")
-	public Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
+	public EntityProposals searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
 		//TODO create and maintain a cache for entity search?
 	
@@ -72,7 +72,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
-		
+		//Postaxial process on fibula
 		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;

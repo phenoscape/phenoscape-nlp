@@ -8,7 +8,11 @@ import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 
 
-//RelationalQualityStrategy is used to check whether an entity is a quality and if true will create qualities accordingly.
+/**
+ * RelationalQualityStrategy is used to check whether an entity is a quality (relaitonal or not) and
+ * if true will create qualities accordingly.
+ */
+
 public class RelationalQualityStrategy1 {
 
 	Element root;
@@ -19,13 +23,13 @@ public class RelationalQualityStrategy1 {
 	String fromstructid;
 	boolean negation; // if true, negate the relation string
 	boolean fromcharacterstatement;
-	ArrayList<Quality> qualities = new ArrayList<Quality>();
+	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 	private TermOutputerUtilities ontoutil;
 	XPath pathCharacterUnderStucture;
-	ArrayList<Entity> keyentities;
+	ArrayList<EntityProposals> keyentities;
 	ArrayList<String> identifiedqualities;
 
-	public RelationalQualityStrategy1(Element root,String toname, String toid, String fromname, String fromid, ArrayList<Entity> keyentities) throws JDOMException {
+	public RelationalQualityStrategy1(Element root,String toname, String toid, String fromname, String fromid, ArrayList<EntityProposals> keyentities) throws JDOMException {
 		this.root = root;
 		this.tostructname = toname;
 		this.tostructid = toid;
@@ -38,13 +42,11 @@ public class RelationalQualityStrategy1 {
 	}
 
 	public void handle() {
-		// TODO Auto-generated method stub
 		try {
-			parseforQuality(this.tostructname, this.tostructid);
+			parseforQuality(this.tostructname, this.tostructid); //to see if the structure is a quality (relational or other quality)
 			parseforQuality(this.fromstructname, this.fromstructid);
 
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -63,20 +65,22 @@ public class RelationalQualityStrategy1 {
 		XPath structurewithstructid = XPath.newInstance(".//structure[@id='"+ qualityid + "']");
 		Structures = (Element) structurewithstructid.selectSingleNode(this.root);
 		characters = pathCharacterUnderStucture.selectNodes(Structures);
-
+		//characters are checked to find out if the quality is negated
 		for (Element chara : characters) {
-			String value = Utilities.formQualityValueFromCharacter(chara);
-			if (value.startsWith("not") || (value.equals("absent"))) {
+			String modifier = chara.getAttribute("modifier")!=null? chara.getAttributeValue("modifier"): "";
+			String value = chara.getAttribute("value")!=null? chara.getAttributeValue("value"):"";
+			if ((modifier.startsWith("not") && !value.equals("absent")) || (!modifier.startsWith("not") && value.equals("absent"))) {
 				negated = true;
 			//	quality = quality.substring(quality.indexOf(" ") + 1).trim();
 				chara_detach =chara;
 				break;
-				// TODO:// deal// with// negated// quality// here
+				
 			}
 
 		}
 		// is the candidate a relational quality?
-		Quality relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		// TODO:// deal// with// negated// quality// later
 		if (relationalquality != null)
 		{
 			//If two entities are there, then the first one is the primary entity and the second one is the related entity
@@ -85,7 +89,9 @@ public class RelationalQualityStrategy1 {
 				for(int i=1;i<this.keyentities.size();i++)
 				{
 					RelationalQuality rq = new RelationalQuality(relationalquality, this.keyentities.get(i));
-					this.qualities.add(rq);
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.add(rq);
+					this.qualities.add(qproposals);
 					this.identifiedqualities.add(qualityid);
 					if(chara_detach!=null)
 						chara_detach.detach();
@@ -94,14 +100,14 @@ public class RelationalQualityStrategy1 {
 			}
 			else
 			{ // TODO how to find related entities from a list of entities >2
-				}
-			
+				return;
+			}
+			return;
 		}
 		
         
-		// Take care of constraints in characters later
-		// constraints may yield entity parts such as entity locator, save
-		// those, resolve them later
+		// may need to consider constraints, which may provide a related entity
+
 
 		// not a relational quality, is this a simple quality or a negated
 		//simple quality == quality character value + quality
@@ -110,67 +116,35 @@ public class RelationalQualityStrategy1 {
 		{
 			quality=chara.getAttributeValue("value")+" "+quality;
 			quality=quality.trim();
-		TermSearcher ts = new TermSearcher();
-		Quality result = (Quality) ts.searchTerm(quality, "quality");
-		if (result != null) {
-			if (negated) {
-				/* TODO use parent classes Jim use for parent classes */
-				String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
-				Quality parentquality = new Quality();
-				parentquality.setString(parentinfo[1]);
-				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);
-				this.qualities.add(new NegatedQuality(result, parentquality));
-				this.identifiedqualities.add(qualityid);
-				chara.detach();
-				//return;
-			} else {
-				this.qualities.add(result);
-				this.identifiedqualities.add(qualityid);
-				chara.detach();
-				//return;
+			TermSearcher ts = new TermSearcher();
+			Quality result = (Quality) ts.searchTerm(quality, "quality");
+			if (result != null) {
+				if (negated) {
+					/* TODO use parent classes Jim use for parent classes */
+					String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
+					Quality parentquality = new Quality();
+					parentquality.setString(parentinfo[1]);
+					parentquality.setLabel(parentinfo[1]);
+					parentquality.setId(parentinfo[0]);
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.add(new NegatedQuality(result, parentquality));
+					this.qualities.add(qproposals);
+					this.identifiedqualities.add(qualityid);
+					chara.detach();
+					//return;
+				} else {
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.add(result);
+					this.qualities.add(qproposals);
+					this.identifiedqualities.add(qualityid);
+					chara.detach();
+					//return;
+				}
+				if(chara_detach!=null)
+					chara_detach.detach();
 			}
-			if(chara_detach!=null)
-				chara_detach.detach();
-		}
 		quality=qualitycopy;
 	}
 		return;
 	}
-
-	public static String formQualityValueFromCharacter(Element chara) {
-		String charatype = chara.getAttribute("char_type") != null ? "range"
-				: "discrete";
-		String quality = "";
-		if (charatype.compareTo("range") == 0) {
-			quality = chara.getAttributeValue("from")
-					+ " "
-					+ (chara.getAttribute("from_unit") != null ? chara
-							.getAttributeValue("from_unit") : "")
-					+ " to "
-					+ chara.getAttributeValue("to")
-					+ " "
-					+ (chara.getAttribute("to_unit") != null ? chara
-							.getAttributeValue("to_unit") : "");
-
-		} else {
-			quality = (chara.getAttribute("modifier") != null
-					&& chara.getAttributeValue("modifier").matches(
-							".*?\\bnot\\b.*") ? "not" : "")
-					+ " "
-					+ chara.getAttributeValue("value")
-					+ " "
-					+ (chara.getAttribute("unit") != null ? chara
-							.getAttributeValue("unit") : "")
-					+ "["
-					+ (chara.getAttribute("modifier") != null ? chara
-							.getAttributeValue("modifier").replaceAll(
-									"\\bnot\\b;?", "") : "") + "]";
-
-		}
-		quality = quality.replaceAll("\\[\\]", "").replaceAll("\\s+", " ")
-				.trim();
-		return quality;
-	}
-
 }

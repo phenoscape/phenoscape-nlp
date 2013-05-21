@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.util.ArrayList;
+
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
@@ -14,8 +16,7 @@ import org.jdom.xpath.XPath;
  */
 public abstract class EntitySearcher {
 	protected static XPath textpath;
-	static{
-		
+	static{	
 		try{
 			textpath = XPath.newInstance(".//text");
 		}catch(Exception e){
@@ -27,7 +28,7 @@ public abstract class EntitySearcher {
 	/*whether the request can be handled by this searcher */
 	//public abstract boolean canHandle (Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup);
 	/*handle the request*/
-	public abstract Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep);
+	public abstract EntityProposals searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep);
 	/*otherwise, set another handler to handle the request*/
    //public abstract void  setHandler(EntitySearcher handler, Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep, int ingroup);
 	

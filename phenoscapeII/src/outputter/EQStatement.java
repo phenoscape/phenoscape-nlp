@@ -17,6 +17,7 @@ public class EQStatement {
 	Entity entity;
 	Quality quality;
 	private String type;
+	float confidenceScore;
 	//Entity relatedEntity;
 	
 
@@ -53,6 +54,7 @@ public class EQStatement {
 	public void setType(String type) {
 		this.type = type;
 	}
+	
 
 	/*public void setRelatedEntity(Entity entity){
 		this.relatedEntity = entity;
@@ -91,8 +93,7 @@ public class EQStatement {
 	}*/
 	
 	public float calculateConfidenceScore(){
-		//TODO
-		return (float) 0.0;
+		return this.entity.getConfidienceScore()*this.quality.getConfidienceScore();
 	}
 	
 	public String toString(){

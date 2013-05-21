@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.util.ArrayList;
+
 import org.jdom.Element;
 
 /**
@@ -27,7 +29,7 @@ public class EntitySearcher2 extends EntitySearcher {
 	}
 
 	@Override
-	public Entity searchEntity(Element root, String structid,
+	public EntityProposals searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
@@ -62,9 +64,15 @@ public class EntitySearcher2 extends EntitySearcher {
 				CompositeEntity centity = new CompositeEntity();
 				centity.addEntity(sentity);
 				centity.addEntity(rentity);
-				return centity;
+				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
+				entities.add(centity);
+				return entities;
 			}else{
-				return sentity;
+				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
+				entities.add(sentity);
+				return entities;
 			}
 		}
 		return new EntitySearcher3().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);

@@ -34,7 +34,7 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = false;//set to true when running only StanfordParser; false when running with GUI. 
+    private static boolean standalone = Boolean.valueOf(ApplicationUtilities.getProperty("finalizer.standalone"));//set to true when running only StanfordParser; false when running with GUI. 
     private static String standalonefolder = "C:/Users/updates/CharaParserTest/EQ-swartz12MP";
     private Text finalLog;
     private Display display;

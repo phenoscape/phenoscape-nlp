@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.util.ArrayList;
+
 import org.jdom.Element;
 
 /**
@@ -23,7 +25,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public Entity searchEntity(Element root, String structid,
+	public EntityProposals searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
@@ -70,7 +72,10 @@ public class EntitySearcher4 extends EntitySearcher {
 						centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
 						centity.addEntity(sentity); //process
 						centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
-						return centity;
+						EntityProposals entities = new EntityProposals();
+						entities.setPhrase(sentity.getString()); //use the primary entity's phrase
+						entities.add(centity);
+						return entities;
 					}else{//sentity1 be the entity locator
 						//relation & entity locator: 
 						FormalRelation rel = new FormalRelation();
@@ -83,7 +88,10 @@ public class EntitySearcher4 extends EntitySearcher {
 						CompositeEntity centity = new CompositeEntity(); 
 						centity.addEntity(sentity); 
 						centity.addEntity(rentity);	
-						return centity;
+						EntityProposals entities = new EntityProposals();
+						entities.setPhrase(sentity.getString());
+						entities.add(centity);
+						return entities;
 					}	
 				}				
 			}

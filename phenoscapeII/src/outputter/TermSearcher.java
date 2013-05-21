@@ -272,7 +272,8 @@ public class TermSearcher {
 	}
 	
 	/**
-	 * 
+	 * search pattern with wildcard "*".
+	 * search for "pevlic *", it will return any class with label or syn of "pelvic somthing".
 	 * @param term
 	 * @param type
 	 * @param results

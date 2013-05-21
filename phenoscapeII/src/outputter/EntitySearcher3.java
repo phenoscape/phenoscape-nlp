@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.util.ArrayList;
+
 import org.jdom.Element;
 
 /**
@@ -23,7 +25,7 @@ public class EntitySearcher3 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public Entity searchEntity(Element root, String structid,
+	public EntityProposals searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//re-arranging word in entity, first search for entity locator
@@ -55,7 +57,10 @@ public class EntitySearcher3 extends EntitySearcher {
 				CompositeEntity centity = new CompositeEntity();
 				centity.addEntity(sentity);
 				centity.addEntity(rentity);
-				return centity;	
+				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
+				entities.add(centity);
+				return entities;	
 			}		
 		}
 		return new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);

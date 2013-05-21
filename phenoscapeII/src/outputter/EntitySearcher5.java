@@ -13,7 +13,7 @@ public class EntitySearcher5 extends EntitySearcher {
 	}
 
 	@Override
-	public Entity searchEntity(Element root, String structid,
+	public EntityProposals searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//bone, cartilage,  element
@@ -39,7 +39,10 @@ public class EntitySearcher5 extends EntitySearcher {
 				sentity.setLabel(entityphrase);
 				sentity.setId(headnouns.get(noun));
 				sentity.setConfidenceScore((float)1.0);
-				return sentity;
+				EntityProposals entities = new EntityProposals();
+				entities.setPhrase(sentity.getString());
+				entities.add(sentity);
+				return entities;
 			}
 		}
 		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);

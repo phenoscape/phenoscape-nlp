@@ -14,9 +14,9 @@ import org.jdom.Element;
 public abstract class Parser {
 	
 	//ArrayList<String> ontologyIRIs;
-	ArrayList<Entity> entities = new ArrayList<Entity>();
+	ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 	String qualityClue;
-	ArrayList<Entity> subjectEntities = new ArrayList<Entity>(); 
+	ArrayList<EntityProposals> subjectEntities = new ArrayList<EntityProposals>(); 
 	TermOutputerUtilities ontoutil;
 	
 	public Parser(TermOutputerUtilities ontoutil){
@@ -25,7 +25,7 @@ public abstract class Parser {
 
 	protected abstract void parse(Element statement, Element root);
 	
-	protected void setParseContextSubjects(ArrayList<Entity> subjects) {
+	protected void setParseContextSubjects(ArrayList<EntityProposals> subjects) {
 		this.subjectEntities = subjects;
 		
 	}
