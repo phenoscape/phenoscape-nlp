@@ -125,7 +125,7 @@ public class CharacterHandler {
 		}else{
 			//check other matches
 			for(FormalConcept aquality: ts.getCandidateMatches()){
-				if(qualityclues!=null)
+				if((qualityclues!=null)&&(qualityclues.size()!=0))
 				for(String clue: qualityclues){
 					Quality qclue = (Quality)ts.searchTerm(clue, "quality");
 					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){

@@ -62,8 +62,7 @@ public class TermSearcher {
 
 		FormalConcept strongmatch = getStrongMatch(phrase+"", phrasetype, results);
 		if(strongmatch != null) return strongmatch;
-		
-		//if landed here, all matches based on the original phrase are weak matches.
+		///if landed here, all matches based on the original phrase are weak matches.
 		candidatematches.addAll(results);
 		results = new ArrayList<Hashtable<String, String>>();
 		
@@ -142,54 +141,21 @@ public class TermSearcher {
 				firstpart = firstpart.substring(0, firstpart.lastIndexOf(" ")).trim();
 			}
 		}
-		
-	// 5.rod => rod shaped, spade => spade-shaped	or rod => rod-like , spade => spade-like
+
+	//convert to relational adjectives by appending ed|-shaped|-like|less etc.
 		if(phrasetype.compareTo("quality")==0)
 		{
-			String diff_forms[] = {"-shaped","-like"};
-			String phrasecopy = phrase;
-			for(String form:diff_forms)
+			ArrayList<String> phraseforms = (ArrayList<String>) Wordforms.toAdjective(phrase);
+			//Uses wordforms class to get all the adjectives of this quality
+			for(String form:phraseforms)
 			{
-			phrase = phrase.trim()+form;
-			strongmatch = getStrongMatch(phrase, phrasetype, results);
-		//	System.out.println(phrase);
+			strongmatch = getStrongMatch(form, phrasetype, results);
 			if(strongmatch != null) return strongmatch;
-
 			candidatematches.addAll(results);
 			results = new ArrayList<Hashtable<String, String>>();
 			}
-			phrase = phrasecopy;
 		}
-		
-	//convert to relational adjectives by appending ed
-		if(phrasetype.compareTo("quality")==0)
-		{
-			String phrasecopy = phrase;
-			String suffixes[] = {"ed"};//this list may expand in the future so only string array
-			
-			//appending "ed" and checking
-			phrase = phrase.trim()+suffixes[0];			
-			strongmatch = getStrongMatch(phrase, phrasetype, results);	
-			//System.out.println(phrase);
-			if(strongmatch != null) return strongmatch;
-			candidatematches.addAll(results);
-			results = new ArrayList<Hashtable<String, String>>();
-			
-			//remove "ion" at the end of phrase and append "ed"
-			phrase = phrasecopy;
-			if(phrase.matches(".*ion"))
-			phrase = phrase.substring(0, phrase.lastIndexOf("ion"))+suffixes[0];
-			//System.out.println(phrase);
-			strongmatch = getStrongMatch(phrase, phrasetype, results);			
-			if(strongmatch != null) return strongmatch;
-			candidatematches.addAll(results);
-			results = new ArrayList<Hashtable<String, String>>();
-			
-			phrase=phrasecopy;
-			
-			
-		}
-		//6.shrinking: should all put in candidatematches, stop shrinking when one match is found, stop shrinking when a spatial term becomes the last word in the phrase
+		//5.shrinking: should all put in candidatematches, stop shrinking when one match is found, stop shrinking when a spatial term becomes the last word in the phrase
 		//shrinking from the end of the phrase forward. if a phrase start with spatial terms, shrinking from both ends. 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"
 		//"crest" => "process"
@@ -380,7 +346,7 @@ public class TermSearcher {
 	public static void main(String[] args) {	
 
 		TermSearcher ts = new TermSearcher();
-		FormalConcept result = ts.searchTerm("rod", "quality");
+		FormalConcept result = ts.searchTerm("fimbriation", "quality");
 		if(result!=null){
 			System.out.println(result.toString());
 		}else{

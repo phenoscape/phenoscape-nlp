@@ -76,6 +76,8 @@ public class RelationHandler {
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			EntityProposals relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 			RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
+			if(quality==null)
+				quality = new QualityProposals();
 			quality.add(rq);			
 		}else{//no, the relation should not be considered relational quality
 			//entity locator?

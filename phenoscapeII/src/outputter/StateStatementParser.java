@@ -129,7 +129,9 @@ public class StateStatementParser extends Parser {
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
 					// strategy.
-					if ((e != null) && (e.hasOntologizedWithHighConfidence())) {//not ontologized entity
+					//removing hasOntologizedWithHighConfidence()
+					for(Entity entity: e.proposals)
+					if ((entity != null) && (entity.getLabel()==null)) {//not ontologized entity
 						RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root,
 								toname, toid, fromname, fromid, keyentities);
 						rq.handle();
@@ -140,6 +142,7 @@ public class StateStatementParser extends Parser {
 								e = null;//e is now showed to be a quality
 								q.clear();
 								q.addAll(rq.qualities);
+								break;
 								// relation.detach();
 							//}
 						}
@@ -252,10 +255,10 @@ public class StateStatementParser extends Parser {
 						eq.setEntity(entity);
 						if (quality instanceof RelationalQuality) {
 							eq.setQuality(((RelationalQuality) quality));
-							//if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
-							//		.getPrimaryEntityLabel()){
-							//	continue;
-							//} //don't recall what the above does --Hong May 20, 13.
+//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
+//									.getPrimaryEntityLabel()){
+//								continue;
+//							} //don't recall what the above does --Hong May 20, 13.
 						} else{
 							eq.setQuality(quality);
 						}
