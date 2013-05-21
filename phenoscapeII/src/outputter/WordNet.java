@@ -63,7 +63,7 @@ public class WordNet {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub 
-		Hashtable<String,Integer> synonyms = getallsynonyms("meets");
+		Hashtable<String,Integer> synonyms = getallsynonyms("notch");
 	Set<String> all_syn = synonyms.keySet();
 	
 	for(String temp:all_syn)
