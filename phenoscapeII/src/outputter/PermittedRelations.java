@@ -11,9 +11,9 @@ public class PermittedRelations {
 	 * @param tostructure name, not the chain of names
 	 * @return if match, return Quality with id and label, if not, return null
 	 */
-	public static Quality matchInPermittedRelation(String relation, boolean negation) {
+	public static QualityProposals matchInPermittedRelation(String relation, boolean negation) {
 		//TODO: handle negated relations
-		
+		QualityProposals qproposals = new QualityProposals();
 		Quality relationalquality = new Quality();
 		relation = Utilities.removeprepositions(relation);
 		/*
@@ -39,7 +39,8 @@ public class PermittedRelations {
 			relationalquality.setId(retrieve_id(relation));
 			relationalquality.setLabel(relation);
 			relationalquality.setConfidenceScore((float)1.0);
-			return relationalquality;
+			qproposals.add(relationalquality);
+			return qproposals;
 		}
 		//if failed in above steps then it uses wordnet to find the different synonyms of the relation string
 		Hashtable<String, Integer> forms = getdifferentrelationalforms(relation);
@@ -54,7 +55,8 @@ public class PermittedRelations {
 				relationalquality.setId(relation_ID);
 				relationalquality.setLabel(relation);
 				relationalquality.setConfidenceScore((float)1.0);
-				return relationalquality;
+				qproposals.add(relationalquality);
+				return qproposals;
 			}
 		}
 		return null;

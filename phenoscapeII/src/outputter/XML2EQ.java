@@ -57,9 +57,9 @@ public class XML2EQ {
 	private String glosstable;
 	private int count = 0;
 	// private String keyentity = null;
-	private ArrayList<Entity> keyentities;
+	private ArrayList<EntityProposals> keyentities;
 	//private String keyentitylocator = null;
-	private ArrayList<EQStatement> allEQs = null;
+	private ArrayList<EQStatementProposals> allEQs = null;
 	private HashSet<String> stateids = new HashSet<String>();
 	private static ArrayList<String> serenostyle = new ArrayList<String>();
 	private String characters = null;
@@ -156,7 +156,7 @@ public class XML2EQ {
 				// if(count!= 67){ count++; continue;}
 				System.out.println("[" + count + "]" + src);
 				count++;
-				allEQs = new ArrayList<EQStatement>();
+				allEQs = new ArrayList<EQStatementProposals>();
 				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
@@ -217,7 +217,7 @@ public class XML2EQ {
 	 */
 	private void outputEQs4CharacterUnit() throws Exception {
 
-		for (EQStatement EQ : allEQs) {
+		for (EQStatementProposals EQ : allEQs) {
 			
 			//this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
@@ -665,9 +665,10 @@ public class XML2EQ {
 							String qlabel = q.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);
 							if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
-								EQStatement EQ = relatedEQ(stateid, ngram);
-								if(EQ==null){ //add one
-									EQ = new EQStatement();
+								EQStatementProposals EQp = relatedEQ(stateid, ngram);
+								if(EQp==null){ //add one
+									EQp = new EQStatementProposals();
+									EQStatement EQ = new EQStatement();
 									//add metadata
 									String characterid = "";
 									try{
@@ -680,9 +681,11 @@ public class XML2EQ {
 									EQ.setCharacterId(characterid);
 									EQ.setStateId(stateid);
 									EQ.setDescription(text);
-									allEQs.add(EQ);
+									EQp.add(EQ);
+									allEQs.add(EQp);
 								}
 								//accept this result for this stateid
+								EQStatement EQ = EQp.getProposals().get(0); //assuming there is only one candidate???
 								EQ.setEntity(keyEQ.getEntity());
 								EQ.setQuality(q);
 								solved = true;
@@ -703,9 +706,9 @@ public class XML2EQ {
 	 * @return the EQ from allEQs with the stateid and included ngram in an element
 	 */
 
-	private EQStatement relatedEQ(String stateid, String ngram) {
-		ArrayList<EQStatement> EQs = this.getEQsforState(stateid);
-		for(EQStatement EQ: EQs){
+	private EQStatementProposals relatedEQ(String stateid, String ngram) {
+		ArrayList<EQStatementProposals> EQs = this.getEQsforState(stateid);
+		for(EQStatementProposals EQ: EQs){
 			String value = EQ.getDescription();
 			if(value!=null && value.length()>0 && (value.contains(ngram) || ngram.contains(value))){
 				return EQ;
@@ -780,11 +783,13 @@ public class XML2EQ {
 	 * @return true if the entitylabel matches one of the key entities.
 	 */
 	private boolean matchWithKeyEntities(String entitylabel) {
-		for(Entity keyentity: this.keyentities){
-			String label = null;
-			if(keyentity instanceof SimpleEntity) label = ((SimpleEntity)keyentity).getLabel();
-			if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getPrimaryEntity().getLabel();
-			if(label !=null && label.compareTo(entitylabel)==0) return true;
+		for(EntityProposals keyentityp: this.keyentities){
+			for(Entity keyentity: keyentityp.getProposals()){
+				String label = null;
+				if(keyentity instanceof SimpleEntity) label = ((SimpleEntity)keyentity).getLabel();
+				if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getPrimaryEntity().getLabel();
+				if(label !=null && label.compareTo(entitylabel)==0) return true;
+			}
 		}		
 		return false;
 	}
@@ -794,10 +799,15 @@ public class XML2EQ {
 	 * @param stateid
 	 * @return the EQs in allEQs that have the stateid 
 	 */
-	private ArrayList<EQStatement> getEQsforState(String stateid) {
-		ArrayList<EQStatement> EQs = new ArrayList<EQStatement>();
-		for(EQStatement EQ: allEQs){
-			if(EQ.getStateId().compareTo(stateid)==0) EQs.add(EQ);
+	private ArrayList<EQStatementProposals> getEQsforState(String stateid) {
+		ArrayList<EQStatementProposals> EQs = new ArrayList<EQStatementProposals>();
+		for(EQStatementProposals EQp: allEQs){
+			for(EQStatement EQ: EQp.getProposals()){
+				if(EQ.getStateId().compareTo(stateid)==0){
+					EQs.add(EQp);
+					continue;
+				}				
+			}
 		}
 		return EQs;
 	}
@@ -809,46 +819,49 @@ public class XML2EQ {
 	 */
 	private void identifyStates(ArrayList<String> incompletestateids,
 			ArrayList<EQStatement> completestateeqs) {
-		for(EQStatement EQ: allEQs){
-			if(EQ.getType().compareTo("state")==0){
-				String stateid = EQ.getStateId();
-				 ArrayList<EQStatement> EQs = getEQsforState(stateid);
+		for(EQStatementProposals EQp: allEQs){
+			if(EQp.getType() !=null && EQp.getType().compareTo("state")==0){
+				String stateid = EQp.getStateId();
+				 ArrayList<EQStatementProposals> EQs = getEQsforState(stateid);
 				 boolean hasentity = false;
 				 boolean hasquality = false;
 				 boolean haskeyentity = false;
-				 for(EQStatement aEQ: EQs){
-					 Entity E = aEQ.getEntity();
-					 String e = null;
-					 hasentity = false;
-					 hasquality = false;
-					 haskeyentity = false;
-					 if(E instanceof SimpleEntity)
-					 {
-						 e = ((SimpleEntity)E).getLabel();
-						 if(((SimpleEntity)E).isOntologized()==true)
+				 for(EQStatementProposals aEQp: EQs){
+					 //need to examine the effectiveness of this method in the context of the proposals
+					 //should only highconfidence score EQs be considered?
+					 for(EQStatement aEQ: aEQp.getProposals()){
+						 Entity E = aEQ.getEntity();
+						 String e = null;
+						 hasentity = false;
+						 hasquality = false;
+						 haskeyentity = false;
+						 if(E instanceof SimpleEntity)
 						 {
-							 if(e.length()>0) hasentity = true; 
-							 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+							 e = ((SimpleEntity)E).getLabel();
+							 if(((SimpleEntity)E).isOntologized()==true)
+							 {
+								 if(e.length()>0) hasentity = true; 
+								 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; //haskeyentity is true if any of the proposal meets the condition
+							 }
 						 }
-					 }
-					 else
-					{
-						 e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
-						 if(((CompositeEntity)E).isOntologized()==true)
+						 else
 						 {
-							 if(e.length()>0) hasentity = true; 
-							 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
-						 }
-					}
-					 
-					 String q = aEQ.getQuality()!=null?aEQ.getQuality().getLabel():""; //ternary operator added => Hariharan
-					 if(q==null) q="";
-					 
-					
-					 if(q.length()>0) hasquality = true;
-					 if(haskeyentity && hasquality) completestateeqs.add(aEQ);
-				 }				 
-				 if(!hasquality) incompletestateids.add(stateid);
+							 e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+							 if(((CompositeEntity)E).isOntologized()==true)
+							 {
+								 if(e.length()>0) hasentity = true; 
+								 if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+							 }
+						 }	
+						 
+						 String q = aEQ.getQuality()!=null?aEQ.getQuality().getLabel():""; //ternary operator added => Hariharan
+						 if(q==null) q="";
+						 
+						 if(q.length()>0) hasquality = true;
+						 if(haskeyentity && hasquality) completestateeqs.add(aEQ);
+					 }	
+				 }
+				 if(!hasquality) incompletestateids.add(stateid); //none of the EQs for the state has a ontologized quality
 				 //if(!hasentity && !hasquality) incompletestates.addAll(EQs);
 				 //if(haskeyentity && !hasquality) incompletestates.addAll(EQs); //none of the EQs for the state has a ontologized quality
 			}

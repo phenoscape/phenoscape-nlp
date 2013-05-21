@@ -58,6 +58,68 @@ public class CompositeEntity extends Entity {
 	public boolean isOntologized() {
 		return this.getPrimaryEntity().id != null;
 	}
+
+
+	@Override
+	public void setString(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setLabel(String label) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setId(String id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setClassIRI(String IRI) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setConfidenceScore(float score) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getString() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getLabel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getClassIRI() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public float getConfidienceScore() {
+		// TODO Auto-generated method stub
+		return 0f;
+	}
+
 	/**
 	 * @param args
 	 */
@@ -65,5 +127,4 @@ public class CompositeEntity extends Entity {
 		// TODO Auto-generated method stub
 
 	}
-
 }

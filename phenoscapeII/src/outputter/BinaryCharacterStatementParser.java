@@ -26,46 +26,54 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 * @param statement: the character statement in a binary statement 
 	 */
 	public void parse(Element statement, Element root){
-		ArrayList<EQStatement> negativestatements = new ArrayList<EQStatement>();
+		ArrayList<EQStatementProposals> negativestatements = new ArrayList<EQStatementProposals>();
 		super.parse(statement, root);
 		if(this.EQStatements.size()==0){
 			parseStandaloneStructures(statement, root);
 		}
-		for(EQStatement eq: this.EQStatements){
-			Quality q = eq.getQuality();
-			if(q==null){
-				//q = "present"
-				q = new Quality();
-				q.setString("present");
-				q.setLabel("PATO:present");
-				q.setId("PATO:0000467");
-				q.setConfidenceScore((float)1.0);
-				eq.setQuality(q);
-				//create absent quality
-				Quality absent = new Quality();
-				absent.setString("absent");
-				absent.setLabel("PATO:absent");
-				absent.setId("PATO:0000462");
-				absent.setConfidenceScore((float)1.0);
-				EQStatement falseeq = clone(eq);
-				falseeq.setQuality(absent);
-				negativestatements.add(falseeq);			
-			}else{
-				//generate negated quality
-				if(q.getId()!=null)
-				{
-				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q.getId()); 
-				if(parentinfo!=null)
-				{
-				Quality parentquality = new Quality();
-				parentquality.setString(parentinfo[1]);
-				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);
-				NegatedQuality nq = new NegatedQuality(q, parentquality);
-				EQStatement falseeq = clone(eq);
-				falseeq.setQuality(nq);
-				negativestatements.add(falseeq);	
-				}
+		for(EQStatementProposals eqp: this.EQStatements){
+			for(EQStatement eq: eqp.getProposals()){
+				//update q for all eq candidates
+				Quality q = eq.getQuality();
+				if(q==null){
+					//create q
+					//q = "present"
+					q = new Quality();
+					q.setString("present");
+					q.setLabel("PATO:present");
+					q.setId("PATO:0000467");
+					q.setConfidenceScore((float)1.0);
+					eq.setQuality(q);//update q
+					//create absent quality
+					Quality absent = new Quality();
+					absent.setString("absent");
+					absent.setLabel("PATO:absent");
+					absent.setId("PATO:0000462");
+					absent.setConfidenceScore((float)1.0);
+					EQStatement falseeq = clone(eq);
+					falseeq.setQuality(absent);
+					EQStatementProposals negativeproposals = new EQStatementProposals();
+					negativeproposals.add(falseeq);
+					negativestatements.add(negativeproposals);			
+				}else{
+					//generate negated quality
+					if(q.getId()!=null)
+					{
+						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q.getId()); 
+						if(parentinfo!=null)
+						{
+						Quality parentquality = new Quality();
+						parentquality.setString(parentinfo[1]);
+						parentquality.setLabel(parentinfo[1]);
+						parentquality.setId(parentinfo[0]);
+						NegatedQuality nq = new NegatedQuality(q, parentquality);
+						EQStatement falseeq = clone(eq);
+						falseeq.setQuality(nq);
+						EQStatementProposals negativeproposals = new EQStatementProposals();
+						negativeproposals.add(falseeq);
+						negativestatements.add(negativeproposals);	
+						}
+					}
 				}
 			}
 		}
@@ -79,16 +87,21 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 */
 	private void parseStandaloneStructures(Element statement, Element root) {
 		EntityParser ep = new EntityParser(statement, root, true);
-		ArrayList<Entity> entities = ep.getEntities();
-		for(Entity entity: entities){
-			EQStatement eq = new EQStatement();
-			eq.setEntity(entity);
-			eq.setSource(super.src);
-			eq.setCharacterId(super.characterid);
-			eq.setStateId(super.stateid);
-			eq.setDescription(super.text);
-			eq.setType("character");
-			this.EQStatements.add(eq);
+		ArrayList<EntityProposals> entities = ep.getEntities();
+		for(EntityProposals entityp: entities){
+			EQStatementProposals eqp= new EQStatementProposals();
+			for(Entity entity: entityp.getProposals()){
+				EQStatement eq = new EQStatement();
+				eq.setEntity(entity);
+				eq.setSource(super.src);
+				eq.setCharacterId(super.characterid);
+				eq.setStateId(super.stateid);
+				eq.setDescription(super.text);
+				eq.setType("character");
+				eqp.add(eq);
+				//this.EQStatements.add(eq);
+			}
+			this.EQStatements.add(eqp);
 		}		
 	}
 

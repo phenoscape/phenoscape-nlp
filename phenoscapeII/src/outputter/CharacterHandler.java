@@ -14,22 +14,19 @@ import org.jdom.Element;
  * @author hong cui
  * Handles the characters of a structure
  * grab character and constrain info from <character> tag
- * return a hashtable:
- * key: "quality" value: qualityID
- * key: "qualitymodifier" value: qualitymodifierID
  * 
  *  
- * TODO could character be a relationalquality?
+ * Could character be a relationalquality?
  * yes, for example, "fused"
  */
 public class CharacterHandler {
 	private TermOutputerUtilities ontoutil;
 	Element root;
 	Element chara;
-	Entity entity; //the entity result will be saved here, which may be null, indicating the ke y entities parsed from the character statement should be used for this character
-	ArrayList<Quality> qualities = new ArrayList<Quality>(); //the quality result will be saved here. May be relationalquality, simple quality, or negated quality
-	ArrayList<Entity> entityparts = new ArrayList<Entity>();
-	ArrayList<String> qualityclues;
+	EntityProposals entity; //the entity result will be saved here, which may be null, indicating the ke y entities parsed from the character statement should be used for this character
+	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //the quality result will be saved here. Because n structures may be involved in constraints (hence multiple relational qualities), this needs to be an arraylist. May be relationalquality, simple quality, or negated quality
+	ArrayList<EntityProposals> entityparts = new ArrayList<EntityProposals>(); //come from constraints, may have multiple.
+	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
 	/**
 	 * 
 	 */
@@ -55,7 +52,8 @@ public class CharacterHandler {
 	
 	public void parseEntity(){
 		Element structure = chara.getParentElement();
-		String structurename = structure.getAttributeValue("name");
+		String structurename = (structure.getAttribute("constraint")!=null? 
+				structure.getAttributeValue("constraint"): ""+" "+structure.getAttributeValue("name")).trim();
 		String structureid = structure.getAttributeValue("id");
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
@@ -65,25 +63,25 @@ public class CharacterHandler {
 	}
 	
 	public void parseQuality(){
-		
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
 		boolean negated = false;
 		if(quality.startsWith("not ")){
 			negated = true;
-			quality = quality.substring(quality.indexOf(" ")+1).trim(); //TODO: deal with negated quality here
+			quality = quality.substring(quality.indexOf(" ")+1).trim(); //deal with negated quality here
 		}
 		//is the candidate a relational quality?
-		Quality relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
 		if(relationalquality!=null){
 			//attempts to find related entity in contraints
 			// constraints = qualitymodifier if quality is a relational quality
 			if (chara.getAttribute("constraintid") != null) {
-				ArrayList<Entity> relatedentities = findEntityInConstraints();
-				for(Entity relatedentity: relatedentities){
-					this.qualities.add(new RelationalQuality(relationalquality, relatedentity));
-					
+				ArrayList<EntityProposals> relatedentities = findEntityInConstraints();
+				for(EntityProposals relatedentity: relatedentities){
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.add(new RelationalQuality(relationalquality, relatedentity));
+					this.qualities.add(qproposals);
 				}
 				return;
 			}else{
@@ -95,8 +93,8 @@ public class CharacterHandler {
 		
 		//constarints may yield entity parts such as entity locator, save those, resolve them later
 		if (chara.getAttribute("constraintid") != null) {
-			ArrayList<Entity> entities = findEntityInConstraints();
-			for(Entity entity: entities){
+			ArrayList<EntityProposals> entities = findEntityInConstraints();
+			for(EntityProposals entity: entities){
 				this.entityparts.add(entity);
 			}
 		}
@@ -113,11 +111,15 @@ public class CharacterHandler {
 				Quality parentquality = new Quality();
 				parentquality.setString(parentinfo[1]);
 				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);				
-				this.qualities.add(new NegatedQuality(result, parentquality));
+				parentquality.setId(parentinfo[0]);		
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add(new NegatedQuality(result, parentquality));
+				this.qualities.add(qproposals);
 				return;
 			}else{
-				this.qualities.add(result);
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add(result);
+				this.qualities.add(qproposals);
 				return;
 			}
 		}else{
@@ -131,13 +133,17 @@ public class CharacterHandler {
 					}					
 				}
 				//no clue or clue was not helpful
-				this.qualities.add((Quality)aquality); //keep confidence score as is
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add((Quality)aquality);
+				this.qualities.add(qproposals); //keep confidence score as is
 			}
 			if(this.qualities.size()==0){
 				result=new Quality();
 				result.string=quality;
 				result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
-				this.qualities.add(result);
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add(result);
+				this.qualities.add(qproposals);
 			}
 			return;
 		}
@@ -146,8 +152,8 @@ public class CharacterHandler {
 	
 	
 	
-	private ArrayList<Entity> findEntityInConstraints() {
-		ArrayList<Entity> entities = new ArrayList<Entity>();
+	private ArrayList<EntityProposals> findEntityInConstraints() {
+		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		if (chara.getAttribute("constraintid") != null) {
 			String[] conids = chara.getAttributeValue("constraintid").split("\\s+");
 			try{
@@ -155,7 +161,7 @@ public class CharacterHandler {
 					String qualitymodifier = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
 					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
-					Entity result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
+					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
 					if(result!=null) entities.add(result);
 				}
 				return entities;
@@ -166,15 +172,18 @@ public class CharacterHandler {
 		return null;
 	}
 	
+	/**
+	 * resolve for entities from entity and entity parts obtained from constraints
+	 */
 	public void resolve(){
 		//TODO
 	}
 	
-	public ArrayList<Quality> getQualities(){
+	public ArrayList<QualityProposals> getQualities(){
 		return this.qualities;
 	}
 
-	public Entity getEntity(){
+	public EntityProposals getEntity(){
 		return this.entity;
 	}
 	/**

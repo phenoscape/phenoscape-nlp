@@ -6,10 +6,11 @@ import java.util.List;
 import org.jdom.Element;
 
 public class EntityParser {
-	private ArrayList<Entity> entities = new ArrayList<Entity>();
+	private ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 
 	/**
 	 * TODO parse also entity locators for entity
+	 * TODO parser restricted relations for post-composition of entities
 	 * @param statement
 	 * @param root
 	 */
@@ -23,8 +24,7 @@ public class EntityParser {
 						Element relation = Utilities.relationWithStructureAsSubject(sid, root);
 						if(relation==null){//the structure is not related to others, form a simple entity
 							String sname = Utilities.getStructureName(root, sid);
-							Entity entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-							//keyentities.add(entity);//TODO try harder to find a match for the key entity
+							EntityProposals entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 							if(entity!=null){
 								entities.add(entity);
 							}
@@ -38,7 +38,7 @@ public class EntityParser {
 									Utilities.getStructureName(root,  relation.getAttributeValue("from")),
 									relation.getAttributeValue("from"), negation, keyelement);
 							rh.handle();
-							Entity entity = rh.getEntity();
+							EntityProposals entity = rh.getEntity();
 							if(entity!=null){
 								entities.add(entity);
 							}
@@ -50,11 +50,11 @@ public class EntityParser {
 				}	
 	}
 
-	public ArrayList<Entity> getEntities() {
+	public ArrayList<EntityProposals> getEntities() {
 		return entities;
 	}
 
-	public void setEntities(ArrayList<Entity> entities) {
+	/*public void setEntities(ArrayList<Entity> entities) {
 		this.entities = entities;
-	}
+	}*/
 }

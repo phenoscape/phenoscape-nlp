@@ -56,7 +56,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	 * @throws Exception the exception
 	 */
 	@SuppressWarnings("unchecked")
-	public Entity searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
+	public EntityProposals searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
 		//TODO create and maintain a cache for entity search?
 	

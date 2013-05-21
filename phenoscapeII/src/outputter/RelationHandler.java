@@ -15,10 +15,9 @@ import org.jdom.Element;
  * http://phenoscape.org/wiki/Guide_to_Character_Annotation#Relations_used_for_post-compositions
  */
 public class RelationHandler {
-	Entity entity; //entity holds the result on entity, may be simple or composite (with a entity locator)
-	Entity entitylocator; 
-	Quality quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
-	ArrayList<EQStatement> otherEQs;
+	EntityProposals entity; //entity holds the result on entity, may be simple or composite (with a entity locator)
+	QualityProposals quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
+	ArrayList<EQStatementProposals> otherEQs;
 	
 	Element root;
 	String relation;
@@ -37,7 +36,7 @@ public class RelationHandler {
 		this.fromstructname = structname;
 		this.fromstructid = structid;
 		this.fromcharacterstatement = keyelement;
-		this.otherEQs = new ArrayList<EQStatement>();
+		this.otherEQs = new ArrayList<EQStatementProposals>();
 		
 	}
 	
@@ -71,13 +70,13 @@ public class RelationHandler {
 		//TODO use character info to help with entity identification?
 		//TODO negation
 
-		Quality relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation);
 		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']");
 		tostructname = tostructname.replaceFirst(",$", "");
 		if(relationalquality !=null){ //yes, the relation is a relational quality
-			Entity qualitymodifier = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-			RelationalQuality rq = new RelationalQuality(relationalquality, qualitymodifier);
-			quality = rq;			
+			EntityProposals relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+			RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
+			quality.add(rq);			
 		}else{//no, the relation should not be considered relational quality
 			//entity locator?
 			if (relation.matches("\\b(" + outputter.Dictionary.positionprep + ")\\b.*")) { // entitylocator
@@ -102,36 +101,45 @@ public class RelationHandler {
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					Utilities.initEQHash(EQ);
-					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-					if(entity!=null){
-						//construct quality
-						Quality present = new Quality();
-						present.setString("present");
-						present.setLabel("PATO:present");
-						present.setId("PATO:0000467");
-						present.setConfidenceScore((float)1.0);
-						EQStatement eq = new EQStatement();
-						eq.setEntity(entity);
-						eq.setQuality(present);
-						this.otherEQs.add(eq);
+					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+					EQStatementProposals eqproposals = new EQStatementProposals();
+					if(entityproposals!=null){
+						ArrayList<Entity> entities = entityproposals.getProposals();
+						for(Entity entity: entities){
+							//construct quality
+							Quality present = new Quality();
+							present.setString("present");
+							present.setLabel("PATO:present");
+							present.setId("PATO:0000467");
+							present.setConfidenceScore((float)1.0);
+							EQStatement eq = new EQStatement();
+							eq.setEntity(entity);
+							eq.setQuality(present);
+							eqproposals.add(eq);
+						}
+						this.otherEQs.add(eqproposals);
 					}
 				}
 			} else if (relation.matches("without.*")) {
 				// output absent as Q for tostructid
 				if (!fromcharacterstatement) {
-					
-					Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-					if(entity!=null){
-						//construct quality
-						Quality absent = new Quality();
-						absent.setString("absent");
-						absent.setLabel("PATO:absent");
-						absent.setId("PATO:0000462");
-						absent.setConfidenceScore((float)1.0);
-						EQStatement eq = new EQStatement();
-						eq.setEntity(entity);
-						eq.setQuality(absent);
-						this.otherEQs.add(eq);
+					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+					EQStatementProposals eqproposals = new EQStatementProposals();
+					if(entityproposals!=null){
+						ArrayList<Entity> entities = entityproposals.getProposals();
+						for(Entity entity: entities){	
+							//construct quality
+							Quality absent = new Quality();
+							absent.setString("absent");
+							absent.setLabel("PATO:absent");
+							absent.setId("PATO:0000462");
+							absent.setConfidenceScore((float)1.0);
+							EQStatement eq = new EQStatement();
+							eq.setEntity(entity);
+							eq.setQuality(absent);
+							eqproposals.add(eq);
+						}
+						this.otherEQs.add(eqproposals);
 					}
 				}
 			} else if(relation.matches("\\b(between|among|amongst)\\b.*")){
@@ -155,15 +163,15 @@ public class RelationHandler {
 		}
 	}
 
-	public Entity getEntity(){
+	public EntityProposals getEntity(){
 		return this.entity;
 	}
 	
-	public Quality getQuality(){
+	public QualityProposals getQuality(){
 		return this.quality;
 	}
 
-	public ArrayList<EQStatement> otherEQs(){
+	public ArrayList<EQStatementProposals> otherEQs(){
 		return this.otherEQs;
 	}
 

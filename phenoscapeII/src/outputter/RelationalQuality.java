@@ -8,8 +8,8 @@ package outputter;
  *
  */
 public class RelationalQuality extends Quality {
-	Quality relationalquality;
-	Entity relatedentity; //also called qualitymodifier
+	QualityProposals relationalquality;
+	EntityProposals relatedentity; //also called qualitymodifier
 	/**
 	 * 
 	 */
@@ -22,29 +22,31 @@ public class RelationalQuality extends Quality {
 	 * @param id
 	 * @param iri
 	 */
-	public RelationalQuality(String string, String label, String id) {
-		relationalquality = new Quality(string, label, id);
-	}
+	/*public RelationalQuality(String string, String label, String id) {
+		Quality q = new Quality(string, label, id);
+		relationalquality = new QualityProposals();
+		relationalquality.add(q);
+	}*/
 
-	public RelationalQuality(Quality relationalquality, Entity qualitymodifier) {
+	public RelationalQuality(QualityProposals relationalquality, EntityProposals relatedentity) {
 		this.relationalquality = relationalquality;
-		this.relatedentity = qualitymodifier;
+		this.relatedentity = relatedentity;
 		
 	}
-	public Quality getQuality(){
+	public QualityProposals getQuality(){
 		return relationalquality;
 	}
 	
-	public void setQualityModifier(Quality relationalquality){
+	public void setQuality(QualityProposals relationalquality){
 		this.relationalquality = relationalquality;
 	}
 	
-	public Entity getQualityModifier(){
+	public EntityProposals getQualityModifier(){
 		return relatedentity;
 	}
 	
-	public void setQualityModifier(Entity qualitymodifier){
-		this.relatedentity = qualitymodifier;
+	public void setQualityModifier(EntityProposals relatedentity){
+		this.relatedentity = relatedentity;
 	}
 	/**
 	 * @param args

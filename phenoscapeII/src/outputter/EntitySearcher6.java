@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import org.jdom.Element;
@@ -25,7 +26,7 @@ public class EntitySearcher6 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public Entity searchEntity(Element root, String structid,
+	public EntityProposals searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//still not find a match, remove the last term in the entityphrase, when what is left is not just a spatial term 
@@ -48,7 +49,9 @@ public class EntitySearcher6 extends EntitySearcher {
 						//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
 						//TODO: change labels to ids
 					}
-					return sentity;
+					EntityProposals entities = new EntityProposals();
+					entities.add(sentity);
+					return entities;
 				}
 			}			
 		}
@@ -56,7 +59,9 @@ public class EntitySearcher6 extends EntitySearcher {
 		SimpleEntity sentity = new SimpleEntity();
 		sentity.setString(entityphrase);
 		sentity.confidenceScore=(float) 1.0;
-		return sentity;
+		EntityProposals entities = new EntityProposals();
+		entities.add(sentity);
+		return entities;
 	}
 
 
