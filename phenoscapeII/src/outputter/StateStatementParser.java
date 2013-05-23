@@ -137,7 +137,7 @@ public class StateStatementParser extends Parser {
 					//removing hasOntologizedWithHighConfidence()
 					for(Entity entity: e.proposals)
 					if ((entity != null) && (entity.getLabel()==null)) {//not ontologized entity
-						Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+						RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root,
 //>>>>>>> branch 'dev' of https://github.com/phenoscape/phenoscape-nlp.git
 								toname, toid, fromname, fromid, keyentities);
 						rq.handle();
@@ -194,7 +194,7 @@ public class StateStatementParser extends Parser {
 				boolean maybesubject = false;
 				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
 						structname, structid, "", "", this.keyentities);*/
-				Structure2QualityStrategy1 rq2 = new Structure2QualityStrategy1(root,
+				RelationalQualityStrategy1 rq2 = new RelationalQualityStrategy1(root,
 						structname, structid, "", "", this.keyentities);
 				rq2.handle();
 				//if (rq2 != null) {

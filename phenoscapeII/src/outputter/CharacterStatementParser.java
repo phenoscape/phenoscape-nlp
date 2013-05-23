@@ -99,7 +99,7 @@ public class CharacterStatementParser extends Parser {
 		{
 			structname = structure.getAttributeValue("name");
 			structid = structure.getAttributeValue("id");
-			Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+			RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root,
 				structname, structid, "", "", null);
 		rq.handle();
 		//If any structure is a quality detach all the structures and relations that contains the structure id

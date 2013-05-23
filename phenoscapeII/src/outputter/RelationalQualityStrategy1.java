@@ -13,7 +13,7 @@ import org.jdom.xpath.XPath;
  * if true will create qualities accordingly.
  */
 
-public class Structure2QualityStrategy1 implements AnnotationStrategy {
+public class RelationalQualityStrategy1 implements AnnotationStrategy {
 
 	Element root;
 	String relation;
@@ -37,7 +37,7 @@ public class Structure2QualityStrategy1 implements AnnotationStrategy {
 		}
 	}
 
-	public Structure2QualityStrategy1(Element root,String toname, String toid, String fromname, String fromid , ArrayList<EntityProposals> keyentities) throws JDOMException {
+	public RelationalQualityStrategy1(Element root,String toname, String toid, String fromname, String fromid , ArrayList<EntityProposals> keyentities) throws JDOMException {
 		this.root = root;
 		this.tostructname = toname;
 		this.tostructid = toid;
