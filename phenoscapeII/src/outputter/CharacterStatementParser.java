@@ -23,9 +23,12 @@ public class CharacterStatementParser extends Parser {
 	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
 	ArrayList<String> qualityClue = new ArrayList<String> ();
 	static XPath pathstructure;
+	static XPath pathrelation;
 	static{
 		try{
 			pathstructure = XPath.newInstance(".//structure");
+			pathrelation = XPath.newInstance(".//relation");
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -73,10 +76,47 @@ public class CharacterStatementParser extends Parser {
 	 */
 	@Override
 	public void parse(Element statement, Element root) {
-		parseForQualityClue(statement); //this may remove quality elements from statement
-		parseForEntities(statement, root, true);
+		try {
+			parseForQualityClue(statement); 
+			checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
+			parseForEntities(statement, root, true);
+
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
 	}
 	
+	//This method checks, if any of the structures in character statement are actually quality. If so, it detaches the structure along with the relations that contain the structure
+	@SuppressWarnings("unchecked")
+	private void checkandfilterqualitystructures(Element statement,Element root) throws JDOMException {
+		
+		String structname;
+		String structid;
+		
+		List<Element> structures = pathstructure.selectNodes(statement);
+//fetch all the structures and individually check, if each are qualities
+		for(Element structure:structures)
+		{
+			structname = structure.getAttributeValue("name");
+			structid = structure.getAttributeValue("id");
+			Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+				structname, structid, "", "", null);
+		rq.handle();
+		//If any structure is a quality detach all the structures and relations that contains the structure id
+		if(rq.qualities.size()>0)
+		{
+			structure.detach();
+			List<Element> relations = pathrelation.selectNodes(statement);
+			for(Element relation:relations)
+				if((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
+							|| (relation.getAttributeValue("to").equals(structid)))
+				relation.detach();
+		}
+		
+		}
+	}
+
+
 	/**
 	 * turn a statement from 
 	 * <statement statement_type="character" character_id="states694" seg_id="0">

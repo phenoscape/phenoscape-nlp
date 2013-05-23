@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 
 /**
@@ -18,6 +19,18 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	/**
 	 * @param ontologyIRIs
 	 */
+	static XPath pathstructure;
+	static XPath pathrelation;
+	static{
+		try{
+			pathstructure = XPath.newInstance(".//structure");
+			pathrelation = XPath.newInstance(".//relation");
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
 	public BinaryCharacterStatementParser(TermOutputerUtilities ontoutil) {
 		super(ontoutil, null, null);
 	}
@@ -29,7 +42,13 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		ArrayList<EQStatementProposals> negativestatements = new ArrayList<EQStatementProposals>();
 		super.parse(statement, root);
 		if(this.EQStatements.size()==0){
-			parseStandaloneStructures(statement, root);
+			try {
+				checkandfilterstructuredquality(statement,root);//checks standalone structure for quality values and detach them.
+				parseStandaloneStructures(statement, root);
+			} catch (JDOMException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		for(EQStatementProposals eqp: this.EQStatements){
 			for(EQStatement eq: eqp.getProposals()){
@@ -103,6 +122,27 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			}
 			this.EQStatements.add(eqp);
 		}		
+	}
+
+private void checkandfilterstructuredquality(Element statement,Element root) throws JDOMException {
+		
+		String structname;
+		String structid;
+		
+		List<Element> structures = pathstructure.selectNodes(statement);
+//Get all the structures and individually check, if each are qualities
+		for(Element structure:structures)
+		{
+			structname = structure.getAttributeValue("name");
+			structid = structure.getAttributeValue("id");
+			Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+				structname, structid, "", "", null);
+		rq.handle();
+		//If any structure is a quality detach all the structures and relations that contains the structure id
+		if(rq.qualities.size()>0)
+			structure.detach();
+		
+		}
 	}
 
 	private EQStatement clone(EQStatement eq){

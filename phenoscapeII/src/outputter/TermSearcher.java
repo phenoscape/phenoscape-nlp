@@ -62,8 +62,7 @@ public class TermSearcher {
 
 		FormalConcept strongmatch = getStrongMatch(phrase+"", phrasetype, results);
 		if(strongmatch != null) return strongmatch;
-		
-		//if landed here, all matches based on the original phrase are weak matches.
+		///if landed here, all matches based on the original phrase are weak matches.
 		candidatematches.addAll(results);
 		results = new ArrayList<Hashtable<String, String>>();
 		
@@ -142,7 +141,20 @@ public class TermSearcher {
 				firstpart = firstpart.substring(0, firstpart.lastIndexOf(" ")).trim();
 			}
 		}
-		
+
+	//convert to relational adjectives by appending ed|-shaped|-like|less etc.
+		if(phrasetype.compareTo("quality")==0)
+		{
+			ArrayList<String> phraseforms = (ArrayList<String>) Wordforms.toAdjective(phrase);
+			//Uses wordforms class to get all the adjectives of this quality
+			for(String form:phraseforms)
+			{
+			strongmatch = getStrongMatch(form, phrasetype, results);
+			if(strongmatch != null) return strongmatch;
+			candidatematches.addAll(results);
+			results = new ArrayList<Hashtable<String, String>>();
+			}
+		}
 		//5.shrinking: should all put in candidatematches, stop shrinking when one match is found, stop shrinking when a spatial term becomes the last word in the phrase
 		//shrinking from the end of the phrase forward. if a phrase start with spatial terms, shrinking from both ends. 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"
@@ -336,7 +348,7 @@ public class TermSearcher {
 	public static void main(String[] args) {	
 
 		TermSearcher ts = new TermSearcher();
-		FormalConcept result = ts.searchTerm("large", "quality");
+		FormalConcept result = ts.searchTerm("fimbriation", "quality");
 		if(result!=null){
 			System.out.println(result.toString());
 		}else{

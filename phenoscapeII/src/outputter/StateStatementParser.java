@@ -130,8 +130,15 @@ public class StateStatementParser extends Parser {
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
 					// strategy.
-					if ((e != null) && (e.hasOntologizedWithHighConfidence())) {//not ontologized entity
+//<<<<<<< HEAD
+//					if ((e != null) && (e.hasOntologizedWithHighConfidence())) {//not ontologized entity
+//						Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+//=======
+					//removing hasOntologizedWithHighConfidence()
+					for(Entity entity: e.proposals)
+					if ((entity != null) && (entity.getLabel()==null)) {//not ontologized entity
 						Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
+//>>>>>>> branch 'dev' of https://github.com/phenoscape/phenoscape-nlp.git
 								toname, toid, fromname, fromid, keyentities);
 						rq.handle();
 						//if (rq != null) {
@@ -141,6 +148,7 @@ public class StateStatementParser extends Parser {
 								e = null;//e is now showed to be a quality
 								q.clear();
 								q.addAll(rq.qualities);
+								break;
 								// relation.detach();
 							//}
 						}
@@ -288,10 +296,10 @@ public class StateStatementParser extends Parser {
 						eq.setEntity(entity);
 						if (quality instanceof RelationalQuality) {
 							eq.setQuality(((RelationalQuality) quality));
-							//if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
-							//		.getPrimaryEntityLabel()){
-							//	continue;
-							//} //don't recall what the above does --Hong May 20, 13.
+//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
+//									.getPrimaryEntityLabel()){
+//								continue;
+//							} //don't recall what the above does --Hong May 20, 13.
 						} else{
 							eq.setQuality(quality);
 						}
