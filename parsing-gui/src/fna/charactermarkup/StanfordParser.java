@@ -82,6 +82,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	static public XPath path21;
 	static public XPath path22;
 	static public XPath path23;
+	static public XPath rb;
 	static{
 		try{
 			path1 = XPath.newInstance(".//character[@value='none']");
@@ -109,6 +110,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path21 = XPath.newInstance(".//PP");
 			path22 = XPath.newInstance(".//PP/CC");
 			path23 = XPath.newInstance(".//NN|.//NNS");
+			
+			rb = XPath.newInstance(".//ADVP/RB");
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -621,12 +624,16 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
 
-		String posedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_posedsentences.txt";
-		String parsedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_parsedsentences.txt";
+		//String posedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_posedsentences.txt";
+		//String parsedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_parsedsentences.txt";
+		
+		String prefix = ApplicationUtilities.getProperty("table.prefix");
+		String posedfile=ApplicationUtilities.getProperty("target.dir")+ApplicationUtilities.getProperty("table.prefix")+"_posedsentences.txt";
+		String parsedfile=ApplicationUtilities.getProperty("target.dir")+ApplicationUtilities.getProperty("table.prefix")+"_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
-		String database = "biocreative2012";
+		String database = ApplicationUtilities.getProperty("database.name");
 		
 
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
@@ -634,9 +641,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "swartz_after", "fishglossaryfixed", false);
-
-		
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, prefix, "fishglossaryfixed", false);
 		//sp.POSTagging();
 		//sp.parsing();
 		sp.extracting();

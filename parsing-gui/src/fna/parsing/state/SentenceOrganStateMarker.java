@@ -37,7 +37,7 @@ public class SentenceOrganStateMarker {
 	private boolean marked = false;
 	private boolean fixadjnn = false;
 	private int fixedcount  =0;
-	
+
 	private Hashtable<String, String> adjnounsent = null;
 	private String adjnounslist = "";
 	private String organnames = null;
@@ -52,14 +52,11 @@ public class SentenceOrganStateMarker {
 	private Display display;
 	private StyledText charLog;
 	private String termprefix = "basi|hypo";
-	
-	
+
+
 	private Connection con;
 	private String url;
-	private String dburl = "jdbc:mysql://localhost:3306/";
-	private String uname = "root";
-	private String upw = "forda444";
-	private String dbname = "biocreative2012";
+
 	private boolean printCompoundPP=false;
 
 	/**
@@ -74,11 +71,11 @@ public class SentenceOrganStateMarker {
 		this.glosstable = glosstable;
 		this.fixadjnn = fixadjnn;
 		try{
-				Statement stmt = conn.createStatement();
-				stmt.execute("drop table if exists "+this.tableprefix+"_markedsentence");
-				stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text, type varchar(20))");
-				//stmt.execute("update "+this.tableprefix+"_sentence set charsegment =''");
-				colors = this.colorsFromGloss();
+			Statement stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+this.tableprefix+"_markedsentence");
+			stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text, type varchar(20))");
+			//stmt.execute("update "+this.tableprefix+"_sentence set charsegment =''");
+			colors = this.colorsFromGloss();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -95,18 +92,18 @@ public class SentenceOrganStateMarker {
 				String tag = rs.getString("tag");
 				String sent = rs.getString("sentence").trim();
 				if(sent.length()!=0){
-				String source = rs.getString("source");
-				String osent = rs.getString("originalsent");
-				String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-				text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-				text = text.replaceAll("&#176;", "°");
-				text = text.replaceAll("\\bca\\s*\\.", "ca");
-				text = stringCompoundPP(text);
-				text = rs.getString("modifier")+"##"+tag+"##"+text;
-		//text.matches(".*?("+termprefix+").*")
-				
-				
-				sentences.put(source, text);
+					String source = rs.getString("source");
+					String osent = rs.getString("originalsent");
+					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
+					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("\\bca\\s*\\.", "ca");
+					text = Utilities.reformAuxiliaryVerbs (text); 
+					text = text.replaceAll("(?<=\\d\\s)x(?=\\s\\w)", "times"); // 2 x longer => 2 times longer, won't match 2x=24 
+					text = stringCompoundPP(text);
+					text = rs.getString("modifier")+"##"+tag+"##"+text;
+					//text.matches(".*?("+termprefix+").*")
+					sentences.put(source, text);
 				}
 			}
 			//merge ditto sentences with previous sentences: this had the drawback of attaching nearest organ as the subject of the ditto sentence
@@ -161,60 +158,63 @@ public class SentenceOrganStateMarker {
 		this.organnames = collectOrganNames();
 		this.statenames = collectStateNames();
 	}
-	
-	/*
+
+
+
+	/**
 	 * The normalize prefix method is used to expand the prefix of a sentence.
 	 * Example : {basi}- and <hypobranchial> <ossifications> will be expanded to 
-	 * 			<basibranchial> and <hypobranchial> <ossifications>
+	 * 			<basibranchial> and <hypobranchial> <ossifications>	 * 
+	 * @param text
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
 	 */
-	
-	
-	
-	String normalizePrefix(String text) throws ClassNotFoundException, SQLException
+	private String normalizePrefix(String text) throws ClassNotFoundException, SQLException
 	{
-String[] splittext = text.split("\\s");
-		
+		String[] splittext = text.split("\\s");
+
 		for(int i=0;i<splittext.length;i++)
 		{
 			if(splittext[i].matches("\\{?("+termprefix+")\\}?-.*"))
-					{
-					if(((i+2)<=splittext.length) && ((splittext[i+1].equals("and")||(splittext[i+1].equals("or")))))
-						 {
-						String termprefix1[] = termprefix.split("\\|");
-						
-						for(int z=0;z<termprefix1.length;z++)
-							 if(splittext[i+2].contains(termprefix1[z]))
-								 {
-								 splittext[i] ="<"+splittext[i].substring(1, splittext[i].lastIndexOf("-")-1)+splittext[i+2].substring(termprefix1[z].length()+1, splittext[i+2].length());
-								 inserttotable(splittext[i]);
-								 break;
-								 }
-						break;
-						 }
-					}
+			{
+				if(((i+2)<=splittext.length) && ((splittext[i+1].equals("and")||(splittext[i+1].equals("or")))))
+				{
+					String termprefix1[] = termprefix.split("\\|");
+
+					for(int z=0;z<termprefix1.length;z++)
+						if(splittext[i+2].contains(termprefix1[z]))
+						{
+							splittext[i] ="<"+splittext[i].substring(1, splittext[i].lastIndexOf("-")-1)+splittext[i+2].substring(termprefix1[z].length()+1, splittext[i+2].length());
+							inserttotable(splittext[i]);
+							break;
+						}
+					break;
+				}
+			}
 		}
 		// combine splittext to form a single text.
-		 text="";
+		text="";
 		for(int i=0,j=0;i<splittext.length;i++,j++)	
-			{
+		{
 			text+=splittext[i];
-		    if(j<splittext.length-1)
-		    	text+=' ';
-			}	
-	return text;
+			if(j<splittext.length-1)
+				text+=' ';
+		}	
+		return text;
 	}
-	
+
 	// The normalized prefix is inserterted into term category table as a structure term
 	void inserttotable(String term) throws ClassNotFoundException, SQLException
 	{
 
-			Class.forName("com.mysql.jdbc.Driver");
-			con = DriverManager.getConnection(dburl + dbname, uname, upw);
+		Class.forName("com.mysql.jdbc.Driver");
+		con = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 
-				// Drop table if exists
-				Statement stmt0 = con.createStatement();
-				System.out.println("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
-				stmt0.executeUpdate("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+		// Drop table if exists
+		Statement stmt0 = con.createStatement();
+		System.out.println("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+		stmt0.executeUpdate("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
 	}
 	/**
 	 * turn reddish purple to reddish-purple
@@ -249,14 +249,14 @@ String[] splittext = text.split("\\s");
 				String sent = (String)sentences.get(source);
 				String taggedsent = "";
 				//if(sent.trim().length()>0){
-					String[] splits = sent.split("##");
-					String modifier = splits[0];
-					String tag = splits[1];
-					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
-					taggedsent = markASentence(source, modifier, tag.trim(), sent);
+				String[] splits = sent.split("##");
+				String modifier = splits[0];
+				String tag = splits[1];
+				sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
+				taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
-				
-			//	System.out.println(taggedsent);
+
+				//	System.out.println(taggedsent);
 				sentences.put(source, taggedsent);
 				try{
 					Statement stmt1 = conn.createStatement();
@@ -269,7 +269,7 @@ String[] splittext = text.split("\\s");
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-				
+
 			}
 		}
 		return sentences;
@@ -288,10 +288,10 @@ String[] splittext = text.split("\\s");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String markASentence(String source, String modifier, String tag, String sent) throws ClassNotFoundException, SQLException {
-		
-		
+
+
 		String taggedsent = markthis(source, sent, organnames, "<", ">");
 		taggedsent = markthis(source, taggedsent, statenames, "{", "}");
 		taggedsent = taggedsent.replaceAll("[<{]or[}>]", "or"); //make sure to/or are left untagged
@@ -310,7 +310,7 @@ String[] splittext = text.split("\\s");
 			//	taggedsent = fixInner(source, taggedsent, modifier, true);//@TODO: debug: need to put tag in after the modifier inner
 			//}
 		}
-		
+
 		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>
 		if(taggedsent.contains("} and ")){
 			String sentcopy = taggedsent;
@@ -335,19 +335,19 @@ String[] splittext = text.split("\\s");
 			taggedsent = taggedsent.replaceAll("\\}###", "}");
 			if(changed){
 				System.out.println("before inserting organ: "+sentcopy);
-				System.out.println("after  inserting organ: "+taggedsent);
+				System.out.println("after inserting organ: "+taggedsent);
 			}
 		}
-		
+
 		//fix cases such as basi_ and hypobranchial => basibranchial and hypobranchial
 
 		if(taggedsent.matches("\\{?("+termprefix+")\\}?-.*")){
 			taggedsent = normalizePrefix(taggedsent); //basi_ and hypobranchial => basibranchial and hypobranchial
 		}
-		
- 		return taggedsent;
+
+		return taggedsent;
 	}
-	
+
 	/**
 	 * mark Inner as organ for sent such as inner red.
 	 * @param adjnouns
@@ -382,7 +382,7 @@ String[] splittext = text.split("\\s");
 					}
 					organ = organ.replaceFirst("\\s*of\\s*$", "").replaceAll("\\W", "");
 					if(TermOutputerUtilities.toSingular(organ).compareTo(tag)==0 || 
-						(organ.matches("(apex|apices)") && tag.compareTo("base")==0)){
+							(organ.matches("(apex|apices)") && tag.compareTo("base")==0)){
 						String b = source.substring(0, source.indexOf("-")+1);
 						String nsource = b +(Integer.parseInt(source.substring(source.indexOf("-")+1))-1);
 						tag = getParentTag(nsource);
@@ -446,7 +446,7 @@ String[] splittext = text.split("\\s");
 						tag = (String)rs.getString("tag").replaceAll("\\W", ""); 	
 					}
 				}while(tag.compareTo("ditto")==0);
-				
+
 			}
 			rs.close();
 			stmt.close();
@@ -474,11 +474,11 @@ String[] splittext = text.split("\\s");
 		//sent = sent.replaceAll("\\(.*?\\)", "");
 		//remove (text)
 		//sent = sent.replaceAll("\\(\\s+(?![\\d\\–\\-\\—]).*?(?<![\\d\\–\\-\\—])\\s+\\)", "");
-		
+
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
 		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
-		
+
 		Pattern tagsp = Pattern.compile("(.*?)\\b("+parts+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 		//System.out.println(parts);
 		String taggedsent = "";
@@ -489,7 +489,7 @@ String[] splittext = text.split("\\s");
 			m = tagsp.matcher(sent);
 		}
 		taggedsent +=sent;
-		
+
 		String tsent = "";
 		Pattern p = Pattern.compile("(.*\\}-)(\\w+)(.*)");
 		m = p.matcher(taggedsent);
@@ -517,7 +517,7 @@ String[] splittext = text.split("\\s");
 		tsent = tsent.replaceAll("\\s+", " ").trim();		
 		return tsent;
 	}
-	
+
 	protected String collectStateNames(){
 		String statestring = "";
 		try{
@@ -532,7 +532,7 @@ String[] splittext = text.split("\\s");
 					statestring += "|"+ w; 
 				}
 			}
-			
+
 			/*wordroles only holds word not in glossary, so need to use glossary to mark a sentence as well.*/
 			rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category not in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'life_style')");
 			while(rs.next()){
@@ -543,27 +543,27 @@ String[] splittext = text.split("\\s");
 					statestring+=("|"+ term);
 			}
 		}catch (Exception e){
-				e.printStackTrace();
+			e.printStackTrace();
 		}
 		return statestring.replaceAll("_", "|").replaceAll("\\b(and|or|to)\\b", "").replaceAll("\\\\d\\+", "").trim().replaceFirst("^\\|", "").replaceFirst("\\|$", "").replaceAll("\\|+", "|");
 	}
-	
+
 	protected String collectOrganNames(){
 		StringBuffer tags = new StringBuffer();
 		try{
-		Statement stmt = conn.createStatement();
-		organNameFromGloss(tags, stmt);
-		organNameFromSentences(tags, stmt);
-		organNameFromPlNouns(tags, stmt);
-	
-		tags = tags.replace(tags.lastIndexOf("|"), tags.lastIndexOf("|")+1, "");
-		
+			Statement stmt = conn.createStatement();
+			organNameFromGloss(tags, stmt);
+			organNameFromSentences(tags, stmt);
+			organNameFromPlNouns(tags, stmt);
+
+			tags = tags.replace(tags.lastIndexOf("|"), tags.lastIndexOf("|")+1, "");
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return tags.toString().replaceAll("\\b\\d+\\b", "").replaceAll("\\|+", "|");
 	}
-	
+
 
 	protected void organNameFromPlNouns(StringBuffer tags, Statement stmt)
 			throws SQLException {
@@ -589,7 +589,7 @@ String[] splittext = text.split("\\s");
 	protected void organNameFromSentences(StringBuffer tags, Statement stmt)
 			throws SQLException {
 		ResultSet rs;
-		
+
 		/*tag terms are already in WORDROLES
 		 * rs = stmt.executeQuery("select distinct tag from sentence where tag not like '% %'");
 		while(rs.next()){
@@ -597,7 +597,7 @@ String[] splittext = text.split("\\s");
 			if(tag == null || tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0){continue;}
 			tags.append(tag+"|");
 		}*/
-		
+
 		rs = stmt.executeQuery("select modifier, tag from "+this.tableprefix+"_sentence where tag  like '[%]'"); //inner [tepal]
 		while(rs.next()){
 			String m = rs.getString("modifier");
@@ -614,7 +614,7 @@ String[] splittext = text.split("\\s");
 			}
 		}
 	}
-	
+
 	protected void organNameFromGloss(StringBuffer tags, Statement stmt)
 			throws SQLException {
 		ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure')");
@@ -625,7 +625,7 @@ String[] splittext = text.split("\\s");
 			tags.append(term+"|");
 		}
 	}
-	
+
 	protected String colorsFromGloss()
 			throws SQLException {
 		StringBuffer colors = new StringBuffer();
@@ -639,7 +639,7 @@ String[] splittext = text.split("\\s");
 		}
 		return colors.toString().replaceFirst("\\|$", "");
 	}
-	
+
 	private void resetOutputMessage() {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
@@ -648,7 +648,7 @@ String[] splittext = text.split("\\s");
 			}
 		});
 	}
-    
+
 	private void showOutputMessage(final String message) {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
@@ -657,25 +657,25 @@ String[] splittext = text.split("\\s");
 			}
 		});
 	}
-	
+
 	/*
 	 * Handles the compound prepositions
 	 */
-	 private String stringCompoundPP(String text) {
-	        boolean did = false;
-	        String result = "";
-	        Matcher m = compreppattern.matcher(text);
-	        while(m.matches()){
-	            String linked = m.group(2).replaceAll("\\s+", "-");
-	            result += m.group(1)+ linked;
-	            text = m.group(3);
-	            m = compreppattern.matcher(text);
-	            did = true;
-	        }
-	        result += text;
-	        if(did && printCompoundPP ) System.out.println("[result]:"+result);
-	        return result;
-	    }
+	private String stringCompoundPP(String text) {
+		boolean did = false;
+		String result = "";
+		Matcher m = compreppattern.matcher(text);
+		while(m.matches()){
+			String linked = m.group(2).replaceAll("\\s+", "-");
+			result += m.group(1)+ linked;
+			text = m.group(3);
+			m = compreppattern.matcher(text);
+			did = true;
+		}
+		result += text;
+		if(did && printCompoundPP ) System.out.println("[result]:"+result);
+		return result;
+	}
 
 	/**
 	 * @param args
@@ -687,26 +687,26 @@ String[] splittext = text.split("\\s");
 		//String database="plaziants_benchmark";//TODO
 		//String database="annotationevaluation";
 		//String database ="phenoscape";
-		String database="biocreative2012";
-		String username="biocreative";
-		String password="biocreative";
+		
+
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
-				conn = DriverManager.getConnection(URL);
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "swartz", "fishglossaryfixed", true, null, null);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
-		//sosm.markSentences();
 
-	}
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
+			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "fishglossaryfixed", true, null, null);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
+			sosm.markSentences();
+			
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		
+		}
 
 }

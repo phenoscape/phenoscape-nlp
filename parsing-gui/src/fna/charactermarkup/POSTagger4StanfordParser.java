@@ -40,7 +40,8 @@ public class POSTagger4StanfordParser {
 	public static String comprepstring = SentenceOrganStateMarker.compoundprep.replaceAll(" ", "-");
 	private static Pattern compreppattern = Pattern.compile("\\{?("+comprepstring+")\\}?");
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
-	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
+	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
+	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(.*)"); //to match in dorsal view and in profile
 	private String countp = "more|fewer|less|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 

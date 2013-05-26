@@ -53,6 +53,7 @@ public class CharacterAnnotatorChunked {
 	private String notInModifier = "a|an|the";
 	private String negationpt = "not|never";
 	private String nonrelation = "through|by|to|into";
+	private String size ="size|length|width";
 	private String lifestyle = "";
 	private String characters;
 	private boolean partofinference = false;
@@ -935,7 +936,7 @@ public class CharacterAnnotatorChunked {
 				modifier2 = rest.replaceFirst(".*?(\\d|\\[|\\+|\\-|\\]|%|\\s|" + ChunkedSentence.units + ")+\\s?(?=[a-z]|$)", "");// 4-5[+]
 				String content = rest.replace(modifier2, "").replaceAll("(\\{|\\})", "").trim();
 				modifier2 = modifier2.replaceAll("(\\w+\\[|\\]|\\{|\\})", "").trim();
-				ArrayList<Element> chars = annotateNumericals(content, text.indexOf("size") >= 0 || content.indexOf('/') > 0 || content.indexOf('%') > 0
+				ArrayList<Element> chars = annotateNumericals(content, text.matches(".*?\\b("+this.size+")\\b.*") || content.indexOf('/') > 0 || content.indexOf('%') > 0
 						|| content.indexOf('.') > 0 ? "size" : null, (modifier1 + ";" + modifier2).replaceAll("(^\\W|\\W$)", ""), lastStructures(), resetfrom);
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkTHAN) {
@@ -3022,17 +3023,25 @@ public class CharacterAnnotatorChunked {
 			this.structid++;
 			e.setAttribute("id", strid);
 			// e.setAttribute("name", o.trim()); //must have.
+			o = o.trim();
 			if(o.indexOf("_")>0) {
-				e.setAttribute("name", o.trim().replaceAll("_", " ")); //prematched phrases from uberon
+				//make sure "_" is used only before the indexes, not btw words of a phrase
+				if(o.matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
+					//handle abc_i-iii, abc_2_to_5, abc_3_and_5, abc_3,4-5... 
+					e.setAttribute("type","multi");
+					e.setAttribute("name", adjustUnderscore(o));//make sure "_" is used only before the indexes, not btw words of a phrase
+				}else{
+					e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
+				}
 			}else{
-				e.setAttribute("name", TermOutputerUtilities.toSingular(o.trim()));
+				e.setAttribute("name", TermOutputerUtilities.toSingular(o));
 			}
 			
 			//Changed by Zilong
-			if(o.trim().matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
+			//if(o.trim().matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
 			//handle abc_i-iii, abc_2_to_5, abc_3_and_5, abc_3,4-5... 
-				e.setAttribute("type","multi");
-			}
+			//	e.setAttribute("type","multi");
+			//}
 			//Changed by Zilong End
 			
 			// must have.
@@ -3064,7 +3073,7 @@ public class CharacterAnnotatorChunked {
 					continue;
 				}
 				String type = null;
-				if (w.startsWith("(") || w.endsWith(")"))
+				if (organ[j].startsWith("(") || w.endsWith(")"))
 					type = "parent_organ";
 				else
 					type = constraintType(w, o);
@@ -3103,6 +3112,15 @@ public class CharacterAnnotatorChunked {
 
 		}
 		return results;
+	}
+
+	/**
+	 * thoracic_vertebra_8
+	 * @param o a phrase with underscores connecting each token, for example 'thoracic_vertebra_8', 'thoracic_vertebra_i-iii'
+	 * @return a phrase with underscores connecting the word part and the index, for example 'thoracic vertebra_8', 'thoracic vertebra_i-iii'
+	 */
+	private String adjustUnderscore(String o) {		
+		return o.replaceAll("_(?![\\divx]+\\b)", " ").trim();
 	}
 
 	/**

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 
+import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
 import fna.parsing.MainForm;
 import fna.parsing.ParsingException;
@@ -1172,7 +1173,7 @@ public class MainFormDbAccessor {
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String t = rs.getString(1);
-				insert2TermCategoryTable(t, "feature");
+				Utilities.insert2TermCategoryTable(t, "feature", conn, MainForm.dataPrefixCombo.getText().trim());
 			}
 			//insert structure terms
 			q = "select distinct word from "+prefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where semanticrole in ('op', 'os') and " +
@@ -1180,7 +1181,7 @@ public class MainFormDbAccessor {
 			rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String t = rs.getString(1);
-				insert2TermCategoryTable(t, "structure");
+				Utilities.insert2TermCategoryTable(t, "structure", conn, MainForm.dataPrefixCombo.getText().trim());
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1188,13 +1189,7 @@ public class MainFormDbAccessor {
 		
 	}
 	
-	private void insert2TermCategoryTable(String term, String cat) throws SQLException {
-		String sql = "insert into " + MainForm.dataPrefixCombo.getText().trim() +"_term_category values (?,?)";
-		PreparedStatement pstmt = conn.prepareStatement(sql);
-		pstmt.setString(1, term);
-		pstmt.setString(2, cat);
-		pstmt.execute();		
-	}
+
 
 	public void createPrepphraseTable() {
 		try{

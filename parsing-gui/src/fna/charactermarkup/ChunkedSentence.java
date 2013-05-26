@@ -427,6 +427,11 @@ public class ChunkedSentence {
 		//for(;i >=this.pointer; i--){
 		for(;i >=0; i--){
 			String t = this.chunkedtokens.get(i);
+			boolean isspatial = false;
+			if(Utilities.isPosition(t.replaceAll("[{<>}]", ""), conn, this.glosstable)){
+				t = t.replaceAll("\\{", "<").replaceAll("\\}", ">").replaceAll("<+", "<").replaceAll(">+", ">");
+				isspatial =true;
+			}
 			/*preventing "the" from blocking the organ following ",the" to being matched as a subject organ- mohan 10/19/2011*/
 			if(t.matches("the|a|an")){
 				if(i!=0){
@@ -435,10 +440,10 @@ public class ChunkedSentence {
 				}
 			}			
 			/*end mohan*/
-			if(t.matches("\\{[\\w-]+\\}")|| t.matches("\\d+") || t.contains("~list~")){
+			if((t.matches("\\{[\\w-]+\\}") && !isspatial)|| t.matches("\\d+") || t.contains("~list~")){
 				chunk = t+" "+chunk;
 				foundm = true;
-			}else if(!foundm && (t.endsWith(">") ||t.endsWith(")") )){ //if m o m o, collect two chunks
+			}else if(!foundm && (t.endsWith(">") ||t.endsWith(")") || isspatial )){ //if m o m o, collect two chunks
 				chunk = t+" "+chunk;
 			}else{
 				if(t.equals(","))subjecto = true;
@@ -449,6 +454,8 @@ public class ChunkedSentence {
 				break;
 			}
 		}
+		chunk = chunk.trim();
+		
 		//if(i==0) subjecto = true;
 		//reformat this.chunkedtokens
 		if(subjecto || i==-1){ 
@@ -2024,7 +2031,14 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		if(token.startsWith("b[")){//z[{longitudinal} (ridge)] b[v[{running}] o[the {length}]] r[p[of] o[the ({quadrate})]] laterally . 
 			if(token.matches(".*\\)\\]+")){
 				return "ChunkVP";
+			}else if(token.indexOf(" o[")<0){//turn it into a simple character chunk, for example "*meet* posteriorly"
+				token = token.replaceAll("([bv]\\[|\\]|\\{|\\})", "").trim();
+				Utilities.insert2TermCategoryTable(token, "feature", conn, this.tableprefix);
+				token = "a[feature["+token+"]]";
+				this.chunkedtokens.set(id, token);				
+				return "ChunkSimpleCharacterState";
 			}else{//z[{longitudinal} (ridge)] b[v[{running}] o[the {length}]] r[p[of] o[the ({quadrate})]] laterally . 
+			
 				String nexttoken = "";
 				int i = id+1;
 				while(nexttoken.length()==0 && i < this.chunkedtokens.size()){

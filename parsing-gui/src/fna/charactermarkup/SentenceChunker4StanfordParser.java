@@ -86,6 +86,7 @@ public class SentenceChunker4StanfordParser {
 	private boolean printNPlist = false;
 	private boolean debug = false;
 	private String type;
+	private boolean debugsureverb = true;
 	//private boolean printPPTO = true;
 	/**
 	 * 
@@ -408,19 +409,31 @@ end procedure
 			boolean sureverb = false;
 			/*
 			 * (ROOT
-  (S
-    (NP (JJ elongate) (NN spine) (NNS bases))
-    (VP (MD may)
-      (VP (VB form)
-        (NP (JJ incipient) (NNS ribs))
-        (ADVP (RB anteriorly))))
-    (: ;)))
+  				(S
+    				(NP (JJ elongate) (NN spine) (NNS bases))
+    				(VP (MD may)
+      					(VP (VB form)
+        				(NP (JJ incipient) (NNS ribs))
+        				(ADVP (RB anteriorly))))
+    			(: ;)))
 			 */
 			if(lVB.getParentElement()!= null && lVB.getParentElement().getParentElement()!=null){
 				List<Element> children= lVB.getParentElement().getParentElement().getChildren();
-				if(children.get(0).getName().compareTo("MD")==0 && children.get(1).equals(lVB.getParentElement())){
+				if(children.get(0).getName().compareTo("MD")==0 && children.get(1).equals(lVB.getParentElement())){//MD: 'can', 'may'
 					sureverb = true;
 				}
+			}
+			/*(S
+				    (NP (NN clavicle_3) (NN clavicles))
+				    (VP (VBP meet)
+				      (ADVP (RB anteriorly)))))*/
+			//if lVB coexists with a ADVP/RB, then sureverb = true
+			Element VP = lVB.getParentElement();
+			try{
+				Element rb = (Element) StanfordParser.rb.selectSingleNode(VP);
+				if(rb!=null) sureverb=true;
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 			extractFromlVB(lVB, sureverb);
 		}		
@@ -439,7 +452,7 @@ end procedure
 		
 		if(!sureverb && (theverb.length()<2 || theverb.matches("\\b(\\w+ly|ca)\\b") 
 		   /*||wnw.mostlikelyPOS()== null || wnw.mostlikelyPOS().compareTo("verb") !=0*/)){ //text of V is not a word, e.g. "x"
-			collapseElement(VP, "", "");
+			collapseElement(VP, "", "");//basically ignore this verb
 			return;
 		}
 		
@@ -454,9 +467,10 @@ end procedure
 		//do extraction here
 		//print(VP, child, "", chaso);
 		String np = firstNP(VP).trim();
-		if(np.length()>0){
+		if(np.length()>0 || sureverb){
 			String chunk = "v["+lVB.getAttributeValue("text")+ "] o["+np+"]";
 			collapseElement(VP, chunk, "b");
+			if(debugsureverb ) System.out.println("sureverb in SentenceChunker: "+chunk);
 		}else{
 			collapseElement(VP, "", "");
 		}
