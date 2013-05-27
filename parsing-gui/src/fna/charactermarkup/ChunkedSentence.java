@@ -989,7 +989,7 @@ public class ChunkedSentence {
 		int nearestAND = 0;
 		for(int i = prepindex+1; i < this.chunkedtokens.size(); i++){
 			String token = this.chunkedtokens.get(i);
-			if(nearestAND ==0 && (token.matches(".*?\\b("+ChunkedSentence.prepositions+"|,)\\b.*"))){
+			if(nearestAND ==0 && (token.matches(".*?(\\b("+ChunkedSentence.prepositions+")\\b|,|\\.).*"))){
 				//failed to find "and", make the chunk stop by nearestN1
 				//check this before checking for < or (
 				return makeChunk4Between(prepindex, nearestN1);
@@ -1009,7 +1009,7 @@ public class ChunkedSentence {
 				//find the 2nd organ, make the chunk
 				return makeChunk4Between(prepindex, nearestN2);
 			}
-			if(nearestAND > 0 && (token.matches(".*?\\b("+ChunkedSentence.prepositions+"|,)\\b.*"))){
+			if(nearestAND > 0 && (token.matches(".*?(\\b("+ChunkedSentence.prepositions+")\\b|,|\\.).*"))){
 				//failed to find nearestN2, make the chunk stop now
 				return makeChunk4Between(prepindex, i-1);				
 			}
@@ -1029,7 +1029,7 @@ public class ChunkedSentence {
 		String chunk = "";
 		for(int i = prepindex+1; i<=endindex; i++){
 			String t = this.chunkedtokens.get(i);
-			t = t.contains("<")? "("+t.replaceAll("[<>(){}]", "")+")": t;
+			t = t.contains("<") || Utilities.isPosition(t.replaceAll("[{}]", ""), conn, this.glosstable)? "("+t.replaceAll("[<>(){}]", "")+")": t;
 			chunk +=t+" ";
 			this.chunkedtokens.set(i, "");
 		}
