@@ -45,7 +45,7 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|forward of|further to|in addition to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|save for|thanks to|together with|up against|up until|vis-a-vis|with reference to|with regard to";
+	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|equal to|forward of|further to|greater or equal to|greater than or equal to|in addition to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|less than or equal to|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|save for|thanks to|together with|up against|up until|vis-a-vis|with reference to|with regard to";
 	public static Pattern compreppattern = Pattern.compile("(.*?)\\b("+compoundprep+")\\b(.*)");
 	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
@@ -98,6 +98,9 @@ public class SentenceOrganStateMarker {
 					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
 					text = text.replaceAll("&#176;", "°");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
+					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.percentage+")\\b)", " ").replaceAll("\\s+", " "); //80percent =>80 percent
+					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.degree+")\\b)", " ").replaceAll("\\s+", " "); //80degree =>80 degree
+					text = text.replaceAll("height width ratio", "h/w");
 					text = Utilities.reformAuxiliaryVerbs (text); 
 					text = text.replaceAll("(?<=\\d\\s)x(?=\\s\\w)", "times"); // 2 x longer => 2 times longer, won't match 2x=24 
 					text = stringCompoundPP(text);

@@ -728,6 +728,14 @@ public class CharacterAnnotatorChunked {
 				ck = cs.nextChunk();
 				if (ck != null && last.getName().compareTo("character") == 0) {
 					String cname = last.getAttributeValue("name");
+					//or greater, less, fewer, more, etc
+					String content = ck.toString();
+					if(content.indexOf(" ")<0 && content.matches(".*?\\b(\\w+er|more|less)\\b.*")){
+						//add content to the value of last character
+						String newvalue = last.getAttributeValue("value")+" or "+content.replaceAll("(\\w+\\[|\\])", "");
+						last.setAttribute("value", newvalue);
+						continue;
+					}
 					if (!(ck instanceof ChunkSimpleCharacterState) && !(ck instanceof ChunkNumericals)) {
 						// these cases can be handled by the normal annotation procedure
 						Element e = new Element("character");
@@ -886,7 +894,7 @@ public class CharacterAnnotatorChunked {
 				// System.out.println(content +
 				// " attached to "+parents.get(0).getAttributeValue("name"));
 				// }
-				ArrayList<Element> chars = annotateNumericals(content, "lwratio", "", lastStructures(), false);
+				ArrayList<Element> chars = annotateNumericals(content, ((ChunkRatio) ck).getLabel(), "", lastStructures(), false);
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkArea) {
 				// ArrayList<Element> chars = annotateNumericals(ck.toString(),
@@ -1130,7 +1138,10 @@ public class CharacterAnnotatorChunked {
 				if (lastelement != null && lastelement.getName().compareTo("character") == 0) {
 					this.addAttribute(lastelement, "modifier", content);
 				} else {
-					cs.unassignedmodifier = content;
+					content = content.replaceAll("(m\\[|\\])", "").replaceAll("(?<=[^\\d])-(?=[^\\d])", " ");
+					ArrayList<Element> chars = annotateNumericals(content, "size", "", lastStructures(), false);
+					updateLatestElements(chars);
+					//cs.unassignedmodifier = content;
 				}
 
 			} else if (ck instanceof ChunkEOS || ck instanceof ChunkEOL) {
@@ -1223,9 +1234,11 @@ public class CharacterAnnotatorChunked {
 		ArrayList<Element> chars = null;
 		// if(character!=null && character.compareTo("size")==0 &&
 		// chunktext.contains("times")){
-		if (character == null)
+		if (character == null){
 			character = "count"; // convenient for phenoscape parsing as it
 									// doesn't care numerical values
+		}
+		chunktext = chunktext.replaceAll("("+ChunkedSentence.percentage+")\\b", " %");
 		chars = parseNumericals(chunktext, character); // annotate "2 times"
 														// without changing
 														// NumericalHandler.parseNumericals
@@ -1440,13 +1453,13 @@ public class CharacterAnnotatorChunked {
 																					// 2
 																					// cm.
 				parts[0] = parts[0].trim().replace("size[", "").replaceFirst("\\]$", "");
-				Pattern p = Pattern.compile(NumericalHandler.numberpattern + " ?[{<(]?[cdm]?m?[)>}]?\\b(" + ChunkedSentence.times + ")?\\b");
+				Pattern p = Pattern.compile(NumericalHandler.numberpattern + " ?(:?[{<(]?[cdm]?m?[)>}]?|"+ChunkedSentence.percentage+")\\b(" + ChunkedSentence.times + ")?\\b");
 				Matcher m = p.matcher(parts[0]);
 				String numeric = "";
 				if (m.find()) { // a series of number
 					numeric = parts[0].substring(m.start(), m.end()).trim().replaceAll("[{<(]$", "");
 				} else {
-					p = Pattern.compile("\\d+ ?[{<(]?[cdm]?m?[)>}]?\\b(" + ChunkedSentence.times + ")?\\b"); // 1
+					p = Pattern.compile("\\d+ ?(:?[{<(]?[cdm]?m?[)>}]?|"+ChunkedSentence.percentage+")\\b(" + ChunkedSentence.times + ")?\\b"); // 1
 																												// number
 					m = p.matcher(parts[0]);
 					m.find();

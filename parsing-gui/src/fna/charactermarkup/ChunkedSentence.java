@@ -1351,7 +1351,7 @@ public class ChunkedSentence {
 		//all tokens: 
 		//number:
 		//if(token.matches(".*?\\d+$")){ //ends with a number
-		if(NumericalHandler.isNumerical(token) ||token.matches("^to~\\d.*")|| token.matches("l\\s*\\W\\s*w")){//l-w or l/w
+		if(NumericalHandler.isNumerical(token) ||token.matches("^to~\\d.*")|| token.matches("h\\s*\\W\\s*w")|| token.matches("l\\s*\\W\\s*w")){//l-w or l/w
 				chunk = getNextNumerics();//pointer++;
 				if(this.unassignedmodifier != null){
 					chunk.setText(this.unassignedmodifier+ " "+chunk.toString());
@@ -1844,7 +1844,7 @@ public class ChunkedSentence {
 			this.pointer++;
 			return new ChunkValue(t.replaceAll("~", " ").trim());
 		}
-		if(t.matches(".*?("+ChunkedSentence.percentage+")")){
+		/*if(t.matches(".*?("+ChunkedSentence.percentage+")")){ //10percent won't work because it won't be seen as a numerical value in the first place
 			numerics += t+ " ";
 			pointer++;
 			return new ChunkValuePercentage(numerics.trim());
@@ -1853,7 +1853,7 @@ public class ChunkedSentence {
 			numerics += t+ " ";
 			pointer++;
 			return new ChunkValueDegree(numerics.trim());
-		}
+		}*/
 		if(t.matches(".*?[()\\[\\]\\-\\–\\d\\.×\\+°²½/¼\\*/%]*?[½/¼\\d][()\\[\\]\\-\\–\\d\\.×\\+°²½/¼\\*/%]*(-\\s*("+ChunkedSentence.counts+")\\b|$)")){ //ends with a number
 			numerics += t+ " ";
 			pointer++;
@@ -1861,7 +1861,7 @@ public class ChunkedSentence {
 				return new ChunkCount(numerics.replaceAll("[{()}]", "").trim());
 			}
 			t = this.chunkedtokens.get(this.pointer);//read next token
-			/*if(t.matches("^[{<(]*("+ChunkedSentence.percentage+").*")){
+			if(t.matches("^[{<(]*("+ChunkedSentence.percentage+").*")){
 				numerics += t+ " ";
 				pointer++;
 				return new ChunkValuePercentage(numerics.replaceAll("[{(<>)}]", "").trim());
@@ -1870,7 +1870,7 @@ public class ChunkedSentence {
 				numerics += t+ " ";
 				pointer++;
 				return new ChunkValueDegree(numerics.replaceAll("[{(<>)}]", "").trim());
-			}*/
+			}
 			if(t.matches("^[{<(]*("+ChunkedSentence.units+")\\b.*?")){
 				numerics += t+ " ";
 				pointer++;
@@ -1904,13 +1904,31 @@ public class ChunkedSentence {
 			}*/
 			return new ChunkCount(numerics.replaceAll("[{()}]", "").trim());
 		}
-		
+		//l/w: length/width
 		if(t.matches("l\\s*\\W\\s*w")){
 			while(!t.matches(".*?\\d.*")){
-				t = this.chunkedtokens.get(++this.pointer);
+				t = this.chunkedtokens.get(++this.pointer)+" ";
 			}
 			this.pointer++;
-			return new ChunkRatio(NumericalHandler.originalNumForm(t).trim());
+			String next = this.chunkedtokens.get(this.pointer);//read next token
+			if(next.matches("^[{<(]*("+ChunkedSentence.percentage+").*")){
+				t += next.replaceAll("[{<()>}]", "")+ " ";
+				pointer++;
+			}
+			return new ChunkRatio(NumericalHandler.originalNumForm(t).trim(), "length/width");
+		}
+		//h/w:height/width
+		if(t.matches("h\\s*\\W\\s*w")){
+			while(!t.matches(".*?\\d.*")){
+				t = this.chunkedtokens.get(++this.pointer)+" ";
+			}
+			this.pointer++;
+			String next = this.chunkedtokens.get(this.pointer);//read next token
+			if(next.matches("^[{<(]*("+ChunkedSentence.percentage+").*")){
+				t += next.replaceAll("[{<()>}]", "")+ " ";
+				pointer++;
+			}
+			return new ChunkRatio(NumericalHandler.originalNumForm(t).trim(), "heigth/width");
 		}
 		return null;
 	}
@@ -2058,6 +2076,15 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		//	return "ChunkOf";
 		//}
 		if(token.startsWith("r[")){
+			if(token.matches(".* o\\[\\(?[0-9+×x°²½/¼*/%-]+\\)?.*("+ChunkedSentence.degree+")[}>)]?\\]+")){
+				token = token.replaceFirst("\\[p\\[", "[m[").replaceAll("[or]\\[", "").replaceFirst("\\]+$", "").replaceAll("[<{()}>]", "");
+				this.chunkedtokens.set(id, token);
+				return "ChunkValueDegree";
+			}else if(token.matches(".* o\\[\\(?[0-9+×x°²½/¼*/%-]+\\)?.*("+ChunkedSentence.percentage+")[}>)]?\\]+")){
+				token = token.replaceFirst("\\[p\\[", "[m[").replaceAll("[or]\\[", "").replaceFirst("\\]+$", "").replaceAll("[<{()}>]", "");
+				this.chunkedtokens.set(id, token);
+				return "ChunkValuePercentage";
+			}else
 			//r[p[around] o[10 mm]] should be ChunkValue
 			if(token.matches(".* o\\[\\(?[0-9+×x°²½/¼*/%-]+\\)?.*("+ChunkedSentence.units+")\\]+")){
 				token = token.replaceFirst("\\[p\\[", "[m[").replaceAll("[or]\\[", "").replaceFirst("\\]+$", "");
