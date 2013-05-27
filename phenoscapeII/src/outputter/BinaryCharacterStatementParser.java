@@ -130,18 +130,17 @@ private void checkandfilterstructuredquality(Element statement,Element root) thr
 		String structid;
 		
 		List<Element> structures = pathstructure.selectNodes(statement);
-//Get all the structures and individually check, if each are qualities
+		//Get all the structures and individually check, if each are qualities
 		for(Element structure:structures)
 		{
 			structname = structure.getAttributeValue("name");
 			structid = structure.getAttributeValue("id");
 			Structure2Quality rq = new Structure2Quality(root,
-				structname, structid, "", "", null);
+				structname, structid, null);
 		rq.handle();
-		//If any structure is a quality detach all the structures and relations that contains the structure id
+		//If any structure is a quality detach all the structures containing the structure id
 		if(rq.qualities.size()>0)
-			structure.detach();
-		
+			structure.detach(); //no need to detach relations because the StateStatementParser was already called (the relations are handled there)	
 		}
 	}
 

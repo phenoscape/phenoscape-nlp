@@ -95,13 +95,13 @@ public class StateStatementParser extends Parser {
 			relations = pathRelation.selectNodes(statement);
 			for (Element relation : relations) {
 				int flag = 1; //should the relation be retained or ignored. 1 = retain
-				for (String struct : StructuredQualities){ //StructuredQualities: initially empty
-					if ((relation.getAttributeValue("from").equals(struct)) //the structure involved in the relation is actually a quality
-							|| (relation.getAttributeValue("to").equals(struct))) {
+				for (String structid : StructuredQualities){ //StructuredQualities: initially empty, populated with the ids of 'bad' structures (that are really quliaties") 
+					if ((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
+							|| (relation.getAttributeValue("to").equals(structid))) {
 						// relation.detach();
 						flag = 0; //bad relation
 						break;
-					} else flag = 1;//good relation
+					} 
 				}
 				//process only the good relation
 				if (flag == 1) {
@@ -116,45 +116,47 @@ public class StateStatementParser extends Parser {
 					List<QualityProposals> q = new ArrayList<QualityProposals>();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					EntityProposals e;
-					
+
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
 					// strategy.
-					
-					Structure2Quality rq = new Structure2Quality(root,
-							toname, toid, fromname, fromid, keyentities);
-					rq.handle();
-					
-					if (rq.qualities.size() > 0) {
-						StructuredQualities.addAll(rq.identifiedqualities);
-						//if (rq.qualities.size() > 0) {
-							e = null;//e is now showed to be a quality
-							q.clear();
-							q.addAll(rq.qualities);
-							// relation.detach();
-						//}
+
+					Structure2Quality rq1 = new Structure2Quality(root,
+							toname, toid, keyentities);
+					rq1.handle();
+
+					Structure2Quality rq2 = new Structure2Quality(root,
+							fromname, fromid, keyentities);
+					rq2.handle();
+					if (rq1.qualities.size() > 0) {
+						StructuredQualities.addAll(rq1.identifiedqualities);
+						e = null;//e is now showed to be a quality
+						q.addAll(rq1.qualities);
+					}else if (rq2.qualities.size() > 0) {
+						StructuredQualities.addAll(rq2.identifiedqualities);
+						e = null;//e is now showed to be a quality
+						q.addAll(rq2.qualities);
+					}else{
+						try {
+							maybesubject = maybeSubject(root, fromid);
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+						RelationHandler rh = new RelationHandler(root, relname,
+								toname, toid, fromname, fromid, neg, false);
+						rh.handle();
+
+						e = rh.getEntity();
+						q = new ArrayList<QualityProposals>();
+						if(rh.getQuality()!=null) q.add(rh.getQuality());
+						if (rh.otherEQs.size() > 0)
+							this.EQStatements.addAll(rh.otherEQs);
 					}
-					else{
-					try {
-						maybesubject = maybeSubject(root, fromid);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					RelationHandler rh = new RelationHandler(root, relname,
-							toname, toid, fromname, fromid, neg, false);
-					rh.handle();
-				
-					e = rh.getEntity();
-					 q = new ArrayList<QualityProposals>();
-					if(rh.getQuality()!=null) q.add(rh.getQuality());
-					if (rh.otherEQs.size() > 0)
-						this.EQStatements.addAll(rh.otherEQs);
-					}
-			
+
 					// Changes Ending => Hariharan Include flag below to make
 					// sure , to include EQ's only when qualities exist.
-					
+
 					if (q.size() > 0) {
 						if (maybesubject && e != null
 								&& this.keyentities != null) {
@@ -169,7 +171,7 @@ public class StateStatementParser extends Parser {
 						//construct EQStatementProposals
 						constructureEQStatementProposals(q, entities);
 
-						
+
 					}
 
 				}
@@ -195,7 +197,7 @@ public class StateStatementParser extends Parser {
 				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
 						structname, structid, "", "", this.keyentities);*/
 				Structure2Quality rq2 = new Structure2Quality(root,
-						structname, structid, "", "", this.keyentities);
+						structname, structid, this.keyentities);
 				rq2.handle();
 				System.out.print("");
 				//if (rq2 != null) {
@@ -212,7 +214,7 @@ public class StateStatementParser extends Parser {
 					} // false if fromid appears in constraintid or toid
 					CharacterHandler ch = new CharacterHandler(root, character,
 							ontoutil, qualityclue); // may contain relational
-													// quality
+					// quality
 					ch.handle();
 					qualities = ch.getQualities();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
@@ -237,7 +239,7 @@ public class StateStatementParser extends Parser {
 		// last, standing alone structures (without characters 
 		// and are not the subject of a relation)
 		//TODO: could it really be a quality?
-		
+
 		//if a real entity, construct EQs of 'entity/present' 
 		//The following case is handled by the wildcard entity search strategy 	  
 		//text::Caudal fin
@@ -290,7 +292,7 @@ public class StateStatementParser extends Parser {
 
 	private void constructureEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
-		
+
 		for (QualityProposals qualityp : qualities){
 			for (EntityProposals entityp : entities) {
 				EQStatementProposals eqp = new EQStatementProposals();
@@ -300,10 +302,10 @@ public class StateStatementParser extends Parser {
 						eq.setEntity(entity);
 						if (quality instanceof RelationalQuality) {
 							eq.setQuality(((RelationalQuality) quality));
-//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
-//									.getPrimaryEntityLabel()){
-//								continue;
-//							} //don't recall what the above does --Hong May 20, 13.
+							//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
+							//									.getPrimaryEntityLabel()){
+							//								continue;
+							//							} //don't recall what the above does --Hong May 20, 13.
 						} else{
 							eq.setQuality(quality);
 						}
@@ -338,7 +340,7 @@ public class StateStatementParser extends Parser {
 			throws Exception {
 		Element e = (Element) XPath.selectSingleNode(root,
 				".//character[contains(@constraintid,'" + structid
-						+ "')]|.//relation[@to='" + structid + "']");
+				+ "')]|.//relation[@to='" + structid + "']");
 		if (e == null)
 			return true;
 		return false;
@@ -359,7 +361,7 @@ public class StateStatementParser extends Parser {
 			entities.add(e);
 			return entities;
 		}
-		
+
 		//find a place for the spatial terms
 		if (containsSpatial(e)) {
 			entities = integrateSpatial(e, this.keyentities);
@@ -367,9 +369,9 @@ public class StateStatementParser extends Parser {
 		}
 
 		if (e.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) { // if
-																					// e
-																					// is
-																					// whole_organism
+			// e
+			// is
+			// whole_organism
 			return (ArrayList<EntityProposals>) keyentities.clone();
 		}
 		// test subclass relations between all e proposals and each of the keyentities proposals
@@ -377,15 +379,15 @@ public class StateStatementParser extends Parser {
 		if(results==null){
 			results = resolveBaseOnPartOfRelation(e, keyentities);
 		}
-		
+
 		if(results!=null)
 			return results;
 
 		return (ArrayList<EntityProposals>) keyentities.clone();
 	}
 
-	
-	
+
+
 	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
 		// test part_of relations between all e proposals and each of the keyentities proposals
 		if (e.hasOntologizedWithHighConfidence()) {
@@ -414,7 +416,7 @@ public class StateStatementParser extends Parser {
 		}		
 		return null;
 	}
-	
+
 	/**
 	 * test subclass relations between all e proposals and each of the keyentities proposals
 	 * if positive for any test, resolve to the subclass
@@ -452,7 +454,7 @@ public class StateStatementParser extends Parser {
 		}		
 		return null;
 	}
-	
+
 	/**
 	 * the state statement may return a spatial element that need to be
 	 * integrated into the keyentity

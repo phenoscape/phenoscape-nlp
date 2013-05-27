@@ -9,44 +9,52 @@ import org.jdom.xpath.XPath;
 
 
 /**
- * RelationalQualityStrategy is used to check whether an entity is a quality (relaitonal or not) and
- * if true will create qualities accordingly.
+ * This Strategy checks whether one <structure> is a quality (relational or not).
+ * If true will create qualities accordingly.
+ * This class also adjust underlying xml file by detaching the structure. 
+ *  
  */
 
 public class Structure2Quality {
 
 	Element root;
 	String relation;
-	String tostructname;
-	String tostructid;
-	String fromstructname;
-	String fromstructid;
+	String structname;
+	String structid;
 	boolean negation; // if true, negate the relation string
 	boolean fromcharacterstatement;
-	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
 	private TermOutputerUtilities ontoutil;
-	XPath pathCharacterUnderStucture;
+	static XPath pathCharacterUnderStucture;
 	ArrayList<EntityProposals> keyentities;
 	ArrayList<String> identifiedqualities;
-
-	public Structure2Quality(Element root,String toname, String toid, String fromname, String fromid, ArrayList<EntityProposals> keyentities) throws JDOMException {
-		this.root = root;
-		this.tostructname = toname;
-		this.tostructid = toid;
-		this.fromstructname = fromname;
-		this.fromstructid = fromid;
+	
+	static{
+		try{
 		pathCharacterUnderStucture = XPath.newInstance(".//character");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	public Structure2Quality(Element root,String structurename, String structureid, ArrayList<EntityProposals> keyentities) {
+		this.root = root;
+		this.structname = structurename;
+		this.structid = structureid;
 		this.keyentities = keyentities;
-		identifiedqualities = new ArrayList<String>();
-		
+		identifiedqualities = new ArrayList<String>(); //list of xml ids
 	}
 
 	public void handle() {
 		try {
-			parseforQuality(this.tostructname, this.tostructid); //to see if the structure is a quality (relational or other quality)
-			parseforQuality(this.fromstructname, this.fromstructid);
-			System.out.print("");
-
+			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+			//detach all identifiedqualities
+			for(String structid: identifiedqualities){
+				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[id='"+structid+"']");
+				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
+									//and the relations are needed for other purpose, 
+									//so don't detach relation here. 
+			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}

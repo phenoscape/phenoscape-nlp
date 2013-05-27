@@ -105,7 +105,7 @@ public class CharacterStatementParser extends Parser {
 			structname = structure.getAttributeValue("name");
 			structid = structure.getAttributeValue("id");
 			Structure2Quality rq = new Structure2Quality(root,
-				structname, structid, "", "", null);
+				structname, structid, null);
 			System.out.print("");
 		rq.handle();
 		//If any structure is a quality detach all the structures and relations that contains the structure id

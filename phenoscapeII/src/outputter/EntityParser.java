@@ -5,6 +5,13 @@ import java.util.List;
 
 import org.jdom.Element;
 
+
+/**
+ * this class parses entities from a statement
+ * returns an ArrayList<EntityProposals> entities
+ * @author Hong Cui
+ *
+ */
 public class EntityParser {
 	private ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 
