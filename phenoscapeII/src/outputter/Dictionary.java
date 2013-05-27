@@ -15,6 +15,7 @@ import owlaccessor.OWLAccessorImpl;
 
 import edu.mit.jwi.IDictionary;
 
+
 public class Dictionary {
 	public static Connection conn;
 	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim

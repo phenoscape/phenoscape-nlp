@@ -164,6 +164,7 @@ public class XML2EQ {
 					bcsp.parse(characterstatement, root);
 					allEQs = bcsp.getEQStatements();
 				}else{
+					int x = 0;
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();

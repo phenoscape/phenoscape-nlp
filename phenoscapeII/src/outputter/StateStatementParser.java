@@ -238,7 +238,7 @@ public class StateStatementParser extends Parser {
 		// and are not the subject of a relation)
 		//TODO: could it really be a quality?
 		
-		//if a real entity, construct EQs of entity/present 
+		//if a real entity, construct EQs of 'entity/present' 
 		//The following case is handled by the wildcard entity search strategy 	  
 		//text::Caudal fin
 		//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
@@ -252,6 +252,7 @@ public class StateStatementParser extends Parser {
 				String sid = structure.getAttributeValue("id");
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null){
+					//standing-alone structure
 					String sname = Utilities.getStructureName(root, sid);
 					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					entities.add(ep);
@@ -276,6 +277,7 @@ public class StateStatementParser extends Parser {
 				q.setString("present");
 				q.setId("PATO:0000467");
 				q.setLabel("present");
+				q.setConfidenceScore(1f);
 				qp.add(q);
 				qualities.add(qp);
 				constructureEQStatementProposals(qualities, entities);

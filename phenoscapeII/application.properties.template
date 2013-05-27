@@ -13,6 +13,8 @@ ontology.dir=
 uberonphrases.bin =
 wordnet.dictionary=
 ontology.uberon=
+
+
 ####################################DO NOT EDIT THE FOLLOWING######################################
 
 #XML Schema

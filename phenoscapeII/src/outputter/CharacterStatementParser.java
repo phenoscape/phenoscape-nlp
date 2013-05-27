@@ -86,7 +86,12 @@ public class CharacterStatementParser extends Parser {
 		}
 	}
 	
-	//This method checks, if any of the structures in character statement are actually quality. If so, it detaches the structure along with the relations that contain the structure
+	/**
+	 * This method checks, if any of the structures in character statement are actually quality. If so, it detaches the structure along with the relations that contain the structure
+	 * @param statement
+	 * @param root
+	 * @throws JDOMException
+	 */
 	@SuppressWarnings("unchecked")
 	private void checkandfilterqualitystructures(Element statement,Element root) throws JDOMException {
 		
@@ -94,7 +99,7 @@ public class CharacterStatementParser extends Parser {
 		String structid;
 		
 		List<Element> structures = pathstructure.selectNodes(statement);
-//fetch all the structures and individually check, if each are qualities
+		//fetch all the structures and individually check, if each are qualities
 		for(Element structure:structures)
 		{
 			structname = structure.getAttributeValue("name");
