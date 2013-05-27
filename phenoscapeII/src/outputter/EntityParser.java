@@ -38,6 +38,7 @@ public class EntityParser {
 									Utilities.getStructureName(root,  relation.getAttributeValue("from")),
 									relation.getAttributeValue("from"), negation, keyelement);
 							rh.handle();
+							System.out.print("");
 							EntityProposals entity = rh.getEntity();
 							if(entity!=null){
 								entities.add(entity);

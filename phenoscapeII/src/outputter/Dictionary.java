@@ -29,6 +29,8 @@ public class Dictionary {
 	public static String selfReference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
 	public static String spatialtermptn="";
+	public static String prefixes = "post|pre|post-|pre-";
+
 	//By Zilong:
 	//sometimes, spatial terms could be used as adjectives to modify head nouns. 
 	//Instead of directly using <spatial terms+head nouns> when searching the ontology,
@@ -154,7 +156,9 @@ public class Dictionary {
 		//un-ed pattern, TODO make it more flexible
 		verbalizednouns.put("unossified", "ossification,absent");
 		
-		spatialMaps.put("portion", "region");				
+		spatialMaps.put("portion", "region");	
+		//end is defined to be region => distal end => distal region
+		spatialMaps.put("end", "region");
 	}
 	//legal relational qualities
 	static{	

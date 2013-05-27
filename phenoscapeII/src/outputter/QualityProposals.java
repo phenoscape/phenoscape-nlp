@@ -21,6 +21,16 @@ public class QualityProposals {
 	public ArrayList<Quality> getProposals(){
 		return proposals;
 	}
+	
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+
+		for(Quality q:proposals)
+		{
+			sb.append(q.toString());
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * @param args

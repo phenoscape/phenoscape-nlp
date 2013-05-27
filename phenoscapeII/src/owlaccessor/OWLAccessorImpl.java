@@ -16,6 +16,8 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
+import outputter.XML2EQ;
+
 // TODO: Auto-generated Javadoc
 //import org.semanticweb.owlapi.util.SimpleIRIMapper;
 
@@ -64,8 +66,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The search cache. */
 	
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> ontologyHash = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>();; //syn type => {term => classes}
-	public static Hashtable<String,Hashtable<String, String>> adjectiveorgans = new Hashtable<String, Hashtable<String, String>>(); //adj => {classID => label}
 	
+
+	public static Hashtable<String,Hashtable<String,String>> adjectiveorgans = new Hashtable<String,Hashtable<String,String>>(); //adj => {classID => label}
+	
+	public static Hashtable<String,ArrayList<String>> organadjective = new Hashtable<String,ArrayList<String>> (); //organ => adjective
 	/** The source. */
 	private String source;
 	private OWLOntology rootOnt;
@@ -187,7 +192,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public String getSource(){
 		return source;
 	}
-
+	
+	public Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> getOntologyHash() {
+		return ontologyHash;
+	}
 	/**
 	 * Gets the keywords.
 	 * 
@@ -253,7 +261,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 
 
-		private void collectAdjectiveOrgans(OWLClass c) {
+		/*private void collectAdjectiveOrgans(OWLClass c) {
 			onts=rootOnt.getImportsClosure();
 			ArrayList<OWLAnnotation> annotations = new ArrayList<OWLAnnotation>();
 			for (OWLOntology ont:onts){
@@ -273,8 +281,36 @@ public class OWLAccessorImpl implements OWLAccessor {
 					this.adjectiveorgans.put(adj,organs);
 				}
 			}			
+		}*/
+//Two caches one to hold organ => adjective pairs and the other to hold adjective => {organid,organlabel}
+		private void collectAdjectiveOrgans(OWLClass c) {
+			onts=rootOnt.getImportsClosure();
+			ArrayList<OWLAnnotation> annotations = new ArrayList<OWLAnnotation>();
+			for (OWLOntology ont:onts){
+			 annotations.addAll(c.getAnnotations(ont));
+			}
+			for(OWLAnnotation anno : annotations){
+				//System.out.println(anno.toString());
+				//adjectiveorgans//adj => classID#label
+				if(anno.toString().contains("UBPROP_0000007") ){//has_relational_adjective
+					String adj = anno.getValue().toString();//"zeugopodial"^^xsd:string
+					adj = adj.substring(0, adj.indexOf("^^")).replace("\"", "");
+					ArrayList<String> adjectives = this.organadjective.get(this.getLabel(c));
+					if(adjectives ==null){
+						adjectives = new ArrayList<String>();
+					}
+					adjectives.add(adj);
+					this.organadjective.put(this.getLabel(c),adjectives);
+					
+					Hashtable<String, String> organs = this.adjectiveorgans.get(adj);
+					if(organs ==null){
+						organs = new Hashtable<String, String>();
+					}
+					organs.put(this.getID(c), this.getLabel(c));
+					this.adjectiveorgans.put(adj,organs);
+				}
+			}			
 		}
-
 
 		private Hashtable<String, ArrayList<OWLClass>> initTypedClasses(){
 			ArrayList<OWLClass> classes = new ArrayList<OWLClass>();
@@ -794,6 +830,30 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return labels;
 	}
 
+
+
+	//Get all the exact and original synonyms of a particular entity or spatial entity
+		//word denotes the term from the entity phrase
+		//onto denotes whether to search in entity cache or BSPO cache
+		public ArrayList<String> getSynonymLabelsbyPhrase(String word, String onto)
+		{
+			String type;
+			ArrayList<String> synonyms = new ArrayList<String>();
+				
+			Hashtable<String, ArrayList<OWLClass>> matches = this.getOntologyHash().get(word);
+			if(matches!=null)
+			{
+			ArrayList<OWLClass> exactsynonyms = matches.get("exact");
+			for(OWLClass synonym:exactsynonyms)
+			synonyms.add(this.getLabel(synonym));
+			ArrayList<OWLClass> originalsynonyms = matches.get("original");
+			for(OWLClass synonym:originalsynonyms)
+			synonyms.add(this.getLabel(synonym));
+			}
+			return synonyms;
+		}
+
+	
 	/**
 	 * Gets the all classes.
 	 * 

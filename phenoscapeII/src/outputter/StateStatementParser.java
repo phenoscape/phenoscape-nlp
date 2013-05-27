@@ -113,6 +113,29 @@ public class StateStatementParser extends Parser {
 					String toname = Utilities.getStructureName(root, toid);
 					String fromname = Utilities.getStructureName(root, fromid);
 					boolean maybesubject = false;
+					List<QualityProposals> q = new ArrayList<QualityProposals>();
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					EntityProposals e;
+					
+					// Changes starting => Hariharan
+					// checking if entity is really an entity or it is a quality
+					// by passing to and from struct names to relational quality
+					// strategy.
+					
+					Structure2Quality rq = new Structure2Quality(root,
+							toname, toid, fromname, fromid, keyentities);
+					rq.handle();
+					
+					if (rq.qualities.size() > 0) {
+						StructuredQualities.addAll(rq.identifiedqualities);
+						//if (rq.qualities.size() > 0) {
+							e = null;//e is now showed to be a quality
+							q.clear();
+							q.addAll(rq.qualities);
+							// relation.detach();
+						//}
+					}
+					else{
 					try {
 						maybesubject = maybeSubject(root, fromid);
 					} catch (Exception e1) {
@@ -122,39 +145,16 @@ public class StateStatementParser extends Parser {
 							toname, toid, fromname, fromid, neg, false);
 					rh.handle();
 				
-					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					EntityProposals e = rh.getEntity();
-					List<QualityProposals> q = new ArrayList<QualityProposals>();
+					e = rh.getEntity();
+					 q = new ArrayList<QualityProposals>();
 					if(rh.getQuality()!=null) q.add(rh.getQuality());
-					// Changes starting => Hariharan
-					// checking if entity is really an entity or it is a quality
-					// by passing to and from struct names to relational quality
-					// strategy.
-//<<<<<<< HEAD
-//					if ((e != null) && (e.hasOntologizedWithHighConfidence())) {//not ontologized entity
-//						Structure2QualityStrategy1 rq = new Structure2QualityStrategy1(root,
-//=======
-					//removing hasOntologizedWithHighConfidence()
-					for(Entity entity: e.proposals)
-					if ((entity != null) && (entity.getLabel()==null)) {//not ontologized entity
-						RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root,
-//>>>>>>> branch 'dev' of https://github.com/phenoscape/phenoscape-nlp.git
-								toname, toid, fromname, fromid, keyentities);
-						rq.handle();
-						//if (rq != null) {
-						if (rq.qualities.size() > 0) {
-							StructuredQualities.addAll(rq.identifiedqualities);
-							//if (rq.qualities.size() > 0) {
-								e = null;//e is now showed to be a quality
-								q.clear();
-								q.addAll(rq.qualities);
-								break;
-								// relation.detach();
-							//}
-						}
+					if (rh.otherEQs.size() > 0)
+						this.EQStatements.addAll(rh.otherEQs);
 					}
+			
 					// Changes Ending => Hariharan Include flag below to make
 					// sure , to include EQ's only when qualities exist.
+					
 					if (q.size() > 0) {
 						if (maybesubject && e != null
 								&& this.keyentities != null) {
@@ -164,12 +164,12 @@ public class StateStatementParser extends Parser {
 							entities = this.keyentities;
 						} else if (e != null) {
 							entities.add(e);
-						}
+						} else 
+							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 						//construct EQStatementProposals
 						constructureEQStatementProposals(q, entities);
 
-						if (rh.otherEQs.size() > 0)
-							this.EQStatements.addAll(rh.otherEQs);
+						
 					}
 
 				}
@@ -194,9 +194,10 @@ public class StateStatementParser extends Parser {
 				boolean maybesubject = false;
 				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
 						structname, structid, "", "", this.keyentities);*/
-				RelationalQualityStrategy1 rq2 = new RelationalQualityStrategy1(root,
+				Structure2Quality rq2 = new Structure2Quality(root,
 						structname, structid, "", "", this.keyentities);
 				rq2.handle();
+				System.out.print("");
 				//if (rq2 != null) {
 				if(rq2.qualities.size()>0){
 					entity = null;
@@ -225,7 +226,8 @@ public class StateStatementParser extends Parser {
 					entities = this.keyentities;
 				} else if (entity != null) {
 					entities.add(entity);
-				}
+				} else 
+					entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 				constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
@@ -362,9 +364,10 @@ public class StateStatementParser extends Parser {
 			// TODO integrate entity with keyentities
 		}
 
-		//if e is whole organism place holder
-		if (e.getPhrase().compareTo(
-				ApplicationUtilities.getProperty("unknown.structure.name")) == 0) { 
+		if (e.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) { // if
+																					// e
+																					// is
+																					// whole_organism
 			return (ArrayList<EntityProposals>) keyentities.clone();
 		}
 		// test subclass relations between all e proposals and each of the keyentities proposals

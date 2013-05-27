@@ -53,29 +53,37 @@ public class EntitySearcher1 extends EntitySearcher {
 				return entities;
 			}
 		}
+		if(entityphrase.split("\\s").length>=2)
+		{
 		//try out the variations
 		SynRingVariation entityvariation = new SynRingVariation(entityphrase);
 		SynRingVariation elocatorvariation = null;
 		if(elocatorphrase==null || elocatorphrase.length()==0){
-			elocatorvariation =  new SynRingVariation(elocatorphrase);
+			//elocatorvariation =  new SynRingVariation(elocatorphrase);
 		}
 		
 		if(elocatorvariation == null){ //try entityvariation alone
 			String spatial = entityvariation.getLeadSpaticalTermVariation();
 			String head = entityvariation.getHeadNounVariation();
-			//regular expression search
-			ArrayList<FormalConcept> temp = (ArrayList<FormalConcept>)new TermSearcher().regexpSearchTerm(spatial+" "+head, "entity");
-			EntityProposals entities = new EntityProposals();
-			if(temp!=null && temp.size()>0){
-				for(int i =0; i <temp.size(); i++){
-					entities.add((Entity)temp.get(i));					
+			spatial="||"+spatial;
+			head+="||"+head;
+			
+			// the below code passes all the spatial and entity variations to termsearcher and get all the matching entities.
+			ArrayList<FormalConcept> matches = TermSearcher.entityvariationtermsearch(spatial,head);
+			if(matches.size()>0)
+			{
+				EntityProposals entities = new EntityProposals();
+				for(int i =0; i <matches.size(); i++){
+					entities.add((Entity)matches.get(i));					
 				}
 				return entities;
 			}
 		}else{
+		System.out.println("");
 			if(prep.contains("part_of")){
-				
+				System.out.println();
 			}
+		}
 		}
 		return new EntitySearcher2().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}

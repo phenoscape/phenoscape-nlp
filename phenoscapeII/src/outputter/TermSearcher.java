@@ -90,7 +90,7 @@ public class TermSearcher {
 				trimed = true;
 				m = p.matcher(phrase);
 			}
-			//spatials = dorsal ; phrase = portion
+			//spatials = dorsal ; phrase = portion,, spatials distal; phrase = end
 			String repl = Dictionary.spatialMaps.get(phrase);
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
@@ -196,6 +196,10 @@ public class TermSearcher {
 		}
 		return null;
 	}
+	
+	
+	
+	
 	/**
 	 * fill in results, return strong match if there is any
 	 * @param term
@@ -236,7 +240,30 @@ public class TermSearcher {
 		}
 		return null;
 	}
+/**
+ * 
+ * Searches for all combination of spatial and headnoun in owl entity and returns matching entities
+ * 
+ * 
+ * 	
+ */
 	
+	
+	
+	public static ArrayList<FormalConcept> entityvariationtermsearch(String spatial, String headnoun)
+	{
+		ArrayList<FormalConcept> matches = new ArrayList<FormalConcept>();
+		
+		for(String spatialterm:spatial.split("\\|"))
+			for(String nounterm:headnoun.split("\\|"))
+			{
+				FormalConcept term = new TermSearcher().searchTerm(spatialterm+" "+nounterm, "entity");
+				if(term!=null)
+					matches.add(term);
+			}
+		return matches;
+		
+	}
 	/**
 	 * search pattern with wildcard "*".
 	 * search for "pevlic *", it will return any class with label or syn of "pelvic somthing".

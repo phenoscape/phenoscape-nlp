@@ -135,7 +135,7 @@ private void checkandfilterstructuredquality(Element statement,Element root) thr
 		{
 			structname = structure.getAttributeValue("name");
 			structid = structure.getAttributeValue("id");
-			RelationalQualityStrategy1 rq = new RelationalQualityStrategy1(root,
+			Structure2Quality rq = new Structure2Quality(root,
 				structname, structid, "", "", null);
 		rq.handle();
 		//If any structure is a quality detach all the structures and relations that contains the structure id

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -223,6 +224,8 @@ public class TermOutputerUtilities {
 		}
 		return null;
 	}
+		
+	
 	/**
 	 * Search a term in a subgroup of an ontology
 	 * subgroup only applies to PATO relational slim //TODO complete this part.

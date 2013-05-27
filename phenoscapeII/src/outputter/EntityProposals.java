@@ -47,6 +47,16 @@ public class EntityProposals implements Proposals {
 		this.proposals = new ArrayList<Entity>();
 		this.phrase = "";		
 	}
+	
+	public String toString(){
+		StringBuffer sb = new StringBuffer();
+
+		for(Entity e:proposals)
+		{
+			sb.append(e.toString());
+		}
+		return sb.toString();
+	}
 	/**
 	 * @param args
 	 */

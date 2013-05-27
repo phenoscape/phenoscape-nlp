@@ -170,12 +170,12 @@ public class TermOutputerUtilities {
 	 * @param type
 	 * @return null or a hashtable (id=>label) containing classes that have term as an relational adjective.
 	 */
-	public Hashtable<String, String> searchAdjectiveOrgan(String term, String type) {
+/*	public Hashtable<String, String> searchAdjectiveOrgan(String term, String type) {
 		if(type.compareTo("entity")==0){
 			return OWLAccessorImpl.adjectiveorgans.get(term);
 		}
 		return null;
-	}
+	}*/
 	/**
 	 * Search a term in a subgroup of an ontology
 	 * subgroup only applies to PATO relational slim //TODO complete this part.
