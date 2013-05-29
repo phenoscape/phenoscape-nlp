@@ -157,7 +157,7 @@ public class Utilities {
 	
 	/**
 	 * 	position terms from BSPO are in the glossary as of 052513		
-		relational adjectives from URBERON are considered structures and are in the glossary too	
+		relational adjectives from URBERON are considered structures (and not spatial term) and are in the glossary too	
 	 * @param term
 	 * @param conn
 	 * @param glossary
@@ -172,8 +172,6 @@ public class Utilities {
 				if(debugPOS) System.out.println(term+" is a position");
 				return true;
 			}
-			
-
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -248,7 +246,7 @@ public class Utilities {
 			notnouns.add(word);
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			notnouns.add(word);
 			return false;
 		}
@@ -277,7 +275,7 @@ public class Utilities {
 		if(!word.matches(".*?[a-z]+.*")){
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			return false;
 		}
 		if(verbs.contains(word)){
@@ -325,7 +323,7 @@ public class Utilities {
 			notadverbs.add(word);
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			notadverbs.add(word);
 			return false;
 		}

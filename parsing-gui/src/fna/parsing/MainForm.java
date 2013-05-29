@@ -7,7 +7,7 @@ package fna.parsing;
 
 
 /**
- * @author prasad
+ * @authors prasad, hong cui,
  *
  */
 import java.io.BufferedReader;

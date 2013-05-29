@@ -765,7 +765,10 @@ public class CharacterAnnotatorChunked {
 				e.add(new Element("or"));
 				updateLatestElements(e);
 			}
-
+			if (ck instanceof ChunkCharacterComparison){//{relative~{A~char}~{relation}~{B~char}}
+				ArrayList<Element> structures = processChunkCharacterComparison(ck.toString());
+				updateLatestElements(structures); //may still be modifiers etc following this chunk
+			}
 			if (ck instanceof ChunkOrgan) {// this is the subject of a segment.
 											// May contain multiple organs
 				String content = ck.toString().replaceFirst("^z\\[", "").replaceFirst("\\]$", "");
@@ -1145,7 +1148,7 @@ public class CharacterAnnotatorChunked {
 				}
 
 			} else if (ck instanceof ChunkEOS || ck instanceof ChunkEOL) {
-				if (cs.unassignedmodifier != null && cs.unassignedmodifier.length() > 0) {
+				if (cs.unassignedmodifier != null && cs.unassignedmodifier.length() > 0 && this.latestelements.size()>=1) {
 					Element latestelement = this.latestelements.get(this.latestelements.size() - 1);
 					// if(latestelement == null){
 					// latestelement =
@@ -1192,6 +1195,49 @@ public class CharacterAnnotatorChunked {
 			}
 		}
 
+	}
+
+	/**
+	 * {relative~{A~charA}~{relation}~{B~charB'}}
+	 * 
+	 * <structure id='1' name='A'/>
+	 * <structure id='2' name='B'/>
+	 * <relation name='charA relation charB'' from='1' to='2'>
+	 * @param string
+	 * @return
+	 */
+	private ArrayList<Element> processChunkCharacterComparison(String content) {
+		ArrayList<Element>result = new ArrayList<Element>();
+		String [] parts = content.replaceFirst("^\\{relative~", "").split("\\{"); //three parts
+		String[] part1 = parts[1].replaceAll("[{}]", "").split("~"); //parts[0] = ""
+		String organA = part1[0];
+		String charA = part1[1];
+		String[] part2 = parts[3].replaceAll("[{}]", "").split("~");
+		String organB="", charB="";
+		//part2 may have one or two elements
+		if(part2.length==1){
+			if(part2[0].matches("\\b("+this.characters+")\\b")){
+				charB = part2[0];
+				organB = organA;
+			}else{
+				organB = part2[0];
+				charB = charA;
+			}
+		}else{
+			organB = part2[0];
+			charB = part2[1];
+		}
+		
+		String relation = charA+" "+parts[2].replaceAll("[{}~]", "")+" "+charB;
+		ArrayList<Element> structureA = this.createStructureElements("("+organA+")");
+		ArrayList<Element> structureB = null;
+		if(organB.compareTo(organA)!=0){
+			structureB = this.createStructureElements(organB);
+		}else{
+			structureB = structureA;
+		}
+		this.createRelationElements("#quality comparison# "+relation, structureA, structureB, "", false);
+		return result; //empty as don't want to expose the elements 
 	}
 
 	private void addClauseModifierConstraint(ChunkedSentence cs, Element e) {

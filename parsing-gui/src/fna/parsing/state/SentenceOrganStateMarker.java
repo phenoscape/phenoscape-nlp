@@ -45,7 +45,7 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|equal to|forward of|further to|greater or equal to|greater than or equal to|in addition to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|less than or equal to|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|save for|thanks to|together with|up against|up until|vis-a-vis|with reference to|with regard to";
+	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|equal to|forward of|further to|greater or equal to|greater than or equal to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|less than or equal to|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regard to";
 	public static Pattern compreppattern = Pattern.compile("(.*?)\\b("+compoundprep+")\\b(.*)");
 	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
@@ -314,11 +314,11 @@ public class SentenceOrganStateMarker {
 			//}
 		}
 
-		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>
-		if(taggedsent.contains("} and ")){
+		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>: "dorsal and anal fins"
+		if(taggedsent.matches(".*?\\}>? and .*")){
 			String sentcopy = taggedsent;
 			boolean changed = false;
-			Pattern p = Pattern.compile("(.*?)\\{(\\w+)\\} and ([^\\d]*) (<\\w+> *)+(.*)");
+			Pattern p = Pattern.compile("(.*?)<?\\{(\\w+)\\}>? and ([^\\d]*) (<\\w+> *)+(.*)");
 			Matcher m = p.matcher(taggedsent);
 			while(m.matches()){
 				String lead = m.group(1).trim()+ " ";
@@ -542,13 +542,13 @@ public class SentenceOrganStateMarker {
 				String term = rs.getString("term").trim();
 				if(term == null){continue;}
 				term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
-				if(!statestring.matches(".*\\b"+term+"\\b.*"))
+				if(!statestring.matches(".*\\b"+term+"\\b.*") &&  !term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")"))
 					statestring+=("|"+ term);
 			}
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-		return statestring.replaceAll("_", "|").replaceAll("\\b(and|or|to)\\b", "").replaceAll("\\\\d\\+", "").trim().replaceFirst("^\\|", "").replaceFirst("\\|$", "").replaceAll("\\|+", "|");
+		return statestring.replaceAll("\\b(and|or|to)\\b", "").replaceAll("\\\\d\\+", "").trim().replaceFirst("^\\|", "").replaceFirst("\\|$", "").replaceAll("\\|+", "|");
 	}
 
 	protected String collectOrganNames(){
@@ -574,7 +574,9 @@ public class SentenceOrganStateMarker {
 		String wordroletable = this.tableprefix + "_"+ApplicationUtilities.getProperty("WORDROLESTABLE");
 		rs = stmt.executeQuery("select word from "+wordroletable+" where semanticrole in ('op', 'os')");
 		while(rs.next()){
-			tags.append(rs.getString("word").trim()+"|");
+			String w = rs.getString("word").trim();
+			if(!w.matches("("+ChunkedSentence.stop+")") &&!w.matches("("+ChunkedSentence.prepositions+")"))
+				tags.append(w+"|");
 		}
 		/*
 		String postable = this.tableprefix + "_"+ApplicationUtilities.getProperty("POSTABLE");
@@ -612,7 +614,7 @@ public class SentenceOrganStateMarker {
 				}else{
 					tag = m.substring(m.lastIndexOf(" ")+1); //last word from modifier
 				}
-				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+StateCollector.stop+").*")){continue;}
+				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+ChunkedSentence.stop+"|"+ChunkedSentence.prepositions+").*")){continue;}
 				tags.append(tag+"|");
 			}
 		}
@@ -625,7 +627,8 @@ public class SentenceOrganStateMarker {
 			String term = rs.getString("term").trim();
 			if(term == null){continue;}
 			term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
-			tags.append(term+"|");
+			if(!term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")"))
+				tags.append(term+"|");
 		}
 	}
 

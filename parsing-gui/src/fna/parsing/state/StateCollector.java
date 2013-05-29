@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 
+import fna.charactermarkup.ChunkedSentence;
+
 /**
  * first run dehypenizer, then run unsupervised.pl, 
  * run on untagged sentences/originalsent
@@ -73,14 +75,14 @@ public class StateCollector  {
 	//static protected String username = "termsuser";
 	//static protected String password = "termspassword";
 	static protected String word = "(?:[\\w_]+\\s)";
-	static public String stop ="a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|was|were|what|when|where|which|why|with|within|without|would";
+	//static public String stop ="a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|was|were|what|when|where|which|why|with|within|without|would";
 	//static public String stop ="a|above|above|across|after|along|also|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|each|even|few|frequently|from|had|has|have|here|how|if|in|into|is|it|its|less|may|might|more|most|much|near|not|occasionally|of|off|often|on|onto|or|over|rarely|should|so|some|sometimes|somewhat|soon|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|very|was|well|were|what|when|where|which|why|with|without|would";
 	static protected String tophrases="articulated to|adnate to|connate to|to ca|reduced to|to form|appressed to|in contrast to|similar to|confined to|equal to|perpendicular to|dissimilar to|lobed to|divided to|invisible to|adherent to|according to|proximal to|distal to|to touch|fused to|attached to|axillary to|back to back|restricted to|ankylosed to|anterior to|attaching to|close to|complementary to|connected to|continuing to|difficult to|extending to|extended to|extend to|joined to|leading to|limited to|posterior to|prior to|tending to|tend to|tends to|tendency to|up to|widening to";
 	static protected String orphrases="more or less";
-	static protected String simple = "((?:(?:^|,|>) "+word+"))or ("+word+"{1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+stop+")\\b)";     //a or b
-	static protected String list = "((?:(?:^|,|>) "+word+")*), or ("+word+"{1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+stop+")\\b)";   //a, b, c, or e f g
-	static protected String to =  "((?:(?:^|,|>) (?:[_a-z]+\\s)))to ((?:[_a-z]+\\s){1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+stop+")\\b)";
-	static protected String tolist ="((?:(?:^|,|>) (?:[_a-z]+\\s))*), to ((?:[_a-z]+\\s){1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+stop+")\\b)";
+	static protected String simple = "((?:(?:^|,|>) "+word+"))or ("+word+"{1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+ChunkedSentence.stop+")\\b)";     //a or b
+	static protected String list = "((?:(?:^|,|>) "+word+")*), or ("+word+"{1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+ChunkedSentence.stop+")\\b)";   //a, b, c, or e f g
+	static protected String to =  "((?:(?:^|,|>) (?:[_a-z]+\\s)))to ((?:[_a-z]+\\s){1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+ChunkedSentence.stop+")\\b)";
+	static protected String tolist ="((?:(?:^|,|>) (?:[_a-z]+\\s))*), to ((?:[_a-z]+\\s){1,}?)"+"(?=$|,|;|:|\\.|<|\\b(?:"+ChunkedSentence.stop+")\\b)";
 
 	protected StateMatrix statematrix = null;
 	protected Hashtable<String, String> sentences = null;
@@ -368,7 +370,7 @@ public class StateCollector  {
 	protected String normalize(String sent){
 		if(sent == null){return sent;}
 		sent = sent.replaceAll("[<>,;.]", "")/*.replaceAll("\\bwith\\b", " WITH ")*/
-		.replaceAll("\\b("+stop+")\\b", "")/*.replaceAll(" WITH ", " with ")*/.replaceAll("\\d+", "").replaceAll("\\b[_a-z]*?ly\\b","")
+		.replaceAll("\\b("+ChunkedSentence.stop+")\\b", "")/*.replaceAll(" WITH ", " with ")*/.replaceAll("\\d+", "").replaceAll("\\b[_a-z]*?ly\\b","")
 		.replaceFirst("^to_", "to").replaceFirst("^or_", "or")./*replaceAll("_", " ").*/replaceAll("\\s+", " ").replaceFirst("^\\s+", "").replaceFirst("\\s+$", "");
 		return sent.trim().toLowerCase();
 	}
