@@ -177,6 +177,11 @@ public class ELKReasoner{
 		return isSubClassOf(class1IRI, newclass.getIRI().toString());
 	}
 	
+
+	public void dispose() {
+		reasoner.dispose();
+		
+	}
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
@@ -192,10 +197,12 @@ public class ELKReasoner{
 			String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
 			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
 			System.out.println(elk.isSubClassOf(subclass, superclass));	
+			elk.dispose();
 			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 }
