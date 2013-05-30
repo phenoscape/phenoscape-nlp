@@ -74,7 +74,17 @@ public class StateStatementParser extends Parser {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void parse(Element statement, Element root) {
-		ArrayList<String> StructuredQualities = new ArrayList<String>();
+		//refactored by extracting the following three methods
+		parseMetadata(statement, root);
+		
+		parseRelations(statement, root);
+
+		parseCharacters(statement, root);
+
+		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
+	}
+
+	protected void parseMetadata(Element statement, Element root) {
 		this.src = root.getAttributeValue(ApplicationUtilities
 				.getProperty("source.attribute.name"));
 		this.characterid = statement.getAttributeValue("character_id");
@@ -86,10 +96,127 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void parseStandaloneStructures(Element statement, Element root) {
+		// last, standing alone structures (without characters 
+		// and are not the subject of a relation)
+		//TODO: could it really be a quality?
+
+		//if a real entity, construct EQs of 'entity/present' 
+		//The following case is handled by the wildcard entity search strategy 	  
+		//text::Caudal fin
+		//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
+		//text::diphycercal
+		//=> heterocercal tail: present
+		List<Element> structures;
+		try{
+			structures = pathStructure.selectNodes(statement);
+			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+			for(Element structure: structures){
+				String sid = structure.getAttributeValue("id");
+				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
+				if(structure.getChildren().isEmpty() && relation==null){
+					//standing-alone structure
+					String sname = Utilities.getStructureName(root, sid);
+					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+					entities.add(ep);
+				}
+			}
+
+			if(entities.size()>1){
+				//more than one unrelated entity -- isn't it suspicious?
+			}
+			for(EntityProposals entity: entities){
+				if (entity != null && this.keyentities != null) {
+					// TODO resolve entity with keyentities
+					this.entities = resolve(entity, this.keyentities);
+				} else if (entity == null && this.keyentities != null) {
+					this.entities = this.keyentities;
+				} else if (entity != null) {
+					this.entities.add(entity);
+				}
+				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+				QualityProposals qp = new QualityProposals();
+				Quality q = new Quality();
+				q.setString("present");
+				q.setId("PATO:0000467");
+				q.setLabel("present");
+				q.setConfidenceScore(1f);
+				qp.add(q);
+				qualities.add(qp);
+				constructureEQStatementProposals(qualities, this.entities);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	protected void parseCharacters(Element statement, Element root) {
+		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
+		List<Element> characters;
+		try {
+			characters = pathCharacter.selectNodes(statement);
+			EntityProposals entity = null;
+			ArrayList<QualityProposals> qualities = null;
+			for (Element character : characters) {
+				// may contain relational quality
+				if(character.getParentElement()==null) continue; //the <structure> may have just been detached in Structure2Quality strategy
+				String structid = character.getParentElement()
+						.getAttributeValue("id" + "");
+				String structname = character.getParentElement()
+						.getAttributeValue("name" + "");
+				boolean maybesubject = false;
+				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
+						structname, structid, "", "", this.keyentities);*/
+				Structure2Quality rq2 = new Structure2Quality(root,
+						structname, structid, this.keyentities);
+				rq2.handle();
+				System.out.print("");
+				//if (rq2 != null) {
+				if(rq2.qualities.size()>0){
+					entity = null;
+					qualities = rq2.qualities;
+				} else {
+					try {
+						maybesubject = maybeSubject(root, structid);
+						entities.clear();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} // false if fromid appears in constraintid or toid
+					CharacterHandler ch = new CharacterHandler(root, character,
+							ontoutil, qualityclue, this.keyentities); // may contain relational
+					// quality
+					ch.handle();
+					qualities = ch.getQualities();
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					entity = ch.getEntity();
+				}
+				if (maybesubject && entity != null && this.keyentities != null) {
+					// TODO resolve entity with keyentities
+					entities = resolve(entity, this.keyentities);
+				} else if (maybesubject && entity == null
+						&& this.keyentities != null) {
+					entities = this.keyentities;
+				} else if (entity != null) {
+					entities.add(entity);
+				} else if (this.keyentities!=null){
+					entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+				}
+				constructureEQStatementProposals(qualities, entities);
+			}
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void parseRelations(Element statement, Element root) {
 		// parse relations first
 		// Check whether tostruct and fromstruct is an entity or quality. 
 		// If they are quality, generate qualities using relational quality strategy and map to keyentities
 		// else use relationhandler and create entities and qualities.
+		ArrayList<String> StructuredQualities = new ArrayList<String>();
 		List<Element> relations;
 		try {
 			relations = pathRelation.selectNodes(statement);
@@ -143,7 +270,7 @@ public class StateStatementParser extends Parser {
 						} catch (Exception e1) {
 							e1.printStackTrace();
 						}
-						RelationHandler rh = new RelationHandler(root, relname,
+						RelationHandler rh = new RelationHandler(root, relname, relation,
 								toname, toid, fromname, fromid, neg, false);
 						rh.handle();
 
@@ -166,8 +293,9 @@ public class StateStatementParser extends Parser {
 							entities = this.keyentities;
 						} else if (e != null) {
 							entities.add(e);
-						} else 
+						} else if(this.keyentities!=null){
 							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+						}
 						//construct EQStatementProposals
 						constructureEQStatementProposals(q, entities);
 
@@ -179,113 +307,6 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 			System.out.println("");
-		}
-
-		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
-		List<Element> characters;
-		try {
-			characters = pathCharacter.selectNodes(statement);
-			EntityProposals entity = null;
-			ArrayList<QualityProposals> qualities = null;
-			for (Element character : characters) {
-				// may contain relational quality
-				String structid = character.getParentElement()
-						.getAttributeValue("id" + "");
-				String structname = character.getParentElement()
-						.getAttributeValue("name" + "");
-				boolean maybesubject = false;
-				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
-						structname, structid, "", "", this.keyentities);*/
-				Structure2Quality rq2 = new Structure2Quality(root,
-						structname, structid, this.keyentities);
-				rq2.handle();
-				System.out.print("");
-				//if (rq2 != null) {
-				if(rq2.qualities.size()>0){
-					entity = null;
-					qualities = rq2.qualities;
-				} else {
-					try {
-						maybesubject = maybeSubject(root, structid);
-						entities.clear();
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} // false if fromid appears in constraintid or toid
-					CharacterHandler ch = new CharacterHandler(root, character,
-							ontoutil, qualityclue); // may contain relational
-					// quality
-					ch.handle();
-					qualities = ch.getQualities();
-					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					entity = ch.getEntity();
-				}
-				if (maybesubject && entity != null && this.keyentities != null) {
-					// TODO resolve entity with keyentities
-					entities = resolve(entity, this.keyentities);
-				} else if (maybesubject && entity == null
-						&& this.keyentities != null) {
-					entities = this.keyentities;
-				} else if (entity != null) {
-					entities.add(entity);
-				} else 
-					entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-				constructureEQStatementProposals(qualities, entities);
-			}
-		} catch (JDOMException e) {
-			e.printStackTrace();
-		}
-
-		// last, standing alone structures (without characters 
-		// and are not the subject of a relation)
-		//TODO: could it really be a quality?
-
-		//if a real entity, construct EQs of 'entity/present' 
-		//The following case is handled by the wildcard entity search strategy 	  
-		//text::Caudal fin
-		//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
-		//text::diphycercal
-		//=> heterocercal tail: present
-		List<Element> structures;
-		try{
-			structures = pathStructure.selectNodes(statement);
-			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-			for(Element structure: structures){
-				String sid = structure.getAttributeValue("id");
-				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
-				if(structure.getChildren().isEmpty() && relation==null){
-					//standing-alone structure
-					String sname = Utilities.getStructureName(root, sid);
-					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.add(ep);
-				}
-			}
-
-			if(entities.size()>1){
-				//more than one unrelated entity -- isn't it suspicious?
-			}
-			for(EntityProposals entity: entities){
-				if (entity != null && this.keyentities != null) {
-					// TODO resolve entity with keyentities
-					entities = resolve(entity, this.keyentities);
-				} else if (entity == null && this.keyentities != null) {
-					entities = this.keyentities;
-				} else if (entity != null) {
-					entities.add(entity);
-				}
-				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
-				QualityProposals qp = new QualityProposals();
-				Quality q = new Quality();
-				q.setString("present");
-				q.setId("PATO:0000467");
-				q.setLabel("present");
-				q.setConfidenceScore(1f);
-				qp.add(q);
-				qualities.add(qp);
-				constructureEQStatementProposals(qualities, entities);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
 		}
 	}
 
@@ -375,6 +396,7 @@ public class StateStatementParser extends Parser {
 			return (ArrayList<EntityProposals>) keyentities.clone();
 		}
 		// test subclass relations between all e proposals and each of the keyentities proposals
+		
 		ArrayList<EntityProposals> results = resolveBaseOnSubclassRelation(e, keyentities);
 		if(results==null){
 			results = resolveBaseOnPartOfRelation(e, keyentities);
@@ -390,29 +412,33 @@ public class StateStatementParser extends Parser {
 
 	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
 		// test part_of relations between all e proposals and each of the keyentities proposals
-		if (e.hasOntologizedWithHighConfidence()) {
+		boolean resolved = false;
+		if (e.higestScore()>=0.8f) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
-						if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
-								key.getPrimaryEntityOWLClassIRI())) {
-							// key is entity locator of e
-							System.out.println("");
-							CompositeEntity ce = new CompositeEntity();
-							ce.addEntity(entity);
-							FormalRelation rel = new FormalRelation();
-							rel.setString("part of");
-							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-							rel.setId("BFO:000050");
-							rel.setConfidenceScore((float) 1.0);
-							REntity rentity = new REntity(rel, key);
-							ce.addEntity(rentity);
-							key = ce; // replace key with the composite entity in keyentities
+						if(entity.isOntologized() && key.isOntologized()){
+							if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
+									key.getPrimaryEntityOWLClassIRI())) {
+								resolved = true;
+								// key is entity locator of e
+								System.out.println("");
+								CompositeEntity ce = new CompositeEntity();
+								ce.addEntity(entity);
+								FormalRelation rel = new FormalRelation();
+								rel.setString("part of");
+								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+								rel.setId("BFO:000050");
+								rel.setConfidenceScore((float) 1.0);
+								REntity rentity = new REntity(rel, key);
+								ce.addEntity(rentity);
+								key = ce; // replace key with the composite entity in keyentities
+							}
 						}
 					}
 				}
 			}
-			return (ArrayList<EntityProposals>) keyentities.clone();
+			if(resolved) return (ArrayList<EntityProposals>) keyentities.clone();
 		}		
 		return null;
 	}
@@ -425,32 +451,36 @@ public class StateStatementParser extends Parser {
 	 * @return
 	 */
 	private ArrayList<EntityProposals> resolveBaseOnSubclassRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
-		if (e.hasOntologizedWithHighConfidence()) {
+		boolean resolved = false;
+		if (e.higestScore()>=0.8) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
-						if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
-								key.getPrimaryEntityOWLClassIRI())) {
-							// reset key to the subclass
-							//System.out.println("");
-							keye.reset();
-							keye.add(entity);
-							keye.setPhrase(entity.getString());
-							/*CompositeEntity ce = new CompositeEntity();
-							ce.addEntity(entity);
-							FormalRelation rel = new FormalRelation();
-							rel.setString("part of");
-							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-							rel.setId("BFO:000050");
-							rel.setConfidenceScore((float) 1.0);
-							REntity rentity = new REntity(rel, key);
-							ce.addEntity(rentity);
-							key = ce; // replace key with the composite entity in keyentities*/
+						if(entity.isOntologized() && key.isOntologized()){
+							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
+									key.getPrimaryEntityOWLClassIRI())) {
+								// reset key to the subclass
+								//System.out.println("");
+								resolved = true;
+								keye.reset();
+								keye.add(entity);
+								keye.setPhrase(entity.getString());
+								/*CompositeEntity ce = new CompositeEntity();
+								ce.addEntity(entity);
+								FormalRelation rel = new FormalRelation();
+								rel.setString("part of");
+								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+								rel.setId("BFO:000050");
+								rel.setConfidenceScore((float) 1.0);
+								REntity rentity = new REntity(rel, key);
+								ce.addEntity(rentity);
+								key = ce; // replace key with the composite entity in keyentities*/
+							}
 						}
 					}
 				}
 			}
-			return (ArrayList<EntityProposals>) keyentities.clone();
+			if(resolved) return (ArrayList<EntityProposals>) keyentities.clone();
 		}		
 		return null;
 	}

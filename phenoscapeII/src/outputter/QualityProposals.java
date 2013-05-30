@@ -6,16 +6,25 @@ import java.util.ArrayList;
  * @author Hong Cui
  * This class holds 0 - n proposals for one quality phrase
  */
-public class QualityProposals {
+public class QualityProposals implements Proposals {
 	ArrayList<Quality> proposals = new ArrayList<Quality>();
+	String phrase="";
 	/**
 	 * 
 	 */
 	public QualityProposals() {		
 	}
 	
-	public void add(Quality q){
-		if(q!=null) proposals.add(q);
+	public void add(Object q){
+		if(q!=null) proposals.add((Quality)q);
+	}
+
+	public String getPhrase() {
+		return this.phrase;
+	}
+
+	public void setPhrase(String phrase) {
+		this.phrase = phrase;		
 	}
 	
 	public ArrayList<Quality> getProposals(){
@@ -31,6 +40,46 @@ public class QualityProposals {
 		}
 		return sb.toString();
 	}
+	
+	public float higestScore() {
+		float max = 0f;
+		for(Quality quality: proposals){
+			if(quality.isOntologized()){
+				float score = quality.getConfidienceScore();
+				if(score > max){
+					max = score; 
+				}
+			}
+		}
+		return max;
+	}
+	
+	public Quality getEntityWithHigestScore() {
+		Quality theone = null;
+		float max = 0f;
+		for(Quality quality: proposals){
+			if(quality.isOntologized()){
+				float score = quality.getConfidienceScore();
+				if(score > max){
+					theone = quality; 
+				}
+			}
+		}
+		return theone;
+	}
+	
+	public ArrayList<Quality> getQualitiesAbove(float threshold){
+		ArrayList<Quality> results = new ArrayList<Quality>();
+		for(Quality quality: proposals){
+			if(quality.isOntologized()){
+				float score = quality.getConfidienceScore();
+				if(score > threshold){
+					results.add(quality); 
+				}
+			}
+		}
+		return results;
+	}
 
 	/**
 	 * @param args
@@ -39,5 +88,6 @@ public class QualityProposals {
 		// TODO Auto-generated method stub
 
 	}
+
 
 }

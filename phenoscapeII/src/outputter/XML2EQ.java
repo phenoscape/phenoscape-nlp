@@ -158,6 +158,7 @@ public class XML2EQ {
 				count++;
 				allEQs = new ArrayList<EQStatementProposals>();
 				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
+				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
 					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil);
@@ -710,7 +711,7 @@ public class XML2EQ {
 	private EQStatementProposals relatedEQ(String stateid, String ngram) {
 		ArrayList<EQStatementProposals> EQs = this.getEQsforState(stateid);
 		for(EQStatementProposals EQ: EQs){
-			String value = EQ.getDescription();
+			String value = EQ.getPhrase();
 			if(value!=null && value.length()>0 && (value.contains(ngram) || ngram.contains(value))){
 				return EQ;
 			}			

@@ -84,9 +84,9 @@ public class EntitySearcher5 extends EntitySearcher {
 	 */
 	private static String searchContext(Element root, String structid, Hashtable<String, String> targets){
 		try{
-			Element statement = (Element) XPath.selectSingleNode(root, ".//statement/structure[@id='"+structid+"']");
+			Element structure = (Element) XPath.selectSingleNode(root, ".//statement/structure[@id='"+structid+"']");
 			//could perform a content similarity measure between the defintions associated with the targets in ontology and the text of the statement
-			String text = statement.getChildText("text");
+			String text = structure.getParentElement().getChildText("text");
 			if(targets.get("bone") != null && targets.get("cartilage")!=null){
 				int bonecount = text.replaceAll("(ossifi|bone)", "#").replaceAll("[^#]", "").length();
 				int cartcount = text.replaceAll("cartil", "#").replaceAll("[^#]", "").length();

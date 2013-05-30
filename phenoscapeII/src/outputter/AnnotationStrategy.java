@@ -4,7 +4,7 @@
 package outputter;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public interface AnnotationStrategy {

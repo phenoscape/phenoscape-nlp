@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.jdom.Element;
@@ -15,7 +16,7 @@ import org.jdom.xpath.XPath;
  *  
  */
 
-public class Structure2Quality {
+public class Structure2Quality implements AnnotationStrategy{
 
 	Element root;
 	String relation;
@@ -27,11 +28,11 @@ public class Structure2Quality {
 	private TermOutputerUtilities ontoutil;
 	static XPath pathCharacterUnderStucture;
 	ArrayList<EntityProposals> keyentities;
-	ArrayList<String> identifiedqualities;
+	HashSet<String> identifiedqualities;
 	
 	static{
 		try{
-		pathCharacterUnderStucture = XPath.newInstance(".//character");
+			pathCharacterUnderStucture = XPath.newInstance(".//character");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -42,7 +43,7 @@ public class Structure2Quality {
 		this.structname = structurename;
 		this.structid = structureid;
 		this.keyentities = keyentities;
-		identifiedqualities = new ArrayList<String>(); //list of xml ids
+		identifiedqualities = new HashSet<String>(); //list of unique xml ids
 	}
 
 	public void handle() {
@@ -50,7 +51,7 @@ public class Structure2Quality {
 			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 			//detach all identifiedqualities
 			for(String structid: identifiedqualities){
-				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[id='"+structid+"']");
+				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
 									//and the relations are needed for other purpose, 
 									//so don't detach relation here. 
@@ -140,7 +141,7 @@ public class Structure2Quality {
 		quality=chara.getAttributeValue("value")+" "+quality;
 		quality=quality.trim();
 		TermSearcher ts = new TermSearcher();
-		System.out.print("");
+		
 		for(;;)
 		{
 		result = (Quality) ts.searchTerm(quality, "quality");
