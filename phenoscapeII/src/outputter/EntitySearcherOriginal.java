@@ -23,7 +23,7 @@ import owlaccessor.OWLAccessorImpl;
  * @author hong cui
  * this class tries to adjust the splitting point between entity and entitylocator, depending on the ontology lookup results
  * try different strategies to form entity and entity locator (optional) and search the ontologies by calling searchTerm.
- * 
+ * TODO
  * 		//unhandled cases: 
 		//upper pharyngeal tooth plates 4 and 5 => upper pharyngeal tooth plate
 		//humeral deltopectoral crest apex => process

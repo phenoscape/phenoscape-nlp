@@ -151,7 +151,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		tagger = new POSTagger4StanfordParser(conn, this.tableprefix, glosstable);
+		tagger = new POSTagger4StanfordParser(conn, this.tableprefix, glosstable, this.characters);
 	}
 	
 	public void POSTagging() throws Exception{
@@ -172,7 +172,14 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				String str = rs.getString(2);
 				String type = rs.getString(3);
 				//TODO: may need to fix "_"
-				//if(src.compareTo("Sereno_2009.xml_8999df54-5901-456e-9250-06c795e0b1bc_85751e91-7e17-4adf-b8b1-84236d41c2f0.txt-0")!=0) continue;
+				//patterns.xml_s64085ffe-ba2c-4584-90b6-185c8af262b1.txt-0
+				//patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.txt-0
+				//patterns.xml_sc8b5f5b8-d85e-4435-abca-517efbe1e64f.txt-0
+				//patterns.xml_se1638ae4-f35b-4ba9-8d33-ab3adf4e3a6f.txt-0
+				//patterns.xml_s900f4608-aaf7-45a0-b5fb-153a0db1c748_s330b823c-6a5e-4385-b91b-3deabd36cc1b.txt-0
+				//patterns.xml_s9be8f099-c030-4c5f-b192-1b07986cb1ff_s499c31ff-5d0f-407a-aa28-f4b6377bfc8e.txt-0
+				//Swartz 2012.xml_states635.txt-0
+				//if(src.compareTo("Swartz 2012.xml_states635.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);

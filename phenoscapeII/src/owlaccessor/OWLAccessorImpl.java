@@ -278,7 +278,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 						organs = new Hashtable<String, String>();
 					}
 					organs.put(this.getID(c), this.getLabel(c));
-					this.adjectiveorgans.put(adj,organs);
+					this.adjectiveorgans.put(adj,organs);					
 				}
 			}			
 		}*/

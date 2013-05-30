@@ -212,6 +212,7 @@ public class ChunkedSentence {
 		recoverConjunctedOrgans(); //
 		//findSubject(); no longer needed //set the pointer to a place right after the subject, assuming the subject part is stable in chunkedtokens at this time
 		recoverOrgans();
+		recoverCharacter4OrganList();
 		segmentSent();//insert segment marks in chunkedtokens while producing this.chunkedsent
 		
 		//TODO move this to an earlier place
@@ -520,6 +521,31 @@ public class ChunkedSentence {
 				/*else if (t.startsWith("b[v") && this.chunkedtokens.get(i+1).matches("(and|or|plus)")){
 					recoverConjunctedOrgans4VB(i);
 				}*/
+			}
+		}
+	}
+	
+	/**
+	 * a {fused} l[(cleithrum) and (suprascapula)] . 
+	 * 
+	 * should be
+	 * 
+	 * a l[{fused} (cleithrum) and (suprascapula)] . 
+	 */
+	private void recoverCharacter4OrganList(){
+		for(int i = 0; i < this.chunkedtokens.size(); i++){
+			String t = this.chunkedtokens.get(i);
+			if(t.startsWith("l[")){
+				for(int j=i-1; j>=0; j--){
+					if(this.chunkedtokens.get(j).length()==0) continue;
+					if(this.chunkedtokens.get(j).endsWith("}")){
+						t = "l["+this.chunkedtokens.get(j)+" "+t.replaceFirst("l\\[", "");
+						this.chunkedtokens.set(j, "");
+						this.chunkedtokens.set(i, t);
+					}else{
+						j=-1; //get out of j-loop
+					}
+				}
 			}
 		}
 	}
@@ -1348,6 +1374,10 @@ public class ChunkedSentence {
 		token = token.compareTo("±")==0? "moreorless" : token;
 		token = token.matches(".*?\\d.*")? NumericalHandler.originalNumForm(token) : token;
 		
+		if(token.contains("relative~")){
+			pointer++;
+			return new ChunkCharacterComparison(token);
+		}
 		//all tokens: 
 		//number:
 		//if(token.matches(".*?\\d+$")){ //ends with a number
