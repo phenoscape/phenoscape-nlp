@@ -15,21 +15,32 @@ public class EntityParser {
 	 * @param root
 	 */
 	public EntityParser(Element statement, Element root, boolean keyelement) {
-		//add all structures which are not "whole organism" to key structures
+		//add all structures which are not "whole organism" to key structure
 				try{
 					List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
+					ArrayList<String> RelatedStructures = new ArrayList<String>();
 					for(Element structure: structures){
 						//Hashtable<String, String> keyentity = new Hashtable<String, String>();
+						int flag=1;
 						String sid = structure.getAttributeValue("id");
-						Element relation = Utilities.relationWithStructureAsSubject(sid, root);
-						if(relation==null){//the structure is not related to others, form a simple entity
+						
+						for(String Structid:RelatedStructures)
+							if(Structid.equals(sid))
+								flag=0;
+						
+						if(flag==1)		
+						{
+							List<Element> relations = Utilities.relationWithStructureAsSubject(sid, root);
+						if((relations==null)||(relations.size()==0)) {//the structure is not related to others, form a simple entity
 							String sname = Utilities.getStructureName(root, sid);
 							EntityProposals entity = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 							if(entity!=null){
 								entities.add(entity);
 							}
 						}else{
-							boolean negation = false;
+							for(Element relation:relations)
+							{
+								boolean negation = false;
 							if(relation.getAttribute("negation")!=null) negation = Boolean.valueOf(relation.getAttributeValue("negation"));
 							RelationHandler rh = new RelationHandler(root, 
 									relation.getAttributeValue("name"),  
@@ -38,13 +49,16 @@ public class EntityParser {
 									Utilities.getStructureName(root,  relation.getAttributeValue("from")),
 									relation.getAttributeValue("from"), negation, keyelement);
 							rh.handle();
-							System.out.print("");
+							
 							EntityProposals entity = rh.getEntity();
 							if(entity!=null){
 								entities.add(entity);
+								for(Entity related:entity.getProposals())
+								if(related instanceof CompositeEntity)
+									RelatedStructures.add(relation.getAttributeValue("to"));
 							}
-
-						}
+							}
+						}}
 					}				
 				}catch(Exception ex){
 					ex.printStackTrace();

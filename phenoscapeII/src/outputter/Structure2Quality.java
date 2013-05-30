@@ -45,7 +45,6 @@ public class Structure2Quality {
 		try {
 			parseforQuality(this.tostructname, this.tostructid); //to see if the structure is a quality (relational or other quality)
 			parseforQuality(this.fromstructname, this.fromstructid);
-			System.out.print("");
 
 		} catch (JDOMException e) {
 			e.printStackTrace();
@@ -70,7 +69,7 @@ public class Structure2Quality {
 		for (Element chara : characters) {
 			String modifier = chara.getAttribute("modifier")!=null? chara.getAttributeValue("modifier"): "";
 			String value = chara.getAttribute("value")!=null? chara.getAttributeValue("value"):"";
-			if ((modifier.startsWith("not") && !value.equals("absent")) || (!modifier.startsWith("not") && value.equals("absent"))) {
+			if ((modifier.startsWith("not") && !value.matches(Dictionary.negation)) || (!modifier.startsWith("not") && value.matches(Dictionary.negation))) {
 				negated = true;
 				chara_detach =chara;
 				break;
@@ -99,7 +98,7 @@ public class Structure2Quality {
 				}
 			}
 			else
-			{ // TODO how to find related entities from a list of entities >2
+			{ // TODO how to find related entities from a list of entities >2 or <2
 				return;
 			}
 			return;
@@ -132,7 +131,6 @@ public class Structure2Quality {
 		quality=chara.getAttributeValue("value")+" "+quality;
 		quality=quality.trim();
 		TermSearcher ts = new TermSearcher();
-		System.out.print("");
 		for(;;)
 		{
 		result = (Quality) ts.searchTerm(quality, "quality");

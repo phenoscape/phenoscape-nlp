@@ -29,10 +29,10 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public static Element  relationWithStructureAsSubject(String sid, Element root) {
+	public static List<Element>  relationWithStructureAsSubject(String sid, Element root) {
 		try{
 			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");
-			Element rel = (Element)tostructure.selectSingleNode(root);
+			List<Element> rel = (List<Element>)tostructure.selectNodes(root);
 			if(rel != null) return rel;
 			
 		}catch(Exception e){

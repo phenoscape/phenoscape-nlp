@@ -115,7 +115,7 @@ public class StateStatementParser extends Parser {
 					boolean maybesubject = false;
 					List<QualityProposals> q = new ArrayList<QualityProposals>();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					EntityProposals e;
+					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
 					
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
@@ -129,8 +129,7 @@ public class StateStatementParser extends Parser {
 					if (rq.qualities.size() > 0) {
 						StructuredQualities.addAll(rq.identifiedqualities);
 						//if (rq.qualities.size() > 0) {
-							e = null;//e is now showed to be a quality
-							q.clear();
+							//e = null;//e is now showed to be a quality
 							q.addAll(rq.qualities);
 							// relation.detach();
 						//}
@@ -144,8 +143,9 @@ public class StateStatementParser extends Parser {
 					RelationHandler rh = new RelationHandler(root, relname,
 							toname, toid, fromname, fromid, neg, false);
 					rh.handle();
-				
-					e = rh.getEntity();
+					if(rh.getEntity()!=null)
+					e.add(rh.getEntity());
+					
 					 q = new ArrayList<QualityProposals>();
 					if(rh.getQuality()!=null) q.add(rh.getQuality());
 					if (rh.otherEQs.size() > 0)
@@ -163,7 +163,7 @@ public class StateStatementParser extends Parser {
 								&& this.keyentities != null) {
 							entities = this.keyentities;
 						} else if (e != null) {
-							entities.add(e);
+							entities.addAll(e);
 						} else 
 							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 						//construct EQStatementProposals
@@ -183,10 +183,12 @@ public class StateStatementParser extends Parser {
 		List<Element> characters;
 		try {
 			characters = pathCharacter.selectNodes(statement);
-			EntityProposals entity = null;
+			ArrayList<EntityProposals> entity = null;
 			ArrayList<QualityProposals> qualities = null;
 			for (Element character : characters) {
 				// may contain relational quality
+				if(character.getParentElement()==null)
+					continue;
 				String structid = character.getParentElement()
 						.getAttributeValue("id" + "");
 				String structname = character.getParentElement()
@@ -197,7 +199,6 @@ public class StateStatementParser extends Parser {
 				Structure2Quality rq2 = new Structure2Quality(root,
 						structname, structid, "", "", this.keyentities);
 				rq2.handle();
-				System.out.print("");
 				//if (rq2 != null) {
 				if(rq2.qualities.size()>0){
 					entity = null;
@@ -211,12 +212,12 @@ public class StateStatementParser extends Parser {
 						e1.printStackTrace();
 					} // false if fromid appears in constraintid or toid
 					CharacterHandler ch = new CharacterHandler(root, character,
-							ontoutil, qualityclue); // may contain relational
+							ontoutil, qualityclue,this.keyentities); // may contain relational
 													// quality
 					ch.handle();
 					qualities = ch.getQualities();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					entity = ch.getEntity();
+					entity = ch.getPrimaryentities();
 				}
 				if (maybesubject && entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
@@ -225,9 +226,9 @@ public class StateStatementParser extends Parser {
 						&& this.keyentities != null) {
 					entities = this.keyentities;
 				} else if (entity != null) {
-					entities.add(entity);
+					entities.addAll(entity);
 				} else 
-					entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+					entities = this.keyentities; // what if it is a subject, but not an entity at all? - Hariharan(So added this code)
 				constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
@@ -261,14 +262,17 @@ public class StateStatementParser extends Parser {
 			if(entities.size()>1){
 				//more than one unrelated entity -- isn't it suspicious?
 			}
+			ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
 			for(EntityProposals entity: entities){
+				ArrayList<EntityProposals> primaryEntities1 = new ArrayList<EntityProposals>();
+				primaryEntities1.add(entity);
 				if (entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
-					entities = resolve(entity, this.keyentities);
+					entities1 = resolve(primaryEntities1, this.keyentities);
 				} else if (entity == null && this.keyentities != null) {
-					entities = this.keyentities;
+					entities1 = this.keyentities;
 				} else if (entity != null) {
-					entities.add(entity);
+					entities1.add(entity);
 				}
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 				QualityProposals qp = new QualityProposals();
@@ -278,7 +282,8 @@ public class StateStatementParser extends Parser {
 				q.setLabel("present");
 				qp.add(q);
 				qualities.add(qp);
-				constructureEQStatementProposals(qualities, entities);
+				constructureEQStatementProposals(qualities, entities1);
+				entities1.clear();
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -288,7 +293,8 @@ public class StateStatementParser extends Parser {
 
 	private void constructureEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
-		
+		ArrayList<Entity> tempholder = new ArrayList<Entity>();//Used to identify related entites which are also entities for that EQ statement
+		if((entities!=null)&&(qualities!=null))
 		for (QualityProposals qualityp : qualities){
 			for (EntityProposals entityp : entities) {
 				EQStatementProposals eqp = new EQStatementProposals();
@@ -296,15 +302,7 @@ public class StateStatementParser extends Parser {
 					for(Entity entity: entityp.getProposals()){
 						EQStatement eq= new EQStatement();
 						eq.setEntity(entity);
-						if (quality instanceof RelationalQuality) {
-							eq.setQuality(((RelationalQuality) quality));
-//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
-//									.getPrimaryEntityLabel()){
-//								continue;
-//							} //don't recall what the above does --Hong May 20, 13.
-						} else{
 							eq.setQuality(quality);
-						}
 						eq.setSource(this.src);
 						eq.setCharacterId(this.characterid);
 						eq.setStateId(this.stateid);
@@ -316,6 +314,25 @@ public class StateStatementParser extends Parser {
 						}
 						//this.EQStatements.add(eq);
 						//eq = new EQStatement();
+						//modify the below code to handle conditions where entity === relatedentity
+						/*Quality q= eq.getQuality();
+						String entitylabel = eq.entity.getPrimaryEntityLabel();
+						if (q instanceof RelationalQuality) {
+							ArrayList<Entity> proposals = ((RelationalQuality) q).getQualityModifier().getProposals();
+
+							for(Entity e: proposals)
+							if (entitylabel.equals(e.getPrimaryEntityLabel()))
+								tempholder.add(e);
+							
+							if(tempholder.size()!=0)
+							{
+								proposals.removeAll(tempholder);
+								tempholder.clear();
+								if(proposals.size()==0)
+									eq=null;
+							}
+							}	*/
+						
 						eqp.add(eq);
 					}
 				}
@@ -342,7 +359,7 @@ public class StateStatementParser extends Parser {
 		return false;
 	}
 
-	private ArrayList<EntityProposals> integrateSpatial(EntityProposals entity,
+	private ArrayList<EntityProposals> integrateSpatial(ArrayList<EntityProposals> e,
 			ArrayList<EntityProposals> keyentities2) {
 
 		// TODO integrate entity with keyentities
@@ -350,11 +367,11 @@ public class StateStatementParser extends Parser {
 	}
 
 	//TODO: resolve better between proposals
-	private ArrayList<EntityProposals> resolve(EntityProposals e, ArrayList<EntityProposals> keyentities) {
+	private ArrayList<EntityProposals> resolve(ArrayList<EntityProposals> e, ArrayList<EntityProposals> keyentities) {
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		//no keyentities 
 		if (keyentities == null || keyentities.size() == 0) {
-			entities.add(e);
+			entities.addAll(e);
 			return entities;
 		}
 		
@@ -363,13 +380,17 @@ public class StateStatementParser extends Parser {
 			entities = integrateSpatial(e, this.keyentities);
 			// TODO integrate entity with keyentities
 		}
-
-		if (e.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) { // if
-																					// e
-																					// is
-																					// whole_organism
-			return (ArrayList<EntityProposals>) keyentities.clone();
+		Iterator entityitr =e.listIterator();
+		while(entityitr.hasNext())
+		{
+			// if e is whole_organism
+			EntityProposals ep = (EntityProposals) entityitr.next();
+		if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
+			entityitr.remove();
 		}
+		if(e.size()==0)
+			return (ArrayList<EntityProposals>) keyentities.clone();
+
 		// test subclass relations between all e proposals and each of the keyentities proposals
 		ArrayList<EntityProposals> results = resolveBaseOnSubclassRelation(e, keyentities);
 		if(results==null){
@@ -384,8 +405,11 @@ public class StateStatementParser extends Parser {
 
 	
 	
-	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
+	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(ArrayList<EntityProposals> eProposals, ArrayList<EntityProposals> keyentities){
 		// test part_of relations between all e proposals and each of the keyentities proposals
+		int flag=0;
+		for(EntityProposals e: eProposals)
+		{
 		if (e.hasOntologizedWithHighConfidence()) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
@@ -404,14 +428,19 @@ public class StateStatementParser extends Parser {
 							REntity rentity = new REntity(rel, key);
 							ce.addEntity(rentity);
 							key = ce; // replace key with the composite entity in keyentities
+							flag=1;
 						}
 					}
 				}
 			}
+		}
+		
+		}	
+		if(flag==1)
 			return (ArrayList<EntityProposals>) keyentities.clone();
-		}		
+		else
 		return null;
-	}
+		}
 	
 	/**
 	 * test subclass relations between all e proposals and each of the keyentities proposals
@@ -420,8 +449,11 @@ public class StateStatementParser extends Parser {
 	 * @param keyentities
 	 * @return
 	 */
-	private ArrayList<EntityProposals> resolveBaseOnSubclassRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
-		if (e.hasOntologizedWithHighConfidence()) {
+	private ArrayList<EntityProposals> resolveBaseOnSubclassRelation(ArrayList<EntityProposals> eProposals, ArrayList<EntityProposals> keyentities){
+		int flag=0;
+		for(EntityProposals e: eProposals)
+		{
+			if (e.hasOntologizedWithHighConfidence()) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
@@ -442,12 +474,16 @@ public class StateStatementParser extends Parser {
 							REntity rentity = new REntity(rel, key);
 							ce.addEntity(rentity);
 							key = ce; // replace key with the composite entity in keyentities*/
+							flag=1;
 						}
 					}
 				}
 			}
+			}
+			}	
+		if(flag==1)
 			return (ArrayList<EntityProposals>) keyentities.clone();
-		}		
+		else
 		return null;
 	}
 	
@@ -458,7 +494,7 @@ public class StateStatementParser extends Parser {
 	 * @param entity
 	 * @return
 	 */
-	private boolean containsSpatial(EntityProposals entityfromstate) {
+	private boolean containsSpatial(ArrayList<EntityProposals> e) {
 		// TODO
 		return false;
 	}

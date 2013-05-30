@@ -12,6 +12,8 @@ import org.jdom.Element;
 /**
  * @author updates
  * This strategy aims to match a pre-composed term in an ontology.
+ * Try different variations of composition using all elements.
+ * 
  * For examples: 
  * 
  * input: e:posterior dorsal fin
@@ -53,7 +55,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				return entities;
 			}
 		}
-		if(entityphrase.split("\\s").length>=2)
+		if((entityphrase.split("\\s").length>=2)&&(elocatorphrase==""))
 		{
 		//try out the variations
 		SynRingVariation entityvariation = new SynRingVariation(entityphrase);
@@ -65,8 +67,6 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(elocatorvariation == null){ //try entityvariation alone
 			String spatial = entityvariation.getLeadSpaticalTermVariation();
 			String head = entityvariation.getHeadNounVariation();
-			spatial="||"+spatial;
-			head+="||"+head;
 			
 			// the below code passes all the spatial and entity variations to termsearcher and get all the matching entities.
 			ArrayList<FormalConcept> matches = TermSearcher.entityvariationtermsearch(spatial,head);
@@ -78,13 +78,22 @@ public class EntitySearcher1 extends EntitySearcher {
 				}
 				return entities;
 			}
-		}else{
-		System.out.println("");
-			if(prep.contains("part_of")){
-				System.out.println();
+		}}
+
+			if(prep.contains("part_of")){//glenoid head of scapula, Entity phrase = glenoid head, Elocator = scapula
+				if(elocatorphrase!="")
+				{
+					SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
+					if(entity!=null){	
+						EntityProposals entities = new EntityProposals();
+						entities.setPhrase(entityphrase);
+						entities.add(entity);
+						return entities;
+					}
+				}
 			}
-		}
-		}
+		
+		
 		return new EntitySearcher2().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
