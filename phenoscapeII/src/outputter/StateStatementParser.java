@@ -100,56 +100,60 @@ public class StateStatementParser extends Parser {
 
 	private void parseStandaloneStructures(Element statement, Element root) {
 		// last, standing alone structures (without characters 
-		// and are not the subject of a relation)
-		//TODO: could it really be a quality?
+				// and are not the subject of a relation)
+				//TODO: could it really be a quality?
 
-		//if a real entity, construct EQs of 'entity/present' 
-		//The following case is handled by the wildcard entity search strategy 	  
-		//text::Caudal fin
-		//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
-		//text::diphycercal
-		//=> heterocercal tail: present
-		List<Element> structures;
-		try{
-			structures = pathStructure.selectNodes(statement);
-			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-			for(Element structure: structures){
-				String sid = structure.getAttributeValue("id");
-				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
-				if(structure.getChildren().isEmpty() && relation==null){
-					//standing-alone structure
-					String sname = Utilities.getStructureName(root, sid);
-					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.add(ep);
-				}
-			}
+				//if a real entity, construct EQs of 'entity/present' 
+				//The following case is handled by the wildcard entity search strategy 	  
+				//text::Caudal fin
+				//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
+				//text::diphycercal
+				//=> heterocercal tail: present
+				List<Element> structures;
+				try{
+					structures = pathStructure.selectNodes(statement);
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					for(Element structure: structures){
+						String sid = structure.getAttributeValue("id");
+						Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
+						if(structure.getChildren().isEmpty() && relation==null){
+							//standing-alone structure
+							String sname = Utilities.getStructureName(root, sid);
+							EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+							entities.add(ep);
+						}
+					}
 
-			if(entities.size()>1){
-				//more than one unrelated entity -- isn't it suspicious?
-			}
-			for(EntityProposals entity: entities){
-				if (entity != null && this.keyentities != null) {
-					// TODO resolve entity with keyentities
-					this.entities = resolve(entity, this.keyentities);
-				} else if (entity == null && this.keyentities != null) {
-					this.entities = this.keyentities;
-				} else if (entity != null) {
-					this.entities.add(entity);
+					if(entities.size()>1){
+						//more than one unrelated entity -- isn't it suspicious?
+					}
+					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
+					for(EntityProposals entity: entities){
+						ArrayList<EntityProposals> primaryEntities1 = new ArrayList<EntityProposals>();
+						primaryEntities1.add(entity);
+						if (entity != null && this.keyentities != null) {
+							// TODO resolve entity with keyentities
+							entities1 = resolve(primaryEntities1, this.keyentities);
+						} else if (entity == null && this.keyentities != null) {
+							entities1 = this.keyentities;
+						} else if (entity != null) {
+							entities1.add(entity);
+						}
+						ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+						QualityProposals qp = new QualityProposals();
+						Quality q = new Quality();
+						q.setString("present");
+						q.setId("PATO:0000467");
+						q.setLabel("present");
+						q.setConfidenceScore(1f);
+						qp.add(q);
+						qualities.add(qp);
+						constructureEQStatementProposals(qualities, entities1);
+						entities1.clear();
+					}
+				}catch(Exception e){
+					e.printStackTrace();
 				}
-				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
-				QualityProposals qp = new QualityProposals();
-				Quality q = new Quality();
-				q.setString("present");
-				q.setId("PATO:0000467");
-				q.setLabel("present");
-				q.setConfidenceScore(1f);
-				qp.add(q);
-				qualities.add(qp);
-				constructureEQStatementProposals(qualities, this.entities);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
 	}
 
 	protected void parseCharacters(Element statement, Element root) {
@@ -157,11 +161,12 @@ public class StateStatementParser extends Parser {
 		List<Element> characters;
 		try {
 			characters = pathCharacter.selectNodes(statement);
-			EntityProposals entity = null;
+			ArrayList<EntityProposals> entity = null;
 			ArrayList<QualityProposals> qualities = null;
 			for (Element character : characters) {
 				// may contain relational quality
-				if(character.getParentElement()==null) continue; //the <structure> may have just been detached in Structure2Quality strategy
+				if(character.getParentElement()==null)
+					continue;
 				String structid = character.getParentElement()
 						.getAttributeValue("id" + "");
 				String structname = character.getParentElement()
@@ -172,7 +177,6 @@ public class StateStatementParser extends Parser {
 				Structure2Quality rq2 = new Structure2Quality(root,
 						structname, structid, this.keyentities);
 				rq2.handle();
-				System.out.print("");
 				//if (rq2 != null) {
 				if(rq2.qualities.size()>0){
 					entity = null;
@@ -186,12 +190,13 @@ public class StateStatementParser extends Parser {
 						e1.printStackTrace();
 					} // false if fromid appears in constraintid or toid
 					CharacterHandler ch = new CharacterHandler(root, character,
-							ontoutil, qualityclue, this.keyentities); // may contain relational
-					// quality
+							ontoutil, qualityclue,this.keyentities); // may contain relational
+													// quality
+
 					ch.handle();
 					qualities = ch.getQualities();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					entity = ch.getEntity();
+					entity = ch.getPrimaryentities();
 				}
 				if (maybesubject && entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
@@ -200,10 +205,9 @@ public class StateStatementParser extends Parser {
 						&& this.keyentities != null) {
 					entities = this.keyentities;
 				} else if (entity != null) {
-					entities.add(entity);
-				} else if (this.keyentities!=null){
-					entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-				}
+					entities.addAll(entity);
+				} else 
+					entities = this.keyentities; // what if it is a subject, but not an entity at all? - Hariharan(So added this code)
 				constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
@@ -242,12 +246,13 @@ public class StateStatementParser extends Parser {
 					boolean maybesubject = false;
 					List<QualityProposals> q = new ArrayList<QualityProposals>();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					EntityProposals e;
+					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
 
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
 					// strategy.
+
 
 					Structure2Quality rq1 = new Structure2Quality(root,
 							toname, toid, keyentities);
@@ -264,21 +269,23 @@ public class StateStatementParser extends Parser {
 						StructuredQualities.addAll(rq2.identifiedqualities);
 						e = null;//e is now showed to be a quality
 						q.addAll(rq2.qualities);
-					}else{
-						try {
-							maybesubject = maybeSubject(root, fromid);
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-						RelationHandler rh = new RelationHandler(root, relname, relation,
-								toname, toid, fromname, fromid, neg, false);
-						rh.handle();
+					}
+					else{
+					try {
+						maybesubject = maybeSubject(root, fromid);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					RelationHandler rh = new RelationHandler(root, relname, relation,
+							toname, toid, fromname, fromid, neg, false);
+					rh.handle();
+					if(rh.getEntity()!=null)
+					e.add(rh.getEntity());
 
-						e = rh.getEntity();
-						q = new ArrayList<QualityProposals>();
-						if(rh.getQuality()!=null) q.add(rh.getQuality());
-						if (rh.otherEQs.size() > 0)
-							this.EQStatements.addAll(rh.otherEQs);
+					 q = new ArrayList<QualityProposals>();
+					if(rh.getQuality()!=null) q.add(rh.getQuality());
+					if (rh.otherEQs.size() > 0)
+						this.EQStatements.addAll(rh.otherEQs);
 					}
 
 					// Changes Ending => Hariharan Include flag below to make
@@ -292,10 +299,9 @@ public class StateStatementParser extends Parser {
 								&& this.keyentities != null) {
 							entities = this.keyentities;
 						} else if (e != null) {
-							entities.add(e);
-						} else if(this.keyentities!=null){
+							entities.addAll(e);
+						} else 
 							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-						}
 						//construct EQStatementProposals
 						constructureEQStatementProposals(q, entities);
 
@@ -314,6 +320,7 @@ public class StateStatementParser extends Parser {
 	private void constructureEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
 
+		if((entities!=null)&&(qualities!=null))
 		for (QualityProposals qualityp : qualities){
 			for (EntityProposals entityp : entities) {
 				EQStatementProposals eqp = new EQStatementProposals();
@@ -321,15 +328,7 @@ public class StateStatementParser extends Parser {
 					for(Entity entity: entityp.getProposals()){
 						EQStatement eq= new EQStatement();
 						eq.setEntity(entity);
-						if (quality instanceof RelationalQuality) {
-							eq.setQuality(((RelationalQuality) quality));
-							//							if (entity.getPrimaryEntityLabel() == ((RelationalQuality) quality).relatedentity
-							//									.getPrimaryEntityLabel()){
-							//								continue;
-							//							} //don't recall what the above does --Hong May 20, 13.
-						} else{
-							eq.setQuality(quality);
-						}
+						eq.setQuality(quality);
 						eq.setSource(this.src);
 						eq.setCharacterId(this.characterid);
 						eq.setStateId(this.stateid);
@@ -339,8 +338,7 @@ public class StateStatementParser extends Parser {
 						}else{
 							eq.setType("character");
 						}
-						//this.EQStatements.add(eq);
-						//eq = new EQStatement();
+						
 						eqp.add(eq);
 					}
 				}
@@ -367,7 +365,7 @@ public class StateStatementParser extends Parser {
 		return false;
 	}
 
-	private ArrayList<EntityProposals> integrateSpatial(EntityProposals entity,
+	private ArrayList<EntityProposals> integrateSpatial(ArrayList<EntityProposals> e,
 			ArrayList<EntityProposals> keyentities2) {
 
 		// TODO integrate entity with keyentities
@@ -375,11 +373,11 @@ public class StateStatementParser extends Parser {
 	}
 
 	//TODO: resolve better between proposals
-	private ArrayList<EntityProposals> resolve(EntityProposals e, ArrayList<EntityProposals> keyentities) {
+	private ArrayList<EntityProposals> resolve(ArrayList<EntityProposals> e, ArrayList<EntityProposals> keyentities) {
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		//no keyentities 
 		if (keyentities == null || keyentities.size() == 0) {
-			entities.add(e);
+			entities.addAll(e);
 			return entities;
 		}
 
@@ -389,12 +387,17 @@ public class StateStatementParser extends Parser {
 			// TODO integrate entity with keyentities
 		}
 
-		if (e.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) { // if
-			// e
-			// is
-			// whole_organism
-			return (ArrayList<EntityProposals>) keyentities.clone();
+		Iterator entityitr =e.listIterator();
+		while(entityitr.hasNext())
+		{
+			// if e is whole_organism
+			EntityProposals ep = (EntityProposals) entityitr.next();
+		if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
+			entityitr.remove();
 		}
+		if(e.size()==0)
+			return (ArrayList<EntityProposals>) keyentities.clone();
+
 		// test subclass relations between all e proposals and each of the keyentities proposals
 		
 		ArrayList<EntityProposals> results = resolveBaseOnSubclassRelation(e, keyentities);
@@ -409,38 +412,44 @@ public class StateStatementParser extends Parser {
 	}
 
 
-
-	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
+	
+	
+	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(ArrayList<EntityProposals> eProposals, ArrayList<EntityProposals> keyentities){
 		// test part_of relations between all e proposals and each of the keyentities proposals
-		boolean resolved = false;
+		int flag=0;
+		for(EntityProposals e: eProposals)
+		{
 		if (e.higestScore()>=0.8f) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
-						if(entity.isOntologized() && key.isOntologized()){
-							if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
-									key.getPrimaryEntityOWLClassIRI())) {
-								resolved = true;
-								// key is entity locator of e
-								System.out.println("");
-								CompositeEntity ce = new CompositeEntity();
-								ce.addEntity(entity);
-								FormalRelation rel = new FormalRelation();
-								rel.setString("part of");
-								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-								rel.setId("BFO:000050");
-								rel.setConfidenceScore((float) 1.0);
-								REntity rentity = new REntity(rel, key);
-								ce.addEntity(rentity);
-								key = ce; // replace key with the composite entity in keyentities
-							}
+						if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
+								key.getPrimaryEntityOWLClassIRI())) {
+							// key is entity locator of e
+							CompositeEntity ce = new CompositeEntity();
+							ce.addEntity(entity);
+							FormalRelation rel = new FormalRelation();
+							rel.setString("part of");
+							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+							rel.setId("BFO:000050");
+							rel.setConfidenceScore((float) 1.0);
+							REntity rentity = new REntity(rel, key);
+							ce.addEntity(rentity);
+							key = ce; // replace key with the composite entity in keyentities
+							flag=1;
 						}
 					}
 				}
 			}
-			if(resolved) return (ArrayList<EntityProposals>) keyentities.clone();
-		}		
-		return null;
+		}
+		
+		}	
+		if(flag==1){
+			return (ArrayList<EntityProposals>) keyentities.clone();
+		}else{
+			return null;
+		}
+
 	}
 
 	/**
@@ -450,38 +459,41 @@ public class StateStatementParser extends Parser {
 	 * @param keyentities
 	 * @return
 	 */
-	private ArrayList<EntityProposals> resolveBaseOnSubclassRelation(EntityProposals e, ArrayList<EntityProposals> keyentities){
-		boolean resolved = false;
-		if (e.higestScore()>=0.8) {
+	private ArrayList<EntityProposals> resolveBaseOnSubclassRelation(ArrayList<EntityProposals> eProposals, ArrayList<EntityProposals> keyentities){
+		int flag=0;
+		for(EntityProposals e: eProposals)
+		{
+			if (e.higestScore()>=0.8f) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
-						if(entity.isOntologized() && key.isOntologized()){
-							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
-									key.getPrimaryEntityOWLClassIRI())) {
-								// reset key to the subclass
-								//System.out.println("");
-								resolved = true;
-								keye.reset();
-								keye.add(entity);
-								keye.setPhrase(entity.getString());
-								/*CompositeEntity ce = new CompositeEntity();
-								ce.addEntity(entity);
-								FormalRelation rel = new FormalRelation();
-								rel.setString("part of");
-								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-								rel.setId("BFO:000050");
-								rel.setConfidenceScore((float) 1.0);
-								REntity rentity = new REntity(rel, key);
-								ce.addEntity(rentity);
-								key = ce; // replace key with the composite entity in keyentities*/
-							}
+						if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
+								key.getPrimaryEntityOWLClassIRI())) {
+							// reset key to the subclass
+							//System.out.println("");
+							keye.reset();
+							keye.add(entity);
+							keye.setPhrase(entity.getString());
+							/*CompositeEntity ce = new CompositeEntity();
+							ce.addEntity(entity);
+							FormalRelation rel = new FormalRelation();
+							rel.setString("part of");
+							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+							rel.setId("BFO:000050");
+							rel.setConfidenceScore((float) 1.0);
+							REntity rentity = new REntity(rel, key);
+							ce.addEntity(rentity);
+							key = ce; // replace key with the composite entity in keyentities*/
+							flag=1;
 						}
 					}
 				}
 			}
-			if(resolved) return (ArrayList<EntityProposals>) keyentities.clone();
-		}		
+			}
+			}	
+		if(flag==1)
+			return (ArrayList<EntityProposals>) keyentities.clone();
+		else
 		return null;
 	}
 
@@ -492,7 +504,7 @@ public class StateStatementParser extends Parser {
 	 * @param entity
 	 * @return
 	 */
-	private boolean containsSpatial(EntityProposals entityfromstate) {
+	private boolean containsSpatial(ArrayList<EntityProposals> e) {
 		// TODO
 		return false;
 	}

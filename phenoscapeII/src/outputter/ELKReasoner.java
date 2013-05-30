@@ -4,6 +4,8 @@ package outputter;
 * perform reasoning tasks
 **/
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ public class ELKReasoner{
 	OWLDataFactory dataFactory;
 	OWLOntology ont;
 	OWLOntologyManager man;
+	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
 	
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
@@ -51,6 +54,7 @@ public class ELKReasoner{
 		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
+		getClassesWithLateralSides();
 	}
 	
 	public ELKReasoner(File ontologyfile) throws OWLOntologyCreationException{
@@ -61,13 +65,14 @@ public class ELKReasoner{
 		// Create an ELK reasoner.
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
+		getClassesWithLateralSides();//populates the lateral sides cache 
 	}
 	
 	/**
 	* union of (in_lateral_side_of some Thing) and (part_of some in_lateral_side_of some Thing)
 	* this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
 	**/
-	Set<OWLClass> getClassesWithLateralSides(){
+	void getClassesWithLateralSides(){
 	    OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
 		OWLObjectProperty lateralside = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BSPO_0000126"));//in_lateral_side_of
 		OWLObjectProperty partof = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
@@ -121,11 +126,12 @@ public class ELKReasoner{
 					.getAnnotations(ont, dataFactory.getRDFSLabel())) {
 					if (labelannotation.getValue() instanceof OWLLiteral) {
 						OWLLiteral val = (OWLLiteral) labelannotation.getValue();
+						lateralsidescache.put(val.getLiteral(), owlClass.getIRI());
 						System.out.println(val.getLiteral());
 					}
 			}
 		}
-		return subClasses;
+		//return subClasses;
 	}
 	
 	/**
@@ -172,16 +178,16 @@ public class ELKReasoner{
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
-			//Set<OWLClass> classes = elk.getClassesWithLateralSides();
+			
 			/*String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
 			String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0003098";//optic stalk is not an organ
 			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
 			System.out.println(elk.isSubClassOf(subclassIRI, superclassIRI));		
 			*/
-			String class1IRI = "http://purl.obolibrary.org/obo/UBERON_0000974"; //neck
-			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0000468"; //multi-cellular organism //neck is prt of multi-cellular organism =>true
-			String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0000064"; //organ part, is neck part of organ part? false
-			System.out.println(elk.isPartOf(class1IRI, class2IRI));	
+			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON:0003606"; //limb long bone
+			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
+			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
+			//System.out.println(elk.isSubClassOf(class1IRI, class2IRI));	
 			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block

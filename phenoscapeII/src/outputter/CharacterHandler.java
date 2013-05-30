@@ -30,7 +30,10 @@ public class CharacterHandler {
 	boolean resolve = false;
 	private ToBeSolved tobesolvedentity;
 	private ArrayList<EntityProposals> keyentities;
+	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+	
 	/**
+	 * @param keyentities 
 	 * 
 	 */
 	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil, ArrayList<String> qualityclues, ArrayList<EntityProposals> keyentities) {
@@ -39,6 +42,7 @@ public class CharacterHandler {
 		this.ontoutil = ontoutil;
 		this.qualityclues = qualityclues;
 		this.keyentities = keyentities;
+
 	}
 
 	/**
@@ -63,6 +67,7 @@ public class CharacterHandler {
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");	
+
 			
 			//if entity match is not very strong, consider whether the structure is really a quality
 			/*if(this.entity.higestScore() < 0.8f){
@@ -86,6 +91,9 @@ public class CharacterHandler {
 				}
 				
 			}*/
+
+			this.primaryentities.add(this.entity);
+
 		}		
 	}
 	
@@ -113,7 +121,41 @@ public class CharacterHandler {
 				}
 				return;
 			}else{
-				//TODO check if the subject entity is a bilateral paired organ
+				//TODO Check the same chara is present in more than one structure 
+				//else check if the subject entity is a bilateral paired organ
+				
+				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara,this.ontoutil,this.keyentities);
+				re.handle();
+				if(re.relatedentities.size()>0)
+				{
+					ArrayList<EntityProposals> relatedentities = re.getrelatedEntities();
+					for(EntityProposals relatedentity: relatedentities){
+						QualityProposals qproposals = new QualityProposals();
+						qproposals.add(new RelationalQuality(relationalquality, relatedentity));
+						this.qualities.add(qproposals);
+					}
+					if(re.getPrimaryentities().size()>0)
+					{
+						Iterator itr1 = re.getPrimaryentities().listIterator();
+						while(itr1.hasNext())
+						{
+							EntityProposals ep1 = (EntityProposals) itr1.next();
+							for(Entity en1: ep1.getProposals())
+							{
+							Iterator itr2 = this.primaryentities.listIterator();
+							while(itr2.hasNext())
+							{
+								EntityProposals ep2 = (EntityProposals) itr2.next();
+								for(Entity en2:ep2.getProposals())
+									if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
+										itr1.remove();
+							}
+							}
+						}
+						this.primaryentities.addAll(re.getPrimaryentities());
+					}
+				}
+				//TODO if a character is not present for more than one structures and not bilateral then process the text
 				return;
 			}
 		}
@@ -150,22 +192,20 @@ public class CharacterHandler {
 				this.qualities.add(qproposals);
 				return;
 			}
-		}
-		
-		
-		//no match for quality either, could it be something else?
-		//try to match it in entity ontologies	  
-		//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
-		//xml: structure: caudal fin, character:heterocercal
-		//=> heterocercal tail: present
-		if(this.entity!=null && this.entity.higestScore()>=0.8f){
-			for(Entity e: entity.getProposals()){
-				Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
-				ces.handle();
-				if(ces.getEntity()!=null && ces.getQuality()!=null){
-					this.entity = ces.getEntity();
-					this.qualities.add(ces.getQuality());
-					return;
+		}else{//no match for quality, could it be something else?
+			//try to match it in entity ontologies	  
+			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
+			//xml: structure: caudal fin, character:heterocercal
+			//=> heterocercal tail: present
+			if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
+				for(Entity e: entity.getProposals()){
+					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
+					ces.handle();
+					if(ces.getEntity()!=null && ces.getQuality()!=null){
+						this.entity = ces.getEntity();
+						this.qualities.add(ces.getQuality());
+						return;
+					}
 				}
 			}
 		}
@@ -241,6 +281,7 @@ public class CharacterHandler {
 		return this.entity;
 	}
 	
+
 	private class ToBeSolved{
 		
 		private String structurename;
@@ -254,8 +295,11 @@ public class CharacterHandler {
 			this.entity = entity;
 			this.qualities = qualities;			
 		}
+	}
 		
-		
+
+	public ArrayList<EntityProposals> getPrimaryentities() {
+		return primaryentities;
 	}
 	/**
 	 * @param args

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import org.jdom.Element;
 
 /**
- * @author updates
+ * @author Hong Cui
+ * This class post-composes spatial parts and their parent organs
+ * e.g .distal end of fibula
  *
  */
 public class EntitySearcher2 extends EntitySearcher {

@@ -31,6 +31,7 @@ public class Dictionary {
 	public static String contact="connection|contact|interconnection";//Extendible
 	public static String spatialtermptn="";
 	public static String prefixes = "post|pre|post-|pre-";
+	public static String negation = "absent|lacking";
 
 	//By Zilong:
 	//sometimes, spatial terms could be used as adjectives to modify head nouns. 
@@ -160,6 +161,7 @@ public class Dictionary {
 		spatialMaps.put("portion", "region");	
 		//end is defined to be region => distal end => distal region
 		spatialMaps.put("end", "region");
+		//spatialMaps.put("end", "margin");
 	}
 	//legal relational qualities
 	static{	

@@ -108,7 +108,6 @@ public class SynRingVariation {
 	for(String temp:Dictionary.prefixes.split("\\|"))
 		if(forms.contains(leadtermcopy)==false)
 		forms+=temp+leadterm+"|";
-	forms += leadterm;
 		return forms;
 	}
 
