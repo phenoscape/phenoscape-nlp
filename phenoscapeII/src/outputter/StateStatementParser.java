@@ -419,10 +419,12 @@ public class StateStatementParser extends Parser {
 		int flag=0;
 		for(EntityProposals e: eProposals)
 		{
-			if (e.higestScore()>=0.8f) {
-				for (Entity entity: e.getProposals()){
-					for (EntityProposals keye : keyentities) {
-						for(Entity key: keye.getProposals()){
+		if (e.higestScore()>=0.8f) {
+			for (Entity entity: e.getProposals()){
+				for (EntityProposals keye : keyentities) {
+					for(Entity key: keye.getProposals()){
+						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
+						{
 							if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
 									key.getPrimaryEntityOWLClassIRI())) {
 								// key is entity locator of e
@@ -442,7 +444,7 @@ public class StateStatementParser extends Parser {
 					}
 				}
 			}
-
+			}
 		}	
 		if(flag==1){
 			return (ArrayList<EntityProposals>) keyentities.clone();
@@ -464,23 +466,34 @@ public class StateStatementParser extends Parser {
 		for(EntityProposals e: eProposals)
 		{
 			if (e.higestScore()>=0.8f) {
-				for (Entity entity: e.getProposals()){
-					for (EntityProposals keye : keyentities) {
-						for(Entity key: keye.getProposals()){
-							if(key.isOntologized() && entity.isOntologized()){
-								if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
-										key.getPrimaryEntityOWLClassIRI())) {
-									// reset key to the subclass
-									//System.out.println("");
-									keye.reset();
-									keye.add(entity);
-									keye.setPhrase(entity.getString());
-									flag=1;
-								}
-							}
+			for (Entity entity: e.getProposals()){
+				for (EntityProposals keye : keyentities) {
+					for(Entity key: keye.getProposals()){
+						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
+						{
+							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
+								key.getPrimaryEntityOWLClassIRI())) {
+							// reset key to the subclass
+							//System.out.println("");
+							keye.reset();
+							keye.add(entity);
+							keye.setPhrase(entity.getString());
+							/*CompositeEntity ce = new CompositeEntity();
+							ce.addEntity(entity);
+							FormalRelation rel = new FormalRelation();
+							rel.setString("part of");
+							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+							rel.setId("BFO:000050");
+							rel.setConfidenceScore((float) 1.0);
+							REntity rentity = new REntity(rel, key);
+							ce.addEntity(rentity);
+							key = ce; // replace key with the composite entity in keyentities*/
+							flag=1;
+						}
 						}
 					}
 				}
+			}
 			}
 		}	
 		if(flag==1)
