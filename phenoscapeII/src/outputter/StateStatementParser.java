@@ -423,6 +423,8 @@ public class StateStatementParser extends Parser {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
+						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
+						{
 						if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
 								key.getPrimaryEntityOWLClassIRI())) {
 							// key is entity locator of e
@@ -437,6 +439,7 @@ public class StateStatementParser extends Parser {
 							ce.addEntity(rentity);
 							key = ce; // replace key with the composite entity in keyentities
 							flag=1;
+						}
 						}
 					}
 				}
@@ -467,7 +470,9 @@ public class StateStatementParser extends Parser {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
-						if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
+						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
+						{
+							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
 								key.getPrimaryEntityOWLClassIRI())) {
 							// reset key to the subclass
 							//System.out.println("");
@@ -485,6 +490,7 @@ public class StateStatementParser extends Parser {
 							ce.addEntity(rentity);
 							key = ce; // replace key with the composite entity in keyentities*/
 							flag=1;
+						}
 						}
 					}
 				}
