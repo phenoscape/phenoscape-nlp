@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.jdom.Element;
@@ -15,7 +16,7 @@ import org.jdom.xpath.XPath;
  *  
  */
 
-public class Structure2Quality {
+public class Structure2Quality implements AnnotationStrategy{
 
 	Element root;
 	String relation;
@@ -27,11 +28,11 @@ public class Structure2Quality {
 	private TermOutputerUtilities ontoutil;
 	static XPath pathCharacterUnderStucture;
 	ArrayList<EntityProposals> keyentities;
-	ArrayList<String> identifiedqualities;
+	HashSet<String> identifiedqualities;
 	
 	static{
 		try{
-		pathCharacterUnderStucture = XPath.newInstance(".//character");
+			pathCharacterUnderStucture = XPath.newInstance(".//character");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -42,7 +43,7 @@ public class Structure2Quality {
 		this.structname = structurename;
 		this.structid = structureid;
 		this.keyentities = keyentities;
-		identifiedqualities = new ArrayList<String>(); //list of xml ids
+		identifiedqualities = new HashSet<String>(); //list of unique xml ids
 	}
 
 	public void handle() {

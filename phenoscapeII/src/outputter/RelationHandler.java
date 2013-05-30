@@ -25,10 +25,11 @@ public class RelationHandler {
 	String tostructid;
 	String fromstructname;
 	String fromstructid;
+	Element relelement;
 	boolean negation; //if true, negate the relation string
 	boolean fromcharacterstatement;
 	
-	public RelationHandler(Element root, String relation, String tostructname, String tostructid, String structname, String structid, boolean negation, boolean keyelement){
+	public RelationHandler(Element root, String relation, Element relelement, String tostructname, String tostructid, String structname, String structid, boolean negation, boolean keyelement){
 		this.root = root;
 		this.relation = relation;
 		this.tostructname = tostructname;
@@ -37,6 +38,7 @@ public class RelationHandler {
 		this.fromstructid = structid;
 		this.fromcharacterstatement = keyelement;
 		this.otherEQs = new ArrayList<EQStatementProposals>();
+		this.relelement = relelement;
 		
 	}
 	
@@ -73,7 +75,9 @@ public class RelationHandler {
 		//TODO negation
 
 		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation);
-		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']");
+		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']" +
+																			 "|//relation[@name='in'][@from='" + tostructid + "']" +
+																			 "|//relation[@name='on'][@from='" + tostructid + "']");
 		tostructname = tostructname.replaceFirst(",$", "");
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			EntityProposals relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
@@ -117,6 +121,14 @@ public class RelationHandler {
 							present.setId("PATO:0000467");
 							present.setConfidenceScore((float)1.0);
 							EQStatement eq = new EQStatement();
+							Element statement = relelement.getParentElement();
+							eq.setCharacterId(statement.getAttributeValue("character_id"));
+							eq.setDescription(statement.getChildText("text"));
+							eq.setSource(root.getAttributeValue(ApplicationUtilities
+									.getProperty("source.attribute.name")));
+							eq.setStateId(statement.getAttribute("state_id") == null ? ""
+									: statement.getAttributeValue("state_id"));
+							eq.setType(this.fromcharacterstatement? "character" : "state");
 							eq.setEntity(entity);
 							eq.setQuality(present);
 							eqproposals.add(eq);
@@ -141,6 +153,14 @@ public class RelationHandler {
 							EQStatement eq = new EQStatement();
 							eq.setEntity(entity);
 							eq.setQuality(absent);
+							Element statement = relelement.getParentElement();
+							eq.setCharacterId(statement.getAttributeValue("character_id"));
+							eq.setDescription(statement.getChildText("text"));
+							eq.setSource(root.getAttributeValue(ApplicationUtilities
+									.getProperty("source.attribute.name")));
+							eq.setStateId(statement.getAttribute("state_id") == null ? ""
+									: statement.getAttributeValue("state_id"));
+							eq.setType(this.fromcharacterstatement? "character" : "state");
 							eqproposals.add(eq);
 						}
 						this.otherEQs.add(eqproposals);

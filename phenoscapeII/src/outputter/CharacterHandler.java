@@ -27,10 +27,11 @@ public class CharacterHandler {
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //the quality result will be saved here. Because n structures may be involved in constraints (hence multiple relational qualities), this needs to be an arraylist. May be relationalquality, simple quality, or negated quality
 	ArrayList<EntityProposals> entityparts = new ArrayList<EntityProposals>(); //come from constraints, may have multiple.
 	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
-	ArrayList<EntityProposals> keyentities;
+	boolean resolve = false;
+	private ToBeSolved tobesolvedentity;
+	private ArrayList<EntityProposals> keyentities;
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
 	
-
 	/**
 	 * @param keyentities 
 	 * 
@@ -40,7 +41,8 @@ public class CharacterHandler {
 		this.chara = chara;
 		this.ontoutil = ontoutil;
 		this.qualityclues = qualityclues;
-		this.keyentities=keyentities;
+		this.keyentities = keyentities;
+
 	}
 
 	/**
@@ -52,7 +54,7 @@ public class CharacterHandler {
 	public void handle(){
 		parseEntity();
 		parseQuality();
-		resolve();
+		if(resolve) resolve();
 	}
 	
 	
@@ -65,9 +67,36 @@ public class CharacterHandler {
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");	
+
+			
+			//if entity match is not very strong, consider whether the structure is really a quality
+			/*if(this.entity.higestScore() < 0.8f){
+				Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
+				rq.handle();
+				ArrayList<QualityProposals> qualities = rq.qualities;
+				if(qualities.size()>0){
+					boolean settled = false;
+					for(QualityProposals qp : qualities){
+						if(qp.higestScore() > this.entity.higestScore() && (this.keyentities!=null && this.keyentities.size()>0)){
+							this.entity = null;
+							this.qualities = qualities;
+							break;
+						}
+					}
+					if(!settled){
+						//park the case and resolve it later after the quality is parsed
+						this.tobesolvedentity = new ToBeSolved(structurename, structureid, this.entity, qualities);
+						this.resolve = true;
+					}					
+				}
+				
+			}*/
+
 			this.primaryentities.add(this.entity);
+
 		}		
 	}
+	
 	
 	public void parseQuality(){
 		// characters => quality
@@ -132,7 +161,7 @@ public class CharacterHandler {
 		}
 		
 		
-		//constarints may yield entity parts such as entity locator, save those, resolve them later
+		//constraints may yield entity parts such as entity locator, save those, resolve them later
 		if (chara.getAttribute("constraintid") != null) {
 			ArrayList<EntityProposals> entities = findEntityInConstraints();
 			for(EntityProposals entity: entities){
@@ -168,7 +197,7 @@ public class CharacterHandler {
 			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
 			//xml: structure: caudal fin, character:heterocercal
 			//=> heterocercal tail: present
-			if((this.entity!=null)&&(this.entity.hasOntologizedWithHighConfidence())){
+			if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
 				for(Entity e: entity.getProposals()){
 					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
 					ces.handle();
@@ -179,31 +208,36 @@ public class CharacterHandler {
 					}
 				}
 			}
+		}
+		
+		//TODO: could this do any good?
+		//Entity result = (Entity) ts.searchTerm(quality, "entity");
+		
 
-			//still not successful, check other matches
-			for(FormalConcept aquality: ts.getCandidateMatches()){
-				if((qualityclues!=null)&&(qualityclues.size()!=0))
+		//still not successful, check other matches
+		for(FormalConcept aquality: ts.getCandidateMatches()){
+			if((qualityclues!=null)&&(qualityclues.size()!=0))
 				for(String clue: qualityclues){
 					Quality qclue = (Quality)ts.searchTerm(clue, "quality");
 					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
 						aquality.setConfidenceScore(1.0f); //increase confidence score
 					}					
 				}
-				//no clue or clue was not helpful
-				QualityProposals qproposals = new QualityProposals();
-				qproposals.add((Quality)aquality);
-				this.qualities.add(qproposals); //keep confidence score as is
-			}
-			if(this.qualities.size()==0){
-				result=new Quality();
-				result.string=quality;
-				result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
-				QualityProposals qproposals = new QualityProposals();
-				qproposals.add(result);
-				this.qualities.add(qproposals);
-			}
-			return;
+			//no clue or clue was not helpful
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add((Quality)aquality);
+			this.qualities.add(qproposals); //keep confidence score as is
 		}
+		if(this.qualities.size()==0){
+			result=new Quality();
+			result.string=quality;
+			result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(result);
+			this.qualities.add(qproposals);
+		}
+		return;
+		
 	}
 	
 	
@@ -231,11 +265,14 @@ public class CharacterHandler {
 	
 	/**
 	 * resolve for entities from entity and entity parts obtained from constraints
+	 * also when neither entity and qualities scores are strong, the keyentities scores are not strong or not ontologized
+	 * should try to resove them here? or in the end?
 	 */
 	public void resolve(){
 		//TODO
 	}
 	
+
 	public ArrayList<QualityProposals> getQualities(){
 		return this.qualities;
 	}
@@ -244,6 +281,23 @@ public class CharacterHandler {
 		return this.entity;
 	}
 	
+
+	private class ToBeSolved{
+		
+		private String structurename;
+		private String structureid;
+		private EntityProposals entity;
+		private ArrayList<QualityProposals> qualities;
+
+		public ToBeSolved(String structurename, String structureid, EntityProposals entity, ArrayList<QualityProposals> qualities){
+			this.structurename = structurename;
+			this.structureid = structureid;
+			this.entity = entity;
+			this.qualities = qualities;			
+		}
+	}
+		
+
 	public ArrayList<EntityProposals> getPrimaryentities() {
 		return primaryentities;
 	}

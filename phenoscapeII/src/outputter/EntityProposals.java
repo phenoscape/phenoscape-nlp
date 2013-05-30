@@ -11,7 +11,6 @@ import java.util.ArrayList;
  */
 public class EntityProposals implements Proposals {
 	ArrayList<Entity> proposals = new ArrayList<Entity>();
-	float confidencethreshold = 0.8f;
 	String phrase = "";
 	/**
 	 * 
@@ -20,19 +19,51 @@ public class EntityProposals implements Proposals {
 	}
 	
 	public void add(Object e){
-		proposals.add((Entity)e);
+		if(e!=null)proposals.add((Entity)e);
 	}
 	
 	public ArrayList<Entity> getProposals(){
 		return proposals;
 	}
 
-	public boolean hasOntologizedWithHighConfidence() {
+	public float higestScore() {
+		float max = 0f;
 		for(Entity entity: proposals){
-			if(entity.isOntologized() && entity.getPrimaryEntityScore()>=this.confidencethreshold)
-				return true;
+			if(entity.isOntologized()){
+				float score = entity.getPrimaryEntityScore();
+				if(score > max){
+					max = score; 
+				}
+			}
 		}
-		return false;
+		return max;
+	}
+	
+	public Entity getEntityWithHigestScore() {
+		Entity theone = null;
+		float max = 0f;
+		for(Entity entity: proposals){
+			if(entity.isOntologized()){
+				float score = entity.getPrimaryEntityScore();
+				if(score > max){
+					theone = entity; 
+				}
+			}
+		}
+		return theone;
+	}
+	
+	public ArrayList<Entity> getEntitiesAbove(float threshold){
+		ArrayList<Entity> results = new ArrayList<Entity>();
+		for(Entity entity: proposals){
+			if(entity.isOntologized()){
+				float score = entity.getPrimaryEntityScore();
+				if(score > threshold){
+					results.add(entity); 
+				}
+			}
+		}
+		return results;
 	}
 	
 	public void setPhrase(String phrase){

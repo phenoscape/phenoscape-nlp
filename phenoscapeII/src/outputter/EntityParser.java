@@ -51,12 +51,12 @@ public class EntityParser {
 							if(relation.getAttribute("negation")!=null) negation = Boolean.valueOf(relation.getAttributeValue("negation"));
 							RelationHandler rh = new RelationHandler(root, 
 									relation.getAttributeValue("name"),  
+									relation,
 									Utilities.getStructureName(root,  relation.getAttributeValue("to")), 
 									relation.getAttributeValue("to"),
 									Utilities.getStructureName(root,  relation.getAttributeValue("from")),
 									relation.getAttributeValue("from"), negation, keyelement);
 							rh.handle();
-							
 							EntityProposals entity = rh.getEntity();
 							if(entity!=null){
 								entities.add(entity);

@@ -14,7 +14,7 @@ public interface Proposals {
 	public void add(Object c);
 	public Object getProposals();
 	public String getPhrase();
-	public void setPhrase(String phrase);
-	public boolean hasOntologizedWithHighConfidence();
+	//public void setPhrase(String phrase);
+	public float higestScore();
 
 }

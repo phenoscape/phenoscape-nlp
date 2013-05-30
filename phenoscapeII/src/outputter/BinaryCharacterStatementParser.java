@@ -40,7 +40,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 */
 	public void parse(Element statement, Element root){
 		ArrayList<EQStatementProposals> negativestatements = new ArrayList<EQStatementProposals>();
-		super.parse(statement, root);
+		super.parseMetadata(statement, root);
+		super.parseRelations(statement, root);
+		super.parseCharacters(statement, root);
 		if(this.EQStatements.size()==0){
 			try {
 				checkandfilterstructuredquality(statement,root);//checks standalone structure for quality values and detach them.

@@ -48,13 +48,15 @@ public class POSTagger4StanfordParser {
 	private String positions = ""; //initialized with two values that are not positions for convenience
 	private Pattern positionptn2;
 	private String characterptn;
-	private Pattern pof1;
-	private Pattern p1;
-	private Pattern pof2;
-	private Pattern p2;	
-	private Pattern pof3;
-	private Pattern p3;	
+	Pattern pof1 = Pattern.compile("(.*?)\\{?("+this.characterptn+")\\}? of (.*?<\\w+>.*)");
+	Pattern p1 = Pattern.compile("(.*<\\w+> )\\{?("+this.characterptn+")\\}?");
+	Pattern pof2 = Pattern.compile("\\{?("+this.characterptn+")\\}? of ((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)(.*)");
+	Pattern p2 = Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)\\{?("+this.characterptn+")\\}?(.*)");
+	Pattern pof3=Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)");
+	Pattern p3=Pattern.compile("\\{?("+this.characterptn+")\\}?");
+	String structs = "((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)";
 	private boolean printRelative=true;
+	private boolean printfromto = true;
 	
 
 	/**
@@ -231,6 +233,7 @@ public class POSTagger4StanfordParser {
 
 				str = handleBrackets(str);
 				str = stringCharacterComparison(str);
+				str = normalizefromto(str);
 				if(type.compareTo("character")==0){//{postorbital} , {form} of {dorsal} <surface>
 					String temp = str;
 					str = str.replaceFirst("(?<=^|,\\s)\\{?\\w+\\}? of ", "").trim(); //shape of 
@@ -287,6 +290,8 @@ public class POSTagger4StanfordParser {
 	        		}else if(word.contains("relative~")){
 	        			 sb.append(word+"/JJ ");
 	        		}else if(word.matches("in-.*?(-view|profile)")){
+	        		   sb.append(word+"/RB ");
+	        	   }else if(word.matches("from~.*?~to~.*")){
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.endsWith("-PPP")){//prepphrase in_association_with
 	        		   sb.append(word.replaceFirst("-PPP", "")+"/IN ");
@@ -348,6 +353,26 @@ public class POSTagger4StanfordParser {
 		//return "";
 	}
 	
+	private String normalizefromto(String str) {
+		String cp = str;
+		boolean changed = false;
+		if(str.matches(".*\\bfrom .*? to\\b.*")){
+			Pattern struct = Pattern.compile("(.*?)(\\bfrom (?:<?\\{?(?:"+this.positions+")\\}?>? |<\\w+> |of |the )+to (?:<?\\{?(?:"+this.positions+")\\}?>? |<\\w+> |of |the )+)(.*)");
+			Matcher m = struct.matcher(str+" "); //need the trailing space
+			while(m.matches()){
+				str = m.group(1)+m.group(2).trim().replaceAll(" ", "~")+" "+m.group(3);
+				m = struct.matcher(str);
+				changed = true;
+			}
+					
+			if(this.printfromto && changed){
+				System.out.println("normalized from-to from:"+cp);
+				System.out.println("normalized from-to to: "+str);
+			}
+		}
+		return str;
+	}
+
 	/**
 	 * {width} of <ethmoid> relative-to its {length} from <snout> <tip> to the {posterior} <{margin}> of the <parietals>
 	 * @param str [char of A|A char] [relative-to|<=|>=|=|x times] [char of B|B char]
@@ -393,12 +418,7 @@ public class POSTagger4StanfordParser {
 	 */
 	private String[] pullCharacterInfo(String str, String part){
 		String[] result = new String[2];
-		pof1 = Pattern.compile("(.*?)\\{?("+this.characterptn+")\\}? of (.*?<\\w+>.*)");
-		p1 = Pattern.compile("(.*<\\w+> )\\{?("+this.characterptn+")\\}?");
-		pof2 = Pattern.compile("\\{?("+this.characterptn+")\\}? of ((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)(.*)");
-		p2 = Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)\\{?("+this.characterptn+")\\}?(.*)");
-		pof3=Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)");
-		p3=Pattern.compile("\\{?("+this.characterptn+")\\}?");
+
 		if(part.compareTo("part1")==0){
 			//find the last structure and character
 			Matcher m = pof1.matcher(str);

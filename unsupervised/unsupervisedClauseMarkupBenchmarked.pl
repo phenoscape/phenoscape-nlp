@@ -6214,6 +6214,7 @@ foreach my $info (@allsents){
 		#print "Sentence: $line\n" if $debug;
 		#print "Leading words: @words\n\n" if $debug;
 		$SENTID++;
+		#print "Total sentences = $SENTID\n";
 	}
 	my $end = $SENTID-1;
 	$NEWDESCRIPTION.=$file."[".$end."] ";

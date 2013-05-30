@@ -179,7 +179,10 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				//patterns.xml_s900f4608-aaf7-45a0-b5fb-153a0db1c748_s330b823c-6a5e-4385-b91b-3deabd36cc1b.txt-0
 				//patterns.xml_s9be8f099-c030-4c5f-b192-1b07986cb1ff_s499c31ff-5d0f-407a-aa28-f4b6377bfc8e.txt-0
 				//Swartz 2012.xml_states635.txt-0
-				//if(src.compareTo("Swartz 2012.xml_states635.txt-0")!=0) continue;
+				//Swartz 2012.xml_states409_state411.txt-0
+				//Swartz 2012.xml_states635.txt-0
+				//Swartz 2012.xml_states640.txt-0
+				if(src.compareTo("Swartz 2012.xml_states640.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
@@ -649,9 +652,9 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
 		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, prefix, "fishglossaryfixed", false);
-		//sp.POSTagging();
+		sp.POSTagging();
 		//sp.parsing();
-		sp.extracting();
+		//sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);
 		}catch (Exception e){

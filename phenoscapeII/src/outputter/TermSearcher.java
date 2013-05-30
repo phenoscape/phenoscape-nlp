@@ -60,7 +60,7 @@ public class TermSearcher {
 		//1. search the original phrase
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
 
-		FormalConcept strongmatch = getStrongMatch(phrase+"", phrasetype, results);
+		FormalConcept strongmatch = getStrongMatch(phrase, phrasetype, results, 1f);
 		if(strongmatch != null) return strongmatch;
 		///if landed here, all matches based on the original phrase are weak matches.
 		candidatematches.addAll(results);
@@ -95,7 +95,7 @@ public class TermSearcher {
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
 			
-				strongmatch = getStrongMatch(phrase, phrasetype, results);
+				strongmatch = getStrongMatch(phrase, phrasetype, results, 0.8f);
 				if(strongmatch != null) return strongmatch;
 				
 				//if landed here, all matches based on this spatial reform are weak matches.
@@ -109,7 +109,7 @@ public class TermSearcher {
 		//3. phrase with hyphens, replace hyphens with spaces
 		if(phrase.indexOf("-")>0){ //caudal-fin
 			phrase = phrase.replaceAll("-", " ");
-			strongmatch = getStrongMatch(phrase, phrasetype, results);
+			strongmatch = getStrongMatch(phrase, phrasetype, results, 1f);
 			if(strongmatch != null) return strongmatch;
 			
 			//TODO: latero-sensory => sensory
@@ -123,7 +123,7 @@ public class TermSearcher {
 			String replacement = phrase.substring(phrase.indexOf("/")).replaceFirst("^/", ""); //tendon
 			String firstpart = phrase.substring(0, phrase.indexOf("/")); //xyz bone
 			
-			strongmatch = getStrongMatch(firstpart, phrasetype, results);
+			strongmatch = getStrongMatch(firstpart, phrasetype, results, 1f);
 			if(strongmatch != null) return strongmatch;
 			
 			//if landed here, all matches based on this reform are weak matches.
@@ -132,7 +132,7 @@ public class TermSearcher {
 			
 			while(firstpart.contains(" ")){
 				phrase = firstpart.replaceFirst("\\s\\S+$", replacement);//replace the last word in firstpart with "replacement": now term = xyz tendon
-				strongmatch = getStrongMatch(phrase, phrasetype, results);
+				strongmatch = getStrongMatch(phrase, phrasetype, results, 0.8f);
 				if(strongmatch != null) return strongmatch;
 				
 				//if landed here, all matches based on this spatial reform are weak matches.
@@ -149,7 +149,7 @@ public class TermSearcher {
 			//Uses wordforms class to get all the adjectives of this quality
 			for(String form:phraseforms)
 			{
-			strongmatch = getStrongMatch(form, phrasetype, results);
+			strongmatch = getStrongMatch(form, phrasetype, results, 0.8f);
 			if(strongmatch != null) return strongmatch;
 			candidatematches.addAll(results);
 			results = new ArrayList<Hashtable<String, String>>();
@@ -209,7 +209,7 @@ public class TermSearcher {
 	 * @throws Exception
 	 */
 
-	private FormalConcept getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results) {
+	private FormalConcept getStrongMatch(String term, String type, ArrayList<Hashtable<String, String>> results, float confscore) {
 		XML2EQ.ontoutil.searchOntologies(term, type, results);
 		if(results !=null && results.size() > 0){
 			//loop through results to find the closest match
@@ -222,7 +222,7 @@ public class TermSearcher {
 						entity.setLabel(aresult.get("label"));
 						entity.setId(aresult.get("id"));
 						entity.setClassIRI(aresult.get("iri"));
-						entity.setConfidenceScore(1f);
+						entity.setConfidenceScore(confscore);
 						cacheIt(term, entity, type);
 						return entity;
 					}else{
@@ -231,7 +231,7 @@ public class TermSearcher {
 						quality.setLabel(aresult.get("label"));
 						quality.setId(aresult.get("id"));
 						quality.setClassIRI(aresult.get("iri"));
-						quality.setConfidenceScore(1f);
+						quality.setConfidenceScore(confscore);
 						cacheIt(term, quality, type);
 						return quality;
 					}		
@@ -375,7 +375,7 @@ public class TermSearcher {
 	public static void main(String[] args) {	
 
 		TermSearcher ts = new TermSearcher();
-		FormalConcept result = ts.searchTerm("fimbriation", "quality");
+		FormalConcept result = ts.searchTerm("ornament", "quality");
 		if(result!=null){
 			System.out.println(result.toString());
 		}else{

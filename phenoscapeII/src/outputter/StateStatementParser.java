@@ -74,7 +74,17 @@ public class StateStatementParser extends Parser {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void parse(Element statement, Element root) {
-		ArrayList<String> StructuredQualities = new ArrayList<String>();
+		//refactored by extracting the following three methods
+		parseMetadata(statement, root);
+		
+		parseRelations(statement, root);
+
+		parseCharacters(statement, root);
+
+		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
+	}
+
+	protected void parseMetadata(Element statement, Element root) {
 		this.src = root.getAttributeValue(ApplicationUtilities
 				.getProperty("source.attribute.name"));
 		this.characterid = statement.getAttributeValue("character_id");
@@ -86,104 +96,67 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
-		// parse relations first
-		// Check whether tostruct and fromstruct is an entity or quality. 
-		// If they are quality, generate qualities using relational quality strategy and map to keyentities
-		// else use relationhandler and create entities and qualities.
-		List<Element> relations;
-		try {
-			relations = pathRelation.selectNodes(statement);
-			for (Element relation : relations) {
-				int flag = 1; //should the relation be retained or ignored. 1 = retain
-				for (String structid : StructuredQualities){ //StructuredQualities: initially empty, populated with the ids of 'bad' structures (that are really quliaties") 
-					if ((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
-							|| (relation.getAttributeValue("to").equals(structid))) {
-						// relation.detach();
-						flag = 0; //bad relation
-						break;
-					} 
-				}
-				//process only the good relation
-				if (flag == 1) {
-					String fromid = relation.getAttributeValue("from");
-					String toid = relation.getAttributeValue("to");
-					String relname = relation.getAttributeValue("name").trim();
-					boolean neg = Boolean.valueOf(relation
-							.getAttributeValue("negation"));
-					String toname = Utilities.getStructureName(root, toid);
-					String fromname = Utilities.getStructureName(root, fromid);
-					boolean maybesubject = false;
-					List<QualityProposals> q = new ArrayList<QualityProposals>();
+	}
+
+	private void parseStandaloneStructures(Element statement, Element root) {
+		// last, standing alone structures (without characters 
+				// and are not the subject of a relation)
+				//TODO: could it really be a quality?
+
+				//if a real entity, construct EQs of 'entity/present' 
+				//The following case is handled by the wildcard entity search strategy 	  
+				//text::Caudal fin
+				//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
+				//text::diphycercal
+				//=> heterocercal tail: present
+				List<Element> structures;
+				try{
+					structures = pathStructure.selectNodes(statement);
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
-					
-					// Changes starting => Hariharan
-					// checking if entity is really an entity or it is a quality
-					// by passing to and from struct names to relational quality
-					// strategy.
-
-
-					Structure2Quality rq1 = new Structure2Quality(root,
-							toname, toid, keyentities);
-					rq1.handle();
-
-					Structure2Quality rq2 = new Structure2Quality(root,
-							fromname, fromid, keyentities);
-					rq2.handle();
-					if (rq1.qualities.size() > 0) {
-						StructuredQualities.addAll(rq1.identifiedqualities);
-						e = null;//e is now showed to be a quality
-						q.addAll(rq1.qualities);
-					}else if (rq2.qualities.size() > 0) {
-						StructuredQualities.addAll(rq2.identifiedqualities);
-						e = null;//e is now showed to be a quality
-						q.addAll(rq2.qualities);
-					}
-					else{
-					try {
-						maybesubject = maybeSubject(root, fromid);
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
-					RelationHandler rh = new RelationHandler(root, relname,
-							toname, toid, fromname, fromid, neg, false);
-					rh.handle();
-					if(rh.getEntity()!=null)
-					e.add(rh.getEntity());
-					
-					 q = new ArrayList<QualityProposals>();
-					if(rh.getQuality()!=null) q.add(rh.getQuality());
-					if (rh.otherEQs.size() > 0)
-						this.EQStatements.addAll(rh.otherEQs);
-					}
-			
-					// Changes Ending => Hariharan Include flag below to make
-					// sure , to include EQ's only when qualities exist.
-
-					if (q.size() > 0) {
-						if (maybesubject && e != null
-								&& this.keyentities != null) {
-							entities = resolve(e, this.keyentities);
-						} else if (maybesubject && e == null
-								&& this.keyentities != null) {
-							entities = this.keyentities;
-						} else if (e != null) {
-							entities.addAll(e);
-						} else 
-							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-						//construct EQStatementProposals
-						constructureEQStatementProposals(q, entities);
-
-
+					for(Element structure: structures){
+						String sid = structure.getAttributeValue("id");
+						Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
+						if(structure.getChildren().isEmpty() && relation==null){
+							//standing-alone structure
+							String sname = Utilities.getStructureName(root, sid);
+							EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+							entities.add(ep);
+						}
 					}
 
+					if(entities.size()>1){
+						//more than one unrelated entity -- isn't it suspicious?
+					}
+					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
+					for(EntityProposals entity: entities){
+						ArrayList<EntityProposals> primaryEntities1 = new ArrayList<EntityProposals>();
+						primaryEntities1.add(entity);
+						if (entity != null && this.keyentities != null) {
+							// TODO resolve entity with keyentities
+							entities1 = resolve(primaryEntities1, this.keyentities);
+						} else if (entity == null && this.keyentities != null) {
+							entities1 = this.keyentities;
+						} else if (entity != null) {
+							entities1.add(entity);
+						}
+						ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+						QualityProposals qp = new QualityProposals();
+						Quality q = new Quality();
+						q.setString("present");
+						q.setId("PATO:0000467");
+						q.setLabel("present");
+						q.setConfidenceScore(1f);
+						qp.add(q);
+						qualities.add(qp);
+						constructureEQStatementProposals(qualities, entities1);
+						entities1.clear();
+					}
+				}catch(Exception e){
+					e.printStackTrace();
 				}
-			}
-		} catch (JDOMException e) {
-			e.printStackTrace();
-			System.out.println("");
-		}
+	}
 
+	protected void parseCharacters(Element statement, Element root) {
 		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
 		List<Element> characters;
 		try {
@@ -240,61 +213,106 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
+	}
 
-		// last, standing alone structures (without characters 
-		// and are not the subject of a relation)
-		//TODO: could it really be a quality?
+	protected void parseRelations(Element statement, Element root) {
+		// parse relations first
+		// Check whether tostruct and fromstruct is an entity or quality. 
+		// If they are quality, generate qualities using relational quality strategy and map to keyentities
+		// else use relationhandler and create entities and qualities.
+		ArrayList<String> StructuredQualities = new ArrayList<String>();
+		List<Element> relations;
+		try {
+			relations = pathRelation.selectNodes(statement);
+			for (Element relation : relations) {
+				int flag = 1; //should the relation be retained or ignored. 1 = retain
+				for (String structid : StructuredQualities){ //StructuredQualities: initially empty, populated with the ids of 'bad' structures (that are really quliaties") 
+					if ((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
+							|| (relation.getAttributeValue("to").equals(structid))) {
+						// relation.detach();
+						flag = 0; //bad relation
+						break;
+					} 
+				}
+				//process only the good relation
+				if (flag == 1) {
+					String fromid = relation.getAttributeValue("from");
+					String toid = relation.getAttributeValue("to");
+					String relname = relation.getAttributeValue("name").trim();
+					boolean neg = Boolean.valueOf(relation
+							.getAttributeValue("negation"));
+					String toname = Utilities.getStructureName(root, toid);
+					String fromname = Utilities.getStructureName(root, fromid);
+					boolean maybesubject = false;
+					List<QualityProposals> q = new ArrayList<QualityProposals>();
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
 
-		//if a real entity, construct EQs of 'entity/present' 
-		//The following case is handled by the wildcard entity search strategy 	  
-		//text::Caudal fin
-		//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
-		//text::diphycercal
-		//=> heterocercal tail: present
-		List<Element> structures;
-		try{
-			structures = pathStructure.selectNodes(statement);
-			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-			for(Element structure: structures){
-				String sid = structure.getAttributeValue("id");
-				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
-				if(structure.getChildren().isEmpty() && relation==null){
-					//standing-alone structure
-					String sname = Utilities.getStructureName(root, sid);
-					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.add(ep);
+					// Changes starting => Hariharan
+					// checking if entity is really an entity or it is a quality
+					// by passing to and from struct names to relational quality
+					// strategy.
+
+
+					Structure2Quality rq1 = new Structure2Quality(root,
+							toname, toid, keyentities);
+					rq1.handle();
+
+					Structure2Quality rq2 = new Structure2Quality(root,
+							fromname, fromid, keyentities);
+					rq2.handle();
+					if (rq1.qualities.size() > 0) {
+						StructuredQualities.addAll(rq1.identifiedqualities);
+						e = null;//e is now showed to be a quality
+						q.addAll(rq1.qualities);
+					}else if (rq2.qualities.size() > 0) {
+						StructuredQualities.addAll(rq2.identifiedqualities);
+						e = null;//e is now showed to be a quality
+						q.addAll(rq2.qualities);
+					}
+					else{
+					try {
+						maybesubject = maybeSubject(root, fromid);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+					RelationHandler rh = new RelationHandler(root, relname, relation,
+							toname, toid, fromname, fromid, neg, false);
+					rh.handle();
+					if(rh.getEntity()!=null)
+					e.add(rh.getEntity());
+
+					 q = new ArrayList<QualityProposals>();
+					if(rh.getQuality()!=null) q.add(rh.getQuality());
+					if (rh.otherEQs.size() > 0)
+						this.EQStatements.addAll(rh.otherEQs);
+					}
+
+					// Changes Ending => Hariharan Include flag below to make
+					// sure , to include EQ's only when qualities exist.
+
+					if (q.size() > 0) {
+						if (maybesubject && e != null
+								&& this.keyentities != null) {
+							entities = resolve(e, this.keyentities);
+						} else if (maybesubject && e == null
+								&& this.keyentities != null) {
+							entities = this.keyentities;
+						} else if (e != null) {
+							entities.addAll(e);
+						} else 
+							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+						//construct EQStatementProposals
+						constructureEQStatementProposals(q, entities);
+
+
+					}
+
 				}
 			}
-
-			if(entities.size()>1){
-				//more than one unrelated entity -- isn't it suspicious?
-			}
-			ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
-			for(EntityProposals entity: entities){
-				ArrayList<EntityProposals> primaryEntities1 = new ArrayList<EntityProposals>();
-				primaryEntities1.add(entity);
-				if (entity != null && this.keyentities != null) {
-					// TODO resolve entity with keyentities
-					entities1 = resolve(primaryEntities1, this.keyentities);
-				} else if (entity == null && this.keyentities != null) {
-					entities1 = this.keyentities;
-				} else if (entity != null) {
-					entities1.add(entity);
-				}
-				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
-				QualityProposals qp = new QualityProposals();
-				Quality q = new Quality();
-				q.setString("present");
-				q.setId("PATO:0000467");
-				q.setLabel("present");
-				q.setConfidenceScore(1f);
-				qp.add(q);
-				qualities.add(qp);
-				constructureEQStatementProposals(qualities, entities1);
-				entities1.clear();
-			}
-		}catch(Exception e){
+		} catch (JDOMException e) {
 			e.printStackTrace();
+			System.out.println("");
 		}
 	}
 
@@ -381,6 +399,7 @@ public class StateStatementParser extends Parser {
 			return (ArrayList<EntityProposals>) keyentities.clone();
 
 		// test subclass relations between all e proposals and each of the keyentities proposals
+		
 		ArrayList<EntityProposals> results = resolveBaseOnSubclassRelation(e, keyentities);
 		if(results==null){
 			results = resolveBaseOnPartOfRelation(e, keyentities);
@@ -400,7 +419,7 @@ public class StateStatementParser extends Parser {
 		int flag=0;
 		for(EntityProposals e: eProposals)
 		{
-		if (e.hasOntologizedWithHighConfidence()) {
+		if (e.higestScore()>=0.8f) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
@@ -425,10 +444,11 @@ public class StateStatementParser extends Parser {
 		}
 		
 		}	
-		if(flag==1)
+		if(flag==1){
 			return (ArrayList<EntityProposals>) keyentities.clone();
-		else
-		return null;
+		}else{
+			return null;
+		}
 
 	}
 
@@ -443,7 +463,7 @@ public class StateStatementParser extends Parser {
 		int flag=0;
 		for(EntityProposals e: eProposals)
 		{
-			if (e.hasOntologizedWithHighConfidence()) {
+			if (e.higestScore()>=0.8f) {
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){

@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * @author Hong Cui
  * This class holds 0 - n proposals for one EQ phrase
  */
-public class EQStatementProposals {
+public class EQStatementProposals implements Proposals {
 	ArrayList<EQStatement> proposals = new ArrayList<EQStatement>();
 	/**
 	 * 
@@ -17,8 +17,10 @@ public class EQStatementProposals {
 	public EQStatementProposals() {		
 	}
 	
-	public void add(EQStatement eq){
-		proposals.add(eq);
+	public void add(Object eq){
+		if(eq!=null){
+			proposals.add((EQStatement)eq);
+		}
 	}
 	
 	public ArrayList<EQStatement> getProposals(){
@@ -44,9 +46,14 @@ public class EQStatementProposals {
 		return proposals.get(0).getStateId();
 	}
 	
-	public String getDescription() {
+	public String getPhrase() {
 		if(proposals.size()==0) return null;
 		return proposals.get(0).getStateId();
+	}
+	
+	public float higestScore() {
+		//TODO
+		return 0;
 	}
 	/**
 	 * @param args
@@ -55,6 +62,7 @@ public class EQStatementProposals {
 		// TODO Auto-generated method stub
 
 	}
+
 
 
 

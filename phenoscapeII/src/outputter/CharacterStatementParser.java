@@ -80,12 +80,11 @@ public class CharacterStatementParser extends Parser {
 			parseForQualityClue(statement); 
 			checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
 			parseForEntities(statement, root, true);
-
-		} catch (JDOMException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * This method checks, if any of the structures in character statement are actually quality. If so, it detaches the structure along with the relations that contain the structure
 	 * @param statement
@@ -94,10 +93,10 @@ public class CharacterStatementParser extends Parser {
 	 */
 	@SuppressWarnings("unchecked")
 	private void checkandfilterqualitystructures(Element statement,Element root) throws JDOMException {
-		
+
 		String structname;
 		String structid;
-		
+
 		List<Element> structures = pathstructure.selectNodes(statement);
 		//fetch all the structures and individually check, if each are qualities
 		for(Element structure:structures)
@@ -105,20 +104,19 @@ public class CharacterStatementParser extends Parser {
 			structname = structure.getAttributeValue("name");
 			structid = structure.getAttributeValue("id");
 			Structure2Quality rq = new Structure2Quality(root,
-				structname, structid, null);
-			System.out.print("");
-		rq.handle();
-		//If any structure is a quality detach all the structures and relations that contains the structure id
-		if(rq.qualities.size()>0)
-		{
-			structure.detach();
-			List<Element> relations = pathrelation.selectNodes(statement);
-			for(Element relation:relations)
-				if((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
+					structname, structid, null);
+			rq.handle();
+			//If any structure is a quality detach all the structures and relations that contains the structure id
+			if(rq.qualities.size()>0)
+			{
+				structure.detach();
+				List<Element> relations = pathrelation.selectNodes(statement);
+				for(Element relation:relations)
+					if((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
 							|| (relation.getAttributeValue("to").equals(structid)))
-				relation.detach();
-		}
-		
+						relation.detach();
+			}
+
 		}
 	}
 
@@ -131,14 +129,14 @@ public class CharacterStatementParser extends Parser {
       <structure id="o2559" name="series" constraint="pineal" />
       <relation id="r454" name="part_of" from="o2558" to="o2559" negation="false" />
     </statement>
-    
+
     to 
-    
+
     <statement statement_type="character" character_id="states694" seg_id="0">
       <text>Shape of pineal series</text>
       <structure id="o2559" name="series" constraint="pineal" />
     </statement>
-    
+
     and grab "shape" as the qualityclue
 	 * @param statement
 	 */
@@ -163,7 +161,7 @@ public class CharacterStatementParser extends Parser {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
-		
+
 		//record qualityclue which may or may not be marked as a structure
 		String text = statement.getChildText("text").toLowerCase();
 		Pattern p = Pattern.compile(".*?\\b("+ontoutil.attributes+")\\b(.*)");
@@ -185,7 +183,7 @@ public class CharacterStatementParser extends Parser {
 		entities = ep.getEntities();
 		keyentities = ep.getEntities();
 	}
-	
+
 	public ArrayList<String> getQualityClue(){
 		return this.qualityClue;
 	}
@@ -193,7 +191,7 @@ public class CharacterStatementParser extends Parser {
 	public ArrayList<EntityProposals> getEntities(){
 		return this.entities;
 	}
-	
+
 	public ArrayList<EntityProposals> getKeyEntities(){
 		return this.keyentities;
 	}
