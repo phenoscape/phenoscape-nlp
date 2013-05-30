@@ -66,7 +66,8 @@ public class CharacterAnnotatorChunked {
 	private boolean debugNum = false;
 	private boolean printComma = false;
 	private boolean printAttach = false;
-	private boolean evaluation = true;
+	private boolean evaluation = false;
+	private boolean printOR = true;
 	private String sentsrc;
 	private boolean nosubject;
 
@@ -760,10 +761,17 @@ public class CharacterAnnotatorChunked {
 							addContent(last.getParentElement(), e);
 						}
 					}
+					ArrayList<Element> e = new ArrayList<Element>();
+					e.add(new Element("or"));
+					updateLatestElements(e);
+				}else if (ck != null && last.getName().compareTo("structure") == 0) { //scattered <patches> or absent
+					if(this.printOR) System.out.println("created whole organism for OR");
+					ArrayList<Element> structure = this.createStructureElements("(whole_organism)");
+					updateLatestElements(structure);
 				}
-				ArrayList<Element> e = new ArrayList<Element>();
+				/*ArrayList<Element> e = new ArrayList<Element>();
 				e.add(new Element("or"));
-				updateLatestElements(e);
+				updateLatestElements(e);*/
 			}
 			if (ck instanceof ChunkCharacterComparison){//{relative~{A~char}~{relation}~{B~char}}
 				ArrayList<Element> structures = processChunkCharacterComparison(ck.toString());
@@ -1362,7 +1370,7 @@ public class CharacterAnnotatorChunked {
 		ArrayList<Element> parents;
 		if (this.latestelements.size() > 0 && this.latestelements.get(this.latestelements.size() - 1).getName().compareTo("structure") == 0) {
 			parents = this.latestelements;
-		} else {
+		}else {
 			parents = this.subjects;
 		}
 		return parents;
