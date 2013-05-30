@@ -178,12 +178,12 @@ public class XML2EQ {
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}
-				elk.dispose();
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
 				e.printStackTrace();
 			}
 		}
+		elk.dispose();
 	}
 
 
