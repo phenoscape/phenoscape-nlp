@@ -79,7 +79,6 @@ private void SingleStructures() {
 		}
 		
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -166,11 +165,35 @@ private void wholeorganismrelentities() {
 		//If it is a composite entity and part of relation, then related entity is one come after part of
 		if(XML2EQ.elk.lateralsidescache.get(structname)!=null)
 		{
-			for(EntityProposals ep:this.keyentities)
+			if((this.keyentities!=null)&&(this.keyentities.size()>0))
+			{
+				for(EntityProposals ep:this.keyentities)
 			{
 				EntityProposals ep1 = new EntityProposals();
 				for(Entity e: ep.getProposals())
 				{
+					if(e instanceof SimpleEntity)
+					{
+						FormalRelation rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:0000050");
+						rel.setConfidenceScore((float)1.0);
+						
+						SimpleEntity entity = new SimpleEntity();
+						entity.setLabel("multicellular organism");
+						entity.setString("multicellular organism");
+						entity.setId("UBERON:0000468");
+						entity.setConfidenceScore((float)1.0);
+						
+						REntity relatedentity = new REntity(rel,entity);
+						
+						CompositeEntity centity = new CompositeEntity();
+						centity.addEntity((SimpleEntity)e);
+						centity.addEntity(relatedentity);
+						ep1.add(centity);
+
+					}
 					if(e instanceof CompositeEntity)
 					{
 						REntity	old_re = (REntity) ((CompositeEntity) e).getEntity(1);
@@ -190,6 +213,7 @@ private void wholeorganismrelentities() {
 				}	
 				if(ep1.getProposals().size()>0)
 				this.relatedentities.add(ep1);
+			}
 			}
 		}
 	}

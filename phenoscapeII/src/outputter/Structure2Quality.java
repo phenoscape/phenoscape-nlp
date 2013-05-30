@@ -51,7 +51,7 @@ public class Structure2Quality {
 			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 			//detach all identifiedqualities
 			for(String structid: identifiedqualities){
-				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[id='"+structid+"']");
+				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
 									//and the relations are needed for other purpose, 
 									//so don't detach relation here. 
