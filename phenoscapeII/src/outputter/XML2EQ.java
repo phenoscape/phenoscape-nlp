@@ -183,6 +183,7 @@ public class XML2EQ {
 				e.printStackTrace();
 			}
 		}
+		elk.dispose();
 	}
 
 

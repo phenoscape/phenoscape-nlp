@@ -53,7 +53,7 @@ public class CompositeEntity extends Entity {
 		for(Entity e: entities){
 			sb.append(e.toString()+" and ");
 		}
-		return sb.toString().trim();
+		return sb.toString().replaceFirst("\\s+and $", "");
 	}
 	public boolean isOntologized() {
 		return this.getPrimaryEntity().id != null;

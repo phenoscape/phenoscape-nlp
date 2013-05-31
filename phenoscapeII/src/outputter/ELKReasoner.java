@@ -42,6 +42,7 @@ public class ELKReasoner{
 	OWLDataFactory dataFactory;
 	OWLOntology ont;
 	OWLOntologyManager man;
+	private ElkReasonerFactory reasonerFactory;
 	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
 	
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
@@ -63,7 +64,7 @@ public class ELKReasoner{
 		// Load your ontology.
 		ont = man.loadOntologyFromOntologyDocument(ontologyfile);
 		// Create an ELK reasoner.
-		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
+		reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();//populates the lateral sides cache 
 	}
@@ -114,12 +115,12 @@ public class ELKReasoner{
 		// After you are done with the queries, you should remove the definitions
 		man.removeAxiom(ont, definition1);
 		man.removeAxiom(ont, definition2);
-
+		reasoner.flush();
 		// You can now add new definitions for new queries in the same way
-
+		
 		// After you are done with all queries, do not forget to free the
 		// resources occupied by the reasoner
-		reasoner.dispose();
+		//reasoner.dispose();
 		for (OWLClass owlClass : subClasses) {
 			// Just iterates over it and print the name of the class
 			for (OWLAnnotation labelannotation : owlClass
@@ -140,7 +141,8 @@ public class ELKReasoner{
 	 * @param superclassIRI
 	 * @return
 	 */
-	public  boolean isSubClassOf(String subclassIRI, String superclassIRI){
+	public boolean isSubClassOf(String subclassIRI, String superclassIRI){
+		//reasoner = reasonerFactory.createReasoner(ont);
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
 		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(superclass, false); //grab all descendant classes
@@ -175,6 +177,11 @@ public class ELKReasoner{
 		return isSubClassOf(class1IRI, newclass.getIRI().toString());
 	}
 	
+
+	public void dispose() {
+		reasoner.dispose();
+		
+	}
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
@@ -187,11 +194,15 @@ public class ELKReasoner{
 			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON:0003606"; //limb long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
-			//System.out.println(elk.isSubClassOf(class1IRI, class2IRI));	
+			String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
+			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
+			System.out.println(elk.isSubClassOf(subclass, superclass));	
+			elk.dispose();
 			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 }
