@@ -5,6 +5,7 @@ package outputter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,7 +146,8 @@ public class TermSearcher {
 	//convert to relational adjectives by appending ed|-shaped|-like|less etc.
 		if(phrasetype.compareTo("quality")==0)
 		{
-			ArrayList<String> phraseforms = (ArrayList<String>) Wordforms.toAdjective(phrase);
+			//TODO: Handle cases like divergent from => ending with a preposition
+			LinkedHashSet<String> phraseforms = Wordforms.toAdjective(phrase);
 			//Uses wordforms class to get all the adjectives of this quality
 			for(String form:phraseforms)
 			{

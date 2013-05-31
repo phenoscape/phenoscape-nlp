@@ -172,12 +172,12 @@ private void wholeorganismrelentities() {
 				EntityProposals ep1 = new EntityProposals();
 				for(Entity e: ep.getProposals())
 				{
-					if(e instanceof SimpleEntity)
+					if(e instanceof SimpleEntity)// define
 					{
 						FormalRelation rel = new FormalRelation();
-						rel.setString("part of");
-						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:0000050");
+						rel.setString("in right_side_of");
+						rel.setLabel(Dictionary.resrelationQ.get("BSPO:0000121"));
+						rel.setId("BSPO:0000121");
 						rel.setConfidenceScore((float)1.0);
 						
 						SimpleEntity entity = new SimpleEntity();
@@ -196,6 +196,7 @@ private void wholeorganismrelentities() {
 					}
 					if(e instanceof CompositeEntity)
 					{
+						//if there is a part of relation alread existing then the related entity 
 						REntity	old_re = (REntity) ((CompositeEntity) e).getEntity(1);
 						FormalRelation rel = new FormalRelation();
 						rel.setString("in right side of");
