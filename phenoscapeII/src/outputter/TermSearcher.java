@@ -151,6 +151,9 @@ public class TermSearcher {
 			//Uses wordforms class to get all the adjectives of this quality
 			for(String form:phraseforms)
 			{
+				//to match predefined quality mapping
+				if(Dictionary.qualitymapping.get(form)!=null)
+					form=Dictionary.qualitymapping.get(form);
 			strongmatch = getStrongMatch(form, phrasetype, results, 0.8f);
 			if(strongmatch != null) return strongmatch;
 			candidatematches.addAll(results);
