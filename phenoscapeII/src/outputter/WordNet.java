@@ -34,7 +34,6 @@ public class WordNet {
 				List<String> stems = stemmer.findStems(word, pos);
 				//System.out.println(stems.size());
 				for(String stem : stems) {		
-					//System.out.println(stem);
 					IIndexWord indexWord = Dictionary.wordnetdict.getIndexWord(stem, pos);
 					if(indexWord!=null) {
 						int count = 0;
@@ -63,11 +62,11 @@ public class WordNet {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub 
-		Hashtable<String,Integer> synonyms = getallsynonyms("notch");
+		Hashtable<String,Integer> synonyms = getallsynonyms("centrally");
 	Set<String> all_syn = synonyms.keySet();
 	
-	for(String temp:all_syn)
-		System.out.println(temp);
+	for(String temp:all_syn);
+		//System.out.print("");
 	
 	}
 

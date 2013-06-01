@@ -48,6 +48,9 @@ public class Dictionary {
 	public static Hashtable<String,Hashtable<String, String>> relationalqualities = new Hashtable<String,Hashtable<String, String>>();
 	public static Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
 	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
+	/** Holds direct quality interpretation	 */
+	
+	public static Hashtable<String,String> qualitymapping = new Hashtable<String,String>();
 	
 	/** special ontology classes **/
 	public static String mcorganism="UBERON:0000468"; //multi-cellular organism
@@ -122,6 +125,18 @@ public class Dictionary {
 		parentclass2label.put("PATO:0000141", "structure");
 		parentclass2label.put("PATO:0000150", "texture");
 	}
+	
+	// Direct quality interpretations
+	static
+	{
+		qualitymapping.put("ball-like", "spherical");
+		qualitymapping.put("subspehrical", "subcircular");
+		qualitymapping.put("kite-shaped", "diamond shaped");
+		qualitymapping.put("spike", "spindle-shaped");
+		qualitymapping.put("crescentic", "crescent-shaped");
+		qualitymapping.put("ossified", "osseus");
+	}
+	
 	//load spatial terms and construct spatial term pattern
 	static{
 		try{

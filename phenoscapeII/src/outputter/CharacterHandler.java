@@ -121,8 +121,7 @@ public class CharacterHandler {
 				}
 				return;
 			}else{
-				//TODO Check the same chara is present in more than one structure 
-				//else check if the subject entity is a bilateral paired organ
+				
 				
 				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara,this.ontoutil,this.keyentities);
 				re.handle();
