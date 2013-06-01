@@ -1,10 +1,17 @@
 package outputter;
 
 /**
-* perform reasoning tasks
-**/
+ * @author Hong Cui
+ * this class performs reasoning tasks
+ * 
+ * the conventions used: 
+ * 1. flush the reasoner *before* sending a query
+ * 2. remove added axioms *after* receiving the result from the reasoner.
+ **/
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,12 +24,20 @@ import org.semanticweb.owlapi.expression.ParserException;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLAnnotationObjectVisitorEx;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
+import org.semanticweb.owlapi.model.OWLClassAxiom;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
+import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -33,6 +48,8 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
+import org.semanticweb.owlapi.util.OWLClassExpressionVisitorAdapter;
+import org.semanticweb.owlapi.util.OWLObjectVisitorExAdapter;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 
@@ -44,20 +61,17 @@ public class ELKReasoner{
 	OWLOntologyManager man;
 	private ElkReasonerFactory reasonerFactory;
 	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
-	
+
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
 		this.ont = ont;
-		// Load your ontology.
-		//ont = man.loadOntology(IRI.create(ontologyIRI));
-		// Create an ELK reasoner.
 		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();
 	}
-	
+
 	public ELKReasoner(File ontologyfile) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
@@ -68,18 +82,18 @@ public class ELKReasoner{
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();//populates the lateral sides cache 
 	}
-	
+
 	/**
-	* union of (in_lateral_side_of some Thing) and (part_of some in_lateral_side_of some Thing)
-	* this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
-	**/
+	 * union of (in_lateral_side_of some Thing) and (part_of some in_lateral_side_of some Thing)
+	 * this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
+	 **/
 	void getClassesWithLateralSides(){
-	    OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
+		OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
 		OWLObjectProperty lateralside = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BSPO_0000126"));//in_lateral_side_of
 		OWLObjectProperty partof = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 		OWLClassExpression query1 = dataFactory.getOWLObjectSomeValuesFrom(lateralside, thing);
 		OWLClassExpression query2 = dataFactory.getOWLObjectSomeValuesFrom(partof, 
-			dataFactory.getOWLObjectSomeValuesFrom(lateralside, thing));
+				dataFactory.getOWLObjectSomeValuesFrom(lateralside, thing));
 
 		// Create a fresh name for the query1.
 		OWLClass newName1 = dataFactory.getOWLClass(IRI.create("temp001"));
@@ -87,7 +101,7 @@ public class ELKReasoner{
 		OWLAxiom definition1 = dataFactory.getOWLEquivalentClassesAxiom(newName1,
 				query1);
 		man.addAxiom(ont, definition1);
-		
+
 		// Create a fresh name for the query2.
 		OWLClass newName2 = dataFactory.getOWLClass(IRI.create("temp002"));
 		// Make the query equivalent to the fresh class
@@ -108,16 +122,15 @@ public class ELKReasoner{
 		// the query class by using its new name instead.
 		Set<OWLClass> subClasses = reasoner.getSubClasses(newName1, false).getFlattened();
 		subClasses.addAll(reasoner.getSubClasses(newName2, false).getFlattened());
-		
+
 		//reasoner.getSuperClasses(newName, true);
 		//reasoner.getInstances(newName, false);
 
 		// After you are done with the queries, you should remove the definitions
 		man.removeAxiom(ont, definition1);
 		man.removeAxiom(ont, definition2);
-		reasoner.flush();
 		// You can now add new definitions for new queries in the same way
-		
+
 		// After you are done with all queries, do not forget to free the
 		// resources occupied by the reasoner
 		//reasoner.dispose();
@@ -125,16 +138,16 @@ public class ELKReasoner{
 			// Just iterates over it and print the name of the class
 			for (OWLAnnotation labelannotation : owlClass
 					.getAnnotations(ont, dataFactory.getRDFSLabel())) {
-					if (labelannotation.getValue() instanceof OWLLiteral) {
-						OWLLiteral val = (OWLLiteral) labelannotation.getValue();
-						lateralsidescache.put(val.getLiteral(), owlClass.getIRI());
-						System.out.println(val.getLiteral());
-					}
+				if (labelannotation.getValue() instanceof OWLLiteral) {
+					OWLLiteral val = (OWLLiteral) labelannotation.getValue();
+					lateralsidescache.put(val.getLiteral(), owlClass.getIRI());
+					System.out.println(val.getLiteral());
+				}
 			}
 		}
 		//return subClasses;
 	}
-	
+
 	/**
 	 * is subclassIRI is a subclass of superclassIRI?
 	 * @param subclassIRI
@@ -142,11 +155,9 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isSubClassOf(String subclassIRI, String superclassIRI){
-		//reasoner = reasonerFactory.createReasoner(ont);
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
 		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(superclass, false); //grab all descendant classes
-		reasoner.dispose();
 		Iterator<OWLClass> it = subClasses.getFlattened().iterator();
 		while(it.hasNext()){
 			OWLClass aclass = it.next();
@@ -157,16 +168,16 @@ public class ELKReasoner{
 		}
 		return false;
 	}	
-	
+
 	/**
-	 * is class1 a subclass of partofclass2
+	 * is class1 a part of class2
 	 * @param class1IRI
-	 * @param class2IRI
+	 * @param whole
 	 * @return
 	 */
-	public boolean isPartOf(String class1IRI, String class2IRI) {
+	public boolean isPartOf(String part, String whole) {
 		OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
-		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(class2IRI)));
+		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
 		// Create a fresh name
 		OWLClass newclass = dataFactory.getOWLClass(IRI.create("temp001"));
 		//make newclass equivalent of partofclass2 
@@ -174,31 +185,155 @@ public class ELKReasoner{
 				partofclass2);
 		man.addAxiom(ont, axiom);
 		reasoner.flush();
-		return isSubClassOf(class1IRI, newclass.getIRI().toString());
+		boolean result =  isSubClassOf(part, newclass.getIRI().toString());
+		man.removeAxiom(ont, axiom);
+		return result;
 	}
-	
+
+	/**
+	 * this method was largely taken from examples published on OWL API website.
+	 * but it does not gather all the restrictions ('inherited anonymous classes').
+	 * @param classIRI
+	 * @param partIRI
+	 * @return
+	 */
+	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
+
+		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
+		//OWLClass subclaz= dataFactory.getOWLClass(IRI.create(subclassIRI)); //'caudal fin' 4000164
+
+		HashSet<OWLClass> classeswithpart = new HashSet<OWLClass>();
+		/*made no difference
+		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+		reasoner.precomputeInferences(InferenceType.OBJECT_PROPERTY_ASSERTIONS);
+		reasoner.precomputeInferences(InferenceType.OBJECT_PROPERTY_HIERARCHY);*/
+
+		//find all classes that have 'part' 
+
+		RestrictionVisitor restrictionVisitor = new RestrictionVisitor(
+				Collections.singleton(ont));
+		for (OWLSubClassOfAxiom ax : ont
+				.getSubClassAxiomsForSubClass(part)) {
+			OWLClassExpression superCls = ax.getSuperClass();
+			superCls.accept(restrictionVisitor);
+		}
+		System.out.println("Restricted properties for " + part + ": "
+				+ restrictionVisitor.getRestrictedProperties().size());
+		for (OWLObjectSomeValuesFrom prop : restrictionVisitor
+				.getRestrictedProperties()) {
+			if(prop.getProperty().toString().contains("http://purl.obolibrary.org/obo/BFO_0000050")){
+				classeswithpart.add((OWLClass) prop.getFiller());
+			}
+		}
+
+		//loop though classeswithpart
+		for(OWLClass classwithpart: classeswithpart){
+			if(isSubClassOf(subclassIRI, classwithpart.getIRI().toString())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+
+	/**
+	 * 		
+		is class a subclass of the things that has part part
+		for example, could 'caudal fin' has_part 'epichordal lepidotrichium'?
+	 * @param classIRI
+	 * @param partIRI
+	 * @return
+	 * this won't work for ELK 0.3, it does not support inverseObjectProperties. 
+	 */
+	/*public boolean isSubclassOfWithPart(String classIRI, String partIRI){	
+		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
+		//OWLClass claz= dataFactory.getOWLClass(IRI.create(classIRI)); //'caudal fin' 4000164
+		OWLObjectProperty haspartp = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000051")); //has_part
+		OWLClassExpression haspart = dataFactory.getOWLObjectSomeValuesFrom(haspartp, part);
+
+		OWLClass haspartc = dataFactory.getOWLClass(IRI.create("temp001"));
+		OWLAxiom ax = dataFactory.getOWLEquivalentClassesAxiom(haspartc, haspart);
+		man.addAxiom(ont, ax);
+		reasoner.flush();
+		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+
+		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(haspartc, false); //grab all descendant classes
+		Iterator<OWLClass> it = subClasses.getFlattened().iterator();
+		while(it.hasNext()){
+			OWLClass aclass = it.next();
+			System.out.println(aclass.getIRI().toString());
+			if(aclass.getIRI().toString().compareTo(classIRI)==0){
+				man.removeAxiom(ont, ax);
+				return true;
+			}
+		}	
+		man.removeAxiom(ont, ax);
+		return false;
+	}*/
 
 	public void dispose() {
 		reasoner.dispose();
-		
+
 	}
+
+	/** Visits existential restrictions and collects the properties which are
+	 * restricted */
+	private static class RestrictionVisitor extends OWLClassExpressionVisitorAdapter {
+		private Set<OWLClass> processedClasses;
+		private Set<OWLObjectSomeValuesFrom> restrictedProperties;
+		private Set<OWLOntology> onts;
+
+		public RestrictionVisitor(Set<OWLOntology> onts) {
+			restrictedProperties = new HashSet<OWLObjectSomeValuesFrom>();
+			processedClasses = new HashSet<OWLClass>();
+			this.onts = onts;
+		}
+
+		public Set<OWLObjectSomeValuesFrom> getRestrictedProperties() {
+			return restrictedProperties;
+		}
+
+		@Override
+		public void visit(OWLClass desc) {
+			if (!processedClasses.contains(desc)) {
+				// If we are processing inherited restrictions then we
+				// recursively visit named supers. Note that we need to keep
+				// track of the classes that we have processed so that we don't
+				// get caught out by cycles in the taxonomy
+				processedClasses.add(desc);
+				for (OWLOntology ont : onts) {
+					for (OWLSubClassOfAxiom ax : ont.getSubClassAxiomsForSubClass(desc)) {
+						OWLClassExpression superCls = ax.getSuperClass();
+						if(superCls instanceof OWLObjectSomeValuesFrom){
+							restrictedProperties.add((OWLObjectSomeValuesFrom)superCls);
+						}
+						superCls.accept(this);
+					}
+				}
+			}
+		}
+	}
+
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
-			
+
 			/*String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
 			String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0003098";//optic stalk is not an organ
 			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
 			System.out.println(elk.isSubClassOf(subclassIRI, superclassIRI));		
-			*/
+			 */
 			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON:0003606"; //limb long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
-			String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
+			/*String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
 			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
-			System.out.println(elk.isSubClassOf(subclass, superclass));	
+			System.out.println(elk.isSubClassOf(subclass, superclass));	*/
+
+			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_4000164", "http://purl.obolibrary.org/obo/UBERON_4200062"));
 			elk.dispose();
-			
+
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,3 +341,5 @@ public class ELKReasoner{
 	}
 
 }
+
+

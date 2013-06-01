@@ -45,7 +45,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 
-		//no entity locator: direct match, for examples: "bone of humerus", "posterior dorsal fin"
+		//no entity locator: try direct match, for examples: "bone of humerus", "posterior dorsal fin"
 		if(elocatorphrase==null || elocatorphrase.length()==0){
 			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
@@ -55,8 +55,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				return entities;
 			}
 		}
-		if((entityphrase.split("\\s").length>=2)&&(elocatorphrase==""))
-		{
+		if((entityphrase.split("\\s").length>=2)&&(elocatorphrase=="")){
 			//try out the variations
 			SynRingVariation entityvariation = new SynRingVariation(entityphrase);
 			SynRingVariation elocatorvariation = null;

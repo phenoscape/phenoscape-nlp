@@ -240,16 +240,13 @@ public class TermSearcher {
 		}
 		return null;
 	}
-/**
- * 
- * Searches for all combination of spatial and headnoun in owl entity and returns matching entities
- * 
- * 
- * 	
- */
-	
-	
-	
+
+	/**
+	 * Searches for all combination of spatial and headnoun in owl entity and returns matching entities
+	 * @param spatial
+	 * @param headnoun
+	 * @return
+	 */
 	public static ArrayList<FormalConcept> entityvariationtermsearch(String spatial, String headnoun)
 	{
 		ArrayList<FormalConcept> matches = new ArrayList<FormalConcept>();
@@ -289,21 +286,33 @@ public class TermSearcher {
 			result = new ArrayList<FormalConcept>();
 			for(Hashtable<String, String> item: searchresult){
 				if(phrasetype.compareTo("entity")==0){
-					SimpleEntity entity = new SimpleEntity();
-					entity.setString(item.get("term"));
-					entity.setLabel(item.get("label"));
-					entity.setId(item.get("id"));
-					entity.setClassIRI(item.get("iri"));
-					entity.setConfidenceScore((float)1);
-					result.add(entity);
+					String str = item.get("term");
+					String[] labels = item.get("label").split(";");
+					String[] ids = item.get("id").split(";");
+					String[] iris = item.get("iri").split(";");
+					for(int i = 0; i < labels.length; i++){
+						SimpleEntity entity = new SimpleEntity();
+						entity.setString(str);
+						entity.setLabel(labels[i]);
+						entity.setId(ids[i]);
+						entity.setClassIRI(iris[i]);
+						entity.setConfidenceScore((float)0.5);
+						result.add(entity);
+					}
 				}else{
-					Quality quality = new Quality();
-					quality.setString(item.get("term"));
-					quality.setLabel(item.get("label"));
-					quality.setId(item.get("id"));
-					quality.setClassIRI(item.get("iri"));
-					quality.setConfidenceScore((float)1);
-					result.add(quality);
+					String str = item.get("term");
+					String[] labels = item.get("label").split(";");
+					String[] ids = item.get("id").split(";");
+					String[] iris = item.get("iri").split(";");
+					for(int i = 0; i < labels.length; i++){
+						Quality quality = new Quality();
+						quality.setString(str);
+						quality.setLabel(labels[i]);
+						quality.setId(ids[i]);
+						quality.setClassIRI(iris[i]);
+						quality.setConfidenceScore((float)0.5);
+						result.add(quality);
+					}
 				}		
 			}			
 			if(phrasetype.compareTo("entity")==0) TermSearcher.regexpEntityIDCache.put(phrase, result);
@@ -375,7 +384,8 @@ public class TermSearcher {
 	public static void main(String[] args) {	
 
 		TermSearcher ts = new TermSearcher();
-		FormalConcept result = ts.searchTerm("ornament", "quality");
+		//FormalConcept result = ts.searchTerm("ornament", "quality");
+		ArrayList<FormalConcept> result =TermSearcher.regexpSearchTerm("epichordal\\b.*", "entity");
 		if(result!=null){
 			System.out.println(result.toString());
 		}else{
