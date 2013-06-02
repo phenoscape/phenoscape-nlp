@@ -68,6 +68,7 @@ public class ELKReasoner{
 		this.ont = ont;
 		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
+		
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();
 	}

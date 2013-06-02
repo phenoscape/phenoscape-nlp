@@ -60,6 +60,14 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//System.out.println("search entity: "+entityphrase);
 		//TODO create and maintain a cache for entity search?
 	
+		//each of entityphrase and elocatorphrase may be multiple names separated by ","
+		if(entityphrase.indexOf(",")>0){
+			String temp = entityphrase.indexOf(",")>0 ? entityphrase.substring(0, entityphrase.indexOf(",")).trim() : entityphrase; // the first seg
+			String ltemp = entityphrase.indexOf(",")>0 ? entityphrase.substring(entityphrase.indexOf(",")+1).trim() : "";
+			if(elocatorphrase.length()==0) elocatorphrase = ltemp;
+			else elocatorphrase = ltemp+","+elocatorphrase; //all remaining segs, separate by ","
+			entityphrase = temp;
+		}
 		
 		entityphrase = Utilities.transform(entityphrase);
 		elocatorphrase = Utilities.transform(elocatorphrase);

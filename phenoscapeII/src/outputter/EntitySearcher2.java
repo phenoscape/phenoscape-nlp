@@ -77,6 +77,7 @@ public class EntitySearcher2 extends EntitySearcher {
 				return entities;
 			}
 		}
+		//entity not match, keep searching
 		return new EntitySearcher3().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 

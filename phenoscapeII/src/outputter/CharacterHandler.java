@@ -65,7 +65,7 @@ public class CharacterHandler {
 		String structureid = structure.getAttributeValue("id");
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
-			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']");
+			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");	
 
 			
@@ -250,7 +250,7 @@ public class CharacterHandler {
 				for(String conid: conids){
 					String qualitymodifier = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
-					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']");
+					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']", 0);
 					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
 					if(result!=null) entities.add(result);
 				}

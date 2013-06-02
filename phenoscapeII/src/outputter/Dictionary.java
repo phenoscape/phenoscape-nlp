@@ -23,6 +23,7 @@ public class Dictionary {
 	//spatial terms form BSPO
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
+	public static String opening = "foramina|foramen|foramens|perforation|orifice|opening"; 
 	public static String binaryTvalues = "present|true|yes|usually";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely";
 	public static String positionprep = "of|part_of|in|on|between";

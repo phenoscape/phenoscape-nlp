@@ -64,8 +64,8 @@ public class EntitySearcher1 extends EntitySearcher {
 			}
 
 			if(elocatorvariation == null){ //try entityvariation alone
-				String spatial = entityvariation.getLeadSpaticalTermVariation();
-				String head = entityvariation.getHeadNounVariation();
+				String spatial = entityvariation.getLeadSpaticalTermVariation(); //TODO
+				String head = entityvariation.getHeadNounVariation(); //TODO remove duplicates
 
 				// the below code passes all the spatial and entity variations to termsearcher and get all the matching entities.
 				ArrayList<FormalConcept> matches = TermSearcher.entityvariationtermsearch(spatial,head);

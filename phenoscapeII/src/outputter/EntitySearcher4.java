@@ -76,20 +76,20 @@ public class EntitySearcher4 extends EntitySearcher {
 						entities.setPhrase(sentity.getString()); //use the primary entity's phrase
 						entities.add(centity);
 						return entities;
-					}else{//sentity1 be the entity locator
+					}else{//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 						//relation & entity locator: 
 						FormalRelation rel = new FormalRelation();
 						rel.setString("part of");
 						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
 						rel.setId("BFO:000050");
 						rel.setConfidenceScore((float)1.0);
-						REntity rentity = new REntity(rel, sentity1);
+						REntity rentity = new REntity(rel, sentity);
 						//composite entity = entity locator for sentity
 						CompositeEntity centity = new CompositeEntity(); 
-						centity.addEntity(sentity); 
+						centity.addEntity(sentity1); 
 						centity.addEntity(rentity);	
 						EntityProposals entities = new EntityProposals();
-						entities.setPhrase(sentity.getString());
+						entities.setPhrase(sentity1.getString());
 						entities.add(centity);
 						return entities;
 					}	
