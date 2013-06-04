@@ -45,7 +45,7 @@ static {
 		// TODO Auto-generated constructor stub
 		this.root = root;
 		this.structure = Structure;
-		relatedentities= new ArrayList<EntityProposals>();
+		this.relatedentities= new ArrayList<EntityProposals>();
 		this.keyentities=keyentities;
 		this.primaryentities = new ArrayList<EntityProposals>();
 	}
