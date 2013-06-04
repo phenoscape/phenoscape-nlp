@@ -63,6 +63,14 @@ public class Dictionary {
 	//private ArrayList<Hashtable<String, String>>  alladjectiveorgans = new ArrayList<Hashtable<String, String>> (); //one hashtable from an ontology
 	public static IDictionary wordnetdict = new edu.mit.jwi.Dictionary(new File(ApplicationUtilities.getProperty("wordnet.dictionary")));
 	
+	//to hold complement of relations
+	public static Hashtable<String,String> complementRelations = new Hashtable<String,String>();
+
+	static
+	{
+		complementRelations.put("in contact with", "separated from");
+		complementRelations.put("fused with", "unfused from");
+	}
 	//special cases for singulars and plurals
 	static{
 		//check cache

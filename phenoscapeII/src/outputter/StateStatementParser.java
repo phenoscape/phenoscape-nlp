@@ -179,7 +179,7 @@ public class StateStatementParser extends Parser {
 				rq2.handle();
 				//if (rq2 != null) {
 				if(rq2.qualities.size()>0){
-					entity = null;
+					entity = rq2.primaryentities;
 					qualities = rq2.qualities;
 				} else {
 					try {
@@ -263,11 +263,11 @@ public class StateStatementParser extends Parser {
 					rq2.handle();
 					if (rq1.qualities.size() > 0) {
 						StructuredQualities.addAll(rq1.identifiedqualities);
-						e = null;//e is now showed to be a quality
+						e = rq1.primaryentities;//e is now showed to be a quality
 						q.addAll(rq1.qualities);
 					}else if (rq2.qualities.size() > 0) {
 						StructuredQualities.addAll(rq2.identifiedqualities);
-						e = null;//e is now showed to be a quality
+						e = rq2.primaryentities;//e is now showed to be a quality
 						q.addAll(rq2.qualities);
 					}
 					else{

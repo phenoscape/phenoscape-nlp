@@ -165,7 +165,6 @@ public class XML2EQ {
 					bcsp.parse(characterstatement, root);
 					allEQs = bcsp.getEQStatements();
 				}else{
-					int x = 0;
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();
@@ -180,6 +179,7 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
+				System.out.println("");
 				e.printStackTrace();
 			}
 		}

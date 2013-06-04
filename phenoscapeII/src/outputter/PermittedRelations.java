@@ -15,6 +15,7 @@ public class PermittedRelations {
 		//TODO: handle negated relations
 		QualityProposals qproposals = new QualityProposals();
 		Quality relationalquality = new Quality();
+		String relationcopy = relation;
 		relation = Utilities.removeprepositions(relation);
 		/*
 		 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
@@ -37,7 +38,7 @@ public class PermittedRelations {
 		{
 			relationalquality.setString(relation);
 			relationalquality.setId(retrieve_id(relation));
-			relationalquality.setLabel(relation);
+			relationalquality.setLabel(retrieve_label(relation));
 			relationalquality.setConfidenceScore((float)1.0);
 			qproposals.add(relationalquality);
 			return qproposals;
@@ -98,6 +99,18 @@ public class PermittedRelations {
 		{
 			//code to choose the best from the list of relational qualities
 			return all_possible_relations.get(key);
+		}
+		return null;
+	}
+	
+	public static String retrieve_label(String relation)
+	{
+		Hashtable<String,String> all_possible_relations = Dictionary.relationalqualities.get(relation);
+		Set<String> Keyset= all_possible_relations.keySet();
+		for(String key:Keyset)
+		{
+			//code to choose the best from the list of relational qualities
+			return key;
 		}
 		return null;
 	}
