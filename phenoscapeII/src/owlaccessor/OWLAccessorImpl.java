@@ -681,6 +681,24 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 	
 	/**
+	 * 		is class a subclass of the things that has part part
+		for example, could 'caudal fin' has_part 'epichordal lepidotrichium'?
+	 * @param classIRI
+	 * @param partIRI
+	 * @return
+	 */
+	public boolean isSubclassOfWithPart(String classIRI, String partIRI){	
+		
+		OWLClass part= df.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
+		OWLClass claz= df.getOWLClass(IRI.create(classIRI)); //'caudal fin' 4000164
+		//find all classes that have 'part' 
+		Set<OWLAnnotationAssertionAxiom> properties = part.getAnnotationAssertionAxioms(this.rootOnt);
+		for(OWLAnnotationAssertionAxiom p: properties){
+			p.toString();
+		}
+		return false;
+	}
+	/**
 	 * Checks if is relational slim.
 	 *
 	 * @param c the c

@@ -8,15 +8,14 @@ import java.util.ArrayList;
 import org.jdom.Element;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public abstract class Parser {
 	
-	//ArrayList<String> ontologyIRIs;
-	ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+	ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>(); //all entities parsed
 	String qualityClue;
-	ArrayList<EntityProposals> subjectEntities = new ArrayList<EntityProposals>(); 
+	ArrayList<EntityProposals> subjectEntities = new ArrayList<EntityProposals>(); //entities that are used as a subject
 	TermOutputerUtilities ontoutil;
 	
 	public Parser(TermOutputerUtilities ontoutil){

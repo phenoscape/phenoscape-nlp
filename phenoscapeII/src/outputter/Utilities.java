@@ -80,13 +80,15 @@ public class Utilities {
 	 * trace part_of relations of structid to get all its parent structures,
 	 * separated by , in order
 	 * 
+	 * TODO limit to 3 commas
+	 * TODO treat "in|on" as part_of? probably not
 	 * @param root
 	 * @param xpath
 	 *            : "//relation[@name='part_of'][@from='"+structid+"']"
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static String getStructureChain(Element root, String xpath) {
+	public static String getStructureChain(Element root, String xpath, int count) {
 		String path = "";
 		try{
 			List<Element> relations = XPath.selectNodes(root, xpath);			
@@ -100,9 +102,9 @@ public class Utilities {
 						xpath += "//relation[@name='part_of'][@from='" + id + "']|";
 				}
 			}
-			if (xpath.length() > 0) {
+			if (xpath.length() > 0 && count < 3) {
 				xpath = xpath.replaceFirst("\\|$", "");
-				path += getStructureChain(root, xpath);
+				path += getStructureChain(root, xpath, count++);
 			} else {
 				return path.replaceFirst(",$", "");
 			}
@@ -122,12 +124,36 @@ public class Utilities {
 
 		} else {
 			quality = (chara.getAttribute("modifier") != null && chara.getAttributeValue("modifier").matches(".*?\\bnot\\b.*") ? "not" : "") + " "
-					+ chara.getAttributeValue("value") + " " + (chara.getAttribute("unit") != null ? chara.getAttributeValue("unit") : "") + "["
-					+ (chara.getAttribute("modifier") != null ? chara.getAttributeValue("modifier").replaceAll("\\bnot\\b;?", "") : "") + "]";
+					+ chara.getAttributeValue("value") + " " + (chara.getAttribute("unit") != null ? chara.getAttributeValue("unit") : "") /*+ "["
+					+ (chara.getAttribute("modifier") != null ? chara.getAttributeValue("modifier").replaceAll("\\bnot\\b;?", "") : "") + "]"*/;
+			//not to include other modifiers in quality string
 
 		}
 		quality = quality.replaceAll("\\[\\]", "").replaceAll("\\s+", " ").trim();
 		return quality;
+	}
+	
+	/**
+	 * spatial terms in adverb form: e.g. laterally
+	 * @param chara
+	 * @return 'laterally;ventrally'
+	 */
+	public static String getSpatialModifierFromCharacter(Element chara) {
+		String spatials = "";
+		String modifier = chara.getAttribute("modifier") != null ? chara.getAttributeValue("modifier").replaceAll("\\bnot\\b;?", "") : null;
+		if(modifier!=null){
+			String[] modifiers = modifier.split("\\s*;\\s*");			
+			Pattern spatial = Pattern.compile(".*?((?:(?:"+Dictionary.spatialtermptn+")ly ?)+)(.*)");
+			for(String mod: modifiers){
+				Matcher m = spatial.matcher(mod);
+				while(m.matches()){
+					spatials += m.group(1).trim()+";";
+					mod = m.group(2);
+					m = spatial.matcher(mod);
+				}
+			}
+		}
+		return spatials.replaceFirst(";$", "").trim();
 	}
 
 	/**

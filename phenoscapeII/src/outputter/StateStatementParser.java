@@ -18,7 +18,7 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import owlaccessor.OWLAccessorImpl;
 
 /**
- * @author updates
+ * @author Hong Cui
  * 
  *         call this parser with entities parsed from CharacterStatement and
  *         optionally qualityClue. parse out EQ statements from a state
@@ -32,7 +32,8 @@ public class StateStatementParser extends Parser {
 	String stateid;
 	String text;
 	ArrayList<String> qualityclue;
-	ArrayList<EntityProposals> keyentities;
+	ArrayList<EntityProposals> keyentities; //use this when changes made here are used somewhere else.
+	//ArrayList<EntityProposals> keyentitiesclone; //use this for local operation
 
 	static XPath pathText2;
 	static XPath pathRelation;
@@ -61,6 +62,20 @@ public class StateStatementParser extends Parser {
 		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;
+	}
+
+	private ArrayList<EntityProposals> clone(ArrayList<EntityProposals> keyentities) {
+		if(keyentities == null) return null;
+		ArrayList<EntityProposals> keyentitiesclone = new ArrayList<EntityProposals>();
+		for(int i = 0; i < keyentities.size(); i++){
+			EntityProposals ep = keyentities.get(i);
+			EntityProposals epclone = new EntityProposals();
+			for(int j = 0; j < ep.proposals.size(); j++){
+				epclone.add(ep.proposals.get(j));
+			}
+			keyentitiesclone.add(epclone);
+		}
+		return keyentitiesclone;
 	}
 
 	/*
@@ -98,6 +113,7 @@ public class StateStatementParser extends Parser {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void parseStandaloneStructures(Element statement, Element root) {
 		// last, standing alone structures (without characters 
 		// and are not the subject of a relation)
@@ -111,6 +127,7 @@ public class StateStatementParser extends Parser {
 		//=> heterocercal tail: present
 		List<Element> structures;
 		try{
+			//identify standalone local entities
 			structures = pathStructure.selectNodes(statement);
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			for(Element structure: structures){
@@ -127,15 +144,19 @@ public class StateStatementParser extends Parser {
 			if(entities.size()>1){
 				//more than one unrelated entity -- isn't it suspicious?
 			}
+			
+			//resolve between local entities and keyentities extracted from character statement
+			//construct EQs using resolved entities
 			ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
 			for(EntityProposals entity: entities){
 				ArrayList<EntityProposals> primaryEntities1 = new ArrayList<EntityProposals>();
+				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 				primaryEntities1.add(entity);
 				if (entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
-					entities1 = resolve(primaryEntities1, this.keyentities);
+					entities1 = resolve(primaryEntities1, keyentitiesclone);
 				} else if (entity == null && this.keyentities != null) {
-					entities1 = this.keyentities;
+					entities1 = keyentitiesclone; //so this.keyentities won't be changed accidentally
 				} else if (entity != null) {
 					entities1.add(entity);
 				}
@@ -172,6 +193,7 @@ public class StateStatementParser extends Parser {
 				String structname = character.getParentElement()
 						.getAttributeValue("name" + "");
 				boolean maybesubject = false;
+				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
 						structname, structid, "", "", this.keyentities);*/
 				Structure2Quality rq2 = new Structure2Quality(root,
@@ -184,7 +206,7 @@ public class StateStatementParser extends Parser {
 				} else {
 					try {
 						maybesubject = maybeSubject(root, structid);
-						entities.clear();
+						//entities.clear();
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -192,34 +214,41 @@ public class StateStatementParser extends Parser {
 					CharacterHandler ch = new CharacterHandler(root, character,
 							ontoutil, qualityclue,this.keyentities); // may contain relational
 					// quality
-
 					ch.handle();
 					qualities = ch.getQualities();
-					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					entity = ch.getPrimaryentities();
 				}
+				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 				if (maybesubject && entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
-					entities = resolve(entity, this.keyentities);
+					entities = resolve(entity,keyentitiesclone);
 				} else if (maybesubject && entity == null
 						&& this.keyentities != null) {
-					entities = this.keyentities;
+					entities = keyentitiesclone;
 				} else if (entity != null) {
 					entities.addAll(entity);
-				} else 
-					entities = this.keyentities; // what if it is a subject, but not an entity at all? - Hariharan(So added this code)
-				constructureEQStatementProposals(qualities, entities);
+				} else{ 
+					entities = keyentitiesclone; 
+					// what if it is a subject, but not an entity at all? - Hariharan(So added this code)
+					//hong: isn't this already handled above?
+				}
+					constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * parse relations first
+		Check whether tostruct and fromstruct is an entity or quality. 
+		If they are quality, generate qualities using relational quality strategy and map to keyentities
+		else use relationhandler and create entities and qualities.
+	 * @param statement
+	 * @param root
+	 */
 
 	protected void parseRelations(Element statement, Element root) {
-		// parse relations first
-		// Check whether tostruct and fromstruct is an entity or quality. 
-		// If they are quality, generate qualities using relational quality strategy and map to keyentities
-		// else use relationhandler and create entities and qualities.
 		ArrayList<String> StructuredQualities = new ArrayList<String>();
 		List<Element> relations;
 		try {
@@ -292,20 +321,21 @@ public class StateStatementParser extends Parser {
 					// sure , to include EQ's only when qualities exist.
 
 					if (q.size() > 0) {
+						ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 						if (maybesubject && e != null
 								&& this.keyentities != null) {
-							entities = resolve(e, this.keyentities);
+							entities = resolve(e, keyentitiesclone);
 						} else if (maybesubject && e == null
 								&& this.keyentities != null) {
-							entities = this.keyentities;
+							entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
 						} else if (e != null) {
 							entities.addAll(e);
-						} else 
-							entities = this.keyentities; // what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-						//construct EQStatementProposals
+						} else {
+							entities = keyentitiesclone; 
+							// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+							//hong: hasn't this case been handled already above?
+						}
 						constructureEQStatementProposals(q, entities);
-
-
 					}
 
 				}
@@ -369,7 +399,7 @@ public class StateStatementParser extends Parser {
 			ArrayList<EntityProposals> keyentities2) {
 
 		// TODO integrate entity with keyentities
-		return (ArrayList<EntityProposals>) keyentities2.clone();
+		return (ArrayList<EntityProposals>) clone(keyentities2);
 	}
 
 	//TODO: resolve better between proposals
@@ -383,7 +413,7 @@ public class StateStatementParser extends Parser {
 
 		//find a place for the spatial terms
 		if (containsSpatial(e)) {
-			entities = integrateSpatial(e, this.keyentities);
+			entities = integrateSpatial(e, keyentities);
 			// TODO integrate entity with keyentities
 		}
 
@@ -396,7 +426,7 @@ public class StateStatementParser extends Parser {
 				entityitr.remove();
 		}
 		if(e.size()==0)
-			return (ArrayList<EntityProposals>) keyentities.clone();
+			return keyentities;
 
 		// test subclass relations between all e proposals and each of the keyentities proposals
 
@@ -408,7 +438,7 @@ public class StateStatementParser extends Parser {
 		if(results!=null)
 			return results;
 
-		return (ArrayList<EntityProposals>) keyentities.clone();
+		return (ArrayList<EntityProposals>) keyentities;
 	}
 
 
@@ -419,7 +449,7 @@ public class StateStatementParser extends Parser {
 		int flag=0;
 		for(EntityProposals e: eProposals)
 		{
-		if (e.higestScore()>=0.8f) {
+		//if (e.higestScore()>=0.8f) {  //this condition is not need as part_of relation is a strong evidence.
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
@@ -428,8 +458,9 @@ public class StateStatementParser extends Parser {
 							if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
 									key.getPrimaryEntityOWLClassIRI())) {
 								// key is entity locator of e
+								entity.setConfidenceScore(1f);
 								CompositeEntity ce = new CompositeEntity();
-								ce.addEntity(entity);
+								ce.addEntity(entity);								
 								FormalRelation rel = new FormalRelation();
 								rel.setString("part of");
 								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
@@ -444,10 +475,10 @@ public class StateStatementParser extends Parser {
 					}
 				}
 			}
-			}
+			//}
 		}	
 		if(flag==1){
-			return (ArrayList<EntityProposals>) keyentities.clone();
+			return keyentities;
 		}else{
 			return null;
 		}
@@ -465,7 +496,7 @@ public class StateStatementParser extends Parser {
 		int flag=0;
 		for(EntityProposals e: eProposals)
 		{
-			if (e.higestScore()>=0.8f) {
+			//if (e.higestScore()>=0.8f) { //this condition is not need as subclass relation is a strong evidence.
 			for (Entity entity: e.getProposals()){
 				for (EntityProposals keye : keyentities) {
 					for(Entity key: keye.getProposals()){
@@ -476,6 +507,7 @@ public class StateStatementParser extends Parser {
 							// reset key to the subclass
 							//System.out.println("");
 							keye.reset();
+							entity.setConfidenceScore(1f);
 							keye.add(entity);
 							keye.setPhrase(entity.getString());
 							/*CompositeEntity ce = new CompositeEntity();
@@ -494,10 +526,10 @@ public class StateStatementParser extends Parser {
 					}
 				}
 			}
-			}
+			//}
 		}	
 		if(flag==1)
-			return (ArrayList<EntityProposals>) keyentities.clone();
+			return keyentities;
 		else
 			return null;
 	}

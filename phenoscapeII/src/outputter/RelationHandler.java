@@ -61,8 +61,8 @@ public class RelationHandler {
 	private void parseEntity(){
 		if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
-			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, "", parents,"");	
+			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']", 0);
+			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, parents, fromstructname,"part_of");	//corrected by Hong
 			
 			//could fromstruct be a quality?
 		}		
@@ -77,8 +77,8 @@ public class RelationHandler {
 		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation);
 		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']" +
 																			 "|//relation[@name='in'][@from='" + tostructid + "']" +
-																			 "|//relation[@name='on'][@from='" + tostructid + "']");
-		tostructname = tostructname.replaceFirst(",$", "");
+																			 "|//relation[@name='on'][@from='" + tostructid + "']", 0); //in/on = part_of?
+		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			EntityProposals relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 			RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
