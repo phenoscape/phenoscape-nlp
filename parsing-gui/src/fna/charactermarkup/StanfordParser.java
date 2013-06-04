@@ -182,7 +182,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				//Swartz 2012.xml_states409_state411.txt-0
 				//Swartz 2012.xml_states635.txt-0
 				//Swartz 2012.xml_states640.txt-0
-				if(src.compareTo("Swartz 2012.xml_states640.txt-0")!=0) continue;
+				//if(src.compareTo("Swartz 2012.xml_states640.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);

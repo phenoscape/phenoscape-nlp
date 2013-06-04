@@ -66,14 +66,7 @@ public class ProcessListener {
 		});
 	}
 	
-	public void clear() {
-		display.syncExec(new Runnable() {
-			public void run() {
-				table.removeAll();
-			}
-		});
-		
-	}
+	
 	
 	public void setProgressBarVisible(final boolean visible) {
 		display.syncExec(new Runnable() {

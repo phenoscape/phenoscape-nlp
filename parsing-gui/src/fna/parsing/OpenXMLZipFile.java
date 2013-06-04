@@ -68,66 +68,7 @@ public class OpenXMLZipFile
 		}
     }
 	
-	public static void UnZipFile(String zipFileName, String ToExtractFile)
-	{
-
-		String inputFileName = zipFileName;   // "C:\\PPT.zip";
-		String desFileName   = ToExtractFile;   // "C:\\TEST\\";
-
-		try
-		{
-
-			File sourceZipFile = new File(inputFileName);
-			File destDirectory = new File(desFileName);
-
-			//Open the ZIP file for reading
-			ZipFile zipFile = new ZipFile(sourceZipFile,ZipFile.OPEN_READ);
-
-			//Get the entries
-			Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zipFile.entries();
-
-
-			while(en.hasMoreElements())
-			{
-				ZipEntry zipEntry = (ZipEntry)en.nextElement();
-
-				String currName = zipEntry.getName();
-
-
-				File destFile = new File(destDirectory,currName);
-				// grab file's parent directory structure
-				File destinationParent = destFile.getParentFile();
-
-				// create the parent directory structure if needed
-				destinationParent.mkdirs();
-
-				if(!zipEntry.isDirectory())
-				{
-				        BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(zipEntry));
-				        int currentByte;
-
-				        // write the current file to disk
-				        FileOutputStream fos = new FileOutputStream(destFile);
-				        BufferedOutputStream dest = new BufferedOutputStream(fos);
-
-				        // read and write until last byte is encountered
-				        while ((currentByte = is.read()) != -1)
-				        {
-					dest.write(currentByte);
-				        }
-				        dest.flush();
-				        dest.close();
-				        is.close();
-
-				}
-			}
-		}
-		catch(IOException ioe)
-		{
-			System.out.println("IOException occured====="+ioe);
-			ioe.printStackTrace();
-		}
-	}
+	
 
 	/**
 	 * @param args

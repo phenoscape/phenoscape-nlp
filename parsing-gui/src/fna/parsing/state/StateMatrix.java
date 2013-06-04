@@ -174,19 +174,7 @@ public class StateMatrix {
 		return null;
 	}
 	
-	public CooccurrenceScore cooccurScore(String str1, String str2){
-		State state1 = this.getStateByName(str1);
-		State state2 = this.getStateByName(str2);
-		int i = states.indexOf(state1);
-		int j = states.indexOf(state2);
-		Cell c = new Cell(i, j, null);
-		if(matrix.contains(c)){
-			c = matrix.get(matrix.indexOf(c));
-			return c.getScore();//"[]" is an empty score
-		}else{
-			return null;
-		}		
-	}
+	
 	
 	public void save2MySQL(Connection conn, String tableprefix, String username, String password){
 		try{

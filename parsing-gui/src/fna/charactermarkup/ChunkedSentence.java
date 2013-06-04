@@ -1265,10 +1265,7 @@ public class ChunkedSentence {
 	public int getPointer(){
 		return this.pointer;
 	}
-	//mohan code to reset the pointer
-	public void resetPointer(){
-		this.pointer=0;
-	}
+	
 	//end mohan code
 	public void setInSegment(boolean yes){
 		this.inSegment = yes;
@@ -1277,60 +1274,7 @@ public class ChunkedSentence {
 	public void setRightAfterSubject(boolean yes){
 		this.rightAfterSubject = yes;
 	}
-	/**
-	 * move pointer after lead in chunkedtokens
-	 * @param lead
-	 */
-	public int skipLead(String[] tobeskipped){
-		int wcount = 0;
-		if(tobeskipped[tobeskipped.length-1].compareTo("chromosome")==0){
-			for(int i = 0; i<this.chunkedtokens.size(); i++){
-				if(this.chunkedtokens.get(i).endsWith("=")){
-					this.pointer = i;
-					break;
-				}
-			}
-			this.pointer++;
-		}else if(tobeskipped[tobeskipped.length-1].compareTo("whole_organism")==0){ //Treatises: "general" = "whole_organism"
-			//do not skip
-		}else{
-			int sl = tobeskipped.length;
-			boolean find = false;
-			for(int i = 0; i<this.chunkedtokens.size(); i++){
-				//chunkedtokens may be a list: shape[{shape~list~planoconvex~to~ventribiconvex~subquadrate~to~subcircular}]
-				/*wcount += (this.chunkedtokens.get(i)+" a").replaceAll(",", "or").replaceAll("\\b(or )+", "or ")
-				.replaceFirst("^.*?~list~", "").replaceAll("~", " ")
-				.trim().split("\\s+").length-1;*/
-				if(this.chunkedtokens.get(i).trim().length()>0) wcount++;
-				//if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+".*") && wcount>=sl){//try to match <phyllaries> to phyllary, "segement I", i is 1-character long
-				if(this.chunkedtokens.get(i).replace("SG", "").replaceAll("(\\w+\\[|\\]|\\)|\\(|\\{|\\})", "").replaceAll("-", "_").toLowerCase().matches(".*?\\b"+(tobeskipped[sl-1].length()-2>0 ? tobeskipped[sl-1].substring(0, tobeskipped[sl-1].length()-2) : tobeskipped[sl-1])+"\\S*") && wcount>=sl){//use \\S* so "leaves" not match b[v[leaves] o[(preopercle)]]
-					if(wcount==sl){
-						this.pointer = i;
-						find = true;
-					}else{
-						//if wcount > sl, then there must be some extra words that have been skipped
-						//put those words in chunkedtokens for process
-						//example:{thin} {dorsal} {median} <septum> {centrally} only ; 
-						int save = i;
-						if(!this.chunkedtokens.get(i).matches(".*?\\bof\\b.*")){//, , l[(taproots) and clusters], , , , r[p[of] o[{coarse} {fibrous} (roots)]],, tobeskiped is "taproot and root"
-							i++;
-							for(int j = 0; j < wcount-sl; j++){
-								this.chunkedtokens.add(i++, this.chunkedtokens.get(j));
-							}
-							this.chunkedtokens.add(i++, ",");
-						}
-						this.pointer = save;
-						find = true;
-					}
-					break;
-				}
-			}
-			//this.pointer++;
-			if(find) this.pointer++;
-		}
-		if(this.pointer==0){return -1;}
-		return 1;
-	}
+	
 
 	public boolean hasNext(){
 		if(pointer <this.chunkedtokens.size()){
