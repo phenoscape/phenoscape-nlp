@@ -2,6 +2,7 @@ package outputter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.jdom.Element;
@@ -25,8 +26,11 @@ public class Structure2Quality implements AnnotationStrategy{
 	boolean negation; // if true, negate the relation string
 	boolean fromcharacterstatement;
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
+	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
 	private TermOutputerUtilities ontoutil;
 	static XPath pathCharacterUnderStucture;
+	XPath pathrelationfromStructure;
+
 	ArrayList<EntityProposals> keyentities;
 	HashSet<String> identifiedqualities;
 	
@@ -43,7 +47,7 @@ public class Structure2Quality implements AnnotationStrategy{
 		this.structname = structurename;
 		this.structid = structureid;
 		this.keyentities = keyentities;
-		identifiedqualities = new HashSet<String>(); //list of unique xml ids
+		identifiedqualities = new HashSet<String>(); //list of unique xml id
 	}
 
 	public void handle() {
@@ -93,8 +97,36 @@ public class Structure2Quality implements AnnotationStrategy{
 		// TODO:// deal// with// negated// quality// later
 		if (relationalquality != null)
 		{
+			XPath pathrelationfromStructure = XPath.newInstance(".//relation[@from='" + qualityid + "']");
+			List<Element> relations= pathrelationfromStructure.selectNodes(this.root);
+			XPath structurewithstructid1;
+			EntityProposals Relatedentity;
+
 			//If two entities are there, then the first one is the primary entity and the second one is the related entity
-			if((this.keyentities!=null) && (this.keyentities.size()==2))
+			if((relations!=null)&&(relations.size()>0))
+			{
+				//Check whether this tostructure is a quality, if not create a related Entity
+				for(Element relation:relations)
+				{
+					String tostructid = relation.getAttributeValue("to");
+					structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
+					Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
+					String tostructname = tostruct.getAttributeValue("name");
+					Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+					if(Relatedentity!=null)
+					{
+						RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
+						QualityProposals qproposals = new QualityProposals();
+						qproposals.add(rq);
+						this.qualities.add(qproposals);
+						this.identifiedqualities.add(qualityid);
+						if(chara_detach!=null)
+							chara_detach.detach();
+					}
+					//What are the primaryentities here?
+				}
+				return;
+			}else if((this.keyentities!=null) && (this.keyentities.size()==2))
 			{
 				for(int i=1;i<this.keyentities.size();i++)
 				{
@@ -107,10 +139,34 @@ public class Structure2Quality implements AnnotationStrategy{
 						chara_detach.detach();
 					return;
 				}
+				this.primaryentities.add(this.keyentities.get(0));
+			}
+			else if((this.keyentities!=null) && (this.keyentities.size()==1)) //bilateral structures?
+			{ // TODO how to find related entities from a list of entities >2 or <2
+				
+				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,Structures,this.keyentities);
+				re.handle();
+				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+				//addREPE(entities,relationalquality);
+				ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
+				for(int i=0;i<relatedentities.size();i++)
+				{
+					RelationalQuality rq = new RelationalQuality(relationalquality, relatedentities.get(i));
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.add(rq);
+					this.qualities.add(qproposals);
+					this.identifiedqualities.add(qualityid);
+					if(chara_detach!=null)
+						chara_detach.detach();
+					return;
+				}
+				
+				this.primaryentities.addAll(entities.get("Primary Entity"));
+				return;
 			}
 			else
-			{ // TODO how to find related entities from a list of entities >2 or <2
-				return;
+			{
+				//TODO if key entities is also null. look into the text for clue? or preprocess later?
 			}
 			return;
 		}

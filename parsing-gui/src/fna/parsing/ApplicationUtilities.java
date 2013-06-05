@@ -151,55 +151,9 @@ public class ApplicationUtilities {
 	
 	}
 
-	public static void showProgressPopup(ProgressBar popupBar) {
-		// TODO Auto-generated method stub
-		
-		try {/*
-			final Display display = Display.getDefault();
-			shell = new Shell(display);
-			final Composite composite_1 = new Composite(shell, SWT.NONE);
-			shell.dispose();			
-			popupBar = new ProgressBar(composite_1, SWT.NONE);
-			popupBar.setVisible(true);
-			popupBar.setBounds(10, 40, 100, 17);
-			ProcessListener process= new ProcessListener( popupBar, display);
-			
-			for(int i=0;i<100;i++)
-			{
-				process.progress(i);
-			}
-			
-		*/}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		
-	}
+	
 
-	public static void showPopUpWindowTab5(String message, String messageHeader, int type, TabFolder tabFolder) {
-		int returnVal = 0;
-		try {
-			final Display display = Display.getDefault();
-			shell = new Shell(display);
-			MessageBox messageBox = new MessageBox(shell, type);
-			messageBox.setMessage(message);
-			messageBox.setText(messageHeader);
-			returnVal = messageBox.open();	 
-			//System.out.println("-----------"+returnVal);
-			if(returnVal==32)
-			{
-				System.out.println("currently on folder:"+tabFolder.getSelectionIndex());
-				tabFolder.setSelection(tabFolder.getSelectionIndex()+1);
-				tabFolder.setFocus();
-			}
-		} catch (Exception exe) {
-			LOGGER.error("couldn't open file in ApplicationUtilities:showPopUpWindow", exe);
-			exe.printStackTrace();
-		}
-		
-		
-	}
+	
 	
 
 }

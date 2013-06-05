@@ -99,30 +99,7 @@ public class MainFormDbAccessor {
 }
 
 	
-	/**
-	 * change pos for these removedtags to 'b' in wordpos table
-	 * @param removedTags
-	 * @throws ParsingException
-	 * @throws SQLException
-	 */
-	public void changePOStoB(List <String> removedTags) throws ParsingException, SQLException {
-		//Connection conn = null;
-		PreparedStatement stmt = null;
-		try {
-			//conn = DriverManager.getConnection(url);
-			String tablePrefix = MainForm.dataPrefixCombo.getText();
-			String sql = "update "+tablePrefix+"_"+ApplicationUtilities.getProperty("POSTABLE")+" set pos = 'b' where word = ?";
-			stmt = conn.prepareStatement(sql);
-			for (String tag : removedTags) {
-				stmt.setString(1, tag);
-				stmt.executeUpdate();
-			}			
-		}catch(Exception sqlexe){
-			LOGGER.error("Couldn't update wordpos table in MainFormDbAccessor:changePOStoB", sqlexe);
-			sqlexe.printStackTrace();
-			throw new ParsingException("Error Accessing the database" , sqlexe);
-		}
-	}
+	
 	/**
 	 * This method is used to remove the Bad structure names from Tab4, after they are marked RED,two steps are taken:
 	 * First Step: Remove from the database (update the tag). Step Two: Keep the UI as it is with selected rows in Red color 
@@ -512,87 +489,7 @@ public class MainFormDbAccessor {
 		
 	}
 	
-	public String getLastAccessedDataSet(int option_chosen) 
-	throws ParsingException, SQLException{
-	
-	//Connection conn = null;
-	Statement stmt = null;
-	ResultSet rset = null;
-	String recent = null;
-	
-	try {
-		//conn = DriverManager.getConnection(url);
-		stmt = conn.createStatement();
-		rset = stmt.executeQuery("select * from datasetprefix where option_chosen= '"+option_chosen+"' order by time_last_accessed desc");
-		if (rset.next()) {
-			recent =  rset.getString("prefix");
-			recent = recent.concat("|").concat(rset.getString("glossary"));
-			//added by prasad to extract the glossary name along with dataset prefix
-		}
-	}catch (SQLException exe) {
-		LOGGER.error("Couldn't execute db query in MainFormDbAccessor:datasetPrefixRetriever", exe);
-		exe.printStackTrace();
-		throw new ParsingException("Failed to execute the statement.", exe);
-	} finally {
-		if (rset != null) {
-			rset.close();
-		}
-		
-		if (stmt != null) {
-			stmt.close();
-		}
-		
-		if (conn != null) {
-			conn.close();
-		}
-		
-		
-					
-	}
-	
-	return recent;
- }
 
-	public void saveOtherTerms(HashMap<String, String> otherTerms) 
-		throws SQLException{
-		
-		//Connection conn = null;
-		PreparedStatement stmt = null;
-		String tablePrefix = MainForm.dataPrefixCombo.getText();
-		try {
-			//conn = DriverManager.getConnection(url);
-			String postable = tablePrefix+ "_"+ApplicationUtilities.getProperty("POSTABLE");
-			
-			stmt = conn.prepareStatement("insert into "+postable+"(word,pos) values (?,?)");
-			Set<String> keys = otherTerms.keySet();
-			for(String key : keys) {
-				try {
-					stmt.setString(1, key);
-					stmt.setString(2, otherTerms.get(key));
-					stmt.execute();
-					System.out.println(key + " " + otherTerms.get(key)+ " inserted");
-				} catch (Exception exe){
-					 if (!exe.getMessage().contains("Duplicate entry")) {
-						 throw exe;
-					 }
-				}
-			}
-			
-		} catch (Exception exe) {
-			LOGGER.error("Error saving other terms from markup - others tab",exe);
-			exe.printStackTrace();
-		} finally {
-			
-			if (stmt != null) {
-				stmt.close();
-			}
-			
-			//if (conn != null) {
-			//	conn.close();
-			//}
-			
-		}
-	}
 	
 	public void savePrefixData(String prefix, String glossaryName, int optionChosen) 
 	throws ParsingException, SQLException{
@@ -841,34 +738,7 @@ public class MainFormDbAccessor {
 	}
 	
 
-	public void removeDescriptorData(List<String> words) throws SQLException {
-		//Connection conn = null;
-		PreparedStatement pstmt = null ;
-		String tablePrefix = MainForm.dataPrefixCombo.getText();
-		try {
-			//conn = DriverManager.getConnection(url);
-			pstmt = conn.prepareStatement("delete from "+tablePrefix+"_wordpos where pos=? and word=?");
-			for (String word : words) {
-				pstmt.setString(1, "b");
-				pstmt.setString(2, word);
-				pstmt.addBatch();
-			}
-			pstmt.executeBatch();
-			
-		} catch (SQLException exe){
-			LOGGER.error("Exception in RemoveDescriptorData", exe);
-			exe.printStackTrace();
-		} finally {
-			if (pstmt != null) {
-				pstmt.close();
-			}
-			
-			//if (conn != null) {
-			//	conn.close();
-			//}			
-			
-		}
-	}
+	
 	
 	public ArrayList<String> getUnknownWords()throws SQLException {
 		
@@ -1012,36 +882,7 @@ public class MainFormDbAccessor {
 		}
 	}
 	
-	public void createHeuristicTermsTable(){
-		//Connection conn = null;
-		Statement stmt = null ;
-		String tablePrefix = MainForm.dataPrefixCombo.getText();
-		try {
-			//conn = DriverManager.getConnection(url);
-			stmt = conn.createStatement();
-			stmt.execute("drop table if exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS"));
-			stmt.execute("create table if not exists "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS")+ " (word varchar(50), type varchar(20), primary key(word))");			
-		} catch (SQLException exe){
-			LOGGER.error("Exception in MainFormDbAccessor", exe);
-			exe.printStackTrace();
-		} finally {
-			try{
-			if (stmt != null) {
-				stmt.close();
-			}
-			
-			//if (conn != null) {
-			//	conn.close();
-			//}		
-			}catch(Exception e){
-				LOGGER.error("Exception in MainFormDbAccessor", e);
-				e.printStackTrace();
-			}
-			
-		}
-
-		
-	}
+	
 	
 	public void createWordRoleTable(){
 		//Connection conn = null;

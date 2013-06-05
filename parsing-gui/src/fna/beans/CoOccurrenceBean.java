@@ -37,17 +37,7 @@ public class CoOccurrenceBean {
 	public Text getText(){
 		return this.text4unpaired;
 	}
-	public CoOccurrenceBean(TermBean term1, TermBean term2,
-			Button contextButton, Label frequency, String[] sourceFiles,
-			int groupNo, String keep) {
-		this.term1 = term1;
-		this.term2 = term2;
-		this.contextButton = contextButton;
-		this.frequency = frequency;
-		this.sourceFiles = sourceFiles;
-		this.groupNo = groupNo;
-		this.keep = keep;
-	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

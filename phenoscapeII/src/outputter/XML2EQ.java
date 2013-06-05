@@ -165,7 +165,6 @@ public class XML2EQ {
 					bcsp.parse(characterstatement, root);
 					allEQs = bcsp.getEQStatements();
 				}else{
-					int x = 0;
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();
@@ -180,6 +179,7 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
+				System.out.println("");
 				e.printStackTrace();
 			}
 		}
@@ -1063,7 +1063,7 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test";
 
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;

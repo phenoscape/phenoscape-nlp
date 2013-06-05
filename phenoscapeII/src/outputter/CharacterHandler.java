@@ -7,8 +7,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.xpath.XPath;
 
 /**
  * @author hong cui
@@ -31,7 +34,10 @@ public class CharacterHandler {
 	private ToBeSolved tobesolvedentity;
 	private ArrayList<EntityProposals> keyentities;
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
-	
+	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+
+	static XPath pathCharacterUnderStucture;
+
 	/**
 	 * @param keyentities 
 	 * 
@@ -42,7 +48,11 @@ public class CharacterHandler {
 		this.ontoutil = ontoutil;
 		this.qualityclues = qualityclues;
 		this.keyentities = keyentities;
-
+		try {
+			this.pathCharacterUnderStucture = XPath.newInstance(".//character");
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -119,44 +129,31 @@ public class CharacterHandler {
 					qproposals.add(new RelationalQuality(relationalquality, relatedentity));
 					this.qualities.add(qproposals);
 				}
-				return;
-			}else{
-				
-				
-				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara,this.ontoutil,this.keyentities);
-				re.handle();
-				if(re.relatedentities.size()>0)
-				{
-					ArrayList<EntityProposals> relatedentities = re.getrelatedEntities();
-					for(EntityProposals relatedentity: relatedentities){
-						QualityProposals qproposals = new QualityProposals();
-						qproposals.add(new RelationalQuality(relationalquality, relatedentity));
-						this.qualities.add(qproposals);
-					}
-					if(re.getPrimaryentities().size()>0)
-					{
-						Iterator itr1 = re.getPrimaryentities().listIterator();
-						while(itr1.hasNext())
-						{
-							EntityProposals ep1 = (EntityProposals) itr1.next();
-							for(Entity en1: ep1.getProposals())
-							{
-							Iterator itr2 = this.primaryentities.listIterator();
-							while(itr2.hasNext())
-							{
-								EntityProposals ep2 = (EntityProposals) itr2.next();
-								for(Entity en2:ep2.getProposals())
-									if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
-										itr1.remove();
-							}
-							}
-						}
-						this.primaryentities.addAll(re.getPrimaryentities());
-					}
 				}
-				//TODO if a character is not present for more than one structures and not bilateral then process the text
-				return;
+			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==true){
+				
+				Hashtable<String,ArrayList<EntityProposals>> entities = this.Processstructureswithsamecharacters(this.chara.getParentElement().getParentElement());
+				addREPE(entities,relationalquality);
 			}
+			else if(XML2EQ.elk.lateralsidescache.get(this.chara.getParentElement())!=null)//bilateral structures
+			{
+				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara.getParentElement(),this.keyentities);
+				re.handle();
+				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+				addREPE(entities,relationalquality);
+
+			}
+			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==false)
+			{
+				//Handling structures that belong to single character
+				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
+				addREPE(entities,relationalquality);
+			}
+			else
+			{
+				//Handle using text
+			}
+				return;
 		}
 		
 		
@@ -241,6 +238,162 @@ public class CharacterHandler {
 	
 	
 	
+private boolean Structureswithsamecharacters(Element statement) {
+	
+	try {
+		List<Element> characters;
+		characters = pathCharacterUnderStucture.selectNodes(statement);
+	int count=0;
+//Checks for same characters present under multiple structures
+	Iterator<Element> itr = characters.listIterator();
+	while(itr.hasNext())
+	{
+		Element character = itr.next();
+		if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
+			count++;
+	}
+	if(count>1)
+		return true;
+	else
+		return false;
+	
+	} catch (JDOMException e) {
+		e.printStackTrace();
+	}
+	return false;
+	}
+
+
+//Adds Related entities and Primary entities to existing identified entities
+private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, QualityProposals relationalquality) {
+		
+
+	
+	ArrayList<EntityProposals> primaryentities = entities.get("Primary Entity");
+	ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
+	
+	if((relatedentities!=null)&&relatedentities.size()>0)
+	{
+		for(EntityProposals relatedentity: relatedentities){
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(new RelationalQuality(relationalquality, relatedentity));
+			this.qualities.add(qproposals);
+		}
+		if(primaryentities.size()>0)
+		{
+			ListIterator<EntityProposals> itr1 = primaryentities.listIterator();
+			//to remove duplicate entities
+			while(itr1.hasNext())
+			{
+				EntityProposals ep1 = (EntityProposals) itr1.next();
+				for(Entity en1: ep1.getProposals())
+				{
+				ListIterator<EntityProposals> itr2 = this.primaryentities.listIterator();
+				while(itr2.hasNext())
+				{
+					EntityProposals ep2 = (EntityProposals) itr2.next();
+					for(Entity en2:ep2.getProposals())
+						if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
+							itr1.remove();
+				}
+				}
+			}
+			this.primaryentities.addAll(primaryentities);
+		}
+	}
+		
+	}
+
+/*
+ * It identifies structures which have the same characters(Relational Quality) 
+ * and it returns all the structures which has the same characters as related entities
+ * if a structure is a whole organism, it calls bilateralstructures to handle the scenario.
+ * 
+ * 
+ */			@SuppressWarnings("unchecked")
+	private Hashtable<String, ArrayList<EntityProposals>> Processstructureswithsamecharacters(Element statement) {
+		
+		try {
+			List<Element> characters = pathCharacterUnderStucture.selectNodes(statement);
+			Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
+			ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+			ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+			
+			//Remove all other characters that are not same as the character under consideration 
+			Iterator<Element> itr = characters.listIterator();
+			while(itr.hasNext())
+			{
+				Element character = itr.next();
+				if(!(character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))||!(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
+					itr.remove();
+			}
+			//First entity will be the main primary entity
+			
+			if(characters.size()>1)
+			{
+				if(chara.getParentElement().getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
+				{
+					EntityProposals primaryEntity  = new EntitySearcherOriginal().searchEntity(root, chara.getParentElement().getAttributeValue("id"), chara.getParentElement().getAttributeValue("name"), "", "","");
+					primaryentities.add(primaryEntity);
+				}
+					
+			}
+			//finding the related entities using structures with same character name and value
+			for(int i=1;i<characters.size();i++)
+			{
+				Element character = characters.get(i);
+				if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
+					{
+					//read the structure(other than whole organism) of this character, find the entity,create entity proposals
+					Element ParentStructure = character.getParentElement();
+					if(ParentStructure.getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
+					{
+						EntityProposals entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
+					if(entity!=null)
+						relatedentities.add(entity);
+					character.detach();
+					}
+						
+					}
+			}
+		if(relatedentities.size()>0)
+		{
+			entities.put("Related Entities", relatedentities);
+			entities.put("Primary Entity", primaryentities);
+		}
+				
+		return entities;
+
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+ private Hashtable<String, ArrayList<EntityProposals>> SingleStructures() {
+		
+					Element ParentStructure = this.chara.getParentElement();
+					ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+					ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+					Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
+					
+					if(ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+					{
+						if(this.keyentities.size()>1)
+						{
+						for(int i=1;i<this.keyentities.size();i++)
+							relatedentities.add(this.keyentities.get(i));
+						
+						primaryentities.add(this.keyentities.get(0));
+						
+						entities.put("Related Entities", relatedentities);
+						entities.put("Primary Entity", primaryentities);
+						}
+					}
+			return entities;
+		
+	}
+
 	
 	private ArrayList<EntityProposals> findEntityInConstraints() {
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();

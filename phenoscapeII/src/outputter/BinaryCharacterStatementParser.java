@@ -55,7 +55,10 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		for(EQStatementProposals eqp: this.EQStatements){
 			for(EQStatement eq: eqp.getProposals()){
 				//update q for all eq candidates
+				int flag=0;;
 				Quality q = eq.getQuality();
+				if(q instanceof RelationalQuality)
+					flag=1;
 				if(q==null){
 					//create q
 					//q = "present"
@@ -78,8 +81,11 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					negativestatements.add(negativeproposals);			
 				}else{
 					//generate negated quality
+					if(flag==0)
+					{
 					if(q.getId()!=null)
 					{
+						@SuppressWarnings("static-access")
 						String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q.getId()); 
 						if(parentinfo!=null)
 						{
@@ -94,6 +100,38 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 						negativeproposals.add(falseeq);
 						negativestatements.add(negativeproposals);	
 						}
+					}
+					}
+					else
+					{
+						QualityProposals qp = ((RelationalQuality)q).relationalquality;
+						EntityProposals relatedentity = ((RelationalQuality)q).relatedentity;
+						QualityProposals nqp = new QualityProposals();
+						
+						for(Quality q1:qp.proposals)
+						{
+							if(q1.getId()!=null)
+							{
+								@SuppressWarnings("static-access")
+								String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q1.getId()); 
+								if(parentinfo!=null)
+								{
+								Quality parentquality = new Quality();
+								parentquality.setString(parentinfo[1]);
+								parentquality.setLabel(parentinfo[1]);
+								parentquality.setId(parentinfo[0]);
+								NegatedQuality nq = new NegatedQuality(q1, parentquality);
+								nqp.proposals.add(nq);
+								}
+							}
+						}
+						RelationalQuality rq = new RelationalQuality(nqp,relatedentity);
+						EQStatement falseeq = clone(eq);
+						falseeq.setQuality(rq);
+						EQStatementProposals negativeproposals = new EQStatementProposals();
+						negativeproposals.add(falseeq);
+						negativestatements.add(negativeproposals);	
+						
 					}
 				}
 			}

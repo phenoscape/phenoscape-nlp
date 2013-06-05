@@ -77,8 +77,6 @@ public class CharacterStatementsTransformer4NeXML extends
 				while(it.hasNext()){
 					Element state = it.next();
 					String content;
-					System.out.println(state.getName());
-					System.out.println("state.getAttributeValue(\"id\")"+state.getAttributeValue("id"));
 					String stateid = state.getAttributeValue("id");
 					if(state.getAttributeValue("label")!=null)
 					content = state.getAttributeValue("label").trim();

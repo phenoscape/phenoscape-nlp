@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,13 +23,16 @@ import org.jdom.xpath.XPath;
 public class RelationalEntityStrategy1 {
 
 	private Element root;
-	private Element chara;
-	private Element Statement;
-	private TermOutputerUtilities ontoutil;
+	private Element structure;
 	static XPath pathCharacterUnderStucture;
 	ArrayList<EntityProposals> relatedentities;
 	ArrayList<EntityProposals> primaryentities;
 	ArrayList<EntityProposals> keyentities;
+	private Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
+
+public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
+		return entities;
+	}
 
 static {
 	try {
@@ -37,14 +41,11 @@ static {
 		e.printStackTrace();
 	}
 }
-	public RelationalEntityStrategy1(Element root, Element chara,
-			TermOutputerUtilities ontoutil, ArrayList<EntityProposals> keyentities) {
+	public RelationalEntityStrategy1(Element root, Element Structure,ArrayList<EntityProposals> keyentities) {
 		// TODO Auto-generated constructor stub
 		this.root = root;
-		this.chara = chara;
-		this.ontoutil = ontoutil;
-		this.Statement = this.chara.getParentElement().getParentElement();
-		relatedentities= new ArrayList<EntityProposals>();
+		this.structure = Structure;
+		this.relatedentities= new ArrayList<EntityProposals>();
 		this.keyentities=keyentities;
 		this.primaryentities = new ArrayList<EntityProposals>();
 	}
@@ -52,171 +53,137 @@ static {
  * Makes a call to Structureswithsamecharacters() to identify the entities of the relational quality
  */
 	public void handle() {
-		Structureswithsamecharacters();
-		SingleStructures();
+		bilateralstructures(this.structure.getAttributeValue("name"));
 	}
 	
 	
-private void SingleStructures() {
-	
-	try {
-		List<Element> characters;
-		
-			characters = pathCharacterUnderStucture.selectNodes(this.Statement);
-		
-		Iterator<Element> itr = characters.listIterator();
-		while(itr.hasNext())
-		{
-			Element character = itr.next();
-			if((character.getAttribute("name")== this.chara.getAttribute("name"))&&(character.getAttribute("value")== this.chara.getAttribute("value")))
-				{
-				Element ParentStructure = character.getParentElement();
-				if(ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
-					wholeorganismrelentities();
-				else
-					bilateralstructures(ParentStructure.getAttributeValue("name"));
-				}
-		}
-		
-		} catch (JDOMException e) {
-			e.printStackTrace();
-		}
-		
-	
-}
-private void wholeorganismrelentities() {
-	
-	if(this.keyentities.size()>1)
-		{
-		for(int i=1;i<this.keyentities.size();i++)
-			this.relatedentities.add(this.keyentities.get(i));
-		
-		this.primaryentities.add(this.keyentities.get(0));
-		}
-	else
-	{
-		//this can be bilateral structure too
-	}
-}
-/*
- * It identifies structures which have the same characters(Relational Quality) 
- * and it returns all the structures which has the same characters as related entities
- * if a structure is a whole organism, it calls bilateralstructures to handle the scenario.
- * 
- * 
- */			@SuppressWarnings("unchecked")
-	private void Structureswithsamecharacters() {
-		
-		try {
-			List<Element> characters = pathCharacterUnderStucture.selectNodes(this.Statement);
-			
-			//remove the main entity as this will be identified before this function call
-			Iterator<Element> itr = characters.listIterator();
-			while(itr.hasNext())
-			{
-				Element character = itr.next();
-				if(!(character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))||!(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
-					itr.remove();
-			}
-			//First entity will be the main primary entity
-			
-			if(characters.size()>1)
-			{
-				if(chara.getParentElement().getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
-				{
-					EntityProposals primaryEntity  = new EntitySearcherOriginal().searchEntity(root, chara.getParentElement().getAttributeValue("id"), chara.getParentElement().getAttributeValue("name"), "", "","");
-					this.primaryentities.add(primaryEntity);
-				}
-					
-			}
-			//finding the related entities using structures with same character name and value
-			for(int i=1;i<characters.size();i++)
-			{
-				Element character = characters.get(i);
-				if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
-					{
-					//read the structure(other than whole organism) of this character, find the entity,create entity proposals
-					Element ParentStructure = character.getParentElement();
-					if(ParentStructure.getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
-					{
-						EntityProposals entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
-					if(entity!=null)
-						this.relatedentities.add(entity);
-					//ParentStructure.detach();//Need to check on this
-					character.detach();
-					}
-						
-					}
-			}
-		
-					
-		} catch (JDOMException e) {
-			e.printStackTrace();
-		}
-		
-	}
+
 	
 /* It checks, if the structure belongs to lateralsides classes and 
 *	if true, it creates "in a right side of" classes on key entities
 */
 	private void bilateralstructures(String structname) {
 
-		//If it is a simpleentity add part of mulitcellular organism
-		//If it is a composite entity and part of relation, then related entity is one come after part of
+		//If it is a simple entity add part of multicellular organism
+		//If it is a composite entity and part of relation, then replace the part of relation with "in right side of" and "in left side of"
+		//else
+		//primary entity of this composite entity "in right side of" or "in left side of" 
 		if(XML2EQ.elk.lateralsidescache.get(structname)!=null)
 		{
 			if((this.keyentities!=null)&&(this.keyentities.size()>0))
 			{
 				for(EntityProposals ep:this.keyentities)
 			{
-				EntityProposals ep1 = new EntityProposals();
+				EntityProposals RelatedEP = new EntityProposals();
+				EntityProposals PrimaryEP = new EntityProposals();
 				for(Entity e: ep.getProposals())
 				{
 					if(e instanceof SimpleEntity)// define
 					{
-						FormalRelation rel = new FormalRelation();
-						rel.setString("in right_side_of");
-						rel.setLabel(Dictionary.resrelationQ.get("BSPO:0000121"));
-						rel.setId("BSPO:0000121");
-						rel.setConfidenceScore((float)1.0);
-						
-						SimpleEntity entity = new SimpleEntity();
-						entity.setLabel("multicellular organism");
-						entity.setString("multicellular organism");
-						entity.setId("UBERON:0000468");
-						entity.setConfidenceScore((float)1.0);
-						
-						REntity relatedentity = new REntity(rel,entity);
-						
+						//Related Entity
+						REntity related1 = this.multicellularrelatedentity("in right side of");
 						CompositeEntity centity = new CompositeEntity();
 						centity.addEntity((SimpleEntity)e);
-						centity.addEntity(relatedentity);
-						ep1.add(centity);
-
+						centity.addEntity(related1);
+						RelatedEP.add(centity);
+						
+						//Primary Entities
+						related1 = this.multicellularrelatedentity("in left side of");
+						CompositeEntity centity1 = new CompositeEntity();
+						centity1.addEntity((SimpleEntity)e);
+						centity1.addEntity(related1);
+						PrimaryEP.add(centity1);
 					}
 					if(e instanceof CompositeEntity)
 					{
-						//if there is a part of relation alread existing then the related entity 
-						REntity	old_re = (REntity) ((CompositeEntity) e).getEntity(1);
-						FormalRelation rel = new FormalRelation();
-						rel.setString("in right side of");
-						rel.setLabel(Dictionary.resrelationQ.get("BSPO:0000121"));
-						rel.setId("BSPO:0000121");
-						rel.setConfidenceScore((float)1.0);
-						Entity related = old_re.getEntity();
-						REntity new_re = new REntity(rel,related);
-						CompositeEntity centity = new CompositeEntity();
-						centity.addEntity(((CompositeEntity) e).getEntity(0));
-						centity.addEntity(new_re);
-						ep1.add(centity);
+						//if there is a part of relation already existing, then the related entity is the entity locator
+						REntity relatedE = (REntity) ((CompositeEntity) e).getEntity(1);
+						if(relatedE.getString().equals("part of"))
+						{
+							FormalRelation rel = new FormalRelation();
+							rel.setString("in right side of");
+							rel.setLabel(Dictionary.resrelationQ.get("BSPO:0000121"));
+							rel.setId("BSPO:0000121");
+							rel.setConfidenceScore((float)1.0);
+							
+							SimpleEntity entitylocator = (SimpleEntity) relatedE.getEntity();
+							REntity relatedentity1 = new REntity(rel,entitylocator);
+							
+							CompositeEntity centity = new CompositeEntity();
+							centity.addEntity(((CompositeEntity) e).getEntity(0));
+							centity.addEntity(relatedentity1);
+							RelatedEP.add(centity);
+
+							FormalRelation rel1 = new FormalRelation();
+							rel1.setString("in left side of");
+							rel1.setLabel(Dictionary.resrelationQ.get("BSPO:0000120"));
+							rel1.setId("BSPO:0000120");
+							rel1.setConfidenceScore((float)1.0);
+							
+							SimpleEntity entitylocator1 = (SimpleEntity) relatedE.getEntity();
+							REntity relatedentity2 = new REntity(rel1,entitylocator1);
+							
+							CompositeEntity centity1 = new CompositeEntity();
+							centity.addEntity(((CompositeEntity) e).getEntity(0));
+							centity.addEntity(relatedentity2);
+							PrimaryEP.add(centity1);
+							
+						}
+						else
+						{
+							//Related Entity
+							//to existing composite entity add a multicellular related entity
+							REntity entity1 = this.multicellularrelatedentity("in right side of");
+							CompositeEntity centity = ((CompositeEntity) e);
+							centity.addEntity(entity1);
+							RelatedEP.add(centity);
+							
+							//Primary Entities
+							REntity entity2 = this.multicellularrelatedentity("in left side of");
+							CompositeEntity centity1 = ((CompositeEntity) e);
+							centity1.addEntity(entity2);
+							PrimaryEP.add(centity1);
+						}
+		
 						
 					}
 				}	
-				if(ep1.getProposals().size()>0)
-				this.relatedentities.add(ep1);
+				if(RelatedEP.getProposals().size()>0)
+				{
+					this.relatedentities.add(RelatedEP);
+					this.primaryentities.add(PrimaryEP);
+				}
 			}
+				this.entities.put("Related Entities",this.relatedentities);
+				this.entities.put("Primary Entity", this.primaryentities);
 			}
 		}
+	}
+	
+	public REntity multicellularrelatedentity(String relation)
+	{
+		String id;
+		
+	if(relation.equals("in right side of"))
+		id="BSPO:0000121";
+	else
+		id="BSPO:0000120";
+		
+	FormalRelation rel = new FormalRelation();
+	rel.setString(relation);
+	rel.setLabel(Dictionary.resrelationQ.get(id));
+	rel.setId(id);
+	rel.setConfidenceScore((float)1.0);
+	
+	SimpleEntity entity = new SimpleEntity();
+	entity.setLabel("multicellular organism");
+	entity.setString("multicellular organism");
+	entity.setId("UBERON:0000468");
+	entity.setConfidenceScore((float)1.0);
+	
+	REntity relatedentity = new REntity(rel,entity);
+
+		return relatedentity;
 	}
 	
 	public ArrayList<EntityProposals> getrelatedEntities() {

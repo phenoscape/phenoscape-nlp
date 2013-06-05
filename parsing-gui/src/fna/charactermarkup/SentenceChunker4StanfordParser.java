@@ -1356,37 +1356,7 @@ end procedure
 		return sb.toString().trim();
 	}
 
-	/**
-	 * establish a mapping between the words of markedsent and the tree 
-	 * @param markedsent
-	 * @param tree
-	 * @return
-	 */
-	boolean POSMatch() {		
-		Iterator<Content> it = this.tree.getDescendants();
-		int c = 0;
-		while(it.hasNext()){
-			Content cont = it.next();
-			if(cont instanceof Element){
-				Attribute t = ((Element)cont).getAttribute("text");
-				if(t!=null){ //only leaf node has a text attribute
-					String word=t.getValue();
-					String pos = ((Element)cont).getName();
-					if(pos.compareToIgnoreCase("PUNCT") != 0){
-						if(this.tokensinsent[c].compareToIgnoreCase(word)!=0){
-							System.err.println(c+"th token in sentence does not match that in the tree");
-							System.exit(1);
-						}
-						if(this.posoftokens[c].compareTo("") !=0 && this.posoftokens[c].compareToIgnoreCase(pos)!=0){
-							return false;
-						}
-					}
-					c++;
-				}
-			}
-		}
-		return true;
-	}
+	
 
 	/**
 	 * @param args
