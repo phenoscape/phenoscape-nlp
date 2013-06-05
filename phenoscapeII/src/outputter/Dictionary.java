@@ -161,11 +161,37 @@ public class Dictionary {
 				String term = rs.getString("term");
 				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
 				if(term.length()>0){					
-					spatialterms.add(term);
 					spatialtermptn += term+"|";
 				}
 			}
 			spatialtermptn = spatialtermptn.replaceFirst("\\|$", "");
+			
+			//sorting according to length of the string 
+			String spatialarray[]=spatialtermptn.split("\\|");
+			spatialtermptn="";
+
+			String temp;
+			for(int i=0;i<spatialarray.length-1;i++)
+			{
+				for(int j=i+1;j<spatialarray.length;j++)
+				{
+					if(spatialarray[i].split(" ").length<spatialarray[j].split(" ").length)
+					{
+						temp = spatialarray[i];
+						spatialarray[i] = spatialarray[j];
+						spatialarray[j] = temp;
+					}
+				}
+			}
+			
+			for(int i=0;i<spatialarray.length;i++)
+				{
+				spatialtermptn+=spatialarray[i]+"|";
+				spatialterms.add(spatialarray[i]);
+				}
+			
+			spatialtermptn = spatialtermptn.replaceFirst("\\|$", "");
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}

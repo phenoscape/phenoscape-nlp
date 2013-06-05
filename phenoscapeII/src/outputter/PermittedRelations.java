@@ -53,8 +53,8 @@ public class PermittedRelations {
 			if(relation_ID!=null)
 			{
 				relationalquality.setString(relation);
-				relationalquality.setId(relation_ID);
-				relationalquality.setLabel(relation);
+				relationalquality.setId(relation_ID.split("\\|\\|")[0]);
+				relationalquality.setLabel(retrieve_label(relation_ID.split("\\|\\|")[1]));
 				relationalquality.setConfidenceScore((float)1.0);
 				qproposals.add(relationalquality);
 				return qproposals;
@@ -75,7 +75,7 @@ public class PermittedRelations {
 		keys = forms.keySet();
 		for(String form:keys)
 			if(Dictionary.relationalqualities.containsKey(form))
-				return retrieve_id(form);
+				return (retrieve_id(form)+"||"+form);
 		
 		return null;
 	}
