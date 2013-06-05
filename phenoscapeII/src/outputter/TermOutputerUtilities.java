@@ -5,6 +5,7 @@ package outputter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ public class TermOutputerUtilities {
 
 	public static boolean debug = false;
 	public static String attributes = "";
+	public static String adjectiveorganptn="";
 	public static OWLOntology uberon = null;
 	
 		
@@ -59,6 +61,14 @@ public class TermOutputerUtilities {
 				OWLentityOntoAPIs.add(api);
 				if(onto.endsWith(ApplicationUtilities.getProperty("ontology.uberon")+".owl")){
 					uberon = api.getOntology();
+					Enumeration<String> organs = api.organadjective.keys();
+					while(organs.hasMoreElements()){
+						ArrayList<String> adjs = api.organadjective.get(organs.nextElement());
+						for(String adj: adjs){
+							if(adj.length()>0)adjectiveorganptn += adj+"|"; 
+						}						
+					}
+					adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
 				}
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format

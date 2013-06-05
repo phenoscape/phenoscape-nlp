@@ -81,7 +81,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
 		
-		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+		return new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;
 		if(elocatorphrase.length()>0) entitylocators = elocatorphrase.split("\\s*,\\s*");

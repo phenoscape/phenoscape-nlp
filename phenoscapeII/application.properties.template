@@ -20,3 +20,4 @@ ontology.uberon=
 #XML Schema
 source.attribute.name=source_pdf
 unknown.structure.name=whole organism
+elk.printmessage=false

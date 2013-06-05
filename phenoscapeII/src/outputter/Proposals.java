@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public interface Proposals {
 
-	public void add(Object c);
+	public boolean add(Object c);
 	public Object getProposals();
 	public String getPhrase();
 	//public void setPhrase(String phrase);
