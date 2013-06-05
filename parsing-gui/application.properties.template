@@ -18,6 +18,7 @@ ontology.uberon=
 #notepad=C:/Windows/notepad.exe
 notepad=
 ####################################DO NOT EDIT THE FOLLOWING######################################
+elk.printmessage=false
 finalizer.standalone=false
 
 #XML Schema

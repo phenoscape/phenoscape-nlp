@@ -500,7 +500,7 @@ public class CharacterAnnotatorChunked {
 			String entity = e.getAttributeValue("name");
 			//organ->singular
 			String organ = TermOutputerUtilities.toSingular(entity.substring(0, entity.indexOf("_")));
-			entity.replaceFirst(entity.substring(0, entity.indexOf("_")), organ);
+			entity =entity.replaceFirst(entity.substring(0, entity.indexOf("_")), organ);
 
 			if (entity.matches(".*?_[\\divx]+-[\\divx]+")) {// abc_1-3
 				if(entity.matches(".*?_[ivx]+-[ivx]+")){
@@ -3183,11 +3183,11 @@ public class CharacterAnnotatorChunked {
 
 	/**
 	 * thoracic_vertebra_8
-	 * @param o a phrase with underscores connecting each token, for example 'thoracic_vertebra_8', 'thoracic_vertebra_i-iii'
+	 * @param o a phrase with underscores connecting each token, for example 'thoracic_vertebra_8 and_9', 'thoracic_vertebra_i-iii'
 	 * @return a phrase with underscores connecting the word part and the index, for example 'thoracic vertebra_8', 'thoracic vertebra_i-iii'
 	 */
 	private String adjustUnderscore(String o) {		
-		return o.replaceAll("_(?![\\divx]+\\b)", " ").trim();
+		return o.replaceAll("_(?![\\divx]+)", " ").trim();
 	}
 
 	/**
