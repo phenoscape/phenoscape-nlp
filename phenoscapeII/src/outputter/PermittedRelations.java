@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class PermittedRelations {	
@@ -17,6 +18,8 @@ public class PermittedRelations {
 		Quality relationalquality = new Quality();
 		String relationcopy = relation;
 		relation = Utilities.removeprepositions(relation);
+		//Adding the below adjective forms to address issue => separate => separated, so it matches ontology
+		LinkedHashSet<String> relationForms = Wordforms.toAdjective(relation);
 		/*
 		 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
 		 * Transform the result from CharaParser which is of the form:
@@ -34,15 +37,21 @@ public class PermittedRelations {
 		/*End handling the "contact" type relation*/
 		String relation_ID=null;
 		//checks if the given relation is present in the identified relationalqualities - Hariharan
-		if(Dictionary.relationalqualities.containsKey(relation))
+		for(String rel:relationForms)
 		{
-			relationalquality.setString(relation);
-			relationalquality.setId(retrieve_id(relation));
-			relationalquality.setLabel(retrieve_label(relation));
+			if(Dictionary.relationalqualities.containsKey(rel))
+		{
+			relationalquality.setString(rel);
+			relationalquality.setId(retrieve_id(rel));
+			relationalquality.setLabel(retrieve_label(rel));
 			relationalquality.setConfidenceScore((float)1.0);
 			qproposals.add(relationalquality);
 			return qproposals;
 		}
+		}
+		//TODO: Check whether something is present in PATO before converting to various forms = Hariharan
+				//Example:broad has an exact match in PATO, but finding synonyms we get tolerant to be a synonym which is in relational quality 
+		
 		//if failed in above steps then it uses wordnet to find the different synonyms of the relation string
 		Hashtable<String, Integer> forms = getdifferentrelationalforms(relation);
 		//of the identified relations, it finds the best equivalent relation else it returns null

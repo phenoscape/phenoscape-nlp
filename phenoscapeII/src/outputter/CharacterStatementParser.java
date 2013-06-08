@@ -78,7 +78,7 @@ public class CharacterStatementParser extends Parser {
 	public void parse(Element statement, Element root) {
 		try {
 			parseForQualityClue(statement); 
-			checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
+			//checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
 			parseForEntities(statement, root, true);
 		} catch (Exception e) {
 			e.printStackTrace();

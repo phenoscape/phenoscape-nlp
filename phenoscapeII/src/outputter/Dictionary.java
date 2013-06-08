@@ -281,7 +281,6 @@ public class Dictionary {
 				relationalqualities.put(root_form,list);
 			}
 			}
-		System.out.println("");
 	}
 	//wordnet 
 	static{

@@ -4,7 +4,9 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -58,7 +60,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				int flag=0;;
 				Quality q = eq.getQuality();
 				if(q instanceof RelationalQuality)
-					flag=1;
+					flag=1;// This will help us to print relational quality properly
 				if(q==null){
 					//create q
 					//q = "present"
@@ -113,6 +115,10 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							if(q1.getId()!=null)
 							{
 								@SuppressWarnings("static-access")
+								 
+								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
+								if(complementQuality==null)
+								{
 								String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q1.getId()); 
 								if(parentinfo!=null)
 								{
@@ -122,6 +128,22 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 								parentquality.setId(parentinfo[0]);
 								NegatedQuality nq = new NegatedQuality(q1, parentquality);
 								nqp.proposals.add(nq);
+								}
+								}
+								else
+								{
+									complementQuality = Utilities.removeprepositions(complementQuality);
+									Hashtable<String,String> cq = Dictionary.relationalqualities.get(complementQuality);
+									Set<String> keys = cq.keySet();
+									for(String key:keys)
+									{
+										Quality negated =new Quality();
+										negated.setLabel(key);
+										negated.setId(cq.get(key));
+										negated.setString(key);
+										nqp.proposals.add(negated);
+
+									}
 								}
 							}
 						}

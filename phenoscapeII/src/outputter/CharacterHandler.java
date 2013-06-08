@@ -35,6 +35,8 @@ public class CharacterHandler {
 	private ArrayList<EntityProposals> keyentities;
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
 	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+	ArrayList<Entity> bilateral = new ArrayList<Entity>();
+	boolean donotresolve=false;// This is to resolve between key entities and relational quality entities
 
 	static XPath pathCharacterUnderStucture;
 
@@ -130,22 +132,25 @@ public class CharacterHandler {
 					this.qualities.add(qproposals);
 				}
 				}
-			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==true){
-				
-				Hashtable<String,ArrayList<EntityProposals>> entities = this.Processstructureswithsamecharacters(this.chara.getParentElement().getParentElement());
+			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==true){
+				//Processes structures with same characters(RQ's) to be related => Hariharan
+				Hashtable<String,ArrayList<EntityProposals>> entities = this.processStructuresWithSameCharacters(this.chara.getParentElement().getParentElement());
 				addREPE(entities,relationalquality);
-			}
-			else if(XML2EQ.elk.lateralsidescache.get(this.chara.getParentElement())!=null)//bilateral structures
+			}//check whether the parent structure(this.entity) is a bilateral entity
+			else if((this.entity!=null)&&(checkBilateral(this.entity)==true))
 			{
-				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara.getParentElement(),this.keyentities);
+				this.primaryentities.clear();//Since among the primary entities only some are bilateral and is relevant to this character/relational quality => Hariharan
+				for(Entity e:this.bilateral)
+				{
+				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
 				re.handle();
 				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
 				addREPE(entities,relationalquality);
-
+				}
 			}
-			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==false)
+			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole organism, it should be handled here
 			{
-				//Handling structures that belong to single character
+				//Handling characters that belong to a single structure => Hariharan
 				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
 				addREPE(entities,relationalquality);
 			}
@@ -153,6 +158,8 @@ public class CharacterHandler {
 			{
 				//Handle using text
 			}
+			if((this.primaryentities.size()>0)&&(this.qualities.size()>0))
+				donotresolve=true;
 				return;
 		}
 		
@@ -236,9 +243,46 @@ public class CharacterHandler {
 		
 	}
 	
+//Checks whether the parent structure is bilateral or not
+	//this.entity contains the parent entity
 	
-	
-private boolean Structureswithsamecharacters(Element statement) {
+private boolean checkBilateral(EntityProposals ep) {
+		
+	EntityProposals epclone = ep.clone(ep);//cloning to avoid original entity proposals to be changed
+		
+	boolean bilateralcheck = false;
+	for(Entity e:epclone.getProposals())
+	{
+		if(e.getId()!=null)
+		{
+			if(e instanceof SimpleEntity)
+			{
+				if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
+				{				
+					this.bilateral.add(e);
+					bilateralcheck=true;
+				}
+			}
+			else
+			{
+				for(Entity e1:((CompositeEntity) e).getEntities())
+				{
+					if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
+				{
+					this.bilateral.add(e);
+					bilateralcheck=true;
+					break;
+				}
+				}
+			}
+		}
+	}
+		return bilateralcheck;
+	}
+
+
+
+private boolean structuresWithSameCharacters(Element statement) {
 	
 	try {
 		List<Element> characters;
@@ -264,7 +308,7 @@ private boolean Structureswithsamecharacters(Element statement) {
 	}
 
 
-//Adds Related entities and Primary entities to existing identified entities
+//Adds Related entities and Primary entities to existing identified entities. Also remove duplicates in the entities
 private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, QualityProposals relationalquality) {
 		
 
@@ -292,7 +336,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				while(itr2.hasNext())
 				{
 					EntityProposals ep2 = (EntityProposals) itr2.next();
-					for(Entity en2:ep2.getProposals())
+					for(Entity en2:ep2.getProposals())//add more conditions to analyze and handle bilateral entities
 						if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
 							itr1.remove();
 				}
@@ -311,8 +355,8 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
  * 
  * 
  */			@SuppressWarnings("unchecked")
-	private Hashtable<String, ArrayList<EntityProposals>> Processstructureswithsamecharacters(Element statement) {
-		
+	private Hashtable<String, ArrayList<EntityProposals>> processStructuresWithSameCharacters(Element statement) {
+		//TODO: Handle scenario where all the characters have whole organism as its parent structure and Keyentities is null
 		try {
 			List<Element> characters = pathCharacterUnderStucture.selectNodes(statement);
 			Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
@@ -331,10 +375,9 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 			
 			if(characters.size()>1)
 			{
-				if(chara.getParentElement().getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
+				if(!chara.getParentElement().getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 				{
-					EntityProposals primaryEntity  = new EntitySearcherOriginal().searchEntity(root, chara.getParentElement().getAttributeValue("id"), chara.getParentElement().getAttributeValue("name"), "", "","");
-					primaryentities.add(primaryEntity);
+					primaryentities.add(this.entity);//Since this is the identified entity of this character
 				}
 					
 			}
@@ -346,7 +389,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					{
 					//read the structure(other than whole organism) of this character, find the entity,create entity proposals
 					Element ParentStructure = character.getParentElement();
-					if(ParentStructure.getAttributeValue("name")!=ApplicationUtilities.getProperty("unknown.structure.name"))
+					if(!ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					{
 						EntityProposals entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
 					if(entity!=null)
@@ -379,17 +422,36 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					
 					if(ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					{
-						if(this.keyentities.size()>1)
+						if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
 						{
 						for(int i=1;i<this.keyentities.size();i++)
 							relatedentities.add(this.keyentities.get(i));
 						
 						primaryentities.add(this.keyentities.get(0));
-						
+
+						}
+						else if((this.keyentities.size()==1)&&(this.checkBilateral(this.keyentities.get(0))==true))//If keyentities.size==1, the it can be a bilateral entity
+						{
+							//call bilateral strategy on the single key entity
+							for(Entity e:this.bilateral)
+							{
+							RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
+							re.handle();
+							Hashtable<String,ArrayList<EntityProposals>> entities1 = re.getEntities();
+							relatedentities.addAll(entities1.get("Related Entities"));
+							primaryentities.addAll(entities1.get("Primary Entity"));
+							}
+						}
+						else
+						{
+								//TODO process text
+						}
+							
 						entities.put("Related Entities", relatedentities);
 						entities.put("Primary Entity", primaryentities);
-						}
+						
 					}
+						
 			return entities;
 		
 	}

@@ -49,6 +49,7 @@ import owlaccessor.OWLAccessorImpl;
  * 
  * 
  */
+@SuppressWarnings("static-access")
 public class XML2EQ {
 	private File source;
 	public static int unknownid = 0;
@@ -78,7 +79,7 @@ public class XML2EQ {
 	public static ELKReasoner elk; 
 	static{
 		try{
-			elk = new ELKReasoner(ontoutil.uberon);
+			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -179,7 +180,7 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
-				System.out.println("");
+
 				e.printStackTrace();
 			}
 		}
@@ -1063,7 +1064,7 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
 
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
