@@ -31,6 +31,7 @@ public class CharacterHandler {
 	ArrayList<EntityProposals> entityparts = new ArrayList<EntityProposals>(); //come from constraints, may have multiple.
 	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
 	boolean resolve = false;
+	boolean fromcharacterstatement = false;
 	private ToBeSolved tobesolvedentity;
 	private ArrayList<EntityProposals> keyentities;
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
@@ -42,12 +43,13 @@ public class CharacterHandler {
 	 * @param keyentities 
 	 * 
 	 */
-	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil, ArrayList<String> qualityclues, ArrayList<EntityProposals> keyentities) {
+	public CharacterHandler(Element root, Element chara, TermOutputerUtilities ontoutil, ArrayList<String> qualityclues, ArrayList<EntityProposals> keyentities, boolean fromecharacterstatement) {
 		this.root = root;
 		this.chara = chara;
 		this.ontoutil = ontoutil;
 		this.qualityclues = qualityclues;
 		this.keyentities = keyentities;
+		this.fromcharacterstatement = fromcharacterstatement;
 		try {
 			this.pathCharacterUnderStucture = XPath.newInstance(".//character");
 		} catch (JDOMException e) {
@@ -70,41 +72,50 @@ public class CharacterHandler {
 	
 	public void parseEntity(){
 		Element structure = chara.getParentElement();
-		String structurename = (structure.getAttribute("constraint")!=null? 
+		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
+			EntityParser ep = new EntityParser(chara, root, structure, fromcharacterstatement);
+			this.tobesolvedentity = new ToBeSolved(structure.getAttributeValue("id"));
+			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
+			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
+			this.resolve = true;			
+		}
+		
+		/*String structurename = (structure.getAttribute("constraint")!=null? 
 				structure.getAttributeValue("constraint"): ""+" "+structure.getAttributeValue("name")).trim();
 		String structureid = structure.getAttributeValue("id");
-		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
+		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
+		 //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
-			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, "", parents,"");	
+			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 
 			
 			//if entity match is not very strong, consider whether the structure is really a quality
-			/*if(this.entity.higestScore() < 0.8f){
-				Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
-				rq.handle();
-				ArrayList<QualityProposals> qualities = rq.qualities;
-				if(qualities.size()>0){
-					boolean settled = false;
-					for(QualityProposals qp : qualities){
-						if(qp.higestScore() > this.entity.higestScore() && (this.keyentities!=null && this.keyentities.size()>0)){
-							this.entity = null;
-							this.qualities = qualities;
-							break;
-						}
-					}
-					if(!settled){
-						//park the case and resolve it later after the quality is parsed
-						this.tobesolvedentity = new ToBeSolved(structurename, structureid, this.entity, qualities);
-						this.resolve = true;
-					}					
-				}
+			//if(this.entity.higestScore() < 0.8f){
+			//	Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
+			//	rq.handle();
+			//	ArrayList<QualityProposals> qualities = rq.qualities;
+			//	if(qualities.size()>0){
+			//		boolean settled = false;
+			//		for(QualityProposals qp : qualities){
+			//			if(qp.higestScore() > this.entity.higestScore() && (this.keyentities!=null && this.keyentities.size()>0)){
+			//				this.entity = null;
+			//				this.qualities = qualities;
+			//			break;
+			//			}
+				//	}
+			//		if(!settled){
+			//			//park the case and resolve it later after the quality is parsed
+			//			this.tobesolvedentity = new ToBeSolved(structurename, structureid, this.entity, qualities);
+			//			this.resolve = true;
+			//		}					
+			//	}
 				
-			}*/
+			//}
 
-			this.primaryentities.add(this.entity);
+			//this.primaryentities.add(this.entity);
 
-		}		
+		//}		*/
 	}
 	
 	
@@ -130,20 +141,19 @@ public class CharacterHandler {
 					this.qualities.add(qproposals);
 				}
 				}
-			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==true){
+			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==true){// A and B: fused
 				
 				Hashtable<String,ArrayList<EntityProposals>> entities = this.Processstructureswithsamecharacters(this.chara.getParentElement().getParentElement());
 				addREPE(entities,relationalquality);
 			}
-			else if(XML2EQ.elk.lateralsidescache.get(this.chara.getParentElement())!=null)//bilateral structures
+			else if(XML2EQ.elk.lateralsidescache.get(this.chara.getParentElement())!=null)//bilateral structures: fused
 			{
 				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,this.chara.getParentElement(),this.keyentities);
 				re.handle();
 				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
 				addREPE(entities,relationalquality);
-
 			}
-			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==false)
+			else if(Structureswithsamecharacters(this.chara.getParentElement().getParentElement())==false) //single, non-bilateral structure: fused: for example whole_organism:fused
 			{
 				//Handling structures that belong to single character
 				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
@@ -207,6 +217,7 @@ public class CharacterHandler {
 		}
 		
 		//TODO: could this do any good?
+		//will resolve() do any good?
 		//Entity result = (Entity) ts.searchTerm(quality, "entity");
 		
 
@@ -436,17 +447,32 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 
 	private class ToBeSolved{
 		
-		private String structurename;
+		//private String structurename;
 		private String structureid;
 		private EntityProposals entity;
-		private ArrayList<QualityProposals> qualities;
+		private Structure2Quality s2q;
+		private QualityProposals quality;
 
-		public ToBeSolved(String structurename, String structureid, EntityProposals entity, ArrayList<QualityProposals> qualities){
-			this.structurename = structurename;
+		public ToBeSolved(String structureid){
+			//this.structurename = structurename;
 			this.structureid = structureid;
-			this.entity = entity;
-			this.qualities = qualities;			
+			//this.entity = entity;
+			//this.s2q = s2q;			
 		}
+		
+		public void setEntityCandidate(EntityProposals entity){
+			this.entity = entity;
+		}
+		
+		public void setStructure2Quality(Structure2Quality s2q){
+			this.s2q = s2q;
+		}
+		
+		public void setQualityCandidate(QualityProposals quality){
+			this.quality = quality;
+		}
+		
+		
 	}
 		
 

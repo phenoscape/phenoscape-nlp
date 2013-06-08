@@ -78,7 +78,7 @@ public class CharacterStatementParser extends Parser {
 	public void parse(Element statement, Element root) {
 		try {
 			parseForQualityClue(statement); 
-			checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
+			//checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
 			parseForEntities(statement, root, true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -86,7 +86,9 @@ public class CharacterStatementParser extends Parser {
 	}
 
 	/**
-	 * This method checks, if any of the structures in character statement are actually quality. If so, it detaches the structure along with the relations that contain the structure
+	 * This method checks, if any of the structures in character statement are actually quality. 
+	 * If so, it detaches the structure along with the relations that contain the structure, so the structure will not be processed as an entity
+	 * 
 	 * @param statement
 	 * @param root
 	 * @throws JDOMException
@@ -179,10 +181,45 @@ public class CharacterStatementParser extends Parser {
 	 * @param root
 	 */
 	public void parseForEntities(Element statement, Element root, boolean fromcharacterdescription){
-		EntityParser ep = new EntityParser(statement, root, fromcharacterdescription);
-		entities = ep.getEntities();
-		keyentities = ep.getEntities();
+		try{
+			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+			ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
+			String checked = "";
+			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
+			ArrayList<String> RelatedStructures = new ArrayList<String>(); //keep a record on related entities, which should not be processed again
+			for(Element structure: structures){
+				String structureid = structure.getAttributeValue("id");
+				if(!checked.contains(structureid+",")){
+					String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0);
+					EntityParser ep = new EntityParser(statement, root, structure, fromcharacterdescription);
+					if(ep.getEntity()!=null) entities.add(ep.getEntity());
+					if(ep.getQualityStrategy()!=null) s2qs.add(ep.getQualityStrategy());
+					checked += structureid+","+parents+",";
+				}
+			}
+			resolve(entities, s2qs, statement, root);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
+
+	/**
+	 * TODO
+	 * 1. determine keyentities, post-compose entities with quality 2. approve/disapprove structure2quality results
+	 * 3. constructure EQ for non-key entities
+	 * @param entities
+	 * @param s2qs
+	 * @param statement
+	 * @param root
+	 */
+	private void resolve(ArrayList<EntityProposals> entities,
+			ArrayList<Structure2Quality> s2qs, Element statement, Element root) {
+		// TODO Auto-generated method stub
+		
+		//if s2qs is approved, use the quality and call s2q.cleanHandledStructures
+		
+	}
+
 
 	public ArrayList<String> getQualityClue(){
 		return this.qualityClue;

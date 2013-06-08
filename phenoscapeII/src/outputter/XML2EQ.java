@@ -23,6 +23,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import owlaccessor.OWLAccessorImpl;
 
@@ -78,7 +79,12 @@ public class XML2EQ {
 	public static ELKReasoner elk; 
 	static{
 		try{
-			elk = new ELKReasoner(ontoutil.uberon);
+			//elk = new ELKReasoner(TermOutputerUtilities.uberon);
+			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
+			/*OWLOntology elkonto = elk.getOntology();
+			System.out.println(elkonto.getAxiomCount());
+			System.out.println(TermOutputerUtilities.uberon.getAxiomCount());
+			System.out.println(elkonto.equals(TermOutputerUtilities.uberon));*/
 		}catch(Exception e){
 			e.printStackTrace();
 		}

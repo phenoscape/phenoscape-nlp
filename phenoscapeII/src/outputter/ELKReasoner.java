@@ -69,9 +69,8 @@ public class ELKReasoner{
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
 		this.ont = ont;
-		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
-		Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		//Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();
 	}
@@ -92,7 +91,7 @@ public class ELKReasoner{
 	 * this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
 	 **/
 	void getClassesWithLateralSides(){
-		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		//if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
 		OWLObjectProperty lateralside = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BSPO_0000126"));//in_lateral_side_of
 		OWLObjectProperty partof = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
@@ -125,7 +124,7 @@ public class ELKReasoner{
 
 		// You can now retrieve subclasses, superclasses, and instances of
 		// the query class by using its new name instead.
-		Set<OWLClass> subClasses = reasoner.getSubClasses(newName1, false).getFlattened();
+ 		Set<OWLClass> subClasses = reasoner.getSubClasses(newName1, false).getFlattened();
 		subClasses.addAll(reasoner.getSubClasses(newName2, false).getFlattened());
 
 		//reasoner.getSuperClasses(newName, true);
@@ -160,7 +159,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isSubClassOf(String subclassIRI, String superclassIRI){
-		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		//if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
 		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(superclass, false); //grab all descendant classes
@@ -182,7 +181,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isPartOf(String part, String whole) {
-		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		//if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
 		// Create a fresh name
@@ -205,7 +204,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
-		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		//if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
 		//OWLClass subclaz= dataFactory.getOWLClass(IRI.create(subclassIRI)); //'caudal fin' 4000164
 
@@ -281,8 +280,9 @@ public class ELKReasoner{
 
 	public void dispose() {
 		reasoner.dispose();
-
 	}
+	
+	public OWLOntology getOntology(){return ont;}
 
 	/** Visits existential restrictions and collects the properties which are
 	 * restricted */
@@ -325,7 +325,7 @@ public class ELKReasoner{
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
-
+			//elk.getClassesWithLateralSides();
 			/*String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0005621";//rhomboid is an organ
 			String subclassIRI = "http://purl.obolibrary.org/obo/UBERON_0003098";//optic stalk is not an organ
 			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
@@ -338,7 +338,7 @@ public class ELKReasoner{
 			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
 			System.out.println(elk.isSubClassOf(subclass, superclass));	*/
 
-			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_4000164", "http://purl.obolibrary.org/obo/UBERON_4200062"));
+			//System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_4000164", "http://purl.obolibrary.org/obo/UBERON_4200062"));
 			elk.dispose();
 
 		} catch (OWLOntologyCreationException e) {

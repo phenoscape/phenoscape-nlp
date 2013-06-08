@@ -28,40 +28,46 @@ public class Structure2Quality implements AnnotationStrategy{
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
 	private TermOutputerUtilities ontoutil;
-	static XPath pathCharacterUnderStucture;
+	//static XPath pathCharacterUnderStucture;
 	XPath pathrelationfromStructure;
 
 	ArrayList<EntityProposals> keyentities;
 	HashSet<String> identifiedqualities;
-	
-	static{
+
+	/*static{
 		try{
 			pathCharacterUnderStucture = XPath.newInstance(".//character");
 		}catch (Exception e){
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	public Structure2Quality(Element root,String structurename, String structureid, ArrayList<EntityProposals> keyentities) {
 		this.root = root;
 		this.structname = structurename;
 		this.structid = structureid;
 		this.keyentities = keyentities;
-		identifiedqualities = new HashSet<String>(); //list of unique xml id
+		identifiedqualities = new HashSet<String>(); //list of unique xml id of the structures found to be quality
 	}
 
 	public void handle() {
 		try {
-
 			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
-			//detach all identifiedqualities
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void cleanHandledStructures(){
+		//TODO move this to where the quality/structure conflict is resolved: detach all identifiedqualities
+		try{
 			for(String structid: identifiedqualities){
 				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
-									//and the relations are needed for other purpose, 
-									//so don't detach relation here. 
-			}
-		} catch (JDOMException e) {
+				//and the relations are needed for other purpose, 
+				//so don't detach relation here. 
+			} 
+		}catch (JDOMException e) {
 			e.printStackTrace();
 		}
 	}
@@ -79,8 +85,9 @@ public class Structure2Quality implements AnnotationStrategy{
 		String qualitycopy=quality;
 		XPath structurewithstructid = XPath.newInstance(".//structure[@id='"+ qualityid + "']");
 		Structures = (Element) structurewithstructid.selectSingleNode(this.root);
-		characters = pathCharacterUnderStucture.selectNodes(Structures);
-		//characters are checked to find out if the quality is negated
+		//characters = pathCharacterUnderStucture.selectNodes(Structures);
+		characters = Structures.getChildren("character");
+		//characters are checked to find out if the quality should be negated
 		for (Element chara : characters) {
 			String modifier = chara.getAttribute("modifier")!=null? chara.getAttributeValue("modifier"): "";
 			String value = chara.getAttribute("value")!=null? chara.getAttributeValue("value"):"";
@@ -88,7 +95,7 @@ public class Structure2Quality implements AnnotationStrategy{
 				negated = true;
 				chara_detach =chara;
 				break;
-				
+
 			}
 
 		}
@@ -143,7 +150,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			}
 			else if((this.keyentities!=null) && (this.keyentities.size()==1)) //bilateral structures?
 			{ // TODO how to find related entities from a list of entities >2 or <2
-				
+
 				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,Structures,this.keyentities);
 				re.handle();
 				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
@@ -160,7 +167,7 @@ public class Structure2Quality implements AnnotationStrategy{
 						chara_detach.detach();
 					return;
 				}
-				
+
 				this.primaryentities.addAll(entities.get("Primary Entity"));
 				return;
 			}
@@ -170,8 +177,8 @@ public class Structure2Quality implements AnnotationStrategy{
 			}
 			return;
 		}
-		
-        
+
+
 		// may need to consider constraints, which may provide a related entity
 
 
@@ -181,29 +188,29 @@ public class Structure2Quality implements AnnotationStrategy{
 		if((characters!=null)&&(characters.size()>0))
 		{
 			for(Element chara:characters)
-			Checkforsimplequality(chara,quality,qualityid,negated,chara_detach);
+				Checkforsimplequality(chara,quality,qualityid,negated,chara_detach);
 		}
 		else
 			Checkforsimplequality(null,quality,qualityid,negated,chara_detach);
 
 		return;
 	}
-	
-	//a separate function is created to handle structures(quality) with characters and without characters
+
+	//a separate function is created to handle structures(quality) (e.g. expansion) with characters (e.g. large) and without characters
 
 	private void Checkforsimplequality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-		
+
 		Quality result;
 		if(chara!=null)
-		quality=chara.getAttributeValue("value")+" "+quality;
+			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion
 		quality=quality.trim();
 		TermSearcher ts = new TermSearcher();
 		for(;;)
 		{
-		result = (Quality) ts.searchTerm(quality, "quality");
-		if((result!=null)||quality.length()==0)
-		break;
-		quality =(quality.indexOf(" ")!=-1)?quality.substring(quality.indexOf(" ")).trim():"";
+			result = (Quality) ts.searchTerm(quality, "quality");
+			if((result!=null)||quality.length()==0)
+				break;
+			quality =(quality.indexOf(" ")!=-1)?quality.substring(quality.indexOf(" ")).trim():"";
 		}
 		if (result != null) {
 			if (negated) {
@@ -228,6 +235,6 @@ public class Structure2Quality implements AnnotationStrategy{
 			if(chara!=null)
 				chara.detach();			
 		}
-		
+
 	}
 }

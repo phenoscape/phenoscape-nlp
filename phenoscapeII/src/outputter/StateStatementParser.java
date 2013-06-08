@@ -190,12 +190,68 @@ public class StateStatementParser extends Parser {
 					continue;
 				String structid = character.getParentElement()
 						.getAttributeValue("id" + "");
+				//String structname = character.getParentElement()
+				//		.getAttributeValue("name" + "");
+				boolean maybesubject = false;
+				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+				//Structure2Quality rq2 = new Structure2Quality(root,
+				//		structname, structid, this.keyentities);
+				//rq2.handle();
+				//if(rq2.qualities.size()>0){
+				//	entity = rq2.primaryentities;
+			    //  qualities = rq2.qualities;
+				//} else {
+					try {
+						maybesubject = maybeSubject(root, structid);
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					} // false if fromid appears in constraintid or toid
+					CharacterHandler ch = new CharacterHandler(root, character,
+							ontoutil, qualityclue,this.keyentities, false); // may contain relational
+					// quality
+					ch.handle();
+					qualities = ch.getQualities();
+					entity = ch.getPrimaryentities();
+				//}
+				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
+				if (maybesubject && entity != null && this.keyentities != null) {
+					// TODO resolve entity with keyentities
+					entities = resolve(entity,keyentitiesclone);
+				} else if (maybesubject && entity == null
+						&& this.keyentities != null) {
+					entities = keyentitiesclone;
+				} else if (entity != null) {
+					entities.addAll(entity);
+				} else{ 
+					entities = keyentitiesclone; 
+					// what if it is a subject, but not an entity at all? - Hariharan(So added this code)
+					//hong: isn't this already handled above?
+				}
+					constructureEQStatementProposals(qualities, entities);
+			}
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 protected void parseCharacters(Element statement, Element root) {
+		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
+		List<Element> characters;
+		try {
+			characters = pathCharacter.selectNodes(statement);
+			ArrayList<EntityProposals> entity = null;
+			ArrayList<QualityProposals> qualities = null;
+			for (Element character : characters) {
+				// may contain relational quality
+				if(character.getParentElement()==null)
+					continue;
+				String structid = character.getParentElement()
+						.getAttributeValue("id" + "");
 				String structname = character.getParentElement()
 						.getAttributeValue("name" + "");
 				boolean maybesubject = false;
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				/*RelationalQualityStrategy1 rq2 = checkforquality(root,
-						structname, structid, "", "", this.keyentities);*/
 				Structure2Quality rq2 = new Structure2Quality(root,
 						structname, structid, this.keyentities);
 				rq2.handle();
@@ -238,7 +294,7 @@ public class StateStatementParser extends Parser {
 			e.printStackTrace();
 		}
 	}
-	
+	 */
 	/**
 	 * parse relations first
 		Check whether tostruct and fromstruct is an entity or quality. 

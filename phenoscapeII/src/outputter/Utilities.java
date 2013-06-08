@@ -114,6 +114,44 @@ public class Utilities {
 		return path.replaceFirst(",$", "");
 	}
 
+	/**
+	 * trace part_of relations of structid to get all its parent structure ids,
+	 * separated by , in order
+	 * 
+	 * TODO limit to 3 commas
+	 * TODO treat "in|on" as part_of? probably not
+	 * @param root
+	 * @param xpath
+	 *            : "//relation[@name='part_of'][@from='"+structid+"']"
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static String getStructureChainIds(Element root, String xpath, int count) {
+		String path = "";
+		try{
+			List<Element> relations = XPath.selectNodes(root, xpath);			
+			xpath = "";
+			for (Element r : relations) {
+				String pid = r.getAttributeValue("to");
+				path += pid + ",";
+				String[] pids = pid.split("\\s+");
+				for (String id : pids) {
+					if (id.length() > 0)
+						xpath += "//relation[@name='part_of'][@from='" + id + "']|//relation[@name='in'][@from='" + id + "']|//relation[@name='on'][@from='" + id + "']|";
+				}
+			}
+			if (xpath.length() > 0 && count < 3) {
+				xpath = xpath.replaceFirst("\\|$", "");
+				path += getStructureChain(root, xpath, count++);
+			} else {
+				return path.replaceFirst(",$", "");
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return path.replaceFirst(",$", "").trim();
+	}
+
 	
 	public static String formQualityValueFromCharacter(Element chara) {
 		String charatype = chara.getAttribute("char_type") != null ? "range" : "discrete";

@@ -4,7 +4,9 @@
 package outputter;
 
 /**
- * @author updates
+ * @author Hong Cui
+ * 
+ * RelatedEntity with relation. For example, part_of fin.
  *
  */
 public class REntity extends Entity{
@@ -52,7 +54,6 @@ public class REntity extends Entity{
 
 	@Override
 	public void setString(String string) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -108,6 +109,18 @@ public class REntity extends Entity{
 	public float getConfidienceScore() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	//@Override
+	public void setXMLid(String xmlid) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	//@Override
+	public String getXMLid() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

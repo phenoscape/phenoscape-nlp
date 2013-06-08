@@ -4,16 +4,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jdom.Element;
+import org.jdom.xpath.XPath;
 
 
 /**
- * this class parses entities from a statement
- * returns an ArrayList<EntityProposals> entities
+ * This class parses entity or quality from one part_of chain of <structure> elements.
+ * It takes as input a <structure> element, identify the part_of chain starting with the structure as an entity and/or a quality,
+ * Returns an EntityProposals and/or a Structure2Quality strategy
  * @author Hong Cui
  *
  */
 public class EntityParser {
-	private ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+	private EntityProposals entity;
+	private Structure2Quality s2q;
+
+	public EntityParser(Element statement, Element root, Element structure, boolean keyelement) {
+		String structureid = structure.getAttributeValue("id");
+		String structurename = Utilities.getStructureName(root, structureid);
+		String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
+		this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
+
+		// could the 'structure' be a quality?
+		//is the structure a simple quality?
+		/*Quality result = (Quality) new TermSearcher().searchTerm(structurename, "quality");
+		if(result!=null){ 
+			quality = new QualityProposals();
+			quality.add(result);
+		}else{
+			// is the structure a relational quality?
+			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structurename, false);
+			if (relationalquality != null) quality = relationalquality;
+		}*/
+		
+		Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
+		rq.handle();
+		//If any structure is a quality detach all the structures containing the structure id
+		if(rq.qualities.size()>0){
+			s2q = rq;
+		}
+	}
+
+
+	public EntityProposals getEntity() {
+		return entity;
+	}
+
+	public Structure2Quality getQualityStrategy() {
+		return s2q;
+	}
+
+	//before
+	//private ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 
 	/**
 	 * TODO parse also entity locators for entity
@@ -21,7 +62,7 @@ public class EntityParser {
 	 * @param statement
 	 * @param root
 	 */
-	public EntityParser(Element statement, Element root, boolean keyelement) {
+	/*public EntityParser(Element statement, Element root, boolean keyelement) {
 		//add all structures which are not "whole organism" to key structure.
 		try{
 			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
@@ -78,7 +119,7 @@ public class EntityParser {
 
 	public ArrayList<EntityProposals> getEntities() {
 		return entities;
-	}
+	}*/
 
 	/*public void setEntities(ArrayList<Entity> entities) {
 		this.entities = entities;

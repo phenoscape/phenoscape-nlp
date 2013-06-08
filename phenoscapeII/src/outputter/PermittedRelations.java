@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class PermittedRelations {	
 	/**
-	 * match the relation to the restricted relation list
+	 * match the relation in PATO relation slim
 	 * @param fromstructure name
 	 * @param relation string
 	 * @param tostructure name, not the chain of names

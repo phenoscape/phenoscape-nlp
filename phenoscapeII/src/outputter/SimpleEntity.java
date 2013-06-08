@@ -9,6 +9,7 @@ package outputter;
  */
 public class SimpleEntity extends Entity implements FormalConcept{
 	String string; //phrase
+	String xmlid;
 	String label; //lable of the class representing the phrase in an ontology
 	String id; //id of the class representing the phrase in an ontology
 	String classIRI; //class iri of the class representing the phrase in an ontology
@@ -126,6 +127,16 @@ public class SimpleEntity extends Entity implements FormalConcept{
 
 	public String toString(){
 		return "phrase="+this.string+" entity="+this.label+ " score="+this.confidenceScore;
+	}
+
+	//@Override
+	public void setXMLid(String xmlid) {
+		this.xmlid = xmlid;
+	}
+
+	//@Override
+	public String getXMLid() {
+		return this.xmlid;
 	}
 
 }

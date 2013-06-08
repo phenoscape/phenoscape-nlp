@@ -10,7 +10,7 @@ import org.jdom.Element;
 
 
 /**
- * @author updates
+ * @author Hong Cui
  * Restricted relation list:
  * http://phenoscape.org/wiki/Guide_to_Character_Annotation#Relations_used_for_post-compositions
  */
