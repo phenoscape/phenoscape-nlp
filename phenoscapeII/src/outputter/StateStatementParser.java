@@ -185,6 +185,8 @@ public class StateStatementParser extends Parser {
 			ArrayList<EntityProposals> entity = null;
 			ArrayList<QualityProposals> qualities = null;
 			for (Element character : characters) {
+				
+				boolean donotresolve=false;
 				// may contain relational quality
 				if(character.getParentElement()==null)
 					continue;
@@ -273,7 +275,10 @@ public class StateStatementParser extends Parser {
 					ch.handle();
 					qualities = ch.getQualities();
 					entity = ch.getPrimaryentities();
+					donotresolve=ch.donotresolve;
 				}
+				if(donotresolve==false)
+				{
 				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 				if (maybesubject && entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
@@ -287,6 +292,11 @@ public class StateStatementParser extends Parser {
 					entities = keyentitiesclone; 
 					// what if it is a subject, but not an entity at all? - Hariharan(So added this code)
 					//hong: isn't this already handled above?
+				}
+				}
+				else
+				{
+					entities.addAll(entity);
 				}
 					constructureEQStatementProposals(qualities, entities);
 			}
@@ -398,15 +408,14 @@ public class StateStatementParser extends Parser {
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
-			System.out.println("");
-		}
+			}
 	}
 
 
 	private void constructureEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
 
-		if((entities!=null)&&(qualities!=null))
+		if((entities!=null)&&(entities.size()>0)&&(qualities!=null)&&(qualities.size()>0))
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					EQStatementProposals eqp = new EQStatementProposals();
@@ -490,7 +499,7 @@ public class StateStatementParser extends Parser {
 		if(results==null){
 			results = resolveBaseOnPartOfRelation(e, keyentities);
 		}
-
+//TODO need to add code for resolving bilateral structure
 		if(results!=null)
 			return results;
 
@@ -561,7 +570,6 @@ public class StateStatementParser extends Parser {
 							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
 								key.getPrimaryEntityOWLClassIRI())) {
 							// reset key to the subclass
-							//System.out.println("");
 							keye.reset();
 							entity.setConfidenceScore(1f);
 							keye.add(entity);

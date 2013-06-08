@@ -96,6 +96,19 @@ public class EntityProposals implements Proposals {
 		}
 		return sb.toString();
 	}
+	
+	public EntityProposals clone(EntityProposals ep) {
+		
+		EntityProposals epclone = new EntityProposals();
+		epclone.setPhrase(ep.phrase);
+		for(Entity e:ep.getProposals())
+		{
+			epclone.proposals.add(e);
+		}
+		
+		return epclone;
+	}
+	
 	/**
 	 * @param args
 	 */

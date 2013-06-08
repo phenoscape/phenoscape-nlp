@@ -50,6 +50,7 @@ import owlaccessor.OWLAccessorImpl;
  * 
  * 
  */
+@SuppressWarnings("static-access")
 public class XML2EQ {
 	private File source;
 	public static int unknownid = 0;
@@ -79,6 +80,7 @@ public class XML2EQ {
 	public static ELKReasoner elk; 
 	static{
 		try{
+			//TODO: figure out why the two calls give different results?
 			//elk = new ELKReasoner(TermOutputerUtilities.uberon);
 			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
 			/*OWLOntology elkonto = elk.getOntology();
@@ -185,7 +187,7 @@ public class XML2EQ {
 				}
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
-				System.out.println("");
+
 				e.printStackTrace();
 			}
 		}

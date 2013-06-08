@@ -30,7 +30,7 @@ public class Structure2Quality implements AnnotationStrategy{
 	private TermOutputerUtilities ontoutil;
 	//static XPath pathCharacterUnderStucture;
 	XPath pathrelationfromStructure;
-
+	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	ArrayList<EntityProposals> keyentities;
 	HashSet<String> identifiedqualities;
 
@@ -58,11 +58,15 @@ public class Structure2Quality implements AnnotationStrategy{
 		}
 	}
 
+	/**
+	 * call this (to detach all identifiedqualities) only when the quality/structure conflict is resolved: 
+	 */
 	public void cleanHandledStructures(){
-		//TODO move this to where the quality/structure conflict is resolved: detach all identifiedqualities
+
 		try{
 			for(String structid: identifiedqualities){
 				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
+				if(structure!=null)
 				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
 				//and the relations are needed for other purpose, 
 				//so don't detach relation here. 
@@ -133,7 +137,7 @@ public class Structure2Quality implements AnnotationStrategy{
 					//What are the primaryentities here?
 				}
 				return;
-			}else if((this.keyentities!=null) && (this.keyentities.size()==2))
+			}else if((this.keyentities!=null) && (this.keyentities.size()>=2))
 			{
 				for(int i=1;i<this.keyentities.size();i++)
 				{
@@ -148,14 +152,19 @@ public class Structure2Quality implements AnnotationStrategy{
 				}
 				this.primaryentities.add(this.keyentities.get(0));
 			}
-			else if((this.keyentities!=null) && (this.keyentities.size()==1)) //bilateral structures?
-			{ // TODO how to find related entities from a list of entities >2 or <2
-
-				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(this.root,Structures,this.keyentities);
+			else if((this.keyentities!=null) && (this.keyentities.size()==1) && (checkbilateral()==true)) //bilateral structures?
+			{ 
+				//Here check bilateral will return us a list of entities which are bilateral.We pass it to relationalentitystrategy1
+				//to find related entities and primary entities
+				for(Entity e:this.bilateral)
+				{
+				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
 				re.handle();
 				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
-				//addREPE(entities,relationalquality);
 				ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
+
+				if((relatedentities!=null)&&(relatedentities.size()>0))//Single key entity might be a bilateral
+				{
 				for(int i=0;i<relatedentities.size();i++)
 				{
 					RelationalQuality rq = new RelationalQuality(relationalquality, relatedentities.get(i));
@@ -165,12 +174,13 @@ public class Structure2Quality implements AnnotationStrategy{
 					this.identifiedqualities.add(qualityid);
 					if(chara_detach!=null)
 						chara_detach.detach();
-					return;
 				}
 
 				this.primaryentities.addAll(entities.get("Primary Entity"));
+				}
+				}
 				return;
-			}
+				}
 			else
 			{
 				//TODO if key entities is also null. look into the text for clue? or preprocess later?
@@ -195,8 +205,44 @@ public class Structure2Quality implements AnnotationStrategy{
 
 		return;
 	}
+	
+	private boolean checkbilateral() {
+			
+			boolean bilateralcheck = false;
+			for(Entity e:this.keyentities.get(0).getProposals())
+			{
+				if(e.getId()!=null)
+				{
+					if(e instanceof SimpleEntity)
+					{
+						if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
+						{				
+							this.bilateral.add(e);
+							bilateralcheck=true;
+						}
+					}
+					else
+					{
+						for(Entity e1:((CompositeEntity) e).getEntities())
+						{
+						if(e1.getPrimaryEntityLabel()!=null)//Entities which don't have a perfect match in ontology need not be checked for bilateral
+						{
+						if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
+						{
+							this.bilateral.add(e);
+							bilateralcheck=true;
+							break;
+						}
+						}
+						}
+					}
+				}
+			}
+				return bilateralcheck;
+		}
+	
 
-	//a separate function is created to handle structures(quality) (e.g. expansion) with characters (e.g. large) and without characters
+	//a separate function is created to handle structures(quality) with characters and without characters
 
 	private void Checkforsimplequality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
 

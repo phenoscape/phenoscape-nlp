@@ -13,6 +13,7 @@ public abstract class Entity implements FormalConcept{
 	public String getPrimaryEntityLabel(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getLabel(); 
 		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getLabel(); 
+		if(this instanceof REntity) return ((REntity)this).getEntity().getPrimaryEntityLabel();
 		return null; //return null for other cases
 	}
 	

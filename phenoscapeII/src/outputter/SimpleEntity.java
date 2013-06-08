@@ -128,6 +128,19 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	public String toString(){
 		return "phrase="+this.string+" entity="+this.label+ " score="+this.confidenceScore;
 	}
+	
+	//Clones the simple entity
+	public SimpleEntity simplecloning() {
+
+			SimpleEntity entity1 = new SimpleEntity();
+			entity1.setId(this.getId());
+			entity1.setClassIRI(this.getClassIRI());
+			entity1.setConfidenceScore(this.getConfidienceScore());
+			entity1.setString(this.getString());
+			entity1.setLabel(this.getLabel());
+		
+		return entity1;
+	}
 
 	//@Override
 	public void setXMLid(String xmlid) {

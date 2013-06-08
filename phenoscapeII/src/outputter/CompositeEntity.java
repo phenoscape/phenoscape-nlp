@@ -17,7 +17,8 @@ import java.util.ArrayList;
 public class CompositeEntity extends Entity {
 	SimpleEntity entity; //the first entity in the post-composed entity
     ArrayList<Entity> entities; //relation + entity
- 	/**
+
+	/**
 	 * 
 	 */
 	public CompositeEntity() {
@@ -43,6 +44,11 @@ public class CompositeEntity extends Entity {
 	public Entity removeLastEntity(){
 		return entities.remove(entities.size()-1); 
 	}
+	
+	public ArrayList<Entity> getEntities() {
+		return entities;
+	}
+	
 	
 	public Entity getEntity(int index){
 		return entities.get(index);
@@ -105,7 +111,7 @@ public class CompositeEntity extends Entity {
 	@Override
 	public String getId() {
 		// TODO Auto-generated method stub
-		return null;
+		return "true";
 	}
 
 	@Override
@@ -119,6 +125,39 @@ public class CompositeEntity extends Entity {
 		// TODO Auto-generated method stub
 		return 0f;
 	}
+	//cloning - recursive implementation
+	public CompositeEntity compositecloning()
+	{
+		CompositeEntity clone=new CompositeEntity();
+			for(Entity e:this.getEntities())
+			{
+				if(e instanceof SimpleEntity)
+				{
+					clone.addEntity(((SimpleEntity) e).simplecloning());
+				}
+				else if(e instanceof CompositeEntity)
+				{
+					clone.addEntity(((CompositeEntity) e).compositecloning());
+				}
+				else//e is related entity
+				{
+					FormalRelation related = ((REntity) e).getRelation();
+					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI());
+					if(((REntity)e).getEntity() instanceof SimpleEntity)
+					{
+						REntity re = new REntity(relation,((SimpleEntity)(((REntity)e).getEntity())).simplecloning());
+						clone.addEntity(re);
+					}
+					else
+					{
+						REntity re = new REntity(relation,((CompositeEntity)(((REntity)e).getEntity())).compositecloning());
+						clone.addEntity(re);
+					}
+				}	
+			}
+		return clone;
+	}
+	
 
 	/**
 	 * @param args

@@ -62,6 +62,7 @@ public class ELKReasoner{
 	OWLOntology ont;
 	OWLOntologyManager man;
 	private ElkReasonerFactory reasonerFactory;
+
 	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
 	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
 
@@ -145,7 +146,6 @@ public class ELKReasoner{
 				if (labelannotation.getValue() instanceof OWLLiteral) {
 					OWLLiteral val = (OWLLiteral) labelannotation.getValue();
 					lateralsidescache.put(val.getLiteral(), owlClass.getIRI());
-					System.out.println(val.getLiteral());
 				}
 			}
 		}
