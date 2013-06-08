@@ -17,10 +17,12 @@ public class EQStatementProposals implements Proposals {
 	public EQStatementProposals() {		
 	}
 	
-	public void add(Object eq){
-		if(eq!=null){
+	public boolean add(Object eq){
+		if(eq instanceof EQStatement){
 			proposals.add((EQStatement)eq);
+			return true;
 		}
+		return false;
 	}
 	
 	public ArrayList<EQStatement> getProposals(){

@@ -18,8 +18,16 @@ public class EntityProposals implements Proposals {
 	public EntityProposals() {		
 	}
 	
-	public void add(Object e){
-		if(e!=null)proposals.add((Entity)e);
+	public boolean add(Object e){
+		if(e instanceof Entity){
+			proposals.add((Entity)e);
+			return true;
+		}
+		if(e instanceof EntityProposals){
+			proposals.addAll(((EntityProposals)e).getProposals());
+			return true;
+		}
+		return false;
 	}
 	
 	public ArrayList<Entity> getProposals(){

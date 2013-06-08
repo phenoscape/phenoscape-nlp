@@ -406,7 +406,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			Hashtable<String, ArrayList<OWLClass>> result = this.searchCache.get(con);
 			if(result != null) return result;
 			
-			if(con.indexOf("*")<0){//exact match
+			if(con.indexOf("*")<0 && con.indexOf("(")<0 &&con.indexOf("|")<0  ){//exact match
 					return this.ontologyHash.get(con);
 			}else{//reg exp
 				Hashtable<String, ArrayList<OWLClass>> output =new Hashtable<String, ArrayList<OWLClass>> ();

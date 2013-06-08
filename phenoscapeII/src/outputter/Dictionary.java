@@ -22,8 +22,8 @@ public class Dictionary {
 	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
-	public static String process="crest|ridge|process|tentacule|shelf|flange|ramus";
-	public static String opening = "foramina|foramen|foramens|perforation|orifice|opening"; 
+	public static String process="process|crest|ridge|tentacule|shelf|flange|ramus";
+	public static String opening = "opening|foramina|foramen|foramens|perforation|orifice"; 
 	public static String binaryTvalues = "present|true|yes|usually";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely";
 	public static String positionprep = "of|part_of|in|on|between";
@@ -31,6 +31,7 @@ public class Dictionary {
 	public static String selfReference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
 	public static String spatialtermptn="";
+
 	public static String prefixes = "post|pre|post-|pre-";
 	public static String negation = "absent|lacking";
 
@@ -290,5 +291,6 @@ public class Dictionary {
 			e.printStackTrace();
 		}
 	}
+
 	
 }

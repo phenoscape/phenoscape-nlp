@@ -86,25 +86,25 @@ public class RelationHandler {
 				quality = new QualityProposals();
 			quality.add(rq);			
 		}else{//no, the relation should not be considered relational quality
-			//entity locator?
-			if (relation.matches("\\b(" + outputter.Dictionary.positionprep + ")\\b.*")) { // entitylocator
+			//entity locator? parseEntity should have already processed entity locators if any
+			/*if (relation.matches("\\b(" + outputter.Dictionary.positionprep + ")\\b.*")) { // entitylocator
 				this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, tostructname, fromstructname, "part_of");
-				/*Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-				if(entity!=null){
-					this.entitylocator = entity;
-					FormalRelation rel = new FormalRelation();
-					rel.setString("part of");
-					rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-					rel.setId("BFO:000050");
-					rel.setConfidenceScore((float)1.0);
-					REntity rentity = new REntity(rel, entity);
-					//update this.entity with the composite entity
-					CompositeEntity centity = new CompositeEntity();
-					centity.addEntity(this.entity);
-					centity.addEntity(rentity);
-					this.entity = centity;					
-				}*/
-			} else if (relation.matches("\\bwith\\b.*")) {
+				//Entity entity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+				//if(entity!=null){
+				//	this.entitylocator = entity;
+				//	FormalRelation rel = new FormalRelation();
+				//	rel.setString("part of");
+				//	rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+				//	rel.setId("BFO:000050");
+				//	rel.setConfidenceScore((float)1.0);
+				//	REntity rentity = new REntity(rel, entity);
+				//	//update this.entity with the composite entity
+				//	CompositeEntity centity = new CompositeEntity();
+				//	centity.addEntity(this.entity);
+				//	centity.addEntity(rentity);
+				//	this.entity = centity;					
+				//}
+			} else*/ if (relation.matches("\\bwith\\b.*")) {
 				//check to-structure, if to-structure has no character, then generate EQ to_entity:present
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
 					Hashtable<String, String> EQ = new Hashtable<String, String>();

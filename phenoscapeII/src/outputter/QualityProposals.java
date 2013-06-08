@@ -15,8 +15,12 @@ public class QualityProposals implements Proposals {
 	public QualityProposals() {		
 	}
 	
-	public void add(Object q){
-		if(q!=null) proposals.add((Quality)q);
+	public boolean add(Object q){
+		if(q instanceof Quality){
+			proposals.add((Quality)q);
+			return true;
+		}
+		return false;
 	}
 
 	public String getPhrase() {

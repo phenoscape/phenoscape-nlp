@@ -16,6 +16,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -60,7 +62,9 @@ public class ELKReasoner{
 	OWLOntology ont;
 	OWLOntologyManager man;
 	private ElkReasonerFactory reasonerFactory;
-	public Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
+
+	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
+	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
 
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
 		man = OWLManager.createOWLOntologyManager();
@@ -68,7 +72,7 @@ public class ELKReasoner{
 		this.ont = ont;
 		this.ont=ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
-		
+		Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();
 	}
@@ -89,6 +93,7 @@ public class ELKReasoner{
 	 * this is used to find paired structures and their parts, for example clavicle blade is part of clavicle, which is a paired structure: there are left clavicle and right clavicle. 
 	 **/
 	void getClassesWithLateralSides(){
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
 		OWLObjectProperty lateralside = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BSPO_0000126"));//in_lateral_side_of
 		OWLObjectProperty partof = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
@@ -155,6 +160,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isSubClassOf(String subclassIRI, String superclassIRI){
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass superclass = dataFactory.getOWLClass(IRI.create(superclassIRI));
 		NodeSet<OWLClass> subClasses = reasoner.getSubClasses(superclass, false); //grab all descendant classes
@@ -176,6 +182,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isPartOf(String part, String whole) {
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
 		// Create a fresh name
@@ -198,7 +205,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
-
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
 		//OWLClass subclaz= dataFactory.getOWLClass(IRI.create(subclassIRI)); //'caudal fin' 4000164
 
