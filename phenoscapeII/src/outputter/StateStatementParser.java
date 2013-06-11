@@ -214,7 +214,10 @@ public class StateStatementParser extends Parser {
 					ch.handle();
 					qualities = ch.getQualities();
 					entity = ch.getPrimaryentities();
+					donotresolve=ch.donotresolve;
 				//}
+				if(donotresolve == false)
+				{
 				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 				if (maybesubject && entity != null && this.keyentities != null) {
 					// TODO resolve entity with keyentities
@@ -228,6 +231,11 @@ public class StateStatementParser extends Parser {
 					entities = keyentitiesclone; 
 					// what if it is a subject, but not an entity at all? - Hariharan(So added this code)
 					//hong: isn't this already handled above?
+				}
+				}
+				else
+				{
+					entities =entity;
 				}
 					constructureEQStatementProposals(qualities, entities);
 			}

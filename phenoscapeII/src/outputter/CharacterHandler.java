@@ -80,6 +80,7 @@ public class CharacterHandler {
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
 			this.resolve = true;			
+			this.entity=ep.getEntity();
 		}
 		
 		/*String structurename = (structure.getAttribute("constraint")!=null? 

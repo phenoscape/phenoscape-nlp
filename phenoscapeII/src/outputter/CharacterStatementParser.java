@@ -217,6 +217,16 @@ public class CharacterStatementParser extends Parser {
 		// TODO Auto-generated method stub
 		
 		//if s2qs is approved, use the quality and call s2q.cleanHandledStructures
+		if(entities.size()>0)
+			keyentities=entities;
+		
+		if(s2qs.size()>0)
+		{
+			for(Structure2Quality clean: s2qs)
+			{
+				clean.cleanHandledStructures();
+			}
+		}
 		
 	}
 

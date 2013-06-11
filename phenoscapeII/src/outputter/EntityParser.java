@@ -23,7 +23,6 @@ public class EntityParser {
 		String structurename = Utilities.getStructureName(root, structureid);
 		String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
 		this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
-
 		// could the 'structure' be a quality?
 		//is the structure a simple quality?
 		/*Quality result = (Quality) new TermSearcher().searchTerm(structurename, "quality");
@@ -39,12 +38,32 @@ public class EntityParser {
 		Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
 		rq.handle();
 		//If any structure is a quality detach all the structures containing the structure id
+		
+		// if this.entity is not ontologized, then take the qualities else retain the entities
 		if(rq.qualities.size()>0){
 			s2q = rq;
 		}
+		resolvestructure();
 	}
 
 
+	
+	public void resolvestructure()
+	{
+		
+		for(Entity proposal :this.entity.getProposals())
+		{
+			if((proposal.isOntologized()==false)&&(s2q!=null))
+			{
+				this.entity =null;
+				return;
+			}
+		}
+		this.s2q=null;
+	}
+	
+	
+	
 	public EntityProposals getEntity() {
 		return entity;
 	}

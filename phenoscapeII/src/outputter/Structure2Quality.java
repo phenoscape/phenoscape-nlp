@@ -33,6 +33,8 @@ public class Structure2Quality implements AnnotationStrategy{
 	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	ArrayList<EntityProposals> keyentities;
 	HashSet<String> identifiedqualities;
+	List<Element> detach_characters = new ArrayList<Element>();
+
 
 	/*static{
 		try{
@@ -203,9 +205,17 @@ public class Structure2Quality implements AnnotationStrategy{
 		else
 			Checkforsimplequality(null,quality,qualityid,negated,chara_detach);
 
+		detach_character();
 		return;
 	}
 	
+	private void detach_character() {
+
+		for(Element chara:this.detach_characters)
+			chara.detach();
+		
+	}
+
 	private boolean checkbilateral() {
 			
 			boolean bilateralcheck = false;
@@ -270,16 +280,16 @@ public class Structure2Quality implements AnnotationStrategy{
 				this.qualities.add(qproposals);
 				this.identifiedqualities.add(qualityid);
 				//to remove negated character and prevent from processed in the future
-				if(chara_detach!=null)
-					chara_detach.detach();
+				this.detach_characters.add(chara_detach);
+
 			} else {
 				QualityProposals qproposals = new QualityProposals();
 				qproposals.add(result);
 				this.qualities.add(qproposals);
 				this.identifiedqualities.add(qualityid);
 			}
-			if(chara!=null)
-				chara.detach();			
+			if(chara!=null)	
+			this.detach_characters.add(chara);
 		}
 
 	}
