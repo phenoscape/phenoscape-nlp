@@ -110,14 +110,12 @@ public class CompositeEntity extends Entity {
 
 	@Override
 	public String getId() {
-		// TODO Auto-generated method stub
-		return "true";
+		return this.getPrimaryEntityID();
 	}
 
 	@Override
 	public String getClassIRI() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.getPrimaryEntityOWLClassIRI();
 	}
 
 	@Override
