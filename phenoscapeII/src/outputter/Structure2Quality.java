@@ -205,11 +205,11 @@ public class Structure2Quality implements AnnotationStrategy{
 		else
 			Checkforsimplequality(null,quality,qualityid,negated,chara_detach);
 
-		detach_character();
+		//detach_character(); need to be invoked only when S2Q is being accpeted by the calling function
 		return;
 	}
 	
-	private void detach_character() {
+	public void detach_character() {
 
 		for(Element chara:this.detach_characters)
 			chara.detach();

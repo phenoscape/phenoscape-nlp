@@ -207,7 +207,7 @@ public class EntitySearcher1 extends EntitySearcher {
 					phrase = m.group(3);
 					m = p.matcher(phrase);
 				}
-				temp +=phrase;//appending the original string to the tokens separated by #
+				temp +=phrase.trim();//appending the original string to the tokens separated by #
 				String[] temps = temp.split("\\s*#\\s*");
 				ArrayList<EntityComponent> thiscomponents = new ArrayList<EntityComponent>();
 				for(String part: temps){

@@ -81,7 +81,9 @@ public class CharacterHandler {
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
 			this.resolve = true;			
 			this.entity=ep.getEntity();
-		}
+			if(this.entity!=null)
+			this.primaryentities.add(this.entity);
+			}
 		
 		/*String structurename = (structure.getAttribute("constraint")!=null? 
 				structure.getAttributeValue("constraint"): ""+" "+structure.getAttributeValue("name")).trim();
@@ -116,7 +118,7 @@ public class CharacterHandler {
 				
 			//}
 
-			//this.primaryentities.add(this.entity);
+			this.primaryentities.add(this.entity);
 
 		//}		*/
 	}
@@ -497,7 +499,39 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 	 * should try to resove them here? or in the end?
 	 */
 	public void resolve(){
-		//TODO
+		//TODO add some more conditions for resolving
+		
+		//the below condition handles situation where a structure is identified to be a quality.
+		if(this.entity==null)
+		{
+			if(tobesolvedentity.s2q==null)
+			{
+				//whole organism
+			}
+			if(tobesolvedentity.s2q!=null)
+			{
+				if(tobesolvedentity.s2q.qualities!=null)
+				{
+					this.qualities.clear();
+					this.qualities.addAll(tobesolvedentity.s2q.qualities);
+					if(tobesolvedentity.s2q.primaryentities.size()>0)//relational quality might contain primary entities
+					{
+						this.primaryentities.clear();
+						this.primaryentities.addAll(primaryentities);
+					}
+					else
+					{
+						if(keyentities!=null)
+						{
+						this.primaryentities.clear();
+						this.primaryentities.addAll(keyentities);
+						}
+					}
+				}
+			}
+		}
+		
+		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
 	
 

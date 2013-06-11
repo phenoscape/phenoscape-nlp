@@ -183,7 +183,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					checked += structureid+","+parents+",";
 				}
 			}
-			resolve(entities, s2qs, statement, root); //after resoluation, entities holds good entities
+			resolve(entities, s2qs, statement, root); //after resolution, entities holds good entities
 
 			for(EntityProposals entityp: entities){
 				EQStatementProposals eqp= new EQStatementProposals();
@@ -238,6 +238,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		// TODO Auto-generated method stub
 
 		//if a s2q is approved, use the quality and call s2q.cleanHandledStructures
+		//Decision should be made based on confidence score
 	}
 
 	private void checkandfilterstructuredquality(Element statement,Element root) throws JDOMException {

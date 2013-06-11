@@ -235,7 +235,7 @@ public class StateStatementParser extends Parser {
 				}
 				else
 				{
-					entities =entity;
+					entities=entity; //If characterhandler is confident of primary entities
 				}
 					constructureEQStatementProposals(qualities, entities);
 			}
@@ -368,10 +368,17 @@ public class StateStatementParser extends Parser {
 						StructuredQualities.addAll(rq1.identifiedqualities);
 						e = rq1.primaryentities;//e is now showed to be a quality
 						q.addAll(rq1.qualities);
+						//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
+						if((this.keyentities!=null)||(e!=null))
+							rq2.detach_character();
 					}else if (rq2.qualities.size() > 0) {
 						StructuredQualities.addAll(rq2.identifiedqualities);
 						e = rq2.primaryentities;//e is now showed to be a quality
 						q.addAll(rq2.qualities);
+						//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
+						if((this.keyentities!=null)||(e.size()>0))
+							rq2.detach_character();
+						
 					}
 					else{
 						try {
