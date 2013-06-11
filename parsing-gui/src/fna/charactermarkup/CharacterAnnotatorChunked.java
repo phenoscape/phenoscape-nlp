@@ -3098,7 +3098,8 @@ public class CharacterAnnotatorChunked {
 					e.setAttribute("type","multi");
 					e.setAttribute("name", adjustUnderscore(o));//make sure "_" is used only before the indexes, not btw words of a phrase
 				}else{
-					e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
+					if(isPrematched(o)) e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
+					else e.setAttribute("name", o); //originally hyphenated phrases such as pubis_ischium
 				}
 			}else{
 				e.setAttribute("name", TermOutputerUtilities.toSingular(o));
@@ -3179,6 +3180,30 @@ public class CharacterAnnotatorChunked {
 
 		}
 		return results;
+	}
+
+	private boolean isPrematched(String o) {
+		Statement stmt =null;
+		ResultSet rs =null;
+		try {
+			// collect life_style terms
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("select distinct term from " + this.glosstable + " where term ='"+o+"'");
+			if (rs.next()) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally{
+			try{
+				if(rs!=null) rs.close();
+				if(stmt!=null) stmt.close();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return false;
 	}
 
 	/**
