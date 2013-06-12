@@ -1,5 +1,6 @@
 package outputter;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -52,6 +53,12 @@ public class PermittedRelations {
 		//TODO: Check whether something is present in PATO before converting to various forms = Hariharan
 				//Example:broad has an exact match in PATO, but finding synonyms we get tolerant to be a synonym which is in relational quality 
 		
+		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
+		XML2EQ.ontoutil.searchOntologies(relation, "quality", results);
+		
+		
+		if(results.size()==0)
+		{
 		//if failed in above steps then it uses wordnet to find the different synonyms of the relation string
 		Hashtable<String, Integer> forms = getdifferentrelationalforms(relation);
 		//of the identified relations, it finds the best equivalent relation else it returns null
@@ -69,6 +76,7 @@ public class PermittedRelations {
 				return qproposals;
 			}
 		}
+	}
 		return null;
 	}
 
