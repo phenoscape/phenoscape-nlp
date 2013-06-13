@@ -272,10 +272,18 @@ public class StateStatementParser extends Parser {
 						rel.setId("BFO:000050");
 						rel.setConfidenceScore((float)1.0);
 						REntity rentity = new REntity(rel, e2);
-						//composite entity
 						CompositeEntity centity = new CompositeEntity();
+						//composite entity
+						if(e1 instanceof SimpleEntity)
+						{
 						centity.addEntity(e1);
 						centity.addEntity(rentity);
+						}
+						else
+						{
+							centity = ((CompositeEntity)e1).compositecloning();
+							((CompositeEntity)centity).addEntity(rentity);
+						}
 						ep3.add(centity);
 					}
 					finalentities.add(ep3);
@@ -393,6 +401,7 @@ public class StateStatementParser extends Parser {
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
 					EntityProposals spatialmodifier = null;
+					EntityProposals entitylocator =null;
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
@@ -439,12 +448,24 @@ public class StateStatementParser extends Parser {
 								toname, toid, fromname, fromid, neg, false);
 						rh.handle();
 						if(rh.getEntity()!=null)
+							{
 							e.add(rh.getEntity());
+							}
 
 						q = new ArrayList<QualityProposals>();
-						if(rh.getQuality()!=null) q.add(rh.getQuality());
+						if(rh.getQuality()!=null) 
+							{
+							q.add(rh.getQuality());
+							}
 						if (rh.otherEQs.size() > 0)
+							{
 							this.EQStatements.addAll(rh.otherEQs);
+							}
+						if(rh.entitylocator!=null)
+							{
+							entitylocator = rh.entitylocator;
+							}
+							
 					}
 
 					// Changes Ending => Hariharan Include flag below to make
@@ -471,6 +492,13 @@ public class StateStatementParser extends Parser {
 							ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
 							spatialmodifiers.add(spatialmodifier);							
 							entities = resolveFinalEntities(entities,spatialmodifiers);
+						}
+						
+						if(entitylocator!=null)
+						{
+							ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
+							entitylocators.add(entitylocator);							
+							entities = resolveFinalEntities(entitylocators,entities);
 						}
 						
 						if(q.size()==0)

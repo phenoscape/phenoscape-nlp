@@ -17,6 +17,7 @@ import org.jdom.Element;
 public class RelationHandler {
 	EntityProposals entity; //entity holds the result on entity, may be simple or composite (with a entity locator)
 	QualityProposals quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
+	EntityProposals entitylocator;
 	ArrayList<EQStatementProposals> otherEQs;
 	
 	Element root;
@@ -28,6 +29,7 @@ public class RelationHandler {
 	Element relelement;
 	boolean negation; //if true, negate the relation string
 	boolean fromcharacterstatement;
+	boolean resolveel = false;
 	
 	public RelationHandler(Element root, String relation, Element relelement, String tostructname, String tostructid, String structname, String structid, boolean negation, boolean keyelement){
 		this.root = root;
@@ -169,7 +171,26 @@ public class RelationHandler {
 				}
 			} else if(relation.matches("\\b(between|among|amongst)\\b.*")){
 				//TODO between is a preposition too.
-			} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
+			}else if(relation.matches("\\b(found|located)\\b.*"))// This handles patter 4.1
+				{
+				
+				Quality present = new Quality();
+				present.setString("present");
+				present.setLabel("PATO:present");
+				present.setId("PATO:0000467");
+				present.setConfidenceScore((float)1.0);
+				
+				this.quality = new QualityProposals();
+				this.quality.add(present);
+				
+				if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
+				{
+				this.resolveel=true;
+				this.entitylocator = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname,"",tostructname,"");
+				}
+				}
+				else {//qualitymodifier to which quality??? could indicate an error, but output anyway
+			
 				/*Hashtable<String, String> result = EntitySearcher.searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
 				results.put("qualitymodifier", results.get("qualitymodifier")+","+tostructname);
 				if(result!=null){
