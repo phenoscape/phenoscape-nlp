@@ -214,6 +214,7 @@ public class StateStatementParser extends Parser {
 					ch.handle();
 					qualities = ch.getQualities();
 					entity = ch.getPrimaryentities();
+					
 					donotresolve=ch.donotresolve;
 				//}
 				if(donotresolve == false)
@@ -237,13 +238,54 @@ public class StateStatementParser extends Parser {
 				{
 					entities=entity; //If characterhandler is confident of primary entities
 				}
+				//This is for resolving final entities with entity in parts=> iliac blade: Flared at the proximal end 
+				if(ch.entityparts.size()>0)
+					{
+					entities = resolveFinalEntities(entities,ch.entityparts);
+					}
+				
 					constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
 	}
-	
+	//Resolve entity in parts/spatial modifiers with final entities
+	private ArrayList<EntityProposals> resolveFinalEntities(ArrayList<EntityProposals> entities,
+			ArrayList<EntityProposals> entityparts) {
+			
+		ArrayList<EntityProposals> finalentities = new ArrayList<EntityProposals>();
+		if((entities!=null)&&entities.size()>0)
+		{
+		for(EntityProposals ep1: entityparts)
+		{
+			for(Entity e1:ep1.getProposals())
+			{
+				for(EntityProposals ep2: entities)
+				{
+					EntityProposals ep3 = new EntityProposals();
+					for(Entity e2: ep2.getProposals())
+					{
+						FormalRelation rel = new FormalRelation();
+						rel.setString("part of");
+						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+						rel.setId("BFO:000050");
+						rel.setConfidenceScore((float)1.0);
+						REntity rentity = new REntity(rel, e2);
+						//composite entity
+						CompositeEntity centity = new CompositeEntity();
+						centity.addEntity(e1);
+						centity.addEntity(rentity);
+						ep3.add(centity);
+					}
+					finalentities.add(ep3);
+				}
+			}
+		}
+		}
+		return finalentities;
+	}
+
 	/*
 	 protected void parseCharacters(Element statement, Element root) {
 		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
@@ -350,7 +392,7 @@ public class StateStatementParser extends Parser {
 					List<QualityProposals> q = new ArrayList<QualityProposals>();
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
-
+					EntityProposals spatialmodifier = null;
 					// Changes starting => Hariharan
 					// checking if entity is really an entity or it is a quality
 					// by passing to and from struct names to relational quality
@@ -366,19 +408,26 @@ public class StateStatementParser extends Parser {
 					rq2.handle();
 					if (rq1.qualities.size() > 0) {
 						StructuredQualities.addAll(rq1.identifiedqualities);
+						if(rq1.primaryentities.size()>0)
 						e = rq1.primaryentities;//e is now showed to be a quality
 						q.addAll(rq1.qualities);
 						//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
-						if((this.keyentities!=null)||(e!=null))
-							rq2.detach_character();
+						if((this.keyentities!=null)||(e.size()>0))
+							rq1.detach_character();
+						
+						if(rq1.spatialmodifier!=null)
+							spatialmodifier=rq1.spatialmodifier;
+						
 					}else if (rq2.qualities.size() > 0) {
 						StructuredQualities.addAll(rq2.identifiedqualities);
+						if(rq2.primaryentities.size()>0)
 						e = rq2.primaryentities;//e is now showed to be a quality
 						q.addAll(rq2.qualities);
 						//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
 						if((this.keyentities!=null)||(e.size()>0))
 							rq2.detach_character();
-						
+						if(rq2.spatialmodifier!=null)
+							spatialmodifier=rq2.spatialmodifier;
 					}
 					else{
 						try {
@@ -401,23 +450,45 @@ public class StateStatementParser extends Parser {
 					// Changes Ending => Hariharan Include flag below to make
 					// sure , to include EQ's only when qualities exist.
 
-					if (q.size() > 0) {
 						ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
-						if (maybesubject && e != null
+						if (maybesubject && e.size()>0
 								&& this.keyentities != null) {
 							entities = resolve(e, keyentitiesclone);
-						} else if (maybesubject && e == null
+						} else if (maybesubject && e.size()==0
 								&& this.keyentities != null) {
 							entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
-						} else if (e != null) {
+						} else if (e.size()>0) {
 							entities.addAll(e);
 						} else {
 							entities = keyentitiesclone; 
 							// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 							//hong: hasn't this case been handled already above?
 						}
+						
+						//resolve final entities with spatial modifiers
+						if(spatialmodifier!=null)
+						{
+							ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
+							spatialmodifiers.add(spatialmodifier);							
+							entities = resolveFinalEntities(entities,spatialmodifiers);
+						}
+						
+						if(q.size()==0)
+						{
+							Quality present = new Quality();
+							present.setString("present");
+							present.setLabel("PATO:present");
+							present.setId("PATO:0000467");
+							present.setConfidenceScore((float)1.0);
+							
+							QualityProposals qp = new QualityProposals();
+							qp.add(present);
+							
+							q.add(qp);
+						}
+						
 						constructureEQStatementProposals(q, entities);
-					}
+			
 
 				}
 			}
@@ -427,10 +498,12 @@ public class StateStatementParser extends Parser {
 	}
 
 
+	
 	private void constructureEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
 
-		if((entities!=null)&&(entities.size()>0)&&(qualities!=null)&&(qualities.size()>0))
+	
+		if((entities!=null)&&(entities.size()>0))
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					EQStatementProposals eqp = new EQStatementProposals();

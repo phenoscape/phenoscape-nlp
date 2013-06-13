@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Wordforms {
 
-static String adjective_suffixes = "e|ed|ent|-like|like|shaped|-shaped|y|ly|ic|ted|ate|led|oid|ion|ied|ous|ing|form|iform|ally|ation|ure|al|ical|ication";
+static String adjective_suffixes = "e|ed|ent|-like|like|shaped|-shaped|y|ly|ic|ted|ate|led|oid|ion|ied|ous|ing|form|iform|ally|ation|ure|al|ical|ication|sion|ded";
 static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<String,LinkedHashSet<String>>();
 	
 	public static LinkedHashSet<String> toAdjective(String word)

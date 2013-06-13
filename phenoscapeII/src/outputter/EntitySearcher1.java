@@ -50,7 +50,6 @@ public class EntitySearcher1 extends EntitySearcher {
 		//construct variations: selected permutation without repetition 
 		ArrayList<String> variations  = new ArrayList<String>();
 		permutation(components, variations); 
-
 		//search variations for pre-composed terms one by one, return all the results
 		boolean found = false;
 		for(String variation: variations){
@@ -231,7 +230,6 @@ public class EntitySearcher1 extends EntitySearcher {
 				//permute parts in the phrase
 				ArrayList<String> permutations = new ArrayList<String>();
 				EntitySearcher1.permutation(thiscomponents, permutations); 
-
 				//save EntityComponent
 				EntityComponent ec = new EntityComponent(phrasecp);
 				ec.isStructure(true); //each phrase representing a structure

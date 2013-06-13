@@ -74,7 +74,7 @@ public class CharacterHandler {
 	
 	public void parseEntity(){
 		Element structure = chara.getParentElement();
-		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
+		if(structure.getAttributeValue("name").replaceAll("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			EntityParser ep = new EntityParser(chara, root, structure, fromcharacterstatement);
 			this.tobesolvedentity = new ToBeSolved(structure.getAttributeValue("id"));
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
@@ -180,6 +180,7 @@ public class CharacterHandler {
 		
 		
 		//constraints may yield entity parts such as entity locator, save those, resolve them later
+		//Need to handle this differently, if quality is size.
 		if (chara.getAttribute("constraintid") != null) {
 			ArrayList<EntityProposals> entities = findEntityInConstraints();
 			for(EntityProposals entity: entities){

@@ -27,6 +27,7 @@ public class Structure2Quality implements AnnotationStrategy{
 	boolean fromcharacterstatement;
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+	EntityProposals spatialmodifier = null;
 	private TermOutputerUtilities ontoutil;
 	//static XPath pathCharacterUnderStucture;
 	XPath pathrelationfromStructure;
@@ -54,9 +55,20 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	public void handle() {
 		try {
+			removeSpatialTerms(this.structid);
 			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 		} catch (JDOMException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void removeSpatialTerms(String structid) throws JDOMException {
+
+		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
+		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
+		{
+			this.structname = structure.getAttributeValue("name");
+			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
 		}
 	}
 
@@ -125,7 +137,7 @@ public class Structure2Quality implements AnnotationStrategy{
 					structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
 					Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
 					String tostructname = tostruct.getAttributeValue("name");
-					Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+					Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", "","");	
 					if(Relatedentity!=null)
 					{
 						RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
@@ -255,7 +267,6 @@ public class Structure2Quality implements AnnotationStrategy{
 	//a separate function is created to handle structures(quality) with characters and without characters
 
 	private void Checkforsimplequality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-
 		Quality result;
 		if(chara!=null)
 			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion

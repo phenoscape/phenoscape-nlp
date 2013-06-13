@@ -59,7 +59,7 @@ public class RelationHandler {
 		
 		
 	private void parseEntity(){
-		if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
+		if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, parents, fromstructname,"part_of");	//corrected by Hong
@@ -110,6 +110,7 @@ public class RelationHandler {
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					Utilities.initEQHash(EQ);
 					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+					System.out.println("");
 					EQStatementProposals eqproposals = new EQStatementProposals();
 					if(entityproposals!=null){
 						ArrayList<Entity> entities = entityproposals.getProposals();
