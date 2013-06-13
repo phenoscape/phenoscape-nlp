@@ -29,7 +29,6 @@ public class RelationHandler {
 	Element relelement;
 	boolean negation; //if true, negate the relation string
 	boolean fromcharacterstatement;
-	boolean resolveel = false;
 	
 	public RelationHandler(Element root, String relation, Element relelement, String tostructname, String tostructid, String structname, String structid, boolean negation, boolean keyelement){
 		this.root = root;
@@ -185,7 +184,6 @@ public class RelationHandler {
 				
 				if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
 				{
-				this.resolveel=true;
 				this.entitylocator = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname,"",tostructname,"");
 				}
 				}

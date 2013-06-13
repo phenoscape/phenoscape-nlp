@@ -437,7 +437,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
 					Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
 					
-					if(ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+					if(ParentStructure.getAttributeValue("name").replaceAll("_", " ").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					{
 						if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
 						{
