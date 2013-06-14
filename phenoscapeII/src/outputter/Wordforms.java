@@ -9,19 +9,19 @@ import java.util.List;
 
 public class Wordforms {
 
-static String adjective_suffixes = "e|ed|ent|-like|like|shaped|-shaped|y|ly|ic|ted|ate|led|oid|ion|ied|ous|ing|form|iform|ally|ation|ure|al|ical|ication|sion|ded";
+static String adjective_suffixes = "e|ed|er|ent|-like|like|shaped|-shaped|y|ly|ic|ted|ate|led|oid|ion|ied|ous|ing|form|iform|ally|ation|ure|al|ical|ication|sion|ded";
 static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<String,LinkedHashSet<String>>();
 	
 	public static LinkedHashSet<String> toAdjective(String word)
 	{
 		//if the word is found in cache it returns it else, adjective forms are generated and a copy is stored in cache
-		if(adjectivecache.get(word)!=null)
-			return adjectivecache.get(word);
+		//if(adjectivecache.get(word)!=null)
+		//	return adjectivecache.get(word);
 			
 		String suffix[] = adjective_suffixes.split("\\|");
 		ArrayList<String> wordforms = stemforms(word);//Stems the word and return all the stemmed form
 		LinkedHashSet<String> forms = new LinkedHashSet<String>();
-		forms.add(wordforms.get(0));
+		forms.addAll(wordforms);
 		for(String word1:wordforms)
 		{
 			for(String suf:suffix)

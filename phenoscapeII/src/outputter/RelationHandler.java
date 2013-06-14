@@ -111,7 +111,6 @@ public class RelationHandler {
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					Utilities.initEQHash(EQ);
 					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-					System.out.println("");
 					EQStatementProposals eqproposals = new EQStatementProposals();
 					if(entityproposals!=null){
 						ArrayList<Entity> entities = entityproposals.getProposals();

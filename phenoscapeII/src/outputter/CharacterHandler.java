@@ -193,7 +193,13 @@ public class CharacterHandler {
 
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
+		
 		if(result!=null){ //has a strong match
+			//qualities involving length should be handled with related entity
+			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length)"))
+			{
+				this.resolve=true;
+			}
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
@@ -505,7 +511,9 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 		//the below condition handles situation where a structure is identified to be a quality.
 		if(this.entity==null)
 		{
-			if(tobesolvedentity.s2q==null)
+			if(tobesolvedentity!=null)
+			{
+				if(tobesolvedentity.s2q==null)
 			{
 				//whole organism
 			}
@@ -530,11 +538,53 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					}
 				}
 			}
+			}
 		}
-		
+		//Reolve for quality when it is "length"
+		if(this.entityparts!=null)
+		{
+			resolveIntoRelationalQuality();
+		}
 		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
-	
+/**
+ * This function handles the special case when increased/decreased length is a quality
+ * The entity in parts will become the Related entity instead of Entity Locator
+ */
+	public void resolveIntoRelationalQuality() {
+
+		ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
+		
+		if(this.qualities.size()>0)
+		{
+			for(QualityProposals qp:this.qualities)
+			{
+				
+				for(Quality q:qp.getProposals())//Reading each of the qualities
+				{
+					QualityProposals newqp = new QualityProposals();
+					
+					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+							{		
+							for(EntityProposals ep : this.entityparts)
+							{
+								RelationalQuality rq = new RelationalQuality(qp,ep);//this forms relationalquality for each of QP and RE and used for new QP
+								newqp.add(rq);
+							}
+							rqp.add(newqp); 
+							break;
+							}
+				}
+				
+			}
+			if(rqp.size()>0)
+			{
+				this.entityparts.clear();
+				this.qualities.clear();
+				this.qualities.addAll(rqp);
+			}
+		}
+	}
 
 	public ArrayList<QualityProposals> getQualities(){
 		return this.qualities;

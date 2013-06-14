@@ -147,6 +147,7 @@ public class TermSearcher {
 		if(phrasetype.compareTo("quality")==0)
 		{
 			//TODO: Handle cases like divergent from => ending with a preposition
+			
 			LinkedHashSet<String> phraseforms = Wordforms.toAdjective(phrase);
 			//Uses wordforms class to get all the adjectives of this quality
 			for(String form:phraseforms)
