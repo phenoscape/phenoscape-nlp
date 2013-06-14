@@ -339,7 +339,7 @@ public class SegmentIntegrator {
 						name = structure.getAttributeValue("constraint")+" "+name;
 					//if(structure.getAttribute("constraint_parent_organ") !=null)
 					//	name = structure.getAttributeValue("constraint_parent_organ")+" "+name;
-					Element wo = (Element)XPath.selectSingleNode(statement, ".//structure[@name='whole_organism']");
+					Element wo = (Element)XPath.selectSingleNode(statement, ".//structure[@name='whole organism']");
 					if(wo!=null){
 						List<Element> content = structure.getContent();
 						structure.removeContent();
@@ -352,7 +352,7 @@ public class SegmentIntegrator {
 						structure.detach();
 						structure = wo;
 					}
-					structure.setAttribute("name", "whole_organism");
+					structure.setAttribute("name", "whole organism");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "life_style");
 					ch.setAttribute("value", name);
@@ -362,7 +362,7 @@ public class SegmentIntegrator {
 				/*if(lifestyle.matches(".*\\b"+name+"\\b.*")){
 					if(structure.getAttribute("constraint") !=null)
 						name = structure.getAttributeValue("constraint")+" "+name;
-					structure.setAttribute("name", "whole_organism");
+					structure.setAttribute("name", "whole organism");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "life_style");
 					ch.setAttribute("value", name);

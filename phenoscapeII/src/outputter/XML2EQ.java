@@ -283,7 +283,7 @@ public class XML2EQ {
 	 * For example, 1 character statement with 3 state statements
 	 * <statement statement_type="character" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" seg_id="0">
 	 * 	<text>Shape of ancistrine opercle (ordered )</text>
-	 * 	<structure id="o650" name="whole_organism">
+	 * 	<structure id="o650" name="whole organism">
 	 * 		<character name="shape" value="shape" constraint="of ancistrine opercle" constraintid="o651" />
 	 * 	</structure>
 	 * 	<structure id="o651" name="opercle" constraint="ancistrine" />
@@ -291,21 +291,21 @@ public class XML2EQ {
 	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="4a99e866-54d9-4875-8b5e-385427db1245" seg_id="0">
 	 * 	<text>sickle-shaped (&lt;i&gt;Peckoltia&lt;/i&gt;-type )</text>
-	 * 	<structure id="o652" name="whole_organism">
+	 * 	<structure id="o652" name="whole organism">
 	 * 		<character name="shape" value="sickle-shaped" />
 	 * 	</structure>
 	 * </statement>
 	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="d53ba92f-0865-4456-9111-c6ff37fc624a" seg_id="0">
 	 * 	<text>barshaped (&lt;i&gt;Ancistrus&lt;/i&gt;-type )</text>
-	 * 	<structure id="o653" name="whole_organism">
+	 * 	<structure id="o653" name="whole organism">
 	 * 		<character name="shape" value="barshaped" />
 	 * 	</structure>
 	 * </statement>
 	 * 
 	 * <statement statement_type="character_state" character_id="0a1e6749-13fc-47be-bc7f-8184fc9c26ad" state_id="f56a9b6a-9720-437c-a1f4-60f01cd1bb15" seg_id="0">
 	 * 	<text>oval or triangular</text>
-	 * 	<structure id="o654" name="whole_organism">
+	 * 	<structure id="o654" name="whole organism">
 	 * 		<character name="shape" value="oval" />
 	 * 		<character name="shape" value="triangular" />
 	 * 	</structure>
@@ -403,7 +403,7 @@ public class XML2EQ {
 			EQc.put("stateid", state.getAttributeValue("state_id"));
 
 			Element firststruct = (Element) state.getChildren("structure").get(0);
-			if (!firststruct.getAttributeValue("name").contains("whole_organism")) {
+			if (!firststruct.getAttributeValue("name").contains("whole organism")) {
 				// noun as state
 				String fsname = Utilities.getStructureName(root, firststruct.getAttributeValue("id"));
 				String characterstr = charactersAsString(root, firststruct);
@@ -417,7 +417,7 @@ public class XML2EQ {
 					this.allEQs.add(EQc);
 				}
 			} else {
-				// collecting all characters of whole_organism
+				// collecting all characters of whole organism
 				List<Element> chars = pathWholeOrgStrucChar.selectNodes(state);
 				for (Element chara : chars) {
 					Hashtable<String, String> EQi = (Hashtable<String, String>) EQc.clone();
@@ -432,7 +432,7 @@ public class XML2EQ {
 					EQi.put("qualitymodifier", QMs);
 					this.allEQs.add(EQi);
 				}
-				// collecting relations of whole_organism
+				// collecting relations of whole organism
 				List<Element> wos = XMLNormalizer.pathWholeOrganismStructure.selectNodes(state);
 				for (Element wo : wos) {
 					String id = wo.getAttributeValue("id");
@@ -1072,7 +1072,7 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test";
 
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;

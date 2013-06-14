@@ -175,9 +175,45 @@ public class TermSearcher {
 		
 		//lastly, rank candidate matches and select the most likely one
 		//TODO
-		return null;
+		if(this.candidatematches.size()>0)
+		{
+			
+			return candidateMataches(this.candidatematches,phrasetype,(float) .5);
+		}
+		else
+			return null;
 	}
 	
+		private FormalConcept candidateMataches(ArrayList<Hashtable<String, String>> results,String type,float confscore)
+		{
+
+				for(Hashtable<String, String> aresult : results){
+					if(aresult.get("matchtype").contains("related")){
+						if(type.compareTo("entity")==0){
+							SimpleEntity entity = new SimpleEntity();
+							entity.setString(aresult.get("term"));
+							entity.setLabel(aresult.get("label"));
+							entity.setId(aresult.get("id"));
+							entity.setClassIRI(aresult.get("iri"));
+							entity.setConfidenceScore(confscore);
+							cacheIt(aresult.get("term"), entity, type);
+							return entity;
+						}else{
+							Quality quality = new Quality();
+							quality.setString(aresult.get("term"));
+							quality.setLabel(aresult.get("label").split(";")[0]);
+							quality.setId(aresult.get("id").split(";")[0]);
+							quality.setClassIRI(aresult.get("iri").split(";")[0]);
+							quality.setConfidenceScore(confscore);
+							cacheIt(aresult.get("term"), quality, type);
+							return quality;
+						}		
+					} 
+				}			
+			
+			return null;
+		}
+		
 	private static String format(String word) {
 		word = word.replaceAll("_", " "); // abc_1
 		word = word.replaceAll("(?<=\\w)- (?=\\w)", "-"); // dorsal- fin

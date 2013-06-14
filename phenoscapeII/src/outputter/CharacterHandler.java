@@ -89,7 +89,9 @@ public class CharacterHandler {
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
 			this.resolve = true;			
 			this.entity=ep.getEntity();
-		}
+			if(this.entity!=null)
+			this.primaryentities.add(this.entity);
+			}
 		
 		/*String structurename = (structure.getAttribute("constraint")!=null? 
 				structure.getAttributeValue("constraint"): ""+" "+structure.getAttributeValue("name")).trim();
@@ -124,7 +126,7 @@ public class CharacterHandler {
 				
 			//}
 
-			//this.primaryentities.add(this.entity);
+			this.primaryentities.add(this.entity);
 
 		//}		*/
 	}
@@ -169,7 +171,7 @@ public class CharacterHandler {
 				}
 			}
 			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole organism, it should be handled here
-				//single, non-bilateral structure: fused: for example whole_organism:fused
+				//single, non-bilateral structure: fused: for example whole organism:fused
 			{
 				//Handling characters that belong to a single structure => Hariharan
 				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
@@ -186,6 +188,7 @@ public class CharacterHandler {
 		
 		
 		//constraints may yield entity parts such as entity locator, save those, resolve them later
+		//Need to handle this differently, if quality is size.
 		if (chara.getAttribute("constraintid") != null) {
 			ArrayList<EntityProposals> entities = findEntityInConstraints();
 			for(EntityProposals entity: entities){
@@ -442,7 +445,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
 					Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
 					
-					if(ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+					if(ParentStructure.getAttributeValue("name").replaceAll("_", " ").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					{
 						if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
 						{
@@ -505,6 +508,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 	 * should try to resove them here? or in the end?
 	 */
 	public void resolve(){
+
 		//TODO
 		//this was how s2q was used before in SSP.
 		//Structure2Quality rq2 = new Structure2Quality(root,
@@ -514,6 +518,40 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 		//	entity = rq2.primaryentities;
 	    //  qualities = rq2.qualities;
 		//} else {
+
+		//TODO add some more conditions for resolving
+		
+		//the below condition handles situation where a structure is identified to be a quality.
+		if(this.entity==null)
+		{
+			if(tobesolvedentity.s2q==null)
+			{
+				//whole organism
+			}
+			if(tobesolvedentity.s2q!=null)
+			{
+				if(tobesolvedentity.s2q.qualities!=null)
+				{
+					this.qualities.clear();
+					this.qualities.addAll(tobesolvedentity.s2q.qualities);
+					if(tobesolvedentity.s2q.primaryentities.size()>0)//relational quality might contain primary entities
+					{
+						this.primaryentities.clear();
+						this.primaryentities.addAll(primaryentities);
+					}
+					else
+					{
+						if(keyentities!=null)
+						{
+						this.primaryentities.clear();
+						this.primaryentities.addAll(keyentities);
+						}
+					}
+				}
+			}
+		}
+		
+		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
 	
 

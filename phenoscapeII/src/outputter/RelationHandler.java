@@ -17,6 +17,7 @@ import org.jdom.Element;
 public class RelationHandler {
 	EntityProposals entity; //entity holds the result on entity, may be simple or composite (with a entity locator)
 	QualityProposals quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
+	EntityProposals entitylocator;
 	ArrayList<EQStatementProposals> otherEQs;
 	
 	Element root;
@@ -59,7 +60,7 @@ public class RelationHandler {
 		
 		
 	private void parseEntity(){
-		if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
+		if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, parents, fromstructname,"part_of");	//corrected by Hong
@@ -110,6 +111,7 @@ public class RelationHandler {
 					Hashtable<String, String> EQ = new Hashtable<String, String>();
 					Utilities.initEQHash(EQ);
 					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+					System.out.println("");
 					EQStatementProposals eqproposals = new EQStatementProposals();
 					if(entityproposals!=null){
 						ArrayList<Entity> entities = entityproposals.getProposals();
@@ -168,7 +170,25 @@ public class RelationHandler {
 				}
 			} else if(relation.matches("\\b(between|among|amongst)\\b.*")){
 				//TODO between is a preposition too.
-			} else {//qualitymodifier to which quality??? could indicate an error, but output anyway
+			}else if(relation.matches("\\b(found|located)\\b.*"))// This handles patter 4.1
+				{
+				
+				Quality present = new Quality();
+				present.setString("present");
+				present.setLabel("PATO:present");
+				present.setId("PATO:0000467");
+				present.setConfidenceScore((float)1.0);
+				
+				this.quality = new QualityProposals();
+				this.quality.add(present);
+				
+				if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
+				{
+				this.entitylocator = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname,"",tostructname,"");
+				}
+				}
+				else {//qualitymodifier to which quality??? could indicate an error, but output anyway
+			
 				/*Hashtable<String, String> result = EntitySearcher.searchEntity(root, tostructid, tostructname, "", tostructname, relation, 0);
 				results.put("qualitymodifier", results.get("qualitymodifier")+","+tostructname);
 				if(result!=null){

@@ -194,6 +194,7 @@ public class StateStatementParser extends Parser {
 		}
 	}
 
+
 	/**
 	 * parse character and resolve for entity
 	 * @param character
@@ -211,7 +212,7 @@ public class StateStatementParser extends Parser {
 		//String structname = character.getParentElement()
 		//		.getAttributeValue("name" + "");
 		boolean maybesubject = false;
-		
+
 		//Structure2Quality rq2 = new Structure2Quality(root,
 		//		structname, structid, this.keyentities);
 		//rq2.handle();
@@ -253,7 +254,60 @@ public class StateStatementParser extends Parser {
 		{
 			entities.addAll(entity);
 		}
+
+		//This is for resolving final entities with entity in parts=> iliac blade: Flared at the proximal end 
+		if(ch.entityparts.size()>0)
+		{
+			entities = resolveFinalEntities(entities,ch.entityparts);
+		}
 	}
+
+
+	//Resolve entity in parts/spatial modifiers with final entities
+	private ArrayList<EntityProposals> resolveFinalEntities(ArrayList<EntityProposals> entities,
+			ArrayList<EntityProposals> entityparts) {
+
+		ArrayList<EntityProposals> finalentities = new ArrayList<EntityProposals>();
+		if((entities!=null)&&entities.size()>0)
+		{
+			for(EntityProposals ep1: entityparts)
+			{
+				for(Entity e1:ep1.getProposals())
+				{
+					for(EntityProposals ep2: entities)
+					{
+						EntityProposals ep3 = new EntityProposals();
+						for(Entity e2: ep2.getProposals())
+						{
+							FormalRelation rel = new FormalRelation();
+							rel.setString("part of");
+							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
+							rel.setId("BFO:000050");
+							rel.setConfidenceScore((float)1.0);
+							REntity rentity = new REntity(rel, e2);
+							CompositeEntity centity = new CompositeEntity();
+							//composite entity
+							if(e1 instanceof SimpleEntity)
+							{
+								centity.addEntity(e1);
+								centity.addEntity(rentity);
+							}
+							else
+							{
+								centity = ((CompositeEntity)e1).clone();
+								((CompositeEntity)centity).addEntity(rentity);
+							}
+							ep3.add(centity);
+						}
+						finalentities.add(ep3);
+					}
+				}
+			}
+		}
+		return finalentities;
+	}
+
+
 	/*
 	 protected void parseCharacters(Element statement, Element root) {
 		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
@@ -348,7 +402,7 @@ public class StateStatementParser extends Parser {
 		}
 	}
 
-	
+
 	public int parseRelation(Element relation, Element root, ArrayList<String> StructuredQualities, ArrayList<EntityProposals> entities,  List<QualityProposals> q){
 		int flag = 1; //should the relation be retained or ignored. 1 = retain
 		for (String structid : StructuredQualities){ //StructuredQualities: initially empty, populated with the ids of 'bad' structures (that are really quliaties") 
@@ -370,35 +424,47 @@ public class StateStatementParser extends Parser {
 			String toname = Utilities.getStructureName(root, toid);
 			String fromname = Utilities.getStructureName(root, fromid);
 			boolean maybesubject = false;
-
 			ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
-
+			EntityProposals spatialmodifier = null;
+			EntityProposals entitylocator =null;
 			// Changes starting => Hariharan
 			// checking if entity is really an entity or it is a quality
 			// by passing to and from struct names to relational quality
 			// strategy.
 
-
 			Structure2Quality rq1 = new Structure2Quality(root,
 					fromname, fromid, keyentities);
 			rq1.handle();
-			
-			
+
 			Structure2Quality rq2 = null;
-			if(toid.indexOf(" ")<0){
+			if(toid.indexOf(" ")<0){ //temp solution, multiple ids in toid is handled in S2Q process in fromname
 				rq2 = new Structure2Quality(root,
 						toname, toid, keyentities);
 				rq2.handle();
 			}
-			
+
 			if (rq1.qualities.size() > 0) {
 				StructuredQualities.addAll(rq1.identifiedqualities);
-				e = rq1.primaryentities;//
+				if(rq1.primaryentities.size()>0)
+					e = rq1.primaryentities;//e is now showed to be a quality
 				q.addAll(rq1.qualities);
+				//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
+				if((this.keyentities!=null)||(e.size()>0))
+					rq1.detach_character();
+
+				if(rq1.spatialmodifier!=null)
+					spatialmodifier=rq1.spatialmodifier;
+
 			}else if (rq2.qualities.size() > 0) {
 				StructuredQualities.addAll(rq2.identifiedqualities);
-				e = rq2.primaryentities;//e is now showed to be a quality
+				if(rq2.primaryentities.size()>0)
+					e = rq2.primaryentities;//e is now showed to be a quality
 				q.addAll(rq2.qualities);
+				//This ensures that characters are not detached until they have been used up to form meaningful EQStatements
+				if((this.keyentities!=null)||(e.size()>0))
+					rq2.detach_character();
+				if(rq2.spatialmodifier!=null)
+					spatialmodifier=rq2.spatialmodifier;
 			}
 			else{
 				try {
@@ -410,37 +476,72 @@ public class StateStatementParser extends Parser {
 						toname, toid, fromname, fromid, neg, false);
 				rh.handle();
 				if(rh.getEntity()!=null)
+				{
 					e.add(rh.getEntity());
+				}
 
 				q = new ArrayList<QualityProposals>();
-				if(rh.getQuality()!=null) q.add(rh.getQuality());
+				if(rh.getQuality()!=null) 
+				{
+					q.add(rh.getQuality());
+				}
 				if (rh.otherEQs.size() > 0)
+				{
 					this.EQStatements.addAll(rh.otherEQs);
+				}
+				if(rh.entitylocator!=null)
+				{
+					entitylocator = rh.entitylocator;
+				}
+
 			}
 
 			// Changes Ending => Hariharan Include flag below to make
 			// sure , to include EQ's only when qualities exist.
 
-			if (q.size() > 0) {
-				ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
-				if (maybesubject && e != null
-						&& this.keyentities != null) {
-					entities = resolve(e, keyentitiesclone);
-				} else if (maybesubject && e == null
-						&& this.keyentities != null) {
-					entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
-				} else if (e != null) {
-					entities.addAll(e);
-				} else {
-					entities = keyentitiesclone; 
-					// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
-					//hong: hasn't this case been handled already above?
-				}
-				//constructEQStatementProposals(q, entities);
-			}else{
-				//create q = "present"
+			ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
+			if (maybesubject && e.size()>0
+					&& this.keyentities != null) {
+				entities = resolve(e, keyentitiesclone);
+			} else if (maybesubject && e.size()==0
+					&& this.keyentities != null) {
+				entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
+			} else if (e.size()>0) {
+				entities.addAll(e);
+			} else {
+				entities = keyentitiesclone; 
+				// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
+				//hong: hasn't this case been handled already above?
 			}
 
+			//resolve final entities with spatial modifiers
+			if(spatialmodifier!=null)
+			{
+				ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
+				spatialmodifiers.add(spatialmodifier);							
+				entities = resolveFinalEntities(entities,spatialmodifiers);
+			}
+
+			if(entitylocator!=null)
+			{
+				ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
+				entitylocators.add(entitylocator);							
+				entities = resolveFinalEntities(entitylocators,entities);
+			}
+
+			if(q.size()==0)
+			{
+				Quality present = new Quality();
+				present.setString("present");
+				present.setLabel("PATO:present");
+				present.setId("PATO:0000467");
+				present.setConfidenceScore((float)1.0);
+
+				QualityProposals qp = new QualityProposals();
+				qp.add(present);
+
+				q.add(qp);
+			}
 		}
 		return flag;
 	}
@@ -448,7 +549,8 @@ public class StateStatementParser extends Parser {
 	private void constructEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
 
-		if((entities!=null)&&(entities.size()>0)&&(qualities!=null)&&(qualities.size()>0))
+
+		if((entities!=null)&&(entities.size()>0))
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					EQStatementProposals eqp = new EQStatementProposals();
@@ -508,7 +610,7 @@ public class StateStatementParser extends Parser {
 			entities.addAll(e);
 			return entities;
 		}
-		
+
 		if(e==null || e.size()==0){
 			return keyentities;
 		}
@@ -522,7 +624,7 @@ public class StateStatementParser extends Parser {
 		Iterator entityitr =e.listIterator();
 		while(entityitr.hasNext())
 		{
-			// if e is whole_organism
+			// if e is whole organism
 			EntityProposals ep = (EntityProposals) entityitr.next();
 			if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
 				entityitr.remove();
@@ -542,7 +644,7 @@ public class StateStatementParser extends Parser {
 		return (ArrayList<EntityProposals>) keyentities;
 	}
 
-	
+
 
 
 	private ArrayList<EntityProposals> resolveBaseOnPartOfRelation(ArrayList<EntityProposals> eProposals, ArrayList<EntityProposals> keyentities){

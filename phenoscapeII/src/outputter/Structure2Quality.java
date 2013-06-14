@@ -27,6 +27,7 @@ public class Structure2Quality implements AnnotationStrategy{
 	boolean fromcharacterstatement;
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+	EntityProposals spatialmodifier = null;
 	private TermOutputerUtilities ontoutil;
 	//static XPath pathCharacterUnderStucture;
 	XPath pathrelationfromStructure;
@@ -54,9 +55,20 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	public void handle() {
 		try {
+			removeSpatialTerms(this.structid);
 			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 		} catch (JDOMException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void removeSpatialTerms(String structid) throws JDOMException {
+
+		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
+		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
+		{
+			this.structname = structure.getAttributeValue("name");
+			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
 		}
 	}
 
@@ -235,11 +247,11 @@ public class Structure2Quality implements AnnotationStrategy{
 		else
 			Checkforsimplequality(null,quality,qualityid,negated,chara_detach);
 
-		detach_character();
+		//detach_character(); need to be invoked only when S2Q is being accpeted by the calling function
 		return;
 	}
 	
-	private void detach_character() {
+	public void detach_character() {
 
 		for(Element chara:this.detach_characters)
 			chara.detach();
@@ -285,7 +297,6 @@ public class Structure2Quality implements AnnotationStrategy{
 	//a separate function is created to handle structures(quality) with characters and without characters
 
 	private void Checkforsimplequality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-
 		Quality result;
 		if(chara!=null)
 			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion

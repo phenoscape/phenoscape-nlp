@@ -214,6 +214,7 @@ public class Dictionary {
 		//end is defined to be region => distal end => distal region
 		spatialMaps.put("end", "region");
 		//spatialMaps.put("end", "margin");
+		spatialMaps.put("segment","region"); // to address basal segment => basal region(only when segment is preceded by spatial term)
 	}
 	//legal relational qualities
 	static{	

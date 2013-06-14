@@ -32,7 +32,6 @@ public class EntityParser {
 			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structurename, false);
 			if (relationalquality != null) quality = relationalquality;
 		}*/
-		
 		Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
 		rq.handle();
 		//If any structure is a quality detach all the structures containing the structure id

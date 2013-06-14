@@ -158,7 +158,7 @@ public class CharacterAnnotatorChunked {
 		if (token.startsWith("z[") || token.startsWith("l[") || token.startsWith("u[")) {
 			annotateByChunk(cs, false);
 		} else {
-			establishSubject("(whole_organism)");
+			establishSubject("(whole organism)");
 			cs.setInSegment(true);
 			cs.setRightAfterSubject(true);
 			annotateByChunk(cs, false);
@@ -166,7 +166,7 @@ public class CharacterAnnotatorChunked {
 		/*
 		 * String subject= cs.getSubjectText(); if(subject==null &&
 		 * cs.getPointer()==0){ Chunk ck = cs.nextChunk(); cs.resetPointer();
-		 * establishSubject("(whole_organism)"); annotateByChunk(cs, false);
+		 * establishSubject("(whole organism)"); annotateByChunk(cs, false);
 		 * }//end mohan code else if(subject.equals("measurements")){
 		 * this.annotatedMeasurements(this.text); }else
 		 * if(!subject.equals("ignore")){ if(subject.equals("ditto")){
@@ -331,11 +331,11 @@ public class CharacterAnnotatorChunked {
 				if (!text.matches("(" + ChunkedSentence.binaryTvalues + "|" + ChunkedSentence.binaryFvalues + ")")) {// non
 																														// binary
 																														// states
-					Element str = new Element("structure"); // whole_organism as
+					Element str = new Element("structure"); // whole organism as
 															// a placeholder
 					str.setAttribute("id", this.structid + "");
 					this.structid++;
-					str.setAttribute("name", "whole_organism");
+					str.setAttribute("name", "whole organism");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "unknown"); // TODO: unknown as a
 														// placeholder
@@ -427,7 +427,7 @@ public class CharacterAnnotatorChunked {
 	 *Original statement: 
 	 * 	<statement statement_type="character_state" character_id="975551bf-c0d8-4d97-9cbc-f7c5b7b38b99" state_id="14e6ee40-450d-4d5f-9573-3c04d8dc0954" seg_id="0">
      * 		<text>loss of connection between pseudobranchial and suprabranchial arteries</text>
-     *		<structure id="o234" name="whole_organism">
+     *		<structure id="o234" name="whole organism">
      *   		<character name="presence" value="loss" constraint="of connection" constraintid="o235" />
      * 		</structure>
      * 		<structure id="o235" name="connection" />
@@ -572,7 +572,7 @@ public class CharacterAnnotatorChunked {
 	}
 
 	private void removeIsolatedWholeOrganismPlaceholders() throws JDOMException {
-		// remove whole_organism structures that without any character children
+		// remove whole organism structures that without any character children
 		// and are not involved in a relation.
 		// These structures were put in as placeholders in processing
 		// characters/character states descriptions
@@ -641,7 +641,7 @@ public class CharacterAnnotatorChunked {
 						structure.detach();
 						structure = wo;
 					}
-					structure.setAttribute("name", "whole_organism");
+					structure.setAttribute("name", "whole organism");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "life_style");
 					ch.setAttribute("value", name);
@@ -653,7 +653,7 @@ public class CharacterAnnotatorChunked {
 				 * if(lifestyle.matches(".*\\b"+name+"\\b.*")){
 				 * if(structure.getAttribute("constraint") !=null) name =
 				 * structure.getAttributeValue("constraint")+" "+name;
-				 * structure.setAttribute("name", "whole_organism"); Element ch
+				 * structure.setAttribute("name", "whole organism"); Element ch
 				 * = new Element("character"); ch.setAttribute("name",
 				 * "life_style"); ch.setAttribute("value", name);
 				 * structure.addContent(ch); }
@@ -766,7 +766,7 @@ public class CharacterAnnotatorChunked {
 					updateLatestElements(e);
 				}else if (ck != null && last.getName().compareTo("structure") == 0) { //scattered <patches> or absent
 					if(this.printOR) System.out.println("created whole organism for OR");
-					ArrayList<Element> structure = this.createStructureElements("(whole_organism)");
+					ArrayList<Element> structure = this.createStructureElements("(whole organism)");
 					updateLatestElements(structure);
 				}
 				/*ArrayList<Element> e = new ArrayList<Element>();
@@ -2289,8 +2289,8 @@ public class CharacterAnnotatorChunked {
 				structs = this.latestelements;
 			} else if (this.subjects.size() != 0) {
 				structs = this.subjects;
-			} else { // create placeholder structure "whole_organism"
-				this.establishSubject("(whole_organism)");
+			} else { // create placeholder structure "whole organism"
+				this.establishSubject("(whole organism)");
 				structs = this.subjects;
 			}
 			Element ch = new Element("character");
@@ -3581,7 +3581,7 @@ public class CharacterAnnotatorChunked {
 	 */
 	private void annotatedMeasurements(String measurements) {
 		measurements = measurements.replaceAll("–", "-");
-		Element whole = new Element("whole_organism");
+		Element whole = new Element("whole organism");
 		// this.statement.addContent(whole);
 		addContent(this.statement, whole);
 		ArrayList<Element> parent = new ArrayList<Element>();
