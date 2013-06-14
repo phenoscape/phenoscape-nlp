@@ -43,8 +43,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	public void parse(Element statement, Element root){
 		ArrayList<EQStatementProposals> negativestatements = new ArrayList<EQStatementProposals>();
 		super.parseMetadata(statement, root);
-		super.parseRelations(statement, root);
-		super.parseCharacters(statement, root);
+		super.parseRelationsFormEQ(statement, root);
+		super.parseCharactersFormEQ(statement, root);
 		if(this.EQStatements.size()==0){
 			//try {
 			//checkandfilterstructuredquality(statement,root);//checks standalone structure for quality values and detach them.
@@ -76,7 +76,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					absent.setLabel("PATO:absent");
 					absent.setId("PATO:0000462");
 					absent.setConfidenceScore((float)1.0);
-					EQStatement falseeq = clone(eq);
+					EQStatement falseeq = eq.clone();
 					falseeq.setQuality(absent);
 					EQStatementProposals negativeproposals = new EQStatementProposals();
 					negativeproposals.add(falseeq);
@@ -96,7 +96,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 								parentquality.setLabel(parentinfo[1]);
 								parentquality.setId(parentinfo[0]);
 								NegatedQuality nq = new NegatedQuality(q, parentquality);
-								EQStatement falseeq = clone(eq);
+								EQStatement falseeq = eq.clone();
 								falseeq.setQuality(nq);
 								EQStatementProposals negativeproposals = new EQStatementProposals();
 								negativeproposals.add(falseeq);
@@ -148,7 +148,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							}
 						}
 						RelationalQuality rq = new RelationalQuality(nqp,relatedentity);
-						EQStatement falseeq = clone(eq);
+						EQStatement falseeq = eq.clone();
 						falseeq.setQuality(rq);
 						EQStatementProposals negativeproposals = new EQStatementProposals();
 						negativeproposals.add(falseeq);
@@ -177,7 +177,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				String structureid = structure.getAttributeValue("id");
 				if(!checked.contains(structureid+",")){
 					String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0);
-					EntityParser ep = new EntityParser(statement, root, structure, true);
+					String structurename = Utilities.getStructureName(root, structureid);
+					EntityParser ep = new EntityParser(statement, root, structureid, structurename, true);
 					if(ep.getEntity()!=null) entities.add(ep.getEntity());
 					if(ep.getQualityStrategy()!=null) s2qs.add(ep.getQualityStrategy());
 					checked += structureid+","+parents+",";
@@ -240,7 +241,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		//if a s2q is approved, use the quality and call s2q.cleanHandledStructures
 	}
 
-	private void checkandfilterstructuredquality(Element statement,Element root) throws JDOMException {
+	/*private void checkandfilterstructuredquality(Element statement,Element root) throws JDOMException {
 
 		String structname;
 		String structid;
@@ -258,19 +259,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			if(rq.qualities.size()>0)
 				structure.detach(); //no need to detach relations because the StateStatementParser was already called (the relations are handled there)	
 		}
-	}
+	}*/
 
-	private EQStatement clone(EQStatement eq){
-		EQStatement eq1 = new EQStatement();
-		eq1.setCharacterId(eq.getCharacterId());
-		eq1.setEntity(eq.getEntity());
-		eq1.setQuality(eq.getQuality());
-		eq1.setSource(eq.getSource());
-		eq1.setStateId(eq.getStateId()); //TODO: change it for states
-		eq1.setDescription(eq.getDescription());
-		eq1.setType(eq.getType());
-		return eq1;
-	}
+
 
 	/**
 	 * @param args

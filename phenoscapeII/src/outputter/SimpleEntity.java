@@ -130,7 +130,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	}
 	
 	//Clones the simple entity
-	public SimpleEntity simplecloning() {
+	public SimpleEntity clone() {
 
 			SimpleEntity entity1 = new SimpleEntity();
 			entity1.setId(this.getId());
@@ -138,7 +138,6 @@ public class SimpleEntity extends Entity implements FormalConcept{
 			entity1.setConfidenceScore(this.getConfidienceScore());
 			entity1.setString(this.getString());
 			entity1.setLabel(this.getLabel());
-		
 		return entity1;
 	}
 

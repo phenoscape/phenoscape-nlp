@@ -23,22 +23,26 @@ import org.jdom.xpath.XPath;
  * yes, for example, "fused"
  */
 public class CharacterHandler {
+	//input
 	private TermOutputerUtilities ontoutil;
 	Element root;
 	Element chara;
-	EntityProposals entity; //the entity result will be saved here, which may be null, indicating the ke y entities parsed from the character statement should be used for this character
+	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
+	private ArrayList<EntityProposals> keyentities;
+	boolean fromcharacterstatement = false;
+	
+	//results
+	EntityProposals entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //the quality result will be saved here. Because n structures may be involved in constraints (hence multiple relational qualities), this needs to be an arraylist. May be relationalquality, simple quality, or negated quality
 	ArrayList<EntityProposals> entityparts = new ArrayList<EntityProposals>(); //come from constraints, may have multiple.
-	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
-	boolean resolve = false;
-	boolean fromcharacterstatement = false;
-	private ToBeSolved tobesolvedentity;
-	private ArrayList<EntityProposals> keyentities;
-	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
-	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
-	ArrayList<Entity> bilateral = new ArrayList<Entity>();
+	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>(); //entities no need to be resolved
 	boolean donotresolve=false;// This is to resolve between key entities and relational quality entities
 
+	//used in process
+	boolean resolve = false;
+	private ToBeSolved tobesolvedentity;
+	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	static XPath pathCharacterUnderStucture;
 
 	/**
@@ -71,11 +75,15 @@ public class CharacterHandler {
 		if(resolve) resolve();
 	}
 	
-	
-	public void parseEntity(){
+	/**
+	 * can't be called out of context, so can't be a public method
+	 */
+	private void parseEntity(){
 		Element structure = chara.getParentElement();
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
-			EntityParser ep = new EntityParser(chara, root, structure, fromcharacterstatement);
+			String structureid = structure.getAttributeValue("id");
+			String structurename = Utilities.getStructureName(root, structureid);
+			EntityParser ep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
 			this.tobesolvedentity = new ToBeSolved(structure.getAttributeValue("id"));
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
@@ -122,7 +130,7 @@ public class CharacterHandler {
 	}
 	
 	
-	public void parseQuality(){
+	private void parseQuality(){
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
@@ -262,7 +270,7 @@ public class CharacterHandler {
 	
 private boolean checkBilateral(EntityProposals ep) {
 		
-	EntityProposals epclone = ep.clone(ep);//cloning to avoid original entity proposals to be changed
+	EntityProposals epclone = ep.clone();//cloning to avoid original entity proposals to be changed
 		
 	boolean bilateralcheck = false;
 	for(Entity e:epclone.getProposals())
@@ -498,6 +506,14 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 	 */
 	public void resolve(){
 		//TODO
+		//this was how s2q was used before in SSP.
+		//Structure2Quality rq2 = new Structure2Quality(root,
+		//		structname, structid, this.keyentities);
+		//rq2.handle();
+		//if(rq2.qualities.size()>0){
+		//	entity = rq2.primaryentities;
+	    //  qualities = rq2.qualities;
+		//} else {
 	}
 	
 

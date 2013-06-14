@@ -64,7 +64,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 					if(this.bilateralentity instanceof SimpleEntity)// define
 					{
 						//Related Entity
-						SimpleEntity bilateralclone1 = ((SimpleEntity)this.bilateralentity).simplecloning();
+						SimpleEntity bilateralclone1 = ((SimpleEntity)this.bilateralentity).clone();
 						REntity related1 = this.multicellularrelatedentity("in right side of");
 						CompositeEntity centity = new CompositeEntity();
 						centity.addEntity((SimpleEntity)bilateralclone1);
@@ -81,8 +81,8 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 					if(this.bilateralentity instanceof CompositeEntity)//In the composite structure, it identifies the bilateral entity and makes it to be located in a multicellular organism 
 					{
 						//Cloning to prevent the original entity from being modified
-						CompositeEntity bilateralclone1 = ((CompositeEntity)this.bilateralentity).compositecloning();
-						CompositeEntity bilateralclone2 = ((CompositeEntity)this.bilateralentity).compositecloning();
+						CompositeEntity bilateralclone1 = ((CompositeEntity)this.bilateralentity).clone();
+						CompositeEntity bilateralclone2 = ((CompositeEntity)this.bilateralentity).clone();
 						//Creating related entities by appending in right side of relation to the bilateral structure
 						for(Entity e:((CompositeEntity) bilateralclone1).getEntities())
 						{

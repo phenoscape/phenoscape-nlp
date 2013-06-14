@@ -118,6 +118,15 @@ public class FormalRelation implements FormalConcept {
 		return this.id != null;
 	}
 
+	public FormalRelation clone(){
+		FormalRelation fr = new FormalRelation();
+		fr.setClassIRI(this.classIRI);
+		fr.setConfidenceScore(this.confidenceScore);
+		fr.setId(this.id);
+		fr.setLabel(this.label);
+		fr.setString(this.string);
+		return fr;
+	}
 
 
 }

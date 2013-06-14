@@ -121,22 +121,52 @@ public class Structure2Quality implements AnnotationStrategy{
 				//Check whether this tostructure is a quality, if not create a related Entity
 				for(Element relation:relations)
 				{
-					String tostructid = relation.getAttributeValue("to");
-					structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
-					Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
-					String tostructname = tostruct.getAttributeValue("name");
-					Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
-					if(Relatedentity!=null)
-					{
-						RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
+					String tostructid = relation.getAttributeValue("to").trim();
+					if(tostructid.indexOf(" ")>0){ //>1 id: o510 o511, in case of relation="between"
 						QualityProposals qproposals = new QualityProposals();
-						qproposals.add(rq);
-						this.qualities.add(qproposals);
-						this.identifiedqualities.add(qualityid);
+						String[] toids = tostructid.split("\\s+");		
+						int count = 0;
+						for(String toid: toids){
+							structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ toid.trim() + "']");
+							Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
+							String tostructname = Utilities.getStructureName(root, toid);
+							Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+							if(Relatedentity!=null){
+								if(count==0){
+									this.primaryentities.add(Relatedentity); //set the first be the primary
+									if(this.keyentities==null){
+										this.keyentities = new ArrayList<EntityProposals>(); 
+										this.keyentities.add(Relatedentity);
+									}
+								}else{
+									//set others as related entity		
+									RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
+									qproposals.add(rq);  //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
+									this.qualities.add(qproposals);
+									this.identifiedqualities.add(qualityid);	
+								}
+							}
+							count++;
+						}
 						if(chara_detach!=null)
 							chara_detach.detach();
+					}else{//one id
+						structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
+						Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
+						String tostructname = Utilities.getStructureName(root, tostructid);
+						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+						if(Relatedentity!=null)
+						{
+							RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
+							QualityProposals qproposals = new QualityProposals();
+							qproposals.add(rq);
+							this.qualities.add(qproposals);
+							this.identifiedqualities.add(qualityid);
+							if(chara_detach!=null)
+								chara_detach.detach();
+						}
+						//What are the primaryentities here?
 					}
-					//What are the primaryentities here?
 				}
 				return;
 			}else if((this.keyentities!=null) && (this.keyentities.size()>=2))
@@ -145,7 +175,7 @@ public class Structure2Quality implements AnnotationStrategy{
 				{
 					RelationalQuality rq = new RelationalQuality(relationalquality, this.keyentities.get(i));
 					QualityProposals qproposals = new QualityProposals();
-					qproposals.add(rq);
+					qproposals.add(rq); //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
 					this.qualities.add(qproposals);
 					this.identifiedqualities.add(qualityid);
 					if(chara_detach!=null)

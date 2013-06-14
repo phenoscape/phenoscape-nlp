@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -19,16 +20,20 @@ import org.jdom.xpath.XPath;
    also identify quality clues from the character statement, such as "size of" "number of", and "fusion of". 
  */
 public class CharacterStatementParser extends Parser {
-	ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+	//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
 	ArrayList<String> qualityClue = new ArrayList<String> ();
+	ArrayList<String> underscoredStructureIDs = new ArrayList<String> ();
+	ArrayList<String> structureIDs = new ArrayList<String> ();
+	String checked = "";
+	private Hashtable<String, ArrayList<EntityProposals>> entityHash = new Hashtable<String, ArrayList<EntityProposals>>();
+	private Hashtable<String, ArrayList<Structure2Quality>> qualityHash = new Hashtable<String, ArrayList<Structure2Quality>>();
 	static XPath pathstructure;
 	static XPath pathrelation;
 	static{
 		try{
 			pathstructure = XPath.newInstance(".//structure");
 			pathrelation = XPath.newInstance(".//relation");
-
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -78,7 +83,6 @@ public class CharacterStatementParser extends Parser {
 	public void parse(Element statement, Element root) {
 		try {
 			parseForQualityClue(statement); 
-			//checkandfilterqualitystructures(statement,root);//this removes quality structure elements from statement
 			parseForEntities(statement, root, true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -93,7 +97,7 @@ public class CharacterStatementParser extends Parser {
 	 * @param root
 	 * @throws JDOMException
 	 */
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	private void checkandfilterqualitystructures(Element statement,Element root) throws JDOMException {
 
 		String structname;
@@ -120,7 +124,7 @@ public class CharacterStatementParser extends Parser {
 			}
 
 		}
-	}
+	}*/
 
 
 	/**
@@ -176,58 +180,373 @@ public class CharacterStatementParser extends Parser {
 	}
 
 	/**
-
+   //TODO patterns s0fd16381: maxillae, anterior end of 
+    * two independent structures in character statement: sereno style.
+    * //case of 'pubis_ischium', one structure id for two structures.
+	*  //joint: joint^overlaps(metapterygoid)^overlaps(hyomandibula)
+	* //skeletal joint: UBERON:0000982
+	*					 
 	 * @param statement
 	 * @param root
 	 */
 	public void parseForEntities(Element statement, Element root, boolean fromcharacterdescription){
 		try{
-			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-			ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
-			String checked = "";
+			//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+			//ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
 			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
 			ArrayList<String> RelatedStructures = new ArrayList<String>(); //keep a record on related entities, which should not be processed again
 			for(Element structure: structures){
-				String structureid = structure.getAttributeValue("id");
-				if(!checked.contains(structureid+",")){
-					String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0);
-					EntityParser ep = new EntityParser(statement, root, structure, fromcharacterdescription);
-					if(ep.getEntity()!=null) entities.add(ep.getEntity());
-					if(ep.getQualityStrategy()!=null) s2qs.add(ep.getQualityStrategy());
-					checked += structureid+","+parents+",";
+				String structureid = structure.getAttributeValue("id");	
+				if(!checked.contains(structureid+",")){	
+					this.structureIDs.add(structureid);
+					String name = structure.getAttributeValue("name");
+					if(name.indexOf("_")>=0){//case of 'pubis_ischium', one structure id for two structures.
+						String[] names = name.split("_");
+						underscoredStructureIDs.add(structureid);
+						for(String aname: names){
+							String parents = parseStructure(statement, root,
+									fromcharacterdescription, /*entities, s2qs,*/
+									structureid, aname); //use the same structureid for all structures
+							checked += structureid+","+parents+",";
+						}
+						//entityHash.put(structureid, entities);
+						//qualityHash.put(structureid, s2qs);
+					}else{
+						String structurename = Utilities.getStructureName(root, structureid);
+						String parents = parseStructure(statement, root,
+								fromcharacterdescription, /*entities, s2qs,*/
+								structureid, structurename);
+						checked += structureid+","+parents+",";
+						//entityHash.put(structureid, entities);
+						//qualityHash.put(structureid, s2qs);
+					}
 				}
 			}
-			resolve(entities, s2qs, statement, root);
+			resolve(/*entities, s2qs,*/ statement, root);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
+
+	private String parseStructure(Element statement, Element root,
+			boolean fromcharacterdescription, String structureid, String structurename) {
+		String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0); //list of structures separated with ","
+		EntityParser ep = new EntityParser(statement, root, structureid, structurename, fromcharacterdescription);
+		if(ep.getEntity()!=null){
+			ArrayList<EntityProposals> entities;
+			if(this.entityHash.get(structureid)==null){
+				entities = new ArrayList<EntityProposals>();
+			}else{
+				entities = this.entityHash.get(structureid);			
+			}
+			entities.add(ep.getEntity());
+			this.entityHash.put(structureid, entities);
+		}
+		if(ep.getQualityStrategy()!=null){
+			ArrayList<Structure2Quality> qualities;
+			if(this.qualityHash.get(structureid)==null){
+				qualities = new ArrayList<Structure2Quality>();
+			}else{
+				qualities = this.qualityHash.get(structureid);			
+			}
+			qualities.add(ep.getQualityStrategy());
+			this.qualityHash.put(structureid, qualities);			
+		}
+		return parents;
+	}
+
 	/**
 	 * TODO
-	 * 1. determine keyentities, post-compose entities with quality 2. approve/disapprove structure2quality results
-	 * 3. constructure EQ for non-key entities
+	 * 1. determine keyentities (note Sereno style)
+	 * 2. post-compose entities with quality 
+	 * 3. approve/disapprove structure2quality results
+	 * 4. constructure EQ for non-key entities 
 	 * @param entities
 	 * @param s2qs
 	 * @param statement
 	 * @param root
 	 */
-	private void resolve(ArrayList<EntityProposals> entities,
-			ArrayList<Structure2Quality> s2qs, Element statement, Element root) {
-		// TODO Auto-generated method stub
+	private void resolve(/*ArrayList<EntityProposals> entities,
+			ArrayList<Structure2Quality> s2qs,*/ Element statement, Element root) {
+		boolean foundaentity = false;
 		
-		//if s2qs is approved, use the quality and call s2q.cleanHandledStructures
-		if(entities.size()>0)
-			keyentities=entities;
+		//1. 'pubis_ischium': these are the key entities
+		//TODO: what about "A_B joint": should have a entity search strategy to handle this
+		int count = 0;
+		for (String structid: this.underscoredStructureIDs){
+			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
+			if(entities!=null){
+				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
+				foundaentity = true;
+				this.qualityHash.remove(structid);
+				//remove from s2q with a structid < the first struct id 
+				if(count==0) removeS2Qbefore(structid);
+				this.structureIDs.remove(structid);
+			}
+			count++;
+		}
 		
-		if(s2qs.size()>0)
-		{
-			for(Structure2Quality clean: s2qs)
-			{
-				clean.cleanHandledStructures();
+		for(int i = 0; i < this.structureIDs.size(); i++){
+			String structid = this.structureIDs.get(i);
+			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
+			if(entities!=null && i == this.structureIDs.size()-1){ //entities resulted from 1 structureid
+				postcomposeWithQuality(entities, structid, statement, root);
+				this.keyentities = entities;	
+				this.entityHash.remove(structid);
+				this.qualityHash = null;
+			}		
+			if(entities==null && i == this.structureIDs.size()-1){//no entity 
+				this.keyentities = null;
+			} 
+			
+			if(qualityHash !=null && entityHash!=null){			
+				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(structid);
+				boolean entitywin = entityWin(entities, s2qs);
+				if(entitywin) this.qualityHash.remove(structid);
+				if(!entitywin) this.entityHash.remove(structid);
+			}
+			
+		}		
+		
+		//remaining s2qs
+		if(this.qualityHash!=null){
+			Enumeration<String> keys = this.qualityHash.keys();
+			while(keys.hasMoreElements()){
+				String sid = keys.nextElement();
+				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(sid);
+				//post compose quality to the closest proceeding entity, or
+				//create EQ with the closest following entity
+				//if no entity exsits, give up
+				consumeQuality(sid, s2qs); //update this.entityHash
 			}
 		}
 		
+		if(this.entityHash!=null && this.entityHash.size()>0){
+			FormalRelation fr = new FormalRelation();
+			fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
+			fr.setConfidenceScore(0.5f);
+			fr.setId("BFO:0000050");
+			fr.setLabel("part of");
+			fr.setString("");
+			//remaining entities
+			//compose entities using 'part_of' relation
+			Enumeration<String> keys = this.entityHash.keys();
+			while(keys.hasMoreElements()){
+				String sid = keys.nextElement();
+				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
+				if(this.keyentities==null){
+					this.keyentities = entities;
+				}
+				addEntityLocators(this.keyentities, entities);
+			}
+		}
+		/*if(entities.size()>1){//multiple unrelated entities  
+		
+			//1. Sereno style or the like
+			//2. qualities mistreated as entities			
+			
+		}else if (entities.size()==1){ //one entity, must be the key entity
+			keyentities=entities;
+		}*/
+		
+		/*if(s2qs.size()>0) //if s2qs is approved, use the quality and call s2q.cleanHandledStructures
+		{
+			for(Structure2Quality s2q: s2qs)
+			{
+				s2q.cleanHandledStructures();
+			}
+		}*/	
+	}
+
+	private void consumeQuality(String sid, ArrayList<Structure2Quality> s2qs) {
+		// TODO implement comparison
+		
+	}
+
+
+	private boolean entityWin(ArrayList<EntityProposals> entities,
+			ArrayList<Structure2Quality> s2qs) {
+		// TODO implement comparison
+		return true;
+	}
+
+	/**
+	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
+	 * @param entities
+	 * @param entitylocators
+	 * 
+	 */
+	private void addEntityLocators(ArrayList<EntityProposals> entities, ArrayList<EntityProposals> entitylocators){
+		for(EntityProposals entity: entities){
+			ArrayList<Entity> eps = entity.getProposals();
+			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
+			for (Entity e: eps){
+				for(EntityProposals entitylocator: entitylocators){
+					ArrayList<Entity> elps = entitylocator.getProposals();
+					for(Entity elp: elps){
+						Entity ecopy = (Entity) e.clone();
+						SimpleEntity qentity = new SimpleEntity();
+						qentity.setClassIRI(elp.getClassIRI());
+						qentity.setConfidenceScore(elp.getConfidienceScore());
+						qentity.setId(elp.getId());
+						qentity.setLabel(elp.getLabel());
+						qentity.setString(elp.getString());
+						FormalRelation fr = new FormalRelation();
+						fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
+						fr.setConfidenceScore(0.5f);
+						fr.setId("BFO:0000050");
+						fr.setLabel("part of");
+						fr.setString("");
+						REntity re = new REntity(fr, qentity); //bear of some Ossified
+						CompositeEntity ce = new CompositeEntity(); 
+						ce.addEntity(ecopy);
+						ce.addEntity(re);											
+						epsresult.add(ce); //save a proposal
+					}
+				}
+			}
+			eps = epsresult; //update entities
+		}
+	}
+	
+
+
+	/**
+	 * if an entity has a character *modifier* in the original text, use the character (simple or relational quality) 
+	 * to post-compose the entity. for example "white hair: absent" => E: hair bearer of white: Q: absent
+	 * 
+	 * note, one structureid may be associated with multiple structures, for example 'pubis_ischium'
+	 * characters associated with the structureid 
+	 * @param entities
+	 */
+	@SuppressWarnings("unchecked")
+	private void postcomposeWithQuality(ArrayList<EntityProposals> entities, String structureid, Element statement, Element root) {
+		try{
+			Element structure = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+structureid+"'");
+			StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>());
+			List<Element> relations = XPath.selectNodes(statement, ".//relation[@from='"+structureid+"']"); 
+			ArrayList<String> StructuredQualities = new ArrayList<String>();//scope of this variable?
+			for(Element relation: relations){
+				if(relation.getAttribute("to")!=null && checked.contains(relation.getAttributeValue("to")+",")){
+					continue; //part_of relations have already been dealt with in EntityParser
+				}
+				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
+			    ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities);
+			    //entities1 is redundant and not used
+				if(qualities!=null && qualities.size()!=0){
+					postcompose(entities, qualities);
+				}
+			}
+			
+			List<Element> characters = structure.getChildren("character");
+			for(Element character: characters){
+				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
+				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
+				ssp.parserCharacters(character, statement, root, entities1, qualities);
+				//entities1 is redundant and not used
+				if(qualities!=null && qualities.size()!=0){
+					postcompose(entities, qualities);
+				}	
+			}			
+		}catch(Exception e){
+			e.printStackTrace();
+		}		
+	}
+
+	/**
+	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
+	 * @param entities
+	 * @param qualities
+	 * 
+	 */
+	private void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+		for(EntityProposals entity: entities){
+			ArrayList<Entity> eps = entity.getProposals();
+			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
+			for (Entity e: eps){
+				for(QualityProposals quality: qualities){
+					ArrayList<Quality> qps = quality.getProposals();
+					for(Quality q: qps){
+						if(q instanceof RelationalQuality){
+							//check if the relation is in the restricted list for post composition
+							QualityProposals relation = ((RelationalQuality) q).getQuality();
+							EntityProposals rentity= ((RelationalQuality) q).getRelatedEntity();
+							ArrayList<Quality> relations = relation.getProposals();
+							for(Quality r : relations){
+								if(r.isOntologized() && isRestrictedRelation(r.getId())){
+									Entity ecopy = (Entity) e.clone(); //create fresh copy
+									//increase confidence
+									//create RE and create compositeEntity
+									FormalRelation fr = new FormalRelation();
+									fr.setClassIRI(r.getClassIRI());
+									fr.setConfidenceScore(r.getConfidienceScore());
+									fr.setId(r.getId());
+									fr.setLabel(r.getLabel());
+									fr.setString(r.getString());
+									for(Entity e1: rentity.getProposals()){
+										REntity re = new REntity(fr, e1);
+										if(ecopy instanceof CompositeEntity){
+											((CompositeEntity) ecopy).addEntity(re); 
+											epsresult.add(ecopy); //save a proposal
+										}else{
+											CompositeEntity ce = new CompositeEntity(); 
+											ce.addEntity(ecopy);
+											ce.addEntity(re);											
+											epsresult.add(ce); //save a proposal
+										}										
+									}							
+								}
+							}
+						}else{
+							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
+							Entity ecopy = (Entity) e.clone();
+							SimpleEntity qentity = new SimpleEntity();
+							qentity.setClassIRI(q.getClassIRI());
+							qentity.setConfidenceScore(q.getConfidienceScore());
+							qentity.setId(q.getId());
+							qentity.setLabel(q.getLabel());
+							qentity.setString(q.getString());
+							FormalRelation fr = new FormalRelation();
+							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
+							fr.setConfidenceScore(1f);
+							fr.setId("BFO:0000053");
+							fr.setLabel("bear of");
+							fr.setString("");
+							REntity re = new REntity(fr, qentity); //bear of some Ossified
+							CompositeEntity ce = new CompositeEntity(); 
+							ce.addEntity(ecopy);
+							ce.addEntity(re);											
+							epsresult.add(ce); //save a proposal
+						}
+					}
+				}
+			}
+			eps = epsresult; //update entities
+		}
+	}
+	
+	private boolean isRestrictedRelation(String id) {
+		if(Dictionary.resrelationQ.get(id) == null) return false;
+		return true;
+	}
+
+
+	/**
+	 * structid has been identified as an entity, 
+	 * any structure with an id less than structid is less likely to be a quality
+	 * @param structid
+	 */
+	private void removeS2Qbefore(String structid) {
+		int structint = Integer.parseInt(structid.replaceAll("[^0-9]", ""));
+		//use enumeration to avoid concurrentmodification exception
+		Enumeration<String> ids = this.qualityHash.keys();
+		while(ids.hasMoreElements()){
+			String id = ids.nextElement();
+			int idint = Integer.parseInt(id.replaceAll("[^0-9]", ""));
+			if(idint <= structint) this.qualityHash.remove(id);
+		}
 	}
 
 

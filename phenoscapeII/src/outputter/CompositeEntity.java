@@ -124,18 +124,18 @@ public class CompositeEntity extends Entity {
 		return 0f;
 	}
 	//cloning - recursive implementation
-	public CompositeEntity compositecloning()
+	public CompositeEntity clone()
 	{
 		CompositeEntity clone=new CompositeEntity();
 			for(Entity e:this.getEntities())
 			{
 				if(e instanceof SimpleEntity)
 				{
-					clone.addEntity(((SimpleEntity) e).simplecloning());
+					clone.addEntity(((SimpleEntity) e).clone());
 				}
 				else if(e instanceof CompositeEntity)
 				{
-					clone.addEntity(((CompositeEntity) e).compositecloning());
+					clone.addEntity(((CompositeEntity) e).clone());
 				}
 				else//e is related entity
 				{
@@ -143,12 +143,12 @@ public class CompositeEntity extends Entity {
 					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI());
 					if(((REntity)e).getEntity() instanceof SimpleEntity)
 					{
-						REntity re = new REntity(relation,((SimpleEntity)(((REntity)e).getEntity())).simplecloning());
+						REntity re = new REntity(relation,((SimpleEntity)(((REntity)e).getEntity())).clone());
 						clone.addEntity(re);
 					}
 					else
 					{
-						REntity re = new REntity(relation,((CompositeEntity)(((REntity)e).getEntity())).compositecloning());
+						REntity re = new REntity(relation,((CompositeEntity)(((REntity)e).getEntity())).clone());
 						clone.addEntity(re);
 					}
 				}	

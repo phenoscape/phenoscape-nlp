@@ -794,6 +794,7 @@ public class XML2EQ {
 	 * @return true if the entitylabel matches one of the key entities.
 	 */
 	private boolean matchWithKeyEntities(String entitylabel) {
+		if (this.keyentities == null) return false;
 		for(EntityProposals keyentityp: this.keyentities){
 			for(Entity keyentity: keyentityp.getProposals()){
 				String label = null;

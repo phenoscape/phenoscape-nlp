@@ -32,7 +32,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	public EntitySearcher1() {
 
 	}
-
+    //TODO patterns s0fd16381: maxillae, anterior end of 
 	/* (non-Javadoc)
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
@@ -77,6 +77,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		EntityProposals entity = eels.getEntities();
 		if(entity != null){
 			found = true;
+			entities.setPhrase(entityphrase);
 			entities.add(entity);
 		}
 		

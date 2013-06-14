@@ -8,7 +8,7 @@ package outputter;
  *
  */
 public class RelationalQuality extends Quality {
-	QualityProposals relationalquality;
+	QualityProposals relationalquality; //any relation from PATO relational_slim, or size
 	EntityProposals relatedentity; //also called qualitymodifier
 	/**
 	 * 
@@ -41,11 +41,11 @@ public class RelationalQuality extends Quality {
 		this.relationalquality = relationalquality;
 	}
 	
-	public EntityProposals getQualityModifier(){
+	public EntityProposals getRelatedEntity(){
 		return relatedentity;
 	}
 	
-	public void setQualityModifier(EntityProposals relatedentity){
+	public void setRelatedEntity(EntityProposals relatedentity){
 		this.relatedentity = relatedentity;
 	}
 	/**

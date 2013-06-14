@@ -26,6 +26,10 @@ public class REntity extends Entity{
 		this.entity = entity;
 	}
 	
+	/**
+	 * relation is one of those from the restricted list
+	 * @param relation
+	 */
 	public void setRelation(FormalRelation relation){
 		this.relation = relation;
 	}
@@ -121,6 +125,12 @@ public class REntity extends Entity{
 	public String getXMLid() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public REntity clone(){
+		FormalRelation fr = this.relation.clone();
+		Entity e = this.entity.clone();
+		return new REntity(fr, e);
 	}
 
 }

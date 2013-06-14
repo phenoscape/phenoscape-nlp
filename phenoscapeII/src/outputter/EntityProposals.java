@@ -97,15 +97,14 @@ public class EntityProposals implements Proposals {
 		return sb.toString();
 	}
 	
-	public EntityProposals clone(EntityProposals ep) {
+	public EntityProposals clone() {
 		
 		EntityProposals epclone = new EntityProposals();
-		epclone.setPhrase(ep.phrase);
-		for(Entity e:ep.getProposals())
+		epclone.setPhrase(this.phrase);
+		for(Entity e:this.getProposals())
 		{
 			epclone.proposals.add(e);
 		}
-		
 		return epclone;
 	}
 	
