@@ -196,7 +196,7 @@ public class CharacterHandler {
 		
 		if(result!=null){ //has a strong match
 			//qualities involving length should be handled with related entity
-			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length)"))
+			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width)"))
 			{
 				this.resolve=true;
 			}
@@ -541,7 +541,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 			}
 		}
 		//Reolve for quality when it is "length"
-		if(this.entityparts!=null)
+		if(this.entityparts.size()>0)
 		{
 			resolveIntoRelationalQuality();
 		}
@@ -564,7 +564,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				{
 					QualityProposals newqp = new QualityProposals();
 					
-					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width)")))//If any of the quality label matches to "length", then the qp itself belongs to size
 							{		
 							for(EntityProposals ep : this.entityparts)
 							{
