@@ -8,13 +8,13 @@ import java.util.Set;
 public class PermittedRelations {	
 	/**
 	 * match the relation in PATO relation slim
-	 * @param fromstructure name
-	 * @param relation string
-	 * @param tostructure name, not the chain of names
+	 * @param relation "name of the quality string"
+	 * @param negation "whether it is a negated relation or not"
+	 * @param flag  flag==1, search for relation in relationalqualities else in restricted relational list
+	 * @
 	 * @return if match, return Quality with id and label, if not, return null
 	 *
 	 */
-	//if flag==1 then relational quality, flag==2, then restricted relation
 	public static QualityProposals matchInPermittedRelation(String relation, boolean negation,int flag) {
 		//TODO: handle negated relations
 		QualityProposals qproposals = new QualityProposals();
