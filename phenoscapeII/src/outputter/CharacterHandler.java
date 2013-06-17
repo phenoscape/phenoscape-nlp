@@ -136,6 +136,13 @@ public class CharacterHandler {
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
+		String value=null;//used to hold character value, in case of "count"
+		//converts numerical value qualities to count, if the character name identifies it as a count
+		if(this.chara.getAttributeValue("name").equals("count"))
+		{
+			value = quality;
+			quality = "count";
+		}
 		boolean special_case = false;
 		if(quality.matches(".*(\\d)*.*")==true)
 		{
@@ -219,6 +226,11 @@ public class CharacterHandler {
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
 		
 		if(result!=null){ //has a strong match
+			//the below if loop handles quality = "count" cases
+			if(value!=null)
+			{
+				result.setString(value);
+			}
 			//qualities involving length should be handled with related entity
 			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size)"))
 			{
