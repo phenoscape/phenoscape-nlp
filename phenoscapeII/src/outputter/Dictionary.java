@@ -25,6 +25,7 @@ public class Dictionary {
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
 	public static String process="process|crest|ridge|tentacule|shelf|flange|ramus";
 	public static String opening = "opening|foramina|foramen|foramens|perforation|orifice"; 
+	public static String joint ="joint|articulation";
 	public static String binaryTvalues = "present|true|yes|usually|with";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely|without";
 	public static String positionprep = "of|part_of|in|on|between";

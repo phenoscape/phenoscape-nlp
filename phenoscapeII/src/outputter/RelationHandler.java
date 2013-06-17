@@ -64,7 +64,7 @@ public class RelationHandler {
 			//parents separated by comma (,).
 			String parents = Utilities.getStructureChain(root, "//relation[@from='" + fromstructid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, parents, fromstructname,"part_of");	//corrected by Hong
-			
+			//shouldn't this calls EntityParser? and then resolve the conflicts, like characterhandler do?
 			//could fromstruct be a quality?
 		}		
 	}

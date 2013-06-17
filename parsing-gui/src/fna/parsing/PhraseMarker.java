@@ -45,8 +45,10 @@ public class PhraseMarker {
 			Collections.sort(phrases, new PhraseComparable()); //longest phrases first
 			phrasestr = "";
 			for(String phrase: phrases){
+				//hyomandibula-opercle_joint
 				phrase = phrase.replaceAll("\\([^)]*\\)", "").trim();
-				if(phrase.length()>0 && phrase.indexOf(" ")>0)
+				if(phrase.length()>0)
+					phrase = phrase.replaceAll("-", "_");//hyomandibula_opercle_joint
 					phrasestr += phrase+"|";
 			}
 			//phrasestr="";
@@ -60,7 +62,6 @@ public class PhraseMarker {
 	}
 
 	/**
-	 * 
 	 * @param sentence : leaf blade rounded
 	 * @return leaf_blade rounded
 	 */
@@ -84,7 +85,7 @@ public class PhraseMarker {
 		PhraseMarker pm = new PhraseMarker(termpath);
 		long time2 = System.currentTimeMillis();
 		System.out.println("read term list took "+(time2-time1)+" ms");
-		System.out.println(pm.markPhrases("dorsal fin and anal fin absent . female gonad present."));
+		System.out.println(pm.markPhrases("hyomandibula-opercle joint and anal fin absent . female gonad present."));
 		long time3 = System.currentTimeMillis();
 		System.out.println("mark the sentence took "+(time3-time2)+" ms");
 	}

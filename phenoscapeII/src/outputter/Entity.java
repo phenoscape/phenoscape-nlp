@@ -40,6 +40,10 @@ public abstract class Entity implements FormalConcept{
 		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getConfidienceScore(); 
 		return 0f;
 	}
+	
+	public Entity clone(){
+		return this.clone();
+	}
 
 	@Override
 	public abstract void setString(String string);

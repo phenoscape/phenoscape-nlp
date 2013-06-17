@@ -178,7 +178,7 @@ public class ParseSimpleseg {
                     		str4="</structure>";
                     	}
                     	else{
-                		str2=str2.concat("<structure name=\"whole_organism\" id=\"o"+(ct+1)+"\">");
+                		str2=str2.concat("<structure name=\"whole organism\" id=\"o"+(ct+1)+"\">");
                 		str4="</structure>";
                     	}
                     	if(srcflag==0)

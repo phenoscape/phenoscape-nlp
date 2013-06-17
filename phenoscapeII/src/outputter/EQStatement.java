@@ -105,12 +105,24 @@ public class EQStatement {
 		if(quality instanceof RelationalQuality)
 		{
 			sb.append("Quality:"+(((RelationalQuality) quality).getQuality()!=null?((RelationalQuality) quality).getQuality().toString():"")+System.getProperty("line.separator"));
-			sb.append("Related Entity:"+(((RelationalQuality) quality).getQualityModifier()!=null?((RelationalQuality) quality).getQualityModifier().toString():"")+System.getProperty("line.separator"));
+			sb.append("Related Entity:"+(((RelationalQuality) quality).getRelatedEntity()!=null?((RelationalQuality) quality).getRelatedEntity().toString():"")+System.getProperty("line.separator"));
 		}
 		else
 			sb.append("Quality:"+(quality!=null?quality.toString():"")+System.getProperty("line.separator"));
 		return sb.toString();
 		
+	}
+	
+	public EQStatement clone(){
+		EQStatement eq1 = new EQStatement();
+		eq1.setCharacterId(this.getCharacterId());
+		eq1.setEntity(this.getEntity());
+		eq1.setQuality(this.getQuality());
+		eq1.setSource(this.getSource());
+		eq1.setStateId(this.getStateId()); //TODO: change it for states
+		eq1.setDescription(this.getDescription());
+		eq1.setType(this.getType());
+		return eq1;
 	}
 	/**
 	 * @param args

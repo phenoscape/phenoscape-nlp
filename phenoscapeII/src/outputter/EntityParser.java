@@ -18,9 +18,7 @@ public class EntityParser {
 	private EntityProposals entity;
 	private Structure2Quality s2q;
 
-	public EntityParser(Element statement, Element root, Element structure, boolean keyelement) {
-		String structureid = structure.getAttributeValue("id");
-		String structurename = Utilities.getStructureName(root, structureid);
+	public EntityParser(Element statement, Element root, String structureid, String structurename, boolean keyelement) {
 		String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
 		this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 		// could the 'structure' be a quality?
