@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
 
@@ -48,6 +49,8 @@ public class Dictionary {
 	/** The spatial maps. */
 	public static Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
 	public static Hashtable<String,Hashtable<String, String>> relationalqualities = new Hashtable<String,Hashtable<String, String>>();
+	public static Hashtable<String,Hashtable<String, String>> restrictedrelations = new Hashtable<String,Hashtable<String, String>>();
+
 	public static Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
 	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
 	/** Holds direct quality interpretation	 */
@@ -261,6 +264,18 @@ public class Dictionary {
 		resrelationQ.put("PHENOSCAPE:serves_as_attachment_site_for","serves_as_attachment_site_for");
 		resrelationQ.put("BFO:0000052","inheres_in");
 		resrelationQ.put("PHENOSCAPE:complement_of","not");		
+		
+		Set<String> keys = resrelationQ.keySet();
+		
+		for(String key:keys)
+		{
+			String relation = resrelationQ.get(key).replaceAll("_", " ");
+			relation = Utilities.removeprepositions(relation.trim());
+			Hashtable<String, String> temp = new Hashtable<String, String>();
+			temp.put(resrelationQ.get(key), key);
+			restrictedrelations.put(relation,temp);			
+		}
+		
 	}
 	//syn phrases mapping to relational qualities
 	static{

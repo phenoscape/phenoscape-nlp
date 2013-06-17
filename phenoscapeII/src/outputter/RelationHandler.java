@@ -75,7 +75,7 @@ public class RelationHandler {
 		//TODO use character info to help with entity identification?
 		//TODO negation
 
-		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation,1);
 		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']" +
 																			 "|//relation[@name='in'][@from='" + tostructid + "']" +
 																			 "|//relation[@name='on'][@from='" + tostructid + "']", 0); //in/on = part_of?

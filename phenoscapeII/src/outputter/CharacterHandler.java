@@ -128,13 +128,29 @@ public class CharacterHandler {
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
+		boolean special_case = false;
+		if(quality.matches(".*(\\d)*.*")==true)
+		{
+			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length).*")))
+			{
+				if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length).*")))
+				{
+					special_case =specialSizeCase();
+				}
+			}
+		}
+		if(special_case)
+			{
+			return;
+			}
+		
 		boolean negated = false;
 		if(quality.startsWith("not ")){
 			negated = true;
 			quality = quality.substring(quality.indexOf(" ")+1).trim(); //deal with negated quality here
 		}
 		//is the candidate a relational quality?
-		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false,1);
 		if(relationalquality!=null){
 			//attempts to find related entity in contraints
 			// constraints = qualitymodifier if quality is a relational quality
@@ -196,7 +212,7 @@ public class CharacterHandler {
 		
 		if(result!=null){ //has a strong match
 			//qualities involving length should be handled with related entity
-			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width)"))
+			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size)"))
 			{
 				this.resolve=true;
 			}
@@ -269,6 +285,67 @@ public class CharacterHandler {
 //Checks whether the parent structure is bilateral or not
 	//this.entity contains the parent entity
 	
+private boolean specialSizeCase() {
+	String primary_part = cleanUp(this.chara.getAttributeValue("name"));
+	String relative_part = cleanUp(this.chara.getAttributeValue("constraint"));
+	String modifier = this.chara.getAttributeValue("modifier");	
+	String relation;
+	
+
+	TermSearcher ts = new TermSearcher();
+	Quality primary_result = (Quality) ts.searchTerm(primary_part, "quality");
+	
+	if(primary_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(primary_result);
+			//this.qualities.add(qproposals);
+		}
+	
+	Quality secondary_result = (Quality) ts.searchTerm(relative_part, "quality");
+	
+	if(secondary_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(secondary_result);
+		//	this.qualities.add(qproposals);
+		}
+	
+	
+	if(modifier.matches(".*(more|greater).*"))
+	{
+		relation = "increased_in_magnitude_relative_to";
+	}
+	else
+	{
+		relation = "decreased_in_magnitude_relative_to";
+	}
+	
+	Quality relation_result = (Quality) ts.searchTerm(relation, "quality");
+	
+	if(relation_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(relation_result);
+			//this.qualities.add(qproposals);
+		}
+	
+	return false;
+	}
+
+private String cleanUp(String entityname) {
+
+	if(entityname.matches(".*(length).*"))
+		{
+		entityname = "length";
+		}
+	else
+		{
+		entityname = "width";
+		}
+	return entityname;
+}
+
 private boolean checkBilateral(EntityProposals ep) {
 		
 	EntityProposals epclone = ep.clone(ep);//cloning to avoid original entity proposals to be changed
@@ -564,7 +641,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				{
 					QualityProposals newqp = new QualityProposals();
 					
-					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size)")))//If any of the quality label matches to "length", then the qp itself belongs to size
 							{		
 							for(EntityProposals ep : this.entityparts)
 							{

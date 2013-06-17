@@ -12,15 +12,27 @@ public class PermittedRelations {
 	 * @param relation string
 	 * @param tostructure name, not the chain of names
 	 * @return if match, return Quality with id and label, if not, return null
+	 *
 	 */
-	public static QualityProposals matchInPermittedRelation(String relation, boolean negation) {
+	//if flag==1 then relational quality, flag==2, then restricted relation
+	public static QualityProposals matchInPermittedRelation(String relation, boolean negation,int flag) {
 		//TODO: handle negated relations
 		QualityProposals qproposals = new QualityProposals();
 		Quality relationalquality = new Quality();
-		String relationcopy = relation;
 		relation = Utilities.removeprepositions(relation);
 		//Adding the below adjective forms to address issue => separate => separated, so it matches ontology
 		LinkedHashSet<String> relationForms = Wordforms.toAdjective(relation);
+		
+		Hashtable<String,Hashtable<String, String>> qualityholder;
+		
+		if(flag==1)
+		{
+			qualityholder = Dictionary.relationalqualities;
+		}
+		else
+		{
+			qualityholder = Dictionary.restrictedrelations;
+		}
 		/*
 		 * Changed by Zilong: deal with relationship such as connect, contact, interconnect etc.
 		 * Transform the result from CharaParser which is of the form:
@@ -40,11 +52,11 @@ public class PermittedRelations {
 		//checks if the given relation is present in the identified relationalqualities - Hariharan
 		for(String rel:relationForms)
 		{
-			if(Dictionary.relationalqualities.containsKey(rel))
+			if(qualityholder.containsKey(rel))
 		{
 			relationalquality.setString(rel);
-			relationalquality.setId(retrieve_id(rel));
-			relationalquality.setLabel(retrieve_label(rel));
+			relationalquality.setId(retrieve_id(rel,qualityholder));
+			relationalquality.setLabel(retrieve_label(rel,qualityholder));
 			relationalquality.setConfidenceScore((float)1.0);
 			qproposals.add(relationalquality);
 			return qproposals;
@@ -65,12 +77,12 @@ public class PermittedRelations {
 		if((forms.size()!=0))
 		{
 			
-			relation_ID=getbestrelation(forms,relation);
+			relation_ID=getbestrelation(forms,relation,qualityholder);
 			if(relation_ID!=null)
 			{
 				relationalquality.setString(relation);
 				relationalquality.setId(relation_ID.split("\\|\\|")[0]);
-				relationalquality.setLabel(retrieve_label(relation_ID.split("\\|\\|")[1]));
+				relationalquality.setLabel(retrieve_label(relation_ID.split("\\|\\|")[1],qualityholder));
 				relationalquality.setConfidenceScore((float)1.0);
 				qproposals.add(relationalquality);
 				return qproposals;
@@ -83,7 +95,7 @@ public class PermittedRelations {
 
 
 	// decides the best equivalent relation from different identified relations using some semantic measures
-	private static String getbestrelation(Hashtable<String, Integer> forms,String  relation) {
+	private static String getbestrelation(Hashtable<String, Integer> forms,String  relation, Hashtable<String, Hashtable<String, String>> qualityholder) {
 		// TODO 
 		//update this later to find the closest similar relation
 		//int probability =0,maxprobability=0;
@@ -91,8 +103,8 @@ public class PermittedRelations {
 		//System.out.println("forms size" +forms.size());
 		keys = forms.keySet();
 		for(String form:keys)
-			if(Dictionary.relationalqualities.containsKey(form))
-				return (retrieve_id(form)+"||"+form);
+			if(qualityholder.containsKey(form))
+				return (retrieve_id(form,qualityholder)+"||"+form);
 		
 		return null;
 	}
@@ -108,9 +120,9 @@ public class PermittedRelations {
 		return synonyms;
 	}
 	
-	public static String retrieve_id(String relation)
+	public static String retrieve_id(String relation, Hashtable<String, Hashtable<String, String>> qualityholder)
 	{
-		Hashtable<String,String> all_possible_relations = Dictionary.relationalqualities.get(relation);
+		Hashtable<String,String> all_possible_relations = qualityholder.get(relation);
 		Set<String> Keyset= all_possible_relations.keySet();
 		for(String key:Keyset)
 		{
@@ -120,9 +132,9 @@ public class PermittedRelations {
 		return null;
 	}
 	
-	public static String retrieve_label(String relation)
+	public static String retrieve_label(String relation, Hashtable<String, Hashtable<String, String>> qualityholder)
 	{
-		Hashtable<String,String> all_possible_relations = Dictionary.relationalqualities.get(relation);
+		Hashtable<String,String> all_possible_relations = qualityholder.get(relation);
 		Set<String> Keyset= all_possible_relations.keySet();
 		for(String key:Keyset)
 		{
