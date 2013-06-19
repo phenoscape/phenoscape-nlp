@@ -1,0 +1,49 @@
+/**
+ * 
+ */
+package outputter;
+
+/**
+ * @author updates
+ *
+ */
+public class ToBeResolved{
+	
+	//private String structurename;
+	private String structureid;
+	private EntityProposals entity;
+	Structure2Quality s2q;
+	private QualityProposals quality;
+
+	public ToBeResolved(String structureid){
+		//this.structurename = structurename;
+		this.structureid = structureid;
+		//this.entity = entity;
+		//this.s2q = s2q;			
+	}
+	
+	public void setEntityCandidate(EntityProposals entity){
+		this.entity = entity;
+	}
+	
+	public void setStructure2Quality(Structure2Quality s2q){
+		this.s2q = s2q;
+	}
+	
+	public void setQualityCandidate(QualityProposals quality){
+		this.quality = quality;
+	}
+
+	public EntityProposals getEntityCandidate() {
+		return this.entity;
+	}
+	
+	public Structure2Quality getStructure2Quality(){
+		return this.s2q;
+	}
+	
+	public QualityProposals getQualityCandidate(){
+		return this.quality;
+	}
+	
+}
