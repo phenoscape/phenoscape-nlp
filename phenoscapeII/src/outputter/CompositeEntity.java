@@ -34,7 +34,12 @@ public class CompositeEntity extends Entity {
 	 * @param entity: simple, rentity, or composite entity
 	 */
 	public void addEntity(Entity entity){ 
-		entities.add(entity);
+		if(entities.size()==0 && entity instanceof CompositeEntity){
+			ArrayList<Entity> additions = ((CompositeEntity)entity).getEntities();
+			entities.addAll(additions);			
+		}else{
+			entities.add(entity);
+		}
 	}
 	
 	/**
@@ -97,9 +102,19 @@ public class CompositeEntity extends Entity {
 	}
 
 	@Override
+	/**
+	 * return the concatenation of the string of all entities
+	 */
 	public String getString() {
-		// TODO Auto-generated method stub
-		return null;
+		String str = "";
+		for(Entity e: this.entities){
+			if(e instanceof SimpleEntity){
+				str += e.getString()+" ";
+			}else if(e instanceof REntity){
+				str += ((REntity)e).getEntity().getString()+" ";
+			}
+		}
+		return str;
 	}
 
 	@Override

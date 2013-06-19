@@ -176,7 +176,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			for(Element structure: structures){
 				String structureid = structure.getAttributeValue("id");
 				if(!checked.contains(structureid+",")){
-					String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0);
+					String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
+							 "|//relation[@name='in'][@from='" + structureid + "']" +
+							 "|//relation[@name='on'][@from='" + structureid + "']", 0);
 					String structurename = Utilities.getStructureName(root, structureid);
 					EntityParser ep = new EntityParser(statement, root, structureid, structurename, true);
 					if(ep.getEntity()!=null) entities.add(ep.getEntity());

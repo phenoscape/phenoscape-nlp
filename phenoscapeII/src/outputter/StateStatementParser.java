@@ -135,6 +135,7 @@ public class StateStatementParser extends Parser {
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null){
 					//standing-alone structure
+					//shouldn't this also call EntityParser?
 					String sname = Utilities.getStructureName(root, sid);
 					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					entities.add(ep);
@@ -392,9 +393,9 @@ public class StateStatementParser extends Parser {
 		List<Element> relations;
 		try {
 			relations = pathRelation.selectNodes(statement);
-			List<QualityProposals> q = new ArrayList<QualityProposals>();
-			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			for (Element relation : relations) {
+				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+				List<QualityProposals> q = new ArrayList<QualityProposals>();
 				int flag = parseRelation(relation, root, StructuredQualities, entities,  q);
 				if(flag==1) constructEQStatementProposals(q, entities);
 			}
@@ -432,19 +433,20 @@ public class StateStatementParser extends Parser {
 			// checking if entity is really an entity or it is a quality
 			// by passing to and from struct names to relational quality
 			// strategy.
+			
+			//moved this logic into EntityParser which will be called by RelationHandler later
+			//Structure2Quality rq1 = new Structure2Quality(root,
+			//		fromname, fromid, keyentities);
+			//rq1.handle();
 
-			Structure2Quality rq1 = new Structure2Quality(root,
-					fromname, fromid, keyentities);
-			rq1.handle();
-
-			Structure2Quality rq2 = null;
+			/*Structure2Quality rq2 = null;
 			if(toid.indexOf(" ")<0){ //temp solution, multiple ids in toid is handled in S2Q process in fromname
 				rq2 = new Structure2Quality(root,
 						toname, toid, keyentities);
 				rq2.handle();
-			}
+			}*/
 
-			if (rq1.qualities.size() > 0) {
+			/*if (rq1.qualities.size() > 0) {
 				StructuredQualities.addAll(rq1.identifiedqualities);
 				if(rq1.primaryentities.size()>0)
 					e = rq1.primaryentities;//e is now showed to be a quality
@@ -456,7 +458,7 @@ public class StateStatementParser extends Parser {
 				if(rq1.spatialmodifier!=null)
 					spatialmodifier=rq1.spatialmodifier;
 
-			}else if (rq2.qualities.size() > 0) {
+			}/*else if (rq2.qualities.size() > 0) {
 				StructuredQualities.addAll(rq2.identifiedqualities);
 				if(rq2.primaryentities.size()>0)
 					e = rq2.primaryentities;//e is now showed to be a quality
@@ -466,25 +468,24 @@ public class StateStatementParser extends Parser {
 					rq2.detach_character();
 				if(rq2.spatialmodifier!=null)
 					spatialmodifier=rq2.spatialmodifier;
-			}
-			else{
+			}*/
+			//else{
 				try {
 					maybesubject = maybeSubject(root, fromid);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 				RelationHandler rh = new RelationHandler(root, relname, relation,
-						toname, toid, fromname, fromid, neg, false);
+						toname, toid, fromname, fromid, neg, this.keyentities, false);
 				rh.handle();
 				if(rh.getEntity()!=null)
 				{
 					e.add(rh.getEntity());
 				}
 
-				q = new ArrayList<QualityProposals>();
-				if(rh.getQuality()!=null) 
+				if(rh.getQuality()!=null) //including s2q identified qualities
 				{
-					q.add(rh.getQuality());
+					q.addAll(rh.getQuality());
 				}
 				if (rh.otherEQs.size() > 0)
 				{
@@ -494,8 +495,18 @@ public class StateStatementParser extends Parser {
 				{
 					entitylocator = rh.entitylocator;
 				}
+				
+				if(rh.spatialmodifier!=null)
+				{
+					spatialmodifier = rh.spatialmodifier;
+				}
+				
+				if(rh.identifiedqualities!=null)
+				{
+					StructuredQualities.addAll(rh.identifiedqualities);
+				}
 
-			}
+			//}
 
 			// Changes Ending => Hariharan Include flag below to make
 			// sure , to include EQ's only when qualities exist.

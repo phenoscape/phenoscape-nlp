@@ -27,6 +27,7 @@ public class CharacterStatementParser extends Parser {
 	ArrayList<String> underscoredStructureIDs = new ArrayList<String> ();
 	ArrayList<String> structureIDs = new ArrayList<String> ();
 	String checked = "";
+	boolean debug = false;
 	private Hashtable<String, ArrayList<EntityProposals>> entityHash = new Hashtable<String, ArrayList<EntityProposals>>();
 	private Hashtable<String, ArrayList<Structure2Quality>> qualityHash = new Hashtable<String, ArrayList<Structure2Quality>>();
 	static XPath pathstructure;
@@ -178,6 +179,14 @@ public class CharacterStatementParser extends Parser {
 			this.qualityClue.add(m.group(1));
 			m = p.matcher(m.group(2));
 		}
+		
+		if(debug){
+			System.out.print("quality clues:");
+			for(String qc: this.qualityClue){
+				System.out.print(qc);
+			}
+			System.out.println();
+		}
 	}
 
 	/**
@@ -201,7 +210,7 @@ public class CharacterStatementParser extends Parser {
 				if(!checked.contains(structureid+",")){	
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
-					if((name.indexOf("_")>=0)||(name.indexOf("/")>=0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
+					if((name.indexOf("_")>0)||(name.indexOf("/")>0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){
@@ -232,7 +241,12 @@ public class CharacterStatementParser extends Parser {
 
 	private String parseStructure(Element statement, Element root,
 			boolean fromcharacterdescription, String structureid, String structurename) {
-		String parents = Utilities.getStructureChainIds(root, "//relation[@from='" + structureid + "']", 0); //list of structures separated with ","
+		String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
+				 "|//relation[@name='in'][@from='" + structureid + "']" +
+				 "|//relation[@name='on'][@from='" + structureid + "']", 0); //list of structures separated with ","
+		if(debug){
+			System.out.println("parse structure:"+structurename);
+		}
 		EntityParser ep = new EntityParser(statement, root, structureid, structurename, fromcharacterdescription);
 		if(ep.getEntity()!=null){
 			ArrayList<EntityProposals> entities;
@@ -243,6 +257,13 @@ public class CharacterStatementParser extends Parser {
 			}
 			entities.add(ep.getEntity());
 			this.entityHash.put(structureid, entities);
+			if(debug){
+				System.out.println("matched entities:");
+				for(EntityProposals aep: entities){
+					System.out.println(aep.toString());
+				}
+				System.out.println();
+			}			
 		}
 		if(ep.getQualityStrategy()!=null){
 			ArrayList<Structure2Quality> qualities;
@@ -252,7 +273,16 @@ public class CharacterStatementParser extends Parser {
 				qualities = this.qualityHash.get(structureid);			
 			}
 			qualities.add(ep.getQualityStrategy());
-			this.qualityHash.put(structureid, qualities);			
+			this.qualityHash.put(structureid, qualities);	
+			if(debug){
+				System.out.println("matched qualities:");
+				for(Structure2Quality as2q: qualities){
+					for(QualityProposals qp: as2q.qualities){
+						System.out.println(qp.toString());
+					}
+				}
+				System.out.println();
+			}	
 		}
 		return parents;
 	}
@@ -276,9 +306,21 @@ public class CharacterStatementParser extends Parser {
 		//TODO: what about "A_B joint": should have a entity search strategy to handle this
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
+			if(debug){
+				System.out.println("resolving underscored structures...");
+			}
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
+
+//get quality from relations and characters from each of the structures and post compose entities with the quality
 			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
-				//get quality from relations and characters from each of the structures and post compose entities with the quality
+				if(debug){
+					System.out.println("entities from underscored structures:");
+					for(EntityProposals aep: entities){
+						System.out.println(aep.toString());
+					}
+					System.out.println("post-composed with quality...");
+				}	
+
 				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
 				foundaentity = true;
 				this.qualityHash.remove(structid);
@@ -305,19 +347,46 @@ public class CharacterStatementParser extends Parser {
 		for(int i = 0; i < this.structureIDs.size(); i++){
 			String structid = this.structureIDs.get(i);
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
-			if(entities!=null && i == this.structureIDs.size()-1){ //entities resulted from 1 structureid
+			if(entities!=null && entities.size()>1){ //entities resulted from 1 structureid
+				if(debug){
+					System.out.println("entities from structure id:"+structid);
+					for(EntityProposals aep: entities){
+						System.out.println(aep.toString());
+					}
+					System.out.println("post-composed with quality...");
+				}	
 				postcomposeWithQuality(entities, structid, statement, root);
 				this.keyentities = entities;	
 				this.entityHash.remove(structid);
 				this.qualityHash = null;
 			}		
-			if(entities==null && i == this.structureIDs.size()-1){//no entity 
+			/*if(entities==null && i == this.structureIDs.size()-1){//no entity 
+				if(debug) {
+					System.out.println("no entity, keyentities is set to null");
+				}
 				this.keyentities = null;
-			} 
+			} */
 			
-			if(qualityHash !=null && entityHash!=null){			
+			if(qualityHash !=null && this.qualityHash.get(structid)!=null && entityHash!=null && entities!=null){		
 				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(structid);
 				boolean entitywin = entityWin(entities, s2qs);
+				if(debug) {
+					System.out.println("selecting btw entity and quality for structure: "+structid);
+				
+					System.out.println("matched entities:");
+					for(EntityProposals aep: entities){
+						System.out.println(aep.toString());
+					}
+					
+					System.out.println("matched qualities:");
+					for(Structure2Quality as2q: s2qs){
+						for(QualityProposals qp: as2q.qualities){
+							System.out.println(qp.toString());
+						}
+					}
+					
+					System.out.println("entity win? " +entitywin);
+				}
 				if(entitywin) this.qualityHash.remove(structid);
 				if(!entitywin) this.entityHash.remove(structid);
 			}
@@ -329,15 +398,29 @@ public class CharacterStatementParser extends Parser {
 			Enumeration<String> keys = this.qualityHash.keys();
 			while(keys.hasMoreElements()){
 				String sid = keys.nextElement();
+				if(debug) {
+					System.out.println("remaining qualities from s2q:");
+				}
 				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(sid);
 				//post compose quality to the closest proceeding entity, or
 				//create EQ with the closest following entity
 				//if no entity exsits, give up
+				if(debug) {
+					for(Structure2Quality as2q: s2qs){
+						for(QualityProposals qp: as2q.qualities){
+							System.out.println(qp.toString());
+						}
+					}
+					System.out.println("how to consume this? ");
+				}
 				consumeQuality(sid, s2qs); //update this.entityHash
 			}
 		}
 		
 		if(this.entityHash!=null && this.entityHash.size()>0){
+			if(debug){
+				System.out.println("remaining entities: post-compose with 'part_of':");
+			}
 			FormalRelation fr = new FormalRelation();
 			fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
 			fr.setConfidenceScore(0.5f);
@@ -346,14 +429,22 @@ public class CharacterStatementParser extends Parser {
 			fr.setString("");
 			//remaining entities
 			//compose entities using 'part_of' relation
-			Enumeration<String> keys = this.entityHash.keys();
-			while(keys.hasMoreElements()){
-				String sid = keys.nextElement();
+			ArrayList<String> orderedIDs = order(this.structureIDs, root);
+			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
+				if(debug){
+					System.out.println("add entities from structure "+sid+" to part_of chain:");
+					for(EntityProposals aep: entities){
+						System.out.println(aep.toString());
+					}
+				}
 				if(this.keyentities==null){
 					this.keyentities = entities;
+				}else if(this.keyentities.size()==0){
+					this.keyentities.addAll(entities);
+				}else{
+					addEntityLocators(this.keyentities, entities);
 				}
-				addEntityLocators(this.keyentities, entities);
 			}
 		}
 		/*if(entities.size()>1){//multiple unrelated entities  
@@ -373,6 +464,26 @@ public class CharacterStatementParser extends Parser {
 			}
 		}*/	
 	}
+
+	/**
+	 * Order the structures shared btw structureIDs and entityHash,
+	 * The ordering is based on part_of relation: 0 part of 1 part of 2 etc.
+	 * Note: in Sereno style, entities are listed from whole to part, which is consistent with other styles 
+	 * Since 'part_of' chains are already handled by EntityParser, these structure should just be a list of structure in whole/part order,
+	 * this function should just revert the order of structureIDs that are in entityHash
+	 * @param structureIDs
+	 * @return structure ids sorted in order of 'part of' relationship
+	 */
+	private ArrayList<String> order(ArrayList<String> structureIDs, Element root) {
+		ArrayList<String> ordered = new ArrayList<String> ();
+		for(String id: structureIDs){
+			if(this.entityHash.containsKey(id)){
+				ordered.add(0,  id);
+			}
+		}
+		return ordered;
+	}
+
 
 	private void consumeQuality(String sid, ArrayList<Structure2Quality> s2qs) {
 		// TODO implement comparison
@@ -421,7 +532,8 @@ public class CharacterStatementParser extends Parser {
 					}
 				}
 			}
-			eps = epsresult; //update entities
+			entity.setProposals(epsresult);
+			//eps = epsresult; //update entities
 		}
 	}
 	

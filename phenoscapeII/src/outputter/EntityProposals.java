@@ -116,9 +116,7 @@ public class EntityProposals implements Proposals {
 
 	}
 
-
-
-
-
-
+	public void setProposals(ArrayList<Entity> proposals) {
+		this.proposals = proposals;		
+	}
 }

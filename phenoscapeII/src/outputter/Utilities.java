@@ -3,12 +3,17 @@
  */
 package outputter;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 /**
@@ -99,7 +104,7 @@ public class Utilities {
 				String[] pids = pid.split("\\s+");
 				for (String id : pids) {
 					if (id.length() > 0)
-						xpath += "//relation[@name='part_of'][@from='" + id + "']|";
+						xpath += "//relation[@name='part_of'][@from='" + id + "']|//relation[@name='in'][@from='" + id + "']|//relation[@name='on'][@from='" + id + "']|";
 				}
 			}
 			if (xpath.length() > 0 && count < 3) {
@@ -461,7 +466,21 @@ public class Utilities {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		File f = new File(ApplicationUtilities.getProperty("source.dir")+"test", "Swartz 2012.xml_states356.xml");
+		SAXBuilder builder = new SAXBuilder();
+		Document xml=null;
+		try {
+			xml = builder.build(f);
+		} catch (JDOMException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Element root = xml.getRootElement();
+		
+		System.out.println(Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='o229']", 0));
 
 	}
 

@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.jdom.Element;
@@ -17,9 +18,13 @@ import org.jdom.xpath.XPath;
 public class EntityParser {
 	private EntityProposals entity;
 	private Structure2Quality s2q;
+	EntityProposals spaitialmodifier;
+	HashSet<String> identifiedqualities;
 
 	public EntityParser(Element statement, Element root, String structureid, String structurename, boolean keyelement) {
-		String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
+		String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
+				 "|//relation[@name='in'][@from='" + structureid + "']" +
+				 "|//relation[@name='on'][@from='" + structureid + "']", 0);
 		this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 		// could the 'structure' be a quality?
 		//is the structure a simple quality?
@@ -32,6 +37,7 @@ public class EntityParser {
 			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structurename, false);
 			if (relationalquality != null) quality = relationalquality;
 		}*/
+		
 		Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
 		rq.handle();
 		//If any structure is a quality detach all the structures containing the structure id
@@ -40,24 +46,33 @@ public class EntityParser {
 		if(rq.qualities.size()>0){
 			s2q = rq;
 		}
-		resolvestructure();
+		//resolveStructure(); //EntityParser doesn't have info to resolve this.
 	}
 
 
-	
-	public void resolvestructure()
+	/**
+	 * if an ontologized entity is found, resolve to it
+	 * otherwise, resolve to s2q and cleanHandledStructures()
+	 */
+	/*public void resolveStructure()
 	{
 		
 		for(Entity proposal :this.entity.getProposals())
 		{
-			if((proposal.isOntologized()==false)&&(s2q!=null))
+			if((proposal.isOntologized())) 
 			{
-				this.entity =null;
+				this.s2q=null;
 				return;
 			}
 		}
-		this.s2q=null;
-	}
+		
+		if(this.s2q != null && this.s2q.qualities.size()>0){
+			this.entity = null;
+			this.spaitialmodifier = this.s2q.spatialmodifier;
+			this.identifiedqualities = this.s2q.identifiedqualities;
+			s2q.cleanHandledStructures();
+		}
+	}*/
 	
 	
 	

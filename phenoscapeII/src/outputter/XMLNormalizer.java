@@ -3,11 +3,16 @@
  */
 package outputter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 
 /**
@@ -54,7 +59,6 @@ public class XMLNormalizer {
 		try{
 			//with2partof(root);
 			removeCategoricalRanges(root);
-			
 			// expect 1 file to have 1 character statement and n statements, but for generality, use arrayList for characterstatements too.
 			//characterstatements are character descriptions
 			List<Element> characterstatements = pathCharacterStatement.selectNodes(root);
@@ -63,9 +67,100 @@ public class XMLNormalizer {
 			
 			//Fixing size to corresponding measure
 			fixSizeForRespectiveMeasureOnlyCharacterStatements(root);
+			collapsePreps(root); //A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
+	 * @param root
+	 */
+	private void collapsePreps(Element root) {
+		List<Element> descriptions = root.getChildren("description"); //should have only 1 description
+		for(Element description: descriptions){
+			List<Element> statements = description.getChildren("statement");
+			for(Element statement: statements){
+				collapsePrepsInStatement(statement);
+			}
+		}		
+	}
+	
+	/**
+	 * <statement statement_type="character" character_id="states356" seg_id="0">
+      <text>Coronoids with a row of very small teeth or denticles lateral to tooth-row</text>
+      <structure id="o228" name="coronoid" />
+      <structure id="o229" name="row" />
+      <relation id="r37" name="with" from="o228" to="o229" negation="false" />
+      <structure id="o230" name="tooth">
+        <character name="size" value="small" modifier="very" />
+      </structure>
+      <structure id="o231" name="denticle">
+        <character name="size" value="small" modifier="very" />
+      </structure>
+      <relation id="r38" name="consist_of" from="o229" to="o230" negation="false" />
+      <relation id="r39" name="consist_of" from="o229" to="o231" negation="false" />
+      <structure id="o232" name="tooth row" />
+      <relation id="r40" name="lateral to" from="o230" to="o232" negation="false" />
+      <relation id="r41" name="lateral to" from="o231" to="o232" negation="false" />
+    </statement>
+	 */
+	
+	/**
+	 * A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
+	 * @param statement
+	 */
+	@SuppressWarnings("unchecked")
+	private void collapsePrepsInStatement(Element statement) {
+		//find relations that are both to and from organs in different relation
+		//when it is a from organ, the relation is "consist of"
+		//expanding beyond "consist_of" can be risky
+		try{
+			boolean fixed = false;
+			ArrayList<Element> tobedetached = new ArrayList<Element>();
+			List<Element> relationofs = XPath.selectNodes(statement, ".//relation[@name='consist_of']");
+			for(Element relationof: relationofs){
+				String rowid = relationof.getAttributeValue("from");
+				String strid = relationof.getAttributeValue("to"); //tooth id
+				List<Element> relationwiths = XPath.selectNodes(statement, ".//relation[@to='"+rowid+"']");
+				if(relationwiths!=null && relationwiths.size()>0 
+						&& !Utilities.hasCharacters(rowid, root) //'row' without characters
+						&& relationofs.equals(XPath.selectNodes(statement, ".//relation[@from='"+rowid+"']")))//no other relations refers to rowid, so row structure may be safely removed
+				{  //found the target, now transform
+					//1. clone relationwiths, then replace rowid with strid in relationwiths clones, add clones to xml, schedule to detach originals
+					for(Element relationwith: relationwiths){
+						Element relationwithcp = (Element) relationwith.clone();
+						relationwithcp.setAttribute("to", strid);
+						statement.addContent(relationwithcp);
+						tobedetached.add(relationwith);
+					}
+					//2. remove row <structure>
+					Element row = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+rowid+"']");
+					tobedetached.add(row);
+					//3. add constraint "row of" to strid
+					Element struct = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+strid+"']");
+					String constraint = struct.getAttribute("constraint")==null? "" : struct.getAttributeValue("constraint") +";";
+					struct.setAttribute("constraint", constraint+ Utilities.getStructureName(root, rowid) +" of");
+					//4. remove relationofs
+					tobedetached.add(relationof);
+					fixed=true;
+				}
+			}
+			
+			//detach unneeded elements
+			for(Element e : tobedetached){
+				e.detach();
+			}			
+			
+			if(fixed){
+				XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+				System.out.println(outputter.outputString(root));
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 	}
 
 	/*
@@ -269,7 +364,19 @@ public class XMLNormalizer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		try{
+			File dir = new File(ApplicationUtilities.getProperty("source.dir")+"final");
+			File[] files = dir.listFiles();
+			for(File f: files){
+				//File f = new File(ApplicationUtilities.getProperty("source.dir")+"test", "Swartz 2012.xml_states356.xml");
+				SAXBuilder builder = new SAXBuilder();
+				Document xml = builder.build(f);
+				Element root = xml.getRootElement();
+				new XMLNormalizer(root).normalize();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 
 	}
 
