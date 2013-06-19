@@ -40,7 +40,7 @@ public class CharacterHandler {
 
 	//used in process
 	boolean resolve = false;
-	private ToBeSolved tobesolvedentity;
+	private ToBeResolved tobesolvedentity;
 	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
 	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	static XPath pathCharacterUnderStucture;
@@ -84,7 +84,7 @@ public class CharacterHandler {
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
 			EntityParser ep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
-			this.tobesolvedentity = new ToBeSolved(structure.getAttributeValue("id"));
+			this.tobesolvedentity = new ToBeResolved(structureid);
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
 			this.resolve = true;			
@@ -99,7 +99,7 @@ public class CharacterHandler {
 		if(structurename.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 		 //otherwise, this.entity remains null
 			//parents separated by comma (,).
-			String parents = Utilities.getStructureChain(root, "//relation[@from='" + structureid + "']", 0);
+			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 
 			
@@ -490,8 +490,10 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				for(String conid: conids){
 					String qualitymodifier = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
-					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@from='" + chara.getAttributeValue("constraintid") + "']", 0);
-					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, "", qualitymodifierparents,"");	
+					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
+							 "|//relation[@name='in'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
+							 "|//relation[@name='on'][@from='" + chara.getAttributeValue("constraintid")  + "']", 0);
+					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, qualitymodifierparents, qualitymodifier,"part_of");	
 					if(result!=null) entities.add(result);
 				}
 				return entities;
@@ -564,35 +566,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 	}
 	
 
-	private class ToBeSolved{
-		
-		//private String structurename;
-		private String structureid;
-		private EntityProposals entity;
-		private Structure2Quality s2q;
-		private QualityProposals quality;
-
-		public ToBeSolved(String structureid){
-			//this.structurename = structurename;
-			this.structureid = structureid;
-			//this.entity = entity;
-			//this.s2q = s2q;			
-		}
-		
-		public void setEntityCandidate(EntityProposals entity){
-			this.entity = entity;
-		}
-		
-		public void setStructure2Quality(Structure2Quality s2q){
-			this.s2q = s2q;
-		}
-		
-		public void setQualityCandidate(QualityProposals quality){
-			this.quality = quality;
-		}
-		
-		
-	}
+	
 		
 
 	public ArrayList<EntityProposals> getPrimaryentities() {

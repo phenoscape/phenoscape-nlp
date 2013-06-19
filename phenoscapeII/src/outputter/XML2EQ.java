@@ -27,7 +27,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 import owlaccessor.OWLAccessorImpl;
 
-
+/* annotation guideline: http://phenoscape.org/wiki/Guide_to_Character_Annotation */
 /**
  * @author Hong Updates
  *This class output EQ statements from the XML files output by CharaParser

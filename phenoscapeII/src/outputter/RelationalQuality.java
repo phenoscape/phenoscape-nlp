@@ -48,6 +48,10 @@ public class RelationalQuality extends Quality {
 	public void setRelatedEntity(EntityProposals relatedentity){
 		this.relatedentity = relatedentity;
 	}
+	
+	public String toString(){
+		return "quality="+this.relationalquality.toString()+" related entity="+this.relatedentity.toString();
+	}
 	/**
 	 * @param args
 	 */

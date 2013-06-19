@@ -55,21 +55,31 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	public void handle() {
 		try {
-			removeSpatialTerms(this.structid);
-			parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+			if(removeSpatialTerms(this.structid)){
+				parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void removeSpatialTerms(String structid) throws JDOMException {
+	/**
+	 * 
+	 * @param structid
+	 * @return boolean success or not
+	 * @throws JDOMException
+	 */
+	private boolean removeSpatialTerms(String structid) throws JDOMException {
 
 		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
 		{
 			this.structname = structure.getAttributeValue("name");
 			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
+		}else if((structure.getAttributeValue("constraint")!=null)){ //the constraint is not a spatial modifier, then this can not be a quality: for example: parasymphysial plate (plate-like)
+			return false;
 		}
+		return true;
 	}
 
 	/**
