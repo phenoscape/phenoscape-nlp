@@ -136,13 +136,36 @@ public class CharacterHandler {
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
+		String value=null;//used to hold character value, in case of "count"
+		//converts numerical value qualities to count, if the character name identifies it as a count
+		if(this.chara.getAttributeValue("name").equals("count"))
+		{
+			value = quality;
+			quality = "count";
+		}
+		boolean special_case = false;
+		if(quality.matches(".*(\\d)*.*")==true)
+		{
+			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length).*")))
+			{
+				if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length).*")))
+				{
+					special_case =specialSizeCase();
+				}
+			}
+		}
+		if(special_case)
+			{
+			return;
+			}
+		
 		boolean negated = false;
 		if(quality.startsWith("not ")){
 			negated = true;
 			quality = quality.substring(quality.indexOf(" ")+1).trim(); //deal with negated quality here
 		}
 		//is the candidate a relational quality?
-		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false,1);
 		if(relationalquality!=null){
 			//attempts to find related entity in contraints
 			// constraints = qualitymodifier if quality is a relational quality
@@ -201,7 +224,18 @@ public class CharacterHandler {
 
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
+		
 		if(result!=null){ //has a strong match
+			//the below if loop handles quality = "count" cases
+			if(value!=null)
+			{
+				result.setString(value);
+			}
+			//qualities involving length should be handled with related entity
+			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size)"))
+			{
+				this.resolve=true;
+			}
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
 				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
@@ -271,6 +305,67 @@ public class CharacterHandler {
 //Checks whether the parent structure is bilateral or not
 	//this.entity contains the parent entity
 	
+private boolean specialSizeCase() {
+	String primary_part = cleanUp(this.chara.getAttributeValue("name"));
+	String relative_part = cleanUp(this.chara.getAttributeValue("constraint"));
+	String modifier = this.chara.getAttributeValue("modifier");	
+	String relation;
+	
+
+	TermSearcher ts = new TermSearcher();
+	Quality primary_result = (Quality) ts.searchTerm(primary_part, "quality");
+	
+	if(primary_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(primary_result);
+			//this.qualities.add(qproposals);
+		}
+	
+	Quality secondary_result = (Quality) ts.searchTerm(relative_part, "quality");
+	
+	if(secondary_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(secondary_result);
+		//	this.qualities.add(qproposals);
+		}
+	
+	
+	if(modifier.matches(".*(more|greater).*"))
+	{
+		relation = "increased_in_magnitude_relative_to";
+	}
+	else
+	{
+		relation = "decreased_in_magnitude_relative_to";
+	}
+	
+	Quality relation_result = (Quality) ts.searchTerm(relation, "quality");
+	
+	if(relation_result!=null){
+		
+			QualityProposals qproposals = new QualityProposals();
+			qproposals.add(relation_result);
+			//this.qualities.add(qproposals);
+		}
+	
+	return false;
+	}
+
+private String cleanUp(String entityname) {
+
+	if(entityname.matches(".*(length).*"))
+		{
+		entityname = "length";
+		}
+	else
+		{
+		entityname = "width";
+		}
+	return entityname;
+}
+
 private boolean checkBilateral(EntityProposals ep) {
 		
 	EntityProposals epclone = ep.clone();//cloning to avoid original entity proposals to be changed
@@ -526,7 +621,9 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 		//the below condition handles situation where a structure is identified to be a quality.
 		if(this.entity==null)
 		{
-			if(tobesolvedentity.s2q==null)
+			if(tobesolvedentity!=null)
+			{
+				if(tobesolvedentity.s2q==null)
 			{
 				//whole organism
 			}
@@ -551,11 +648,53 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					}
 				}
 			}
+			}
 		}
-		
+		//Reolve for quality when it is "length"
+		if(this.entityparts.size()>0)
+		{
+			resolveIntoRelationalQuality();
+		}
 		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
-	
+/**
+ * This function handles the special case when increased/decreased length is a quality
+ * The entity in parts will become the Related entity instead of Entity Locator
+ */
+	public void resolveIntoRelationalQuality() {
+
+		ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
+		
+		if(this.qualities.size()>0)
+		{
+			for(QualityProposals qp:this.qualities)
+			{
+				
+				for(Quality q:qp.getProposals())//Reading each of the qualities
+				{
+					QualityProposals newqp = new QualityProposals();
+					
+					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+							{		
+							for(EntityProposals ep : this.entityparts)
+							{
+								RelationalQuality rq = new RelationalQuality(qp,ep);//this forms relationalquality for each of QP and RE and used for new QP
+								newqp.add(rq);
+							}
+							rqp.add(newqp); 
+							break;
+							}
+				}
+				
+			}
+			if(rqp.size()>0)
+			{
+				this.entityparts.clear();
+				this.qualities.clear();
+				this.qualities.addAll(rqp);
+			}
+		}
+	}
 
 	public ArrayList<QualityProposals> getQualities(){
 		return this.qualities;

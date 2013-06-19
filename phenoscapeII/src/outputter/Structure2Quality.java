@@ -128,7 +128,7 @@ public class Structure2Quality implements AnnotationStrategy{
 
 		}
 		// is the candidate a relational quality?
-		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false);
+		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false,1);
 		// TODO:// deal// with// negated// quality// later
 		if (relationalquality != null)
 		{

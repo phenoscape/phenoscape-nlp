@@ -144,10 +144,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 		for (OWLOntology ont:onts){
 			allclasses.addAll(ont.getClassesInSignature(true));
 		}
-		
-		//eliminate branches
+		//"Process Quality" IRI value is added to be excluded
+		excludedclassIRIs.add("http://purl.obolibrary.org/obo/PATO_0001236");
+			//eliminate branches
 		allclasses.removeAll(this.classesToExclude(excludedclassIRIs));
-		
+
 		//add all relational slim terms to a list
 		//also add all obsolete terms to a list
 		for (OWLClass c: allclasses){
@@ -168,7 +169,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		allclasses.removeAll(obsolete);
 		
 	}
-	
+
 	/**
 	 * Checks if is relational slim.
 	 *
@@ -539,10 +540,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 
 	/**
-	 * Gets the words to eliminate.
+	 * Gets the IRI to eliminate.
 	 *
 	 * @param excludedclassIRIs the eliminate
-	 * @return the words to eliminate
+	 * @return the IRI's(including all subclasses) to eliminate
 	 */
 	public Set<OWLClass> classesToExclude(List<String> excludedclassIRIs) {
 		Set<OWLClass> er = new HashSet<OWLClass>();
