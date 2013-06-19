@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 
 /**
@@ -22,6 +23,7 @@ public class XMLNormalizer {
 	public static XPath pathStateStatement;
 	public static XPath pathWholeOrganismStructure;
 	public static XPath pathNonWholeOrganismStructure;
+	public static XPath pathCharacter;
 	private static XPath pathText;
 	
 	
@@ -31,6 +33,7 @@ public class XMLNormalizer {
 			pathStateStatement = XPath.newInstance(".//statement[@statement_type='character_state']");
 			pathWithHaveHasRelation = XPath.newInstance("//relation[@name='with'] | //relation[@name='have'] | //relation[@name='has']");
 			pathRangeValueCharacter = XPath.newInstance("//character[@char_type='range_value']");
+			pathCharacter = XPath.newInstance(".//character");
 			pathCountStructure = XPath.newInstance("//structure[character[@name='count']]");
 			pathText = XPath.newInstance(".//text");
 			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
@@ -57,8 +60,51 @@ public class XMLNormalizer {
 			List<Element> characterstatements = pathCharacterStatement.selectNodes(root);
 			integrateWholeOrganism4CharacterStatements(characterstatements, root);
 			repairWholeOrganismOnlyCharacterStatements(characterstatements, root);
+			
+			//Fixing size to corresponding measure
+			fixSizeForRespectiveMeasureOnlyCharacterStatements(root);
 		}catch(Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * Currently the below text
+	 * <text>posteriormost teeth at least twice height of anteriormost teeth</text>
+	 * is intepreted as,
+	 * 
+	 * <structure constraint="posteriormost" name="tooth" id="o324">
+	 *  <character constraint="height of anteriormost teeth" name="size" value="2 times" modifier="at-least" constraintid="o325"/> 
+	 *  </structure> <structure constraint="anteriormost" name="tooth" id="o325"/>
+	 * 
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	private void fixSizeForRespectiveMeasureOnlyCharacterStatements(Element root) throws Exception {
+		
+		List<Element> characters = pathCharacter.selectNodes(root);
+		
+		for(Element chara:characters)
+		{
+		if(chara.getAttributeValue("name").equals("size"))
+		{
+			if((chara.getAttributeValue("constraint")!=null)&&(chara.getAttributeValue("constraint").matches(".*(height|width|length).*")))
+			{
+				System.out.println("-----------inside normalizer------------");
+				if(chara.getAttributeValue("constraint").contains("height"))
+				{
+					chara.setAttribute("name","height");
+				}
+				else if(chara.getAttributeValue("constraint").contains("width"))
+				{
+					chara.setAttribute("name","width");
+				}
+				else
+				{
+					chara.setAttribute("name","length");
+				}
+			}
+		}
 		}
 	}
 

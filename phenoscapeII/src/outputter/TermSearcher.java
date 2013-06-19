@@ -50,8 +50,8 @@ public class TermSearcher {
 		//the first strong match based on the original phrase is returned right away. Other matches are saved in candidate matches
 		//strong match = a match to a class lable or an exact synonym
 		phrase = format(phrase);
-		FormalConcept result = searchCache(phrase, phrasetype);
-		if(result!=null) return result;
+		//FormalConcept result = searchCache(phrase, phrasetype);
+		//if(result!=null) return result;
 		
 		//search ontologies
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]

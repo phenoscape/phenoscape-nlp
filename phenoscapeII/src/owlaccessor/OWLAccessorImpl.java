@@ -1,6 +1,10 @@
 package owlaccessor;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -16,6 +20,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
+import outputter.ApplicationUtilities;
 import outputter.XML2EQ;
 
 // TODO: Auto-generated Javadoc
@@ -504,6 +509,8 @@ public class OWLAccessorImpl implements OWLAccessor {
 		for(OWLClass c: this.attributeSlim){
 			//add labels to the pattern string
 			String label = this.getLabel(c).replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim();
+			if(structureCheck(label)==false)
+			{
 			sb.append(label);
 			sb.append("|");
 			//add syns to the pattern string
@@ -512,9 +519,38 @@ public class OWLAccessorImpl implements OWLAccessor {
 				sb.append(syn.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim());
 				sb.append("|");
 			}
+			}
 		}
 		return sb.toString().replaceAll("\\|+", "|").replace("\\|$", "").trim();
 	}
+	
+	//returns false, if the label is not a structure in fishglossaryfixed table
+	
+	private boolean structureCheck(String label) {
+		Connection conn;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			Statement stmt = conn.createStatement();
+			//fetches result if the label is associated with a structure
+			ResultSet rs = stmt.executeQuery("select * from fishglossaryfixed where category = \"structure\" and term = \""+label+"\"");
+			
+			if(rs.next()==false)
+			{
+				conn.close();
+				return false;
+			} else
+			{
+				conn.close();
+				return true;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+}
+
 	/**
 	 * Match syn.
 	 * 

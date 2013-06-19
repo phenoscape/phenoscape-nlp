@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -200,8 +201,8 @@ public class CharacterStatementParser extends Parser {
 				if(!checked.contains(structureid+",")){	
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
-					if(name.indexOf("_")>=0){//case of 'pubis_ischium', one structure id for two structures.
-						String[] names = name.split("_");
+					if((name.indexOf("_")>=0)||(name.indexOf("/")>=0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
+						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){
 							String parents = parseStructure(statement, root,
@@ -276,13 +277,27 @@ public class CharacterStatementParser extends Parser {
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
-			if(entities!=null){
+			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
+				//get quality from relations and characters from each of the structures and post compose entities with the quality
 				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
 				foundaentity = true;
 				this.qualityHash.remove(structid);
 				//remove from s2q with a structid < the first struct id 
 				if(count==0) removeS2Qbefore(structid);
 				this.structureIDs.remove(structid);
+			}
+			else if((entities!=null)&&(this.qualityClue.contains("ratio")==true))//if the quality clue has ratio then, just return all th entities
+			{
+				Set<String> keys = this.entityHash.keySet();
+				for(String key:keys)
+				{
+					this.keyentities.addAll(this.entityHash.get(key));
+					foundaentity = true;
+					this.qualityHash.remove(structid);
+					//remove from s2q with a structid < the first struct id 
+					if(count==0) removeS2Qbefore(structid);
+					this.structureIDs.remove(structid);
+				}
 			}
 			count++;
 		}

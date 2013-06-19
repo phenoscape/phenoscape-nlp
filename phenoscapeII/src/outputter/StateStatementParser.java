@@ -180,7 +180,6 @@ public class StateStatementParser extends Parser {
 		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
 		List<Element> characters;
 		try {
-			System.out.println();
 			characters = pathCharacter.selectNodes(statement);			
 			for (Element character : characters) {		
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
@@ -226,6 +225,8 @@ public class StateStatementParser extends Parser {
 			e1.printStackTrace();
 		} 
 		//TODO: redundant parsing of shared entity of the characters?
+		
+
 		CharacterHandler ch = new CharacterHandler(root, character,
 				ontoutil, qualityclue,this.keyentities, false); // may contain relational quality
 		ch.handle();

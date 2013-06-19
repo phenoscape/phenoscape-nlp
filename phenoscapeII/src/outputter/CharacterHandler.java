@@ -70,9 +70,14 @@ public class CharacterHandler {
 	 * @return
 	 */
 	public void handle(){
+		try {
 		parseEntity();
 		parseQuality();
 		if(resolve) resolve();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -132,26 +137,50 @@ public class CharacterHandler {
 	}
 	
 	
-	private void parseQuality(){
+	private void parseQuality() throws Exception{
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
-		String value=null;//used to hold character value, in case of "count"
-		//converts numerical value qualities to count, if the character name identifies it as a count
-		if(this.chara.getAttributeValue("name").equals("count"))
-		{
-			value = quality;
-			quality = "count";
-		}
+		String value=null;//used to hold character value, in case of "count","Size"
+
 		boolean special_case = false;
-		if(quality.matches(".*(\\d)*.*")==true)
+		if(quality.matches(".*(\\d)+.*")==true)
 		{
-			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length).*")))
+			preProcess(this.chara.getAttributeValue("name"));//handles height/width cases
+			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length|height|depth|broad).*")))
 			{
-				if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length).*")))
+				//To handle width,length statements of a same structure
+				if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length|height|depth|broad).*"))&&(this.chara.getAttributeValue("constraintid")==null))//constraint id should be null
 				{
-					special_case =specialSizeCase();
+					special_case =specialSizeCaseSameEntity();// handles when two properties of same entity is compared
 				}
+				else if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length|height|depth|broad).*"))&&(this.chara.getAttributeValue("constraintid")!=null))
+				{
+					//if constraintid is not null then two different structures are being compared
+					special_case = specialCaseDifferentStructures();
+					
+				}else//handles the case where a single property is being discussed
+				{
+					value = quality;
+					quality = this.chara.getAttributeValue("name");
+				}
+			}
+			if(((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(size).*"))))
+			{
+				value=quality;
+				quality="size";
+			}
+			//converts numerical value qualities to count, if the character name identifies it as a count
+			if(this.chara.getAttributeValue("name").equals("count"))
+			{
+				value = quality;
+				quality = "count";
+			}
+			
+			if(this.chara.getAttributeValue("name").equals("ratio"))
+			{
+				value = quality;
+				quality = "ratio";
 			}
 		}
 		if(special_case)
@@ -232,7 +261,7 @@ public class CharacterHandler {
 				result.setString(value);
 			}
 			//qualities involving length should be handled with related entity
-			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size)"))
+			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
 			{
 				this.resolve=true;
 			}
@@ -290,7 +319,7 @@ public class CharacterHandler {
 			qproposals.add((Quality)aquality);
 			this.qualities.add(qproposals); //keep confidence score as is
 		}
-		if(this.qualities.size()==0){
+		if((this.qualities.size()==0)&&(quality.equals("")==false)){
 			result=new Quality();
 			result.string=quality;
 			result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
@@ -301,36 +330,67 @@ public class CharacterHandler {
 		return;
 		
 	}
+
+	/*
+	 * 
+	 * handles case where same property of two different entities are being discussed
+	 * Here, the first entity is being identified by this.entity and related entity is identified by 
+	 * 
+	 */
+private boolean specialCaseDifferentStructures() throws Exception {
+
+	String quality = this.chara.getAttributeValue("name");
 	
+	TermSearcher ts = new TermSearcher();
+	Quality primary_quality = (Quality) ts.searchTerm(quality, "quality");
+	QualityProposals qp = new QualityProposals();
+	qp.add(primary_quality);
+	
+	Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
+	String structureid = structure.getAttributeValue("id");
+	String structurename = Utilities.getStructureName(root, structureid);
+	EntityParser rep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
+	
+	RelationalQuality rq = new RelationalQuality(qp,rep.getEntity());
+	qp = new QualityProposals();
+	qp.add(rq);
+	if(rq!=null)
+	{
+		this.qualities.add(qp);
+	}
+	return true;
+	}
+
+private void preProcess(String attributeValue) {
+
+	if((this.chara.getAttributeValue("name").contains("/")==true)&&(this.chara.getAttributeValue("name").split("/").length==2))
+	{
+		this.chara.setAttribute("constraint", this.chara.getAttributeValue("name").split("/")[1]);
+		this.chara.setAttribute("name", this.chara.getAttributeValue("name").split("/")[0]);		
+		//primaryquality = this.chara.getAttributeValue("name").split("/")[0];
+		//secondaryquality = this.chara.getAttributeValue("name").split("/")[1];
+	}
+	
+	}
+
 //Checks whether the parent structure is bilateral or not
 	//this.entity contains the parent entity
 	
-private boolean specialSizeCase() {
-	String primary_part = cleanUp(this.chara.getAttributeValue("name"));
-	String relative_part = cleanUp(this.chara.getAttributeValue("constraint"));
+private boolean specialSizeCaseSameEntity() {
+	String primaryquality = cleanUp(this.chara.getAttributeValue("name"));
+	String secondaryquality = cleanUp(this.chara.getAttributeValue("constraint"));
 	String modifier = this.chara.getAttributeValue("modifier");	
+	if(modifier==null)
+	{
+		modifier = this.chara.getAttributeValue("value");
+	}
 	String relation;
+	Entity relatedentity=null;
+	QualityProposals qp = new QualityProposals();
 	
-
 	TermSearcher ts = new TermSearcher();
-	Quality primary_result = (Quality) ts.searchTerm(primary_part, "quality");
-	
-	if(primary_result!=null){
-		
-			QualityProposals qproposals = new QualityProposals();
-			qproposals.add(primary_result);
-			//this.qualities.add(qproposals);
-		}
-	
-	Quality secondary_result = (Quality) ts.searchTerm(relative_part, "quality");
-	
-	if(secondary_result!=null){
-		
-			QualityProposals qproposals = new QualityProposals();
-			qproposals.add(secondary_result);
-		//	this.qualities.add(qproposals);
-		}
-	
+	Quality primary_quality = (Quality) ts.searchTerm(primaryquality, "quality");
+	Quality secondary_quality = (Quality) ts.searchTerm(secondaryquality, "quality");	
 	
 	if(modifier.matches(".*(more|greater).*"))
 	{
@@ -341,28 +401,68 @@ private boolean specialSizeCase() {
 		relation = "decreased_in_magnitude_relative_to";
 	}
 	
-	Quality relation_result = (Quality) ts.searchTerm(relation, "quality");
+	FormalRelation rel = new FormalRelation();
 	
-	if(relation_result!=null){
-		
-			QualityProposals qproposals = new QualityProposals();
-			qproposals.add(relation_result);
-			//this.qualities.add(qproposals);
+	rel.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
+	rel.setString("inheres_in");
+	rel.setId("BFO:0000052");
+	rel.setLabel("inheres_in");
+	
+	if(this.entity!=null)
+	{
+		for(Entity e:this.entity.getProposals())
+		{
+		relatedentity = e; 
+		REntity related = new REntity(rel,relatedentity);
+		CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
+		qp.add(compquality);
 		}
+	} else
+	{
+		if(this.keyentities!=null)
+		{
+			for(EntityProposals ep:this.keyentities)
+			{
+				for(Entity e: ep.getProposals())
+				{
+					relatedentity = e;
+					REntity related = new REntity(rel,relatedentity);
+					CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
+					qp.add(compquality);
+				}
+			}
+		}
+	}
 	
-	return false;
+	this.qualities.add(qp);
+	
+	return true;
 	}
 
 private String cleanUp(String entityname) {
 
-	if(entityname.matches(".*(length).*"))
+	if(entityname!=null)
+	{
+		if(entityname.matches(".*(length).*"))
 		{
 		entityname = "length";
 		}
-	else
+		else if(entityname.matches(".*(height).*"))
 		{
+		entityname = "height";
+		}
+		else if(entityname.matches(".*(depth).*"))
+		{
+			entityname = "depth";
+		}
+		else if(entityname.matches(".*(broad).*"))
+		{
+			entityname = "broad";
+		}
+		else{
 		entityname = "width";
 		}
+	}
 	return entityname;
 }
 
@@ -619,13 +719,15 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 		//the below condition handles situation where a structure is identified to be a quality.
 		if(this.entity==null)
 		{
-			if(tobesolvedentity!=null)
-			{
-				if(tobesolvedentity.s2q==null)
-			{
-				//whole organism
-			}
-			if(tobesolvedentity.s2q!=null)
+			
+			if(tobesolvedentity==null)
+			{					
+					if(this.qualities.size()>0)
+					{
+						resolveForWholeOrganism();// Identify Entities/qualities/REntities for length or width or size
+						this.donotresolve=true;
+					}
+			}else if(tobesolvedentity.s2q!=null)
 			{
 				if(tobesolvedentity.s2q.qualities!=null)
 				{
@@ -646,15 +748,64 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 					}
 				}
 			}
-			}
+			
 		}
 		//Reolve for quality when it is "length"
 		if(this.entityparts.size()>0)
 		{
 			resolveIntoRelationalQuality();
+			this.donotresolve=true;
 		}
 		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
+	
+//When the parent structure is whole organism then, the first key entity is considered primary and the rest as related entity
+	
+private void resolveForWholeOrganism() {
+	
+	ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
+	if((this.keyentities!=null)&&(this.keyentities.size()>0))
+	{
+	if(this.entity==null)
+	{
+		this.entity = this.keyentities.get(0);
+		this.primaryentities.add(this.entity);
+	}
+	
+	if(this.qualities.size()>0)
+	{
+		for(QualityProposals qp:this.qualities)
+		{
+			
+			for(Quality q:qp.getProposals())//Reading each of the qualities
+			{
+				QualityProposals newqp = new QualityProposals();
+				
+				if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth).*")))//If any of the quality label matches to "length", then the qp itself belongs to size
+						{		
+						for(int i=1;i<this.keyentities.size();i++)
+						{
+							RelationalQuality rq = new RelationalQuality(qp,this.keyentities.get(i));
+							newqp.add(rq);							
+						}
+						if(newqp.getProposals().size()>0)
+						{
+							rqp.add(newqp);
+						}
+						break;
+						}
+			}
+		}
+	}
+	if(rqp.size()>0)
+	{
+		this.qualities.clear();
+		this.qualities.addAll(rqp);
+		this.donotresolve = true;
+	}
+	}				
+	}
+
 /**
  * This function handles the special case when increased/decreased length is a quality
  * The entity in parts will become the Related entity instead of Entity Locator
@@ -672,7 +823,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				{
 					QualityProposals newqp = new QualityProposals();
 					
-					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth|broad)")))//If any of the quality label matches to "length", then the qp itself belongs to size
 							{		
 							for(EntityProposals ep : this.entityparts)
 							{
