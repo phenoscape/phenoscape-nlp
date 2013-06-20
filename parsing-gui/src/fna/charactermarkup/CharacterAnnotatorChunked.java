@@ -70,6 +70,7 @@ public class CharacterAnnotatorChunked {
 	private boolean printOR = true;
 	private String sentsrc;
 	private boolean nosubject;
+	private boolean debugextraattributes=false;
 
 	/**
 	 * 
@@ -158,7 +159,7 @@ public class CharacterAnnotatorChunked {
 		if (token.startsWith("z[") || token.startsWith("l[") || token.startsWith("u[")) {
 			annotateByChunk(cs, false);
 		} else {
-			establishSubject("(whole organism)");
+			establishSubject("(whole_organism)", false);
 			cs.setInSegment(true);
 			cs.setRightAfterSubject(true);
 			annotateByChunk(cs, false);
@@ -166,7 +167,7 @@ public class CharacterAnnotatorChunked {
 		/*
 		 * String subject= cs.getSubjectText(); if(subject==null &&
 		 * cs.getPointer()==0){ Chunk ck = cs.nextChunk(); cs.resetPointer();
-		 * establishSubject("(whole organism)"); annotateByChunk(cs, false);
+		 * establishSubject("(whole_organism)"); annotateByChunk(cs, false);
 		 * }//end mohan code else if(subject.equals("measurements")){
 		 * this.annotatedMeasurements(this.text); }else
 		 * if(!subject.equals("ignore")){ if(subject.equals("ditto")){
@@ -211,6 +212,8 @@ public class CharacterAnnotatorChunked {
 			for (Element e : es) {
 				e.setAttribute("value", "0");
 			}
+			
+
 
 			/*
 			 * <structure id="o437" name="tooth"> <character name="presence"
@@ -282,6 +285,12 @@ public class CharacterAnnotatorChunked {
 				e.setAttribute("value", "absent");
 			}
 
+			//whole_organism => whole organism
+			es = StanfordParser.path6.selectNodes(this.statement);
+			for (Element e : es) {
+				e.setAttribute("name", "whole organism");
+				e.setAttribute("name_original", "");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -331,11 +340,12 @@ public class CharacterAnnotatorChunked {
 				if (!text.matches("(" + ChunkedSentence.binaryTvalues + "|" + ChunkedSentence.binaryFvalues + ")")) {// non
 																														// binary
 																														// states
-					Element str = new Element("structure"); // whole organism as
+					Element str = new Element("structure"); // whole_organism as
 															// a placeholder
 					str.setAttribute("id", this.structid + "");
 					this.structid++;
-					str.setAttribute("name", "whole organism");
+					str.setAttribute("name", "whole_organism");
+					str.setAttribute("name_original", "");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "unknown"); // TODO: unknown as a
 														// placeholder
@@ -395,9 +405,10 @@ public class CharacterAnnotatorChunked {
 
 	// conpied end
 
-	private void decomposeAddToXML(Element e, String newname, String newid) throws JDOMException {
-		Element tempe = (Element) e.clone();
+	private void decomposeAddToXML(Element e, String newname, String newid, String originalname) throws JDOMException {
+		Element tempe = (Element) e.clone(); //all new elements would still have type="multi" attribute
 		tempe.setAttribute("name", newname);
+		tempe.setAttribute("name_original", originalname);
 		tempe.setAttribute("id", newid);// id starts from 0
 		addContent(e.getParentElement(), tempe);
 
@@ -427,7 +438,7 @@ public class CharacterAnnotatorChunked {
 	 *Original statement: 
 	 * 	<statement statement_type="character_state" character_id="975551bf-c0d8-4d97-9cbc-f7c5b7b38b99" state_id="14e6ee40-450d-4d5f-9573-3c04d8dc0954" seg_id="0">
      * 		<text>loss of connection between pseudobranchial and suprabranchial arteries</text>
-     *		<structure id="o234" name="whole organism">
+     *		<structure id="o234" name="whole_organism">
      *   		<character name="presence" value="loss" constraint="of connection" constraintid="o235" />
      * 		</structure>
      * 		<structure id="o235" name="connection" />
@@ -497,6 +508,7 @@ public class CharacterAnnotatorChunked {
 
 		for (Element e : mss) {
 			boolean isRoman=false;
+			String originalname = e.getAttributeValue("name_original");
 			String entity = e.getAttributeValue("name");
 			//organ->singular
 			String organ = TermOutputerUtilities.toSingular(entity.substring(0, entity.indexOf("_")));
@@ -526,7 +538,7 @@ public class CharacterAnnotatorChunked {
 					entity = entity.replaceFirst(" and ", "," + organ + " ");
 					String[] entities = entity.split(",");
 					for (int i = 0; i < entities.length; i++) {
-						this.decomposeAddToXML(e, entities[i], e.getAttributeValue("id") + "-" + (i + 1));
+						this.decomposeAddToXML(e, entities[i], e.getAttributeValue("id") + "-" + (i + 1), originalname);
 						// id starts from 0
 					}
 				}
@@ -539,7 +551,7 @@ public class CharacterAnnotatorChunked {
 					int to = Integer.parseInt(m.group(3));
 					for (int i = from; i <= to; i++) {
 						String temp1 = organ + " " + (isRoman?RomanConversion.binaryToRoman(i):i);
-						this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + i);// id=i
+						this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + i, originalname);// id=i
 					}
 
 					// abc 1, 2 to 5;
@@ -548,7 +560,7 @@ public class CharacterAnnotatorChunked {
 						String[] nums = part1.split("\\s+");
 						for (String n : nums) {
 							String temp1 = organ + " " + (isRoman? RomanConversion.binaryToRoman(Integer.parseInt(n)):n);
-							this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + n);// id=i
+							this.decomposeAddToXML(e, temp1, e.getAttributeValue("id") + "-" + n, originalname);// id=i
 
 						}
 					}
@@ -572,7 +584,7 @@ public class CharacterAnnotatorChunked {
 	}
 
 	private void removeIsolatedWholeOrganismPlaceholders() throws JDOMException {
-		// remove whole organism structures that without any character children
+		// remove whole_organism structures that without any character children
 		// and are not involved in a relation.
 		// These structures were put in as placeholders in processing
 		// characters/character states descriptions
@@ -641,7 +653,7 @@ public class CharacterAnnotatorChunked {
 						structure.detach();
 						structure = wo;
 					}
-					structure.setAttribute("name", "whole organism");
+					structure.setAttribute("name", "whole_organism");
 					Element ch = new Element("character");
 					ch.setAttribute("name", "life_style");
 					ch.setAttribute("value", name);
@@ -653,7 +665,7 @@ public class CharacterAnnotatorChunked {
 				 * if(lifestyle.matches(".*\\b"+name+"\\b.*")){
 				 * if(structure.getAttribute("constraint") !=null) name =
 				 * structure.getAttributeValue("constraint")+" "+name;
-				 * structure.setAttribute("name", "whole organism"); Element ch
+				 * structure.setAttribute("name", "whole_organism"); Element ch
 				 * = new Element("character"); ch.setAttribute("name",
 				 * "life_style"); ch.setAttribute("value", name);
 				 * structure.addContent(ch); }
@@ -741,7 +753,7 @@ public class CharacterAnnotatorChunked {
 						// these cases can be handled by the normal annotation procedure
 						Element e = new Element("character");
 						if (this.inbrackets) {
-							e.setAttribute("note", "in_bracket");
+							e.setAttribute("in_bracket", "true");
 						}
 						e.setAttribute("name", cname);
 						String v = ck.toString(); // may be a character list
@@ -765,8 +777,8 @@ public class CharacterAnnotatorChunked {
 					e.add(new Element("or"));
 					updateLatestElements(e);
 				}else if (ck != null && last.getName().compareTo("structure") == 0) { //scattered <patches> or absent
-					if(this.printOR) System.out.println("created whole organism for OR");
-					ArrayList<Element> structure = this.createStructureElements("(whole organism)");
+					if(this.printOR) System.out.println("created whole_organism for OR");
+					ArrayList<Element> structure = this.createStructureElements("(whole_organism)", false);
 					updateLatestElements(structure);
 				}
 				/*ArrayList<Element> e = new ArrayList<Element>();
@@ -779,8 +791,13 @@ public class CharacterAnnotatorChunked {
 			}
 			if (ck instanceof ChunkOrgan) {// this is the subject of a segment.
 											// May contain multiple organs
+				//if this chunk appears right after a comma
+				boolean aftercomma = false;
+				if(this.latestelements.size()>0 && this.latestelements.get(this.latestelements.size()-1).getName().compareTo("comma")==0){
+					aftercomma = true;
+				}
 				String content = ck.toString().replaceFirst("^z\\[", "").replaceFirst("\\]$", "");
-				establishSubject(content/* , false */);
+				establishSubject(content, aftercomma/* , false */);
 				if (this.partofinference) {
 					this.cstructures.addAll(this.subjects);
 				}
@@ -796,7 +813,12 @@ public class CharacterAnnotatorChunked {
 				} else {
 					structure = content;
 				}
-				ArrayList<Element> structures = createStructureElements(structure/*
+				//if this chunk appears right after a comma
+				boolean aftercomma = false;
+				if(this.latestelements.size()>0 && this.latestelements.get(this.latestelements.size()-1).getName().compareTo("comma")==0){
+					aftercomma = true;
+				}
+				ArrayList<Element> structures = createStructureElements(structure, aftercomma/*
 																				 * ,
 																				 * false
 																				 */);
@@ -825,7 +847,12 @@ public class CharacterAnnotatorChunked {
 					content = content.replaceAll(" +(?=\\w+\\))", " (");
 					if(!content.startsWith("(")) content="("+content;//added by Hari
 				}
-				establishSubject(content/* , false */);
+				//if this chunk appears right after a comma
+				boolean aftercomma = false;
+				if(this.latestelements.size()>0 && this.latestelements.get(this.latestelements.size()-1).getName().compareTo("comma")==0){
+					aftercomma = true;
+				}
+				establishSubject(content, aftercomma/* , false */);
 			} else if (ck instanceof ChunkSimpleCharacterState) {
 				String content = ck.toString().replaceFirst("^a\\[", "").replaceFirst("\\]$", "");
 				// ArrayList<Element> chars =
@@ -854,7 +881,7 @@ public class CharacterAnnotatorChunked {
 				// System.out.println(ck.toString() +
 				// " attached to "+parents.get(0).getAttributeValue("name"));
 				// }
-				ArrayList<Element> chars = processCharacterList(ck.toString(), lastStructures()/*
+				ArrayList<Element> chars = processCharacterList(ck.toString(), lastStructures(), false/*
 																								 * this
 																								 * .
 																								 * subjects
@@ -905,7 +932,7 @@ public class CharacterAnnotatorChunked {
 				// System.out.println(content +
 				// " attached to "+parents.get(0).getAttributeValue("name"));
 				// }
-				ArrayList<Element> chars = annotateNumericals(content, ((ChunkRatio) ck).getLabel(), "", lastStructures(), false);
+				ArrayList<Element> chars = annotateNumericals(content, ((ChunkRatio) ck).getLabel(), "", lastStructures(), false, false);
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkArea) {
 				// ArrayList<Element> chars = annotateNumericals(ck.toString(),
@@ -919,7 +946,7 @@ public class CharacterAnnotatorChunked {
 				// System.out.println(content + " attached to "+
 				// parents.get(0).getAttributeValue("name"));
 				// }
-				ArrayList<Element> chars = annotateNumericals(content, "area", "", lastStructures(), false);
+				ArrayList<Element> chars = annotateNumericals(content, "area", "", lastStructures(), false, false);
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkNumericals) {
 				// ** find parents, modifiers
@@ -956,7 +983,7 @@ public class CharacterAnnotatorChunked {
 				String content = rest.replace(modifier2, "").replaceAll("(\\{|\\})", "").trim();
 				modifier2 = modifier2.replaceAll("(\\w+\\[|\\]|\\{|\\})", "").trim();
 				ArrayList<Element> chars = annotateNumericals(content, text.matches(".*?\\b("+this.size+")\\b.*") || content.indexOf('/') > 0 || content.indexOf('%') > 0
-						|| content.indexOf('.') > 0 ? "size" : null, (modifier1 + ";" + modifier2).replaceAll("(^\\W|\\W$)", ""), lastStructures(), resetfrom);
+						|| content.indexOf('.') > 0 ? "size" : null, (modifier1 + ";" + modifier2).replaceAll("(^\\W|\\W$)", ""), lastStructures(), resetfrom, false);
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkTHAN) {
 				ArrayList<Element> chars = processTHAN(ck.toString().replaceFirst("^n\\[", "").replaceFirst("\\]$", ""), this.subjects);
@@ -1018,7 +1045,12 @@ public class CharacterAnnotatorChunked {
 				ChunkedSentence newcs = new ChunkedSentence(chunkedTokens, content, conn, glosstable, this.tableprefix);
 				Chunk firstck = newcs.getNextChunk();
 				if (firstck instanceof ChunkNonSubjectOrgan || firstck instanceof ChunkOrgan) {
-					establishSubject(firstck.toString().replaceAll("\\w\\[", "").replaceAll("\\]", "").trim());
+					//if this chunk appears right after a comma
+					boolean aftercomma = false;
+					if(this.latestelements.size()>0 && this.latestelements.get(this.latestelements.size()-1).getName().compareTo("comma")==0){
+						aftercomma = true;
+					}
+					establishSubject(firstck.toString().replaceAll("\\w\\[", "").replaceAll("\\]", "").trim(), aftercomma);
 				}
 
 				if (connector.compareTo("when") == 0) {// rewrite content and
@@ -1130,11 +1162,12 @@ public class CharacterAnnotatorChunked {
 				// Element structure = new Element("chromosome");
 				Element structure = new Element("structure");
 				this.addAttribute(structure, "name", "chromosome");
+				this.addAttribute(structure, "name_original", ""); //what value should it be?
 				this.addAttribute(structure, "id", "o" + this.structid);
 				this.structid++;
 				ArrayList<Element> list = new ArrayList<Element>();
 				list.add(structure);
-				this.annotateNumericals(content, "count", "", list, false);
+				this.annotateNumericals(content, "count", "", list, false, false);
 				/*
 				 * for(int i = 0; i<counts.length; i++){ Element character = new
 				 * Element("character"); this.addAttribute(character, "count",
@@ -1150,7 +1183,7 @@ public class CharacterAnnotatorChunked {
 					this.addAttribute(lastelement, "modifier", content);
 				} else {
 					content = content.replaceAll("(m\\[|\\])", "").replaceAll("(?<=[^\\d])-(?=[^\\d])", " ");
-					ArrayList<Element> chars = annotateNumericals(content, "size", "", lastStructures(), false);
+					ArrayList<Element> chars = annotateNumericals(content, "size", "", lastStructures(), false, false);
 					updateLatestElements(chars);
 					//cs.unassignedmodifier = content;
 				}
@@ -1237,10 +1270,10 @@ public class CharacterAnnotatorChunked {
 		}
 		
 		String relation = charA+" "+parts[2].replaceAll("[{}~]", "")+" "+charB;
-		ArrayList<Element> structureA = this.createStructureElements("("+organA+")");
+		ArrayList<Element> structureA = this.createStructureElements("("+organA+")", false);
 		ArrayList<Element> structureB = null;
 		if(organB.compareTo(organA)!=0){
-			structureB = this.createStructureElements(organB);
+			structureB = this.createStructureElements(organB, false);
 		}else{
 			structureB = structureA;
 		}
@@ -1284,7 +1317,7 @@ public class CharacterAnnotatorChunked {
 		return afteror;
 	}
 
-	private ArrayList<Element> annotateNumericals(String chunktext, String character, String modifier, ArrayList<Element> parents, boolean resetfrom) {
+	private ArrayList<Element> annotateNumericals(String chunktext, String character, String modifier, ArrayList<Element> parents, boolean resetfrom, boolean characterismodifier) {
 		ArrayList<Element> chars = null;
 		// if(character!=null && character.compareTo("size")==0 &&
 		// chunktext.contains("times")){
@@ -1326,6 +1359,10 @@ public class CharacterAnnotatorChunked {
 			}
 			if (this.inbrackets) {
 				e.setAttribute("in_bracket", "true");
+			}
+			if(characterismodifier){
+				e.setAttribute("is_modifier", "true");
+				if(debugextraattributes) System.out.println("is modifier:"+e.getAttributeValue("value"));
 			}
 			/*
 			 * if(this.unassignedmodifiers != null &&
@@ -1536,7 +1573,7 @@ public class CharacterAnnotatorChunked {
 				 * numeric = numeric.substring(0,
 				 * numeric.indexOf("]")+1).replaceAll("(\\w+\\[|\\])", "");
 				 */
-				charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), "size", modifier.replaceAll("[{<()>}]", ""), parents, false);
+				charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), "size", modifier.replaceAll("[{<()>}]", ""), parents, false, false);
 			} else {// size[{shorter} than {plumose} {inner}]
 				charas = this.processSimpleCharacterState(parts[0].replaceAll("(\\{|\\})", "").trim(), parents); // numeric
 																													// part
@@ -1720,7 +1757,7 @@ public class CharacterAnnotatorChunked {
 		String previousToken = this.cs.getTokenAt((this.cs.getPointer() - 2));
 		if (previousToken != null) {
 			if (previousToken.matches(conjunction)) {
-				this.createCharacterElement(parents, results, modifier, state, character, "");
+				this.createCharacterElement(parents, results, modifier, state, character, "", false);
 			}
 
 			// deal with possible 3cm wide, or high relief cases: rewrite the
@@ -1744,13 +1781,13 @@ public class CharacterAnnotatorChunked {
 					}
 					results = this.latestelements;
 				} else {// no, it is not the case
-					this.createCharacterElement(parents, results, modifier, state, character, "");
+					this.createCharacterElement(parents, results, modifier, state, character, "", false);
 				}
 			} else {// no, it is not the case
-				this.createCharacterElement(parents, results, modifier, state, character, "");
+				this.createCharacterElement(parents, results, modifier, state, character, "", false);
 			}
 		} else {
-			this.createCharacterElement(parents, results, modifier, state, character, "");
+			this.createCharacterElement(parents, results, modifier, state, character, "", false);
 		}
 		/*
 		 * seemed to be unnecessarily complexed and sensitive to the glossary
@@ -1777,8 +1814,8 @@ public class CharacterAnnotatorChunked {
 		return results;
 	}
 
-	private void establishSubject(String content/* , boolean makeconstraint */) {
-		ArrayList<Element> structures = createStructureElements(content/*
+	private void establishSubject(String content, boolean aftercomma/* , boolean makeconstraint */) {
+		ArrayList<Element> structures = createStructureElements(content, aftercomma/*
 																		 * ,
 																		 * makeconstraint
 																		 */);
@@ -1817,9 +1854,10 @@ public class CharacterAnnotatorChunked {
 	 *            : pubescence[m[not]
 	 *            {pubescence-list-sometimes-bristly-or-hairy}]
 	 * @param parents
+	 * @param characterismodifier 
 	 * @return
 	 */
-	private ArrayList<Element> processCharacterList(String content, ArrayList<Element> parents) {
+	private ArrayList<Element> processCharacterList(String content, ArrayList<Element> parents, boolean characterismodifier) {
 		ArrayList<Element> results = new ArrayList<Element>();
 		String modifier = "";
 		if (content.indexOf("m[") >= 0) {
@@ -1849,11 +1887,11 @@ public class CharacterAnnotatorChunked {
 		}
 		String cvalue = list.replaceFirst("\\{" + cname + "~list~", "").replaceFirst("\\W+$", "").replaceAll("~", " ").trim();
 		if (cname.endsWith("ttt")) {
-			this.createCharacterElement(parents, results, modifier, cvalue, cname.replaceFirst("ttt$", ""), "");
+			this.createCharacterElement(parents, results, modifier, cvalue, cname.replaceFirst("ttt$", ""), "", characterismodifier);
 			return results;
 		}
 		if (cvalue.indexOf(" to ") >= 0) {
-			createRangeCharacterElement(parents, results, modifier, cvalue.replaceAll("punct", ",").replaceAll("(\\{|\\})", ""), cname); // add
+			createRangeCharacterElement(parents, results, modifier, cvalue.replaceAll("punct", ",").replaceAll("(\\{|\\})", ""), cname, characterismodifier); // add
 																																			// a
 																																			// general
 																																			// statement:
@@ -1913,7 +1951,7 @@ public class CharacterAnnotatorChunked {
 			}
 			String[] tokens = state.split("\\s+");
 			tokens[tokens.length - 1] = tokens[tokens.length - 1].replaceAll("#", " ");
-			results.addAll(this.processCharacterText(tokens, parents, cname));
+			results.addAll(this.processCharacterText(tokens, parents, cname, characterismodifier));
 			// results.addAll(this.processCharacterText(new String[]{state},
 			// parents, cname));
 		}
@@ -1929,11 +1967,16 @@ public class CharacterAnnotatorChunked {
 	 * @param modifier
 	 * @param cvalue
 	 * @param cname
+	 * @param characterismodifier 
 	 */
-	private String createRangeCharacterElement(ArrayList<Element> parents, ArrayList<Element> results, String modifiers, String cvalue, String cname) {
+	private String createRangeCharacterElement(ArrayList<Element> parents, ArrayList<Element> results, String modifiers, String cvalue, String cname, boolean characterismodifier) {
 		Element character = new Element("character");
 		if (this.inbrackets) {
-			character.setAttribute("note", "in_bracket");
+			character.setAttribute("in_bracket", "true");
+		}
+		if(characterismodifier){
+			character.setAttribute("is_modifier", "true");
+			if(debugextraattributes) System.out.println("is modifier:"+cvalue);
 		}
 		character.setAttribute("char_type", "range_value");
 		character.setAttribute("name", cname);
@@ -2192,7 +2235,7 @@ public class CharacterAnnotatorChunked {
 		}
 		// of o[3-7]
 		if (lastIsStruct && object.matches("o\\[\\(?\\[?\\d.*?\\d\\+?\\]")) {
-			this.annotateNumericals(object.replaceAll("(o\\[|\\])", ""), "count", null, this.latestelements, false);
+			this.annotateNumericals(object.replaceAll("(o\\[|\\])", ""), "count", null, this.latestelements, false, false);
 			return;
 		}
 
@@ -2289,8 +2332,8 @@ public class CharacterAnnotatorChunked {
 				structs = this.latestelements;
 			} else if (this.subjects.size() != 0) {
 				structs = this.subjects;
-			} else { // create placeholder structure "whole organism"
-				this.establishSubject("(whole organism)");
+			} else { // create placeholder structure "whole_organism"
+				this.establishSubject("(whole_organism)", false);
 				structs = this.subjects;
 			}
 			Element ch = new Element("character");
@@ -2608,7 +2651,7 @@ public class CharacterAnnotatorChunked {
 												// organs in object
 												// o[.........{m} {m} (o1) and
 												// {m} (o2)]
-		structures = createStructureElements(twoparts[1]/* , false */);// to be
+		structures = createStructureElements(twoparts[1], false/* , false */);// to be
 																		// added
 																		// structures
 																		// found
@@ -2646,12 +2689,13 @@ public class CharacterAnnotatorChunked {
 				String firstorgans = twoparts[1].substring(0, twoparts[1].indexOf(") plus")); // (teeth
 				String lastorganincluded = firstorgans.substring(firstorgans.lastIndexOf("(") + 1);
 				for (int i = structures.size() - 1; i >= 0; i--) {
-					if (!structures.get(i).getAttributeValue("name").equals(TermOutputerUtilities.toSingular(lastorganincluded))) {
+					if (!structures.get(i).getAttributeValue("name_original").equals(lastorganincluded)) {
+					//if (!structures.get(i).getAttributeValue("name").equals(TermOutputerUtilities.toSingular(lastorganincluded))) {
 						structures.remove(i);
 					}
 				}
 			}
-			processCharacterText(tokens, structures, null); // process part 1,
+			processCharacterText(tokens, structures, null, false); // process part 1,
 															// which applies to
 															// all
 															// lateststructures,
@@ -2841,8 +2885,8 @@ public class CharacterAnnotatorChunked {
 					// String pattern = a+"[ ]+of[ ]+[0-9]+.*"+b+"[,\\.]";
 					// //consists-of
 					if (a.length() > 0 && b.length() > 0) {
-						String pb = TermOutputerUtilities.plural(b);
-						String pa = TermOutputerUtilities.plural(a);
+						String pb = TermOutputerUtilities.toPlural(b);
+						String pa = TermOutputerUtilities.toPlural(a);
 						String pattern = "(" + b + "|" + pb + ")" + "[ ]+of[ ]+[0-9]+.*" + "(" + a + "|" + pa + ")" + "[ ]?(,|;|\\.|and|or|plus)"; // consists-of
 						String query = "select * from " + this.tableprefix + "_sentence where sentence rlike '" + pattern + "'";
 						ResultSet rs = stmt.executeQuery(query);
@@ -3022,7 +3066,7 @@ public class CharacterAnnotatorChunked {
 	 *            : {} (), {} (), () and/or ()
 	 * @return
 	 */
-	private ArrayList<Element> createStructureElements(String listofstructures/*
+	private ArrayList<Element> createStructureElements(String listofstructures, boolean aftercomma/*
 																			 * ,
 																			 * boolean
 																			 * makeconstraint
@@ -3084,7 +3128,7 @@ public class CharacterAnnotatorChunked {
 			// create element,
 			Element e = new Element("structure");
 			if (this.inbrackets) {
-				e.setAttribute("note", "in_bracket");
+				e.setAttribute("in_bracket", "true");
 			}
 			String strid = "o" + this.structid;
 			this.structid++;
@@ -3097,12 +3141,26 @@ public class CharacterAnnotatorChunked {
 					//handle abc_i-iii, abc_2_to_5, abc_3_and_5, abc_3,4-5... 
 					e.setAttribute("type","multi");
 					e.setAttribute("name", adjustUnderscore(o));//make sure "_" is used only before the indexes, not btw words of a phrase
+					e.setAttribute("name_original", o.replaceAll("_", " "));
 				}else{
-					if(isPrematched(o)) e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
-					else e.setAttribute("name", o); //originally hyphenated phrases such as pubis_ischium
+					if(isPrematched(o)){
+						e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
+						e.setAttribute("name_original", o.replaceAll("_", " ").trim());
+					}
+					else{
+						e.setAttribute("name", o); //originally hyphenated phrases such as pubis_ischium
+						e.setAttribute("name_original", o);
+					}
 				}
 			}else{
+				e.setAttribute("name_original", o); //add structure name as the original text
 				e.setAttribute("name", TermOutputerUtilities.toSingular(o));
+			}
+			
+			//if e appears right after a comma
+			if(aftercomma){
+				e.setAttribute("after_comma", "true");
+				if(debugextraattributes) System.out.println("after_comma:"+e.getAttributeValue("name"));
 			}
 			
 			//Changed by Zilong
@@ -3171,7 +3229,7 @@ public class CharacterAnnotatorChunked {
 													// organ
 				organ = sharedcharacters;
 			}
-			processCharacterText(organ, list, null); // characters created here
+			processCharacterText(organ, list, null, true); // characters created here
 														// are final and all the
 														// structures will have,
 														// therefore they shall
@@ -3262,7 +3320,7 @@ public class CharacterAnnotatorChunked {
 																					// organname
 				if (toorganname.indexOf('(') < 0)
 					toorganname = "(" + toorganname;
-				this.createStructureElements(toorganname);
+				this.createStructureElements(toorganname, false);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -3291,7 +3349,7 @@ public class CharacterAnnotatorChunked {
 	 * @param tokens
 	 * @param parents
 	 */
-	private ArrayList<Element> processCharacterText(String[] tokens, ArrayList<Element> parents, String character) {
+	private ArrayList<Element> processCharacterText(String[] tokens, ArrayList<Element> parents, String character, boolean characterismodifier) {
 		ArrayList<Element> results = new ArrayList<Element>();
 		// determine characters and modifiers
 		String modifiers = "";
@@ -3299,7 +3357,7 @@ public class CharacterAnnotatorChunked {
 			if (tokens[j].trim().length() > 0) {
 				tokens[j] = NumericalHandler.originalNumForm(tokens[j]);
 				if (tokens[j].indexOf("~list~") >= 0) {
-					results = this.processCharacterList(tokens[j], parents);
+					results = this.processCharacterList(tokens[j], parents, characterismodifier);
 				} else {
 					String w = tokens[j];
 					String chara = null;
@@ -3331,7 +3389,7 @@ public class CharacterAnnotatorChunked {
 																					// 2
 																					// times
 																					// =>2-times?
-						results = this.annotateNumericals(w, "count", modifiers, parents, false);
+						results = this.annotateNumericals(w, "count", modifiers, parents, false, characterismodifier);
 						modifiers = "";
 					} else {
 						// String chara = MyPOSTagger.characterhash.get(w);
@@ -3366,7 +3424,7 @@ public class CharacterAnnotatorChunked {
 									 */
 								}
 							} else {
-								createCharacterElement(parents, results, modifiers, w, chara, ""); // default
+								createCharacterElement(parents, results, modifiers, w, chara, "", characterismodifier); // default
 																									// type
 																									// ""
 																									// =
@@ -3383,10 +3441,14 @@ public class CharacterAnnotatorChunked {
 		return results;
 	}
 
-	private String createCharacterElement(ArrayList<Element> parents, ArrayList<Element> results, String modifiers, String cvalue, String cname, String char_type) {
+	private String createCharacterElement(ArrayList<Element> parents, ArrayList<Element> results, String modifiers, String cvalue, String cname, String char_type, boolean characterismodifier) {
 		Element character = new Element("character");
 		if (this.inbrackets) {
-			character.setAttribute("note", "in_bracket");
+			character.setAttribute("in_bracket", "true");
+		}
+		if(characterismodifier){
+			character.setAttribute("is_modifier", "true");
+			if(debugextraattributes) System.out.println("is modifier:"+cvalue);
 		}
 		if (cname.compareTo("count") == 0 && cvalue.indexOf("-") >= 0 && cvalue.indexOf("-") == cvalue.lastIndexOf("-")) {
 			String[] values = cvalue.split("-");
@@ -3581,7 +3643,7 @@ public class CharacterAnnotatorChunked {
 	 */
 	private void annotatedMeasurements(String measurements) {
 		measurements = measurements.replaceAll("–", "-");
-		Element whole = new Element("whole organism");
+		Element whole = new Element("whole_organism");
 		// this.statement.addContent(whole);
 		addContent(this.statement, whole);
 		ArrayList<Element> parent = new ArrayList<Element>();
@@ -3601,7 +3663,7 @@ public class CharacterAnnotatorChunked {
 			String modifier = vstring.substring(vlu.length()).trim();
 			modifier = modifier.length() > 0 ? "m[" + modifier + "]" : null;
 			vlu = vlu.replaceAll("(?<=\\d)\\s*\\.\\s*(?=\\d)", ".");
-			this.annotateNumericals(vlu.trim(), chara.trim(), modifier, parent, false);
+			this.annotateNumericals(vlu.trim(), chara.trim(), modifier, parent, false, false);
 		}
 	}
 
