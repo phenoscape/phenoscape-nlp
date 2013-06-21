@@ -427,16 +427,20 @@ public class TermSearcher {
 
 		TermSearcher ts = new TermSearcher();
 		//FormalConcept result = ts.searchTerm("ornament", "quality");
-		ArrayList<FormalConcept> result =TermSearcher.regexpSearchTerm("epichordal\\b.*", "entity");
-		if(result!=null){
-			System.out.println(result.toString());
-		}else{
-			ArrayList<FormalConcept> fcs = ts.getCandidateMatches();
-			for(FormalConcept fc: fcs){
-				System.out.println(fc.toString());
-			}
+//		ArrayList<FormalConcept> result =TermSearcher.regexpSearchTerm("epichordal\\b.*", "entity");
+//		if(result!=null){
+//			System.out.println(result.toString());
+//		}else{
+//			ArrayList<FormalConcept> fcs = ts.getCandidateMatches();
+//			for(FormalConcept fc: fcs){
+//				System.out.println(fc.toString());
+//			}
+		
+		Quality primary_quality = (Quality) ts.searchTerm("decreas height", "quality");
+		System.out.println(primary_quality.getLabel());
+
 		}		
 
-	}
+	
 
 }

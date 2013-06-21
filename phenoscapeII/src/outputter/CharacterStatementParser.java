@@ -416,8 +416,11 @@ public class CharacterStatementParser extends Parser {
 				consumeQuality(sid, s2qs); //update this.entityHash
 			}
 		}
-		
+
 		if(this.entityHash!=null && this.entityHash.size()>0){
+			//Check ELK if there is actually a part of relationship, if yes proceed
+//			else if they are involved in any relation as from then, they can key entity
+			
 			if(debug){
 				System.out.println("remaining entities: post-compose with 'part_of':");
 			}
@@ -443,7 +446,13 @@ public class CharacterStatementParser extends Parser {
 				}else if(this.keyentities.size()==0){
 					this.keyentities.addAll(entities);
 				}else{
-					addEntityLocators(this.keyentities, entities);
+					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the entity is part of keyentity
+						addEntityLocators(this.keyentities, entities);
+					}
+					else
+					{
+						this.keyentities.addAll(entities);
+					}
 				}
 			}
 		}
@@ -464,6 +473,32 @@ public class CharacterStatementParser extends Parser {
 			}
 		}*/	
 	}
+
+	private boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
+		
+		for(EntityProposals ep1 : this.keyentities)
+		{
+			for(Entity e1: ep1.getProposals())
+			{
+				for(EntityProposals ep2:entities)
+				{
+					for(Entity e2:ep2.getProposals())
+					{
+						if((e1.getClassIRI()!=null)&&(e2.getClassIRI()!=null))
+						{
+						if(XML2EQ.elk.isPartOf(e1.getClassIRI(),e2.getClassIRI()))
+						{
+							return true;
+						}
+						}
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+
 
 	/**
 	 * Order the structures shared btw structureIDs and entityHash,

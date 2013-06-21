@@ -144,17 +144,18 @@ public class CharacterHandler {
 		String value=null;//used to hold character value, in case of "count","Size"
 
 		boolean special_case = false;
-		if(quality.matches(".*(\\d)+.*")==true)
+		if((quality.matches(".*(\\d)+.*")==true)||(quality.equals("")==true)||(quality.equals("not")==true||(quality.matches(".*(width|height|length|broad|depth).*"))))
 		{
 			preProcess(this.chara.getAttributeValue("name"));//handles height/width cases
+				
 			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length|height|depth|broad).*")))
 			{
 				//To handle width,length statements of a same structure
 				if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length|height|depth|broad).*"))&&(this.chara.getAttributeValue("constraintid")==null))//constraint id should be null
 				{
-					special_case =specialSizeCaseSameEntity();// handles when two properties of same entity is compared
+					special_case =specialSizeCaseSameStructure();// handles when two properties of same entity is compared
 				}
-				else if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraint").matches(".*(width|length|height|depth|broad).*"))&&(this.chara.getAttributeValue("constraintid")!=null))
+				else if((this.chara.getAttributeValue("constraint")!=null)&&(this.chara.getAttributeValue("constraintid")!=null))
 				{
 					//if constraintid is not null then two different structures are being compared
 					special_case = specialCaseDifferentStructures();
@@ -333,16 +334,40 @@ public class CharacterHandler {
 
 	/*
 	 * 
-	 * handles case where same property of two different entities are being discussed
-	 * Here, the first entity is being identified by this.entity and related entity is identified by 
+	 * handles case where same property of two different structures are being discussed
+	 * Here, the first entity is being identified by this.entity and related entity is identified by constraintid
 	 * 
 	 */
 private boolean specialCaseDifferentStructures() throws Exception {
 
 	String quality = this.chara.getAttributeValue("name");
+	boolean negation=false;
+	boolean flag=false;//used to check, if quality is modified
+	if(this.chara.getAttributeValue("modifier")!=null)
+	{
+		if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+		{
+			negation = true;
+		}
+		if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+		{
+			quality = (negation==false?"increased ":"decreased ")+quality;
+		}
+		else
+		{
+			quality = (negation==true?"increased ":"decreased ")+quality;
+		}
+		flag=true;
+			
+	}
 	
 	TermSearcher ts = new TermSearcher();
 	Quality primary_quality = (Quality) ts.searchTerm(quality, "quality");
+	if((primary_quality==null) &&(flag=true))//removes the increased or decreased and check for the plain quality
+	{
+		quality = quality.substring(quality.indexOf(" "));
+		primary_quality = (Quality) ts.searchTerm(quality, "quality");
+	}
 	QualityProposals qp = new QualityProposals();
 	qp.add(primary_quality);
 	
@@ -361,25 +386,53 @@ private boolean specialCaseDifferentStructures() throws Exception {
 	return true;
 	}
 
-private void preProcess(String attributeValue) {
 
-	if((this.chara.getAttributeValue("name").contains("/")==true)&&(this.chara.getAttributeValue("name").split("/").length==2))
+private void preProcess(String quality) {
+	//The below code is used to handle (height/width) kind of character name
+
+	if((quality.contains("/")==true)&&(quality.split("/").length==2))
 	{
-		this.chara.setAttribute("constraint", this.chara.getAttributeValue("name").split("/")[1]);
-		this.chara.setAttribute("name", this.chara.getAttributeValue("name").split("/")[0]);		
-		//primaryquality = this.chara.getAttributeValue("name").split("/")[0];
-		//secondaryquality = this.chara.getAttributeValue("name").split("/")[1];
+		this.chara.setAttribute("constraint", quality.split("/")[1]);
+		this.chara.setAttribute("name", quality.split("/")[0]);	
 	}
 	
+	//The below code uses quality clue to process empty names and replace them with clues
+	if((quality==null)||(quality.equals(""))==true)
+	{
+		for(String measure:this.qualityclues)
+		{
+			if(measure.matches("(height|length|width|depth|broad|breadth)")==true)
+			{
+				this.chara.setAttribute("name", measure);
+				break;
+			}
+		}
+	}
+	
+	if(quality.contains("_")==true)
+	{
+			if(quality.contains("height"))
+			{
+				this.chara.setAttribute("name","height");
+			}else if(quality.contains("width"))
+			{
+				this.chara.setAttribute("name","width");
+			}else if(quality.contains("depth"))
+			{
+				this.chara.setAttribute("name","depth");
+			}else if(quality.contains("length"))
+			{
+				this.chara.setAttribute("name","length");
+			}
+	}
 	}
 
-//Checks whether the parent structure is bilateral or not
-	//this.entity contains the parent entity
-	
-private boolean specialSizeCaseSameEntity() {
+
+private boolean specialSizeCaseSameStructure() {
 	String primaryquality = cleanUp(this.chara.getAttributeValue("name"));
 	String secondaryquality = cleanUp(this.chara.getAttributeValue("constraint"));
 	String modifier = this.chara.getAttributeValue("modifier");	
+	boolean negation=false;
 	if(modifier==null)
 	{
 		modifier = this.chara.getAttributeValue("value");
@@ -392,13 +445,17 @@ private boolean specialSizeCaseSameEntity() {
 	Quality primary_quality = (Quality) ts.searchTerm(primaryquality, "quality");
 	Quality secondary_quality = (Quality) ts.searchTerm(secondaryquality, "quality");	
 	
-	if(modifier.matches(".*(more|greater).*"))
+	if(modifier.matches(".*(not|no).*"))
 	{
-		relation = "increased_in_magnitude_relative_to";
+		negation = true;
+	}
+	if(modifier.matches(".*(more|great|wide|broad|large|much).*"))
+	{
+		relation = negation==false?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
 	}
 	else
 	{
-		relation = "decreased_in_magnitude_relative_to";
+		relation = negation==true?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
 	}
 	
 	FormalRelation rel = new FormalRelation();
@@ -466,6 +523,13 @@ private String cleanUp(String entityname) {
 	return entityname;
 }
 
+/*
+ * Uses Elk to find out if which entities are bilateral
+ * //Checks whether the parent structure is bilateral or not
+	//this.entity contains the parent entity
+	
+ */
+
 private boolean checkBilateral(EntityProposals ep) {
 		
 	EntityProposals epclone = ep.clone();//cloning to avoid original entity proposals to be changed
@@ -500,7 +564,9 @@ private boolean checkBilateral(EntityProposals ep) {
 		return bilateralcheck;
 	}
 
-
+/*
+ * Processes multiple structures which has same characters
+ */
 
 private boolean structuresWithSameCharacters(Element statement) {
 	
@@ -761,7 +827,9 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 		//need to resolve on cases where both entity!=null and S2Q!=null
 	}
 	
-//When the parent structure is whole organism then, the first key entity is considered primary and the rest as related entity
+/*
+ * When the parent structure is whole organism then, the first key entity is considered primary and the rest as related entity
+ */
 	
 private void resolveForWholeOrganism() {
 	
