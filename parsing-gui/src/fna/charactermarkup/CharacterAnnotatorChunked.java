@@ -905,7 +905,7 @@ public class CharacterAnnotatorChunked {
 				// "").replaceFirst("\\]$", ""),
 				// CharacterAnnotatorChunked.subjects);
 				updateLatestElements(es);
-			} else if (ck instanceof ChunkComparativeValue) {
+			} else if (ck instanceof ChunkComparativeValue) {//m[at-least] 2 times n[length[{longer}] constraint[than {wide}]]
 				// ArrayList<Element> chars =
 				// processComparativeValue(ck.toString().replaceAll("–", "-"),
 				// lastStructures());
@@ -1524,6 +1524,9 @@ public class CharacterAnnotatorChunked {
 	 * size[{longer}] constraint[than (object)]"; shape[{lobed} constraint[than
 	 * (proximal)]]
 	 * 
+	 * m[at-least] 2 times n[length[{longer}] constraint[than {wide}]
+	 * size[less than 2 times {longer} constraint[than {wide}]]
+	 * 
 	 * @param replaceFirst
 	 * @param subjects2
 	 * @return
@@ -1531,11 +1534,21 @@ public class CharacterAnnotatorChunked {
 	private ArrayList<Element> processTHAN(String content, ArrayList<Element> parents) {
 
 		ArrayList<Element> charas = new ArrayList<Element>();
+		String modifier = "";
+		while(content.startsWith("m[")){
+			modifier += content.substring(0, content.indexOf("]")+1);
+			content = content.substring(content.indexOf("]")+1).trim();
+		}
 		String[] parts = content.split("constraint\\[");
 		if (content.startsWith("constraint")) {
 			charas = latest("character", this.latestelements);
 		} else {
-			if (parts[0].matches(".*?\\d.*") && parts[0].matches(".*size\\[.*")) {// size[m[mostly]
+			String ch = "";
+			if(parts[0].contains(" n[") && parts.length>1 && parts[1].matches(".*?\\b("+ChunkedSentence.asasthan+")\\b.*")){//both parts contains a dimension
+				String t = parts[0].substring(parts[0].indexOf(" n[")+3);
+				ch = t.substring(0, t.indexOf("["));
+			}
+			if (parts[0].matches(".*?\\d.*") && parts[0].matches(".*(size|orientation)\\[.*")) {// size[m[mostly]
 																					// [0.5-]1.5-4.5]
 																					// ;//
 																					// often
@@ -1543,28 +1556,37 @@ public class CharacterAnnotatorChunked {
 																					// than
 																					// 2
 																					// cm.
-				parts[0] = parts[0].trim().replace("size[", "").replaceFirst("\\]$", "");
-				Pattern p = Pattern.compile(NumericalHandler.numberpattern + " ?(:?[{<(]?[cdm]?m?[)>}]?|"+ChunkedSentence.percentage+")\\b(" + ChunkedSentence.times + ")?\\b");
+
+				if(ch.length()==0 && parts[0].indexOf("size[")>=0){
+					ch = "size";
+				}
+				if(parts[0].indexOf("orientation[")>=0) ch = "orientation";
+				parts[0] = parts[0].trim().replace("size[", "").replace("orientation[", "").replaceFirst("\\]$", "");
+				Pattern p = Pattern.compile(NumericalHandler.numberpattern + " ?[{<(]?(?:"+ChunkedSentence.units+"|"+ChunkedSentence.percentage+"|"+ChunkedSentence.degree+")?[)>}]?\\b?(" + ChunkedSentence.times + ")?\\b");
 				Matcher m = p.matcher(parts[0]);
 				String numeric = "";
 				if (m.find()) { // a series of number
 					numeric = parts[0].substring(m.start(), m.end()).trim().replaceAll("[{<(]$", "");
 				} else {
-					p = Pattern.compile("\\d+ ?(:?[{<(]?[cdm]?m?[)>}]?|"+ChunkedSentence.percentage+")\\b(" + ChunkedSentence.times + ")?\\b"); // 1
+					p = Pattern.compile("\\d+ ?[{<(]?(?:"+ChunkedSentence.units+"|"+ChunkedSentence.percentage+"|"+ChunkedSentence.degree+")?[)>}]?\\b?(" + ChunkedSentence.times + ")?\\b"); // 1
 																												// number
 					m = p.matcher(parts[0]);
 					m.find();
 					numeric = parts[0].substring(m.start(), m.end()).trim().replaceAll("[{<(]$", "");
 				}
-				String modifier = parts[0].substring(0, parts[0].indexOf(numeric)).replaceAll("(\\w+\\[|\\[|\\])", "").trim();
+				modifier = modifier.replaceAll("(m\\[|\\])", "");
+				modifier = modifier+";"+ parts[0].substring(0, parts[0].indexOf(numeric)).replaceAll("(\\w+\\[|\\[|\\]|\\{|\\})", "").trim();
+				modifier = modifier+";"+ parts[0].substring(parts[0].indexOf(numeric)+numeric.length()).replaceAll("(\\w+\\[|\\[|\\]|\\{|\\})", "").trim();
+				modifier = modifier.replaceAll(";+", ";").replaceAll("(^;|;$)", "").replaceAll("-", " ");
 				if (parts.length < 2) {// parse out a constraint for further
 										// process
-					String constraint = parts[0].substring(parts[0].indexOf(numeric) + numeric.length()).trim();
+					//String constraint = parts[0].substring(parts[0].indexOf(numeric) + numeric.length()).trim(); //treated as a modifier above
 					String t = parts[0];
 					parts = new String[2];// parsed out a constraint for further
 											// process
 					parts[0] = t;
-					parts[1] = constraint;
+					//parts[1] = constraint;
+					parts[1] = "";
 				}
 				/*
 				 * String modifier = parts[0].replaceFirst("size\\[.*?\\]",
@@ -1573,10 +1595,31 @@ public class CharacterAnnotatorChunked {
 				 * numeric = numeric.substring(0,
 				 * numeric.indexOf("]")+1).replaceAll("(\\w+\\[|\\])", "");
 				 */
-				charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), "size", modifier.replaceAll("[{<()>}]", ""), parents, false, false);
-			} else {// size[{shorter} than {plumose} {inner}]
-				charas = this.processSimpleCharacterState(parts[0].replaceAll("(\\{|\\})", "").trim(), parents); // numeric
-																													// part
+				charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), ch, modifier.replaceAll("[{<()>}]", ""), parents, false, false);
+			} else {// size[{shorter} than {plumose} {inner}]; size[{equal-to} or {greater} than] 
+				String value = "";
+				String mod = "";
+				if(modifier.length()>0){
+					if(modifier.contains("m[not]")) mod = "not";
+					if(modifier.contains("m[no]")) mod = "no";
+					if(modifier.contains("m[much]")) value = "much";
+				}
+				if(parts[0].indexOf(" or ")>0){
+					if(ch.length()==0) ch = parts[0].substring(0, parts[0].indexOf("["));
+					parts[0] = parts[0].replaceAll("(\\w+\\[|\\])", "");
+					String[] subparts = parts[0].split("( or | , )");
+					for(String subpart: subparts){
+						subpart = mod+";"+subpart.replaceAll("(\\{|\\})", "").trim();	
+						subpart = subpart.replaceAll("-", " ");
+						subpart = subpart.replaceFirst("\\s+than$", "");
+						this.createCharacterElement(parents, charas, subpart.replaceAll(";+", ";").replaceAll("(^;|;$)", "").replaceAll("-", " "), value, ch, "", false);
+						//charas.addAll(this.processSimpleCharacterState(ch+"["+subpart.replaceAll("(\\{|\\})", "").trim()+"]", parents));
+					}
+				}else{
+					if(ch.length()==0) ch = parts[0].substring(0, parts[0].indexOf("["));
+					this.createCharacterElement(parents, charas, (mod+";"+parts[0].replaceAll("(\\{|\\})", "").trim()).replaceAll(";+", ";").replaceAll("(^;|;$)","").replaceAll("-", " "), value, ch, "", false);
+					//charas = this.processSimpleCharacterState(parts[0].replaceAll("(\\{|\\})", "").trim(), parents); // numeric part
+				}
 			}
 		}
 		String object = null;
@@ -1609,7 +1652,9 @@ public class CharacterAnnotatorChunked {
 				// this.addAttribute(e, "constraint",
 				// this.listStructureNames(parts[1]));
 				// }else{
-				this.addAttribute(e, "constraint", parts[1].replaceAll("(\\(|\\)|\\{|\\}|\\w*\\[|\\])", ""));
+				String constraint = parts[1].replaceAll("(\\(|\\)|\\{|\\}|\\w*\\[|\\])", "");
+				constraint = map2character(constraint); //long => length
+				this.addAttribute(e, "constraint", constraint);
 				// }
 				if (object != null) {
 					this.addAttribute(e, "constraintid", this.listStructureIds(structures));// TODO:
@@ -1628,6 +1673,51 @@ public class CharacterAnnotatorChunked {
 		} else {
 			return charas;
 		}
+	}
+
+	/**
+	 * ChunkedSentence.asasthan: "long|wide|broad|tall|high|deep|short|narrow|thick"
+	 * @param constraint
+	 * @return
+	 */
+	private String map2character(String constraint) {
+		constraint = constraint.replaceAll("\\blong\\b", "length");
+		constraint = constraint.replaceAll("\\blonger\\b", "length");
+		constraint = constraint.replaceAll("\\blongest\\b", "length");
+		
+		constraint = constraint.replaceAll("\\bwide\\b", "width");
+		constraint = constraint.replaceAll("\\bwider\\b", "width");
+		constraint = constraint.replaceAll("\\bwidest\\b", "width");
+		
+		constraint = constraint.replaceAll("\\bbroad\\b", "width");
+		constraint = constraint.replaceAll("\\bbroader\\b", "width");
+		constraint = constraint.replaceAll("\\bbroadest\\b", "width");
+		
+		constraint = constraint.replaceAll("\\btall\\b", "height");
+		constraint = constraint.replaceAll("\\btaller\\b", "height");
+		constraint = constraint.replaceAll("\\btallest\\b", "height");
+		
+		constraint = constraint.replaceAll("\\bhigh\\b", "height");
+		constraint = constraint.replaceAll("\\bhigher\\b", "height");
+		constraint = constraint.replaceAll("\\bhighest\\b", "height");
+		
+		constraint = constraint.replaceAll("\\bdeep\\b", "height");
+		constraint = constraint.replaceAll("\\bdeeper\\b", "height");
+		constraint = constraint.replaceAll("\\bdeepest\\b", "height");
+
+		constraint = constraint.replaceAll("\\bshort\\b", "length");
+		constraint = constraint.replaceAll("\\bshort\\b", "length");
+		constraint = constraint.replaceAll("\\bshort\\b", "length");
+		
+		constraint = constraint.replaceAll("\\bnarrow\\b", "width");
+		constraint = constraint.replaceAll("\\bnarrower\\b", "width");
+		constraint = constraint.replaceAll("\\bnarrowest\\b", "width");
+		
+		constraint = constraint.replaceAll("\\bthick\\b", "height");
+		constraint = constraint.replaceAll("\\bthicker\\b", "height");
+		constraint = constraint.replaceAll("\\bthickest\\b", "height");
+		
+		return constraint;
 	}
 
 	private ArrayList<Element> latest(String name, ArrayList<Element> list) {
