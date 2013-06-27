@@ -64,6 +64,7 @@ public class ChunkedSentence {
 	public static final String stop = "a|about|above|across|after|along|also|although|amp|an|and|are|as|at|be|because|become|becomes|becoming|been|before|being|beneath|between|beyond|but|by|ca|can|could|did|do|does|doing|done|for|from|had|has|have|hence|here|how|if|in|into|inside|inward|is|it|its|may|might|more|most|near|no|not|of|off|on|onto|or|out|outside|outward|over|should|so|than|that|the|then|there|these|this|those|throughout|to|toward|towards|up|upward|was|were|what|when|where|which|why|with|within|without|would";
 	public static final String skip = "and|becoming|if|or|that|these|this|those|to|what|when|where|which|why|not|throughout";
 	public static final String positionprep = "of|part_of|in|on|between";
+	public static final String asasthan = "long|wide|broad|tall|high|deep|short|narrow|thick"; //as-long-as wide
 	public static Hashtable<String, String> eqcharacters = new Hashtable<String, String>();
 	private boolean inSegment = false;
 	private boolean rightAfterSubject = false;
@@ -199,11 +200,18 @@ public class ChunkedSentence {
 		
 		int discoveredchunks = 0;
 
+		discoveredchunks += normalizeThan();//do Than first before OtherINs
+		/*OtherINs first: r[p[equal-to] o[or {greater} than {depth}]] r[p[of] o[{adjacent} (prearticular)]] .
+		 *Than first: {equal-to} or n[{greater} than {depth} r[p[of] o[{adjacent} (prearticular)]]] . This is desired results for ChunkTHAN
+		 *Besides, it is important to group all Than cases as ChunkTHAN, not split them between ChunkPrep and ChunkTHAN
+		 */
 		discoveredchunks += normalizeOtherINs(); //find objects for those VB/IN that without
 		discoveredchunks += normalizeBetween();
-		discoveredchunks +=normalizeThan();
-		discoveredchunks +=normalizeTo();
+		//discoveredchunks += normalizeThan();
+		discoveredchunks += normalizeTo();
 		normalizeUnits();
+		normalizePPList4Than(); //take care of orphaned 'equal-to or' 'as-short-as or'
+		normalizeAsAsThan();
 		int allchunks = chunks();
 		StanfordParser.countChunks(allchunks, discoveredchunks);
 		
@@ -220,6 +228,107 @@ public class ChunkedSentence {
 		//if(this.chunkedsent.matches(".*?l\\[[^\\[].*?}\\].*")){
 		//	removeStateFromList();
 		//}
+	}
+	
+	/**
+	 * 1. as-long-as wide 
+	 * 2. as-long-as organ
+	 * 3. as-long-as width of organ
+	 * form n[] chunk
+	 */
+	private void normalizeAsAsThan() {
+		for(int i = 0; i< this.chunkedtokens.size(); i++){	
+			String token = this.chunkedtokens.get(i);
+			String chunk = token+" ";
+			boolean success = false;
+			if(token.matches("\\{?as-("+ChunkedSentence.asasthan+")-as\\}?")){//{as-long-as}: treat these as ChunkTHAN
+				//looking for the 2nd part
+				int j = 0; String t = "";
+				for(j = i+1; j<this.chunkedtokens.size(); j++){
+					t = this.chunkedtokens.get(j);
+					if(t.length()!=0) break;
+				}
+				if(t.matches("\\{?("+ChunkedSentence.asasthan+")\\}?")){ //case 1
+					chunk +=t+" ";
+					success = true;
+				}
+				else if(t.matches("\\{?(height|width|length|depth|thickness)\\}?")){ //case 3
+					chunk +=t+" ";
+					for(int k = j+1; k < this.chunkedtokens.size(); k++){
+						if(this.chunkedtokens.get(k).length()==0) continue;
+						if(this.chunkedtokens.get(k).startsWith("r[p[of")){
+							chunk += this.chunkedtokens.get(k)+" ";
+							j = k;
+							success = true;
+							break;
+						}
+					}
+				}
+				if(!success){
+					//case 2
+					while(!t.startsWith("(") && !t.equals(",")){//found bony in {bony} (portion)
+						chunk +=t+" ";
+						if(j < this.chunkedtokens.size()-1) t = this.chunkedtokens.get(++j);
+						else break;
+						success = true;
+					}
+					while((t.length()==0 || t.startsWith("("))){ //found (portion)
+						chunk +=t+" ";
+						if(j < this.chunkedtokens.size()-1) t = this.chunkedtokens.get(++j);
+						else break;
+					}
+				}
+
+				//form n[chunk]
+				if(success){
+					this.chunkedtokens.set(i, "n["+chunk.trim()+"]");
+					for(int k=i+1; k<=j; k++){
+						this.chunkedtokens.set(k, "");
+					}
+				}
+			}			
+		}		
+	}
+	/**
+	 * turn {equal-to} or n[{greater} than {depth} r[p[of] o[{adjacent} (prearticular)]]] 
+	 * to  n[{equal-to} or {greater} than {depth} r[p[of] o[{adjacent} (prearticular)]]] 
+	 * 
+	 * note cases like n[less than or {equal-to} 35 {percent}] are already in the desired form. 
+	 */
+	private void normalizePPList4Than() {
+		//search for n[] in 
+		for(int i = 0; i< this.chunkedtokens.size(); i++){		
+			if(this.chunkedtokens.get(i).startsWith("n[")){
+				//search back to include proceeding prepositions
+				String preps = "";
+				int j;
+				for(j = i-1; j >= 0; j--){
+					String token = this.chunkedtokens.get(j);
+					if(token.length()==0) continue;
+					if(token.startsWith("r[") && token.indexOf("o[")<0){
+						preps = token+" "+preps;
+					}else if(token.replaceAll("[{}]", "").matches(ChunkedSentence.prepositions+"|"+POSTagger4StanfordParser.comprepstring+"|as-("+ChunkedSentence.asasthan+")-as")){//equal-to, as-long-as
+						preps = token+" "+preps;
+					}else if(token.matches("or|,")){
+						preps = token+" "+preps;
+					}else{//encounter first non-prep part, end search
+						break;
+					}
+				}
+				preps = preps.trim();
+				while(preps.startsWith("or") || preps.endsWith(",")){
+					//remove the first token
+					preps = preps.substring(preps.indexOf(" ")).trim();
+					j++;
+				}
+				if(preps.length()>0){
+					for(int k = j+1; k<i; k++){
+						this.chunkedtokens.set(k, "");
+					}
+					this.chunkedtokens.set(i, "n["+preps+" "+this.chunkedtokens.get(i).replaceFirst("n\\[", ""));
+				}
+			}
+		}		
 	}
 	/**
 	 * contact between organ a and organ b
@@ -830,7 +939,7 @@ public class ChunkedSentence {
 							//if(w.matches("\\b("+preps+"|and|or|that|which|but)\\b") || w.matches("\\W")){
 							if(w.matches("\\b("+preps+"|and|that|which|but)\\b") || w.matches("\\p{Punct}")){ //should allow ±, n[{shorter} than] ± {campanulate} <throats>
 								np = np.replaceAll("<", "(").replaceAll(">", ")").trim();
-								this.chunkedtokens.set(thani, "n["+np+"]");
+								this.chunkedtokens.set(thani, "n["+np+"]"); 
 								count++;
 								break;
 							}else{
@@ -1530,7 +1639,7 @@ public class ChunkedSentence {
 					token = token.matches(".*?\\d.*")? NumericalHandler.originalNumForm(token):token;
 					scs = scs.trim().length()>0? scs.trim()+"] " : ""; //modifier 
 					String start = token.substring(0, token.indexOf("[")+1); //becomes n[m[usually] size[{shorter}] constraint[than or {equaling} (phyllaries)]]
-					String end = token.replace(start, "");
+					String end = token.substring(start.length());
 					token = start+scs+end;
 					try{
 						if(type !=null){//r[p[as]] without o[]
@@ -1859,15 +1968,19 @@ public class ChunkedSentence {
 				numerics += t+ " ";
 				pointer++;
 				numerics = numerics.replaceAll("[{(<>)}]", "");
+				String size = numerics.trim();
 				Chunk c = nextChunk();
 				while(c.toString().contains("character")){
 					numerics +=c.toString().replaceAll("(\\w+\\[|\\])", "")+" ";
 					c = nextChunk();
 				}
 				numerics +=c.toString();
-				if(c instanceof ChunkTHANC){
-					return new ChunkValue(numerics);//1.5-2 times n[size[{longer} than {wide}]]
+				if(c instanceof ChunkTHAN){
+					return new ChunkTHAN(numerics.replaceFirst(size, "size["+size+"]"));
 				}else{
+				//if(c instanceof ChunkTHANC){
+				//	return new ChunkValue(numerics);//1.5-2 times n[size[{longer} than {wide}]]
+				//}else{	
 					return new ChunkComparativeValue(numerics);//1-2 times a[shape[divided]]???; 1-2 times shape[{shape~list~pinnately~lobed~or~dissected}];many 2-4[-6+] times a[size[widths]];[0.5-]1.5-4.5 times u[o[(leaves)]];0.4-0.5 times u[o[(diams)]]
 				}
 			}
@@ -2087,7 +2200,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 					}					
 				}
 				return "ChunkPrep";
-			}else if(token.indexOf("-as")>0){//as-wide-as, same-width-as:r[p[{same-width-distally-as}]]
+			}else if(token.indexOf("-as")>0 && !token.startsWith("n[")){//as-wide-as, same-width-as:r[p[{same-width-distally-as}]]
 				//a[intensity_level_or_thickness[thin]]
 				//repack as ChunkSimpleCharacterState
 				token = token.substring(token.lastIndexOf("[")+1, token.indexOf("]")).replaceAll("[{}]", ""); //same-width-distally-as
@@ -2124,46 +2237,106 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			return "ChunkCHPP"; //character/state-pp
 		}
 		if(token.startsWith("n[")){//returns three different types of ChunkTHAN
-			Pattern p = Pattern.compile("\\bthan\\b");
-			Matcher m = p.matcher(token);
-			m.find();
-			//String beforethan = token.substring(0, token.indexOf(" than "));
-			String beforethan = token.substring(0, m.start()).trim();
-			String charword = beforethan.lastIndexOf(' ')>0 ? beforethan.substring(beforethan.lastIndexOf(' ')+1) : beforethan.replaceFirst("n\\[", "");
-			String beforechar = beforethan.replace(charword, "").trim().replaceFirst("n\\[", "");
-			
+			//n[{equal-to} or {greater} than {depth} r[p[of] o[{adjacent} (prearticular)]]]
+			//n[{greater} than or {equal-to} {depth} r[p[of] o[{adjacent} (prearticular)]]]
+			//n[{as-long-as} or {greater} than {depth} r[p[of] o[{adjacent} (prearticular)]]]
+			//n[{as-long-as} {depth} r[p[of] o[{adjacent} (prearticular)]]]
+			String beforethan = "";
+			String charword= "";
+			String beforechar = "";
+			String afterthan = "";
 			String chara = null;
-			if(!charword.matches("("+ChunkedSentence.more+")")){
-				chara = Utilities.lookupCharacter(charword, this.conn, ChunkedSentence.characterhash, glosstable, tableprefix);
+			String keyword = ""; //than, as long as, etc.
+			if(token.indexOf(" or ")>0 || token.startsWith("or ")){
+				//find 
+				Pattern p = Pattern.compile("(\\bor\\b.*?\\b(?:than|to|as)\\b)"); //equal-to, same as, or same-as
+				Matcher m = p.matcher(token);
+				m.find();
+				keyword = "than"; // if "than" is part of " or " conjunction, then keyword is default to "than"
+				beforethan = token.substring(0, m.start()+m.group(1).length()+1).trim(); //including 'than': {equal-to} or {greater} than |  {greater} than or {equal-to}
+				afterthan = token.substring(m.start()+m.group(1).length()+1).trim(); //anything follows before than
+				String temp = "";
+				if(beforethan.indexOf(" than ")>0)
+					temp = beforethan.substring(0, beforethan.indexOf(" than ")).trim();
+				if(beforethan.endsWith(" than"))
+					temp = beforethan.substring(0, beforethan.length()-4).trim();	
+				if(temp.length()>0){
+					charword = temp.substring(temp.lastIndexOf(" ")>0? temp.lastIndexOf(" ") : temp.length()).trim(); //word before "than"
+					beforechar = "";
+				}
+				if(!charword.matches("("+ChunkedSentence.more+")")){
+					chara = Utilities.lookupCharacter(charword, this.conn, ChunkedSentence.characterhash, glosstable, tableprefix);
+				}
+				charword = beforethan.replaceFirst("n\\[", "").trim(); //make sure not lose 'equal to' before "greater than'
+			}else{
+				if(token.matches(".*?as-.*?-as.*")){ //as-long-as case
+					Pattern p = Pattern.compile("(\\{?as-(?:"+ChunkedSentence.asasthan+")-as\\}?)");
+					Matcher m = p.matcher(token);
+					m.find();
+					keyword = m.group(1).replaceAll("[{}]", "").replaceAll("-", " ");
+					beforethan = token.substring(0, m.start()).trim().replaceFirst("n\\[", ""); //not including 'than'
+					afterthan = token.substring(m.start()+m.group(1).length()+1).trim();
+					charword = keyword.replaceAll("(^as | as$)", "").trim();
+					keyword = ""; //reset to "" as it is not needed in the final chunk
+					beforechar = beforethan;
+				}else{
+					Pattern p = Pattern.compile("\\b(than)\\b");
+					Matcher m = p.matcher(token);
+					m.find();
+					keyword = m.group(1);
+					beforethan = token.substring(0, m.start()).trim(); //not including 'than'
+					afterthan = token.substring(m.start()+m.group(1).length()+1).trim();
+					charword = beforethan.lastIndexOf(' ')>0 ? beforethan.substring(beforethan.lastIndexOf(' ')+1) : beforethan.replaceFirst("n\\[", "");
+					beforechar = beforethan.replace(charword, "").trim().replaceFirst("n\\[", "");
+				}			
+
+				if(!charword.matches("("+ChunkedSentence.more+")")){
+					chara = Utilities.lookupCharacter(charword, this.conn, ChunkedSentence.characterhash, glosstable, tableprefix);
+				}
+				//afterthan = token.substring(token.indexOf(" than ")+6);
 			}
-			String afterthan = token.substring(token.indexOf(" than ")+6);
-			//Case B
-			if(afterthan.matches(".*?\\d.*?\\b("+ChunkedSentence.units+"|long|length|wide|width)\\b.*") || afterthan.matches(".*?\\d\\.\\d.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+			
+			if(afterthan.indexOf(" than ")>0){//2nd than in the token
+				//'more than'... 2 times {longer} than {wide}]
+				String cp = afterthan;
+				afterthan = afterthan.replaceFirst(" than ", " constraint[than ")+"]";
+				token = token.replace(cp, afterthan);
+			}
+			//Case B: compared to numerical values
+			if(afterthan.matches(".*?.*?\\d.*?\\b("+ChunkedSentence.units+"|"+ChunkedSentence.percentage+"|long|length|wide|width)\\b.*") || afterthan.matches(".*?\\d\\.\\d.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
 				if(chara==null){chara="size";}
 				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
 				this.chunkedtokens.set(id, token);
 				return "ChunkTHAN"; //character
-			}else if(afterthan.matches(".*?\\b\\d\\b.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+			}else if(afterthan.matches(".*?.*?\\d.*?\\b("+ChunkedSentence.degree+")\\b.*") || afterthan.matches(".*?\\d\\.\\d.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+				if(chara==null){chara="orientation";}
+				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
+				this.chunkedtokens.set(id, token);
+				return "ChunkTHAN"; //character
+			}
+			else if(afterthan.matches(".*?.*?\\b\\d\\b.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
 				if(chara==null){chara="count";}
 				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
 				this.chunkedtokens.set(id, token);
 				return "ChunkTHAN";
-			}//Case C
+			}//Case C: compared to organs
 			else if(afterthan.indexOf("(")>=0){ //contains organ
 				if(chara==null){//is a constraint, lobed n[more than...]
 					token = "n["+token.replaceFirst("n\\[", "constraint[")+"]";
 					this.chunkedtokens.set(id, token);
 					return "ChunkTHAN";
 				}else{//n[more deeply lobed than...
-					token = "n["+(beforechar.length()>0? "m["+beforechar+"] ": "")+chara+"["+charword+"] constraint[than "+afterthan+"]";
+					token = "n["+(beforechar.length()>0? "m["+beforechar+"] ": "")+chara+"["+charword+"] constraint["+keyword+" "+afterthan+"]";
 					this.chunkedtokens.set(id, token);
 					return "ChunkTHAN";
 				}
-			}//Case A n[wider than long]
+			}//Case A n[wider than long]: compare among characters
 			else{
-				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
+				token = "n["+(beforechar.length()>0? "m["+beforechar+"] ": "")+chara+"["+charword+"] constraint["+keyword+" "+afterthan+"]";
+				//token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
 				this.chunkedtokens.set(id, token);
-				return "ChunkTHANC"; //character
+				//return "ChunkTHANC"; //character
+				return "ChunkTHAN";
 			}
 		}
 		if(token.startsWith("w[")){//w[{proximal} to the (florets)] ; or w[to (midvine)]
@@ -2264,7 +2437,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			ResultSet rs = stmt.executeQuery("select modifier, tag, originalsent from "+this.tableprefix+"_sentence where source ='"+sentsrc+"'");
 			if(rs.next()){
 				senttag = rs.getString(2).trim();
-				senttag = senttag.compareTo("general")==0? "whole organism" : senttag;
+				senttag = senttag.compareTo("general")==0? "whole_organism" : senttag;
 				sentmod = rs.getString(1).trim();
 				this.text = rs.getString(3); //has to use originalsent, because it is "ditto"-fixed (in SentenceOrganStateMarker.java) and perserve capitalization for measurements markup
 			}
@@ -2281,8 +2454,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		
 		if(senttag.compareTo("ignore")!=0){
 			//sentence subject
-			if(senttag.compareTo("whole organism")==0){
-				this.subjecttext = "(whole organism)";
+			if(senttag.compareTo("whole_organism")==0){
+				this.subjecttext = "(whole_organism)";
 			}else if(senttag.compareTo("chromosome")==0){
 				this.subjecttext = "(chromosome)";
 				skipLead("chromosome".split("\\s"));
@@ -2368,7 +2541,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 
 			}else if(senttag.compareTo("ditto")==0){
 				if(sentsrc.endsWith("0")){
-					this.subjecttext ="(whole organism)";//it is a starting sentence in a treatment, without an explicit subject.
+					this.subjecttext ="(whole_organism)";//it is a starting sentence in a treatment, without an explicit subject.
 				}else{
 					this.subjecttext ="ditto";
 					//mohan code :10/28/2011. If the subject is ditto and the first chunk is a preposition chunk make the subject empty so that it can search within the same sentence for the subject.

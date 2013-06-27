@@ -23,7 +23,7 @@ finalizer.standalone=false
 
 #XML Schema
 source.attribute.name=source_pdf
-unknown.structure.name=whole organism
+unknown.structure.name=whole_organism
 
 # Data individual to mark up
 style.mapping=style-mapping.properties

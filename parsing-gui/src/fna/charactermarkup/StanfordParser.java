@@ -90,7 +90,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path3 = XPath.newInstance(".//character[@name='presence'][@value='present']");
 			path4 = XPath.newInstance(".//relation[starts-with(@name, 'present']");
 			path5 = XPath.newInstance(".//character[@name='character']");
-			path6 = XPath.newInstance(".//structure[@name='whole organism']");
+			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
 			path7 = XPath.newInstance(".//structure");
 			path8 = XPath.newInstance(".//character[@name='count']");
 
@@ -351,11 +351,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 							sent = sent.replaceAll("<\\{?diams\\}?>", "diams");
 							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, type, this.tableprefix, conn, glosstable, characters);
 							cs = ex.chunkIt();
-							if(this.printSent){
-								System.out.println();
-								System.out.println(i+"["+src+"]: "+cs.toString());
-							}
-							statement = cac.annotate(src, src, cs); 
+							
 							
 							//2. collect character and associated character states/descriptions annotations for EQ generation
 							//character src: Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6.txt-0
@@ -382,6 +378,12 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 									description = new Element("description");									
 								}
 							}
+							
+							if(this.printSent){
+								System.out.println();
+								System.out.println(i+"["+src+"]: "+cs.toString());
+							}
+							statement = cac.annotate(src, src, cs); 
 							
 							description.addContent(statement);
 							pCharaID = thisCharaID;
