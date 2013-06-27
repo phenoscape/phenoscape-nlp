@@ -2955,6 +2955,8 @@ public class CharacterAnnotatorChunked {
 
 			for (int i = 0; i < organsbeforeOf.size(); i++) {
 				String b = organsbeforeOf.get(i).getAttributeValue("name");
+				String pb = organsbeforeOf.get(i).getAttributeValue("name_original");
+				if(pb.length()==0) pb = b;
 				if (b.matches("(" + ChunkedSentence.pairs + "|" + ChunkedSentence.clusters + ")")) {
 					// z[{2} (pairs)] r[p[of] o[(uroneural) (bones)]]
 					// 2 was marked as the count from the organsbeforeOf
@@ -2972,11 +2974,11 @@ public class CharacterAnnotatorChunked {
 				}
 				for (int j = 0; j < organsafterOf.size(); j++) {
 					String a = organsafterOf.get(j).getAttributeValue("name");
+					String pa = organsafterOf.get(j).getAttributeValue("name_original");
+					if(pa.length()==0) pa = a;
 					// String pattern = a+"[ ]+of[ ]+[0-9]+.*"+b+"[,\\.]";
 					// //consists-of
 					if (a.length() > 0 && b.length() > 0) {
-						String pb = TermOutputerUtilities.toPlural(b);
-						String pa = TermOutputerUtilities.toPlural(a);
 						String pattern = "(" + b + "|" + pb + ")" + "[ ]+of[ ]+[0-9]+.*" + "(" + a + "|" + pa + ")" + "[ ]?(,|;|\\.|and|or|plus)"; // consists-of
 						String query = "select * from " + this.tableprefix + "_sentence where sentence rlike '" + pattern + "'";
 						ResultSet rs = stmt.executeQuery(query);
