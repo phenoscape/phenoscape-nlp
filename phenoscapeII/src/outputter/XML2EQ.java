@@ -1072,8 +1072,8 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/final_test";
-
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/test";
+		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
 		String prefix =ApplicationUtilities.getProperty("table.prefix");

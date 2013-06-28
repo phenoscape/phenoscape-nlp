@@ -142,9 +142,10 @@ public class CharacterHandler {
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
 		String value=null;//used to hold character value, in case of "count","Size"
+		boolean negation = false;
 
 		boolean special_case = false;
-		if((quality.matches(".*(\\d)+.*")==true)||(quality.equals("")==true)||(quality.equals("not")==true||(quality.matches(".*(width|height|length|broad|depth).*"))))
+		if((quality.matches(".*(\\d)+.*")==true)||(quality.equals("")==true)||(quality.equals("not")==true||(quality.matches(".*(width|height|length|broad|depth).*")||(quality.matches(".*(half|full|quarter|much).*")))))
 		{
 			preProcess(this.chara.getAttributeValue("name"));//handles height/width cases
 				
@@ -182,6 +183,38 @@ public class CharacterHandler {
 			{
 				value = quality;
 				quality = "ratio";
+			}
+			if(quality.matches(".*(width|height|length|depth).*"))
+			{//TODO:consider size,if needed
+				if(this.chara.getAttributeValue("modifier")!=null)
+				{
+				if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+				{
+					negation = true;
+				}
+				if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+				{
+					quality = (negation==false?"increased ":"decreased ")+quality;
+				}
+				else
+				{
+					quality = (negation==true?"increased ":"decreased ")+quality;
+				}
+				} else if(this.chara.getAttributeValue("value")!=null)
+				{
+				if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
+				{
+					negation = true;
+				}
+				if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
+				{
+					quality = (negation==false?"increased ":"decreased ")+quality;
+				}
+				else
+				{
+					quality = (negation==true?"increased ":"decreased ")+quality;
+				}
+				}
 			}
 		}
 		if(special_case)
@@ -248,23 +281,37 @@ public class CharacterHandler {
 				this.entityparts.add(entity);
 			}
 		}
+				
 		
-
 		//not a relational quality, is this a simple quality or a negated quality?
 
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
 		
 		if(result!=null){ //has a strong match
-			//the below if loop handles quality = "count" cases
-			if(value!=null)
-			{
-				result.setString(value);
-			}
 			//qualities involving length should be handled with related entity
+
 			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
 			{
 				this.resolve=true;
+//				//if a quality is negated then the result should contain the antonym quality
+				//below negation code is not needed as Prof.Hong want it to be printed as complement of
+//				if(negated)
+//				{
+//					if(Dictionary.measureantonyms.get(quality.trim())!=null)
+//					{
+//						String qualitycopy=quality;
+//						quality = Dictionary.measureantonyms.get(quality.trim());
+//						result = (Quality) ts.searchTerm(quality, "quality");
+//						result.setString("not "+ qualitycopy);
+//						negated=false;
+//					}
+//				}
+			}
+			//the below if loop handles quality = "count" cases
+			if((value!=null)&&(value!=""))
+			{
+				result.setString(value);
 			}
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
@@ -349,7 +396,7 @@ private boolean specialCaseDifferentStructures() throws Exception {
 		{
 			negation = true;
 		}
-		if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+		if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large|long|atleast).*"))
 		{
 			quality = (negation==false?"increased ":"decreased ")+quality;
 		}
@@ -375,6 +422,7 @@ private boolean specialCaseDifferentStructures() throws Exception {
 	String structureid = structure.getAttributeValue("id");
 	String structurename = Utilities.getStructureName(root, structureid);
 	EntityParser rep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
+	structure.setAttribute("processed", "true");
 	
 	RelationalQuality rq = new RelationalQuality(qp,rep.getEntity());
 	qp = new QualityProposals();
@@ -397,7 +445,7 @@ private void preProcess(String quality) {
 	}
 	
 	//The below code uses quality clue to process empty names and replace them with clues
-	if((quality==null)||(quality.equals(""))==true)
+	if((quality==null)||(quality.equals("")||quality.equals("size"))==true)
 	{
 		for(String measure:this.qualityclues)
 		{
@@ -449,7 +497,7 @@ private boolean specialSizeCaseSameStructure() {
 	{
 		negation = true;
 	}
-	if(modifier.matches(".*(more|great|wide|broad|large|much).*"))
+	if(modifier.matches(".*(more|great|wide|broad|large|much|long|tall).*"))
 	{
 		relation = negation==false?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
 	}
@@ -818,7 +866,12 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 			}
 			
 		}
-		//Reolve for quality when it is "length"
+		else
+		{
+			this.donotresolve=true;
+
+		}
+		//Resolve for quality when it is "length"
 		if(this.entityparts.size()>0)
 		{
 			resolveIntoRelationalQuality();

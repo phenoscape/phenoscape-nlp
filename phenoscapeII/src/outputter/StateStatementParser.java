@@ -133,7 +133,7 @@ public class StateStatementParser extends Parser {
 			for(Element structure: structures){
 				String sid = structure.getAttributeValue("id");
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
-				if(structure.getChildren().isEmpty() && relation==null){
+				if(structure.getChildren().isEmpty() && relation==null && structure.getAttributeValue("processed")==null){
 					//standing-alone structure
 					//shouldn't this also call EntityParser?
 					String sname = Utilities.getStructureName(root, sid);
@@ -189,6 +189,7 @@ public class StateStatementParser extends Parser {
 				parserCharacters(character, statement, root, entities, qualities);
 				constructEQStatementProposals(qualities, entities);
 			}
+			
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
@@ -260,8 +261,9 @@ public class StateStatementParser extends Parser {
 		//This is for resolving final entities with entity in parts=> iliac blade: Flared at the proximal end 
 		if(ch.entityparts.size()>0)
 		{
-			entities = resolveFinalEntities(entities,ch.entityparts);
+			entities.addAll(resolveFinalEntities(entities,ch.entityparts));
 		}
+		
 	}
 
 
@@ -306,6 +308,7 @@ public class StateStatementParser extends Parser {
 				}
 			}
 		}
+		entities.clear();
 		return finalentities;
 	}
 

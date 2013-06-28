@@ -340,7 +340,7 @@ public class ELKReasoner{
 
 			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424","http://purl.obolibrary.org/obo/UBERON_0010703"));
 
-			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001010","http://purl.obolibrary.org/obo/UBERON_0010703"));
+			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584"));
 			
 			elk.dispose();
 

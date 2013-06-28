@@ -211,6 +211,7 @@ public class CharacterStatementParser extends Parser {
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
 					if((name.indexOf("_")>0)||(name.indexOf("/")>0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
+						name=name.replaceAll("(\\(|\\))", "");//used to address case fang relative-to (dentary_tooth) size check with prof.
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){

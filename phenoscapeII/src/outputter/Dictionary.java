@@ -54,6 +54,8 @@ public class Dictionary {
 
 	public static Hashtable<String, String> resrelationQ = new Hashtable<String, String>();
 	public static Hashtable<String, String> parentclass2label = new Hashtable<String, String>();
+	public static Hashtable<String, String> measureantonyms = new Hashtable<String, String>();
+
 	/** Holds direct quality interpretation	 */
 	
 	public static Hashtable<String,String> qualitymapping = new Hashtable<String,String>();
@@ -76,6 +78,19 @@ public class Dictionary {
 	{
 		complementRelations.put("in contact with", "separated from");
 		complementRelations.put("fused with", "unfused from");
+	}
+	//to hold antonyms of measures
+	// As per discussion with prof. this is not needed, we will use complement of  as of now.
+	static
+	{
+//		measureantonyms.put("short", "long");
+//		measureantonyms.put("long", "short");
+//		measureantonyms.put("high", "low");
+//		measureantonyms.put("low", "high");
+//		measureantonyms.put("wide", "narrow");
+//		measureantonyms.put("narrow", "wide");
+//		measureantonyms.put("broad", "narrow");
+
 	}
 	//special cases for singulars and plurals
 	static{
