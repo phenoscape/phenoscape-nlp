@@ -141,10 +141,10 @@ public class CharacterHandler {
 		// characters => quality
 		//get quality candidate
 		String quality = Utilities.formQualityValueFromCharacter(chara);
-		String value=null;//used to hold character value, in case of "count","Size"
-		boolean negation = false;
+		String qualitycopy =quality;
 
 		boolean special_case = false;
+		// The below code handles all measure related cases like length,width,depth etc.
 		if((quality.matches(".*(\\d)+.*")==true)||(quality.equals("")==true)||(quality.equals("not")==true||(quality.matches(".*(width|height|length|broad|depth).*")||(quality.matches(".*(half|full|quarter|much).*")))))
 		{
 			preProcess(this.chara.getAttributeValue("name"));//handles height/width cases
@@ -163,59 +163,11 @@ public class CharacterHandler {
 					
 				}else//handles the case where a single property is being discussed
 				{
-					value = quality;
 					quality = this.chara.getAttributeValue("name");
 				}
 			}
-			if(((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(size).*"))))
-			{
-				value=quality;
-				quality="size";
-			}
-			//converts numerical value qualities to count, if the character name identifies it as a count
-			if(this.chara.getAttributeValue("name").equals("count"))
-			{
-				value = quality;
-				quality = "count";
-			}
+			quality=format(quality);
 			
-			if(this.chara.getAttributeValue("name").equals("ratio"))
-			{
-				value = quality;
-				quality = "ratio";
-			}
-			if(quality.matches(".*(width|height|length|depth).*"))
-			{//TODO:consider size,if needed
-				if(this.chara.getAttributeValue("modifier")!=null)
-				{
-				if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
-				{
-					negation = true;
-				}
-				if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
-				{
-					quality = (negation==false?"increased ":"decreased ")+quality;
-				}
-				else
-				{
-					quality = (negation==true?"increased ":"decreased ")+quality;
-				}
-				} else if(this.chara.getAttributeValue("value")!=null)
-				{
-				if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
-				{
-					negation = true;
-				}
-				if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
-				{
-					quality = (negation==false?"increased ":"decreased ")+quality;
-				}
-				else
-				{
-					quality = (negation==true?"increased ":"decreased ")+quality;
-				}
-				}
-			}
 		}
 		if(special_case)
 			{
@@ -294,24 +246,11 @@ public class CharacterHandler {
 			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
 			{
 				this.resolve=true;
-//				//if a quality is negated then the result should contain the antonym quality
-				//below negation code is not needed as Prof.Hong want it to be printed as complement of
-//				if(negated)
-//				{
-//					if(Dictionary.measureantonyms.get(quality.trim())!=null)
-//					{
-//						String qualitycopy=quality;
-//						quality = Dictionary.measureantonyms.get(quality.trim());
-//						result = (Quality) ts.searchTerm(quality, "quality");
-//						result.setString("not "+ qualitycopy);
-//						negated=false;
-//					}
-//				}
 			}
-			//the below if loop handles quality = "count" cases
-			if((value!=null)&&(value!=""))
+			//the below if loop is used to reset the string to original value of quality
+			if((quality!=qualitycopy))
 			{
-				result.setString(value);
+				result.setString(qualitycopy);
 			}
 			if(negated){
 				/*TODO use parent classes Jim use for parent classes*/
@@ -377,6 +316,64 @@ public class CharacterHandler {
 		}
 		return;
 		
+	}
+
+	private String format(String quality) {
+		boolean negation = false;
+		if(((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches("(size|count|ratio)"))))
+		{
+			if(this.chara.getAttributeValue("name").equals("size"))
+			{
+				quality="size";
+			}
+			else if(this.chara.getAttributeValue("name").equals("count"))
+			{
+				quality="count";
+			}
+			else if(this.chara.getAttributeValue("name").equals("ratio"))
+			{
+				quality = "ratio";
+			}
+			else
+			{
+				
+			}
+			
+		}
+
+		if(quality.matches(".*(width|height|length|depth|size).*"))
+		{
+			if(this.chara.getAttributeValue("modifier")!=null)
+			{
+			if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+			{
+				negation = true;
+			}
+			if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+			{
+				quality = (negation==false?"increased ":"decreased ")+quality;
+			}
+			else
+			{
+				quality = (negation==true?"increased ":"decreased ")+quality;
+			}
+			} else if(this.chara.getAttributeValue("value")!=null)
+			{
+			if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
+			{
+				negation = true;
+			}
+			if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
+			{
+				quality = (negation==false?"increased ":"decreased ")+quality;
+			}
+			else
+			{
+				quality = (negation==true?"increased ":"decreased ")+quality;
+			}
+			}
+		}
+		return quality;
 	}
 
 	/*
