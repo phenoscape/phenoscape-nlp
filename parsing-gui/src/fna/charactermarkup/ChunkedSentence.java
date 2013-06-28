@@ -2015,7 +2015,7 @@ public class ChunkedSentence {
 				t += next.replaceAll("[{<()>}]", "")+ " ";
 				pointer++;
 			}
-			return new ChunkRatio(NumericalHandler.originalNumForm(t).trim(), "heigth/width");
+			return new ChunkRatio(NumericalHandler.originalNumForm(t).trim(), "height/width");
 		}
 		return null;
 	}
