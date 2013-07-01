@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.filter.ElementFilter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
@@ -314,17 +315,31 @@ public class CharacterAnnotatorChunked {
 	 * @throws JDOMException
 	 */
 	private void removeIsolatedCharacters() throws JDOMException {
-		if (this.statement.getAttribute("state_id") == null) {
+		//if (this.statement.getAttribute("state_id") == null) {
 			List<Element> chars = StanfordParser.path5.selectNodes(this.statement);
 			for (Element chara : chars) {
+				if(chara.getAttributes().size()>2) return; //isolated characters should only have name and value attributes.
 				String v = chara.getAttributeValue("value");
-				String text = this.statement.getChild("text").getTextTrim();
-				text = text.replaceAll(v, "[" + v + "]");
-				this.statement.getChild("text").setText(text);
+				if (this.statement.getAttribute("state_id") == null){ //if a character statement, mark the [character]
+					String text = this.statement.getChild("text").getTextTrim();
+					text = text.replaceAll(v, "[" + v + "]");
+					this.statement.getChild("text").setText(text);
+				}
+				List<Element> childreninorder = chara.getParentElement().getContent(new ElementFilter()); 
+				Element nextchara = null;
+				int i = childreninorder.indexOf(chara);
+				if(i<childreninorder.size()-1)
+					nextchara = childreninorder.get(++i);
+				while(nextchara!=null && nextchara.getAttributeValue("name").compareTo("size")==0){ //next element is a size character, replace size with this character
+					nextchara.setAttribute("name", v);
+					nextchara = null;
+					if(i<childreninorder.size()-1)
+						nextchara = childreninorder.get(++i);;
+				}
 				chara.detach();
 				chara = null;
 			}
-		}
+		//}
 	}
 
 	/**
@@ -993,8 +1008,7 @@ public class CharacterAnnotatorChunked {
 				updateLatestElements(chars);
 			} else if (ck instanceof ChunkBracketed) {
 				annotateByChunk(new ChunkedSentence(ck.getChunkedTokens(), ck.toString(), conn, glosstable, this.tableprefix), true); // no
-																																		// need
-																																		// to
+																																		// need																															// to
 																																		// updateLatestElements
 				this.inbrackets = false;
 			} else if (ck instanceof ChunkSBAR) {
@@ -1595,7 +1609,14 @@ public class CharacterAnnotatorChunked {
 				 * numeric = numeric.substring(0,
 				 * numeric.indexOf("]")+1).replaceAll("(\\w+\\[|\\])", "");
 				 */
-				charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), ch, modifier.replaceAll("[{<()>}]", ""), parents, false, false);
+				if(modifier.indexOf(" or ")>0){
+					String[] mods = modifier.split(" or ");
+					for(String mod: mods){
+						charas.addAll(this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), ch, mod.replaceAll("[{<()>}]", ""), parents, false, false));
+					}
+				}else{
+					charas = this.annotateNumericals(numeric.replaceAll("[{<()>}]", ""), ch, modifier.replaceAll("[{<()>}]", ""), parents, false, false);
+				}
 			} else {// size[{shorter} than {plumose} {inner}]; size[{equal-to} or {greater} than] 
 				String value = "";
 				String mod = "";
@@ -1677,45 +1698,46 @@ public class CharacterAnnotatorChunked {
 
 	/**
 	 * ChunkedSentence.asasthan: "long|wide|broad|tall|high|deep|short|narrow|thick"
+	 * 
 	 * @param constraint
 	 * @return
 	 */
 	private String map2character(String constraint) {
 		constraint = constraint.replaceAll("\\blong\\b", "length");
 		constraint = constraint.replaceAll("\\blonger\\b", "length");
-		constraint = constraint.replaceAll("\\blongest\\b", "length");
+		//constraint = constraint.replaceAll("\\blongest\\b", "length");
 		
 		constraint = constraint.replaceAll("\\bwide\\b", "width");
 		constraint = constraint.replaceAll("\\bwider\\b", "width");
-		constraint = constraint.replaceAll("\\bwidest\\b", "width");
+		//constraint = constraint.replaceAll("\\bwidest\\b", "width");
 		
 		constraint = constraint.replaceAll("\\bbroad\\b", "width");
 		constraint = constraint.replaceAll("\\bbroader\\b", "width");
-		constraint = constraint.replaceAll("\\bbroadest\\b", "width");
+		//constraint = constraint.replaceAll("\\bbroadest\\b", "width");
 		
 		constraint = constraint.replaceAll("\\btall\\b", "height");
 		constraint = constraint.replaceAll("\\btaller\\b", "height");
-		constraint = constraint.replaceAll("\\btallest\\b", "height");
+		//constraint = constraint.replaceAll("\\btallest\\b", "height");
 		
 		constraint = constraint.replaceAll("\\bhigh\\b", "height");
 		constraint = constraint.replaceAll("\\bhigher\\b", "height");
-		constraint = constraint.replaceAll("\\bhighest\\b", "height");
+		//constraint = constraint.replaceAll("\\bhighest\\b", "height");
 		
 		constraint = constraint.replaceAll("\\bdeep\\b", "height");
 		constraint = constraint.replaceAll("\\bdeeper\\b", "height");
-		constraint = constraint.replaceAll("\\bdeepest\\b", "height");
+		//constraint = constraint.replaceAll("\\bdeepest\\b", "height");
 
 		constraint = constraint.replaceAll("\\bshort\\b", "length");
-		constraint = constraint.replaceAll("\\bshort\\b", "length");
-		constraint = constraint.replaceAll("\\bshort\\b", "length");
+		constraint = constraint.replaceAll("\\bshorter\\b", "length");
+		//constraint = constraint.replaceAll("\\bshortest\\b", "length");
 		
 		constraint = constraint.replaceAll("\\bnarrow\\b", "width");
 		constraint = constraint.replaceAll("\\bnarrower\\b", "width");
-		constraint = constraint.replaceAll("\\bnarrowest\\b", "width");
+		//constraint = constraint.replaceAll("\\bnarrowest\\b", "width");
 		
 		constraint = constraint.replaceAll("\\bthick\\b", "height");
 		constraint = constraint.replaceAll("\\bthicker\\b", "height");
-		constraint = constraint.replaceAll("\\bthickest\\b", "height");
+		//constraint = constraint.replaceAll("\\bthickest\\b", "height");
 		
 		return constraint;
 	}
