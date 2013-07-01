@@ -318,7 +318,7 @@ public class CharacterAnnotatorChunked {
 		//if (this.statement.getAttribute("state_id") == null) {
 			List<Element> chars = StanfordParser.path5.selectNodes(this.statement);
 			for (Element chara : chars) {
-				if(chara.getAttributes().size()>2) return; //isolated characters should only have name and value attributes.
+				if(chara.getAttributes().size()>2) continue; //isolated characters should only have name and value attributes.
 				String v = chara.getAttributeValue("value");
 				if (this.statement.getAttribute("state_id") == null){ //if a character statement, mark the [character]
 					String text = this.statement.getChild("text").getTextTrim();
@@ -1826,19 +1826,21 @@ public class CharacterAnnotatorChunked {
 		String state = "";
 		String[] tokens = content.split("\\]\\s*");
 		for (int i = 0; i < tokens.length; i++) {
-			//Changed by Zilong
+			//Changed by Zilong: this change created numerous errors -- abandoned by Hong.
 			//more ventrally->more should be modifier of ventrally
 			//however, parsed as adj[more] adv[ventrally]
-			if(tokens[i].matches("^comparison\\[.*")){
-				if(i<tokens.length-1){//only if not the last token
-					if(tokens[i+1].matches("^m\\[.*")){//next token is a modifier.
-						modifier +=tokens[i].replaceAll("^comparison\\[", "").trim()+" "+tokens[i+1]+" ";
-						i++;
-						continue;
-					}
-				}
-			//changed by Zilong
-			}else if (tokens[i].matches("^m\\[.*")) {
+			//if(tokens[i].matches("^comparison\\[.*")){
+			//	if(i<tokens.length-1){//only if not the last token
+			//		if(tokens[i+1].matches("^m\\[.*")){//next token is a modifier.
+			//			modifier +=tokens[i].replaceAll("^comparison\\[", "").trim()+" "+tokens[i+1]+" ";
+			//			i++;
+			//			continue;
+			//		}
+			//	}
+		
+			//}else 	//changed by Zilong
+				
+			if (tokens[i].matches("^m\\[.*")) {
 				modifier += tokens[i] + " ";
 			} else if (tokens[i].matches("^\\w+\\[.*")) {
 				String[] parts = tokens[i].split("\\[");

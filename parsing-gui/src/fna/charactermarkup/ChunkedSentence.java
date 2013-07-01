@@ -118,10 +118,13 @@ public class ChunkedSentence {
 		eqcharacters.put("long", "length");
 		eqcharacters.put("broad", "width");
 		eqcharacters.put("diam", "diameter");
-		//eqcharacters.put("width", "width");
-		//eqcharacters.put("length", "length");
-		//eqcharacters.put("depth", "depth");
-		//eqcharacters.put("breadth", "width");
+		eqcharacters.put("size", "size");
+		eqcharacters.put("high", "height");
+		eqcharacters.put("height", "height");
+		eqcharacters.put("width", "width");
+		eqcharacters.put("length", "length");
+		eqcharacters.put("depth", "depth");
+		eqcharacters.put("breadth", "width");
 				
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
