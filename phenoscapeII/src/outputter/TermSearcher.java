@@ -46,12 +46,14 @@ public class TermSearcher {
 	 * @throws Exception the exception
 	 */
 	public FormalConcept searchTerm(String phrase, String phrasetype){
+		String phrasecopy;
 		if(phrase.trim().length()==0) return null;
 		//the first strong match based on the original phrase is returned right away. Other matches are saved in candidate matches
 		//strong match = a match to a class lable or an exact synonym
 		phrase = format(phrase);
-		FormalConcept result = searchCache(phrase, phrasetype);
-		if(result!=null) return result;
+		phrasecopy=phrase;
+		//FormalConcept result = searchCache(phrase, phrasetype);
+		//if(result!=null) return result;
 		
 		//search ontologies
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]
@@ -80,7 +82,6 @@ public class TermSearcher {
 		
 		//2. dorsal portion => dorsal region
 		if(phrasetype.compareTo("entity")==0){
-			String phrasecopy = phrase;
 			Matcher m = p.matcher(phrase);//term = dorsal portion
 			String spatials = "";
 			boolean trimed = false;
@@ -117,6 +118,7 @@ public class TermSearcher {
 			//if landed here, all matches based on this spatial reform are weak matches.
 			candidatematches.addAll(results);
 			results = new ArrayList<Hashtable<String, String>>();
+			phrase = phrasecopy;
 		}		
 		
 		//4. phrase with /, assuming one / in the phrase.
@@ -427,16 +429,20 @@ public class TermSearcher {
 
 		TermSearcher ts = new TermSearcher();
 		//FormalConcept result = ts.searchTerm("ornament", "quality");
-		ArrayList<FormalConcept> result =TermSearcher.regexpSearchTerm("epichordal\\b.*", "entity");
-		if(result!=null){
-			System.out.println(result.toString());
-		}else{
-			ArrayList<FormalConcept> fcs = ts.getCandidateMatches();
-			for(FormalConcept fc: fcs){
-				System.out.println(fc.toString());
-			}
+//		ArrayList<FormalConcept> result =TermSearcher.regexpSearchTerm("epichordal\\b.*", "entity");
+//		if(result!=null){
+//			System.out.println(result.toString());
+//		}else{
+//			ArrayList<FormalConcept> fcs = ts.getCandidateMatches();
+//			for(FormalConcept fc: fcs){
+//				System.out.println(fc.toString());
+//			}
+		
+		Quality primary_quality = (Quality) ts.searchTerm("decreased broad", "quality");
+		System.out.println(primary_quality.getLabel());
+
 		}		
 
-	}
+	
 
 }

@@ -1,4 +1,3 @@
-#Nov. 17 2008
 #This version output GraphML for generation of visualization among organs and sub-organs.
 #This version also assemble marked clauses into description documents and dump them to disk
 #This version uses extra parameters

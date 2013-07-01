@@ -7,6 +7,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -209,8 +210,9 @@ public class CharacterStatementParser extends Parser {
 				if(!checked.contains(structureid+",")){	
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
-					if(name.indexOf("_")>0 || name.indexOf("/")>0){//case of 'pubis[_/]ischium', one structure id for two structures.
-						String[] names = name.split("[_/]");
+					if((name.indexOf("_")>0)||(name.indexOf("/")>0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
+						name=name.replaceAll("(\\(|\\))", "");//used to address case fang relative-to (dentary_tooth) size check with prof.
+						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){
 							String parents = parseStructure(statement, root,
@@ -309,7 +311,9 @@ public class CharacterStatementParser extends Parser {
 				System.out.println("resolving underscored structures...");
 			}
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
-			if(entities!=null){
+
+//get quality from relations and characters from each of the structures and post compose entities with the quality
+			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
 				if(debug){
 					System.out.println("entities from underscored structures:");
 					for(EntityProposals aep: entities){
@@ -317,12 +321,26 @@ public class CharacterStatementParser extends Parser {
 					}
 					System.out.println("post-composed with quality...");
 				}	
+
 				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
 				foundaentity = true;
 				this.qualityHash.remove(structid);
 				//remove from s2q with a structid < the first struct id 
 				if(count==0) removeS2Qbefore(structid);
 				this.structureIDs.remove(structid);
+			}
+			else if((entities!=null)&&(this.qualityClue.contains("ratio")==true))//if the quality clue has ratio then, just return all th entities
+			{
+				Set<String> keys = this.entityHash.keySet();
+				for(String key:keys)
+				{
+					this.keyentities.addAll(this.entityHash.get(key));
+					foundaentity = true;
+					this.qualityHash.remove(structid);
+					//remove from s2q with a structid < the first struct id 
+					if(count==0) removeS2Qbefore(structid);
+					this.structureIDs.remove(structid);
+				}
 			}
 			count++;
 		}
@@ -399,8 +417,11 @@ public class CharacterStatementParser extends Parser {
 				consumeQuality(sid, s2qs); //update this.entityHash
 			}
 		}
-		
+
 		if(this.entityHash!=null && this.entityHash.size()>0){
+			//Check ELK if there is actually a part of relationship, if yes proceed
+//			else if they are involved in any relation as from then, they can key entity
+			
 			if(debug){
 				System.out.println("remaining entities: post-compose with 'part_of':");
 			}
@@ -426,7 +447,13 @@ public class CharacterStatementParser extends Parser {
 				}else if(this.keyentities.size()==0){
 					this.keyentities.addAll(entities);
 				}else{
-					addEntityLocators(this.keyentities, entities);
+					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the entity is part of keyentity
+						addEntityLocators(this.keyentities, entities);
+					}
+					else
+					{
+						this.keyentities.addAll(entities);
+					}
 				}
 			}
 		}
@@ -447,6 +474,32 @@ public class CharacterStatementParser extends Parser {
 			}
 		}*/	
 	}
+
+	private boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
+		
+		for(EntityProposals ep1 : this.keyentities)
+		{
+			for(Entity e1: ep1.getProposals())
+			{
+				for(EntityProposals ep2:entities)
+				{
+					for(Entity e2:ep2.getProposals())
+					{
+						if((e1.getClassIRI()!=null)&&(e2.getClassIRI()!=null))
+						{
+						if(XML2EQ.elk.isPartOf(e1.getClassIRI(),e2.getClassIRI()))
+						{
+							return true;
+						}
+						}
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+
 
 	/**
 	 * Order the structures shared btw structureIDs and entityHash,

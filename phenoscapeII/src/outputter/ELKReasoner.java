@@ -187,8 +187,7 @@ public class ELKReasoner{
 		// Create a fresh name
 		OWLClass newclass = dataFactory.getOWLClass(IRI.create("temp001"));
 		//make newclass equivalent of partofclass2 
-		OWLAxiom axiom = dataFactory.getOWLEquivalentClassesAxiom(newclass,
-				partofclass2);
+		OWLAxiom axiom = dataFactory.getOWLEquivalentClassesAxiom(newclass,partofclass2);
 		man.addAxiom(ont, axiom);
 		reasoner.flush();
 		boolean result =  isSubClassOf(part, newclass.getIRI().toString());
@@ -335,10 +334,14 @@ public class ELKReasoner{
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
 			/*String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
-			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
-			System.out.println(elk.isSubClassOf(subclass, superclass));	*/
+			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";*/
+			System.out.println("______________________________________________________________________________________________________________");
+			System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0001010","http://purl.obolibrary.org/obo/UBERON_0003607"));	
 
-			//System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_4000164", "http://purl.obolibrary.org/obo/UBERON_4200062"));
+			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424","http://purl.obolibrary.org/obo/UBERON_0010703"));
+
+			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584"));
+			
 			elk.dispose();
 
 		} catch (OWLOntologyCreationException e) {
