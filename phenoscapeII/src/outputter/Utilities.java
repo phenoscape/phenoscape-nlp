@@ -34,6 +34,54 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
+	/**
+	 * 
+	 * @param sid
+	 * @param charvalue
+	 * @param root
+	 * @return ture if the charvalue is a modifier in the original text
+	 */
+	/*public static boolean isModifier(String sid, String charvalue, Element statement){
+		//Element root = statement.getDocument().getRootElement();
+		String text = statement.getChildText("text");
+		try {
+			//construct the name
+			Element struct = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+sid+"']");
+			String singularname = struct.getAttributeValue("name");
+			String pluralname = TermOutputerUtilities.toPlural(singularname);
+			String name = "\\b("+pluralname+"|"+singularname+"|"+singularname.substring(0, singularname.length()-2)+".*?)\\b";
+			
+			String constraint = "";
+			if(struct.getAttribute("constraint")!=null){
+				String singularconstraint = struct.getAttributeValue("constraint");
+				String plural = "";
+				if(!singularconstraint.endsWith(" of")){ //row of
+					String [] tokens = singularconstraint.split("\\s+");
+					for(String token: tokens){
+						plural = TermOutputerUtilities.toPlural(token)+" ";
+						constraint += "\\b("+plural+"|"+token+"|"+token.substring(0, token.length()-2)+".*?)\\b\\s+";
+					}
+				}
+			}
+			name = constraint+name;
+			//similar structures?
+			List<Element> structs;
+			if(struct.getAttribute("constraint")!=null){
+				structs= XPath.selectNodes(statement, ".//structure[@name='"+singularname+"']");
+			}else{
+				structs= XPath.selectNodes(statement, ".//structure[@name='"+singularname+"']");
+			}
+			//search in text
+			
+			
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+		
+		
+		return false;
+	}*/
+	
 	public static List<Element>  relationWithStructureAsSubject(String sid, Element root) {
 		try{
 			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");

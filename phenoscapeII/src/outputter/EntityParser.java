@@ -94,7 +94,7 @@ public class EntityParser {
 	 * @param root
 	 */
 	/*public EntityParser(Element statement, Element root, boolean keyelement) {
-		//add all structures which are not "whole organism" to key structure.
+		//add all structures which are not "whole_organism" to key structure.
 		try{
 			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
 			ArrayList<String> RelatedStructures = new ArrayList<String>(); //keep a record on related entities, which should not be processed again

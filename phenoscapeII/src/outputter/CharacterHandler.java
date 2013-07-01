@@ -193,8 +193,8 @@ public class CharacterHandler {
 				addREPE(entities,relationalquality);
 				}
 			}
-			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole organism, it should be handled here
-				//single, non-bilateral structure: fused: for example whole organism:fused
+			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole_organism, it should be handled here
+				//single, non-bilateral structure: fused: for example whole_organism:fused
 			{
 				//Handling characters that belong to a single structure => Hariharan
 				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
@@ -471,12 +471,12 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 /*
  * It identifies structures which have the same characters(Relational Quality) 
  * and it returns all the structures which has the same characters as related entities
- * if a structure is a whole organism, it calls bilateralstructures to handle the scenario.
+ * if a structure is a whole_organism, it calls bilateralstructures to handle the scenario.
  * 
  * 
  */			@SuppressWarnings("unchecked")
 	private Hashtable<String, ArrayList<EntityProposals>> processStructuresWithSameCharacters(Element statement) {
-		//TODO: Handle scenario where all the characters have whole organism as its parent structure and Keyentities is null
+		//TODO: Handle scenario where all the characters have whole_organism as its parent structure and Keyentities is null
 		try {
 			List<Element> characters = pathCharacterUnderStucture.selectNodes(statement);
 			Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
@@ -507,7 +507,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 				Element character = characters.get(i);
 				if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
 					{
-					//read the structure(other than whole organism) of this character, find the entity,create entity proposals
+					//read the structure(other than whole_organism) of this character, find the entity,create entity proposals
 					Element ParentStructure = character.getParentElement();
 					if(!ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					{
@@ -625,7 +625,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 			{
 				if(tobesolvedentity.s2q==null)
 			{
-				//whole organism
+				//whole_organism
 			}
 			if(tobesolvedentity.s2q!=null)
 			{

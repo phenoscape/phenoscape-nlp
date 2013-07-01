@@ -19,5 +19,5 @@ ontology.uberon=
 
 #XML Schema
 source.attribute.name=source_pdf
-unknown.structure.name=whole organism
+unknown.structure.name=whole_organism
 elk.printmessage=false

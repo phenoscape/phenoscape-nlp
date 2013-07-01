@@ -635,7 +635,7 @@ public class StateStatementParser extends Parser {
 		Iterator entityitr =e.listIterator();
 		while(entityitr.hasNext())
 		{
-			// if e is whole organism
+			// if e is whole_organism
 			EntityProposals ep = (EntityProposals) entityitr.next();
 			if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
 				entityitr.remove();

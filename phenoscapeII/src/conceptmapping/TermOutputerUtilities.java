@@ -552,7 +552,7 @@ public class TermOutputerUtilities {
 		return word;
 	}
 	
-	public static String plural(String b) {
+	public static String toPlural(String b) {
 		return Dictionary.plurals.get(b);
 	}
 
