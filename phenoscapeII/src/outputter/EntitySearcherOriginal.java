@@ -4,6 +4,8 @@
 package outputter;
 
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -14,7 +16,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import owlaccessor.OWLAccessorImpl;
@@ -456,16 +461,6 @@ public class EntitySearcherOriginal extends EntitySearcher {
 //
 //	}
 
-
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		//posterior supraorbital postfrontal
-		//anteriormost teeth/posteriormost teeth
-	}
-
 	/*
 	@Override
 	public boolean canHandle(Element root, String structid,
@@ -483,4 +478,37 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		
 	}
 	*/
+
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		//posterior supraorbital postfrontal
+		//anteriormost teeth/posteriormost teeth
+		EntitySearcherOriginal eso = new EntitySearcherOriginal();
+		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states595.xml";
+		SAXBuilder builder = new SAXBuilder();
+		Document xml = null;
+		try {
+			xml = builder.build(new File(src));
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(xml!=null){
+			Element root = xml.getRootElement();
+			String structid ="o560";
+			String entityphrase = "posterior postfrontal";
+			//String entityphrase = "posterior supraorbital postfrontal";
+			String elocatorphrase = "";
+			String prep = "";
+			EntityProposals ep = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
+			System.out.println("result:");
+			System.out.println(ep.toString());
+		}
+	}
+
+	
 }

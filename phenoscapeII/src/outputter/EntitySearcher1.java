@@ -3,13 +3,18 @@
  */
 package outputter;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 /**
  * @author updates
@@ -25,6 +30,8 @@ import org.jdom.Element;
  * 
  */
 public class EntitySearcher1 extends EntitySearcher {
+
+	private static boolean debug_permutation = true;
 
 	/**
 	 * 
@@ -45,11 +52,17 @@ public class EntitySearcher1 extends EntitySearcher {
 
 		//save phrases as components
 		EntityComponents ecs = new EntityComponents(entityphrase, elocatorphrase);
-		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity/entity locator
+		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity or an entity locator
 
 		//construct variations: selected permutation without repetition 
 		ArrayList<String> variations  = new ArrayList<String>();
 		permutation(components, variations); 
+		if(debug_permutation){
+			System.out.println();
+			System.out.println(entityphrase+" , "+elocatorphrase+" generated "+variations.size()+" variations:");
+			for(String variation : variations)
+				System.out.println(variation);
+		}
 		//search variations for pre-composed terms one by one, return all the results
 		boolean found = false;
 		for(String variation: variations){
@@ -103,6 +116,16 @@ public class EntitySearcher1 extends EntitySearcher {
 
 
 
+	/**
+	 * posterior radials , anterior dorsal fin generated 2 variations:
+	 * 1. (?:(?:posterior|posterior side) (?:radials)) of (?:(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin)|(?:dorsal|dorsal side) (?:anterior|anterior side) (?:fin))
+	 * 2. (?:(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin)|(?:dorsal|dorsal side) (?:anterior|anterior side) (?:fin)) (?:(?:posterior|posterior side) (?:radials))
+
+	 *posterior postfrontal ,  generated 1 variations:
+	 * 1. (?:(?:posterior|posterior side) (?:postfrontal))
+	 * @param components
+	 * @param variations
+	 */
 	public  static void permutation(ArrayList<EntityComponent> components, ArrayList<String> variations) { 
 		//System.out.println("round 0: i=-1 "+ "components size="+components.size()+" prefix=''");
 		permutation("", components, variations, clone(components), -1); 
@@ -119,8 +142,8 @@ public class EntitySearcher1 extends EntitySearcher {
 		if (n == 0){
 			if(!clone.get(lastindex).isSpatial()){ //the last component can not be a spatial term
 				variations.add(prefix+"("+lastindex+")");
-				//System.out.println();
-				//System.out.println("variation: "+prefix+"("+lastindex+")");
+				if(debug_permutation) System.out.println();
+				if(debug_permutation) System.out.println("variation: "+prefix+"("+lastindex+")");
 			}
 		}
 		else {
@@ -130,9 +153,9 @@ public class EntitySearcher1 extends EntitySearcher {
 					if(j!=i) reducedcomps.add(components.get(j)); //reducedcomps = components - element_i
 				}
 
-				String newprefix = newPrefix(prefix, lastindex, clone.indexOf(components.get(i)), i, components);
-				//System.out.println("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+(prefix+" "+components.get(i).getSynRing()).trim());
-				//System.out.println("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+prefix);
+				String newprefix = newPrefix(prefix, lastindex, clone, clone.indexOf(components.get(i)), i, components);
+				if(debug_permutation ) System.out.println("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+(prefix+" "+components.get(i).getSynRing()).trim());
+				if(debug_permutation) System.out.println("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+prefix);
 				permutation(/*(prefix+" "+components.get(i).getSynRing()).trim()*/newprefix, reducedcomps, variations, clone, clone.indexOf(components.get(i)));
 			}
 		}
@@ -140,16 +163,18 @@ public class EntitySearcher1 extends EntitySearcher {
 
 	/**
 	 * decide whether to concatenate oldprefix and components.get(i).getSynRing() directly or to add " of " between them.
-	 * @param prefix
+	 * add "of" after a structure
+	 * @param oldprefix: the current prefix 
 	 * @param lastindex: index of the last component in the original components(clone) that was added to prefix. 
+	 * @param newindex:  index of the component i in the original clone
 	 * @param i: index of the to-be-added component in components
 	 * @param components
 	 * @return
 	 */
 
-	private static String newPrefix(String oldprefix, int lastindex, int newindex, int i,
+	private static String newPrefix(String oldprefix, int lastindex, ArrayList<EntityComponent> clone, int newindex, int i,
 			ArrayList<EntityComponent> components) {
-		if(lastindex>=0 && components.get(i).isStructure() && lastindex < newindex){
+		if(lastindex>=0 && lastindex<components.size() && clone.get(lastindex).isStructure() && lastindex < newindex){
 			return (oldprefix+"("+lastindex+") of "+components.get(i).getSynRing()).trim();
 		}
 		return (oldprefix+"("+lastindex+") "+components.get(i).getSynRing()).trim();
@@ -358,11 +383,36 @@ public class EntitySearcher1 extends EntitySearcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		//Posterior radials in posterior-dorsal-fin
+		EntitySearcher1 eso = new EntitySearcher1();
+		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states595.xml";
+		SAXBuilder builder = new SAXBuilder();
+		Document xml = null;
+		try {
+			xml = builder.build(new File(src));
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(xml!=null){
+			Element root = xml.getRootElement();
+			String structid ="o560";
+			String entityphrase = "posterior postfrontal";
+			String elocatorphrase = "";
+			//String entityphrase = "posterior supraorbital postfrontal";
+			//String entityphrase ="posterior radials";
+			//String elocatorphrase = "anterior dorsal fin";
+			String prep = "";
+			EntityProposals ep = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
+			System.out.println("result:");
+			System.out.println(ep.toString());
+		}
+	}
 
 	}
 
-}
+
 
 
 /*if((entityphrase.split("\\s").length>=2)&&(elocatorphrase=="")){
