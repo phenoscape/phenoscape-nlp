@@ -1826,7 +1826,7 @@ public class CharacterAnnotatorChunked {
 		String state = "";
 		String[] tokens = content.split("\\]\\s*");
 		for (int i = 0; i < tokens.length; i++) {
-			//Changed by Zilong: this change created numerous errors -- abandoned by Hong.
+			//Changed by Zilong: update: this change created numerous errors -- abandoned by Hong 7/1/13.
 			//more ventrally->more should be modifier of ventrally
 			//however, parsed as adj[more] adv[ventrally]
 			//if(tokens[i].matches("^comparison\\[.*")){
@@ -2938,6 +2938,7 @@ public class CharacterAnnotatorChunked {
 	}
 
 	private void addAttribute(Element e, String attribute, String value) {
+		if(attribute.compareTo("modifier")==0) value = value.replaceAll("-", " ");
 		value = value.replaceAll("(\\w+\\[|\\]|\\{|\\}|\\(|\\))", "").replaceAll("\\s+;\\s+", ";").replaceAll("\\[", "").trim();
 		if (value.indexOf("LRB-") > 0)
 			value = NumericalHandler.originalNumForm(value);

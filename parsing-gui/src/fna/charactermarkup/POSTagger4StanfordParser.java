@@ -40,7 +40,7 @@ public class POSTagger4StanfordParser {
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
 	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(.*)"); //to match in dorsal view and in profile
-	private String countp = "more|fewer|less|\\d+";
+	private String countp = "more|fewer|less|many|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 
 	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?!%))?)");
@@ -539,7 +539,12 @@ public class POSTagger4StanfordParser {
 				int start = m.start(1);
 				int end = m.end(1);
 				String count = m.group(1).trim();
-				String rcount = "{count~list~"+count.replaceAll(" ","~").replaceAll("[{}]", "")+"}";
+				String rcount = "";
+				if(count.compareTo("more or less")==0){
+					rcount = count.replaceAll(" ","-").replaceAll("[{}]", "");
+				}else{
+					rcount = "{count~list~"+count.replaceAll(" ","~").replaceAll("[{}]", "")+"}";
+				}
 				//synchronise this.chunkedtokens
 				//split by single space to get an accurate count to elements that would be in chunkedtokens
 				int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
