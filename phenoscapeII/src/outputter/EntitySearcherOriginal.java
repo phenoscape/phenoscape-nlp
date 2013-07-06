@@ -63,8 +63,31 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	@SuppressWarnings("unchecked")
 	public EntityProposals searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
-		//TODO create and maintain a cache for entity search?
+		//create and maintain a cache for entity search?: yes, created in EntityParser
 	
+		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
+		String origname = Utilities.getOriginalStructureName(root, structid);
+		if(origname!=null && origname.compareTo("sexes")==0){
+			EntityProposals ep = new EntityProposals();
+			ep.setPhrase(origname);
+			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
+			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
+			FormalRelation bearer = new FormalRelation("", "bearer of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
+			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
+			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
+			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
+			CompositeEntity ce1 = new CompositeEntity();
+			ce1.addEntity(organism);
+			ce1.addEntity(re1);
+			ep.add(ce1);
+			CompositeEntity ce2 = new CompositeEntity();
+			ce2.addEntity(organism);
+			ce2.addEntity(re2);
+			ep.add(ce2);
+			return ep;
+		}
+		
+		
 		//each of entityphrase and elocatorphrase may be multiple names separated by ","
 		if(entityphrase.indexOf(",")>0){
 			String temp = entityphrase.indexOf(",")>0 ? entityphrase.substring(0, entityphrase.indexOf(",")).trim() : entityphrase; // the first seg

@@ -52,7 +52,8 @@ public class EntitySearcher6 extends EntitySearcher {
 			}
 		}
 		
-		String[] tokens = entityphrase.split("\\s+");
+		entityphrase = entityphrase.replaceFirst("^\\(\\?:", "").replaceFirst("\\)$", "");				
+		String[] tokens = entityphrase.split("\\s+"); //(?:(?:humerus|humeral) (?:shaft))
 		if(tokens.length>=2){ //to prevent "rostral tubule" from entering the subsequent process 
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
 			if(!shortened.matches(".*?\\b("+Dictionary.spatialtermptn+")$")){

@@ -220,8 +220,8 @@ public class TermSearcher {
 	private static String format(String word) {
 		word = word.replaceAll("_", " "); // abc_1
 		word = word.replaceAll("(?<=\\w)- (?=\\w)", "-"); // dorsal- fin
-		// word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
-		word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to dorsal-fin
+		//word = word.replaceAll("\\[.*?\\]", "");//remove [usually]
+		//word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to dorsal-fin: fix it early, not here because search word may be regular expressions
 		word = word.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal to
 		word = word.replaceAll("(?<=\\w)shaped", "-shaped");
 		return word;

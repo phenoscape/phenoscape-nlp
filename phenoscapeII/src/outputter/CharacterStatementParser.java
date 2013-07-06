@@ -211,7 +211,7 @@ public class CharacterStatementParser extends Parser {
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
 					if((name.indexOf("_")>0)||(name.indexOf("/")>0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
-						name=name.replaceAll("(\\(|\\))", "");//used to address case fang relative-to (dentary_tooth) size check with prof.
+						name=name.replaceAll("(\\(|\\))", "");//used to address case 'fang relative-to (dentary_tooth) size' check with prof.
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){
@@ -234,6 +234,7 @@ public class CharacterStatementParser extends Parser {
 				}
 			}
 			resolve(/*entities, s2qs,*/ statement, root);
+			String temp="";
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -308,7 +309,7 @@ public class CharacterStatementParser extends Parser {
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
 			if(debug){
-				System.out.println("resolving underscored structures...");
+				System.out.println("resolving underscored structures...  ");
 			}
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 
@@ -665,12 +666,7 @@ public class CharacterStatementParser extends Parser {
 						}else{
 							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
 							Entity ecopy = (Entity) e.clone();
-							SimpleEntity qentity = new SimpleEntity();
-							qentity.setClassIRI(q.getClassIRI());
-							qentity.setConfidenceScore(q.getConfidienceScore());
-							qentity.setId(q.getId());
-							qentity.setLabel(q.getLabel());
-							qentity.setString(q.getString());
+							SimpleEntity qentity = Utilities.wrapQualityAs(q);
 							FormalRelation fr = new FormalRelation();
 							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
 							fr.setConfidenceScore(1f);
@@ -689,6 +685,9 @@ public class CharacterStatementParser extends Parser {
 			eps = epsresult; //update entities
 		}
 	}
+
+
+
 	
 	private boolean isRestrictedRelation(String id) {
 		if(Dictionary.resrelationQ.get(id) == null) return false;

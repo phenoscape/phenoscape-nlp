@@ -139,8 +139,8 @@ public class RelationHandler {
 			else if(ep.getQualityStrategy()!=null && ep.getEntity()==null){
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
 				this.quality.addAll(ep.getQualityStrategy().qualities);
-				this.spatialmodifier = ep.spaitialmodifier;
-				this.identifiedqualities = ep.identifiedqualities;
+				this.spatialmodifier = ep.getSpaitialmodifier();
+				this.identifiedqualities = ep.getIdentifiedqualities();
 			}
 			else{
 				this.tobesolvedentity = new ToBeResolved(fromstructid);

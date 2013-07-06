@@ -264,7 +264,7 @@ public class Utilities {
 				Element structure = (Element) XPath.selectSingleNode(root, "//structure[@id='" + structid + "']");
 				String sname = "";
 				if (structure == null) {
-					sname = "REF"; // this should never happen
+					sname = "ERROR"; // this should never happen
 				} else {
 					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name"));
 				}
@@ -277,13 +277,42 @@ public class Utilities {
 		return result;
 	}
 	
+	/**
+	 * Get structure names for 1 or more structids from the XML results of CharaParser.
+	 * 
+	 * @param root
+	 * @param structids
+	 *            : 1 or more structids
+	 * @return
+	 */
+	public static String getOriginalStructureName(Element root, String structids) {
+		String result = "";
+
+		String[] ids = structids.split("\\s+");
+		for (String structid : ids) {
+			try{
+				Element structure = (Element) XPath.selectSingleNode(root, "//structure[@id='" + structid + "']");
+				String sname = "";
+				if (structure == null) {
+					return null;
+				} else {
+					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name_original"));
+				}
+				result += sname + ",";
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
+		return result;
+	}
 
 
 	/**
-	 * like array join function in Perl.
+	 * like the array join function in Perl.
 	 *
 	 * @param tokens the tokens
-	 * @param start the start index
+	 * @param start the start index, inclusive
 	 * @param end the end index, inclusive
 	 * @param delimiter the delimiter
 	 * @return the string
@@ -532,4 +561,21 @@ public class Utilities {
 
 	}
 
-}
+	/**
+	 * to allow using "bearer of [quality]" to construct a CompositeEntity
+	 * this wrapper is not needed if REntity allowed relation+quality besides relation+entity.
+	 * @param q
+	 * @return
+	 */
+	public static SimpleEntity wrapQualityAs(Quality q) {
+			SimpleEntity qentity = new SimpleEntity();
+			qentity.setClassIRI(q.getClassIRI());
+			qentity.setConfidenceScore(q.getConfidienceScore());
+			qentity.setId(q.getId());
+			qentity.setLabel(q.getLabel());
+			qentity.setString(q.getString());
+			return qentity;
+		}
+	}
+
+

@@ -185,7 +185,7 @@ public class XMLNormalizer {
 		{
 			if((chara.getAttributeValue("constraint")!=null)&&(chara.getAttributeValue("constraint").matches(".*(height|width|length|depth).*")))
 			{
-				System.out.println("-----------inside normalizer------------");
+				//System.out.println("-----------inside normalizer------------");
 				if(chara.getAttributeValue("constraint").contains("height"))
 				{
 					chara.setAttribute("name","height");

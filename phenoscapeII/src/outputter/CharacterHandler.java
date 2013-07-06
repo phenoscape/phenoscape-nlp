@@ -444,12 +444,14 @@ private void preProcess(String quality) {
 	//The below code uses quality clue to process empty names and replace them with clues
 	if((quality==null)||(quality.equals("")||quality.equals("size"))==true)
 	{
-		for(String measure:this.qualityclues)
-		{
-			if(measure.matches("(height|length|width|depth|broad|breadth)")==true)
+		if(this.qualityclues!=null){
+			for(String measure:this.qualityclues)
 			{
-				this.chara.setAttribute("name", measure);
-				break;
+				if(measure.matches("(height|length|width|depth|broad|breadth)")==true)
+				{
+					this.chara.setAttribute("name", measure);
+					break;
+				}
 			}
 		}
 	}
@@ -794,12 +796,12 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 			String[] conids = chara.getAttributeValue("constraintid").split("\\s+");
 			try{
 				for(String conid: conids){
-					String qualitymodifier = Utilities.getStructureName(root, conid);
+					String relatedentity = Utilities.getStructureName(root, conid);
 					//parents separated by comma (,).
-					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
+					String relatedentityparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
 							 "|//relation[@name='in'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
 							 "|//relation[@name='on'][@from='" + chara.getAttributeValue("constraintid")  + "']", 0);
-					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, qualitymodifierparents, qualitymodifier,"part_of");	
+					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, relatedentity, relatedentityparents, relatedentity,"part_of");	
 					if(result!=null) entities.add(result);
 				}
 				return entities;
@@ -813,7 +815,7 @@ private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, Qua
 	/**
 	 * resolve for entities from entity and entity parts obtained from constraints
 	 * also when neither entity and qualities scores are strong, the keyentities scores are not strong or not ontologized
-	 * should try to resove them here? or in the end?
+	 * should try to resolve them here? or in the end?
 	 */
 	public void resolve(){
 

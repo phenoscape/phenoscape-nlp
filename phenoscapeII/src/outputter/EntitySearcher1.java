@@ -31,7 +31,7 @@ import org.jdom.input.SAXBuilder;
  */
 public class EntitySearcher1 extends EntitySearcher {
 
-	private static boolean debug_permutation = true;
+	private static boolean debug_permutation = false;
 
 	/**
 	 * 
@@ -81,27 +81,42 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(found) return entities;
 
 		//failed to find pre-composed terms, try to post-compose using part_of
-		//call on EntityEntityLocatorStrategy on expressions with or without spatial terms as they may all exist as precomposed entities
-		//i.e. EntitySearch2, but more flexible: may call the strategy on different entity/entity locator combinations
+		//call on EntityEntityLocatorStrategy on expressions without spatial terms:
+		//(the attachment of spatial terms to parent entity is different from attachement of a child entity to parent entity)
+		//like EntitySearch2, but more flexible: may call the strategy on different entity/entity locator combinations
 		//TODO: need more work: what's entityphrase and elocatorphrase?
-		EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-		eels.handle();
-		EntityProposals entity = eels.getEntities();
-		if(entity != null){
-			found = true;
+		boolean hasspatial = ecs.containsSpatial();
+		if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			entities.setPhrase(entityphrase);
-			entities.add(entity);
+			for(String variation: variations){
+				//split variation to entity and elocator
+				if(variation.indexOf(" of ")<0) continue; //there must be another  variation with " of " that is equivalent to this variation
+				String[] parts = variation.split("\\s+of\\s+");
+				for(int p = 0; p < parts.length; p++){
+					for(int l = 0; l < parts.length-1; l++){ //length of entity
+						entityphrase = Utilities.join(parts, 0, l, " of ");
+						elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
+						originalentityphrase = entityphrase;
+						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+						eels.handle();
+						EntityProposals entity = eels.getEntities();
+						if(entity != null){
+							found = true;
+							entities.add(entity);
+						}
+					}
+				}
+			}
 		}
-		
 		if(found) return entities;
 
 		//deal with spatial expressions
-		if(ecs.containsSpatial()){
+		if(hasspatial){
 			//i.e. EntitySearch4, but more flexible: may call the strategy on different entity/entity locator combinations
 			//TODO: need more work: what's entityphrase and elocatorphrase?
 			SpatialModifiedEntityStrategy smes = new SpatialModifiedEntityStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			smes.handle();
-			entity = smes.getEntities();
+			EntityProposals entity = smes.getEntities();
 			if(entity != null){
 				found = true;
 				entities.add(entity);
@@ -223,6 +238,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");
 			for(String phrase: entityphrases){
 				phrase = phrase.trim();
+				if(phrase.length()==0) continue;
 				String phrasecp = phrase;
 				Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)");
 				Matcher m = p.matcher(phrase);
@@ -253,6 +269,7 @@ public class EntitySearcher1 extends EntitySearcher {
 					}
 				}
 
+
 				//permute parts in the phrase
 				ArrayList<String> permutations = new ArrayList<String>();
 				EntitySearcher1.permutation(thiscomponents, permutations); 
@@ -261,6 +278,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				ec.isStructure(true); //each phrase representing a structure
 				ec.setPermutations(permutations);
 				components.add(ec);
+				
 			}
 			return components;
 		}
@@ -283,11 +301,12 @@ public class EntitySearcher1 extends EntitySearcher {
 
 		/**
 		 * dorsal fin
-		 * @param phrase
-		 * @return (dorsal|dorsal side) (fin)
+		 * @param phrase: (?:(?:shoulder) (?:girdle)) or dorsal fin
+		 * @return (?:dorsal|dorsal side) (?:fin)
 		 */
 		private String getSynRing4Phrase(String phrase){
 			String synring = "";
+			phrase = phrase.replaceAll("(\\(\\?:|\\))", ""); //(?:(?:shoulder) (?:girdle)) =>shoulder girdle
 			String[] tokens = phrase.split("\\s+");
 			//may use a more sophisticated approach to construct ngrams: A B C => A B C;A (B C); (A B) C;
 			for(int i = 0; i < tokens.length; i++){
@@ -385,7 +404,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	public static void main(String[] args) {
 		//Posterior radials in posterior-dorsal-fin
 		EntitySearcher1 eso = new EntitySearcher1();
-		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states595.xml";
+		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states1004.xml";
 		SAXBuilder builder = new SAXBuilder();
 		Document xml = null;
 		try {
@@ -397,19 +416,21 @@ public class EntitySearcher1 extends EntitySearcher {
 		}
 		if(xml!=null){
 			Element root = xml.getRootElement();
-			String structid ="o560";
-			String entityphrase = "posterior postfrontal";
-			String elocatorphrase = "";
+			String structid ="o5";
+			//String entityphrase = "posterior postfrontal";
+			//String entityphrase ="heterocercal";
+			//String elocatorphrase = "";
 			//String entityphrase = "posterior supraorbital postfrontal";
 			//String entityphrase ="posterior radials";
 			//String elocatorphrase = "anterior dorsal fin";
+			String entityphrase = "posterior radial";
+			String elocatorphrase = "posterior dorsal fin";
 			String prep = "";
 			EntityProposals ep = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
 			System.out.println("result:");
 			System.out.println(ep.toString());
 		}
 	}
-
 	}
 
 

@@ -15,7 +15,7 @@ import java.util.ArrayList;
  *2. lamina AND (part_of SOME (anterior region and part_of SOME scapula)))
  */
 public class CompositeEntity extends Entity {
-	SimpleEntity entity; //the first entity in the post-composed entity
+	//SimpleEntity entity; //the first entity in the post-composed entity
     ArrayList<Entity> entities; //relation + entity
 
 	/**
@@ -30,7 +30,8 @@ public class CompositeEntity extends Entity {
 		return (SimpleEntity) entities.get(0);
 	}
 	/**
-	 * 
+	 * add new components to this CompositEentity: add another "and"
+	 * increase the size of the arraylist
 	 * @param entity: simple, rentity, or composite entity
 	 */
 	public void addEntity(Entity entity){ 
@@ -39,6 +40,29 @@ public class CompositeEntity extends Entity {
 			entities.addAll(additions);			
 		}else{
 			entities.add(entity);
+		}
+	}
+	
+	/**
+	 * add a parent entity to the parent entity of the current CompositeEntity 
+	 * not increase the size of the arraylist 
+	 * @param entity
+	 */
+	public void addParentEntity(Entity entity){
+		if(entities.size()==0 && entity instanceof CompositeEntity){
+			ArrayList<Entity> additions = ((CompositeEntity)entity).getEntities();
+			entities.addAll(additions);			
+		}else{
+			Entity last = entities.get(entities.size()-1);
+			if(last instanceof CompositeEntity){//is this possible?
+				((CompositeEntity) last).addEntity(entity);
+			}else if(last instanceof REntity){
+				Entity e = ((REntity) last).getEntity();
+				CompositeEntity ce = new CompositeEntity();
+				ce.addEntity(e);
+				ce.addEntity(entity);
+				((REntity) last).setEntity(ce);
+			}
 		}
 	}
 	
