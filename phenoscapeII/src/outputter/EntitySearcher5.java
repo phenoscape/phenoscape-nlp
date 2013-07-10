@@ -20,7 +20,7 @@ public class EntitySearcher5 extends EntitySearcher {
 	}
 
 	@Override
-	public EntityProposals searchEntity(Element root, String structid,
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//bone, cartilage,  element
@@ -41,7 +41,9 @@ public class EntitySearcher5 extends EntitySearcher {
 			//search headnouns in the context: coronoid .* => coronoid process of ulna
 			String nouns = searchContext(root, structid, headnouns); //bone, cartilaginous
 			if(nouns != null){
-				EntityProposals entities = new EntityProposals();
+				EntityProposals ep = new EntityProposals();
+				ep.setPhrase(entityphrase+" .*");
+				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				String[] choices = nouns.split(",");
 				float score = 1.0f/choices.length;
 				for(String noun: choices){
@@ -52,9 +54,9 @@ public class EntitySearcher5 extends EntitySearcher {
 					sentity.setId(idiri[0]);
 					sentity.setConfidenceScore(score);
 					sentity.setClassIRI(idiri[1]);
-					entities.setPhrase(sentity.getString());
-					entities.add(sentity);
+					ep.add(sentity);
 				}
+				entities.add(ep);
 				return entities;
 			}/*else{
 				//text::Caudal fin

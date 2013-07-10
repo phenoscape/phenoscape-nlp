@@ -44,11 +44,12 @@ public class EntitySearcher1 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public EntityProposals searchEntity(Element root, String structid,
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-
-		EntityProposals entities = new EntityProposals(); //search results
+		
+		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+		EntityProposals ep = new EntityProposals(); //search results
 
 		//save phrases as components
 		EntityComponents ecs = new EntityComponents(entityphrase, elocatorphrase);
@@ -72,13 +73,16 @@ public class EntitySearcher1 extends EntitySearcher {
 				for(FormalConcept entity:entityfcs){
 					if(entity!=null){
 						found = true;
-						entities.setPhrase(entityphrase);
-						entities.add((Entity)entity);
+						ep.setPhrase(entityphrase);
+						ep.add((Entity)entity); //all variations are alternative entities (i.e. proposals) for the phrase
 					}
 				}
 			}
 		}
-		if(found) return entities;
+		if(found){
+			entities.add(ep);
+			return entities;
+		}
 
 		//failed to find pre-composed terms, try to post-compose using part_of
 		//call on EntityEntityLocatorStrategy on expressions without spatial terms:
@@ -87,7 +91,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		//TODO: need more work: what's entityphrase and elocatorphrase?
 		boolean hasspatial = ecs.containsSpatial();
 		if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
-			entities.setPhrase(entityphrase);
+			ep.setPhrase(entityphrase);
 			for(String variation: variations){
 				//split variation to entity and elocator
 				if(variation.indexOf(" of ")<0) continue; //there must be another  variation with " of " that is equivalent to this variation
@@ -99,10 +103,12 @@ public class EntitySearcher1 extends EntitySearcher {
 						originalentityphrase = entityphrase;
 						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 						eels.handle();
-						EntityProposals entity = eels.getEntities();
+						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
 						if(entity != null){
 							found = true;
-							entities.add(entity);
+							//ep.add(entity);
+							//entities.add(ep);
+							entities.addAll(entity);
 						}
 					}
 				}
@@ -116,10 +122,13 @@ public class EntitySearcher1 extends EntitySearcher {
 			//TODO: need more work: what's entityphrase and elocatorphrase?
 			SpatialModifiedEntityStrategy smes = new SpatialModifiedEntityStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			smes.handle();
-			EntityProposals entity = smes.getEntities();
+			String t="";
+			ArrayList<EntityProposals> entity = smes.getEntities();
 			if(entity != null){
 				found = true;
-				entities.add(entity);
+				//ep.add(entity);
+				//entities.add(ep);
+				entities.addAll(entity); //add a list of different entities: both sexes => female and male
 			}
 		}
 		if(found) return entities;
@@ -426,9 +435,10 @@ public class EntitySearcher1 extends EntitySearcher {
 			String entityphrase = "posterior radial";
 			String elocatorphrase = "posterior dorsal fin";
 			String prep = "";
-			EntityProposals ep = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
+			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
 			System.out.println("result:");
-			System.out.println(ep.toString());
+			for(EntityProposals ep: eps)
+				System.out.println(ep.toString());
 		}
 	}
 	}

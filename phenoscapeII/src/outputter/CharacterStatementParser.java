@@ -23,6 +23,7 @@ import org.jdom.xpath.XPath;
 public class CharacterStatementParser extends Parser {
 	//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
+	//use of qualityclue: test cases:patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml
 	ArrayList<String> qualityClue = new ArrayList<String> ();
 	ArrayList<String> underscoredStructureIDs = new ArrayList<String> ();
 	ArrayList<String> structureIDs = new ArrayList<String> ();
@@ -234,7 +235,7 @@ public class CharacterStatementParser extends Parser {
 				}
 			}
 			resolve(/*entities, s2qs,*/ statement, root);
-			String temp="";
+	
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -257,7 +258,7 @@ public class CharacterStatementParser extends Parser {
 			}else{
 				entities = this.entityHash.get(structureid);			
 			}
-			entities.add(ep.getEntity());
+			entities.addAll(ep.getEntity());
 			this.entityHash.put(structureid, entities);
 			if(debug){
 				System.out.println("matched entities:");
@@ -434,6 +435,9 @@ public class CharacterStatementParser extends Parser {
 			fr.setString("");
 			//remaining entities
 			//compose entities using 'part_of' relation
+			//test cases: 
+			//patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.xml (-)
+			//patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml (+)
 			ArrayList<String> orderedIDs = order(this.structureIDs, root);
 			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
@@ -448,7 +452,7 @@ public class CharacterStatementParser extends Parser {
 				}else if(this.keyentities.size()==0){
 					this.keyentities.addAll(entities);
 				}else{
-					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the entity is part of keyentity
+					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
 					}
 					else
@@ -476,6 +480,11 @@ public class CharacterStatementParser extends Parser {
 		}*/	
 	}
 
+	/**
+	 * are keyentities part of any of the entities?
+	 * @param entities
+	 * @return
+	 */
 	private boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
 		
 		for(EntityProposals ep1 : this.keyentities)
@@ -561,10 +570,10 @@ public class CharacterStatementParser extends Parser {
 						fr.setId("BFO:0000050");
 						fr.setLabel("part of");
 						fr.setString("");
-						REntity re = new REntity(fr, qentity); //bear of some Ossified
+						REntity re = new REntity(fr, qentity); 
 						CompositeEntity ce = new CompositeEntity(); 
 						ce.addEntity(ecopy);
-						ce.addEntity(re);											
+						ce.addEntity(re); //ce.addParentEntity(re)											
 						epsresult.add(ce); //save a proposal
 					}
 				}

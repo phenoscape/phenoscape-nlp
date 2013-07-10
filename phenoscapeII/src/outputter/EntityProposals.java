@@ -92,7 +92,7 @@ public class EntityProposals implements Proposals {
 
 		for(Entity e:proposals)
 		{
-			sb.append(e.toString());
+			sb.append(e.toString()+" ");
 		}
 		return sb.toString();
 	}

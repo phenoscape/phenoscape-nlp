@@ -19,9 +19,9 @@ import org.jdom.xpath.XPath;
  * http://phenoscape.org/wiki/Guide_to_Character_Annotation#Relations_used_for_post-compositions
  */
 public class RelationHandler {
-	EntityProposals entity; //entity holds the result on entity, may be simple or composite (with a entity locator)
+	ArrayList<EntityProposals> entity; //could be multiple entities, entity holds the result on entity, may be simple or composite (with a entity locator)
 	ArrayList<QualityProposals> quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
-	EntityProposals entitylocator;
+	ArrayList<EntityProposals> entitylocator;
 	ArrayList<EQStatementProposals> otherEQs;
 
 	Element root;
@@ -37,7 +37,7 @@ public class RelationHandler {
 	private ToBeResolved tobesolvedentity;
 	private boolean resolve = false;
 	private ArrayList<EntityProposals> keyentities;
-	EntityProposals spatialmodifier;
+	ArrayList<EntityProposals> spatialmodifier;
 	HashSet<String> identifiedqualities;
 
 	public RelationHandler(Element root, String relation, Element relelement, String tostructname, String tostructid, String structname, String structid, boolean negation, ArrayList<EntityProposals> keyentities, boolean keyelement){
@@ -165,12 +165,14 @@ public class RelationHandler {
 		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			String t = "";
-			EntityProposals relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-			RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
-			if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
-			QualityProposals aquality = new QualityProposals();
-			aquality.add(rq);
-			quality.add(aquality);					
+			ArrayList<EntityProposals> relatedentities = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+			for(EntityProposals relatedentity: relatedentities){
+				RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
+				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
+				QualityProposals aquality = new QualityProposals();
+				aquality.add(rq);
+				quality.add(aquality);
+			}
 		}else{//no, the relation should not be considered relational quality
 			//entity locator? parseEntity should have already processed entity locators if any
 			/*if (relation.matches("\\b(" + outputter.Dictionary.positionprep + ")\\b.*")) { // entitylocator
@@ -196,42 +198,44 @@ public class RelationHandler {
 
 				//check to-structure, if to-structure has no character, then generate EQs 1) to_entity:present 
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
-					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, "");					
-					if(entityproposals!=null){
-						//1) to_entity:present 
+					ArrayList<EntityProposals> entityproposallist = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, "");					
+					if(entityproposallist!=null){
+						//1) to_entity:present
 						EQStatementProposals eqproposals = new EQStatementProposals();
-						ArrayList<Entity> entities = entityproposals.getProposals();
-						for(Entity entity: entities){
-							//construct quality
-							Quality present = new Quality();
-							present.setString("present");
-							present.setLabel("PATO:present");
-							present.setId("PATO:0000467");
-							present.setConfidenceScore((float)1.0);
-							EQStatement eq = new EQStatement();
-							Element statement = relelement.getParentElement();
-							eq.setCharacterId(statement.getAttributeValue("character_id"));
-							eq.setDescription(statement.getChildText("text"));
-							eq.setSource(root.getAttributeValue(ApplicationUtilities
-									.getProperty("source.attribute.name")));
-							eq.setStateId(statement.getAttribute("state_id") == null ? ""
-									: statement.getAttributeValue("state_id"));
-							eq.setType(this.fromcharacterstatement? "character" : "state");
-							eq.setEntity(entity);
-							eq.setQuality(present);
-							eqproposals.add(eq);
+						for(EntityProposals entityproposals: entityproposallist){
+							ArrayList<Entity> entities = entityproposals.getProposals();
+							for(Entity entity: entities){
+								//construct quality
+								Quality present = new Quality();
+								present.setString("present");
+								present.setLabel("PATO:present");
+								present.setId("PATO:0000467");
+								present.setConfidenceScore((float)1.0);
+								EQStatement eq = new EQStatement();
+								Element statement = relelement.getParentElement();
+								eq.setCharacterId(statement.getAttributeValue("character_id"));
+								eq.setDescription(statement.getChildText("text"));
+								eq.setSource(root.getAttributeValue(ApplicationUtilities
+										.getProperty("source.attribute.name")));
+								eq.setStateId(statement.getAttribute("state_id") == null ? ""
+										: statement.getAttributeValue("state_id"));
+								eq.setType(this.fromcharacterstatement? "character" : "state");
+								eq.setEntity(entity);
+								eq.setQuality(present);
+								eqproposals.add(eq);
+							}
+							this.otherEQs.add(eqproposals);
+							//2) from_entity: has_part to_entity
 						}
-						this.otherEQs.add(eqproposals);
-						//2) from_entity: has_part to_entity
-
 					}
 				}
 			} else if (relation.matches("without.*")) {
 				// output absent as Q for tostructid
 				if (!fromcharacterstatement) {
-					EntityProposals entityproposals = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+					ArrayList<EntityProposals> entityproposallist = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
 					EQStatementProposals eqproposals = new EQStatementProposals();
-					if(entityproposals!=null){
+					if(entityproposallist!=null){
+						for(EntityProposals entityproposals: entityproposallist){
 						ArrayList<Entity> entities = entityproposals.getProposals();
 						for(Entity entity: entities){	
 							//construct quality
@@ -255,9 +259,11 @@ public class RelationHandler {
 						}
 						this.otherEQs.add(eqproposals);
 					}
+					}
 				}
 			}else if(relation.matches("\\b(between|among|amongst)\\b.*")){
 				//TODO between is a preposition too.
+				//test cases: patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml
 			}else if(relation.matches("\\b(found|located)\\b.*"))// This handles pattern 4.1
 			{
 
@@ -317,7 +323,7 @@ public class RelationHandler {
 		return null;
 	}
 
-	public EntityProposals getEntity(){
+	public ArrayList<EntityProposals> getEntity(){
 		return this.entity;
 	}
 

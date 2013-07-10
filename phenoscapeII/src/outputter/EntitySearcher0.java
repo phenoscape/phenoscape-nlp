@@ -19,7 +19,7 @@ public class EntitySearcher0 extends EntitySearcher {
 	public EntitySearcher0() {
 	}
 	
-	public EntityProposals searchEntity(Element root, String structid,
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//search the originals:
@@ -27,9 +27,11 @@ public class EntitySearcher0 extends EntitySearcher {
 		if(elocatorphrase==null || elocatorphrase.length()==0){
 			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
-				EntityProposals entities = new EntityProposals();
-				entities.setPhrase(entityphrase);
-				entities.add(entity);
+				EntityProposals ep = new EntityProposals();
+				ep.setPhrase(entityphrase);
+				ep.add(entity);
+				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+				entities.add(ep);
 				return entities;
 			}
 		}
@@ -39,9 +41,11 @@ public class EntitySearcher0 extends EntitySearcher {
 			{
 				SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
 				if(entity!=null){	
-					EntityProposals entities = new EntityProposals();
-					entities.setPhrase(entityphrase);
-					entities.add(entity);
+					EntityProposals ep = new EntityProposals();
+					ep.setPhrase(entityphrase);
+					ep.add(entity);
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					entities.add(ep);
 					return entities;
 				}
 			}

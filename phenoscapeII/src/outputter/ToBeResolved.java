@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.util.ArrayList;
+
 /**
  * @author updates
  *
@@ -11,7 +13,7 @@ public class ToBeResolved{
 	
 	//private String structurename;
 	private String structureid;
-	private EntityProposals entity;
+	private ArrayList<EntityProposals> entity;
 	Structure2Quality s2q;
 	private QualityProposals quality;
 
@@ -22,7 +24,7 @@ public class ToBeResolved{
 		//this.s2q = s2q;			
 	}
 	
-	public void setEntityCandidate(EntityProposals entity){
+	public void setEntityCandidate(ArrayList<EntityProposals> entity){
 		this.entity = entity;
 	}
 	
@@ -34,7 +36,7 @@ public class ToBeResolved{
 		this.quality = quality;
 	}
 
-	public EntityProposals getEntityCandidate() {
+	public ArrayList<EntityProposals> getEntityCandidate() {
 		return this.entity;
 	}
 	

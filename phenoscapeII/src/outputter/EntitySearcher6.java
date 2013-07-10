@@ -25,8 +25,11 @@ public class EntitySearcher6 extends EntitySearcher {
 	/* (non-Javadoc)
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
+	/**
+	 * test cases:patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.xml (manual)
+	 */
 	@Override
-	public EntityProposals searchEntity(Element root, String structid,
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//still not find a match, remove the last term in the entityphrase, when what is left is not just a spatial term 
@@ -58,14 +61,16 @@ public class EntitySearcher6 extends EntitySearcher {
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
 			if(!shortened.matches(".*?\\b("+Dictionary.spatialtermptn+")$")){
 				//SimpleEntity sentity = (SimpleEntity) new TermSearcher().searchTerm(shortened, "entity");
-				ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity");
+				ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
 				if(sentities!=null){
-					EntityProposals entities = new EntityProposals();
+					EntityProposals ep = new EntityProposals();
+					boolean found = false;
 					for(FormalConcept sentityfc: sentities){
 						//if sentity part_of entityl holds, then sentity's conf score = 1 and return the result
 						SimpleEntity sentity = (SimpleEntity)sentityfc;
 						if(sentity.isOntologized() && entityl!=null && entityl.isOntologized()){
 							if(XML2EQ.elk.isSubclassOfWithPart(entityl.getClassIRI(), sentity.getClassIRI())){
+								found = true;
 								sentity.setConfidenceScore(1f);
 								FormalRelation rel = new FormalRelation();
 								rel.setString("part of");
@@ -77,14 +82,19 @@ public class EntitySearcher6 extends EntitySearcher {
 								CompositeEntity centity = new CompositeEntity();
 								centity.addEntity(sentity);
 								centity.addEntity(rentity);
-								entities.setPhrase(sentity.getString());
-								entities.add(centity);
-								return entities;
+								ep.setPhrase(sentity.getString());
+								ep.add(centity); //add candidate matches as a proposal/possible match
 							}
 						}
 					}
+					if(found){
+						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+						entities.add(ep);
+						return entities;
+					}
 					//else, record all results
-					for(FormalConcept sentityfc: sentities){
+					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+					for(FormalConcept sentityfc: sentities){				
 						SimpleEntity sentity = (SimpleEntity)sentityfc;
 						if(sentity.getId().compareTo(Dictionary.mcorganism)==0){
 							//too general "body scale", try to search for "scale"
@@ -105,16 +115,16 @@ public class EntitySearcher6 extends EntitySearcher {
 								CompositeEntity centity = new CompositeEntity();
 								centity.addEntity(sentity);
 								centity.addEntity(rentity);
-								//EntityProposals entities = new EntityProposals();
-								entities.setPhrase(sentity.getString());
-								entities.add(centity);
+								ep.setPhrase(sentity.getString());
+								ep.add(centity);			
 							}else{
 								//EntityProposals entities = new EntityProposals();
-								entities.setPhrase(sentity.getString());
-								entities.add(sentity);
+								ep.setPhrase(sentity.getString());
+								ep.add(sentity);
 							}
 						}
 					}
+					entities.add(ep);
 					return entities;
 				}
 			}			
@@ -122,7 +132,8 @@ public class EntitySearcher6 extends EntitySearcher {
 		//If not found in Ontology, then return the phrase as simpleentity string
 		//TODO return "some anatomical entity" or other high level concepts. 
 		//don't forget the entityl
-		EntityProposals entities = new EntityProposals();
+		EntityProposals ep = new EntityProposals();
+		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		SimpleEntity sentity = new SimpleEntity();
 		sentity.setString(entityphrase);
 		sentity.confidenceScore=0f;
@@ -139,12 +150,14 @@ public class EntitySearcher6 extends EntitySearcher {
 			centity.addEntity(sentity);
 			centity.addEntity(rentity);
 			//EntityProposals entities = new EntityProposals();
-			entities.setPhrase(sentity.getString());
-			entities.add(centity);
+			ep.setPhrase(sentity.getString());
+			ep.add(centity);
+			entities.add(ep);
 		}else{
 			//EntityProposals entities = new EntityProposals();
-			entities.setPhrase(sentity.getString());
-			entities.add(sentity);
+			ep.setPhrase(sentity.getString());
+			ep.add(sentity);
+			entities.add(ep);
 		}
 		return entities;
 	}

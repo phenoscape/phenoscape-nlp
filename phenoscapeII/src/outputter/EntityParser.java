@@ -18,12 +18,12 @@ import org.jdom.xpath.XPath;
  */
 public class EntityParser {
 	//caches: key = structid
-	private static Hashtable<String, EntityProposals> entitycache = new Hashtable<String, EntityProposals>() ;
+	private static Hashtable<String, ArrayList<EntityProposals>> entitycache = new Hashtable<String, ArrayList<EntityProposals>>() ;
 	private static Hashtable<String, Structure2Quality> s2qcache = new Hashtable<String, Structure2Quality> ();
 	//private Hashtable<String, EntityProposals> spaitialmodifiercache;
 	//private Hashtable<String, HashSet<String>> identifiedqualitiescache;
 	
-	private EntityProposals entity;
+	private ArrayList<EntityProposals> entity;
 	private Structure2Quality s2q;
 	private EntityProposals spaitialmodifier;
 	private HashSet<String> identifiedqualities;
@@ -63,7 +63,7 @@ public class EntityParser {
 		}
 	}
 
-	public EntityProposals getEntity() {
+	public ArrayList<EntityProposals> getEntity() {
 		return entity;
 	}
 
@@ -71,7 +71,7 @@ public class EntityParser {
 		return s2q;
 	}
 
-	public EntityProposals getSpaitialmodifier(){
+	public ArrayList<EntityProposals> getSpaitialmodifier(){
 		if(s2q!=null) return this.s2q.spatialmodifier;
 		return null;
 	}

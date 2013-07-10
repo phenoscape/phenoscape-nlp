@@ -137,8 +137,8 @@ public class StateStatementParser extends Parser {
 					//standing-alone structure
 					//shouldn't this also call EntityParser?
 					String sname = Utilities.getStructureName(root, sid);
-					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.add(ep);
+					ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+					entities.addAll(ep);
 				}
 			}
 
@@ -443,8 +443,8 @@ public class StateStatementParser extends Parser {
 			String fromname = Utilities.getStructureName(root, fromid);
 			boolean maybesubject = false;
 			ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
-			EntityProposals spatialmodifier = null;
-			EntityProposals entitylocator =null;
+			ArrayList<EntityProposals> spatialmodifier = null;
+			ArrayList<EntityProposals> entitylocator =null;
 			// Changes starting => Hariharan
 			// checking if entity is really an entity or it is a quality
 			// by passing to and from struct names to relational quality
@@ -496,7 +496,7 @@ public class StateStatementParser extends Parser {
 				rh.handle();
 				if(rh.getEntity()!=null)
 				{
-					e.add(rh.getEntity());
+					e.addAll(rh.getEntity());
 				}
 
 				if(rh.getQuality()!=null) //including s2q identified qualities
@@ -546,14 +546,14 @@ public class StateStatementParser extends Parser {
 			if(spatialmodifier!=null)
 			{
 				ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
-				spatialmodifiers.add(spatialmodifier);							
+				spatialmodifiers.addAll(spatialmodifier);							
 				entities = resolveFinalEntities(entities,spatialmodifiers);
 			}
 
 			if(entitylocator!=null)
 			{
 				ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
-				entitylocators.add(entitylocator);							
+				entitylocators.addAll(entitylocator);							
 				entities = resolveFinalEntities(entitylocators,entities);
 			}
 
