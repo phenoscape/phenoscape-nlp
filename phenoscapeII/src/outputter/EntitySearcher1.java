@@ -114,7 +114,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				}
 			}
 		}
-		if(found) return entities;
+		//if(found) return entities;
 
 		//deal with spatial expressions
 		if(hasspatial){
@@ -131,11 +131,17 @@ public class EntitySearcher1 extends EntitySearcher {
 				entities.addAll(entity); //add a list of different entities: both sexes => female and male
 			}
 		}
-		if(found) return entities;
+		//if(found) return entities;
 
-
-
-		return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+		ArrayList<EntityProposals> entity = new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+		//proximal tarsal element:
+		//SpaticalModifiedEntity: phrase=proximal region entity=proximal region score=1.0 and (part_of some phrase=tarsal\b.* entity=tarsal bone score=0.5) 
+		//EntitySearcher5: phrase=proximal tarsal\b.* entity=proximal tarsal bone score=0.5
+		//TODO: save both or select one? 
+		if(entity!=null) entities.addAll(entity);
+		
+		return entities;
+		//return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
 

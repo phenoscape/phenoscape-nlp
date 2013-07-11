@@ -528,7 +528,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		if(xml!=null){
 			Element root = xml.getRootElement();
 			String structid ="o560";
-			String entityphrase = "lateral condyle";
+			String entityphrase = "proximal tarsal element";
 			//String entityphrase = "posterior postfrontal";
 			//String entityphrase = "posterior supraorbital postfrontal";
 			String elocatorphrase = "";

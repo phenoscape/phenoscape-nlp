@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class PermittedRelations {	
+	static Hashtable<String, QualityProposals> cache = new Hashtable<String, QualityProposals>();
 	/**
 	 * match the relation in PATO relation slim
 	 * @param relation "name of the quality string"
@@ -16,6 +17,8 @@ public class PermittedRelations {
 	 *
 	 */
 	public static QualityProposals matchInPermittedRelation(String relation, boolean negation,int flag) {
+		QualityProposals qp = cache.get(relation+negation+flag);
+		if(qp!=null) return qp;
 		//TODO: handle negated relations
 		QualityProposals qproposals = new QualityProposals();
 		Quality relationalquality = new Quality();
@@ -59,6 +62,7 @@ public class PermittedRelations {
 			relationalquality.setLabel(retrieve_label(rel,qualityholder));
 			relationalquality.setConfidenceScore((float)1.0);
 			qproposals.add(relationalquality);
+			cache.put(relation+negation+flag, qproposals);
 			return qproposals;
 		}
 		}
@@ -85,6 +89,7 @@ public class PermittedRelations {
 				relationalquality.setLabel(retrieve_label(relation_ID.split("\\|\\|")[1],qualityholder));
 				relationalquality.setConfidenceScore((float)1.0);
 				qproposals.add(relationalquality);
+				cache.put(relation+negation+flag, qproposals);
 				return qproposals;
 			}
 		}

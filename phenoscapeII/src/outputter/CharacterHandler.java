@@ -88,7 +88,7 @@ public class CharacterHandler {
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
-			EntityParser ep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
+			EntityParser ep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
 			this.tobesolvedentity = new ToBeResolved(structureid);
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
@@ -437,7 +437,7 @@ public class CharacterHandler {
 		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
 		String structureid = structure.getAttributeValue("id");
 		String structurename = Utilities.getStructureName(root, structureid);
-		EntityParser rep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
+		EntityParser rep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
 		structure.setAttribute("processed", "true");
 
 		for(EntityProposals ep: rep.getEntity()){

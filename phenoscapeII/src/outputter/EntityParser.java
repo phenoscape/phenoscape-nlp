@@ -27,8 +27,10 @@ public class EntityParser {
 	private Structure2Quality s2q;
 	private EntityProposals spaitialmodifier;
 	private HashSet<String> identifiedqualities;
+	private ArrayList<EntityProposals> keyentities;
 
-	public EntityParser(Element statement, Element root, String structureid, String structurename, boolean keyelement) {
+	public EntityParser(Element statement, Element root, String structureid, String structurename, ArrayList<EntityProposals> keyentities, boolean keyelement) {
+		this.keyentities = keyentities; 
 		if(entitycache.get(structureid)!=null){
 			entity = entitycache.get(structureid);
 			s2q =  s2qcache.get(structureid);
@@ -50,8 +52,9 @@ public class EntityParser {
 				if (relationalquality != null) quality = relationalquality;
 			}*/
 			
-			Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
+			Structure2Quality rq = new Structure2Quality(root, structurename, structureid, keyentities);
 			rq.handle();
+			String t = "";
 			//If any structure is a quality detach all the structures containing the structure id
 			
 			// if this.entity is not ontologized, then take the qualities else retain the entities
@@ -63,8 +66,13 @@ public class EntityParser {
 		}
 	}
 
+	/**
+	 * 
+	 * @return null if no entity has been found/ontologized.
+	 */
 	public ArrayList<EntityProposals> getEntity() {
-		return entity;
+		if(entity!=null && entity.size()>0 && entity.get(0)!=null) return entity;
+		else return null;
 	}
 
 	public Structure2Quality getQualityStrategy() {

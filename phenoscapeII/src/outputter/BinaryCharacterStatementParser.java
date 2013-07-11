@@ -180,7 +180,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							 "|//relation[@name='in'][@from='" + structureid + "']" +
 							 "|//relation[@name='on'][@from='" + structureid + "']", 0);
 					String structurename = Utilities.getStructureName(root, structureid);
-					EntityParser ep = new EntityParser(statement, root, structureid, structurename, true);
+					EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, true);
 					if(ep.getEntity()!=null) entities.addAll(ep.getEntity());
 					if(ep.getQualityStrategy()!=null) s2qs.add(ep.getQualityStrategy());
 					checked += structureid+","+parents+",";

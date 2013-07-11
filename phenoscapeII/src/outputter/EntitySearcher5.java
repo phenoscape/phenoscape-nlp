@@ -106,7 +106,6 @@ public class EntitySearcher5 extends EntitySearcher {
 			}			
 			//filter other cases: prefer phrases one-word longer than the original phrase 
 			String result = "";
-			//int size = targets.size();
 			Enumeration<String> keys = targets.keys();
 			while(keys.hasMoreElements()){
 				String noun = keys.nextElement();

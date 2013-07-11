@@ -44,15 +44,17 @@ public class CompositeEntity extends Entity {
 	}
 	
 	/**
-	 * add a parent entity to the parent entity of the current CompositeEntity 
-	 * not increase the size of the arraylist 
+	 * add a parent entity 
+	 * not increase the size of the arraylist for existing CompositeEntity
+	 * increase the size of the arraylist for existing simpleEntity (in the process of constructing the compositEntity)
 	 * @param entity
 	 */
-	public void addParentEntity(Entity entity){
+	public void addParentEntity(REntity entity){
+	/*public void addParentEntity(Entity entity){
 		if(entities.size()==0 && entity instanceof CompositeEntity){
 			ArrayList<Entity> additions = ((CompositeEntity)entity).getEntities();
 			entities.addAll(additions);			
-		}else{
+		}else{*/
 			Entity last = entities.get(entities.size()-1);
 			if(last instanceof CompositeEntity){//is this possible?
 				((CompositeEntity) last).addEntity(entity);
@@ -62,8 +64,10 @@ public class CompositeEntity extends Entity {
 				ce.addEntity(e);
 				ce.addEntity(entity);
 				((REntity) last).setEntity(ce);
+			}else{
+				this.addEntity(entity);
 			}
-		}
+		//}
 	}
 	
 	/**

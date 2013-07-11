@@ -132,7 +132,7 @@ public class RelationHandler {
 			//this.entity = new EntitySearcherOriginal().searchEntity(root, fromstructid, fromstructname, parents, fromstructname,"part_of");	//corrected by Hong
 			//shouldn't this calls EntityParser? and then resolve the conflicts, like characterhandler do?
 			//could fromstruct be a quality?
-			EntityParser ep = new EntityParser(relelement, root, fromstructid, fromstructname, fromcharacterstatement);
+			EntityParser ep = new EntityParser(relelement, root, fromstructid, fromstructname, keyentities, fromcharacterstatement);
 			if(ep.getEntity()!=null && ep.getQualityStrategy()==null){
 				this.entity = ep.getEntity();
 			}

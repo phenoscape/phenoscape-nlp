@@ -134,11 +134,19 @@ public class StateStatementParser extends Parser {
 				String sid = structure.getAttributeValue("id");
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']|.//*[@constraintid='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null && structure.getAttributeValue("processed")==null){
-					//standing-alone structure
-					//shouldn't this also call EntityParser?
-					String sname = Utilities.getStructureName(root, sid);
-					ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.addAll(ep);
+					//standing-alone structure: could be entity or quality
+					String t="";
+					String sname = Utilities.getStructureName(root, sid);		
+					EntityParser ep = new EntityParser(statement, root, sid, sname, keyentities, this instanceof BinaryCharacterStatementParser);
+					if(ep.getEntity()!=null){
+						entities.addAll(ep.getEntity()); //if found entities, take them
+					}else if(ep.getQualityStrategy()!=null){
+						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
+						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
+						this.constructEQStatementProposals(qualities, primentities);	
+					}
+					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+					//entities.addAll(ep);
 				}
 			}
 

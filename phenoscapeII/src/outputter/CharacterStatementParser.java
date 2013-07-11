@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
@@ -250,7 +251,7 @@ public class CharacterStatementParser extends Parser {
 		if(debug){
 			System.out.println("parse structure:"+structurename);
 		}
-		EntityParser ep = new EntityParser(statement, root, structureid, structurename, fromcharacterdescription);
+		EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, fromcharacterdescription);
 		if(ep.getEntity()!=null){
 			ArrayList<EntityProposals> entities;
 			if(this.entityHash.get(structureid)==null){
@@ -438,7 +439,7 @@ public class CharacterStatementParser extends Parser {
 			//test cases: 
 			//patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.xml (-)
 			//patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml (+)
-			ArrayList<String> orderedIDs = order(this.structureIDs, root);
+			ArrayList<String> orderedIDs = partofwholeorder(this.structureIDs, root);//reverse the order in original text
 			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
 				if(debug){
@@ -460,6 +461,10 @@ public class CharacterStatementParser extends Parser {
 						this.keyentities.addAll(entities);
 					}
 				}
+			}
+			//reverse the order back to original-like
+			for(int i = 0; i<this.keyentities.size()/2; i++){
+				Collections.swap(this.keyentities, i, this.keyentities.size()-i-1);
 			}
 		}
 		/*if(entities.size()>1){//multiple unrelated entities  
@@ -520,7 +525,7 @@ public class CharacterStatementParser extends Parser {
 	 * @param structureIDs
 	 * @return structure ids sorted in order of 'part of' relationship
 	 */
-	private ArrayList<String> order(ArrayList<String> structureIDs, Element root) {
+	private ArrayList<String> partofwholeorder(ArrayList<String> structureIDs, Element root) {
 		ArrayList<String> ordered = new ArrayList<String> ();
 		for(String id: structureIDs){
 			if(this.entityHash.containsKey(id)){
@@ -573,7 +578,7 @@ public class CharacterStatementParser extends Parser {
 						REntity re = new REntity(fr, qentity); 
 						CompositeEntity ce = new CompositeEntity(); 
 						ce.addEntity(ecopy);
-						ce.addEntity(re); //ce.addParentEntity(re)											
+						ce.addParentEntity(re); //ce.addParentEntity(re)											
 						epsresult.add(ce); //save a proposal
 					}
 				}
