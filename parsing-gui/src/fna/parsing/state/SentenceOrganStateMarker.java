@@ -95,7 +95,7 @@ public class SentenceOrganStateMarker {
 					String source = rs.getString("source");
 					String osent = rs.getString("originalsent");
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
+					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
 					text = text.replaceAll("&#176;", "°");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.percentage+")\\b)", " ").replaceAll("\\s+", " "); //80percent =>80 percent
