@@ -3675,7 +3675,7 @@ public class CharacterAnnotatorChunked {
 		// w = w.replaceAll("\\W", ""); //don't turn frontal-postorbital to
 		// frontalpostorbital
 		String ch = Utilities.lookupCharacter(w, conn, ChunkedSentence.characterhash, this.glosstable, tableprefix);
-		if (ch != null && ch.matches(".*?_?(position|insertion|structure_type|life_stage|functionality)_?.*") && w.compareTo("low") != 0)
+		if (ch != null && ch.matches(".*?(_|^)(position|insertion|structure_type|life_stage|functionality)(_|$).*") && w.compareTo("low") != 0)
 			return "type";
 		String sw = TermOutputerUtilities.toSingular(w);
 		try {
