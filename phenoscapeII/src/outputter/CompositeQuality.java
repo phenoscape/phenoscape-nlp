@@ -1,5 +1,12 @@
 package outputter;
-
+/**
+ * For post-composition of qualities.
+ * For example, an author may describe the frontal bone as having a "greater length relative to width". This requires post-composing the quality with the two PATO terms for length and width:
+     E: frontal bone, Q: length^increased_in_magnitude_relative_to(width^inheres_in(frontal bone))
+     
+ * @author Hari, Hong Cui
+ *
+ */
 public class CompositeQuality extends Quality {
 
 	Quality mainquality;

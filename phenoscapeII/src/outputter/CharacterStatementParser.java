@@ -3,6 +3,7 @@
  */
 package outputter;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import org.jdom.xpath.XPath;
 public class CharacterStatementParser extends Parser {
 	//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
+	//use of qualityclue: test cases:patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml
 	ArrayList<String> qualityClue = new ArrayList<String> ();
 	ArrayList<String> underscoredStructureIDs = new ArrayList<String> ();
 	ArrayList<String> structureIDs = new ArrayList<String> ();
@@ -211,7 +213,7 @@ public class CharacterStatementParser extends Parser {
 					this.structureIDs.add(structureid);
 					String name = structure.getAttributeValue("name");
 					if((name.indexOf("_")>0)||(name.indexOf("/")>0)){//case of 'pubis_ischium', one structure id for two structures. also humerus/radius ratio case
-						name=name.replaceAll("(\\(|\\))", "");//used to address case fang relative-to (dentary_tooth) size check with prof.
+						name=name.replaceAll("(\\(|\\))", "");//used to address case 'fang relative-to (dentary_tooth) size' check with prof.
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						for(String aname: names){
@@ -234,6 +236,7 @@ public class CharacterStatementParser extends Parser {
 				}
 			}
 			resolve(/*entities, s2qs,*/ statement, root);
+	
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -248,7 +251,7 @@ public class CharacterStatementParser extends Parser {
 		if(debug){
 			System.out.println("parse structure:"+structurename);
 		}
-		EntityParser ep = new EntityParser(statement, root, structureid, structurename, fromcharacterdescription);
+		EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, fromcharacterdescription);
 		if(ep.getEntity()!=null){
 			ArrayList<EntityProposals> entities;
 			if(this.entityHash.get(structureid)==null){
@@ -256,7 +259,7 @@ public class CharacterStatementParser extends Parser {
 			}else{
 				entities = this.entityHash.get(structureid);			
 			}
-			entities.add(ep.getEntity());
+			entities.addAll(ep.getEntity());
 			this.entityHash.put(structureid, entities);
 			if(debug){
 				System.out.println("matched entities:");
@@ -308,7 +311,7 @@ public class CharacterStatementParser extends Parser {
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
 			if(debug){
-				System.out.println("resolving underscored structures...");
+				System.out.println("resolving underscored structures...  ");
 			}
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 
@@ -433,7 +436,10 @@ public class CharacterStatementParser extends Parser {
 			fr.setString("");
 			//remaining entities
 			//compose entities using 'part_of' relation
-			ArrayList<String> orderedIDs = order(this.structureIDs, root);
+			//test cases: 
+			//patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.xml (-)
+			//patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml (+)
+			ArrayList<String> orderedIDs = partofwholeorder(this.structureIDs, root);//reverse the order in original text
 			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
 				if(debug){
@@ -447,7 +453,7 @@ public class CharacterStatementParser extends Parser {
 				}else if(this.keyentities.size()==0){
 					this.keyentities.addAll(entities);
 				}else{
-					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the entity is part of keyentity
+					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
 					}
 					else
@@ -455,6 +461,10 @@ public class CharacterStatementParser extends Parser {
 						this.keyentities.addAll(entities);
 					}
 				}
+			}
+			//reverse the order back to original-like
+			for(int i = 0; i<this.keyentities.size()/2; i++){
+				Collections.swap(this.keyentities, i, this.keyentities.size()-i-1);
 			}
 		}
 		/*if(entities.size()>1){//multiple unrelated entities  
@@ -475,6 +485,11 @@ public class CharacterStatementParser extends Parser {
 		}*/	
 	}
 
+	/**
+	 * are keyentities part of any of the entities?
+	 * @param entities
+	 * @return
+	 */
 	private boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
 		
 		for(EntityProposals ep1 : this.keyentities)
@@ -510,7 +525,7 @@ public class CharacterStatementParser extends Parser {
 	 * @param structureIDs
 	 * @return structure ids sorted in order of 'part of' relationship
 	 */
-	private ArrayList<String> order(ArrayList<String> structureIDs, Element root) {
+	private ArrayList<String> partofwholeorder(ArrayList<String> structureIDs, Element root) {
 		ArrayList<String> ordered = new ArrayList<String> ();
 		for(String id: structureIDs){
 			if(this.entityHash.containsKey(id)){
@@ -560,10 +575,10 @@ public class CharacterStatementParser extends Parser {
 						fr.setId("BFO:0000050");
 						fr.setLabel("part of");
 						fr.setString("");
-						REntity re = new REntity(fr, qentity); //bear of some Ossified
+						REntity re = new REntity(fr, qentity); 
 						CompositeEntity ce = new CompositeEntity(); 
 						ce.addEntity(ecopy);
-						ce.addEntity(re);											
+						ce.addParentEntity(re); //ce.addParentEntity(re)											
 						epsresult.add(ce); //save a proposal
 					}
 				}
@@ -665,12 +680,7 @@ public class CharacterStatementParser extends Parser {
 						}else{
 							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
 							Entity ecopy = (Entity) e.clone();
-							SimpleEntity qentity = new SimpleEntity();
-							qentity.setClassIRI(q.getClassIRI());
-							qentity.setConfidenceScore(q.getConfidienceScore());
-							qentity.setId(q.getId());
-							qentity.setLabel(q.getLabel());
-							qentity.setString(q.getString());
+							SimpleEntity qentity = Utilities.wrapQualityAs(q);
 							FormalRelation fr = new FormalRelation();
 							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
 							fr.setConfidenceScore(1f);
@@ -689,6 +699,9 @@ public class CharacterStatementParser extends Parser {
 			eps = epsresult; //update entities
 		}
 	}
+
+
+
 	
 	private boolean isRestrictedRelation(String id) {
 		if(Dictionary.resrelationQ.get(id) == null) return false;

@@ -40,16 +40,17 @@ public class PhraseMarker {
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(
 					file));
 			// Deserialize the object
-		    phrases = (ArrayList<String>) in.readObject(); //phrases are words connected with "_"
+		    phrases = (ArrayList<String>) in.readObject(); //phrases are words connected with " "
 			in.close();			
 			Collections.sort(phrases, new PhraseComparable()); //longest phrases first
 			phrasestr = "";
 			for(String phrase: phrases){
-				//hyomandibula-opercle_joint
+				//hyomandibula-opercle joint
 				phrase = phrase.replaceAll("\\([^)]*\\)", "").trim();
-				if(phrase.length()>0)
-					phrase = phrase.replaceAll("-", "_");//hyomandibula_opercle_joint
+				if(phrase.length()>0 && phrase.indexOf(" ")>0){ //can't allow single-word phrase 
+					phrase = phrase.replaceAll("-", "_");//hyomandibula_opercle joint
 					phrasestr += phrase+"|";
+				}
 			}
 			//phrasestr="";
 			phrasestr = phrasestr.replaceFirst("\\|$", ""); //space separated words in phrases
@@ -69,6 +70,7 @@ public class PhraseMarker {
 		Matcher m = phrasepattern.matcher(sentence);
 		//System.out.println(this.phrasestr);
 		while(m.matches()){
+			//System.out.println(phrasepattern);
 			sentence = m.group(1)+m.group(2).replaceAll("\\s+", "_")+m.group(3);
 			m = phrasepattern.matcher(sentence);
 		}				

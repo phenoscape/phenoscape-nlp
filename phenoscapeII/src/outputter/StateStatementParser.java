@@ -116,7 +116,7 @@ public class StateStatementParser extends Parser {
 	@SuppressWarnings("unchecked")
 	private void parseStandaloneStructures(Element statement, Element root) {
 		// last, standing alone structures (without characters 
-		// and are not the subject of a relation)
+		// and are not the subject of a relation or a character constraint)
 		//TODO: could it really be a quality?
 
 		//if a real entity, construct EQs of 'entity/present' 
@@ -132,13 +132,21 @@ public class StateStatementParser extends Parser {
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			for(Element structure: structures){
 				String sid = structure.getAttributeValue("id");
-				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']");
+				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']|.//*[@constraintid='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null && structure.getAttributeValue("processed")==null){
-					//standing-alone structure
-					//shouldn't this also call EntityParser?
-					String sname = Utilities.getStructureName(root, sid);
-					EntityProposals ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
-					entities.add(ep);
+					//standing-alone structure: could be entity or quality
+					String t="";
+					String sname = Utilities.getStructureName(root, sid);		
+					EntityParser ep = new EntityParser(statement, root, sid, sname, keyentities, this instanceof BinaryCharacterStatementParser);
+					if(ep.getEntity()!=null){
+						entities.addAll(ep.getEntity()); //if found entities, take them
+					}else if(ep.getQualityStrategy()!=null){
+						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
+						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
+						this.constructEQStatementProposals(qualities, primentities);	
+					}
+					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
+					//entities.addAll(ep);
 				}
 			}
 
@@ -178,7 +186,7 @@ public class StateStatementParser extends Parser {
 	}
 
 	protected void parseCharactersFormEQ(Element statement, Element root) {
-		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.
+		//then parse characters. 
 		List<Element> characters;
 		try {
 			characters = pathCharacter.selectNodes(statement);			
@@ -265,9 +273,18 @@ public class StateStatementParser extends Parser {
 		}
 		
 	}
+	
+	
+	
 
-
-	//Resolve entity in parts/spatial modifiers with final entities
+	/**
+	 * This is for resolving final entities with entity in parts, e.g.:
+	 * iliac blade: Flared at the proximal end (here part is proximal end)
+	 * dorsal fin: absent in both sexes (here part is dorsal fin)
+	 * @param entities
+	 * @param entityparts
+	 * @return
+	 */
 	private ArrayList<EntityProposals> resolveFinalEntities(ArrayList<EntityProposals> entities,
 			ArrayList<EntityProposals> entityparts) {
 
@@ -278,6 +295,10 @@ public class StateStatementParser extends Parser {
 			{
 				for(Entity e1:ep1.getProposals())
 				{
+					//if e1 contains spatial term, it is part
+					//else e1 is the parent
+					boolean foundpart = false;
+					if(e1.getString().matches(".*?\\b("+Dictionary.spatialtermptn+")\\b.*")) foundpart = true;
 					for(EntityProposals ep2: entities)
 					{
 						EntityProposals ep3 = new EntityProposals();
@@ -288,18 +309,18 @@ public class StateStatementParser extends Parser {
 							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
 							rel.setId("BFO:000050");
 							rel.setConfidenceScore((float)1.0);
-							REntity rentity = new REntity(rel, e2);
+							REntity rentity = foundpart? new REntity(rel, e2): new REntity(rel, e1);
 							CompositeEntity centity = new CompositeEntity();
 							//composite entity
 							if(e1 instanceof SimpleEntity)
 							{
-								centity.addEntity(e1);
+								centity.addEntity(foundpart? e1 : e2);
 								centity.addEntity(rentity);
 							}
 							else
 							{
-								centity = ((CompositeEntity)e1).clone();
-								((CompositeEntity)centity).addEntity(rentity);
+								centity = ((CompositeEntity) (foundpart? e1 : e2)).clone();
+								((CompositeEntity)centity).addParentEntity(rentity);
 							}
 							ep3.add(centity);
 						}
@@ -430,8 +451,8 @@ public class StateStatementParser extends Parser {
 			String fromname = Utilities.getStructureName(root, fromid);
 			boolean maybesubject = false;
 			ArrayList<EntityProposals> e = new ArrayList<EntityProposals>();
-			EntityProposals spatialmodifier = null;
-			EntityProposals entitylocator =null;
+			ArrayList<EntityProposals> spatialmodifier = null;
+			ArrayList<EntityProposals> entitylocator =null;
 			// Changes starting => Hariharan
 			// checking if entity is really an entity or it is a quality
 			// by passing to and from struct names to relational quality
@@ -483,7 +504,7 @@ public class StateStatementParser extends Parser {
 				rh.handle();
 				if(rh.getEntity()!=null)
 				{
-					e.add(rh.getEntity());
+					e.addAll(rh.getEntity());
 				}
 
 				if(rh.getQuality()!=null) //including s2q identified qualities
@@ -533,14 +554,14 @@ public class StateStatementParser extends Parser {
 			if(spatialmodifier!=null)
 			{
 				ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
-				spatialmodifiers.add(spatialmodifier);							
+				spatialmodifiers.addAll(spatialmodifier);							
 				entities = resolveFinalEntities(entities,spatialmodifiers);
 			}
 
 			if(entitylocator!=null)
 			{
 				ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
-				entitylocators.add(entitylocator);							
+				entitylocators.addAll(entitylocator);							
 				entities = resolveFinalEntities(entitylocators,entities);
 			}
 
@@ -639,7 +660,7 @@ public class StateStatementParser extends Parser {
 		Iterator entityitr =e.listIterator();
 		while(entityitr.hasNext())
 		{
-			// if e is whole organism
+			// if e is whole_organism
 			EntityProposals ep = (EntityProposals) entityitr.next();
 			if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
 				entityitr.remove();

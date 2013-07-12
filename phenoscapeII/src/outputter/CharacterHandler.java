@@ -30,9 +30,9 @@ public class CharacterHandler {
 	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
 	private ArrayList<EntityProposals> keyentities;
 	boolean fromcharacterstatement = false;
-	
+
 	//results
-	EntityProposals entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
+	ArrayList<EntityProposals> entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //the quality result will be saved here. Because n structures may be involved in constraints (hence multiple relational qualities), this needs to be an arraylist. May be relationalquality, simple quality, or negated quality
 	ArrayList<EntityProposals> entityparts = new ArrayList<EntityProposals>(); //come from constraints, may have multiple.
 	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>(); //entities no need to be resolved
@@ -71,15 +71,15 @@ public class CharacterHandler {
 	 */
 	public void handle(){
 		try {
-		parseEntity();
-		parseQuality();
-		if(resolve) resolve();
+			parseEntity();
+			parseQuality();
+			if(resolve) resolve();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * can't be called out of context, so can't be a public method
 	 */
@@ -88,16 +88,16 @@ public class CharacterHandler {
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
-			EntityParser ep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
+			EntityParser ep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
 			this.tobesolvedentity = new ToBeResolved(structureid);
 			this.tobesolvedentity.setEntityCandidate(ep.getEntity());
 			this.tobesolvedentity.setStructure2Quality(ep.getQualityStrategy());
 			this.resolve = true;			
 			this.entity=ep.getEntity();
 			if(this.entity!=null)
-			this.primaryentities.add(this.entity);
-			}
-		
+				this.primaryentities.addAll(this.entity);
+		}
+
 		/*String structurename = (structure.getAttribute("constraint")!=null? 
 				structure.getAttributeValue("constraint"): ""+" "+structure.getAttributeValue("name")).trim();
 		String structureid = structure.getAttributeValue("id");
@@ -107,7 +107,7 @@ public class CharacterHandler {
 			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']", 0);
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 
-			
+
 			//if entity match is not very strong, consider whether the structure is really a quality
 			//if(this.entity.higestScore() < 0.8f){
 			//	Structure2Quality rq = new Structure2Quality(root, structurename, structureid, null);
@@ -128,15 +128,15 @@ public class CharacterHandler {
 			//			this.resolve = true;
 			//		}					
 			//	}
-				
+
 			//}
 
 			this.primaryentities.add(this.entity);
 
 		//}		*/
 	}
-	
-	
+
+
 	private void parseQuality() throws Exception{
 		// characters => quality
 		//get quality candidate
@@ -148,7 +148,7 @@ public class CharacterHandler {
 		if((quality.matches(".*(\\d)+.*")==true)||(quality.equals("")==true)||(quality.equals("not")==true||(quality.matches(".*(width|height|length|broad|depth).*")||(quality.matches(".*(half|full|quarter|much).*")))))
 		{
 			preProcess(this.chara.getAttributeValue("name"));//handles height/width cases
-				
+
 			if((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*(width|length|height|depth|broad).*")))
 			{
 				//To handle width,length statements of a same structure
@@ -160,20 +160,20 @@ public class CharacterHandler {
 				{
 					//if constraintid is not null then two different structures are being compared
 					special_case = specialCaseDifferentStructures();
-					
+
 				}else//handles the case where a single property is being discussed
 				{
 					quality = this.chara.getAttributeValue("name");
 				}
 			}
 			quality=format(quality);
-			
+
 		}
 		if(special_case)
-			{
+		{
 			return;
-			}
-		
+		}
+
 		boolean negated = false;
 		if(quality.startsWith("not ")){
 			negated = true;
@@ -191,7 +191,7 @@ public class CharacterHandler {
 					qproposals.add(new RelationalQuality(relationalquality, relatedentity));
 					this.qualities.add(qproposals);
 				}
-				}
+			}
 			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==true){// A and B: fused
 				//Processes structures with same characters(RQ's) to be related => Hariharan
 				Hashtable<String,ArrayList<EntityProposals>> entities = this.processStructuresWithSameCharacters(this.chara.getParentElement().getParentElement());
@@ -202,14 +202,14 @@ public class CharacterHandler {
 				this.primaryentities.clear();//Since among the primary entities only some are bilateral and is relevant to this character/relational quality => Hariharan
 				for(Entity e:this.bilateral)
 				{
-				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
-				re.handle();
-				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
-				addREPE(entities,relationalquality);
+					RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
+					re.handle();
+					Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+					addREPE(entities,relationalquality);
 				}
 			}
-			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole organism, it should be handled here
-				//single, non-bilateral structure: fused: for example whole organism:fused
+			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole_organism, it should be handled here
+				//single, non-bilateral structure: fused: for example whole_organism:fused
 			{
 				//Handling characters that belong to a single structure => Hariharan
 				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
@@ -221,10 +221,10 @@ public class CharacterHandler {
 			}
 			if((this.primaryentities.size()>0)&&(this.qualities.size()>0))
 				donotresolve=true;
-				return;
+			return;
 		}
-		
-		
+
+
 		//constraints may yield entity parts such as entity locator, save those, resolve them later
 		//Need to handle this differently, if quality is size.
 		if (chara.getAttribute("constraintid") != null) {
@@ -233,13 +233,13 @@ public class CharacterHandler {
 				this.entityparts.add(entity);
 			}
 		}
-				
-		
+
+
 		//not a relational quality, is this a simple quality or a negated quality?
 
 		TermSearcher ts = new TermSearcher();
 		Quality result = (Quality) ts.searchTerm(quality, "quality");
-		
+
 		if(result!=null){ //has a strong match
 			//qualities involving length should be handled with related entity
 
@@ -274,7 +274,26 @@ public class CharacterHandler {
 			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
 			//xml: structure: caudal fin, character:heterocercal
 			//=> heterocercal tail: present
-			if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
+			
+			if(this.entity!=null){
+				for(int i = 0; i<entity.size(); i++){
+					EntityProposals ep = entity.get(i);
+					if(ep.higestScore()>=0.8f){
+						for(Entity e: ep.getProposals()){
+							Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
+							ces.handle();
+							if(ces.getEntity()!=null && ces.getQuality()!=null){
+								ep = ces.getEntity();//update
+								this.qualities.add(ces.getQuality());
+								this.entity.set(i, ep);
+								return;
+							}
+						}
+					}
+				}
+			}
+			
+			/*if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
 				for(Entity e: entity.getProposals()){
 					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
 					ces.handle();
@@ -284,13 +303,13 @@ public class CharacterHandler {
 						return;
 					}
 				}
-			}
+			}*/
 		}
-		
+
 		//TODO: could this do any good?
 		//will resolve() do any good?
 		//Entity result = (Entity) ts.searchTerm(quality, "entity");
-		
+
 
 		//still not successful, check other matches
 		for(FormalConcept aquality: ts.getCandidateMatches()){
@@ -315,7 +334,7 @@ public class CharacterHandler {
 			this.qualities.add(qproposals);
 		}
 		return;
-		
+
 	}
 
 	private String format(String quality) {
@@ -336,41 +355,41 @@ public class CharacterHandler {
 			}
 			else
 			{
-				
+
 			}
-			
+
 		}
 
 		if(quality.matches(".*(width|height|length|depth|size).*"))
 		{
 			if(this.chara.getAttributeValue("modifier")!=null)
 			{
-			if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
-			{
-				negation = true;
-			}
-			if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
-			{
-				quality = (negation==false?"increased ":"decreased ")+quality;
-			}
-			else
-			{
-				quality = (negation==true?"increased ":"decreased ")+quality;
-			}
+				if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+				{
+					negation = true;
+				}
+				if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+				{
+					quality = (negation==false?"increased ":"decreased ")+quality;
+				}
+				else
+				{
+					quality = (negation==true?"increased ":"decreased ")+quality;
+				}
 			} else if(this.chara.getAttributeValue("value")!=null)
 			{
-			if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
-			{
-				negation = true;
-			}
-			if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
-			{
-				quality = (negation==false?"increased ":"decreased ")+quality;
-			}
-			else
-			{
-				quality = (negation==true?"increased ":"decreased ")+quality;
-			}
+				if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
+				{
+					negation = true;
+				}
+				if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
+				{
+					quality = (negation==false?"increased ":"decreased ")+quality;
+				}
+				else
+				{
+					quality = (negation==true?"increased ":"decreased ")+quality;
+				}
 			}
 		}
 		return quality;
@@ -382,80 +401,84 @@ public class CharacterHandler {
 	 * Here, the first entity is being identified by this.entity and related entity is identified by constraintid
 	 * 
 	 */
-private boolean specialCaseDifferentStructures() throws Exception {
+	private boolean specialCaseDifferentStructures() throws Exception {
 
-	String quality = this.chara.getAttributeValue("name");
-	boolean negation=false;
-	boolean flag=false;//used to check, if quality is modified
-	if(this.chara.getAttributeValue("modifier")!=null)
-	{
-		if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+		String quality = this.chara.getAttributeValue("name");
+		boolean negation=false;
+		boolean flag=false;//used to check, if quality is modified
+		if(this.chara.getAttributeValue("modifier")!=null)
 		{
-			negation = true;
-		}
-		if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large|long|atleast).*"))
-		{
-			quality = (negation==false?"increased ":"decreased ")+quality;
-		}
-		else
-		{
-			quality = (negation==true?"increased ":"decreased ")+quality;
-		}
-		flag=true;
-			
-	}
-	
-	TermSearcher ts = new TermSearcher();
-	Quality primary_quality = (Quality) ts.searchTerm(quality, "quality");
-	if((primary_quality==null) &&(flag=true))//removes the increased or decreased and check for the plain quality
-	{
-		quality = quality.substring(quality.indexOf(" "));
-		primary_quality = (Quality) ts.searchTerm(quality, "quality");
-	}
-	QualityProposals qp = new QualityProposals();
-	qp.add(primary_quality);
-	
-	Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
-	String structureid = structure.getAttributeValue("id");
-	String structurename = Utilities.getStructureName(root, structureid);
-	EntityParser rep = new EntityParser(chara, root, structureid, structurename, fromcharacterstatement);
-	structure.setAttribute("processed", "true");
-	
-	RelationalQuality rq = new RelationalQuality(qp,rep.getEntity());
-	qp = new QualityProposals();
-	qp.add(rq);
-	if(rq!=null)
-	{
-		this.qualities.add(qp);
-	}
-	return true;
-	}
-
-
-private void preProcess(String quality) {
-	//The below code is used to handle (height/width) kind of character name
-
-	if((quality.contains("/")==true)&&(quality.split("/").length==2))
-	{
-		this.chara.setAttribute("constraint", quality.split("/")[1]);
-		this.chara.setAttribute("name", quality.split("/")[0]);	
-	}
-	
-	//The below code uses quality clue to process empty names and replace them with clues
-	if((quality==null)||(quality.equals("")||quality.equals("size"))==true)
-	{
-		for(String measure:this.qualityclues)
-		{
-			if(measure.matches("(height|length|width|depth|broad|breadth)")==true)
+			if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
 			{
-				this.chara.setAttribute("name", measure);
-				break;
+				negation = true;
+			}
+			if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large|long|atleast).*"))
+			{
+				quality = (negation==false?"increased ":"decreased ")+quality;
+			}
+			else
+			{
+				quality = (negation==true?"increased ":"decreased ")+quality;
+			}
+			flag=true;
+
+		}
+
+		TermSearcher ts = new TermSearcher();
+		Quality primary_quality = (Quality) ts.searchTerm(quality, "quality");
+		if((primary_quality==null) &&(flag=true))//removes the increased or decreased and check for the plain quality
+		{
+			quality = quality.substring(quality.indexOf(" "));
+			primary_quality = (Quality) ts.searchTerm(quality, "quality");
+		}
+		QualityProposals qp = new QualityProposals();
+		qp.add(primary_quality);
+
+		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
+		String structureid = structure.getAttributeValue("id");
+		String structurename = Utilities.getStructureName(root, structureid);
+		EntityParser rep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
+		structure.setAttribute("processed", "true");
+
+		for(EntityProposals ep: rep.getEntity()){
+			RelationalQuality rq = new RelationalQuality(qp,ep);
+			qp = new QualityProposals();
+			qp.add(rq);
+			if(rq!=null)
+			{
+				this.qualities.add(qp);
 			}
 		}
+		return true;
 	}
-	
-	if(quality.contains("_")==true)
-	{
+
+
+	private void preProcess(String quality) {
+		//The below code is used to handle (height/width) kind of character name
+
+		if((quality.contains("/")==true)&&(quality.split("/").length==2))
+		{
+			this.chara.setAttribute("constraint", quality.split("/")[1]);
+			this.chara.setAttribute("name", quality.split("/")[0]);	
+		}
+
+		//The below code uses quality clue to process empty names and replace them with clues
+		if((quality==null)||(quality.equals("")||quality.equals("size"))==true)
+		{
+			if(this.qualityclues!=null){
+				for(String measure:this.qualityclues)
+				{
+					if(measure.matches("(height|length|width|depth|broad|breadth)")==true)
+					{
+						this.chara.setAttribute("name", measure);
+						break;
+					}
+				}
+			}
+		}
+
+		if(quality.contains("_")==true)
+		{
 			if(quality.contains("height"))
 			{
 				this.chara.setAttribute("name","height");
@@ -469,523 +492,527 @@ private void preProcess(String quality) {
 			{
 				this.chara.setAttribute("name","length");
 			}
-	}
-	}
-
-
-private boolean specialSizeCaseSameStructure() {
-	String primaryquality = cleanUp(this.chara.getAttributeValue("name"));
-	String secondaryquality = cleanUp(this.chara.getAttributeValue("constraint"));
-	String modifier = this.chara.getAttributeValue("modifier");	
-	boolean negation=false;
-	if(modifier==null)
-	{
-		modifier = this.chara.getAttributeValue("value");
-	}
-	String relation;
-	Entity relatedentity=null;
-	QualityProposals qp = new QualityProposals();
-	
-	TermSearcher ts = new TermSearcher();
-	Quality primary_quality = (Quality) ts.searchTerm(primaryquality, "quality");
-	Quality secondary_quality = (Quality) ts.searchTerm(secondaryquality, "quality");	
-	
-	if(modifier.matches(".*(not|no).*"))
-	{
-		negation = true;
-	}
-	if(modifier.matches(".*(more|great|wide|broad|large|much|long|tall).*"))
-	{
-		relation = negation==false?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
-	}
-	else
-	{
-		relation = negation==true?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
-	}
-	
-	FormalRelation rel = new FormalRelation();
-	
-	rel.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
-	rel.setString("inheres_in");
-	rel.setId("BFO:0000052");
-	rel.setLabel("inheres_in");
-	
-	if(this.entity!=null)
-	{
-		for(Entity e:this.entity.getProposals())
-		{
-		relatedentity = e; 
-		REntity related = new REntity(rel,relatedentity);
-		CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
-		qp.add(compquality);
 		}
-	} else
-	{
-		if(this.keyentities!=null)
+	}
+
+
+	private boolean specialSizeCaseSameStructure() {
+		String primaryquality = cleanUp(this.chara.getAttributeValue("name"));
+		String secondaryquality = cleanUp(this.chara.getAttributeValue("constraint"));
+		String modifier = this.chara.getAttributeValue("modifier");	
+		boolean negation=false;
+		if(modifier==null)
 		{
-			for(EntityProposals ep:this.keyentities)
+			modifier = this.chara.getAttributeValue("value");
+		}
+		String relation;
+		Entity relatedentity=null;
+		QualityProposals qp = new QualityProposals();
+
+		TermSearcher ts = new TermSearcher();
+		Quality primary_quality = (Quality) ts.searchTerm(primaryquality, "quality");
+		Quality secondary_quality = (Quality) ts.searchTerm(secondaryquality, "quality");	
+
+		if(modifier.matches(".*(not|no).*"))
+		{
+			negation = true;
+		}
+		if(modifier.matches(".*(more|great|wide|broad|large|much|long|tall).*"))
+		{
+			relation = negation==false?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
+		}
+		else
+		{
+			relation = negation==true?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
+		}
+
+		FormalRelation rel = new FormalRelation();
+
+		rel.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
+		rel.setString("inheres_in");
+		rel.setId("BFO:0000052");
+		rel.setLabel("inheres_in");
+
+		if(this.entity!=null)
+		{
+			for(EntityProposals ep: this.entity)
 			{
 				for(Entity e: ep.getProposals())
+			//for(Entity e:this.entity.getProposals())
 				{
-					relatedentity = e;
-					REntity related = new REntity(rel,relatedentity);
-					CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
-					qp.add(compquality);
+				relatedentity = e; 
+				REntity related = new REntity(rel,relatedentity);
+				CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
+				qp.add(compquality);
+				}
+			}
+		} else
+		{
+			if(this.keyentities!=null)
+			{
+				for(EntityProposals ep:this.keyentities)
+				{
+					for(Entity e: ep.getProposals())
+					{
+						relatedentity = e;
+						REntity related = new REntity(rel,relatedentity);
+						CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
+						qp.add(compquality);
+					}
 				}
 			}
 		}
-	}
-	
-	this.qualities.add(qp);
-	
-	return true;
+
+		this.qualities.add(qp);
+
+		return true;
 	}
 
-private String cleanUp(String entityname) {
+	private String cleanUp(String entityname) {
 
-	if(entityname!=null)
-	{
-		if(entityname.matches(".*(length).*"))
+		if(entityname!=null)
 		{
-		entityname = "length";
+			if(entityname.matches(".*(length).*"))
+			{
+				entityname = "length";
+			}
+			else if(entityname.matches(".*(height).*"))
+			{
+				entityname = "height";
+			}
+			else if(entityname.matches(".*(depth).*"))
+			{
+				entityname = "depth";
+			}
+			else if(entityname.matches(".*(broad).*"))
+			{
+				entityname = "broad";
+			}
+			else{
+				entityname = "width";
+			}
 		}
-		else if(entityname.matches(".*(height).*"))
-		{
-		entityname = "height";
-		}
-		else if(entityname.matches(".*(depth).*"))
-		{
-			entityname = "depth";
-		}
-		else if(entityname.matches(".*(broad).*"))
-		{
-			entityname = "broad";
-		}
-		else{
-		entityname = "width";
-		}
+		return entityname;
 	}
-	return entityname;
-}
 
-/*
- * Uses Elk to find out if which entities are bilateral
- * //Checks whether the parent structure is bilateral or not
+	/*
+	 * Uses Elk to find out if which entities are bilateral
+	 * //Checks whether the parent structure is bilateral or not
 	//this.entity contains the parent entity
-	
- */
 
-private boolean checkBilateral(EntityProposals ep) {
-		
-	EntityProposals epclone = ep.clone();//cloning to avoid original entity proposals to be changed
-		
-	boolean bilateralcheck = false;
-	for(Entity e:epclone.getProposals())
-	{
-		if(e.getId()!=null)
-		{
-			if(e instanceof SimpleEntity)
+	 */
+
+	private boolean checkBilateral(ArrayList<EntityProposals> eps) {
+		boolean bilateralcheck = false;
+		for(EntityProposals ep: eps){
+			EntityProposals epclone = ep.clone();//cloning to avoid original entity proposals to be changed
+			for(Entity e:epclone.getProposals())
 			{
-				if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
-				{				
-					this.bilateral.add(e);
-					bilateralcheck=true;
-				}
-			}
-			else
-			{
-				for(Entity e1:((CompositeEntity) e).getEntities())
+				if(e.getId()!=null)
 				{
-					if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
-				{
-					this.bilateral.add(e);
-					bilateralcheck=true;
-					break;
-				}
+					if(e instanceof SimpleEntity)
+					{
+						if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
+						{				
+							this.bilateral.add(e);
+							bilateralcheck=true;
+						}
+					}
+					else
+					{
+						for(Entity e1:((CompositeEntity) e).getEntities())
+						{
+							if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
+							{
+								this.bilateral.add(e);
+								bilateralcheck=true;
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
-	}
 		return bilateralcheck;
 	}
 
-/*
- * Processes multiple structures which has same characters
- */
+	/*
+	 * Processes multiple structures which has same characters
+	 */
 
-private boolean structuresWithSameCharacters(Element statement) {
-	
-	try {
-		List<Element> characters;
-		characters = pathCharacterUnderStucture.selectNodes(statement);
-	int count=0;
-//Checks for same characters present under multiple structures
-	Iterator<Element> itr = characters.listIterator();
-	while(itr.hasNext())
-	{
-		Element character = itr.next();
-		if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
-			count++;
-	}
-	if(count>1)
-		return true;
-	else
-		return false;
-	
-	} catch (JDOMException e) {
-		e.printStackTrace();
-	}
-	return false;
-	}
+	private boolean structuresWithSameCharacters(Element statement) {
 
-
-//Adds Related entities and Primary entities to existing identified entities. Also remove duplicates in the entities
-private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, QualityProposals relationalquality) {
-		
-
-	
-	ArrayList<EntityProposals> primaryentities = entities.get("Primary Entity");
-	ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
-	
-	if((relatedentities!=null)&&relatedentities.size()>0)
-	{
-		for(EntityProposals relatedentity: relatedentities){
-			QualityProposals qproposals = new QualityProposals();
-			qproposals.add(new RelationalQuality(relationalquality, relatedentity));
-			this.qualities.add(qproposals);
-		}
-		if(primaryentities.size()>0)
-		{
-			ListIterator<EntityProposals> itr1 = primaryentities.listIterator();
-			//to remove duplicate entities
-			while(itr1.hasNext())
-			{
-				EntityProposals ep1 = (EntityProposals) itr1.next();
-				for(Entity en1: ep1.getProposals())
-				{
-				ListIterator<EntityProposals> itr2 = this.primaryentities.listIterator();
-				while(itr2.hasNext())
-				{
-					EntityProposals ep2 = (EntityProposals) itr2.next();
-					for(Entity en2:ep2.getProposals())//add more conditions to analyze and handle bilateral entities
-						if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
-							itr1.remove();
-				}
-				}
-			}
-			this.primaryentities.addAll(primaryentities);
-		}
-	}
-		
-	}
-
-/*
- * It identifies structures which have the same characters(Relational Quality) 
- * and it returns all the structures which has the same characters as related entities
- * if a structure is a whole organism, it calls bilateralstructures to handle the scenario.
- * 
- * 
- */			@SuppressWarnings("unchecked")
-	private Hashtable<String, ArrayList<EntityProposals>> processStructuresWithSameCharacters(Element statement) {
-		//TODO: Handle scenario where all the characters have whole organism as its parent structure and Keyentities is null
 		try {
-			List<Element> characters = pathCharacterUnderStucture.selectNodes(statement);
-			Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
-			ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
-			ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
-			
-			//Remove all other characters that are not same as the character under consideration 
+			List<Element> characters;
+			characters = pathCharacterUnderStucture.selectNodes(statement);
+			int count=0;
+			//Checks for same characters present under multiple structures
 			Iterator<Element> itr = characters.listIterator();
 			while(itr.hasNext())
 			{
 				Element character = itr.next();
-				if(!(character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))||!(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
-					itr.remove();
-			}
-			//First entity will be the main primary entity
-			
-			if(characters.size()>1)
-			{
-				if(!chara.getParentElement().getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
-				{
-					primaryentities.add(this.entity);//Since this is the identified entity of this character
-				}
-					
-			}
-			//finding the related entities using structures with same character name and value
-			for(int i=1;i<characters.size();i++)
-			{
-				Element character = characters.get(i);
 				if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
-					{
-					//read the structure(other than whole organism) of this character, find the entity,create entity proposals
-					Element ParentStructure = character.getParentElement();
-					if(!ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
-					{
-						EntityProposals entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
-					if(entity!=null)
-						relatedentities.add(entity);
-					character.detach();
-					}
-						
-					}
+					count++;
 			}
-		if(relatedentities.size()>0)
-		{
-			entities.put("Related Entities", relatedentities);
-			entities.put("Primary Entity", primaryentities);
-		}
-				
-		return entities;
+			if(count>1)
+				return true;
+			else
+				return false;
 
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return false;
 	}
-	
- private Hashtable<String, ArrayList<EntityProposals>> SingleStructures() {
-		
-					Element ParentStructure = this.chara.getParentElement();
-					ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
-					ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
-					Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
-					
-					if(ParentStructure.getAttributeValue("name").replaceAll("_", " ").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+
+
+	//Adds Related entities and Primary entities to existing identified entities. Also remove duplicates in the entities
+	private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, QualityProposals relationalquality) {
+
+
+
+		ArrayList<EntityProposals> primaryentities = entities.get("Primary Entity");
+		ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
+
+		if((relatedentities!=null)&&relatedentities.size()>0)
+		{
+			for(EntityProposals relatedentity: relatedentities){
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add(new RelationalQuality(relationalquality, relatedentity));
+				this.qualities.add(qproposals);
+			}
+			if(primaryentities.size()>0)
+			{
+				ListIterator<EntityProposals> itr1 = primaryentities.listIterator();
+				//to remove duplicate entities
+				while(itr1.hasNext())
+				{
+					EntityProposals ep1 = (EntityProposals) itr1.next();
+					for(Entity en1: ep1.getProposals())
 					{
-						if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
+						ListIterator<EntityProposals> itr2 = this.primaryentities.listIterator();
+						while(itr2.hasNext())
 						{
-						for(int i=1;i<this.keyentities.size();i++)
-							relatedentities.add(this.keyentities.get(i));
-						
-						primaryentities.add(this.keyentities.get(0));
-
+							EntityProposals ep2 = (EntityProposals) itr2.next();
+							for(Entity en2:ep2.getProposals())//add more conditions to analyze and handle bilateral entities
+								if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
+									itr1.remove();
 						}
-						else if((this.keyentities.size()==1)&&(this.checkBilateral(this.keyentities.get(0))==true))//If keyentities.size==1, the it can be a bilateral entity
-						{
-							//call bilateral strategy on the single key entity
-							for(Entity e:this.bilateral)
-							{
-							RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
-							re.handle();
-							Hashtable<String,ArrayList<EntityProposals>> entities1 = re.getEntities();
-							relatedentities.addAll(entities1.get("Related Entities"));
-							primaryentities.addAll(entities1.get("Primary Entity"));
-							}
-						}
-						else
-						{
-								//TODO process text
-						}
-							
-						entities.put("Related Entities", relatedentities);
-						entities.put("Primary Entity", primaryentities);
-						
 					}
-						
-			return entities;
-		
+				}
+				this.primaryentities.addAll(primaryentities);
+			}
+		}
+
 	}
 
-	
-	private ArrayList<EntityProposals> findEntityInConstraints() {
-		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-		if (chara.getAttribute("constraintid") != null) {
-			String[] conids = chara.getAttributeValue("constraintid").split("\\s+");
-			try{
-				for(String conid: conids){
-					String qualitymodifier = Utilities.getStructureName(root, conid);
-					//parents separated by comma (,).
-					String qualitymodifierparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
+	/*
+	 * It identifies structures which have the same characters(Relational Quality) 
+	 * and it returns all the structures which has the same characters as related entities
+	 * if a structure is a whole_organism, it calls bilateralstructures to handle the scenario.
+	 * 
+	 * 
+	 */			@SuppressWarnings("unchecked")
+	 private Hashtable<String, ArrayList<EntityProposals>> processStructuresWithSameCharacters(Element statement) {
+		 //TODO: Handle scenario where all the characters have whole_organism as its parent structure and Keyentities is null
+		 try {
+			 List<Element> characters = pathCharacterUnderStucture.selectNodes(statement);
+			 Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
+			 ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+			 ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+
+			 //Remove all other characters that are not same as the character under consideration 
+			 Iterator<Element> itr = characters.listIterator();
+			 while(itr.hasNext())
+			 {
+				 Element character = itr.next();
+				 if(!(character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))||!(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
+					 itr.remove();
+			 }
+			 //First entity will be the main primary entity
+
+			 if(characters.size()>1)
+			 {
+				 if(!chara.getParentElement().getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+				 {
+					 primaryentities.addAll(this.entity);//Since this is the identified entity of this character
+				 }
+
+			 }
+			 //finding the related entities using structures with same character name and value
+			 for(int i=1;i<characters.size();i++)
+			 {
+				 Element character = characters.get(i);
+				 if((character.getAttribute("name").getValue().equals(this.chara.getAttribute("name").getValue()))&&(character.getAttribute("value").getValue().equals(this.chara.getAttribute("value").getValue())))
+				 {
+					 //read the structure(other than whole_organism) of this character, find the entity,create entity proposals
+					 Element ParentStructure = character.getParentElement();
+					 if(!ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+					 {
+						 ArrayList<EntityProposals> entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
+						 if(entity!=null)  relatedentities.addAll(entity); 
+						 character.detach();
+					 }
+
+				 }
+			 }
+			 if(relatedentities.size()>0)
+			 {
+				 entities.put("Related Entities", relatedentities);
+				 entities.put("Primary Entity", primaryentities);
+			 }
+
+			 return entities;
+
+		 } catch (JDOMException e) {
+			 e.printStackTrace();
+		 }
+		 return null;
+	 }
+
+	 private Hashtable<String, ArrayList<EntityProposals>> SingleStructures() {
+
+		 Element ParentStructure = this.chara.getParentElement();
+		 ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
+		 ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
+		 Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
+
+		 if(ParentStructure.getAttributeValue("name").replaceAll("_", " ").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+		 {
+			 if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
+			 {
+				 for(int i=1;i<this.keyentities.size();i++)
+					 relatedentities.add(this.keyentities.get(i));
+
+				 primaryentities.add(this.keyentities.get(0));
+
+			 }
+			 else if((this.keyentities.size()==1)&&(this.checkBilateral(this.keyentities)==true))//If keyentities.size==1, the it can be a bilateral entity
+			 {
+				 //call bilateral strategy on the single key entity
+				 for(Entity e:this.bilateral)
+				 {
+					 RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
+					 re.handle();
+					 Hashtable<String,ArrayList<EntityProposals>> entities1 = re.getEntities();
+					 relatedentities.addAll(entities1.get("Related Entities"));
+					 primaryentities.addAll(entities1.get("Primary Entity"));
+				 }
+			 }
+			 else
+			 {
+				 //TODO process text
+			 }
+
+			 entities.put("Related Entities", relatedentities);
+			 entities.put("Primary Entity", primaryentities);
+
+		 }
+
+		 return entities;
+
+	 }
+
+
+	 private ArrayList<EntityProposals> findEntityInConstraints() {
+		 ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+		 if (chara.getAttribute("constraintid") != null) {
+			 String[] conids = chara.getAttributeValue("constraintid").split("\\s+");
+			 try{
+				 for(String conid: conids){
+					 String relatedentity = Utilities.getStructureName(root, conid);
+					 //parents separated by comma (,).
+					 String relatedentityparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
 							 "|//relation[@name='in'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
 							 "|//relation[@name='on'][@from='" + chara.getAttributeValue("constraintid")  + "']", 0);
-					EntityProposals result = new EntitySearcherOriginal().searchEntity(root, conid, qualitymodifier, qualitymodifierparents, qualitymodifier,"part_of");	
-					if(result!=null) entities.add(result);
-				}
-				return entities;
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * resolve for entities from entity and entity parts obtained from constraints
-	 * also when neither entity and qualities scores are strong, the keyentities scores are not strong or not ontologized
-	 * should try to resove them here? or in the end?
-	 */
-	public void resolve(){
+					 ArrayList<EntityProposals> result = new EntitySearcherOriginal().searchEntity(root, conid, relatedentity, relatedentityparents, relatedentity,"part_of");	
+					 if(result!=null) entities.addAll(result);
+				 }
+				 return entities;
+			 }catch(Exception e){
+				 e.printStackTrace();
+			 }
+		 }
+		 return null;
+	 }
 
-		//TODO
-		//this was how s2q was used before in SSP.
-		//Structure2Quality rq2 = new Structure2Quality(root,
-		//		structname, structid, this.keyentities);
-		//rq2.handle();
-		//if(rq2.qualities.size()>0){
-		//	entity = rq2.primaryentities;
-	    //  qualities = rq2.qualities;
-		//} else {
+	 /**
+	  * resolve for entities from entity and entity parts obtained from constraints
+	  * also when neither entity and qualities scores are strong, the keyentities scores are not strong or not ontologized
+	  * should try to resolve them here? or in the end?
+	  */
+	 public void resolve(){
 
-		//TODO add some more conditions for resolving
-		
-		//the below condition handles situation where a structure is identified to be a quality.
-		if(this.entity==null)
-		{
-			
-			if(tobesolvedentity==null)
-			{					
-					if(this.qualities.size()>0)
-					{
-						resolveForWholeOrganism();// Identify Entities/qualities/REntities for length or width or size
-						this.donotresolve=true;
-					}
-			}else if(tobesolvedentity.s2q!=null)
-			{
-				if(tobesolvedentity.s2q.qualities!=null)
-				{
-					this.qualities.clear();
-					this.qualities.addAll(tobesolvedentity.s2q.qualities);
-					if(tobesolvedentity.s2q.primaryentities.size()>0)//relational quality might contain primary entities
-					{
-						this.primaryentities.clear();
-						this.primaryentities.addAll(primaryentities);
-					}
-					else
-					{
-						if(keyentities!=null)
-						{
-						this.primaryentities.clear();
-						this.primaryentities.addAll(keyentities);
-						}
-					}
-				}
-			}
-			
-		}
-		else
-		{
-			this.donotresolve=true;
+		 //TODO
+		 //this was how s2q was used before in SSP.
+		 //Structure2Quality rq2 = new Structure2Quality(root,
+		 //		structname, structid, this.keyentities);
+		 //rq2.handle();
+		 //if(rq2.qualities.size()>0){
+		 //	entity = rq2.primaryentities;
+		 //  qualities = rq2.qualities;
+		 //} else {
 
-		}
-		//Resolve for quality when it is "length"
-		if(this.entityparts.size()>0)
-		{
-			resolveIntoRelationalQuality();
-			this.donotresolve=true;
-		}
-		//need to resolve on cases where both entity!=null and S2Q!=null
-	}
-	
-/*
- * When the parent structure is whole organism then, the first key entity is considered primary and the rest as related entity
- */
-	
-private void resolveForWholeOrganism() {
-	
-	ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
-	if((this.keyentities!=null)&&(this.keyentities.size()>0))
-	{
-	if(this.entity==null)
-	{
-		this.entity = this.keyentities.get(0);
-		this.primaryentities.add(this.entity);
-	}
-	
-	if(this.qualities.size()>0)
-	{
-		for(QualityProposals qp:this.qualities)
-		{
-			
-			for(Quality q:qp.getProposals())//Reading each of the qualities
-			{
-				QualityProposals newqp = new QualityProposals();
-				
-				if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth).*")))//If any of the quality label matches to "length", then the qp itself belongs to size
-						{		
-						for(int i=1;i<this.keyentities.size();i++)
-						{
-							RelationalQuality rq = new RelationalQuality(qp,this.keyentities.get(i));
-							newqp.add(rq);							
-						}
-						if(newqp.getProposals().size()>0)
-						{
-							rqp.add(newqp);
-						}
-						break;
-						}
-			}
-		}
-	}
-	if(rqp.size()>0)
-	{
-		this.qualities.clear();
-		this.qualities.addAll(rqp);
-		this.donotresolve = true;
-	}
-	}				
-	}
+		 //TODO add some more conditions for resolving
 
-/**
- * This function handles the special case when increased/decreased length is a quality
- * The entity in parts will become the Related entity instead of Entity Locator
- */
-	public void resolveIntoRelationalQuality() {
+		 //the below condition handles situation where a structure is identified to be a quality.
+		 if(this.entity==null)
+		 {
 
-		ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
-		
-		if(this.qualities.size()>0)
-		{
-			for(QualityProposals qp:this.qualities)
-			{
-				
-				for(Quality q:qp.getProposals())//Reading each of the qualities
-				{
-					QualityProposals newqp = new QualityProposals();
-					
-					if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth|broad)")))//If any of the quality label matches to "length", then the qp itself belongs to size
-							{		
-							for(EntityProposals ep : this.entityparts)
-							{
-								RelationalQuality rq = new RelationalQuality(qp,ep);//this forms relationalquality for each of QP and RE and used for new QP
-								newqp.add(rq);
-							}
-							rqp.add(newqp); 
-							break;
-							}
-				}
-				
-			}
-			if(rqp.size()>0)
-			{
-				this.entityparts.clear();
-				this.qualities.clear();
-				this.qualities.addAll(rqp);
-			}
-		}
-	}
+			 if(tobesolvedentity==null)
+			 {					
+				 if(this.qualities.size()>0)
+				 {
+					 resolveForWholeOrganism();// Identify Entities/qualities/REntities for length or width or size
+					 this.donotresolve=true;
+				 }
+			 }else if(tobesolvedentity.s2q!=null)
+			 {
+				 if(tobesolvedentity.s2q.qualities!=null)
+				 {
+					 this.qualities.clear();
+					 this.qualities.addAll(tobesolvedentity.s2q.qualities);
+					 if(tobesolvedentity.s2q.primaryentities.size()>0)//relational quality might contain primary entities
+					 {
+						 this.primaryentities.clear();
+						 this.primaryentities.addAll(primaryentities);
+					 }
+					 else
+					 {
+						 if(keyentities!=null)
+						 {
+							 this.primaryentities.clear();
+							 this.primaryentities.addAll(keyentities);
+						 }
+					 }
+				 }
+			 }
 
-	public ArrayList<QualityProposals> getQualities(){
-		return this.qualities;
-	}
+		 }
+		 else
+		 {
+			 this.donotresolve=true;
 
-	public EntityProposals getEntity(){
-		return this.entity;
-	}
-	
+		 }
+		 //Resolve for quality when it is "length"
+		 if(this.entityparts.size()>0)
+		 {
+			 resolveIntoRelationalQuality();
+			 this.donotresolve=true;
+		 }
+		 //need to resolve on cases where both entity!=null and S2Q!=null
+	 }
 
-	
-		
+	 /*
+	  * When the parent structure is whole organism then, the first key entity is considered primary and the rest as related entity
+	  */
 
-	public ArrayList<EntityProposals> getPrimaryentities() {
-		return primaryentities;
-	}
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	 private void resolveForWholeOrganism() {
 
-	}
+		 ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
+		 if((this.keyentities!=null)&&(this.keyentities.size()>0))
+		 {
+			 if(this.entity==null)
+			 {
+				 //this.entity = this.keyentities.get(0);
+				this.entity = this.keyentities;
+				 this.primaryentities.addAll(this.entity);
+			 }
+
+			 if(this.qualities.size()>0)
+			 {
+				 for(QualityProposals qp:this.qualities)
+				 {
+
+					 for(Quality q:qp.getProposals())//Reading each of the qualities
+					 {
+						 QualityProposals newqp = new QualityProposals();
+
+						 if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth).*")))//If any of the quality label matches to "length", then the qp itself belongs to size
+						 {		
+							 for(int i=1;i<this.keyentities.size();i++)
+							 {
+								 RelationalQuality rq = new RelationalQuality(qp,this.keyentities.get(i));
+								 newqp.add(rq);							
+							 }
+							 if(newqp.getProposals().size()>0)
+							 {
+								 rqp.add(newqp);
+							 }
+							 break;
+						 }
+					 }
+				 }
+			 }
+			 if(rqp.size()>0)
+			 {
+				 this.qualities.clear();
+				 this.qualities.addAll(rqp);
+				 this.donotresolve = true;
+			 }
+		 }				
+	 }
+
+	 /**
+	  * This function handles the special case when increased/decreased length is a quality
+	  * The entity in parts will become the Related entity instead of Entity Locator
+	  */
+	 public void resolveIntoRelationalQuality() {
+
+		 ArrayList<QualityProposals> rqp = new ArrayList<QualityProposals>();
+
+		 if(this.qualities.size()>0)
+		 {
+			 for(QualityProposals qp:this.qualities)
+			 {
+
+				 for(Quality q:qp.getProposals())//Reading each of the qualities
+				 {
+					 QualityProposals newqp = new QualityProposals();
+
+					 if((q.getLabel()!=null)&&(q.getLabel().matches(".*(length|width|size|height|depth|broad)")))//If any of the quality label matches to "length", then the qp itself belongs to size
+					 {		
+						 for(EntityProposals ep : this.entityparts)
+						 {
+							 RelationalQuality rq = new RelationalQuality(qp,ep);//this forms relationalquality for each of QP and RE and used for new QP
+							 newqp.add(rq);
+						 }
+						 rqp.add(newqp); 
+						 break;
+					 }
+				 }
+
+			 }
+			 if(rqp.size()>0)
+			 {
+				 this.entityparts.clear();
+				 this.qualities.clear();
+				 this.qualities.addAll(rqp);
+			 }
+		 }
+	 }
+
+	 public ArrayList<QualityProposals> getQualities(){
+		 return this.qualities;
+	 }
+
+	 public ArrayList<EntityProposals> getEntity(){
+		 return this.entity;
+	 }
+
+
+
+
+
+	 public ArrayList<EntityProposals> getPrimaryentities() {
+		 return primaryentities;
+	 }
+	 /**
+	  * @param args
+	  */
+	 public static void main(String[] args) {
+		 // TODO Auto-generated method stub
+
+	 }
 
 }

@@ -185,7 +185,7 @@ public class XMLNormalizer {
 		{
 			if((chara.getAttributeValue("constraint")!=null)&&(chara.getAttributeValue("constraint").matches(".*(height|width|length|depth).*")))
 			{
-				System.out.println("-----------inside normalizer------------");
+				//System.out.println("-----------inside normalizer------------");
 				if(chara.getAttributeValue("constraint").contains("height"))
 				{
 					chara.setAttribute("name","height");
@@ -274,11 +274,11 @@ public class XMLNormalizer {
 	/**
 	 * in phylogenetic descriptions, whole-organisms are not semantically possible in a character statement
 	 * [although whole-organism is used as ditto in state statement]
-	 * if such element exists in a character statement, remove whole organism and merge its character to the next structure
+	 * if such element exists in a character statement, remove whole_organism and merge its character to the next structure
 	 * Turn:
 	 * <statement statement_type="character" character_id="c97d5c39-838d-4cbb-b159-bce93a7a7291" seg_id="0">
 	 * <text>Hatchet-shaped opercle</text>
-	 * <structure id="o1507" name="whole organism">
+	 * <structure id="o1507" name="whole_organism">
 	 * <character name="shape" value="hatchet-shaped" />
 	 * </structure>
 	 * <structure id="o1508" name="opercle" />
@@ -328,12 +328,12 @@ public class XMLNormalizer {
 	}
 	
 	/**
-	 * character statements that contain 1 structure "whole organism"
+	 * character statements that contain 1 structure "whole_organism"
 	 * these were caused by annotation errors
 	 * for example "IO4", "A-B contact", "bony stays" etc.
 	 * 
 	 * @param characterstatements
-	 *            : character statements that contain 1 structure "whole organism". This should not be possible. Remark it as structure/entity
+	 *            : character statements that contain 1 structure "whole_organism". This should not be possible. Remark it as structure/entity
 	 * @param root
 	 */
 	@SuppressWarnings("unchecked")

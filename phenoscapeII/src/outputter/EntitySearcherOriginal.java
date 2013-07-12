@@ -4,6 +4,8 @@
 package outputter;
 
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -14,7 +16,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import owlaccessor.OWLAccessorImpl;
@@ -56,10 +61,38 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	 * @throws Exception the exception
 	 */
 	@SuppressWarnings("unchecked")
-	public EntityProposals searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
-		//TODO create and maintain a cache for entity search?
+		//create and maintain a cache for entity search?: yes, created in EntityParser
 	
+		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
+		String origname = Utilities.getOriginalStructureName(root, structid);
+		if(origname!=null && origname.compareTo("sexes")==0){
+			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
+			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
+			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
+			FormalRelation bearer = new FormalRelation("", "bearer of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
+			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
+			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
+			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
+			CompositeEntity ce1 = new CompositeEntity();
+			ce1.addEntity(organism);
+			ce1.addEntity(re1);
+			EntityProposals ep = new EntityProposals();
+			ep.setPhrase(origname);
+			ep.add(ce1);
+			eps.add(ep); //add one entity
+			CompositeEntity ce2 = new CompositeEntity();
+			ce2.addEntity(organism);
+			ce2.addEntity(re2);
+			ep = new EntityProposals();
+			ep.setPhrase(origname);
+			ep.add(ce2);
+			eps.add(ep); //add the other entity
+			return eps;
+		}
+		
+		
 		//each of entityphrase and elocatorphrase may be multiple names separated by ","
 		if(entityphrase.indexOf(",")>0){
 			String temp = entityphrase.indexOf(",")>0 ? entityphrase.substring(0, entityphrase.indexOf(",")).trim() : entityphrase; // the first seg
@@ -456,16 +489,6 @@ public class EntitySearcherOriginal extends EntitySearcher {
 //
 //	}
 
-
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		//posterior supraorbital postfrontal
-		//anteriormost teeth/posteriormost teeth
-	}
-
 	/*
 	@Override
 	public boolean canHandle(Element root, String structid,
@@ -483,4 +506,39 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		
 	}
 	*/
+
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		//posterior supraorbital postfrontal
+		//anteriormost teeth/posteriormost teeth
+		EntitySearcherOriginal eso = new EntitySearcherOriginal();
+		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states595.xml";
+		SAXBuilder builder = new SAXBuilder();
+		Document xml = null;
+		try {
+			xml = builder.build(new File(src));
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if(xml!=null){
+			Element root = xml.getRootElement();
+			String structid ="o560";
+			String entityphrase = "proximal tarsal element";
+			//String entityphrase = "posterior postfrontal";
+			//String entityphrase = "posterior supraorbital postfrontal";
+			String elocatorphrase = "";
+			String prep = "";
+			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
+			System.out.println("result:");
+			for(EntityProposals ep: eps )
+				System.out.println(ep.toString());
+		}
+	}
+
+	
 }

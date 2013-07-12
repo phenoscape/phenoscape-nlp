@@ -65,6 +65,7 @@ public class ChunkedSentence {
 	public static final String skip = "and|becoming|if|or|that|these|this|those|to|what|when|where|which|why|not|throughout";
 	public static final String positionprep = "of|part_of|in|on|between";
 	public static final String asasthan = "long|wide|broad|tall|high|deep|short|narrow|thick"; //as-long-as wide
+	public static final String size="long|longer|wide|wider|broad|broader|tall|taller|high|higher|deep|deeper|short|shorter|narrow|narrower|thick|thicker|length|width|height|depth|breadth";
 	public static Hashtable<String, String> eqcharacters = new Hashtable<String, String>();
 	private boolean inSegment = false;
 	private boolean rightAfterSubject = false;
@@ -117,10 +118,13 @@ public class ChunkedSentence {
 		eqcharacters.put("long", "length");
 		eqcharacters.put("broad", "width");
 		eqcharacters.put("diam", "diameter");
-		//eqcharacters.put("width", "width");
-		//eqcharacters.put("length", "length");
-		//eqcharacters.put("depth", "depth");
-		//eqcharacters.put("breadth", "width");
+		eqcharacters.put("size", "size");
+		eqcharacters.put("high", "height");
+		eqcharacters.put("height", "height");
+		eqcharacters.put("width", "width");
+		eqcharacters.put("length", "length");
+		eqcharacters.put("depth", "depth");
+		eqcharacters.put("breadth", "width");
 				
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
@@ -316,9 +320,9 @@ public class ChunkedSentence {
 					}
 				}
 				preps = preps.trim();
-				while(preps.startsWith("or") || preps.endsWith(",")){
-					//remove the first token
-					preps = preps.substring(preps.indexOf(" ")).trim();
+				while(preps.startsWith("or") || preps.startsWith(",")){
+					//remove the leading (or|,)
+					preps = preps.replaceFirst("^(or|,)($| )", ""); //preps could be just "or" --in some wired sentences
 					j++;
 				}
 				if(preps.length()>0){
@@ -2269,6 +2273,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				}
 				charword = beforethan.replaceFirst("n\\[", "").trim(); //make sure not lose 'equal to' before "greater than'
 			}else{
+				token = token.replaceAll("°", " degrees"); //° and % don't work well with \b in reg exp.
+				token = token.replaceAll("%", " percent");
 				if(token.matches(".*?as-.*?-as.*")){ //as-long-as case
 					Pattern p = Pattern.compile("(\\{?as-(?:"+ChunkedSentence.asasthan+")-as\\}?)");
 					Matcher m = p.matcher(token);
@@ -2303,8 +2309,16 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				token = token.replace(cp, afterthan);
 			}
 			//Case B: compared to numerical values
-			if(afterthan.matches(".*?.*?\\d.*?\\b("+ChunkedSentence.units+"|"+ChunkedSentence.percentage+"|long|length|wide|width)\\b.*") || afterthan.matches(".*?\\d\\.\\d.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+			if(afterthan.matches(".*?\\d.*?\\b("+ChunkedSentence.units+"|"+ChunkedSentence.percentage+"|"+ChunkedSentence.size+")\\b.*") || afterthan.matches(".*?(\\d\\.\\d|%).*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+				//'%\b' won't match '%'
 				if(chara==null){chara="size";}
+				//n[more than 4 times {maximum} {width}]=> put {width} part in constraint
+				//don't add another constraint in n[2 times {longer} constraint[than {wide}]]
+				if(afterthan.indexOf(" constraint[")<0 && afterthan.matches(".*?\\d.*?\\b("+ChunkedSentence.size+")\\b.*")){
+					String sizechara = afterthan.replaceFirst(".*?\\d.*?\\b("+ChunkedSentence.times+"|"+ChunkedSentence.percentage+") (?=[^\\d]+\\b("+ChunkedSentence.size+")\\b)", "");
+					String escaped = sizechara.replaceAll("\\{", "\\\\{").replaceAll("\\}", "\\\\}").replaceAll("\\[", "\\\\[").replaceAll("\\]", "\\\\]");
+					token = token.replaceFirst(escaped+"$", "constraint["+sizechara+"]");
+				}
 				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
 				this.chunkedtokens.set(id, token);
 				return "ChunkTHAN"; //character
@@ -2314,7 +2328,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 				this.chunkedtokens.set(id, token);
 				return "ChunkTHAN"; //character
 			}
-			else if(afterthan.matches(".*?.*?\\b\\d\\b.*")){// "n[{longer} than 3 (cm)]" => n[size[{longer} than 3 (cm)]]
+			else if(afterthan.matches(".*?.*?\\b\\d\\b.*")){// "teeth more than 20"
 				if(chara==null){chara="count";}
 				token = "n["+token.replaceFirst("n\\[", chara+"[")+"]";
 				this.chunkedtokens.set(id, token);

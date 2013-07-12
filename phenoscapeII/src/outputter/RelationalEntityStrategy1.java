@@ -13,7 +13,7 @@ import org.jdom.xpath.XPath;
  * This class identifies related entities. If a quality is identified to be a relational quality,
  * then other structures which contain the same quality can be related entities
  * else
- * If the structure that contains the relational Q is "whole organism" then all key entities except the first one can be related entities
+ * If the structure that contains the relational Q is "whole_organism" then all key entities except the first one can be related entities
  * else
  * the structure can be a bilateral structure then all the key entities will be bilateral
  * 

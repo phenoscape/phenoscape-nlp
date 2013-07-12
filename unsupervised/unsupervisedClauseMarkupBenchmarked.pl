@@ -1,4 +1,3 @@
-#Nov. 17 2008
 #This version output GraphML for generation of visualization among organs and sub-organs.
 #This version also assemble marked clauses into description documents and dump them to disk
 #This version uses extra parameters
@@ -581,6 +580,7 @@ $del->execute() or print STDOUT "$del->errstr\n";
 $create = $dbh->prepare('create table if not exists '.$prefix.'_sentence (sentid int(11) not null unique, source varchar(500), sentence text, originalsent text, lead varchar(2000), status varchar(20), tag varchar('.$taglength.'),modifier varchar(150), charsegment varchar(500),type varchar(20), primary key (sentid)) CHARACTER SET utf8 engine=innodb');
 $create->execute() or print STDOUT "$create->errstr\n";
 
+#role: initial = "", from unknown->known = "*", is_headnoun = "-", modifier="_", multiple="+"
 $del = $dbh->prepare('drop table if exists '.$prefix.'_wordpos');
 $del->execute() or print STDOUT "$del->errstr\n";
 $create = $dbh->prepare('create table if not exists '.$prefix.'_wordpos (word varchar(200) not null, pos varchar(2) not null, role varchar(5), certaintyu int, certaintyl int, saved_flag varchar(20) default "", savedid varchar(40), primary key (word, pos))  CHARACTER SET utf8 engine=innodb');
@@ -661,7 +661,7 @@ sub addstopwords{
 	for (@stops){
 		my $w = $_;
 		if($w =~/\b(?:$FORBIDDEN)\b/){next;}
-		update($w, "b", "*", "wordpos", 0);
+		update($w, "b", "*", "wordpos", 0); 
 		#my $stmt ="insert into ".$prefix."_wordpos (word, pos, role, certaintyu, certaintyl) values(\"$w\",\"b\",\"\",1,1)";
 		#my $sth = $dbh->prepare($stmt);
 		#$sth->execute();
@@ -4191,7 +4191,7 @@ sub additionalbootstrapping{
 	do{
 	   $flag = 0;
 	   $TAGS = currenttags();
-	   $flag += wrapupmarkup(); #shared subject different boundary
+	   $flag += wrapupmarkup(); #shared subject with different boundary
 	   $flag += oneleadwordmarkup($TAGS);#one lead word
 	   $flag += doitmarkup();
 	}while ($flag>0);

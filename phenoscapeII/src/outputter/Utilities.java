@@ -34,6 +34,54 @@ public class Utilities {
 		// TODO Auto-generated constructor stub
 	}
 	
+	/**
+	 * 
+	 * @param sid
+	 * @param charvalue
+	 * @param root
+	 * @return ture if the charvalue is a modifier in the original text
+	 */
+	/*public static boolean isModifier(String sid, String charvalue, Element statement){
+		//Element root = statement.getDocument().getRootElement();
+		String text = statement.getChildText("text");
+		try {
+			//construct the name
+			Element struct = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+sid+"']");
+			String singularname = struct.getAttributeValue("name");
+			String pluralname = TermOutputerUtilities.toPlural(singularname);
+			String name = "\\b("+pluralname+"|"+singularname+"|"+singularname.substring(0, singularname.length()-2)+".*?)\\b";
+			
+			String constraint = "";
+			if(struct.getAttribute("constraint")!=null){
+				String singularconstraint = struct.getAttributeValue("constraint");
+				String plural = "";
+				if(!singularconstraint.endsWith(" of")){ //row of
+					String [] tokens = singularconstraint.split("\\s+");
+					for(String token: tokens){
+						plural = TermOutputerUtilities.toPlural(token)+" ";
+						constraint += "\\b("+plural+"|"+token+"|"+token.substring(0, token.length()-2)+".*?)\\b\\s+";
+					}
+				}
+			}
+			name = constraint+name;
+			//similar structures?
+			List<Element> structs;
+			if(struct.getAttribute("constraint")!=null){
+				structs= XPath.selectNodes(statement, ".//structure[@name='"+singularname+"']");
+			}else{
+				structs= XPath.selectNodes(statement, ".//structure[@name='"+singularname+"']");
+			}
+			//search in text
+			
+			
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}
+		
+		
+		return false;
+	}*/
+	
 	public static List<Element>  relationWithStructureAsSubject(String sid, Element root) {
 		try{
 			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");
@@ -216,7 +264,7 @@ public class Utilities {
 				Element structure = (Element) XPath.selectSingleNode(root, "//structure[@id='" + structid + "']");
 				String sname = "";
 				if (structure == null) {
-					sname = "REF"; // this should never happen
+					sname = "ERROR"; // this should never happen
 				} else {
 					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name"));
 				}
@@ -229,13 +277,42 @@ public class Utilities {
 		return result;
 	}
 	
+	/**
+	 * Get structure names for 1 or more structids from the XML results of CharaParser.
+	 * 
+	 * @param root
+	 * @param structids
+	 *            : 1 or more structids
+	 * @return
+	 */
+	public static String getOriginalStructureName(Element root, String structids) {
+		String result = "";
+
+		String[] ids = structids.split("\\s+");
+		for (String structid : ids) {
+			try{
+				Element structure = (Element) XPath.selectSingleNode(root, "//structure[@id='" + structid + "']");
+				String sname = "";
+				if (structure == null) {
+					return null;
+				} else {
+					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name_original"));
+				}
+				result += sname + ",";
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
+		return result;
+	}
 
 
 	/**
-	 * like array join function in Perl.
+	 * like the array join function in Perl.
 	 *
 	 * @param tokens the tokens
-	 * @param start the start index
+	 * @param start the start index, inclusive
 	 * @param end the end index, inclusive
 	 * @param delimiter the delimiter
 	 * @return the string
@@ -484,4 +561,21 @@ public class Utilities {
 
 	}
 
-}
+	/**
+	 * to allow using "bearer of [quality]" to construct a CompositeEntity
+	 * this wrapper is not needed if REntity allowed relation+quality besides relation+entity.
+	 * @param q
+	 * @return
+	 */
+	public static SimpleEntity wrapQualityAs(Quality q) {
+			SimpleEntity qentity = new SimpleEntity();
+			qentity.setClassIRI(q.getClassIRI());
+			qentity.setConfidenceScore(q.getConfidienceScore());
+			qentity.setId(q.getId());
+			qentity.setLabel(q.getLabel());
+			qentity.setString(q.getString());
+			return qentity;
+		}
+	}
+
+

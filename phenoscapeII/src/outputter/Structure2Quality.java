@@ -20,14 +20,14 @@ import org.jdom.xpath.XPath;
 public class Structure2Quality implements AnnotationStrategy{
 
 	Element root;
-	String relation;
+	String  relation;
 	String structname;
 	String structid;
 	boolean negation; // if true, negate the relation string
 	boolean fromcharacterstatement;
 	ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>(); //typically has 1 element, declared to be an arraylist for some rare cases (like 3 entities contact one another)
-	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>();
-	EntityProposals spatialmodifier = null;
+	ArrayList<EntityProposals> primaryentities = new ArrayList<EntityProposals>(); //if find a relational quality, the primaryentities are used at the left side of the relation.
+	ArrayList<EntityProposals> spatialmodifier = null;
 	private TermOutputerUtilities ontoutil;
 	//static XPath pathCharacterUnderStucture;
 	XPath pathrelationfromStructure;
@@ -55,28 +55,51 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	public void handle() {
 		try {
-			if(removeSpatialTerms(this.structid)){
-				parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+			if(!isPossibleQuality(this.structid)) return;
+			//whether to include spatial constraint in the search for quality
+			//first try include
+			//if failed, try exclude
+
+			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structname, false,1);
+			if(relationalquality!=null) parseforQuality(this.structname, this.structid);
+			else{
+				Quality quality= searchForSimpleQuality(this.structname);
+				if(quality!=null) parseforQuality(this.structname, this.structid);
+				else{
+					if(removeSpatialConstraint(this.structid)){
+						parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+					}
+				}
 			}
+			//if(removeSpatialConstraint(this.structid)){
+			//	parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
+			//}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * 
+	 * remove the constraint part of the structure name that is a spatial term
 	 * @param structid
 	 * @return boolean success or not
 	 * @throws JDOMException
 	 */
-	private boolean removeSpatialTerms(String structid) throws JDOMException {
+	private boolean removeSpatialConstraint(String structid) throws JDOMException {
 
 		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
 		{
 			this.structname = structure.getAttributeValue("name");
 			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
-		}else if((structure.getAttributeValue("constraint")!=null)){ //the constraint is not a spatial modifier, then this can not be a quality: for example: parasymphysial plate (plate-like)
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isPossibleQuality(String strutid) throws JDOMException {
+		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
+		if((structure.getAttributeValue("constraint")!=null && !structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn))){ //has constraint but the constraint is not a spatial modifier, then this can not be a quality. for example: parasymphysial plate (should not match plate-like)
 			return false;
 		}
 		return true;
@@ -91,7 +114,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			for(String structid: identifiedqualities){
 				Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
 				if(structure!=null)
-				structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
+					structure.detach(); //identifiedqualities are used to check the relations this structure is involved in, 
 				//and the relations are needed for other purpose, 
 				//so don't detach relation here. 
 			} 
@@ -135,7 +158,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			XPath pathrelationfromStructure = XPath.newInstance(".//relation[@from='" + qualityid + "']");
 			List<Element> relations= pathrelationfromStructure.selectNodes(this.root);
 			XPath structurewithstructid1;
-			EntityProposals Relatedentity;
+			ArrayList<EntityProposals> Relatedentity;
 
 			//If two entities are there, then the first one is the primary entity and the second one is the related entity
 			if((relations!=null)&&(relations.size()>0))
@@ -155,17 +178,19 @@ public class Structure2Quality implements AnnotationStrategy{
 							Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
 							if(Relatedentity!=null){
 								if(count==0){
-									this.primaryentities.add(Relatedentity); //set the first be the primary
+									this.primaryentities.addAll(Relatedentity); //set the first be the primary
 									if(this.keyentities==null){
 										this.keyentities = new ArrayList<EntityProposals>(); 
-										this.keyentities.add(Relatedentity);
+										this.keyentities.addAll(Relatedentity);
 									}
 								}else{
-									//set others as related entity		
-									RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
-									qproposals.add(rq);  //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
-									this.qualities.add(qproposals);
-									this.identifiedqualities.add(qualityid);	
+									//set others as related entity	
+									for(EntityProposals relatedentity: Relatedentity){
+										RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
+										qproposals.add(rq);  //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
+										this.qualities.add(qproposals);
+										this.identifiedqualities.add(qualityid);	
+									}
 								}
 							}
 							count++;
@@ -179,11 +204,13 @@ public class Structure2Quality implements AnnotationStrategy{
 						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
 						if(Relatedentity!=null)
 						{
-							RelationalQuality rq = new RelationalQuality(relationalquality, Relatedentity);
-							QualityProposals qproposals = new QualityProposals();
-							qproposals.add(rq);
-							this.qualities.add(qproposals);
-							this.identifiedqualities.add(qualityid);
+							for(EntityProposals relatedentity: Relatedentity){
+								RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
+								QualityProposals qproposals = new QualityProposals();
+								qproposals.add(rq);
+								this.qualities.add(qproposals);
+								this.identifiedqualities.add(qualityid);
+							}
 							if(chara_detach!=null)
 								chara_detach.detach();
 						}
@@ -197,14 +224,15 @@ public class Structure2Quality implements AnnotationStrategy{
 				{
 					RelationalQuality rq = new RelationalQuality(relationalquality, this.keyentities.get(i));
 					QualityProposals qproposals = new QualityProposals();
-					qproposals.add(rq); //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
+					qproposals.add(rq); 
 					this.qualities.add(qproposals);
 					this.identifiedqualities.add(qualityid);
-					if(chara_detach!=null)
-						chara_detach.detach();
-					return;
 				}
-				this.primaryentities.add(this.keyentities.get(0));
+				this.primaryentities.add(this.keyentities.get(0)); //if keyentities = [A, B, C, D] then primaryentity=A;
+																   //qualities=[relationalquality B; relationalquality C;relationalquality D]
+				if(chara_detach!=null)
+					chara_detach.detach();
+				return;
 			}
 			else if((this.keyentities!=null) && (this.keyentities.size()==1) && (checkbilateral()==true)) //bilateral structures?
 			{ 
@@ -212,32 +240,35 @@ public class Structure2Quality implements AnnotationStrategy{
 				//to find related entities and primary entities
 				for(Entity e:this.bilateral)
 				{
-				RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
-				re.handle();
-				Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
-				ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
+					RelationalEntityStrategy1 re = new RelationalEntityStrategy1(e);
+					re.handle();
+					Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+					ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
 
-				if((relatedentities!=null)&&(relatedentities.size()>0))//Single key entity might be a bilateral
-				{
-				for(int i=0;i<relatedentities.size();i++)
-				{
-					RelationalQuality rq = new RelationalQuality(relationalquality, relatedentities.get(i));
-					QualityProposals qproposals = new QualityProposals();
-					qproposals.add(rq);
-					this.qualities.add(qproposals);
-					this.identifiedqualities.add(qualityid);
-					if(chara_detach!=null)
-						chara_detach.detach();
-				}
-
-				this.primaryentities.addAll(entities.get("Primary Entity"));
-				}
+					if((relatedentities!=null)&&(relatedentities.size()>0))//Single key entity might be a bilateral
+					{
+						for(int i=0;i<relatedentities.size();i++)
+						{
+							RelationalQuality rq = new RelationalQuality(relationalquality, relatedentities.get(i));
+							QualityProposals qproposals = new QualityProposals();
+							qproposals.add(rq);
+							this.qualities.add(qproposals);
+							this.identifiedqualities.add(qualityid);
+						}
+						this.primaryentities.addAll(entities.get("Primary Entity"));
+						if(chara_detach!=null)
+							chara_detach.detach();
+					}
 				}
 				return;
-				}
-			else
+			}
+			else //pack and return an incomplete relational quality (EntityProposals = null)
 			{
-				//TODO if key entities is also null. look into the text for clue? or preprocess later?
+				RelationalQuality rq = new RelationalQuality(relationalquality, new EntityProposals());
+				QualityProposals qproposals = new QualityProposals();
+				qproposals.add(rq);
+				this.qualities.add(qproposals);
+				this.identifiedqualities.add(qualityid);			
 			}
 			return;
 		}
@@ -252,73 +283,68 @@ public class Structure2Quality implements AnnotationStrategy{
 		if((characters!=null)&&(characters.size()>0))
 		{
 			for(Element chara:characters)
-				Checkforsimplequality(chara,quality,qualityid,negated,chara_detach);
+				checkForSimpleQuality(chara,quality,qualityid,negated,chara_detach);
 		}
 		else
-			Checkforsimplequality(null,quality,qualityid,negated,chara_detach);
+			checkForSimpleQuality(null,quality,qualityid,negated,chara_detach);
 
 		//detach_character(); need to be invoked only when S2Q is being accpeted by the calling function
 		return;
 	}
-	
+
 	public void detach_character() {
 
 		for(Element chara:this.detach_characters)
 			chara.detach();
-		
+
 	}
 
 	private boolean checkbilateral() {
-			
-			boolean bilateralcheck = false;
-			for(Entity e:this.keyentities.get(0).getProposals())
+
+		boolean bilateralcheck = false;
+		for(Entity e:this.keyentities.get(0).getProposals())
+		{
+			if(e.getId()!=null)
 			{
-				if(e.getId()!=null)
+				if(e instanceof SimpleEntity)
 				{
-					if(e instanceof SimpleEntity)
-					{
-						if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
-						{				
-							this.bilateral.add(e);
-							bilateralcheck=true;
-						}
+					if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
+					{				
+						this.bilateral.add(e);
+						bilateralcheck=true;
 					}
-					else
+				}
+				else
+				{
+					for(Entity e1:((CompositeEntity) e).getEntities())
 					{
-						for(Entity e1:((CompositeEntity) e).getEntities())
-						{
 						if(e1.getPrimaryEntityLabel()!=null)//Entities which don't have a perfect match in ontology need not be checked for bilateral
 						{
-						if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
-						{
-							this.bilateral.add(e);
-							bilateralcheck=true;
-							break;
-						}
-						}
+							if(XML2EQ.elk.lateralsidescache.get(e1.getPrimaryEntityLabel())!=null)
+							{
+								this.bilateral.add(e);
+								bilateralcheck=true;
+								break;
+							}
 						}
 					}
 				}
 			}
-				return bilateralcheck;
 		}
-	
+		return bilateralcheck;
+	}
+
 
 	//a separate function is created to handle structures(quality) with characters and without characters
 
-	private void Checkforsimplequality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-		Quality result;
+	private void checkForSimpleQuality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
+
 		if(chara!=null)
 			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion
 		quality=quality.trim();
-		TermSearcher ts = new TermSearcher();
-		for(;;)
-		{
-			result = (Quality) ts.searchTerm(quality, "quality");
-			if((result!=null)||quality.length()==0)
-				break;
-			quality =(quality.indexOf(" ")!=-1)?quality.substring(quality.indexOf(" ")).trim():"";
-		}
+
+		Quality result = searchForSimpleQuality(quality);
+
 		if (result != null) {
 			if (negated) {
 				String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
@@ -340,8 +366,21 @@ public class Structure2Quality implements AnnotationStrategy{
 				this.identifiedqualities.add(qualityid);
 			}
 			if(chara!=null)	
-			this.detach_characters.add(chara);
+				this.detach_characters.add(chara);
 		}
 
+	}
+
+	private Quality searchForSimpleQuality(String quality) {
+		Quality result;
+		TermSearcher ts = new TermSearcher();
+		for(;;)
+		{
+			result = (Quality) ts.searchTerm(quality, "quality");
+			if((result!=null)||quality.length()==0)
+				break;
+			quality =(quality.indexOf(" ")!=-1)?quality.substring(quality.indexOf(" ")).trim():"";
+		}
+		return result;
 	}
 }

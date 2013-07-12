@@ -67,6 +67,7 @@ public class ELKReasoner{
 	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
 
 	public ELKReasoner(OWLOntology ont) throws OWLOntologyCreationException{
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
 		this.ont = ont;
@@ -77,6 +78,7 @@ public class ELKReasoner{
 	}
 
 	public ELKReasoner(File ontologyfile) throws OWLOntologyCreationException{
+		if(!this.printmessage) Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
 		man = OWLManager.createOWLOntologyManager();
 		dataFactory = man.getOWLDataFactory();
 		// Load your ontology.

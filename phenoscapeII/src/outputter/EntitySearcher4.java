@@ -25,7 +25,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public EntityProposals searchEntity(Element root, String structid,
+	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
@@ -72,9 +72,11 @@ public class EntitySearcher4 extends EntitySearcher {
 						centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
 						centity.addEntity(sentity); //process
 						centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
-						EntityProposals entities = new EntityProposals();
-						entities.setPhrase(sentity.getString()); //use the primary entity's phrase
-						entities.add(centity);
+						EntityProposals ep = new EntityProposals();
+						ep.setPhrase(sentity.getString()); //use the primary entity's phrase
+						ep.add(centity);
+						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+						entities.add(ep);
 						return entities;
 					}else{//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 						//relation & entity locator: 
@@ -88,9 +90,11 @@ public class EntitySearcher4 extends EntitySearcher {
 						CompositeEntity centity = new CompositeEntity(); 
 						centity.addEntity(sentity1); 
 						centity.addEntity(rentity);	
-						EntityProposals entities = new EntityProposals();
-						entities.setPhrase(sentity1.getString());
-						entities.add(centity);
+						EntityProposals ep = new EntityProposals();
+						ep.setPhrase(sentity1.getString());
+						ep.add(centity);
+						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+						entities.add(ep);
 						return entities;
 					}	
 				}				
