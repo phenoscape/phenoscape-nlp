@@ -521,7 +521,7 @@ public class ChunkedSentence {
 	 */
 	private void recoverOrgans() {
 		//for(int i = this.chunkedtokens.size()-1; i >=this.pointer; i--){
-		for(int i = this.chunkedtokens.size()-1; i >=0; i--){
+		for(int i = this.chunkedtokens.size()-1; i >=0+0; i--){
 			String t = this.chunkedtokens.get(i);
 			if(t.endsWith(">") || t.endsWith(")")){//TODO: not dealing with nplist at this time, may be later
 				recoverOrgan(i);//chunk and update chunkedtokens
@@ -2451,7 +2451,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 			ResultSet rs = stmt.executeQuery("select modifier, tag, originalsent from "+this.tableprefix+"_sentence where source ='"+sentsrc+"'");
 			if(rs.next()){
 				senttag = rs.getString(2).trim();
-				senttag = senttag.compareTo("general")==0? "whole_organism" : senttag;
+				senttag = senttag.compareTo("general")==0? "ApplicationUtilities.getProperty("unknown.structure.name")" : senttag;
 				sentmod = rs.getString(1).trim();
 				this.text = rs.getString(3); //has to use originalsent, because it is "ditto"-fixed (in SentenceOrganStateMarker.java) and perserve capitalization for measurements markup
 			}
@@ -2468,8 +2468,8 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 		
 		if(senttag.compareTo("ignore")!=0){
 			//sentence subject
-			if(senttag.compareTo("whole_organism")==0){
-				this.subjecttext = "(whole_organism)";
+			if(senttag.compareTo("ApplicationUtilities.getProperty("unknown.structure.name")")==0){
+				this.subjecttext = "(ApplicationUtilities.getProperty("unknown.structure.name"))";
 			}else if(senttag.compareTo("chromosome")==0){
 				this.subjecttext = "(chromosome)";
 				skipLead("chromosome".split("\\s"));
@@ -2555,7 +2555,7 @@ character modifier: a[m[largely] relief[smooth] m[abaxially]]
 
 			}else if(senttag.compareTo("ditto")==0){
 				if(sentsrc.endsWith("0")){
-					this.subjecttext ="(whole_organism)";//it is a starting sentence in a treatment, without an explicit subject.
+					this.subjecttext ="(ApplicationUtilities.getProperty("unknown.structure.name"))";//it is a starting sentence in a treatment, without an explicit subject.
 				}else{
 					this.subjecttext ="ditto";
 					//mohan code :10/28/2011. If the subject is ditto and the first chunk is a preposition chunk make the subject empty so that it can search within the same sentence for the subject.
