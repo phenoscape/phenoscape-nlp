@@ -1,6 +1,8 @@
 package owlaccessor;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,12 +17,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.io.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import outputter.ApplicationUtilities;
+import outputter.TermSearcher;
 import outputter.XML2EQ;
 
 // TODO: Auto-generated Javadoc
@@ -41,7 +45,7 @@ import outputter.XML2EQ;
  */
 @SuppressWarnings("unused")
 public class OWLAccessorImpl implements OWLAccessor {
-
+	private static final Logger LOGGER = Logger.getLogger(OWLAccessorImpl.class);   
 	/** The manager. */
 	private OWLOntologyManager manager;
 
@@ -127,7 +131,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			this.retrieveAllConcept();
 		}catch(Exception e){
 			System.out.println("can't load ontology:"+file.getPath());
-			e.printStackTrace();
+			LOGGER.error("", e);
 			System.exit(1);
 		}
 	}
@@ -545,8 +549,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 				return true;
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return true;
 }

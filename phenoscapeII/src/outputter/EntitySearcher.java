@@ -3,8 +3,11 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
@@ -16,11 +19,12 @@ import org.jdom.xpath.XPath;
  */
 public abstract class EntitySearcher {
 	protected static XPath textpath;
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher.class);   
 	static{	
 		try{
 			textpath = XPath.newInstance(".//text");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	

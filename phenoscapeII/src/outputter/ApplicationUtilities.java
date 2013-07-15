@@ -5,11 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 
 public class ApplicationUtilities {
-
+	private static final Logger LOGGER = Logger.getLogger(ApplicationUtilities.class);   
 	private static Properties properties = null;
 	private static FileInputStream fstream = null;
 	
@@ -18,7 +22,7 @@ public class ApplicationUtilities {
 			fstream = new FileInputStream(System.getProperty("user.dir")
 					+System.getProperty("file.separator")+"application.properties");
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -49,8 +53,8 @@ public class ApplicationUtilities {
 				out.flush();
 				System.exit(0);
 			}			
-		} catch(Exception exe) {
-			exe.printStackTrace();
+		} catch(Exception e) {
+			LOGGER.error("", e);
 		} finally {
 			if (out != null) {
 				out.close();
@@ -73,7 +77,7 @@ public class ApplicationUtilities {
 			try {
 				properties.load(fstream);
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("", e);
 			} 
 		}
 		return properties.getProperty(key);

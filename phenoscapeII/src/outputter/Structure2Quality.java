@@ -1,10 +1,13 @@
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -19,6 +22,7 @@ import org.jdom.xpath.XPath;
 
 public class Structure2Quality implements AnnotationStrategy{
 
+	private static final Logger LOGGER = Logger.getLogger(Structure2Quality.class);   
 	Element root;
 	String  relation;
 	String structname;
@@ -41,7 +45,7 @@ public class Structure2Quality implements AnnotationStrategy{
 		try{
 			pathCharacterUnderStucture = XPath.newInstance(".//character");
 		}catch (Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}*/
 
@@ -75,7 +79,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			//	parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 			//}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -119,7 +123,7 @@ public class Structure2Quality implements AnnotationStrategy{
 				//so don't detach relation here. 
 			} 
 		}catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

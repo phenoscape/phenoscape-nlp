@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -25,7 +29,7 @@ import java.util.Iterator;
  */
 @SuppressWarnings("unused")
 public class EQPerformanceEvaluation {
-
+	private static final Logger LOGGER = Logger.getLogger(EQPerformanceEvaluation.class);   
 	private Connection conn;
 	private String username ="root";
 	private String password = "root";
@@ -96,7 +100,7 @@ public class EQPerformanceEvaluation {
 						")");
 				}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -149,7 +153,7 @@ public class EQPerformanceEvaluation {
 			readResultsfromDatabase();
 			compareTranslations(); //translation from raw to labels/Ids
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -317,7 +321,7 @@ public class EQPerformanceEvaluation {
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+tablename+"("+fieldstring+")"+" values ("+prstring+")");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}		
 	}
 
@@ -351,7 +355,7 @@ public class EQPerformanceEvaluation {
 			counts.put("generated"+field, ""+(count++));
 
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		
 	}
@@ -727,7 +731,7 @@ public class EQPerformanceEvaluation {
 			prstring += p + ","+ r;
 			this.insertInto(this.prtableTranslations,fieldstring, prstring);			
 		}catch(Exception e){
-				e.printStackTrace();
+				LOGGER.error("", e);
 		}				
 	}
 	

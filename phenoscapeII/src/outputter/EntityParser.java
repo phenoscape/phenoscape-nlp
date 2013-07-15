@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
@@ -17,6 +18,7 @@ import org.jdom.xpath.XPath;
  *
  */
 public class EntityParser {
+	private static final Logger LOGGER = Logger.getLogger(EntityParser.class);   
 	//caches: key = structid
 	private static Hashtable<String, ArrayList<EntityProposals>> entitycache = new Hashtable<String, ArrayList<EntityProposals>>() ;
 	private static Hashtable<String, Structure2Quality> s2qcache = new Hashtable<String, Structure2Quality> ();

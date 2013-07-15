@@ -3,6 +3,8 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -22,6 +25,7 @@ import org.jdom.xpath.XPath;
    also identify quality clues from the character statement, such as "size of" "number of", and "fusion of". 
  */
 public class CharacterStatementParser extends Parser {
+	private static final Logger LOGGER = Logger.getLogger(CharacterStatementParser.class);   
 	//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 	ArrayList<EntityProposals> keyentities = new ArrayList<EntityProposals>();
 	//use of qualityclue: test cases:patterns.xml_s08e7ab42-dd8f-409c-adbe-5126d8579e82.xml
@@ -39,10 +43,11 @@ public class CharacterStatementParser extends Parser {
 			pathstructure = XPath.newInstance(".//structure");
 			pathrelation = XPath.newInstance(".//relation");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
+	
 	/**
 	 * 
 	 */
@@ -89,7 +94,7 @@ public class CharacterStatementParser extends Parser {
 			parseForQualityClue(statement); 
 			parseForEntities(statement, root, true);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -169,7 +174,7 @@ public class CharacterStatementParser extends Parser {
 				}
 			}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 		//record qualityclue which may or may not be marked as a structure
@@ -238,7 +243,7 @@ public class CharacterStatementParser extends Parser {
 			resolve(/*entities, s2qs,*/ statement, root);
 	
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -629,7 +634,7 @@ public class CharacterStatementParser extends Parser {
 				}	
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}		
 	}
 

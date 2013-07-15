@@ -2,6 +2,8 @@ package outputter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,14 +12,15 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import owlaccessor.OWLAccessorImpl;
-
 import edu.mit.jwi.IDictionary;
 
 
 public class Dictionary {
+	private static final Logger LOGGER = Logger.getLogger(Dictionary.class);   
 	public static Connection conn;
 	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim
 	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
@@ -213,7 +216,7 @@ public class Dictionary {
 			spatialtermptn = spatialtermptn.replaceFirst("\\|$", "");
 
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		spatialterms.add("accessory");
 		
@@ -320,7 +323,7 @@ public class Dictionary {
 		try {
 			wordnetdict.open();					
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

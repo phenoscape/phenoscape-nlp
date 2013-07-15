@@ -2,17 +2,21 @@ package owlaccessor;
 
 //import java.io.File;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.*;
 import java.util.*;
-//import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
+
+import outputter.TermSearcher;
 
 /**
  * This class extracts all terms, their IDs and synonyms from PATO to database.
  * 
  * 
- * @author Zilong Chang
+ * @author Zilong Chang, Hong Cui
  * 
  * */
 public class DBMigrater {
@@ -22,6 +26,7 @@ public class DBMigrater {
 	private String dburl = "jdbc:mysql://localhost:3306/";
 	private String uname = "root";
 	private String upw = "root";
+	private static final Logger LOGGER = Logger.getLogger(DBMigrater.class);   
 
 	/**
 	 * This method extracts terms, their IDs and synonyms from PATO (from web)
@@ -104,11 +109,11 @@ public class DBMigrater {
 				con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
@@ -173,14 +178,14 @@ public class DBMigrater {
 				con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
@@ -225,11 +230,11 @@ public class DBMigrater {
 				con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
@@ -252,7 +257,7 @@ public class DBMigrater {
 		try{
 			dbm.migrate("biocreative2012", tname, url);
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		
 		//dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");

@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 /**
@@ -12,7 +13,7 @@ import org.jdom.Element;
  *
  */
 public class EntitySearcher4 extends EntitySearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher4.class);   
 	/**
 	 * 
 	 */
@@ -28,6 +29,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
+		LOGGER.debug("EntitySearcher4: search "+entityphrase+"[orig="+originalentityphrase+"]");
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
 
 		String[] entityphrasetokens = entityphrase.split("\\s+");
@@ -76,7 +78,8 @@ public class EntitySearcher4 extends EntitySearcher {
 						ep.setPhrase(sentity.getString()); //use the primary entity's phrase
 						ep.add(centity);
 						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-						entities.add(ep);
+						//entities.add(ep);
+						Utilities.addEntityProposals(entities, ep);
 						return entities;
 					}else{//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 						//relation & entity locator: 
@@ -94,12 +97,14 @@ public class EntitySearcher4 extends EntitySearcher {
 						ep.setPhrase(sentity1.getString());
 						ep.add(centity);
 						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-						entities.add(ep);
+						//entities.add(ep);
+						Utilities.addEntityProposals(entities, ep);
 						return entities;
 					}	
 				}				
 			}
 		}
+		LOGGER.debug("EntitySearcher4 calls EntitySearcher5");
 		return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 

@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 /**
@@ -12,7 +13,7 @@ import org.jdom.Element;
  *
  */
 public class EntitySearcher3 extends EntitySearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher3.class);   
 	/**
 	 * 
 	 */
@@ -28,6 +29,7 @@ public class EntitySearcher3 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
+		LOGGER.debug("EntitySearcher3: search "+entityphrase+"[orig="+originalentityphrase+"]");
 		//re-arranging word in entity, first search for entity locator
 		
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
@@ -61,10 +63,12 @@ public class EntitySearcher3 extends EntitySearcher {
 				ep.setPhrase(sentity.getString());
 				ep.add(centity);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				entities.add(ep);
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
 				return entities;	
 			}		
 		}
+		LOGGER.debug("EntitySearcher3 calls EntitySearcher4");
 		return new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 

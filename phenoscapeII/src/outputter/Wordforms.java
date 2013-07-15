@@ -6,9 +6,11 @@ import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 
 public class Wordforms {
-
+private static final Logger LOGGER = Logger.getLogger(Wordforms.class);   
 static String adjective_suffixes = "e|ed|er|ent|-like|like|shaped|-shaped|y|ly|ic|ted|ate|led|oid|ion|ied|ous|ing|form|iform|ally|ation|ure|al|ical|ication|sion|ded";
 static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<String,LinkedHashSet<String>>();
 	

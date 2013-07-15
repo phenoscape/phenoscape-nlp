@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 /**
@@ -14,7 +15,7 @@ import org.jdom.Element;
  *
  */
 public class EntitySearcher2 extends EntitySearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher2.class);   
 	/**
 	 * 
 	 */
@@ -34,6 +35,7 @@ public class EntitySearcher2 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
+		LOGGER.debug("EntitySearcher2: search "+entityphrase+"[orig="+originalentityphrase+"]");
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
 		
 		//search entity and entity locator separately
@@ -70,18 +72,21 @@ public class EntitySearcher2 extends EntitySearcher {
 				ep.setPhrase(sentity.getString());
 				ep.add(centity);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				entities.add(ep);
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
 				return entities;
 			}else{
 				EntityProposals ep = new EntityProposals();
 				ep.setPhrase(sentity.getString());
 				ep.add(sentity);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				entities.add(ep);
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
 				return entities;
 			}
 		}
 		//entity not match, keep searching
+		LOGGER.debug("EntitySearcher2 calls EntitySearcher3");
 		return new EntitySearcher3().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 

@@ -3,12 +3,15 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -26,7 +29,9 @@ import owlaccessor.OWLAccessorImpl;
  *         statement
  */
 public class StateStatementParser extends Parser {
-	ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
+	//ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
+	private static final Logger LOGGER = Logger.getLogger(StateStatementParser.class);   
+	ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
 	String src;
 	String characterid;
 	String stateid;
@@ -50,7 +55,7 @@ public class StateStatementParser extends Parser {
 			pathCharacter = XPath.newInstance(".//character");
 			pathStructure = XPath.newInstance(".//structure");
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -109,7 +114,7 @@ public class StateStatementParser extends Parser {
 			text = ((Element) pathText2.selectSingleNode(statement))
 					.getTextNormalize();
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -143,7 +148,8 @@ public class StateStatementParser extends Parser {
 					}else if(ep.getQualityStrategy()!=null){
 						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
 						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
-						this.constructEQStatementProposals(qualities, primentities);	
+						//this.constructEQStatementProposals(qualities, primentities);	
+						this.constructEQProposals(qualities, primentities);	
 					}
 					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					//entities.addAll(ep);
@@ -177,11 +183,12 @@ public class StateStatementParser extends Parser {
 				q.setConfidenceScore(1f);
 				qp.add(q);
 				qualities.add(qp);
-				constructEQStatementProposals(qualities, entities1);
+				//constructEQStatementProposals(qualities, entities1);
+				constructEQProposals(qualities, entities1);
 				entities1.clear();
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -195,11 +202,12 @@ public class StateStatementParser extends Parser {
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				parserCharacters(character, statement, root, entities, qualities);
-				constructEQStatementProposals(qualities, entities);
+				//constructEQStatementProposals(qualities, entities);
+				constructEQProposals(qualities, entities);
 			}
 			
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -399,7 +407,7 @@ public class StateStatementParser extends Parser {
 					constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	 */
@@ -421,10 +429,13 @@ public class StateStatementParser extends Parser {
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				List<QualityProposals> q = new ArrayList<QualityProposals>();
 				int flag = parseRelation(relation, root, StructuredQualities, entities,  q);
-				if(flag==1) constructEQStatementProposals(q, entities);
+				if(flag==1){
+					//constructEQStatementProposals(q, entities);
+					constructEQProposals(q, entities);
+				}
 			}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -511,7 +522,7 @@ public class StateStatementParser extends Parser {
 				{
 					q.addAll(rh.getQuality());
 				}
-				if (rh.otherEQs.size() > 0)
+				if (rh.otherEQs!=null && rh.otherEQs.size() > 0)
 				{
 					this.EQStatements.addAll(rh.otherEQs);
 				}
@@ -582,10 +593,30 @@ public class StateStatementParser extends Parser {
 		return flag;
 	}
 
-	private void constructEQStatementProposals(
+	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities){
+		if((entities!=null)&&(entities.size()>0))
+			for (QualityProposals qualityp : qualities){
+				for (EntityProposals entityp : entities) {
+					EQProposals eqp = new EQProposals();
+					eqp.setEntity(entityp);
+					eqp.setQuality(qualityp);
+					eqp.setSource(this.src);
+					eqp.setCharacterId(this.characterid);
+					eqp.setStateId(this.stateid);
+					eqp.setDescription(text);
+					if (this instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					this.EQStatements.add(eqp);
+				}
+			}
+	}
+	
+	
+	/*private void constructEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
-
-
 		if((entities!=null)&&(entities.size()>0))
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
@@ -611,7 +642,7 @@ public class StateStatementParser extends Parser {
 					this.EQStatements.add(eqp);
 				}
 			}
-	}
+	}*/
 
 	/**
 	 * if structid appears as a constraintid or toid, then it can't be a subject
@@ -784,7 +815,9 @@ public class StateStatementParser extends Parser {
 		return false;
 	}
 
-	public ArrayList<EQStatementProposals> getEQStatements() {
+	
+	//public ArrayList<EQStatementProposals> getEQStatements() {
+	public ArrayList<EQProposals> getEQStatements() {
 		return this.EQStatements;
 	}
 

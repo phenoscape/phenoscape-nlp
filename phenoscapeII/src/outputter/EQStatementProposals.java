@@ -50,7 +50,7 @@ public class EQStatementProposals implements Proposals {
 	
 	public String getPhrase() {
 		if(proposals.size()==0) return null;
-		return proposals.get(0).getStateId();
+		return proposals.get(0).getDescription();
 	}
 	
 	public float higestScore() {

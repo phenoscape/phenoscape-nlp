@@ -5,6 +5,8 @@ package conceptmapping;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,10 +15,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
+
+import outputter.ApplicationUtilities;
 
 /**
  * @author hong cui
@@ -28,6 +33,7 @@ import org.jdom.xpath.XPath;
  * source	characterid	stateid	description	entity	entitylabel	entityid	quality	qualitylabel	qualityid	qualitynegated	qualitynegatedlabel	qnparentlabel	qnparentid	qualitymodifier	qualitymodifierlabel	qualitymodifierid	entitylocator	entitylocatorlabel	entitylocatorid	countt
  */
 public class CharacterText2CSV {
+	private static final Logger LOGGER = Logger.getLogger(CharacterText2CSV.class);  
 	Element root;
 	Path csvpath;
 	Path newcsv;
@@ -44,7 +50,7 @@ public class CharacterText2CSV {
 			csvpath = Paths.get(csvfilepath);
 			newcsv = Paths.get(csvfilepath.replaceFirst("\\.csv$", ".new.csv"));
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -74,7 +80,7 @@ public class CharacterText2CSV {
 			scanner.close();
 			System.out.println("new csv file is at "+newcsv.getFileName());
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	

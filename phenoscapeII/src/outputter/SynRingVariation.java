@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import owlaccessor.OWLAccessorImpl;
@@ -30,7 +31,7 @@ import owlaccessor.OWLAccessorImpl;
 public class SynRingVariation {
 	//private String leadspatialtermvariation="";
 	//private String headnounvariation="";
-
+	private static final Logger LOGGER = Logger.getLogger(SynRingVariation.class);   
 	/**
 	 * 
 	 * @param phrase

@@ -4,6 +4,8 @@
 package conceptmapping;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,6 +17,7 @@ import java.util.List;
 
 import oboaccessor.OBO2DB;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import owlaccessor.OWLAccessorImpl;
@@ -65,6 +68,7 @@ public class TermOutputer {
 	/** The sourceprefix. */
 	private String sourceprefix = null;
 
+	private static final Logger LOGGER = Logger.getLogger(TermOutputer.class);  
 	
 	/**
 	 * Instantiates a new term outputer.
@@ -100,7 +104,7 @@ public class TermOutputer {
 				stmt.execute("create table if not exists "+qualitytable+" (id int(11) not null unique auto_increment primary key, term varchar(100), ontoid text, ontolabel text, characterr text, characterstate text, source text)");
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -200,7 +204,7 @@ public class TermOutputer {
 			rs.close();
 			stmt.close();
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -225,7 +229,7 @@ public class TermOutputer {
 			System.out.println(q);
 			stmt.execute(q);
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -262,7 +266,7 @@ public class TermOutputer {
 				return new String[]{this.qualitytable, qualityid, qualitylabel};
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return null;
 	}
@@ -462,7 +466,7 @@ public class TermOutputer {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return qterms;
 	}
@@ -492,7 +496,7 @@ public class TermOutputer {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return eterms;
 	}

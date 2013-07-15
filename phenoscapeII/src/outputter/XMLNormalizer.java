@@ -4,9 +4,12 @@
 package outputter;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -20,6 +23,7 @@ import org.jdom.xpath.XPath;
  *
  */
 public class XMLNormalizer {
+	private static final Logger LOGGER = Logger.getLogger(XMLNormalizer.class);   
 	public Element root;
 	private static XPath pathWithHaveHasRelation;
 	private static XPath pathRangeValueCharacter;
@@ -44,7 +48,7 @@ public class XMLNormalizer {
 			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 			pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -69,7 +73,7 @@ public class XMLNormalizer {
 			fixSizeForRespectiveMeasureOnlyCharacterStatements(root);
 			collapsePreps(root); //A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -158,7 +162,7 @@ public class XMLNormalizer {
 				System.out.println(outputter.outputString(root));
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		
 	}
@@ -379,7 +383,7 @@ public class XMLNormalizer {
 				new XMLNormalizer(root).normalize();
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}

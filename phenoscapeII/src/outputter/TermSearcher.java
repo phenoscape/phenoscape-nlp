@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * @author hong cui
@@ -19,7 +21,7 @@ import java.util.regex.Pattern;
  *
  */
 public class TermSearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(TermSearcher.class);   
 	/** The entity id cache. */
 	public static Hashtable<String, FormalConcept> entityIDCache = new Hashtable<String, FormalConcept>(); //term=> {id, label}
 	

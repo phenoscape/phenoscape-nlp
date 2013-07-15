@@ -3,10 +3,16 @@
  */
 package preprocessing;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import org.apache.log4j.Logger;
+
+import outputter.TermSearcher;
 
 /**
  * @author Hong Updates
@@ -17,6 +23,7 @@ public class OntologyMappingChecker4Ant {
 	private String targettable;
 	private static String username="root";
 	private static String password="root";
+	private static final Logger LOGGER = Logger.getLogger(OntologyMappingChecker4Ant.class);   
 
 
 	/**
@@ -32,7 +39,7 @@ public class OntologyMappingChecker4Ant {
 				conn = DriverManager.getConnection(URL);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -54,7 +61,7 @@ public class OntologyMappingChecker4Ant {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -74,7 +81,7 @@ public class OntologyMappingChecker4Ant {
 				stmt.execute("insert into "+this.targettable+"(structure, hao) values ('"+structure+"','"+hao+"')");
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

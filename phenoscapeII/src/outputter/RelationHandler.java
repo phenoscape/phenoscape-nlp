@@ -4,11 +4,14 @@
 package outputter;
 
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
@@ -19,10 +22,12 @@ import org.jdom.xpath.XPath;
  * http://phenoscape.org/wiki/Guide_to_Character_Annotation#Relations_used_for_post-compositions
  */
 public class RelationHandler {
+	private static final Logger LOGGER = Logger.getLogger(RelationHandler.class);   
 	ArrayList<EntityProposals> entity; //could be multiple entities, entity holds the result on entity, may be simple or composite (with a entity locator)
 	ArrayList<QualityProposals> quality; //quality (simple quality or relational quality) or negated quality. If relational quality, must have qualitymodifier (i.e. related entity)
 	ArrayList<EntityProposals> entitylocator;
-	ArrayList<EQStatementProposals> otherEQs;
+	//ArrayList<EQStatementProposals> otherEQs;
+	ArrayList<EQProposals> otherEQs;
 
 	Element root;
 	String relation;
@@ -48,7 +53,8 @@ public class RelationHandler {
 		this.fromstructname = structname;
 		this.fromstructid = structid;
 		this.fromcharacterstatement = keyelement;
-		this.otherEQs = new ArrayList<EQStatementProposals>();
+		//this.otherEQs = new ArrayList<EQStatementProposals>();
+		this.otherEQs = new ArrayList<EQProposals>();
 		this.relelement = relelement;
 		this.keyentities = keyentities;
 
@@ -195,13 +201,12 @@ public class RelationHandler {
 			} else*/ if (relation.matches("\\bwith\\b.*")) {
 				//generate EQ: from_entity: has_part to_entity
 
-
 				//check to-structure, if to-structure has no character, then generate EQs 1) to_entity:present 
 				if(!Utilities.hasCharacters(tostructid, root) && !fromcharacterstatement){
 					ArrayList<EntityProposals> entityproposallist = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, "");					
 					if(entityproposallist!=null){
 						//1) to_entity:present
-						EQStatementProposals eqproposals = new EQStatementProposals();
+						/*EQStatementProposals eqproposals = new EQStatementProposals();
 						for(EntityProposals entityproposals: entityproposallist){
 							ArrayList<Entity> entities = entityproposals.getProposals();
 							for(Entity entity: entities){
@@ -224,6 +229,32 @@ public class RelationHandler {
 								eq.setQuality(present);
 								eqproposals.add(eq);
 							}
+							this.otherEQs.add(eqproposals);*/
+
+						EQProposals eqproposals = new EQProposals();
+						Quality present = new Quality();
+						present.setString("present");
+						present.setLabel("PATO:present");
+						present.setId("PATO:0000467");
+						present.setConfidenceScore((float)1.0);
+						QualityProposals presentp = new QualityProposals();
+						presentp.add(present);
+						for(EntityProposals entityproposals: entityproposallist){
+							//ArrayList<Entity> entities = entityproposals.getProposals();
+							//for(Entity entity: entities){
+							//construct quality
+
+							Element statement = relelement.getParentElement();
+							eqproposals.setCharacterId(statement.getAttributeValue("character_id"));
+							eqproposals.setDescription(statement.getChildText("text"));
+							eqproposals.setSource(root.getAttributeValue(ApplicationUtilities
+									.getProperty("source.attribute.name")));
+							eqproposals.setStateId(statement.getAttribute("state_id") == null ? ""
+									: statement.getAttributeValue("state_id"));
+							eqproposals.setType(this.fromcharacterstatement? "character" : "state");
+							eqproposals.setEntity(entityproposals);
+							eqproposals.setQuality(presentp);
+							//}
 							this.otherEQs.add(eqproposals);
 							//2) from_entity: has_part to_entity
 						}
@@ -233,32 +264,55 @@ public class RelationHandler {
 				// output absent as Q for tostructid
 				if (!fromcharacterstatement) {
 					ArrayList<EntityProposals> entityproposallist = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
-					EQStatementProposals eqproposals = new EQStatementProposals();
+					/*EQStatementProposals eqproposals = new EQStatementProposals();
 					if(entityproposallist!=null){
 						for(EntityProposals entityproposals: entityproposallist){
-						ArrayList<Entity> entities = entityproposals.getProposals();
-						for(Entity entity: entities){	
-							//construct quality
-							Quality absent = new Quality();
-							absent.setString("absent");
-							absent.setLabel("PATO:absent");
-							absent.setId("PATO:0000462");
-							absent.setConfidenceScore((float)1.0);
-							EQStatement eq = new EQStatement();
-							eq.setEntity(entity);
-							eq.setQuality(absent);
-							Element statement = relelement.getParentElement();
-							eq.setCharacterId(statement.getAttributeValue("character_id"));
-							eq.setDescription(statement.getChildText("text"));
-							eq.setSource(root.getAttributeValue(ApplicationUtilities
-									.getProperty("source.attribute.name")));
-							eq.setStateId(statement.getAttribute("state_id") == null ? ""
-									: statement.getAttributeValue("state_id"));
-							eq.setType(this.fromcharacterstatement? "character" : "state");
-							eqproposals.add(eq);
+							ArrayList<Entity> entities = entityproposals.getProposals();
+							for(Entity entity: entities){	
+								//construct quality
+								Quality absent = new Quality();
+								absent.setString("absent");
+								absent.setLabel("PATO:absent");
+								absent.setId("PATO:0000462");
+								absent.setConfidenceScore((float)1.0);
+								EQStatement eq = new EQStatement();
+								eq.setEntity(entity);
+								eq.setQuality(absent);
+								Element statement = relelement.getParentElement();
+								eq.setCharacterId(statement.getAttributeValue("character_id"));
+								eq.setDescription(statement.getChildText("text"));
+								eq.setSource(root.getAttributeValue(ApplicationUtilities
+										.getProperty("source.attribute.name")));
+								eq.setStateId(statement.getAttribute("state_id") == null ? ""
+										: statement.getAttributeValue("state_id"));
+								eq.setType(this.fromcharacterstatement? "character" : "state");
+								eqproposals.add(eq);
+							}
+							this.otherEQs.add(eqproposals);
 						}
-						this.otherEQs.add(eqproposals);
-					}
+					}*/
+					EQProposals eqproposals = new EQProposals();
+					Quality absent = new Quality();
+					absent.setString("absent");
+					absent.setLabel("PATO:absent");
+					absent.setId("PATO:0000462");
+					absent.setConfidenceScore((float)1.0);
+					QualityProposals absentp = new QualityProposals();
+					absentp.add(absent);
+					if(entityproposallist!=null){
+						for(EntityProposals entityproposals: entityproposallist){
+							eqproposals.setEntity(entityproposals);
+							eqproposals.setQuality(absentp);
+							Element statement = relelement.getParentElement();
+							eqproposals.setCharacterId(statement.getAttributeValue("character_id"));
+							eqproposals.setDescription(statement.getChildText("text"));
+							eqproposals.setSource(root.getAttributeValue(ApplicationUtilities
+									.getProperty("source.attribute.name")));
+							eqproposals.setStateId(statement.getAttribute("state_id") == null ? ""
+									: statement.getAttributeValue("state_id"));
+							eqproposals.setType(this.fromcharacterstatement? "character" : "state");
+							this.otherEQs.add(eqproposals);
+						}
 					}
 				}
 			}else if(relation.matches("\\b(between|among|amongst)\\b.*")){
@@ -318,7 +372,8 @@ public class RelationHandler {
 			}
 			return partsids;
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
+			
 		}
 		return null;
 	}
@@ -331,7 +386,11 @@ public class RelationHandler {
 		return this.quality;
 	}
 
-	public ArrayList<EQStatementProposals> otherEQs(){
+	/*public ArrayList<EQStatementProposals> otherEQs(){
+		return this.otherEQs;
+	}*/
+
+	public ArrayList<EQProposals> otherEQs(){
 		return this.otherEQs;
 	}
 
