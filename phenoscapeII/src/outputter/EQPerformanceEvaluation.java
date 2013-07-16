@@ -91,8 +91,7 @@ public class EQPerformanceEvaluation {
 				stmt.execute(sql);
 
 				stmt.execute("create table if not exists "+prtableEQs+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
-						"exactp float(4,2), exactr float(4,2), " +
-						"partialp float(4,2), partialr float(4,2) "+
+						"exactp float(4,2), exactr float(4,2)" +
 						")");
 
 			}
@@ -146,7 +145,7 @@ public class EQPerformanceEvaluation {
 	}
 
 	private void readResultsfromDatabase() throws SQLException {
-		System.out.println("inside read results");
+		//System.out.println("inside read results");
 		ResultSet rs;
 		Statement stmt = conn.createStatement();
 		//pair up answer and test states
@@ -217,13 +216,16 @@ public class EQPerformanceEvaluation {
 			float tcount = 0;
 			float acount = 0;
 			float tempcount =0;
+			System.out.println("Field========"+field);
 			for(int i = 0; i < astates.size(); i++){
+				System.out.println("state==="+i);
 				ArrayList<String> avalues = new ArrayList<String>();
-				//TODO: There is no guarantee that each entity is mapped to same quality of the corresponding gold standard
+				//There is no guarantee that each entity is mapped to same quality of the corresponding gold standard
+				System.out.println("Gold standard total EQ"+astates.get(i).size());
 				for(Hashtable<String, String> EQ :astates.get(i)){//gold standard
 					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
-						String[] vs = v.split("\\s*,\\s*");// handling multiple values in each statement(field level)
+						String[] vs = v.split("\\s*,\\s*");// handling multiple values in each statement(field level) => multiple EQ's for gold standard
 						for(String v1 : vs){
 							if(v1.length()>0) avalues.add(v1);// collects the field values from all the EQ's
 						}
@@ -233,7 +235,9 @@ public class EQPerformanceEvaluation {
 
 				Hashtable<String,Hashtable<String,Float>> topvalues = new Hashtable<String,Hashtable<String,Float>>();
 				int eqcount=0;
+				System.out.println("charparser total EQ"+tstates.get(i).size());
 				for(Hashtable<String, String> EQ :tstates.get(i)){// reference=> CharParser generated output
+					System.out.println("EQ"+eqcount);
 					ArrayList<String> tvalues = new ArrayList<String>();
 					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
@@ -242,71 +246,77 @@ public class EQPerformanceEvaluation {
 							if(v1.length()>0) tvalues.add(v1);//holds all the entity proposals of this EQ statement
 						}
 					}
-					//evaluate cost associated with each proposal and group them
+					System.out.println("total number of proposals"+tvalues.size());
+					//evaluate cost associated with each proposal and GS, grouping them
 					Hashtable<String,Float> groups = new Hashtable<String,Float>();
 					for(int j = 0; j<avalues.size(); j++){//gold standard entities
 						float maxscore = 0;
 						String entityproposal ="";
 						ArrayList<Float> otherscores = new ArrayList<Float>();
+						//System.out.println("gold standard GS   "+j);
 						for(int k = 0; k < tvalues.size(); k++){// reference entity proposals
-							String v1 = tvalues.get(k);
-							String a = avalues.get(j);
-
+							String v1 = tvalues.get(k).replace("\"", "");
+							String a = avalues.get(j).replace("\"", "");
+							
 							//here, all the possible combinations should be scored and the best should be retained
 							if(field.matches(".*(id)")==true)
 							{
 								tempcount= getIdMatchScore(v1.toLowerCase(),a.toLowerCase(),field);// uses exact match, partial match using elk to find the similarity score
-								wcount+=tempcount;
+								//System.out.println(tempcount);
 								if(maxscore<tempcount)
 								{
 									maxscore=tempcount;//score alone is important
 								}
+								otherscores.add(tempcount);
 							}
 							else if(field.matches(".*(label)")==true)
 							{
 								tempcount= getLabelMatchScore(v1.toLowerCase(),a.toLowerCase(),field);// Uses exact match and METEOR evaluation parameter to find the similarity of sentences
-								wcount+=tempcount;
+								//System.out.println(tempcount);
 								if(maxscore<tempcount)
 								{
 									maxscore=tempcount;
 								}
 								otherscores.add(tempcount);
 							}
-
 						}
-						//apply penalty to the maximum score
-						maxscore = penalty(maxscore,otherscores);
-						groups.put("EQP"+j, maxscore);// stores the best of eqp * eq (from GS)
+						//apply penalty to the maximum score, since many alternatives were proposed
+						maxscore = penalty(maxscore,otherscores,otherscores.size());
+						System.out.println("gold standard GS   "+j+"Max score ==== "+maxscore);
+						groups.put("GS"+j, maxscore);// stores the best of  eq (from GS) *eqp1
 					}
 					topvalues.put("EQ"+eqcount++, groups);//Stores each EQ's best entity proposals
 					//group should contain the maximum combination of generated*gold standard
 				}
 				//the below code picks out the best EP and E(GS) mapping => basically resolving the groups
-				for(int j=0;j<avalues.size();j++)
-				{
-					float max=0;
-					Set<String> groups = topvalues.keySet();
+					String matched ="";			
+					Set<String> EQS = topvalues.keySet();
 					String tempgroup="";
-				for(String group:groups)
+				for(String EQ:EQS)//each EQ's
 				{
-					Hashtable<String,Float> eq = topvalues.get(group);
-					Set<String> keys = eq.keySet();
-					for(String key:keys)
+					Hashtable<String,Float> gsgroups = topvalues.get(EQ);//gets the group of each EQ containing GS->EQ matching scores
+					Set<String> groups = gsgroups.keySet();
+					float max=0;
+					tempgroup="";
+					for(String group:groups)
 					{
-						if(key.matches(".*"+j+"$")==true)
+						if(matched.contains(group)==false)
 						{
-							if(max<eq.get(key))
+							if(max<gsgroups.get(group))
 							{
-								max = eq.get(key);
+								max = gsgroups.get(group);
 								tempgroup=group;
 							}
 						}
 					}
+					matched+=" "+tempgroup;
+					System.out.println("max====="+max);
+					counts.put("matched"+field, ""+(Float.parseFloat(counts.get("matched"+field))+max));
+
 				}
-				counts.put("matched"+field, ""+(Float.parseFloat(counts.get("matched"+field))+max));
-				if(tempgroup!="")
-					topvalues.remove(tempgroup);// to make sure that this group is not considered again as one entity proposal has been already considered
-				}
+			//	if(tempgroup!="")
+			//		topvalues.remove(tempgroup);// to make sure that this group is not considered again as one entity proposal has been already considered
+				
 
 
 			}
@@ -317,6 +327,10 @@ public class EQPerformanceEvaluation {
 		String fieldstring = "";
 		for(String field : this.fields){
 			fieldstring += field+"p,"+field+"r,";
+			System.out.println("\t\t\t\t matchedfield======"+counts.get("matched"+field));
+			System.out.println("\t\t\t\tgeneratedfield======"+counts.get("generated"+field));
+			System.out.println("\t\t\t inanswerfield======"+counts.get("inanswer"+field));
+
 			float p = Float.parseFloat(counts.get("generated"+field))==0? -1 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("generated"+field));
 			float r = Float.parseFloat(counts.get("inanswer"+field)) ==0? -1 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("inanswer"+field));
 			prstring += p+","+r+",";
@@ -324,6 +338,7 @@ public class EQPerformanceEvaluation {
 		prstring = prstring.replaceFirst(",$", "");
 		fieldstring = fieldstring.replaceFirst(",$", "");
 		insertInto(this.prtablefields, fieldstring, prstring);
+		System.out.println("End of compare fields");
 	}
 /*
  * 
@@ -331,8 +346,8 @@ public class EQPerformanceEvaluation {
  * 
  */
 
-	private float penalty(float maxscore, ArrayList<Float> otherscores) {
-System.out.println("inside penalty for EP");
+	private float penalty(float maxscore, ArrayList<Float> otherscores, int totalsize) {
+//System.out.println("inside penalty for EP");
 		//removing the max score from the list
 		float meansquare =0;
 		float standarddeviation =0;
@@ -355,7 +370,8 @@ System.out.println("inside penalty for EP");
 		if(otherscores.size()>0)
 		{
 			standarddeviation = meansquare/otherscores.size();
-			penalty = (float) (standarddeviation * Math.pow((otherscores.size()/(otherscores.size()+1)), 3));
+			standarddeviation=(float) Math.sqrt(standarddeviation);
+			penalty = (float) (standarddeviation * Math.pow((double)(((float)totalsize-1)/(float)(totalsize)), 3));
 		}
 		finalscore = maxscore - penalty;
 		return finalscore;
@@ -384,7 +400,7 @@ System.out.println("inside penalty for EP");
  * @return count holds the closeness score
  */
 	private float getIdMatchScore(String a, String v, String field) {
-System.out.println("inside getidmatch score");
+//System.out.println("inside getidmatch score");
 		float count=0;
 		ELKReasoner elk =null;
 		Hashtable<String,Float> substrings = new Hashtable<String, Float>();//holds substrings in candidate string along with the score
@@ -447,7 +463,7 @@ System.out.println("inside getidmatch score");
 	 * @param field
 	 */
 	private void getTotal(String field) {
-System.out.println("inside get total");
+//System.out.println("inside get total");
 		try{
 			Statement stmt = conn.createStatement();
 			//total for answers(Gold standard)
@@ -462,6 +478,7 @@ System.out.println("inside get total");
 					}
 			}
 			counts.put("inanswer"+field, ""+(count++));
+			System.out.println("inanswer"+field+ "    "+(count));
 
 			//total for generated(our algorithm
 			count = 0;
@@ -476,7 +493,7 @@ System.out.println("inside get total");
 		}
 		
 			counts.put("generated"+field, ""+(count++));
-
+			System.out.println("generated"+field+ "    "+(count));
 
 
 		}catch(Exception e){
@@ -525,20 +542,22 @@ System.out.println("inside get total");
 			Hashtable<String,Hashtable<String,Float>> eqgroups = new Hashtable<String,Hashtable<String,Float>>();
 			int counter=0;
 			statescore=0;
+			int eqcount=0;
+			System.out.println("state"+i);
 			for(Hashtable<String, String> tEQ : tstates.get(i)){
-				String entity = tEQ.get("entityid");
-				String relatedentitylabel = tEQ.get("relatedentityid");
-				String quality = tEQ.get("qualityid");
+				System.out.println("EQ==="+eqcount++);
+				String entity = tEQ.get("entityid");//contains entity proposals seprated by comma
+				String relatedentitylabel = tEQ.get("relatedentityid");//ditto
+				String quality = tEQ.get("qualityid");//ditto
 
-				quality=quality.replaceAll("\\[.*\\]", "").trim();//replacing anyhting inside bracket with space
-				System.out.println("before matchAstates");
+				quality=quality.replaceAll("\\[.*\\]", "").trim();//replacing anything inside bracket[] with space
 				eqgroups.put("EQ"+counter++,matchAstates(entity, relatedentitylabel, quality, astates.get(i), ""));//   EQ,(gs,scores)
-				System.out.println("after matchAstates");
 
 			}
+			//change the hash table to be GS -> EQ to maximize the score
 			//pick out the matching EQ's 
 			System.out.println("sorting out EQ's");
-			Set<String> keys = eqgroups.keySet();
+			Set<String> keys = eqgroups.keySet();//gives all the eq's
 			String gsmatched="";
 			for(String key:keys)
 			{
@@ -547,8 +566,10 @@ System.out.println("inside get total");
 				Set<String> keys2 = eqmatch.keySet();
 				float maxscore=0;
 				String matched="";
+				System.out.println(key);
 				for(String key2:keys2)
 				{
+					System.out.println("gs=== "+key2+" match score"+eqmatch.get(key2));
 					if((maxscore<eqmatch.get(key2))&&(gsmatched.matches(key2)==false)) //reading each of the eq's and finding the best match
 					{
 						maxscore=eqmatch.get(key2);
@@ -558,7 +579,7 @@ System.out.println("inside get total");
 				gsmatched+=" "+matched;//used to track the gold standards already matched
 				statescore+=maxscore;
 			}
-			System.out.println("After sorting out EQ's");
+			System.out.println("State score"+i+"   "+statescore);
 
 			totalscore+=statescore;
 		}
@@ -588,36 +609,55 @@ System.out.println("inside get total");
 		System.out.println("inside match a state");
 		//one state may have N EQs
 		float matchscore = 0;
-		String entityproposals[] = entity.split(",");
-		String qualityproposals[] = quality.split(",");
-		String relatedentityproposals[] = relatedentity.split(",");
+		String entityproposals[] = entity.replace("\"","").split(",");
+		String qualityproposals[] = quality.replace("\"","").split(",");
+		String relatedentityproposals[] = relatedentity.replace("\"","").split(",");
 		Hashtable<String,Float> group = new Hashtable<String,Float>();
-
+//Gives score of all the proposals against all the gold standards
 		for(int i = 0; i < aState.size(); i++){//Parsing through multiple EQ's of each state(gold standard)
-			for(int j=0;j<entityproposals.length;j++)
+			ArrayList<Float> otherscores = new ArrayList<Float>();
+			for(int j=0;j<entityproposals.length;j++)//parsing through multiple proposals
 			{
 				for(int k=0;k<qualityproposals.length;k++)
 				{
 					for(int p=0;p<relatedentityproposals.length;p++)
 					{
-						System.out.println("before matchinstate");
 						float epscore = matchInState(entityproposals[j], relatedentityproposals[p], qualityproposals[k], aState.get(i), suffix);
-						System.out.println("after matchinstate");
-
+						
 						if(epscore > matchscore)
 						{//max of all states as the character's matchsize 
 							matchscore = epscore;
 							//Not breaking out until, we find more appropriate match by iterating through the EQ's for that particular stateid
 						}
+						otherscores.add(epscore);
 					}
 				}	
 				}
+			int totalsize= gettotalsize(entityproposals.length,qualityproposals.length,relatedentityproposals.length);
+			matchscore= penalty(matchscore,otherscores,totalsize);
 			group.put("GS"+i, matchscore);//holds the maximum closeness score for all the GS statement with this EQ
+			System.out.println("GS"+i+"matchscore"+matchscore);
 			}
 		return group;
 		}
 
 
+
+	private int gettotalsize(int entitysize, int qualitysize, int relatedentitysize) {
+
+/*		int maxsize = entitysize;
+		if(qualitysize>relatedentitysize)
+		{
+		if(maxsize<qualitysize)
+			maxsize = qualitysize;
+		}else
+		{
+			if(maxsize<relatedentitysize)
+				maxsize = relatedentitysize;
+		}*/
+		return entitysize+qualitysize+relatedentitysize;
+
+	}
 
 	/**
 	 * 
@@ -636,10 +676,8 @@ System.out.println("inside get total");
 		totalscore+=getIdMatchScore(entity.toLowerCase(),EQ.get("entityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(relatedentity.toLowerCase(),EQ.get("relatedentityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(quality.toLowerCase(),EQ.get("qualityid").toLowerCase(),"quality");
-		
-		System.out.println("outside match in state");
-		
-		if((relatedentity.toLowerCase()=="")&&(EQ.get("relatedentityid").toLowerCase()!=""))
+				
+		if((relatedentity.toLowerCase().equals("")==true)&&(EQ.get("relatedentityid").toLowerCase().equals("")==true))
 		return totalscore/2;
 		else
 		return totalscore/3;
@@ -653,7 +691,7 @@ System.out.println("inside get total");
 	 */
 	public  float meteor(String candidate,String reference)
 	{
-		System.out.println("inside meteor");
+		//System.out.println("inside meteor");
 		candidate = candidate.replaceAll("(\\(|\\))","");
 		reference = reference.replaceAll("(\\(|\\))","");
 		float matchedunigrams = (float)unigramMatcher(candidate,reference);
@@ -666,9 +704,12 @@ System.out.println("inside get total");
 		String substring;
 		float chunklength= (float)maxChunks(candidate,reference,0,candidate.split(" ").length-1);
 		// calculate penalty
+		if(matchedunigrams>0)
+		{
 		penalty = (float) ((float)(0.5)* Math.pow((chunklength/matchedunigrams), 3));
 		// calculate meteor score
 		finalscore = (fmean)*(1-penalty);
+		}
 		return finalscore;
 
 	}
@@ -679,7 +720,7 @@ System.out.println("inside get total");
  */
 	private  int unigramMatcher(String candidate, String reference)
 	{
-		System.out.println("inside unigram matcher");
+		//System.out.println("inside unigram matcher");
 		String cand[] = candidate.split(" ");
 		String ref[] = reference.split(" ");
 		int matches=0;
@@ -708,7 +749,7 @@ System.out.println("inside get total");
 	 */
 	private int maxChunks(String candidate,String reference,int start,int end)
 	{
-		System.out.println("inside max chunks");
+		//System.out.println("inside max chunks");
 		String tokens[] = candidate.split(" ");
 		String bigchunk="";
 		String substring;
@@ -753,7 +794,7 @@ System.out.println("inside get total");
 		} else 
 		{
 			substring = substring(tokens,start,end);
-			System.out.println(substring);
+			//System.out.println(substring);
 			return 1 ;
 		}
 
@@ -766,8 +807,8 @@ System.out.println("inside get total");
 
 	private void getMatchingSubstrings(String candidate,String reference,int start, int end, Hashtable<String,Float> substrings,String type,ELKReasoner elk,Hashtable<String,String> equivalence)
 	{
-		System.out.println("inside getmatching substring");
-		System.out.println(candidate+"       "+reference);
+		//System.out.println("inside getmatching substring");
+		//System.out.println(candidate+"       "+reference);
 		if (candidate == null || reference == null || candidate.length() == 0 || reference.length() == 0) {
 			return;
 		}
@@ -797,10 +838,10 @@ System.out.println("inside get total");
 				if(c[i].equals(r[j]))
 				{
 					score =1;
-				} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i],"http://purl.obolibrary.org/obo/"+r[j])==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j],"http://purl.obolibrary.org/obo/"+c[i])==true)
+				} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
 				{
 					score=(float) 0.75;
-				} else if((type.equals("entity"))&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i],"http://purl.obolibrary.org/obo/"+r[j])==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j],"http://purl.obolibrary.org/obo/"+c[i])==true)))
+				} else if((type.contains("entity"))&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
 				{
 					score=(float) 0.75;
 				}
@@ -853,13 +894,13 @@ System.out.println("inside get total");
 			}
 			else
 			{
-				System.out.println("--end of function-----");
+				//System.out.println("--end of function-----");
 				return;
 			}
 		} else 
 		{
 			substrings.put(substring,finalscore);
-			System.out.println("--end of function-----");
+		//	System.out.println("--end of function-----");
 			return;
 		}
 	}
@@ -889,7 +930,7 @@ System.out.println("inside get total");
  */
 	private static float replaceSubString(String candidate, String reference,
 			Hashtable<String, Float> substrings, Hashtable<String,String> substringmap) {
-System.out.println("inside replace substring");
+//System.out.println("inside replace substring");
 		char alphabets = 'a';
 		int i=0;
 		float finalscore= 0;
@@ -1002,7 +1043,7 @@ System.out.println("inside replace substring");
 	
 	//Sorts the given set according to length of the key
 	private static Set<String> sort(Set<String> keys) {
-System.out.println("Inside sort");
+//System.out.println("Inside sort");
 		LinkedHashSet<String> temp1 = new LinkedHashSet<String>();
 		String temp2[] = new String[keys.size()];
 		String temp;
@@ -1038,7 +1079,7 @@ System.out.println("Inside sort");
 	 * 
 	 */
 	public static ArrayList<String> lcs(String a, String b, Hashtable<String, Float> chunkscore) {
-		System.out.println("Inside LCS");
+		//System.out.println("Inside LCS");
 		int[][] lengths = new int[a.length()+1][b.length()+1];
 		String candidateposition ="";
 		String referenceposition ="";
@@ -1153,19 +1194,6 @@ System.out.println("Inside sort");
 			return sb;
 	}
 
-	/*
-	 * The cases that can be covered are wrong word order
-	 * unmatched words can be synonyms
-	 * wrong word needs deletion,substuition 
-	 * 
-	 */
-	public int costToConvert(String generatedsent,String goldstandard)
-	{
-
-
-		return 0;
-	}
-
 	private static String format(String token) {
 
 		token = token.replaceAll("(and |some |all )", "");
@@ -1184,7 +1212,7 @@ System.out.println("Inside sort");
 		//String candidate = "the cat sat on the mat";
 		//	String reference = "the cat was sat on the mat";
 		//System.out.println(meteor(candidate,reference,1,1));
-		work(database, "goldstandard","input", "NewEQEval");
+		work(database, "input", "goldstandard","NewEQEval");
 		
 		//maxChunks("28135","13528635",0,3);
 
