@@ -132,12 +132,26 @@ public class XML2EQ {
 		// qualityid
 		// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
 		stmt.execute("drop table if exists " + outputtable);
-		stmt.execute("create table if not exists " + outputtable
+/*		stmt.execute("create table if not exists " + outputtable
 				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
 				+ "entity varchar(200), entitylabel varchar(200), entityid varchar(200), " + "quality varchar(200), qualitylabel varchar(200), qualityid varchar(200), "
 				+ "qualitynegated varchar(200), qualitynegatedlabel varchar(200), " + "qnparentlabel varchar(200), qnparentid varchar(200), "
 				+ "qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(300), "
 				+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
+		*/
+		
+		stmt.execute("create table if not exists " + outputtable
+				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
+				+ "entityid varchar(2000), entitylabel varchar(2000),  " + "qualityid varchar(2000), qualitylabel varchar(2000), "
+				+ "relatedentityid varchar(2000), relatedentitylabel varchar(2000), "
+				+ "qualitymodifier varchar(2000), qualitymodifierlabel varchar(2000), qualitymodifierid varchar(3000), "
+				+ "entitylocator varchar(2000), entitylocatorlabel varchar(2000), entitylocatorid varchar(2000))");
+		System.out.println("create table if not exists " + outputtable
+				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
+				+ "entityid varchar(2000), entitylabel varchar(2000),  " + "qualityid varchar(2000), qualitylabel varchar(2000), "
+				+ "relatedentityid varchar(2000), relatedentitylabel varchar(2000), "
+				+ "qualitymodifier varchar(2000), qualitymodifierlabel varchar(2000), qualitymodifierid varchar(3000), "
+				+ "entitylocator varchar(2000), entitylocatorlabel varchar(2000), entitylocatorid varchar(2000))");
 		
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");

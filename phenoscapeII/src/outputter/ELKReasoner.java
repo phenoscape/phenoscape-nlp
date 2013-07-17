@@ -55,6 +55,8 @@ import org.semanticweb.owlapi.util.OWLObjectVisitorExAdapter;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import org.semanticweb.owlapi.util.SimpleShortFormProvider;
 
+import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
+
 
 public class ELKReasoner{
 	OWLReasoner reasoner;
@@ -279,6 +281,7 @@ public class ELKReasoner{
 		return false;
 	}*/
 
+	
 	public void dispose() {
 		reasoner.dispose();
 	}
@@ -338,12 +341,12 @@ public class ELKReasoner{
 			/*String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
 			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";*/
 			System.out.println("______________________________________________________________________________________________________________");
-			System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0001010","http://purl.obolibrary.org/obo/UBERON_0003607"));	
+			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));	
 
-			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424","http://purl.obolibrary.org/obo/UBERON_0010703"));
+			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));
 
-			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584"));
-			
+			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584"));
+		//	elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
 			elk.dispose();
 
 		} catch (OWLOntologyCreationException e) {
