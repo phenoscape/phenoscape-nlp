@@ -212,6 +212,7 @@ public class EQPerformanceEvaluation {
 
 		//collecting matched field by field
 		for(String field : this.fields){
+	
 			float wcount = 0;
 			float tcount = 0;
 			float acount = 0;
@@ -670,17 +671,17 @@ public class EQPerformanceEvaluation {
 	 */
 	private float matchInState(String entity, String relatedentity,String quality, Hashtable<String, String> EQ, String suffix)
 	{
-		System.out.println("inside match in state");
+		//System.out.println("inside match in state");
 		float totalscore=0;
 		
 		totalscore+=getIdMatchScore(entity.toLowerCase(),EQ.get("entityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(relatedentity.toLowerCase(),EQ.get("relatedentityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(quality.toLowerCase(),EQ.get("qualityid").toLowerCase(),"quality");
-				
+		//Related entity, if present in both then only it should be taken into consideration		
 		if((relatedentity.toLowerCase().equals("")==true)&&(EQ.get("relatedentityid").toLowerCase().equals("")==true))
 		return totalscore/2;
 		else
-		return totalscore/3;
+		return totalscore/3;//approximation to 1
 		
 	}
 	/*
@@ -706,7 +707,7 @@ public class EQPerformanceEvaluation {
 		// calculate penalty
 		if(matchedunigrams>0)
 		{
-		penalty = (float) ((float)(0.5)* Math.pow((chunklength/matchedunigrams), 3));
+		penalty = (float) ((float)(0.5)* Math.pow((chunklength/matchedunigrams), 3));//chunklength shouldnt be greater than number of unigrams
 		// calculate meteor score
 		finalscore = (fmean)*(1-penalty);
 		}
@@ -793,9 +794,9 @@ public class EQPerformanceEvaluation {
 			}
 		} else 
 		{
-			substring = substring(tokens,start,end);
+			//substring = substring(tokens,start,end);
 			//System.out.println(substring);
-			return 1 ;
+			return 0 ;
 		}
 
 	}
@@ -825,12 +826,16 @@ public class EQPerformanceEvaluation {
 
 		for (int i = start; i <= end; i++) {
 			
-			if(type.matches(".*(entity).*")==true)
+			if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo).*")==true)
 			{
-				if(c[i].matches("(bspo|BSPO).*")==false)
+				if(c[i].matches(".*(bspo|BSPO).*")==false)
 					elk = this.elkentity;
 				else
 					elk = this.elkspatial;
+			}
+			else
+			{
+				elk = this.elkquality;
 			}
 			for (int j = 0; j < rlength; j++) {
 				float score=0;
@@ -841,7 +846,7 @@ public class EQPerformanceEvaluation {
 				} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
 				{
 					score=(float) 0.75;
-				} else if((type.contains("entity"))&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
+				} else if((c[i].matches(".*(pato|PATO).*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
 				{
 					score=(float) 0.75;
 				}
