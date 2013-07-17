@@ -7,6 +7,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.mit.jwi.item.IIndexWord;
 import edu.mit.jwi.item.ISenseEntry;
 import edu.mit.jwi.item.ISynset;
@@ -19,7 +21,7 @@ import edu.mit.jwi.morph.WordnetStemmer;
  *
  */
 public class WordNet {
-
+	private static final Logger LOGGER = Logger.getLogger(WordNet.class);   
 	// This methods get all the possible synonyms with POS of the word passed.
 
 		public static Hashtable<String,Integer> getallsynonyms(String word) {

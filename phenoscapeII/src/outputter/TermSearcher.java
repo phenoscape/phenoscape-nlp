@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 
 /**
  * @author hong cui
@@ -19,7 +21,7 @@ import java.util.regex.Pattern;
  *
  */
 public class TermSearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(TermSearcher.class);   
 	/** The entity id cache. */
 	public static Hashtable<String, FormalConcept> entityIDCache = new Hashtable<String, FormalConcept>(); //term=> {id, label}
 	
@@ -93,7 +95,8 @@ public class TermSearcher {
 				m = p.matcher(phrase);
 			}
 			//spatials = dorsal ; phrase = portion,, spatials distal; phrase = end
-			String repl = Dictionary.spatialMaps.get(phrase);
+			//TODO: check: spatialMaps function is replaced by SpatialModifiedEntityStrategy.synVariation
+			/*String repl = Dictionary.spatialMaps.get(phrase);
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
 			
@@ -103,7 +106,7 @@ public class TermSearcher {
 				//if landed here, all matches based on this spatial reform are weak matches.
 				candidatematches.addAll(results);
 				results = new ArrayList<Hashtable<String, String>>();
-			}
+			}*/
 			phrase = phrasecopy;
 		}
 		

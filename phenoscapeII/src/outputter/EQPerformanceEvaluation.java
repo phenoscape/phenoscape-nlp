@@ -3,6 +3,9 @@
  */
 package outputter;
 
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.File;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,6 +17,9 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+
+
+import org.apache.log4j.Logger;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -23,6 +29,7 @@ import java.util.regex.Pattern;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 
+
 /**
  * @author Hariharan
  * Used the existing EQPerformance and enhanced it to work with upgraded algorithm
@@ -30,7 +37,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 @SuppressWarnings("unused")
 public class EQPerformanceEvaluation {
-
+	private static final Logger LOGGER = Logger.getLogger(EQPerformanceEvaluation.class);   
 	private Connection conn;
 	private String username ="root";
 	private String password = "forda444";
@@ -96,7 +103,7 @@ public class EQPerformanceEvaluation {
 
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -137,7 +144,7 @@ public class EQPerformanceEvaluation {
 			compareEQs(); //for raw/labeled EQ statements
 
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		this.elkentity.dispose();
 		this.elkquality.dispose();
@@ -453,7 +460,7 @@ public class EQPerformanceEvaluation {
 			System.out.println(fieldstring);
 			stmt.execute("insert into "+tablename+"("+fieldstring+")"+" values ("+prstring+")");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}		
 	}
 
@@ -498,7 +505,7 @@ public class EQPerformanceEvaluation {
 
 
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 
@@ -798,6 +805,7 @@ public class EQPerformanceEvaluation {
 			//System.out.println(substring);
 			return 0 ;
 		}
+
 
 	}
 	/*

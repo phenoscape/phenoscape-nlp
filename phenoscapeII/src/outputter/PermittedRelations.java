@@ -5,7 +5,10 @@ import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 public class PermittedRelations {	
+	private static final Logger LOGGER = Logger.getLogger(PermittedRelations.class);   
 	static Hashtable<String, QualityProposals> cache = new Hashtable<String, QualityProposals>();
 	/**
 	 * match the relation in PATO relation slim

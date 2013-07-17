@@ -3,12 +3,15 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -26,7 +29,9 @@ import owlaccessor.OWLAccessorImpl;
  *         statement
  */
 public class StateStatementParser extends Parser {
-	ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
+	//ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
+	private static final Logger LOGGER = Logger.getLogger(StateStatementParser.class);   
+	ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
 	String src;
 	String characterid;
 	String stateid;
@@ -39,6 +44,7 @@ public class StateStatementParser extends Parser {
 	static XPath pathRelation;
 	static XPath pathRelationUnderCharacter;
 	static XPath pathCharacter;
+	static XPath pathPostCompCharacter;
 	static XPath pathStructure;
 
 	static {
@@ -48,9 +54,10 @@ public class StateStatementParser extends Parser {
 			pathRelationUnderCharacter = XPath
 					.newInstance(".//statement[@statement_type='character']/relation");
 			pathCharacter = XPath.newInstance(".//character");
+			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true']");
 			pathStructure = XPath.newInstance(".//structure");
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -90,12 +97,13 @@ public class StateStatementParser extends Parser {
 	@Override
 	public void parse(Element statement, Element root) {
 		//refactored by extracting the following three methods
+		LOGGER.debug("StateStatementParser: parsing metadata...");
 		parseMetadata(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing relations...");
 		parseRelationsFormEQ(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing characters...");
 		parseCharactersFormEQ(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing standalone structures...");
 		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
 	}
 
@@ -109,7 +117,7 @@ public class StateStatementParser extends Parser {
 			text = ((Element) pathText2.selectSingleNode(statement))
 					.getTextNormalize();
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -143,7 +151,8 @@ public class StateStatementParser extends Parser {
 					}else if(ep.getQualityStrategy()!=null){
 						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
 						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
-						this.constructEQStatementProposals(qualities, primentities);	
+						//this.constructEQStatementProposals(qualities, primentities);	
+						this.constructEQProposals(qualities, primentities);	
 					}
 					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					//entities.addAll(ep);
@@ -177,32 +186,68 @@ public class StateStatementParser extends Parser {
 				q.setConfidenceScore(1f);
 				qp.add(q);
 				qualities.add(qp);
-				constructEQStatementProposals(qualities, entities1);
+				//constructEQStatementProposals(qualities, entities1);
+				constructEQProposals(qualities, entities1);
 				entities1.clear();
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
 	protected void parseCharactersFormEQ(Element statement, Element root) {
 		//then parse characters. 
-		List<Element> characters;
 		try {
-			characters = pathCharacter.selectNodes(statement);			
-			for (Element character : characters) {		
-				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+			ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+			
+			//if any one of the characters is a post-comp quality, the entity needs to be post-comped
+			List<Element> postcompchars = pathPostCompCharacter.selectNodes(statement);
+			ArrayList<QualityProposals> postcomps = new ArrayList<QualityProposals>();
+			for(Element character: postcompchars){
+				entities = new ArrayList<EntityProposals>();
+				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				parserCharacters(character, statement, root, entities, qualities);
-				constructEQStatementProposals(qualities, entities);
+				postcomps.addAll(qualities);
+			}
+			
+			if(postcomps.size()>0){
+				LOGGER.debug("SSP: found postcomp qualities: ");
+				for(QualityProposals qp: postcomps){
+					LOGGER.debug(".."+qp.toString());
+				}
+			}
+			Utilities.postcompose(entities, postcomps); //assuming the same entities being returned in the loop
+			
+			//other qualities
+			List<Element> characters = pathCharacter.selectNodes(statement);	
+			characters.removeAll(postcompchars);
+			
+			if(characters.size()<=0){
+				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
+				constructEQProposals(qualities, entities);
+			}else{
+				for (Element character : characters) {		
+					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'...");
+					entities = new ArrayList<EntityProposals>();
+					qualities = new ArrayList<QualityProposals>();
+					if(character.getParentElement()==null) continue;
+					parserCharacters(character, statement, root, entities, qualities);
+					LOGGER.debug("SSP: parsed entities:");
+					for(EntityProposals ep: entities) LOGGER.debug(ep.toString());
+					LOGGER.debug("SSP: parsed qualities:");
+					for(QualityProposals qp: qualities) LOGGER.debug(qp.toString());
+					//constructEQStatementProposals(qualities, entities);
+					Utilities.postcompose(entities, postcomps);
+					constructEQProposals(qualities, entities);
+				}
 			}
 			
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
-
 
 	/**
 	 * parse character and resolve for entity
@@ -399,7 +444,7 @@ public class StateStatementParser extends Parser {
 					constructureEQStatementProposals(qualities, entities);
 			}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	 */
@@ -421,10 +466,13 @@ public class StateStatementParser extends Parser {
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				List<QualityProposals> q = new ArrayList<QualityProposals>();
 				int flag = parseRelation(relation, root, StructuredQualities, entities,  q);
-				if(flag==1) constructEQStatementProposals(q, entities);
+				if(flag==1){
+					//constructEQStatementProposals(q, entities);
+					constructEQProposals(q, entities);
+				}
 			}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -511,7 +559,7 @@ public class StateStatementParser extends Parser {
 				{
 					q.addAll(rh.getQuality());
 				}
-				if (rh.otherEQs.size() > 0)
+				if (rh.otherEQs!=null && rh.otherEQs.size() > 0)
 				{
 					this.EQStatements.addAll(rh.otherEQs);
 				}
@@ -582,10 +630,48 @@ public class StateStatementParser extends Parser {
 		return flag;
 	}
 
-	private void constructEQStatementProposals(
+	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities){
+		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
+			for (QualityProposals qualityp : qualities){
+				for (EntityProposals entityp : entities) {
+					EQProposals eqp = new EQProposals();
+					eqp.setEntity(entityp);
+					eqp.setQuality(qualityp);
+					eqp.setSource(this.src);
+					eqp.setCharacterId(this.characterid);
+					eqp.setStateId(this.stateid);
+					eqp.setDescription(text);
+					if (this instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					this.EQStatements.add(eqp);
+				}
+			}			
+		} else if(entities!=null && entities.size()>0){ //no qualities
+				for (EntityProposals entityp : entities) {
+					EQProposals eqp = new EQProposals();
+					eqp.setEntity(entityp);
+					eqp.setQuality(null);
+					eqp.setSource(this.src);
+					eqp.setCharacterId(this.characterid);
+					eqp.setStateId(this.stateid);
+					eqp.setDescription(text);
+					if (this instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					this.EQStatements.add(eqp);
+				}					
+		}
+		
+	}
+	
+	
+	/*private void constructEQStatementProposals(
 			List<QualityProposals> qualities, ArrayList<EntityProposals> entities) {
-
-
 		if((entities!=null)&&(entities.size()>0))
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
@@ -611,7 +697,7 @@ public class StateStatementParser extends Parser {
 					this.EQStatements.add(eqp);
 				}
 			}
-	}
+	}*/
 
 	/**
 	 * if structid appears as a constraintid or toid, then it can't be a subject
@@ -784,7 +870,9 @@ public class StateStatementParser extends Parser {
 		return false;
 	}
 
-	public ArrayList<EQStatementProposals> getEQStatements() {
+	
+	//public ArrayList<EQStatementProposals> getEQStatements() {
+	public ArrayList<EQProposals> getEQStatements() {
 		return this.EQStatements;
 	}
 

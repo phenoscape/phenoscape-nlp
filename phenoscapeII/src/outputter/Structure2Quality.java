@@ -1,10 +1,13 @@
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -19,6 +22,7 @@ import org.jdom.xpath.XPath;
 
 public class Structure2Quality implements AnnotationStrategy{
 
+	private static final Logger LOGGER = Logger.getLogger(Structure2Quality.class);   
 	Element root;
 	String  relation;
 	String structname;
@@ -41,7 +45,7 @@ public class Structure2Quality implements AnnotationStrategy{
 		try{
 			pathCharacterUnderStucture = XPath.newInstance(".//character");
 		}catch (Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}*/
 
@@ -55,9 +59,9 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	public void handle() {
 		try {
-			if(!isPossibleQuality(this.structid)) return;
+			if(!isPossibleQuality()) return;
 			//whether to include spatial constraint in the search for quality
-			//first try include
+			//first, try include
 			//if failed, try exclude
 
 			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structname, false,1);
@@ -75,7 +79,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			//	parseforQuality(this.structname, this.structid); //to see if the structure is a quality (relational or other quality)
 			//}
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -91,15 +95,21 @@ public class Structure2Quality implements AnnotationStrategy{
 		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
 		{
 			this.structname = structure.getAttributeValue("name");
+			LOGGER.debug("Structure2Quality calls EntitySearcherOriginal to search structure constraint '"+structure.getAttributeValue("constraint")+"'");
 			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
 			return true;
 		}
 		return false;
 	}
 
-	private boolean isPossibleQuality(String strutid) throws JDOMException {
-		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
-		if((structure.getAttributeValue("constraint")!=null && !structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn))){ //has constraint but the constraint is not a spatial modifier, then this can not be a quality. for example: parasymphysial plate (should not match plate-like)
+	private boolean isPossibleQuality() throws JDOMException {
+		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.structid+"']");
+		//if structure has constraint but the constraint is not a spatial modifier, then this can not be a quality. for example: parasymphysial plate (should not match plate-like)
+		if((structure.getAttributeValue("constraint")!=null && !structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn))){ 
+			return false;
+		}
+		//if the full structurename (constraint+name) matches spatial term pattern (e.g.'dorsal surface'), then this can not be a quality
+		if(this.structname.matches("^("+Dictionary.spatialtermptn+")+\\s+("+Dictionary.allSpatialHeadNouns()+")+")){
 			return false;
 		}
 		return true;
@@ -119,7 +129,7 @@ public class Structure2Quality implements AnnotationStrategy{
 				//so don't detach relation here. 
 			} 
 		}catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

@@ -4,6 +4,8 @@
 package outputter;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -14,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import oboaccessor.OBO2DB;
+
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -24,7 +28,7 @@ import owlaccessor.OWLAccessorImpl;
  *
  */
 public class TermOutputerUtilities {
-	
+	private static final Logger LOGGER = Logger.getLogger(TermOutputerUtilities.class);   
 	public static ArrayList<OBO2DB> OBOqualityOntoAPIs = new ArrayList<OBO2DB>();
 	public static ArrayList<OBO2DB> OBOentityOntoAPIs  = new ArrayList<OBO2DB>();
 	public static ArrayList<OWLAccessorImpl> OWLqualityOntoAPIs = new ArrayList<OWLAccessorImpl>();
@@ -481,7 +485,7 @@ public class TermOutputerUtilities {
 	            return sb.toString();
 				
 		  	}catch(Exception e){
-		  		e.printStackTrace();
+		  		LOGGER.error("", e);
 		  	}
 		  	return "";
 	}

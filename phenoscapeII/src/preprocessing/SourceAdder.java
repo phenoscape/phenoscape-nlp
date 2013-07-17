@@ -3,10 +3,16 @@
  */
 package preprocessing;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
+import org.apache.log4j.Logger;
+
+import outputter.TermSearcher;
 
 /**
  * @author Hong Updates
@@ -22,6 +28,7 @@ public class SourceAdder {
 	private String srcprefix;
 	private String termcolumn;
 	private String mode;
+	private static final Logger LOGGER = Logger.getLogger(SourceAdder.class);   
 	
 	public SourceAdder(String termtable, String termcolumn, String mode,  String sentencetable, String termdatabase){
 		this.termtable = termtable;
@@ -36,7 +43,7 @@ public class SourceAdder {
 				conn = DriverManager.getConnection(URL);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -64,7 +71,7 @@ public class SourceAdder {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -73,7 +80,7 @@ public class SourceAdder {
 			Statement stmt = conn.createStatement();
 			stmt.execute("update "+this.termtable+ " set srcfile='"+srcprefix+"."+source+"', srcsentence='"+sentence+"' where "+this.termcolumn+"='"+term+"'");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		
 	}

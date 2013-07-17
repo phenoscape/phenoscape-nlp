@@ -9,11 +9,13 @@ package outputter;
  *
  */
 import java.util.*;
-
 import java.io.*;
+
+import org.apache.log4j.Logger;
 @SuppressWarnings({ "unused" })
 class StreamGobbler extends Thread
 {
+	private static final Logger LOGGER = Logger.getLogger(StreamGobbler.class);   
     InputStream is;
     String type;
     OutputStream os;
@@ -52,9 +54,9 @@ class StreamGobbler extends Thread
             if(sb.toString().trim().length()>0){
             	trees.add(sb.toString());
             }
-        } catch (IOException ioe)
+        } catch (IOException e)
             {
-            ioe.printStackTrace();  
+            LOGGER.error("", e);  
             }
     }
 

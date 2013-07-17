@@ -90,7 +90,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path3 = XPath.newInstance(".//character[@name='presence'][@value='present']");
 			path4 = XPath.newInstance(".//relation[starts-with(@name, 'present']");
 			path5 = XPath.newInstance(".//character[@name='character']");
-			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
+			path6 = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 			path7 = XPath.newInstance(".//structure");
 			path8 = XPath.newInstance(".//character[@name='count']");
 

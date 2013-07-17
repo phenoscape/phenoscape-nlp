@@ -6,6 +6,8 @@ package outputter;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -16,6 +18,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -37,7 +40,7 @@ import owlaccessor.OWLAccessorImpl;
  */
 public class EntitySearcherOriginal extends EntitySearcher {
 	
-
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);   
 	/**
 	 * * Search a phrase A B C
 	 * search A B C
@@ -64,31 +67,36 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
 		//create and maintain a cache for entity search?: yes, created in EntityParser
-	
+		LOGGER.debug("EntitySearcherOriginal: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
 			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
 			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
-			FormalRelation bearer = new FormalRelation("", "bearer of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
+			FormalRelation bearer = new FormalRelation("", "bearer_of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
 			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
 			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
 			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
 			CompositeEntity ce1 = new CompositeEntity();
+			ce1.setString("female");
 			ce1.addEntity(organism);
 			ce1.addEntity(re1);
 			EntityProposals ep = new EntityProposals();
-			ep.setPhrase(origname);
+			ep.setPhrase("female"); //the phrase set this proposal apart from the other one
 			ep.add(ce1);
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce1.toString());
 			eps.add(ep); //add one entity
 			CompositeEntity ce2 = new CompositeEntity();
 			ce2.addEntity(organism);
 			ce2.addEntity(re2);
+			ce2.setClassIRI("male");
 			ep = new EntityProposals();
-			ep.setPhrase(origname);
+			ep.setPhrase("male");//the phrase set this proposal apart from the other one
 			ep.add(ce2);
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce2.toString());
 			eps.add(ep); //add the other entity
+			LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returned two EntityProposals");
 			return eps;
 		}
 		
@@ -113,7 +121,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
-		
+		LOGGER.debug("EntitySearcherOriginal calls EntitySearcher0");
 		return new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;
@@ -128,7 +136,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			try{
 				texts = textpath.selectNodes(root);
 			}catch(Exception e){
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 			for(Element text : texts){
 				if(text.getTextNormalize().toLowerCase().contains(phrase)){
@@ -462,7 +470,8 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				if(bonecount == cartcount) return "element";
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}		
 		return null;
 	}
@@ -521,9 +530,9 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		try {
 			xml = builder.build(new File(src));
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		if(xml!=null){
 			Element root = xml.getRootElement();

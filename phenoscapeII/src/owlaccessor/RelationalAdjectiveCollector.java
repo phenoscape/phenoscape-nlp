@@ -4,6 +4,8 @@
 package owlaccessor;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,11 +15,16 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
 
 
+
+
+
 import outputter.ApplicationUtilities;
+import outputter.TermSearcher;
 
 /**
  * @author Hong Cui
@@ -25,7 +32,7 @@ import outputter.ApplicationUtilities;
  * this class is used to create a newtable holding relational adjectives that may be added to the the glossary table (relational adjectives are considered structures)
  */
 public class RelationalAdjectiveCollector {
-
+	private static final Logger LOGGER = Logger.getLogger(RelationalAdjectiveCollector.class);   
 	/**
 	 * 
 	 */
@@ -52,7 +59,7 @@ public class RelationalAdjectiveCollector {
 				}
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

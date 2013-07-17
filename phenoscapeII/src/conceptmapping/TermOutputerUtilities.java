@@ -4,6 +4,8 @@
 package conceptmapping;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -12,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import oboaccessor.OBO2DB;
+
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
@@ -36,7 +40,7 @@ public class TermOutputerUtilities {
 	private String database;
 
 	public static boolean debug = false;
-	
+	private static final Logger LOGGER = Logger.getLogger(TermOutputerUtilities.class);  
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
 		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
@@ -417,7 +421,7 @@ public class TermOutputerUtilities {
 	            return sb.toString();
 				
 		  	}catch(Exception e){
-		  		e.printStackTrace();
+		  		LOGGER.error("", e);
 		  	}
 		  	return "";
 	}

@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 /**
@@ -12,6 +13,7 @@ import org.jdom.Element;
  * search originals as precomposed entity
  */
 public class EntitySearcher0 extends EntitySearcher {
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher0.class);   
 
 	/**
 	 * 
@@ -22,36 +24,51 @@ public class EntitySearcher0 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
+		LOGGER.debug("EntitySearcher0: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//search the originals:
 		//no entity locator: try direct match, for examples: "bone of humerus", "posterior dorsal fin"
 		if(elocatorphrase==null || elocatorphrase.length()==0){
+			LOGGER.debug("search entity '"+entityphrase+"'");
 			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
 				EntityProposals ep = new EntityProposals();
-				ep.setPhrase(entityphrase);
+				//ep.setPhrase(entityphrase);
+				ep.setPhrase(originalentityphrase);
 				ep.add(entity);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				entities.add(ep);
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
+				LOGGER.debug("EntitySearcher0 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns");
+				for(EntityProposals aep: entities){
+					LOGGER.debug("..EntityProposals:"+aep.toString());
+				}
 				return entities;
 			}
 		}
 		//with entity locator:
 		if(prep.contains("part_of")){//glenoid head of scapula, Entity phrase = glenoid head, Elocator = scapula
-			if(elocatorphrase!="")
+			if(elocatorphrase.length()>0)
 			{
+				LOGGER.debug("search entity '"+entityphrase+" of "+elocatorphrase+"'");
 				SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
 				if(entity!=null){	
 					EntityProposals ep = new EntityProposals();
-					ep.setPhrase(entityphrase);
+					//ep.setPhrase(entityphrase);
+					ep.setPhrase(originalentityphrase);
 					ep.add(entity);
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-					entities.add(ep);
+					//entities.add(ep);
+					Utilities.addEntityProposals(entities, ep);
+					LOGGER.debug("EntitySearcher0 returns");
+					for(EntityProposals aep: entities){
+						LOGGER.debug("..EntityProposals:"+aep.toString());
+					}
 					return entities;
 				}
 			}
 		}
 		
-		
+		LOGGER.debug("EntitySearcher0 calls EntitySearch1");
 		return new EntitySearcher1().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 

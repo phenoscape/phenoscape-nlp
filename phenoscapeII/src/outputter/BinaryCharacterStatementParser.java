@@ -3,11 +3,14 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -17,7 +20,7 @@ import org.jdom.xpath.XPath;
  * parse out Entities and Qualities, form EQ directly without access state statements as they are just binary values, i.e., T/F. (not two different vaules, but binary values)
  */
 public class BinaryCharacterStatementParser extends StateStatementParser {
-
+	private static final Logger LOGGER = Logger.getLogger(BinaryCharacterStatementParser.class);   
 	/**
 	 * @param ontologyIRIs
 	 */
@@ -29,7 +32,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			pathrelation = XPath.newInstance(".//relation");
 
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -40,7 +43,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	/**
 	 * @param statement: the character statement in a binary statement 
 	 */
-	public void parse(Element statement, Element root){
+	/*public void parse(Element statement, Element root){
 		ArrayList<EQStatementProposals> negativestatements = new ArrayList<EQStatementProposals>();
 		super.parseMetadata(statement, root);
 		super.parseRelationsFormEQ(statement, root);
@@ -51,7 +54,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			parseStandaloneStructures(statement, root);
 			//} catch (JDOMException e) {
 			// TODO Auto-generated catch block
-			//	e.printStackTrace();
+			//	LOGGER.error("", e);
 			//}
 		}
 		for(EQStatementProposals eqp: this.EQStatements){
@@ -115,7 +118,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							if(q1.getId()!=null)
 							{
 								@SuppressWarnings("static-access")
-								 
+
 								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
 								if(complementQuality==null)
 								{
@@ -159,6 +162,121 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			}
 		}
 		this.EQStatements.addAll(negativestatements);
+	}*/
+
+	/**
+	 * @param statement: the character statement in a binary statement 
+	 */
+	public void parse(Element statement, Element root){
+		ArrayList<EQProposals> negativestatements = new ArrayList<EQProposals>();
+		super.parseMetadata(statement, root);
+		super.parseRelationsFormEQ(statement, root);
+		super.parseCharactersFormEQ(statement, root);
+		if(this.EQStatements.size()==0){
+			parseStandaloneStructures(statement, root);
+		}
+		for(EQProposals eqp: this.EQStatements){
+			//for(EQStatement eq: eqp.getProposals()){
+			//update q for all eq candidates
+
+			QualityProposals qp = eqp.getQuality();
+			if(qp==null){//no qp, create qp
+				//q = "present"
+				qp = new QualityProposals();
+				Quality q = new Quality();
+				q.setString("present");
+				q.setLabel("PATO:present");
+				q.setId("PATO:0000467");
+				q.setConfidenceScore((float)1.0);
+				qp.add(q);
+				eqp.setQuality(qp);//update qp
+				//create absent quality
+				Quality absent = new Quality();
+				absent.setString("absent");
+				absent.setLabel("PATO:absent");
+				absent.setId("PATO:0000462");
+				absent.setConfidenceScore((float)1.0);
+				qp = new QualityProposals();
+				qp.add(absent);
+				EQProposals falseeq = eqp.clone();
+				falseeq.setQuality(qp);
+				negativestatements.add(falseeq);			
+			}else{//has q, generate and add negated quality
+				int flag=0;
+				QualityProposals negativeqp = new QualityProposals();
+				for(Quality q: qp.getProposals()){
+					if(q instanceof RelationalQuality) //relational, generate and add negated quality
+					{
+						QualityProposals thisqp = ((RelationalQuality)q).relationalquality;
+						EntityProposals relatedentity = ((RelationalQuality)q).relatedentity;
+						QualityProposals nqp = new QualityProposals();
+						for(Quality q1:thisqp.proposals)
+						{
+							if(q1.getId()!=null)
+							{
+								@SuppressWarnings("static-access")
+
+								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
+								if(complementQuality==null)
+								{
+									String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q1.getId()); 
+									if(parentinfo!=null)
+									{
+										Quality parentquality = new Quality();
+										parentquality.setString(parentinfo[1]);
+										parentquality.setLabel(parentinfo[1]);
+										parentquality.setId(parentinfo[0]);
+										NegatedQuality nq = new NegatedQuality(q1, parentquality);
+										nqp.proposals.add(nq);
+									}
+								}
+								else
+								{
+									complementQuality = Utilities.removeprepositions(complementQuality);
+									Hashtable<String,String> cq = Dictionary.relationalqualities.get(complementQuality);
+									Set<String> keys = cq.keySet();
+									for(String key:keys)
+									{
+										Quality negated =new Quality();
+										negated.setLabel(key);
+										negated.setId(cq.get(key));
+										negated.setString(key);
+										nqp.proposals.add(negated);
+
+									}
+								}
+							}
+						}
+						RelationalQuality rq = new RelationalQuality(nqp,relatedentity);
+						negativeqp.add(rq);
+						EQProposals falseeq = eqp.clone();
+						falseeq.setQuality(negativeqp);
+						negativestatements.add(falseeq);	
+					}else{ //not relational, generate and add the negated quality
+						if(q.getId()!=null)
+						{
+							@SuppressWarnings("static-access")
+							String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q.getId()); 
+							if(parentinfo!=null)
+							{
+								Quality parentquality = new Quality();
+								parentquality.setString(parentinfo[1]);
+								parentquality.setLabel(parentinfo[1]);
+								parentquality.setId(parentinfo[0]);
+								NegatedQuality nq = new NegatedQuality(q, parentquality);
+								negativeqp.add(nq);
+								EQProposals falseeq = eqp.clone();
+								falseeq.setQuality(negativeqp);
+								negativestatements.add(falseeq);	
+							}
+						}
+					}
+
+				}
+			}
+		}
+		//}
+		this.EQStatements.addAll(negativestatements);
 	}
 
 	/**
@@ -177,8 +295,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				String structureid = structure.getAttributeValue("id");
 				if(!checked.contains(structureid+",")){
 					String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
-							 "|//relation[@name='in'][@from='" + structureid + "']" +
-							 "|//relation[@name='on'][@from='" + structureid + "']", 0);
+							"|//relation[@name='in'][@from='" + structureid + "']" +
+							"|//relation[@name='on'][@from='" + structureid + "']", 0);
 					String structurename = Utilities.getStructureName(root, structureid);
 					EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, true);
 					if(ep.getEntity()!=null) entities.addAll(ep.getEntity());
@@ -188,7 +306,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			}
 			resolve(entities, s2qs, statement, root); //after resolution, entities holds good entities
 
-			for(EntityProposals entityp: entities){
+			/*for(EntityProposals entityp: entities){
 				EQStatementProposals eqp= new EQStatementProposals();
 				for(Entity entity: entityp.getProposals()){
 					EQStatement eq = new EQStatement();
@@ -199,12 +317,22 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					eq.setDescription(super.text);
 					eq.setType("character");
 					eqp.add(eq);
-					//this.EQStatements.add(eq);
 				}
 				this.EQStatements.add(eqp);
-			}
+			}*/
+
+			for(EntityProposals entityp: entities){
+				EQProposals eqp= new EQProposals();
+				eqp.setEntity(entityp);
+				eqp.setSource(super.src);
+				eqp.setCharacterId(super.characterid);
+				eqp.setStateId(super.stateid);
+				eqp.setDescription(super.text);
+				eqp.setType("character");
+				this.EQStatements.add(eqp);
+			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 

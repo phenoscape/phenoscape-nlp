@@ -80,7 +80,7 @@ public class TestOWLAccessorImpl {
 			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}*/
 		
 //	}
@@ -145,7 +145,6 @@ public class TestOWLAccessorImpl {
 		try {
 			to.testGetAnnotationProperties();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

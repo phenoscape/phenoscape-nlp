@@ -5,11 +5,15 @@ package outputter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -17,10 +21,11 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public class Utilities {
+	private static final Logger LOGGER = Logger.getLogger(Utilities.class);   
 	private static Hashtable<String, String> entityhash = new Hashtable<String, String>();
 
 	private static Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
@@ -33,7 +38,7 @@ public class Utilities {
 	public Utilities() {
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	/**
 	 * 
 	 * @param sid
@@ -50,7 +55,7 @@ public class Utilities {
 			String singularname = struct.getAttributeValue("name");
 			String pluralname = TermOutputerUtilities.toPlural(singularname);
 			String name = "\\b("+pluralname+"|"+singularname+"|"+singularname.substring(0, singularname.length()-2)+".*?)\\b";
-			
+
 			String constraint = "";
 			if(struct.getAttribute("constraint")!=null){
 				String singularconstraint = struct.getAttributeValue("constraint");
@@ -72,28 +77,29 @@ public class Utilities {
 				structs= XPath.selectNodes(statement, ".//structure[@name='"+singularname+"']");
 			}
 			//search in text
-			
-			
+
+
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
-		
-		
+
+
 		return false;
 	}*/
-	
+
 	public static List<Element>  relationWithStructureAsSubject(String sid, Element root) {
 		try{
 			XPath tostructure = XPath.newInstance(".//relation[@from='"+sid+"']");
 			List<Element> rel = (List<Element>)tostructure.selectNodes(root);
 			if(rel != null) return rel;
-			
+
 		}catch(Exception e){
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}		
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param structureid
@@ -105,7 +111,8 @@ public class Utilities {
 			List<Element> chars = characters.selectNodes(root);
 			if(chars.size()>0) return true;
 		}catch(Exception e){
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}	
 		return false;
 	}
@@ -128,7 +135,7 @@ public class Utilities {
 				rel.setAttribute("from", newid);
 		}
 	}
-	
+
 	/**
 	 * trace part_of relations of structid to get all its parent structures,
 	 * separated by , in order
@@ -162,7 +169,8 @@ public class Utilities {
 				return path.replaceFirst(",$", "");
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}
 		return path.replaceFirst(",$", "");
 	}
@@ -200,12 +208,13 @@ public class Utilities {
 				return path.replaceFirst(",$", "");
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}
 		return path.replaceFirst(",$", "").trim();
 	}
 
-	
+
 	public static String formQualityValueFromCharacter(Element chara) {
 		String charatype = chara.getAttribute("char_type") != null ? "range" : "discrete";
 		String quality = "";
@@ -223,7 +232,7 @@ public class Utilities {
 		quality = quality.replaceAll("\\[\\]", "").replaceAll("\\s+", " ").trim();
 		return quality;
 	}
-	
+
 	/**
 	 * spatial terms in adverb form: e.g. laterally
 	 * @param chara
@@ -270,13 +279,14 @@ public class Utilities {
 				}
 				result += sname + ",";
 			}catch(Exception e){
-				e.printStackTrace();
+				StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+				LOGGER.error(sw.toString());
 			}
 		}
 		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
 		return result;
 	}
-	
+
 	/**
 	 * Get structure names for 1 or more structids from the XML results of CharaParser.
 	 * 
@@ -300,7 +310,8 @@ public class Utilities {
 				}
 				result += sname + ",";
 			}catch(Exception e){
-				e.printStackTrace();
+				StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+				LOGGER.error(sw.toString());
 			}
 		}
 		result = result.replaceAll("\\s+", " ").replaceFirst(",$", "").trim();
@@ -323,7 +334,7 @@ public class Utilities {
 		for(int i = start; i <=end; i++) result += tokens[i]+delimiter;
 		return result.replaceFirst(delimiter+"$", "");
 	}
-	
+
 	public static void initEQHash(Hashtable<String, String> EQ) {
 		EQ.put("source", "");
 		EQ.put("characterid", "");
@@ -348,7 +359,7 @@ public class Utilities {
 		EQ.put("entitylocatorid", "");
 		EQ.put("countt", "");
 	}
-	
+
 	/**
 	 * fifth abc => abc 5
 	 * abc_1 => abc 1
@@ -520,22 +531,22 @@ public class Utilities {
 			return "10";
 		return null;
 	}
-//code to remove prepositions from starting and ending of strings => Hariharan
+	//code to remove prepositions from starting and ending of strings => Hariharan
 	public static String removeprepositions(String trim) {
 		for(;;)
 		{
-	   if(trim.matches("("+preposition+")\\s.*"))
-		   trim = trim.substring(trim.indexOf(" ")+1);
-	   else
-		   break;
+			if(trim.matches("("+preposition+")\\s.*"))
+				trim = trim.substring(trim.indexOf(" ")+1);
+			else
+				break;
 		}
-		
+
 		for(;;)
 		{
 			if(trim.matches(".*\\s("+preposition+")"))
-				   trim = trim.substring(0,trim.lastIndexOf(" "));
-			   else
-				   break;
+				trim = trim.substring(0,trim.lastIndexOf(" "));
+			else
+				break;
 		}
 		return trim;
 	}
@@ -549,14 +560,14 @@ public class Utilities {
 		try {
 			xml = builder.build(f);
 		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			StringWriter sw = new StringWriter();PrintWriter pw = new PrintWriter(sw);e.printStackTrace(pw);
+			LOGGER.error(sw.toString());
 		}
 		Element root = xml.getRootElement();
-		
+
 		System.out.println(Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='o229']", 0));
 
 	}
@@ -568,14 +579,112 @@ public class Utilities {
 	 * @return
 	 */
 	public static SimpleEntity wrapQualityAs(Quality q) {
-			SimpleEntity qentity = new SimpleEntity();
-			qentity.setClassIRI(q.getClassIRI());
-			qentity.setConfidenceScore(q.getConfidienceScore());
-			qentity.setId(q.getId());
-			qentity.setLabel(q.getLabel());
-			qentity.setString(q.getString());
-			return qentity;
+		SimpleEntity qentity = new SimpleEntity();
+		qentity.setClassIRI(q.getClassIRI());
+		qentity.setConfidenceScore(q.getConfidienceScore());
+		qentity.setId(q.getId());
+		qentity.setLabel(q.getLabel());
+		qentity.setString(q.getString());
+		return qentity;
+	}
+
+	/**
+	 * add ep to entities, grouping proposals with the same phrase/string together
+	 * @param entities
+	 * @param ep
+	 */
+	public static void addEntityProposals(ArrayList<EntityProposals> entities,
+			EntityProposals ep) {
+
+		for(EntityProposals aep: entities){
+			if(ep.getPhrase().compareTo(aep.getPhrase())==0){
+				aep.add(ep);
+				return;
+			}
+		}
+		entities.add(ep);
+	}
+	
+	
+	
+	/**
+	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
+	 * @param entities
+	 * @param qualities
+	 * 
+	 */
+	public static void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+		for(EntityProposals entity: entities){
+			ArrayList<Entity> eps = entity.getProposals();
+			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
+			boolean postcomped = false;
+			for (Entity e: eps){
+				for(QualityProposals quality: qualities){
+					ArrayList<Quality> qps = quality.getProposals();
+					for(Quality q: qps){
+						if(q instanceof RelationalQuality){
+							//check if the relation is in the restricted list for post composition
+							QualityProposals relation = ((RelationalQuality) q).getQuality();
+							EntityProposals rentity= ((RelationalQuality) q).getRelatedEntity();
+							ArrayList<Quality> relations = relation.getProposals();
+							for(Quality r : relations){
+								if(r.isOntologized() && isRestrictedRelation(r.getId())){
+									Entity ecopy = (Entity) e.clone(); //create fresh copy
+									//increase confidence
+									//create RE and create compositeEntity
+									FormalRelation fr = new FormalRelation();
+									fr.setClassIRI(r.getClassIRI());
+									fr.setConfidenceScore(r.getConfidienceScore());
+									fr.setId(r.getId());
+									fr.setLabel(r.getLabel());
+									fr.setString(r.getString());
+									for(Entity e1: rentity.getProposals()){
+										REntity re = new REntity(fr, e1);
+										if(ecopy instanceof CompositeEntity){
+											((CompositeEntity) ecopy).addEntity(re); 
+											postcomped = true;
+											epsresult.add(ecopy); //save a proposal
+										}else{
+											CompositeEntity ce = new CompositeEntity(); 
+											ce.addEntity(ecopy);
+											ce.addEntity(re);		
+											postcomped = true;
+											epsresult.add(ce); //save a proposal
+										}										
+									}							
+								}
+							}
+						}else{
+							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
+							Entity ecopy = (Entity) e.clone();
+							SimpleEntity qentity = Utilities.wrapQualityAs(q);
+							FormalRelation fr = new FormalRelation();
+							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
+							fr.setConfidenceScore(1f);
+							fr.setId("BFO:0000053");
+							fr.setLabel("bearer_of");
+							fr.setString("");
+							REntity re = new REntity(fr, qentity); //bearer of some Ossified
+							CompositeEntity ce = new CompositeEntity(); 
+							ce.addEntity(ecopy);
+							ce.addEntity(re);											
+							epsresult.add(ce); //save a proposal
+							postcomped = true;
+						}
+					}
+				}
+			}
+			//eps = epsresult; //update entities
+			if(postcomped) entity.setProposals(epsresult);
 		}
 	}
+
+	private static boolean isRestrictedRelation(String id) {
+		if(Dictionary.resrelationQ.get(id) == null) return false;
+		return true;
+	}
+	
+	
+}
 
 

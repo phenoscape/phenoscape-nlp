@@ -3,12 +3,15 @@
  */
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -45,6 +48,7 @@ public class CharacterHandler {
 	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	static XPath pathCharacterUnderStucture;
 
+	private static final Logger LOGGER = Logger.getLogger(CharacterHandler.class);   
 	/**
 	 * @param keyentities 
 	 * 
@@ -59,7 +63,7 @@ public class CharacterHandler {
 		try {
 			this.pathCharacterUnderStucture = XPath.newInstance(".//character");
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -76,7 +80,7 @@ public class CharacterHandler {
 			if(resolve) resolve();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -660,7 +664,7 @@ public class CharacterHandler {
 				return false;
 
 		} catch (JDOMException e) {
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return false;
 	}
@@ -765,7 +769,7 @@ public class CharacterHandler {
 			 return entities;
 
 		 } catch (JDOMException e) {
-			 e.printStackTrace();
+			 LOGGER.error("", e);
 		 }
 		 return null;
 	 }
@@ -830,7 +834,7 @@ public class CharacterHandler {
 				 }
 				 return entities;
 			 }catch(Exception e){
-				 e.printStackTrace();
+				 LOGGER.error("", e);
 			 }
 		 }
 		 return null;

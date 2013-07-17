@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -22,7 +23,7 @@ import org.jdom.xpath.XPath;
 
 public class RelationalEntityStrategy1 {
 
-	
+	private static final Logger LOGGER = Logger.getLogger(RelationalEntityStrategy1.class);   
 	ArrayList<EntityProposals> relatedentities;
 	ArrayList<EntityProposals> primaryentities;
 	ArrayList<EntityProposals> keyentities;

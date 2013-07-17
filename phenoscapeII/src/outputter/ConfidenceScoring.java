@@ -25,7 +25,12 @@ public class ConfidenceScoring {
 	public ConfidenceScoring() {
 	}
 
-	public float score(Element characterUnit, ArrayList<EQStatement> EQStatements){
+	/*public float score(Element characterUnit, ArrayList<EQStatement> EQStatements){
+		//TODO
+		return 0;
+	}*/
+	
+	public float score(Element characterUnit, ArrayList<EQProposals> EQStatements){
 		//TODO
 		return 0;
 	}

@@ -1,10 +1,13 @@
 package outputter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
@@ -14,7 +17,7 @@ import org.jdom.xpath.XPath;
  *
  */
 public class EntitySearcher5 extends EntitySearcher {
-
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcher5.class);   
 	public EntitySearcher5() {
 		// TODO Auto-generated constructor stub
 	}
@@ -23,6 +26,7 @@ public class EntitySearcher5 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
+		LOGGER.debug("EntitySearcher5: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
@@ -34,15 +38,22 @@ public class EntitySearcher5 extends EntitySearcher {
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
 			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
 			if(regexpresults!=null){
+				LOGGER.debug("search entity '"+entityphrase+" .*' found match");
 				for(FormalConcept regexpresult: regexpresults){
+					regexpresult.setString(originalentityphrase+"["+regexpresult.getString()+"]"); //record originalentityphrase for grouping entity proposals later
 					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI()); //don't trim headnoun
 				}			
+			}else{
+				LOGGER.debug("search entity '"+entityphrase+" .*' found no match");
 			}
 			//search headnouns in the context: coronoid .* => coronoid process of ulna
 			String nouns = searchContext(root, structid, headnouns); //bone, cartilaginous
+			
 			if(nouns != null){
+				LOGGER.debug("found candidate headnouns '"+nouns+"', forming proposals...");
 				EntityProposals ep = new EntityProposals();
-				ep.setPhrase(entityphrase+" .*");
+				//ep.setPhrase(entityphrase+" .*");
+				ep.setPhrase(originalentityphrase);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				String[] choices = nouns.split(",");
 				float score = 1.0f/choices.length;
@@ -55,10 +66,20 @@ public class EntitySearcher5 extends EntitySearcher {
 					sentity.setConfidenceScore(score);
 					sentity.setClassIRI(idiri[1]);
 					ep.add(sentity);
+					LOGGER.debug("..add a proposal:"+sentity);
 				}
-				entities.add(ep);
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
+				LOGGER.debug("EntitySearcher5 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
+				for(EntityProposals aep: entities){
+					LOGGER.debug("..EntityProposals: "+aep.toString());
+				}
 				return entities;
-			}/*else{
+			}else{
+				LOGGER.debug("candidate headnouns is null, search failed");
+			}
+				/*else{
+			
 				//text::Caudal fin
 				//text::heterocercal  (heterocercal tail is a subclass of caudal fin, search "heterocercal *")
 				//return all matches as candidates
@@ -73,6 +94,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				
 			}*/
 		}
+		LOGGER.debug("EntitySearcher5 calls EntitySearcher6");
 		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			
 	}
@@ -120,7 +142,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				return result.replaceFirst(",$", "");
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}		
 		return null;
 	}
@@ -147,7 +169,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return false;
 	}

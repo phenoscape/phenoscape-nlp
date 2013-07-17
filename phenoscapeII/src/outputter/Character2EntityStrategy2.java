@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -17,6 +18,7 @@ import owlaccessor.OWLAccessorImpl;
  * if so it will turn the <character> to an entity and set its quality to "present" 
  */
 public class Character2EntityStrategy2 {
+	private static final Logger LOGGER = Logger.getLogger(Character2EntityStrategy2.class);   
 	EntityProposals entity; //result of the computation
 	QualityProposals quality; //result of the computation, if set, it's "present"
 	Entity subjectentity; //subject of the character, keyentity.

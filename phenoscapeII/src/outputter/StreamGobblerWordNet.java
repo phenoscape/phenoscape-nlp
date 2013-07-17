@@ -9,12 +9,14 @@ package outputter;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 /**
 * @author Hong Updates
 *
 */
 public class StreamGobblerWordNet extends StreamGobbler {
-
+	private static final Logger LOGGER = Logger.getLogger(StreamGobblerWordNet.class);   
 	/**
 	 * @param is
 	 * @param type

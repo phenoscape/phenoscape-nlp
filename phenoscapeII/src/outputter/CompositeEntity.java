@@ -17,6 +17,7 @@ import java.util.ArrayList;
 public class CompositeEntity extends Entity {
 	//SimpleEntity entity; //the first entity in the post-composed entity
     ArrayList<Entity> entities; //relation + entity
+    String string;
 
 	/**
 	 * 
@@ -101,7 +102,7 @@ public class CompositeEntity extends Entity {
 
 	@Override
 	public void setString(String string) {
-		// TODO Auto-generated method stub
+		this.string = string;
 		
 	}
 
@@ -134,7 +135,7 @@ public class CompositeEntity extends Entity {
 	 * return the concatenation of the string of all entities
 	 */
 	public String getString() {
-		String str = "";
+		/*String str = "";
 		for(Entity e: this.entities){
 			if(e instanceof SimpleEntity){
 				str += e.getString()+" ";
@@ -142,7 +143,8 @@ public class CompositeEntity extends Entity {
 				str += ((REntity)e).getEntity().getString()+" ";
 			}
 		}
-		return str;
+		return str;*/
+		return this.string;
 	}
 
 	@Override

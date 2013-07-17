@@ -23,6 +23,7 @@ finalizer.standalone=false
 
 #XML Schema
 source.attribute.name=source_pdf
+#unknown.structure.name must be one word:
 unknown.structure.name=whole_organism
 
 # Data individual to mark up
