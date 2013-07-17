@@ -24,11 +24,11 @@ public class EntitySearcher0 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher0: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher0: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//search the originals:
 		//no entity locator: try direct match, for examples: "bone of humerus", "posterior dorsal fin"
 		if(elocatorphrase==null || elocatorphrase.length()==0){
-			LOGGER.debug("search entity: "+entityphrase);
+			LOGGER.debug("search entity '"+entityphrase+"'");
 			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
 				EntityProposals ep = new EntityProposals();
@@ -38,7 +38,7 @@ public class EntitySearcher0 extends EntitySearcher {
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				//entities.add(ep);
 				Utilities.addEntityProposals(entities, ep);
-				LOGGER.debug("EntitySearcher0 returns");
+				LOGGER.debug("EntitySearcher0 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns");
 				for(EntityProposals aep: entities){
 					LOGGER.debug("..EntityProposals:"+aep.toString());
 				}
@@ -49,7 +49,7 @@ public class EntitySearcher0 extends EntitySearcher {
 		if(prep.contains("part_of")){//glenoid head of scapula, Entity phrase = glenoid head, Elocator = scapula
 			if(elocatorphrase.length()>0)
 			{
-				LOGGER.debug("search entity: "+entityphrase+" of "+elocatorphrase);
+				LOGGER.debug("search entity '"+entityphrase+" of "+elocatorphrase+"'");
 				SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
 				if(entity!=null){	
 					EntityProposals ep = new EntityProposals();

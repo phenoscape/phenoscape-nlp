@@ -40,7 +40,13 @@ public class EntityParser {
 			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
 					 "|//relation[@name='in'][@from='" + structureid + "']" +
 					 "|//relation[@name='on'][@from='" + structureid + "']", 0);
+			LOGGER.debug("EntityParser calls EntitySearcherOriginal to search '"+structurename+","+parents+"'");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
+			boolean record = false;
+			for(EntityProposals ep: entity){ record= true;
+				LOGGER.debug("..EntityParser recorded matched proposals: "+ep.toString());
+			}
+			if(!record) LOGGER.debug("EntityParser found no matching entities for '"+structurename+","+parents+"'");
 			entitycache.put(structureid, entity);
 			// could the 'structure' be a quality?
 			//is the structure a simple quality?
@@ -56,13 +62,15 @@ public class EntityParser {
 			
 			Structure2Quality rq = new Structure2Quality(root, structurename, structureid, keyentities);
 			rq.handle();
-			String t = "";
 			//If any structure is a quality detach all the structures containing the structure id
 			
 			// if this.entity is not ontologized, then take the qualities else retain the entities
 			if(rq.qualities.size()>0){
 				s2q = rq;
 				s2qcache.put(structureid, rq);
+				LOGGER.debug("EntityParser recorded candidate s2q");
+			}else{
+				LOGGER.debug("EntityParser found no matching qualities for '"+structurename+","+parents+"'");
 			}
 			//resolveStructure(); //EntityParser doesn't have info to resolve this.
 		}

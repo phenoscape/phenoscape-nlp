@@ -95,7 +95,8 @@ public class TermSearcher {
 				m = p.matcher(phrase);
 			}
 			//spatials = dorsal ; phrase = portion,, spatials distal; phrase = end
-			String repl = Dictionary.spatialMaps.get(phrase);
+			//TODO: check: spatialMaps function is replaced by SpatialModifiedEntityStrategy.synVariation
+			/*String repl = Dictionary.spatialMaps.get(phrase);
 			if(trimed && repl!=null){
 				phrase=spatials+repl; //repl = region, newTerm = dorsal region
 			
@@ -105,7 +106,7 @@ public class TermSearcher {
 				//if landed here, all matches based on this spatial reform are weak matches.
 				candidatematches.addAll(results);
 				results = new ArrayList<Hashtable<String, String>>();
-			}
+			}*/
 			phrase = phrasecopy;
 		}
 		

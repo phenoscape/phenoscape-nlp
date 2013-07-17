@@ -33,25 +33,33 @@ public class Dictionary {
 	public static String binaryFvalues = "absent|false|no|rarely|without";
 	public static String positionprep = "of|part_of|in|on|between";
 	//Changed by Zilong
-	public static String selfReference = "counterpart";//Extendible
+	public static String selfreference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
 	public static String spatialtermptn="";
 
 	public static String prefixes = "post|pre|post-|pre-";
 	public static String negation = "absent|lacking";
 
-	//By Zilong:
+	//By Zilong: Update by Hong: Zilong's modifications have all be over-written. 
 	//sometimes, spatial terms could be used as adjectives to modify head nouns. 
 	//Instead of directly using <spatial terms+head nouns> when searching the ontology,
 	//the program should interpret the pattern as a part_of relation. 
 	//eg. "anterior coracoid process" should be interpreted as "anterior region(part_of(coracoid))"
 	//This list contains all identified head nouns
-	public static ArrayList<String> spatialHeadNoun = new ArrayList<String>();
+	//public static ArrayList<String> spatialHeadNoun = new ArrayList<String>();
 	//eg. <"unossified", "ossification,absent">; ossified => with ossification => ossification = present
-	public static Hashtable<String, String> verbalizednouns = new Hashtable<String,String>();
+	//public static Hashtable<String, String> verbalizednouns = new Hashtable<String,String>();
 	//this instance var is used to map spatial terms that are not in ontology to terms that are.
 	/** The spatial maps. */
-	public static Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
+	//public static Hashtable<String, String> spatialMaps = new Hashtable<String, String>();
+	
+	//headnouns that may be used as part of a spatial term
+	public static String spatialheadnouns ="axis|boudary|compartment boundary|compartment|gradient|margin|region|section|side|surface"; 
+	//synonyms of the head noun 'region'. May include a syn list for each of the head noun.
+	public static Hashtable<String, String> headnounsyns= new Hashtable<String, String> ();
+	static{
+		headnounsyns.put("region", "portion|end|segment");
+	}
 	public static Hashtable<String,Hashtable<String, String>> relationalqualities = new Hashtable<String,Hashtable<String, String>>();
 	public static Hashtable<String,Hashtable<String, String>> restrictedrelations = new Hashtable<String,Hashtable<String, String>>();
 
@@ -224,18 +232,18 @@ public class Dictionary {
 	//other spatial related info
 	static{
 		//spatialHeadNoun: TODO make it more flexible
-		spatialHeadNoun.add("coronoid");
-		spatialHeadNoun.add("process");
-		spatialHeadNoun.add("coracoid");
+		//spatialHeadNoun.add("coronoid");
+		//spatialHeadNoun.add("process");
+		//spatialHeadNoun.add("coracoid");
 		
 		//un-ed pattern, TODO make it more flexible
-		verbalizednouns.put("unossified", "ossification,absent");
+		//verbalizednouns.put("unossified", "ossification,absent");
 		
-		spatialMaps.put("portion", "region");	
+		//spatialMaps.put("portion", "region");	
 		//end is defined to be region => distal end => distal region
-		spatialMaps.put("end", "region");
+		//spatialMaps.put("end", "region");
 		//spatialMaps.put("end", "margin");
-		spatialMaps.put("segment","region"); // to address basal segment => basal region(only when segment is preceded by spatial term)
+		//spatialMaps.put("segment","region"); // to address basal segment => basal region(only when segment is preceded by spatial term)
 	}
 	//legal relational qualities
 	static{	
@@ -327,5 +335,16 @@ public class Dictionary {
 		}
 	}
 
-	
+	/**
+	 * 
+	 * @return a String of alternative pattern of all spatial headnouns and their synonyms
+	 */
+	public static String allSpatialHeadNouns(){
+		String shn = Dictionary.spatialheadnouns+"|";
+		String[] terms = Dictionary.spatialheadnouns.split("\\|");
+		for(String term: terms){
+			shn+=Dictionary.headnounsyns.get(term);
+		}
+		return shn.replaceAll("\\|+", "|").replaceAll("(^\\||\\|$)", "");
+	}
 }

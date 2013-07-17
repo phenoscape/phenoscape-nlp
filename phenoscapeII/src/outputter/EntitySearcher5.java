@@ -26,7 +26,7 @@ public class EntitySearcher5 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher5: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher5: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
@@ -38,19 +38,19 @@ public class EntitySearcher5 extends EntitySearcher {
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
 			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
 			if(regexpresults!=null){
-				LOGGER.debug("search entity ["+entityphrase+" .*] found match");
+				LOGGER.debug("search entity '"+entityphrase+" .*' found match");
 				for(FormalConcept regexpresult: regexpresults){
 					regexpresult.setString(originalentityphrase+"["+regexpresult.getString()+"]"); //record originalentityphrase for grouping entity proposals later
 					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI()); //don't trim headnoun
 				}			
 			}else{
-				LOGGER.debug("search entity ["+entityphrase+" .*] found no match");
+				LOGGER.debug("search entity '"+entityphrase+" .*' found no match");
 			}
 			//search headnouns in the context: coronoid .* => coronoid process of ulna
 			String nouns = searchContext(root, structid, headnouns); //bone, cartilaginous
 			
 			if(nouns != null){
-				LOGGER.debug("candidate headnouns: "+nouns+", forming proposals...");
+				LOGGER.debug("found candidate headnouns '"+nouns+"', forming proposals...");
 				EntityProposals ep = new EntityProposals();
 				//ep.setPhrase(entityphrase+" .*");
 				ep.setPhrase(originalentityphrase);
@@ -70,7 +70,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				}
 				//entities.add(ep);
 				Utilities.addEntityProposals(entities, ep);
-				LOGGER.debug("EntitySearcher5 returns:");
+				LOGGER.debug("EntitySearcher5 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
 				for(EntityProposals aep: entities){
 					LOGGER.debug("..EntityProposals: "+aep.toString());
 				}

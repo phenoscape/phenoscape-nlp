@@ -604,6 +604,87 @@ public class Utilities {
 		}
 		entities.add(ep);
 	}
+	
+	
+	
+	/**
+	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
+	 * @param entities
+	 * @param qualities
+	 * 
+	 */
+	public static void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+		for(EntityProposals entity: entities){
+			ArrayList<Entity> eps = entity.getProposals();
+			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
+			boolean postcomped = false;
+			for (Entity e: eps){
+				for(QualityProposals quality: qualities){
+					ArrayList<Quality> qps = quality.getProposals();
+					for(Quality q: qps){
+						if(q instanceof RelationalQuality){
+							//check if the relation is in the restricted list for post composition
+							QualityProposals relation = ((RelationalQuality) q).getQuality();
+							EntityProposals rentity= ((RelationalQuality) q).getRelatedEntity();
+							ArrayList<Quality> relations = relation.getProposals();
+							for(Quality r : relations){
+								if(r.isOntologized() && isRestrictedRelation(r.getId())){
+									Entity ecopy = (Entity) e.clone(); //create fresh copy
+									//increase confidence
+									//create RE and create compositeEntity
+									FormalRelation fr = new FormalRelation();
+									fr.setClassIRI(r.getClassIRI());
+									fr.setConfidenceScore(r.getConfidienceScore());
+									fr.setId(r.getId());
+									fr.setLabel(r.getLabel());
+									fr.setString(r.getString());
+									for(Entity e1: rentity.getProposals()){
+										REntity re = new REntity(fr, e1);
+										if(ecopy instanceof CompositeEntity){
+											((CompositeEntity) ecopy).addEntity(re); 
+											postcomped = true;
+											epsresult.add(ecopy); //save a proposal
+										}else{
+											CompositeEntity ce = new CompositeEntity(); 
+											ce.addEntity(ecopy);
+											ce.addEntity(re);		
+											postcomped = true;
+											epsresult.add(ce); //save a proposal
+										}										
+									}							
+								}
+							}
+						}else{
+							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
+							Entity ecopy = (Entity) e.clone();
+							SimpleEntity qentity = Utilities.wrapQualityAs(q);
+							FormalRelation fr = new FormalRelation();
+							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
+							fr.setConfidenceScore(1f);
+							fr.setId("BFO:0000053");
+							fr.setLabel("bearer_of");
+							fr.setString("");
+							REntity re = new REntity(fr, qentity); //bearer of some Ossified
+							CompositeEntity ce = new CompositeEntity(); 
+							ce.addEntity(ecopy);
+							ce.addEntity(re);											
+							epsresult.add(ce); //save a proposal
+							postcomped = true;
+						}
+					}
+				}
+			}
+			//eps = epsresult; //update entities
+			if(postcomped) entity.setProposals(epsresult);
+		}
+	}
+
+	private static boolean isRestrictedRelation(String id) {
+		if(Dictionary.resrelationQ.get(id) == null) return false;
+		return true;
+	}
+	
+	
 }
 
 

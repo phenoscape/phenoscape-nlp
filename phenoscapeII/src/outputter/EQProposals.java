@@ -93,7 +93,8 @@ public class EQProposals{
 	
 	public String toString(){
 		
-		return "E proposals:"+this.entity.toString()+
+		return System.getProperty("line.separator")+
+				"E proposals:"+this.entity.toString()+
 				System.getProperty("line.separator")+
 				"Q proposals:"+this.quality.toString();
 		

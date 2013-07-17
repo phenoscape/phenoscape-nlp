@@ -266,13 +266,10 @@ public class CharacterStatementParser extends Parser {
 			}
 			entities.addAll(ep.getEntity());
 			this.entityHash.put(structureid, entities);
-			if(debug){
-				System.out.println("matched entities:");
-				for(EntityProposals aep: entities){
-					System.out.println(aep.toString());
-				}
-				System.out.println();
-			}			
+			LOGGER.debug("CharacterStatementParser received matched entities: ");
+			for(EntityProposals aep: entities){
+				LOGGER.debug(".."+aep.toString());
+			}
 		}
 		if(ep.getQualityStrategy()!=null){
 			ArrayList<Structure2Quality> qualities;
@@ -310,26 +307,20 @@ public class CharacterStatementParser extends Parser {
 	private void resolve(/*ArrayList<EntityProposals> entities,
 			ArrayList<Structure2Quality> s2qs,*/ Element statement, Element root) {
 		boolean foundaentity = false;
-		
 		//1. 'pubis_ischium': these are the key entities
 		//TODO: what about "A_B joint": should have a entity search strategy to handle this
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
-			if(debug){
-				System.out.println("resolving underscored structures...  ");
-			}
+			LOGGER.debug("CSP: resolving underscored structures...  ");
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 
 //get quality from relations and characters from each of the structures and post compose entities with the quality
 			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
-				if(debug){
-					System.out.println("entities from underscored structures:");
+				LOGGER.debug("CSP: entities from underscored structures (qualityclue is not 'ratio'):");
 					for(EntityProposals aep: entities){
-						System.out.println(aep.toString());
+						LOGGER.debug(".."+aep.toString());
 					}
-					System.out.println("post-composed with quality...");
-				}	
-
+				LOGGER.debug("CSP: post-composed with quality...");
 				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
 				foundaentity = true;
 				this.qualityHash.remove(structid);
@@ -357,13 +348,11 @@ public class CharacterStatementParser extends Parser {
 			String structid = this.structureIDs.get(i);
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 			if(entities!=null && entities.size()>1){ //entities resulted from 1 structureid
-				if(debug){
-					System.out.println("entities from structure id:"+structid);
-					for(EntityProposals aep: entities){
-						System.out.println(aep.toString());
-					}
-					System.out.println("post-composed with quality...");
-				}	
+				LOGGER.debug("CSP: entities from one structures:");
+				for(EntityProposals aep: entities){
+					LOGGER.debug(".."+aep.toString());
+				}
+				LOGGER.debug("CSP:post-composed with quality...");
 				postcomposeWithQuality(entities, structid, statement, root);
 				this.keyentities = entities;	
 				this.entityHash.remove(structid);
@@ -379,23 +368,23 @@ public class CharacterStatementParser extends Parser {
 			if(qualityHash !=null && this.qualityHash.get(structid)!=null && entityHash!=null && entities!=null){		
 				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(structid);
 				boolean entitywin = entityWin(entities, s2qs);
-				if(debug) {
-					System.out.println("selecting btw entity and quality for structure: "+structid);
 				
-					System.out.println("matched entities:");
+					LOGGER.debug("CSP: selecting btw entity and quality for structure: "+structid);
+				
+					LOGGER.debug("CSP: matched entities:");
 					for(EntityProposals aep: entities){
-						System.out.println(aep.toString());
+						LOGGER.debug(aep.toString());
 					}
 					
-					System.out.println("matched qualities:");
+					LOGGER.debug("CSP: matched qualities:");
 					for(Structure2Quality as2q: s2qs){
 						for(QualityProposals qp: as2q.qualities){
-							System.out.println(qp.toString());
+							LOGGER.debug(".."+qp.toString());
 						}
 					}
 					
-					System.out.println("entity win? " +entitywin);
-				}
+					LOGGER.debug("CSP: entity win? " +entitywin);
+				
 				if(entitywin) this.qualityHash.remove(structid);
 				if(!entitywin) this.entityHash.remove(structid);
 			}
@@ -407,21 +396,20 @@ public class CharacterStatementParser extends Parser {
 			Enumeration<String> keys = this.qualityHash.keys();
 			while(keys.hasMoreElements()){
 				String sid = keys.nextElement();
-				if(debug) {
-					System.out.println("remaining qualities from s2q:");
-				}
+				LOGGER.debug("CSP: remaining qualities from s2q:");
+				
 				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(sid);
 				//post compose quality to the closest proceeding entity, or
 				//create EQ with the closest following entity
 				//if no entity exsits, give up
-				if(debug) {
+			
 					for(Structure2Quality as2q: s2qs){
 						for(QualityProposals qp: as2q.qualities){
-							System.out.println(qp.toString());
+							LOGGER.debug(".."+ qp.toString());
 						}
 					}
-					System.out.println("how to consume this? ");
-				}
+					LOGGER.debug("CSP: how to consume this? ");
+				
 				consumeQuality(sid, s2qs); //update this.entityHash
 			}
 		}
@@ -430,14 +418,13 @@ public class CharacterStatementParser extends Parser {
 			//Check ELK if there is actually a part of relationship, if yes proceed
 //			else if they are involved in any relation as from then, they can key entity
 			
-			if(debug){
-				System.out.println("remaining entities: post-compose with 'part_of':");
-			}
+			LOGGER.debug("CSP: remaining entities: post-compose with 'part_of':");
+			
 			FormalRelation fr = new FormalRelation();
 			fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
 			fr.setConfidenceScore(0.5f);
 			fr.setId("BFO:0000050");
-			fr.setLabel("part of");
+			fr.setLabel("part_of");
 			fr.setString("");
 			//remaining entities
 			//compose entities using 'part_of' relation
@@ -447,12 +434,11 @@ public class CharacterStatementParser extends Parser {
 			ArrayList<String> orderedIDs = partofwholeorder(this.structureIDs, root);//reverse the order in original text
 			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
-				if(debug){
-					System.out.println("add entities from structure "+sid+" to part_of chain:");
+				LOGGER.debug("CSP: add entities from structure "+sid+" to part_of chain:");
 					for(EntityProposals aep: entities){
-						System.out.println(aep.toString());
+						LOGGER.debug(".."+aep.toString());
 					}
-				}
+				
 				if(this.keyentities==null){
 					this.keyentities = entities;
 				}else if(this.keyentities.size()==0){
@@ -619,7 +605,7 @@ public class CharacterStatementParser extends Parser {
 			    ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities);
 			    //entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
-					postcompose(entities, qualities);
+					Utilities.postcompose(entities, qualities);
 				}
 			}
 			
@@ -630,7 +616,7 @@ public class CharacterStatementParser extends Parser {
 				ssp.parserCharacters(character, statement, root, entities1, qualities);
 				//entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
-					postcompose(entities, qualities);
+					Utilities.postcompose(entities, qualities);
 				}	
 			}			
 		}catch(Exception e){
@@ -638,80 +624,11 @@ public class CharacterStatementParser extends Parser {
 		}		
 	}
 
-	/**
-	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
-	 * @param entities
-	 * @param qualities
-	 * 
-	 */
-	private void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
-		for(EntityProposals entity: entities){
-			ArrayList<Entity> eps = entity.getProposals();
-			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
-			for (Entity e: eps){
-				for(QualityProposals quality: qualities){
-					ArrayList<Quality> qps = quality.getProposals();
-					for(Quality q: qps){
-						if(q instanceof RelationalQuality){
-							//check if the relation is in the restricted list for post composition
-							QualityProposals relation = ((RelationalQuality) q).getQuality();
-							EntityProposals rentity= ((RelationalQuality) q).getRelatedEntity();
-							ArrayList<Quality> relations = relation.getProposals();
-							for(Quality r : relations){
-								if(r.isOntologized() && isRestrictedRelation(r.getId())){
-									Entity ecopy = (Entity) e.clone(); //create fresh copy
-									//increase confidence
-									//create RE and create compositeEntity
-									FormalRelation fr = new FormalRelation();
-									fr.setClassIRI(r.getClassIRI());
-									fr.setConfidenceScore(r.getConfidienceScore());
-									fr.setId(r.getId());
-									fr.setLabel(r.getLabel());
-									fr.setString(r.getString());
-									for(Entity e1: rentity.getProposals()){
-										REntity re = new REntity(fr, e1);
-										if(ecopy instanceof CompositeEntity){
-											((CompositeEntity) ecopy).addEntity(re); 
-											epsresult.add(ecopy); //save a proposal
-										}else{
-											CompositeEntity ce = new CompositeEntity(); 
-											ce.addEntity(ecopy);
-											ce.addEntity(re);											
-											epsresult.add(ce); //save a proposal
-										}										
-									}							
-								}
-							}
-						}else{
-							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
-							Entity ecopy = (Entity) e.clone();
-							SimpleEntity qentity = Utilities.wrapQualityAs(q);
-							FormalRelation fr = new FormalRelation();
-							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
-							fr.setConfidenceScore(1f);
-							fr.setId("BFO:0000053");
-							fr.setLabel("bear of");
-							fr.setString("");
-							REntity re = new REntity(fr, qentity); //bear of some Ossified
-							CompositeEntity ce = new CompositeEntity(); 
-							ce.addEntity(ecopy);
-							ce.addEntity(re);											
-							epsresult.add(ce); //save a proposal
-						}
-					}
-				}
-			}
-			eps = epsresult; //update entities
-		}
-	}
-
+	
 
 
 	
-	private boolean isRestrictedRelation(String id) {
-		if(Dictionary.resrelationQ.get(id) == null) return false;
-		return true;
-	}
+
 
 
 	/**

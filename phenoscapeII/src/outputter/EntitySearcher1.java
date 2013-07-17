@@ -52,7 +52,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher1: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher1: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		EntityProposals ep = new EntityProposals(); //search results
@@ -64,8 +64,8 @@ public class EntitySearcher1 extends EntitySearcher {
 		//construct variations: selected permutation without repetition 
 		ArrayList<String> variations  = new ArrayList<String>();
 		permutation(components, variations); 
-		
-		LOGGER.debug(entityphrase+" , "+elocatorphrase+" generated "+variations.size()+" variations:");
+		LOGGER.debug(System.getProperty("line.separator")+"search variations...");
+		LOGGER.debug("'"+entityphrase+" , "+elocatorphrase+"' generated "+variations.size()+" variations:");
 		for(String variation : variations)
 			LOGGER.debug(".."+variation);
 		
@@ -84,13 +84,13 @@ public class EntitySearcher1 extends EntitySearcher {
 						ep.add((Entity)entity); //all variations are alternative entities (i.e. proposals) for the phrase
 					}
 				}
-				LOGGER.debug("search variation ["+variation+"] found match: "+ep.toString());
+				LOGGER.debug("search variation '"+variation+"' found match: "+ep.toString());
 			}
 		}
 		if(found){
 			//entities.add(ep);
 			Utilities.addEntityProposals(entities, ep);
-			LOGGER.debug("EntitySearcher1 returns");
+			LOGGER.debug("EntitySearcher1 found matched variations, returns entity proposals:");
 			for(EntityProposals aep: entities){
 				LOGGER.debug("..EntityProposals:"+aep.toString());
 			}
@@ -105,7 +105,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		boolean hasspatial = ecs.containsSpatial();
 		if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
-			LOGGER.debug("EntitySearcher1 calls EntityEntityLocatorStrategy to search varitions as entity and locators");
+			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
 			for(String variation: variations){
 				//split variation to entity and elocator
 				if(variation.indexOf(" of ")<0) continue; //there must be another  variation with " of " that is equivalent to this variation
@@ -114,8 +114,7 @@ public class EntitySearcher1 extends EntitySearcher {
 					for(int l = 0; l < parts.length-1; l++){ //length of entity
 						entityphrase = Utilities.join(parts, 0, l, " of ");
 						elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
-						originalentityphrase = entityphrase;
-						LOGGER.debug("..search entity=["+entityphrase+"] locator=["+elocatorphrase+"]");
+						LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
 						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 						eels.handle();
 						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
@@ -123,11 +122,13 @@ public class EntitySearcher1 extends EntitySearcher {
 							found = true;
 							//ep.add(entity);
 							//entities.add(ep);
-							//entities.addAll(entity);
-							LOGGER.debug("..add proposals from EntityEntityLocatorStrategy");
+							//entities.addAll(entity);						
 							for(EntityProposals aep: entity){
 								Utilities.addEntityProposals(entities, aep);
+								LOGGER.debug("..EEL adds proposals:"+aep);
 							}
+						}else{
+							LOGGER.debug("..EEL found no match");
 						}
 					}
 				}
@@ -137,7 +138,7 @@ public class EntitySearcher1 extends EntitySearcher {
 
 		//deal with spatial expressions
 		if(hasspatial){
-			LOGGER.debug("EntitySearcher1 calls SpatialModifiedEntityStrategy");
+			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls SpatialModifiedEntityStrategy");
 			//i.e. EntitySearch4, but more flexible: may call the strategy on different entity/entity locator combinations
 			//TODO: need more work: what's entityphrase and elocatorphrase?
 			SpatialModifiedEntityStrategy smes = new SpatialModifiedEntityStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
@@ -146,17 +147,20 @@ public class EntitySearcher1 extends EntitySearcher {
 			ArrayList<EntityProposals> entity = smes.getEntities();
 			if(entity != null){
 				found = true;
-				LOGGER.debug("add proposals from SpatialModifiedEntityStrategy");
+				
 				//ep.add(entity);
 				//entities.add(ep);
 				//entities.addAll(entity); //add a list of different entities: both sexes => female and male
 				for(EntityProposals aep: entity){
+					LOGGER.debug("..SME adds proposals: "+aep.toString());
 					Utilities.addEntityProposals(entities, aep);
 				}
+			}else{
+				LOGGER.debug("SME found no match");
 			}
 		}
 		//if(found) return entities;
-		LOGGER.debug("EntitySearcher1 calls EntitySearcher5");
+		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntitySearcher5");
 		ArrayList<EntityProposals> entity = new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		//proximal tarsal element:
 		//SpaticalModifiedEntity: phrase=proximal region entity=proximal region score=1.0 and (part_of some phrase=tarsal\b.* entity=tarsal bone score=0.5) 
@@ -164,12 +168,16 @@ public class EntitySearcher1 extends EntitySearcher {
 		//TODO: save both or select one? 
 		if(entity!=null){
 			//entities.addAll(entity);
-			LOGGER.debug("add proposals from EntitySearcher5");
 			for(EntityProposals aep: entity){
+				LOGGER.debug("..ES5 adds proposals: "+aep.toString());
 				Utilities.addEntityProposals(entities, aep);
 			}
+		}else{
+			LOGGER.debug("..ES5 found no match");
 		}
-		LOGGER.debug("EntitySearcher1 returns");
+		
+		
+		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
 		for(EntityProposals aep: entities){
 			LOGGER.debug("..EntityProposals:"+aep.toString());
 		}

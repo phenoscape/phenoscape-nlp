@@ -35,7 +35,7 @@ public class EntitySearcher2 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher2: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher2: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
 		
 		//search entity and entity locator separately

@@ -29,7 +29,7 @@ public class EntitySearcher3 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher3: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher3: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//re-arranging word in entity, first search for entity locator
 		
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla

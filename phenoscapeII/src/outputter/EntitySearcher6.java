@@ -33,7 +33,7 @@ public class EntitySearcher6 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher6: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher6: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//still not find a match, remove the last term in the entityphrase, when what is then left is not just a spatial term 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"	
 		//TODO "some part" of humerus; "some quality"
@@ -51,9 +51,9 @@ public class EntitySearcher6 extends EntitySearcher {
 			SimpleEntity result = (SimpleEntity) new TermSearcher().searchTerm(elocatorphrase, "entity");
 			if(result!=null){
 				entityl = result;
-				LOGGER.debug("search for locator ["+elocatorphrase+"] found a match: "+entityl.toString());
+				LOGGER.debug("search for locator '"+elocatorphrase+"' found a match: "+entityl.toString());
 			}else{ //entity locator not matched
-				LOGGER.debug("search for locator ["+elocatorphrase+"] found no match");
+				LOGGER.debug("search for locator '"+elocatorphrase+"' found no match");
 			}
 		}
 		
@@ -69,7 +69,7 @@ public class EntitySearcher6 extends EntitySearcher {
 				
 				ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
 				if(sentities!=null){
-					LOGGER.debug("search for entity ["+shortened+"\\b.*] found match, forming proposals...");
+					LOGGER.debug("search for entity '"+shortened+"\\b.*' found match, forming proposals...");
 					//construct anatomicalentity
 					SimpleEntity anatomicalentity = new SimpleEntity();
 					anatomicalentity.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0001062");
@@ -92,7 +92,7 @@ public class EntitySearcher6 extends EntitySearcher {
 						SimpleEntity sentity = (SimpleEntity)sentityfc;
 						if(sentity.isOntologized() && entityl!=null && entityl.isOntologized()){
 							if(XML2EQ.elk.isSubclassOfWithPart(entityl.getClassIRI(), sentity.getClassIRI())){
-								LOGGER.debug(entityl.getLabel() +" and "+sentity.getLabel() + " are related, increase confidence score");
+								LOGGER.debug("'"+entityl.getLabel() +"' and '"+sentity.getLabel() + "' are related, increase confidence score");
 								found = true;
 								sentity.setConfidenceScore(1f);
 								CompositeEntity centity = new CompositeEntity();
@@ -179,7 +179,7 @@ public class EntitySearcher6 extends EntitySearcher {
 					}
 					return entities;
 				}else{
-					LOGGER.debug("search for entity ["+shortened+"\\b.*] found no match");
+					LOGGER.debug("search for entity '"+shortened+"\\b.*' found no match");
 				}
 			}			
 		}
@@ -222,7 +222,7 @@ public class EntitySearcher6 extends EntitySearcher {
 			Utilities.addEntityProposals(entities, ep);
 		}
 		
-		LOGGER.debug("EntitySearcher6 returns:");
+		LOGGER.debug("EntitySearcher6 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
 		for(EntityProposals aep: entities){
 			LOGGER.debug("..EntityProposals: "+aep.toString());
 		}

@@ -33,7 +33,7 @@ public class EntityEntityLocatorStrategy implements AnnotationStrategy {
 		this.structid = structid;
 		this.prep = prep;
 		this.originalentityphrase = originalentityphrase;
-		LOGGER.debug("EntityEntityLocatorStrategy: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntityEntityLocatorStrategy: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 
 	}
 
@@ -58,12 +58,12 @@ public class EntityEntityLocatorStrategy implements AnnotationStrategy {
 			ArrayList<EntityProposals> result = new EntitySearcherOriginal().searchEntity(root, structid,  elocatorphrase, "", originalentityphrase, prep); //advanced search
 			if(result!=null){
 				entitylps = result;
-				LOGGER.debug("EntityEntityLocatorStrategy: results from searching "+elocatorphrase+"[orig="+originalentityphrase+"]:");
+				LOGGER.debug("EntityEntityLocatorStrategy: results from searching '"+elocatorphrase+"[orig="+originalentityphrase+"]':");
 				for(EntityProposals ep: result){
 					LOGGER.debug(ep.toString());
 				}
 			}else{ //entity locator not matched
-				LOGGER.debug("EntityEntityLocatorStrategy: no results from searching "+elocatorphrase+"[orig="+originalentityphrase+"]:");
+				LOGGER.debug("EntityEntityLocatorStrategy: no results from searching '"+elocatorphrase+"[orig="+originalentityphrase+"]':");
 				//TODO
 			}
 		}
@@ -121,7 +121,7 @@ public class EntityEntityLocatorStrategy implements AnnotationStrategy {
 				}
 			}
 		}else{
-			LOGGER.debug("EntityEntityLocatorStrategy: no results from searching "+entityphrase+"[orig="+originalentityphrase+"]:");
+			LOGGER.debug("EntityEntityLocatorStrategy: no results from searching '"+entityphrase+"[orig="+originalentityphrase+"]':");
 		}
 	}
 

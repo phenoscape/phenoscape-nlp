@@ -110,7 +110,7 @@ public class XML2EQ {
 		this.glosstable = glosstable;
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
-		LOGGER.debug("In XML2EQ");
+
 		if(dictionary.conn == null){
 			Class.forName("com.mysql.jdbc.Driver");
 			dictionary.conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
@@ -169,9 +169,12 @@ public class XML2EQ {
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
 					keyentities = csp.getKeyEntities();
+					LOGGER.debug("XML2EQ: received keyentities");
+					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
 					ArrayList<String> qualityclue = csp.getQualityClue();
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
+						LOGGER.debug("XML2EQ: processing state statement...");
 						ssp.parse(statestatement, root);
 						allEQs.addAll(ssp.getEQStatements());
 						ssp.EQStatements.clear();

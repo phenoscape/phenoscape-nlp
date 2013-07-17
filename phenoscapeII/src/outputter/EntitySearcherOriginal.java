@@ -67,14 +67,14 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,  String entityphrase, String elocatorphrase, String originalentityphrase, String prep){
 		//System.out.println("search entity: "+entityphrase);
 		//create and maintain a cache for entity search?: yes, created in EntityParser
-		LOGGER.debug("EntityEntityLocatorStrategy: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcherOriginal: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
 			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
 			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
-			FormalRelation bearer = new FormalRelation("", "bearer of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
+			FormalRelation bearer = new FormalRelation("", "bearer_of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
 			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
 			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
 			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
@@ -85,7 +85,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			EntityProposals ep = new EntityProposals();
 			ep.setPhrase("female"); //the phrase set this proposal apart from the other one
 			ep.add(ce1);
-			LOGGER.debug("EntityEntityLocatorStrategy: formed EntityProposals with CompositeEntity "+ce1.toString());
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce1.toString());
 			eps.add(ep); //add one entity
 			CompositeEntity ce2 = new CompositeEntity();
 			ce2.addEntity(organism);
@@ -94,9 +94,9 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			ep = new EntityProposals();
 			ep.setPhrase("male");//the phrase set this proposal apart from the other one
 			ep.add(ce2);
-			LOGGER.debug("EntityEntityLocatorStrategy: formed EntityProposals with CompositeEntity "+ce2.toString());
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce2.toString());
 			eps.add(ep); //add the other entity
-			LOGGER.debug("EntityEntityLocatorStrategy: returned two EntityProposals");
+			LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returned two EntityProposals");
 			return eps;
 		}
 		
@@ -121,7 +121,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
-		LOGGER.debug("EntityEntityLocatorStrategy: calling EntitySearcher0 to search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcherOriginal calls EntitySearcher0");
 		return new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
 		/*(String[] entitylocators = null;

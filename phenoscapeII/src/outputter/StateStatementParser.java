@@ -44,6 +44,7 @@ public class StateStatementParser extends Parser {
 	static XPath pathRelation;
 	static XPath pathRelationUnderCharacter;
 	static XPath pathCharacter;
+	static XPath pathPostCompCharacter;
 	static XPath pathStructure;
 
 	static {
@@ -53,6 +54,7 @@ public class StateStatementParser extends Parser {
 			pathRelationUnderCharacter = XPath
 					.newInstance(".//statement[@statement_type='character']/relation");
 			pathCharacter = XPath.newInstance(".//character");
+			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true']");
 			pathStructure = XPath.newInstance(".//structure");
 		} catch (Exception e) {
 			LOGGER.error("", e);
@@ -95,12 +97,13 @@ public class StateStatementParser extends Parser {
 	@Override
 	public void parse(Element statement, Element root) {
 		//refactored by extracting the following three methods
+		LOGGER.debug("StateStatementParser: parsing metadata...");
 		parseMetadata(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing relations...");
 		parseRelationsFormEQ(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing characters...");
 		parseCharactersFormEQ(statement, root);
-
+		LOGGER.debug("StateStatementParser: parsing standalone structures...");
 		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
 	}
 
@@ -194,23 +197,57 @@ public class StateStatementParser extends Parser {
 
 	protected void parseCharactersFormEQ(Element statement, Element root) {
 		//then parse characters. 
-		List<Element> characters;
 		try {
-			characters = pathCharacter.selectNodes(statement);			
-			for (Element character : characters) {		
-				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+			ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+			
+			//if any one of the characters is a post-comp quality, the entity needs to be post-comped
+			List<Element> postcompchars = pathPostCompCharacter.selectNodes(statement);
+			ArrayList<QualityProposals> postcomps = new ArrayList<QualityProposals>();
+			for(Element character: postcompchars){
+				entities = new ArrayList<EntityProposals>();
+				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				parserCharacters(character, statement, root, entities, qualities);
-				//constructEQStatementProposals(qualities, entities);
+				postcomps.addAll(qualities);
+			}
+			
+			if(postcomps.size()>0){
+				LOGGER.debug("SSP: found postcomp qualities: ");
+				for(QualityProposals qp: postcomps){
+					LOGGER.debug(".."+qp.toString());
+				}
+			}
+			Utilities.postcompose(entities, postcomps); //assuming the same entities being returned in the loop
+			
+			//other qualities
+			List<Element> characters = pathCharacter.selectNodes(statement);	
+			characters.removeAll(postcompchars);
+			
+			if(characters.size()<=0){
+				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
 				constructEQProposals(qualities, entities);
+			}else{
+				for (Element character : characters) {		
+					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'...");
+					entities = new ArrayList<EntityProposals>();
+					qualities = new ArrayList<QualityProposals>();
+					if(character.getParentElement()==null) continue;
+					parserCharacters(character, statement, root, entities, qualities);
+					LOGGER.debug("SSP: parsed entities:");
+					for(EntityProposals ep: entities) LOGGER.debug(ep.toString());
+					LOGGER.debug("SSP: parsed qualities:");
+					for(QualityProposals qp: qualities) LOGGER.debug(qp.toString());
+					//constructEQStatementProposals(qualities, entities);
+					Utilities.postcompose(entities, postcomps);
+					constructEQProposals(qualities, entities);
+				}
 			}
 			
 		} catch (JDOMException e) {
 			LOGGER.error("", e);
 		}
 	}
-
 
 	/**
 	 * parse character and resolve for entity
@@ -594,7 +631,7 @@ public class StateStatementParser extends Parser {
 	}
 
 	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities){
-		if((entities!=null)&&(entities.size()>0))
+		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					EQProposals eqp = new EQProposals();
@@ -611,7 +648,25 @@ public class StateStatementParser extends Parser {
 					}
 					this.EQStatements.add(eqp);
 				}
-			}
+			}			
+		} else if(entities!=null && entities.size()>0){ //no qualities
+				for (EntityProposals entityp : entities) {
+					EQProposals eqp = new EQProposals();
+					eqp.setEntity(entityp);
+					eqp.setQuality(null);
+					eqp.setSource(this.src);
+					eqp.setCharacterId(this.characterid);
+					eqp.setStateId(this.stateid);
+					eqp.setDescription(text);
+					if (this instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					this.EQStatements.add(eqp);
+				}					
+		}
+		
 	}
 	
 	

@@ -29,7 +29,7 @@ public class EntitySearcher4 extends EntitySearcher {
 	public ArrayList<EntityProposals> searchEntity(Element root, String structid,
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
-		LOGGER.debug("EntitySearcher4: search "+entityphrase+"[orig="+originalentityphrase+"]");
+		LOGGER.debug("EntitySearcher4: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
 
 		String[] entityphrasetokens = entityphrase.split("\\s+");
