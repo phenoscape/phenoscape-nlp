@@ -46,6 +46,22 @@ public class NegatedQuality extends Quality {
 		return this.parentQuality;
 	}
 
+	public String getFullString()
+	{		
+		//return this.parentQuality.getString()+" and ("+negation.getLabel()+" some "+this.string+")";
+		return this.string;
+	}
+	
+	public String getFullLabel()
+	{
+		return this.parentQuality.getLabel()+" and ("+negation.getLabel()+" some "+this.getLabel()+")";
+	}
+	
+	public String getFullId()
+	{
+		return this.parentQuality.getId()+" and ("+negation.getId()+" some "+this.getId()+")";
+	}
+	
 	/**
 	 * not waisted => shape and complement_of some waisted
 	 */

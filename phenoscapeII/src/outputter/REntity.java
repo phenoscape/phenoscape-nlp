@@ -87,20 +87,31 @@ public class REntity extends Entity{
 
 	@Override
 	public String getString() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		if(entity instanceof CompositeEntity)
+		return "("+this.relation.getString()+" some ("+((CompositeEntity)entity).getFullString()+")"+")";
+		else
+		return "("+this.relation.getString()+" some "+entity.getString()+""+")";
+		
 	}
 
 	@Override
 	public String getLabel() {
-		// TODO Auto-generated method stub
-		return null;
+
+		if(entity instanceof CompositeEntity)
+		return "("+this.relation.getLabel()+" some ("+entity.getLabel()+")"+")";
+		else
+		return "("+this.relation.getLabel()+" some "+entity.getLabel()+""+")";
 	}
 
 	@Override
 	public String getId() {
-		// TODO Auto-generated method stub
-		return null;
+		
+			if(entity instanceof CompositeEntity)
+			return "("+this.relation.getId()+" some ("+((CompositeEntity)entity).getFullID()+")"+")";
+			else
+			return "("+this.relation.getId()+" some "+entity.getId()+""+")";
+
 	}
 
 	@Override
@@ -111,8 +122,8 @@ public class REntity extends Entity{
 
 	@Override
 	public float getConfidienceScore() {
-		// TODO Auto-generated method stub
-		return 0;
+		//multiple of all confidence scores
+		return this.relation.getConfidienceScore()*this.entity.getConfidienceScore();
 	}
 
 	//@Override

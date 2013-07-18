@@ -70,6 +70,9 @@ public class CompositeEntity extends Entity {
 			}
 		//}
 	}
+
+	
+	
 	
 	/**
 	 * removing elements from the middle may not make sense.
@@ -147,12 +150,83 @@ public class CompositeEntity extends Entity {
 		return this.string;
 	}
 
-	@Override
+	@Override	
 	public String getLabel() {
-		// TODO Auto-generated method stub
-		return null;
+		String label="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				label+=e.getLabel()+" and ";
+			}
+			else if( e instanceof CompositeEntity)
+			{
+				label+=((CompositeEntity) e).getLabel();
+			}
+			else
+			{
+				label+=((REntity) e).getLabel()+" and ";
+			}
+				
+		}
+		
+		label = label.replaceAll("(and )$", "");
+		return label.trim();
 	}
 
+	public String getFullID()
+	{
+
+		String id="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				id+=e.getId()+" and ";
+			}
+			else if( e instanceof CompositeEntity)
+			{
+				id+=((CompositeEntity) e).getFullID();
+			}
+			else
+			{
+				id+=((REntity) e).getId()+" and ";
+			}
+				
+		}
+		
+		id = id.replaceAll("(and )$", "");
+		return id.trim();
+	
+	}
+	
+	
+	public String getFullString()
+	{
+
+		String string="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				string+=e.getString()+" and ";
+			}
+			else if(e instanceof CompositeEntity)
+			{
+				string+=((CompositeEntity) e).getFullString();
+			}
+			else
+			{
+				string+=((REntity) e).getString()+" and ";
+			}
+				
+		}
+		
+		string = string.replaceAll("(and )$", "");
+		return string.trim();	
+	}
+	
+	
 	@Override
 	public String getId() {
 		return this.getPrimaryEntityID();
@@ -165,8 +239,14 @@ public class CompositeEntity extends Entity {
 
 	@Override
 	public float getConfidienceScore() {
-		// TODO Auto-generated method stub
-		return 0f;
+		
+		float score=1.0f;
+		for(Entity e:this.getEntities())
+		{			
+				score*=e.getConfidienceScore();	
+		}
+		
+		return score;
 	}
 	//cloning - recursive implementation
 	public CompositeEntity clone()

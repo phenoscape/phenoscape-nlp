@@ -22,11 +22,52 @@ public class CompositeQuality extends Quality {
 		this.relatedentity = (REntity) relatedentity;
 	}
 
-	public CompositeQuality(String string, String label, String id) {
+/*	public CompositeQuality(String string, String label, String id) {
 		super(string, label, id);
 		// TODO Auto-generated constructor stub
 	}
+	*/
 	
+	public String getFullString()
+	{
+		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
+		{
+			return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+"^"+this.relatedentity.getRelation().getString()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullString()+"))";
+		}
+		else
+		{
+			return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+"^"+this.relatedentity.getRelation().getString()+"("+((REntity)this.relatedentity).getEntity().getString()+"))";
+		}
+	}
+	
+	public String getFullLabel()
+	{
+		return this.mainquality.getLabel()+"^"+this.restrictedrelation+"("+this.comparedquality.getLabel()+"^"+this.relatedentity.getRelation().getLabel()+"("+((REntity)this.relatedentity).getEntity().getLabel()+"))";
+	}
+	
+	public String getFullId()
+	{
+		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
+		{
+		return this.mainquality.getId()+"^"+this.restrictedrelation+"("+this.comparedquality.getId()+"^"+this.relatedentity.getRelation().getId()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullID()+"))";
+		}
+		else
+		{
+		return this.mainquality.getId()+"^"+this.restrictedrelation+"("+this.comparedquality.getId()+"^"+this.relatedentity.getRelation().getId()+"("+((REntity)this.relatedentity).getEntity().getId()+"))";
+		}
+	}
+	
+	@Override
+	public float getConfidienceScore() {
+		
+		return this.mainquality.getConfidienceScore()*this.comparedquality.getConfidienceScore()*this.relatedentity.getConfidienceScore();
+
+	}
+	
+	public String getId()
+	{
+		return null;
+	}
 	public Quality getMainquality() {
 		return mainquality;
 	}

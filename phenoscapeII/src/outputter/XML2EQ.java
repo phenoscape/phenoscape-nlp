@@ -5,6 +5,8 @@ package outputter;
 
 import java.io.File;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -124,12 +126,12 @@ public class XML2EQ {
 		// qualityid
 		// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
 		stmt.execute("drop table if exists " + outputtable);
+		System.out.println("create table if not exists " + outputtable
+				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
+				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))");
 		stmt.execute("create table if not exists " + outputtable
 				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
-				+ "entity varchar(200), entitylabel varchar(200), entityid varchar(200), " + "quality varchar(200), qualitylabel varchar(200), qualityid varchar(200), "
-				+ "qualitynegated varchar(200), qualitynegatedlabel varchar(200), " + "qnparentlabel varchar(200), qnparentid varchar(200), "
-				+ "qualitymodifier varchar(200), qualitymodifierlabel varchar(200), qualitymodifierid varchar(300), "
-				+ "entitylocator varchar(200), entitylocatorlabel varchar(200), entitylocatorid varchar(200), " + "countt varchar(200))");
+				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))" );
 
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
@@ -220,16 +222,167 @@ public class XML2EQ {
 	 * text::long and rounded along entire length
 	 * 5 EQ::[E]lateral wall [Q]long [EL]metapterygoid channel
 	 * 6 EQ::[E]lateral wall [Q]rounded [along entire length] [EL]metapterygoid channel
+	 * @param charactertext 
+	 * @param sourcefile 
+	 * @param characterId 
 	 */
 	private void outputEQs4CharacterUnit() throws Exception {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
-			//this.insertEQs2Table(EQ);
+		this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
 
 	}
+
+	
+	
+	
+	private void insertEQs2Table(EQProposals eQ)
+	{
+		String entity ="";
+		String entitylabel="";
+		String entityid="";
+		String quality ="";
+		String qualitylabel="";
+		String qualityid="";
+		String relatedentity ="";
+		String relatedentitylabel="";
+		String relatedentityid="";
+		//Read all Entity Proposals and store as comma separated values
+		for(Entity e:eQ.entity.getProposals())
+		{
+			entitylabel+=e.getLabel()+" Score:"+e.getConfidienceScore()+",";
+			if(e instanceof CompositeEntity)
+			{
+				entity+=((CompositeEntity) e).getFullString()+" Score:"+e.getConfidienceScore()+",";
+				entityid+=((CompositeEntity) e).getFullID()+" Score:"+e.getConfidienceScore()+",";
+			}
+			else
+			{
+				entity+=e.getString()+" Score:"+e.getConfidienceScore()+",";
+				entityid+=e.getId()+" Score:"+e.getConfidienceScore()+",";
+			}
+		}
+		
+		entity = entity.replaceAll(",$", "");
+		entitylabel = entitylabel.replaceAll(",$", "");
+		entityid = entityid.replaceAll(",$", "");
+		
+		//Read all Quality Proposals and store as comma separated values
+		for(Quality q:eQ.quality.getProposals())
+		{
+			if(q instanceof RelationalQuality)
+			{
+				quality+=q.getString()+" Score:"+q.getConfidienceScore()+",";
+				qualityid+=q.getId()+" Score:"+q.getConfidienceScore()+",";
+				qualitylabel+=q.getLabel()+" Score:"+q.getConfidienceScore()+",";
+				//Reading all related entities and store as comma separated values
+				for(Entity e:((RelationalQuality) q).relatedentity.getProposals())
+				{
+					relatedentitylabel+=e.getLabel()+" Score:"+e.getConfidienceScore()+",";
+					if(e instanceof CompositeEntity)
+					{
+						relatedentity+=((CompositeEntity) e).getFullString()+" Score:"+e.getConfidienceScore()+",";
+						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:"+e.getConfidienceScore()+",";
+					}
+					else
+					{
+						relatedentity+=e.getString()+" Score:"+e.getConfidienceScore()+",";
+						relatedentityid+=e.getId()+" Score:"+e.getConfidienceScore()+",";
+					}
+				}
+			}
+			else if((q instanceof CompositeQuality))
+			{
+				quality+=((CompositeQuality)q).getFullString()+" Score:"+q.getConfidienceScore()+",";
+				qualityid+=((CompositeQuality)q).getId()+" Score:"+q.getConfidienceScore()+",";
+				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:"+q.getConfidienceScore()+",";
+
+			}
+			else if((q instanceof NegatedQuality))
+			{
+				quality+=((NegatedQuality)q).getFullString()+" Score:"+q.getConfidienceScore()+",";
+				qualityid+=((NegatedQuality)q).getFullId()+" Score:"+q.getConfidienceScore()+",";
+				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:"+q.getConfidienceScore()+",";
+			}
+			else
+			{
+				quality+=q.getString()+" Score:"+q.getConfidienceScore()+",";
+				qualityid+=q.getId()+" Score:"+q.getConfidienceScore()+",";
+				qualitylabel+=q.getLabel()+" Score:"+q.getConfidienceScore()+",";
+			}
+		}
+		
+		relatedentity = relatedentity.replaceAll(",$", "");
+		relatedentitylabel = relatedentitylabel.replaceAll(",$", "");
+		relatedentityid = relatedentityid.replaceAll(",$", "");
+		quality = quality.replaceAll(",$", "");
+		qualitylabel = qualitylabel.replaceAll(",$", "");
+		qualityid = qualityid.replaceAll(",$", "");
+		
+		String sql = "insert into "+this.outputtable +" (source,characterID,stateID,description, entity,"+
+					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
+					 "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+		System.out.println(sql);
+		
+		try {
+			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
+			preparedStatement.setString(1, eQ.sourceFile);
+			preparedStatement.setString(2, eQ.characterId);
+			preparedStatement.setString(3,eQ.stateId);
+			preparedStatement.setString(4,eQ.description);
+			preparedStatement.setString(5,entity);
+			preparedStatement.setString(6,entitylabel);
+			preparedStatement.setString(7,entityid);
+			preparedStatement.setString(8,quality);
+			preparedStatement.setString(9,qualitylabel);
+			preparedStatement.setString(10,qualityid);
+			preparedStatement.setString(11,relatedentity);
+			preparedStatement.setString(12,relatedentitylabel);
+			preparedStatement.setString(13,relatedentityid);
+
+			preparedStatement.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		
+	}
+
+/*	private ArrayList<String> printEntity(ArrayList<Entity> proposals) {
+
+		ArrayList<String> entitystrings = new ArrayList<String>();
+		String entity ="";
+		String entitylabel="";
+		String entityid="";
+		
+		for(Entity e:proposals)
+		{
+			if(e instanceof CompositeEntity)
+			{
+				ArrayList<String> entitystring = printEntity(((CompositeEntity) e).getEntities());
+				
+				entity+=entitystring.get(0);
+				entitylabel+=entitystring.get(1);
+				entityid+=entitystring.get(2);
+				
+			}
+			else{
+				entity+=e.getString()+",";
+				entitylabel+=e.getLabel()+",";
+				entityid+=e.getId()+",";
+			}
+		}
+		
+		entitystrings.add(entity.replaceAll(",$",""));
+		entitystrings.add(entitylabel.replaceAll(",$",""));
+		entitystrings.add(entityid.replaceAll(",$",""));
+		
+		return entitystrings;
+	}*/
 
 	/**
 	 * 
@@ -1164,7 +1317,7 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
