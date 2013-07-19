@@ -334,6 +334,7 @@ public class TermOutputerUtilities {
 		
 		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
+			return null;
 			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
 			//TODO: update other copies of the method
 			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan

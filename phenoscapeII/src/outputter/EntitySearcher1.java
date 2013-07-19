@@ -108,7 +108,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(!hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
-			
+
 			if(components.size()==1){
 				LOGGER.debug("find components size = 1");
 				//has one component only, split the component into entity and entitylocator
@@ -117,65 +117,70 @@ public class EntitySearcher1 extends EntitySearcher {
 					if(perm.indexOf(" of ")<0) continue; //there must be another variation with " of " that is equivalent to this variation
 					if(this.debug_permutation) System.err.println("variation to split: "+perm);
 					String[] parts = perm.split("\\s+of\\s+");
-					for(int p = 0; p < parts.length; p++){
-						for(int l = 0; l < parts.length-1; l++){ //length of entity
-							entityphrase = Utilities.join(parts, 0, l, " of ");
-							elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
-							LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
-							EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-							eels.handle();
-							ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
-							if(entity != null){
-								found = true;
-								//ep.add(entity);
-								//entities.add(ep);
-								//entities.addAll(entity);						
-								for(EntityProposals aep: entity){
-									Utilities.addEntityProposals(entities, aep);
-									LOGGER.debug("..EEL adds proposals:"+aep);
-								}
-							}else{
-								LOGGER.debug("..EEL found no match");
+					for(int l = 0; l < parts.length-1; l++){ //length of entity
+						entityphrase = Utilities.join(parts, 0, l, " of ");
+						elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
+						LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+						eels.handle();
+						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+						if(entity != null){
+							found = true;
+							//ep.add(entity);
+							//entities.add(ep);
+							//entities.addAll(entity);						
+							for(EntityProposals aep: entity){
+								Utilities.addEntityProposals(entities, aep);
+								LOGGER.debug("..EEL adds proposals:"+aep);
 							}
+						}else{
+							LOGGER.debug("..EEL found no match");
 						}
 					}
 				}
 			}else{
 				LOGGER.debug("find components size > 1");
 				//has multiple components
-				//use the first as entity
-				ArrayList<String> perms = components.get(0).getPermutations();
-				for(String perm : perms){
-					entityphrase += perm+"|";
-				}
-				entityphrase = entityphrase.replaceFirst("\\|$", "");
-				//use the rest as entity locators
-				for(int i = 1; i < components.size(); i++){ //
-					perms = components.get(0).getPermutations();
-					String vars = "";
-					for(String perm : perms){
-						vars += perm+"|";
+				//use the first n as entity
+				for(int n = 1; n < components.size()-1; n++){
+					for(int i = 0; i < n; i++){ //
+						ArrayList<String> perms = components.get(i).getPermutations();
+						String vars = "";
+						for(String perm : perms){
+							vars += perm+"|";
+						}
+						vars = vars.replaceFirst("\\|$", "");
+						entityphrase +="(?:"+vars+") of ";
 					}
-					vars = vars.replaceFirst("\\|$", "");
-					elocatorphrase +="(?:"+vars+") of ";
-				}
-				elocatorphrase = elocatorphrase.replaceFirst(" of $", "");
-				
-				LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
-				EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-				eels.handle();
-				ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
-				if(entity != null){
-					found = true;
-					//ep.add(entity);
-					//entities.add(ep);
-					//entities.addAll(entity);						
-					for(EntityProposals aep: entity){
-						Utilities.addEntityProposals(entities, aep);
-						LOGGER.debug("..EEL adds proposals:"+aep);
+					entityphrase = entityphrase.replaceFirst(" of $", "");
+					//use the rest as entity locators
+					for(int i = n; i < components.size(); i++){ //
+						ArrayList<String> perms = components.get(i).getPermutations();
+						String vars = "";
+						for(String perm : perms){
+							vars += perm+"|";
+						}
+						vars = vars.replaceFirst("\\|$", "");
+						elocatorphrase +="(?:"+vars+") of ";
 					}
-				}else{
-					LOGGER.debug("..EEL found no match");
+					elocatorphrase = elocatorphrase.replaceFirst(" of $", "");
+
+					LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+					EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+					eels.handle();
+					ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+					if(entity != null){
+						found = true;
+						//ep.add(entity);
+						//entities.add(ep);
+						//entities.addAll(entity);						
+						for(EntityProposals aep: entity){
+							Utilities.addEntityProposals(entities, aep);
+							LOGGER.debug("..EEL adds proposals:"+aep);
+						}
+					}else{
+						LOGGER.debug("..EEL found no match");
+					}
 				}
 			}
 		}

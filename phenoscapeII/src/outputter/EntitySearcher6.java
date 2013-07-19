@@ -180,47 +180,8 @@ public class EntitySearcher6 extends EntitySearcher {
 				}
 			}			
 		}
-		//If not found in Ontology, then return the phrase as simpleentity string
-		//TODO return "some anatomical entity" or other high level concepts. 
-		//don't forget the entityl
-		LOGGER.debug("no match in ontology is found, form string-based proposals...");
-		EntityProposals ep = new EntityProposals();
-		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
-		SimpleEntity sentity = new SimpleEntity();
-		sentity.setString(entityphrase);
-		sentity.confidenceScore=0f;
-		if(entityl.getString().length()>0){
-			//relation & entity locator
-			FormalRelation rel =  Dictionary.partof;
-			rel.setConfidenceScore((float)1.0);
-			REntity rentity = new REntity(rel, entityl);
-			//composite entity
-			CompositeEntity centity = new CompositeEntity();
-			centity.addEntity(sentity);
-			centity.addEntity(rentity);
-			//EntityProposals entities = new EntityProposals();
-			//ep.setPhrase(sentity.getString());
-			centity.setString(originalentityphrase);
-			ep.setPhrase(originalentityphrase);
-			ep.add(centity);
-			LOGGER.debug("add a proposal:"+centity.toString());
-			//entities.add(ep);
-			Utilities.addEntityProposals(entities, ep);
-		}else{
-			//EntityProposals entities = new EntityProposals();
-			//ep.setPhrase(sentity.getString());
-			ep.setPhrase(originalentityphrase);
-			ep.add(sentity);
-			LOGGER.debug("add a proposal:"+sentity.toString());
-			//entities.add(ep);
-			Utilities.addEntityProposals(entities, ep);
-		}
 		
-		LOGGER.debug("EntitySearcher6 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
-		for(EntityProposals aep: entities){
-			LOGGER.debug("..EntityProposals: "+aep.toString());
-		}
-		return entities;
+		return null;
 	}
 
 
