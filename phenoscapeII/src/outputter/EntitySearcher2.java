@@ -58,10 +58,7 @@ public class EntitySearcher2 extends EntitySearcher {
 			//entity
 			if(entityl.getString().length()>0){
 				//relation & entity locator
-				FormalRelation rel = new FormalRelation();
-				rel.setString("part of");
-				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				rel.setId("BFO:000050");
+				FormalRelation rel = Dictionary.partof;
 				rel.setConfidenceScore((float)1.0);
 				REntity rentity = new REntity(rel, entityl);
 				//composite entity

@@ -89,25 +89,26 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 					for(Entity sentity: sentityp.getProposals()){
 						for(FormalConcept spatialentity: spatialentities){
 							SimpleEntity sentity1 = (SimpleEntity) spatialentity;
-							if(sentity1!=null){
+							if(sentity1!=null){//ventral region
 								//nested part_of relation
-								if(entityl.getString().length()>0){ //anterior process of maxilla 
+								if(entityl.getString().length()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
 									//relation & entity locator: inner
-									FormalRelation rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
+									FormalRelation rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
-									REntity rentity = new REntity(rel, entityl);
+									REntity rentity = null;
+									if(sentity instanceof CompositeEntity){
+										//sentity should not have any post-composed quality, so need not consider it
+										rentity = ((CompositeEntity) sentity).getEntityLocator();
+										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
+									}else if(entityl.getString().length()>0){
+										rentity = new REntity(rel, entityl);
+									}
 									//composite entity = entity locator for sentity
 									CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
 									centity.addEntity(sentity1); //anterior region
 									centity.addEntity(rentity);	//^part_of(maxilla)	
 									//relation & entity locator:outer 
-									rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
+									rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
 									rentity = new REntity(rel, centity);
 									centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
@@ -126,10 +127,7 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 								}else{//anterior maxilla 
 									//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 									//relation & entity locator: 
-									FormalRelation rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
+									FormalRelation rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
 									REntity rentity = new REntity(rel, sentity);
 									//composite entity = entity locator for sentity

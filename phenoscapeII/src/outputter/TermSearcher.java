@@ -61,6 +61,19 @@ public class TermSearcher {
 		//one result = 4-element array: querytype[qualty|entity], id, label, matchtype[original|exact|narrow|related]
 		//one result from each ontology that has at least some type of hit
 		//result from each ontology is either a match to original class, or via exact, narrow, or related synonyms, the first match is returned.
+		//0. special cases
+		if(phrasetype.compareTo("entity")==0){
+			//'process' => 'anatomical projection' UBERON:0004529
+			if(phrase.compareTo("process")==0){
+				SimpleEntity se = new SimpleEntity();
+				se.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0004529");
+				se.setConfidenceScore(1f);
+				se.setId("UBERON:0004529");
+				se.setLabel("anatomical projection");
+				se.setString(phrase);
+				return se;
+			}
+		}
 		
 		//1. search the original phrase
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
@@ -83,7 +96,7 @@ public class TermSearcher {
 		/*end handling the "unossified" like term*/
 		
 		//2. dorsal portion => dorsal region
-		if(phrasetype.compareTo("entity")==0){
+		/*if(phrasetype.compareTo("entity")==0){
 			Matcher m = p.matcher(phrase);//term = dorsal portion
 			String spatials = "";
 			boolean trimed = false;
@@ -93,7 +106,7 @@ public class TermSearcher {
 				phrase = m.group(2).trim();
 				trimed = true;
 				m = p.matcher(phrase);
-			}
+			}*/
 			//spatials = dorsal ; phrase = portion,, spatials distal; phrase = end
 			//TODO: check: spatialMaps function is replaced by SpatialModifiedEntityStrategy.synVariation
 			/*String repl = Dictionary.spatialMaps.get(phrase);
@@ -107,8 +120,8 @@ public class TermSearcher {
 				candidatematches.addAll(results);
 				results = new ArrayList<Hashtable<String, String>>();
 			}*/
-			phrase = phrasecopy;
-		}
+			/*phrase = phrasecopy;
+		}*/
 		
 		//TODO let ontoutil.searchOntologies handle variations in hyphens as this case can be mixed with any other cases
 		//3. phrase with hyphens, replace hyphens with spaces
@@ -294,7 +307,7 @@ public class TermSearcher {
 	 * @param headnoun
 	 * @return
 	 */
-	public static ArrayList<FormalConcept> entityvariationtermsearch(String spatial, String headnoun)
+	public static ArrayList<FormalConcept> entityVariationTermSearch(String spatial, String headnoun)
 	{
 		ArrayList<FormalConcept> matches = new ArrayList<FormalConcept>();
 		
@@ -327,6 +340,24 @@ public class TermSearcher {
 			result = TermSearcher.regexpQualityIDCache.get(phrase);
 		}		
 		if(result !=null ) return result;
+		
+		if(phrasetype.compareTo("entity")==0){
+			//'process' => 'anatomical projection' UBERON:0004529
+			if(phrase.matches("\\W*process(\\|process)+\\W*")){
+				SimpleEntity se = new SimpleEntity();
+				se.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0004529");
+				se.setConfidenceScore(1f);
+				se.setId("UBERON:0004529");
+				se.setLabel("anatomical projection");
+				se.setString(phrase);
+				result= new ArrayList<FormalConcept>();
+				result.add(se);
+				TermSearcher.regexpEntityIDCache.put(phrase, result);
+				return result;
+			}
+		}
+		
+		
 		ArrayList<Hashtable<String, String>> searchresult = new ArrayList<Hashtable<String, String>> ();
 		XML2EQ.ontoutil.searchOntologies(phrase, phrasetype, searchresult);
 		if(searchresult !=null && searchresult.size() > 0){

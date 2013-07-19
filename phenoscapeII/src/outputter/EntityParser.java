@@ -43,8 +43,10 @@ public class EntityParser {
 			LOGGER.debug("EntityParser calls EntitySearcherOriginal to search '"+structurename+","+parents+"'");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 			boolean record = false;
-			for(EntityProposals ep: entity){ record= true;
-				LOGGER.debug("..EntityParser recorded matched proposals: "+ep.toString());
+			LOGGER.debug("EntityParser recorded matched proposals: ");
+			for(EntityProposals ep: entity){ 
+				record= true;
+				LOGGER.debug(".."+ep.toString());
 			}
 			if(!record) LOGGER.debug("EntityParser found no matching entities for '"+structurename+","+parents+"'");
 			entitycache.put(structureid, entity);
@@ -77,14 +79,24 @@ public class EntityParser {
 	}
 
 	/**
-	 * 
+	 * return a clone so subsequent changes to entities will not be proprogated to the entity cache.
 	 * @return null if no entity has been found/ontologized.
 	 */
 	public ArrayList<EntityProposals> getEntity() {
-		if(entity!=null && entity.size()>0 && entity.get(0)!=null) return entity;
+		if(entity!=null && entity.size()>0 && entity.get(0)!=null){
+			 ArrayList<EntityProposals> clone = new  ArrayList<EntityProposals>();
+			 for(EntityProposals ep: entity){
+				 clone.add(ep.clone());
+			 }
+			return clone;
+		}
 		else return null;
 	}
 
+	/**
+	 * not return a clone because no subsequent change is performed on s2q
+	 * @return
+	 */
 	public Structure2Quality getQualityStrategy() {
 		return s2q;
 	}

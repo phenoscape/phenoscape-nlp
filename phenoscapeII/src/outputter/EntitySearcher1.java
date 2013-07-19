@@ -35,7 +35,7 @@ import org.jdom.input.SAXBuilder;
  */
 public class EntitySearcher1 extends EntitySearcher {
 	private static final Logger LOGGER = Logger.getLogger(EntitySearcher1.class);   
-	//private static boolean debug_permutation = false;
+	private static boolean debug_permutation = false;
 	//boolean debug = true;
 
 	/**
@@ -44,7 +44,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	public EntitySearcher1() {
 
 	}
-    //TODO patterns s0fd16381: maxillae, anterior end of 
+	//TODO patterns s0fd16381: maxillae, anterior end of 
 	/* (non-Javadoc)
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
@@ -56,24 +56,25 @@ public class EntitySearcher1 extends EntitySearcher {
 
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		EntityProposals ep = new EntityProposals(); //search results
-
+		//entityphrase =  "posterior radials";
+		//elocatorphrase = "anterior dorsal fin";
 		//save phrases as components
 		EntityComponents ecs = new EntityComponents(entityphrase, elocatorphrase);
 		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity or an entity locator
 
-		//construct variations: selected permutation without repetition 
+		//construct pre-composed variations: selected permutations without repetition 
 		ArrayList<String> variations  = new ArrayList<String>();
+		//permutation on synrings that are results of subcomponents permutation
 		permutation(components, variations); 
 		LOGGER.debug(System.getProperty("line.separator")+"search variations...");
 		LOGGER.debug("'"+entityphrase+" , "+elocatorphrase+"' generated "+variations.size()+" variations:");
 		for(String variation : variations)
 			LOGGER.debug(".."+variation);
-		
+
 		//search variations for pre-composed terms one by one, return all the results
 		boolean found = false;
 		LOGGER.debug("search variations one by one...");
 		for(String variation: variations){
-			
 			ArrayList<FormalConcept> entityfcs = new TermSearcher().regexpSearchTerm(variation, "entity"); //remove indexes from variation before search
 			//check for the strength of the match: related synonyms: (?:(?:crista) (?:parotica)) entity=>tegmen tympani
 			if(entityfcs!=null){
@@ -103,34 +104,78 @@ public class EntitySearcher1 extends EntitySearcher {
 		//like EntitySearch2, but more flexible: may call the strategy on different entity/entity locator combinations
 		//TODO: need more work: what's entityphrase and elocatorphrase?
 		boolean hasspatial = ecs.containsSpatial();
-		if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
+		//if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
+		if(!hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
-			for(String variation: variations){
-				//split variation to entity and elocator
-				if(variation.indexOf(" of ")<0) continue; //there must be another  variation with " of " that is equivalent to this variation
-				String[] parts = variation.split("\\s+of\\s+");
-				for(int p = 0; p < parts.length; p++){
-					for(int l = 0; l < parts.length-1; l++){ //length of entity
-						entityphrase = Utilities.join(parts, 0, l, " of ");
-						elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
-						LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
-						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-						eels.handle();
-						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
-						if(entity != null){
-							found = true;
-							//ep.add(entity);
-							//entities.add(ep);
-							//entities.addAll(entity);						
-							for(EntityProposals aep: entity){
-								Utilities.addEntityProposals(entities, aep);
-								LOGGER.debug("..EEL adds proposals:"+aep);
+			
+			if(components.size()==1){
+				LOGGER.debug("find components size = 1");
+				//has one component only, split the component into entity and entitylocator
+				ArrayList<String> perms = components.get(0).getPermutations();
+				for(String perm : perms){
+					if(perm.indexOf(" of ")<0) continue; //there must be another variation with " of " that is equivalent to this variation
+					if(this.debug_permutation) System.err.println("variation to split: "+perm);
+					String[] parts = perm.split("\\s+of\\s+");
+					for(int p = 0; p < parts.length; p++){
+						for(int l = 0; l < parts.length-1; l++){ //length of entity
+							entityphrase = Utilities.join(parts, 0, l, " of ");
+							elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
+							LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+							EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+							eels.handle();
+							ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+							if(entity != null){
+								found = true;
+								//ep.add(entity);
+								//entities.add(ep);
+								//entities.addAll(entity);						
+								for(EntityProposals aep: entity){
+									Utilities.addEntityProposals(entities, aep);
+									LOGGER.debug("..EEL adds proposals:"+aep);
+								}
+							}else{
+								LOGGER.debug("..EEL found no match");
 							}
-						}else{
-							LOGGER.debug("..EEL found no match");
 						}
 					}
+				}
+			}else{
+				LOGGER.debug("find components size > 1");
+				//has multiple components
+				//use the first as entity
+				ArrayList<String> perms = components.get(0).getPermutations();
+				for(String perm : perms){
+					entityphrase += perm+"|";
+				}
+				entityphrase = entityphrase.replaceFirst("\\|$", "");
+				//use the rest as entity locators
+				for(int i = 1; i < components.size(); i++){ //
+					perms = components.get(0).getPermutations();
+					String vars = "";
+					for(String perm : perms){
+						vars += perm+"|";
+					}
+					vars = vars.replaceFirst("\\|$", "");
+					elocatorphrase +="(?:"+vars+") of ";
+				}
+				elocatorphrase = elocatorphrase.replaceFirst(" of $", "");
+				
+				LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+				EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+				eels.handle();
+				ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+				if(entity != null){
+					found = true;
+					//ep.add(entity);
+					//entities.add(ep);
+					//entities.addAll(entity);						
+					for(EntityProposals aep: entity){
+						Utilities.addEntityProposals(entities, aep);
+						LOGGER.debug("..EEL adds proposals:"+aep);
+					}
+				}else{
+					LOGGER.debug("..EEL found no match");
 				}
 			}
 		}
@@ -143,11 +188,10 @@ public class EntitySearcher1 extends EntitySearcher {
 			//TODO: need more work: what's entityphrase and elocatorphrase?
 			SpatialModifiedEntityStrategy smes = new SpatialModifiedEntityStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			smes.handle();
-			String t="";
 			ArrayList<EntityProposals> entity = smes.getEntities();
 			if(entity != null){
 				found = true;
-				
+
 				//ep.add(entity);
 				//entities.add(ep);
 				//entities.addAll(entity); //add a list of different entities: both sexes => female and male
@@ -175,8 +219,8 @@ public class EntitySearcher1 extends EntitySearcher {
 		}else{
 			LOGGER.debug("..ES5 found no match");
 		}
-		
-		
+
+
 		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
 		for(EntityProposals aep: entities){
 			LOGGER.debug("..EntityProposals:"+aep.toString());
@@ -188,11 +232,14 @@ public class EntitySearcher1 extends EntitySearcher {
 
 
 	/**
-	 * posterior radials , anterior dorsal fin generated 2 variations:
-	 * 1. (?:(?:posterior|posterior side) (?:radials)) of (?:(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin)|(?:dorsal|dorsal side) (?:anterior|anterior side) (?:fin))
-	 * 2. (?:(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin)|(?:dorsal|dorsal side) (?:anterior|anterior side) (?:fin)) (?:(?:posterior|posterior side) (?:radials))
+	 * 'posterior radials,anterior dorsal fin' generated 2 variations:
+		..(?:(?:posterior|posterior side) (?:radials)) of (?:(?:fin) of (?:anterior|anterior side) (?:dorsal|dorsal side)|(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin))
+		..(?:(?:fin) of (?:anterior|anterior side) (?:dorsal|dorsal side)|(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin)) (?:(?:posterior|posterior side) (?:radials))
 
-	 *posterior postfrontal ,  generated 1 variations:
+	 * 'ventral radial crest,' generated 1 variations
+	 *..(?:(?:process|crest|ridge|tentacule|shelf|flange|ramus) of (?:ventral|ventral side) (?:radial|radius)|(?:ventral|ventral side) (?:radial|radius) (?:process|crest|ridge|tentacule|shelf|flange|ramus))
+	 * 
+	 * 'posterior postfrontal,'  generated 1 variations:
 	 * 1. (?:(?:posterior|posterior side) (?:postfrontal))
 	 * @param components
 	 * @param variations
@@ -213,7 +260,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		if (n == 0){
 			if(!clone.get(lastindex).isSpatial()){ //the last component can not be a spatial term
 				variations.add(prefix+"("+lastindex+")");
-				//LOGGER.debug("variation: "+prefix+"("+lastindex+")");
+				if(debug_permutation) System.err.println("variation: "+prefix+"("+lastindex+")");
 			}
 		}
 		else {
@@ -222,10 +269,9 @@ public class EntitySearcher1 extends EntitySearcher {
 				for(int j = 0; j < n; j++){
 					if(j!=i) reducedcomps.add(components.get(j)); //reducedcomps = components - element_i
 				}
-
+				if(debug_permutation) System.err.println("prefix="+prefix+" new round: i="+i+ " components size="+reducedcomps.size());
 				String newprefix = newPrefix(prefix, lastindex, clone, clone.indexOf(components.get(i)), i, components);
-				//LOGGER.debug("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+(prefix+" "+components.get(i).getSynRing()).trim());
-				//LOGGER.debug("new round: i="+i+ " components size="+reducedcomps.size()+" prefix="+prefix);
+				if(debug_permutation) System.err.println("newprefix="+newprefix+" new round: i="+i+ " components size="+reducedcomps.size());
 				permutation(/*(prefix+" "+components.get(i).getSynRing()).trim()*/newprefix, reducedcomps, variations, clone, clone.indexOf(components.get(i)));
 			}
 		}
@@ -233,18 +279,19 @@ public class EntitySearcher1 extends EntitySearcher {
 
 	/**
 	 * decide whether to concatenate oldprefix and components.get(i).getSynRing() directly or to add " of " between them.
-	 * add "of" after a structure
+	 * add "of" after a structure when the lastindex < newindex (i.e., putting a child before a parent organ)
 	 * @param oldprefix: the current prefix 
 	 * @param lastindex: index of the last component in the original components(clone) that was added to prefix. 
 	 * @param newindex:  index of the component i in the original clone
-	 * @param i: index of the to-be-added component in components
+	 * @param i: index of the to-be-added component in current components
 	 * @param components
 	 * @return
 	 */
 
 	private static String newPrefix(String oldprefix, int lastindex, ArrayList<EntityComponent> clone, int newindex, int i,
 			ArrayList<EntityComponent> components) {
-		if(lastindex>=0 && lastindex<components.size() && clone.get(lastindex).isStructure() && lastindex < newindex){
+		//if(lastindex>=0 && lastindex<components.size() && clone.get(lastindex).isStructure() && lastindex < newindex){
+		if(lastindex>=0 && clone.get(lastindex).isStructure() && lastindex < newindex){
 			return (oldprefix+"("+lastindex+") of "+components.get(i).getSynRing()).trim();
 		}
 		return (oldprefix+"("+lastindex+") "+components.get(i).getSynRing()).trim();
@@ -269,7 +316,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		ArrayList<EntityComponent> components = new ArrayList<EntityComponent>(); //the order of the elements indicate the part of relation, 0 part of 1 part of 2 ...
 
 		public EntityComponents(String entity, String locator){
-			//1. join entityphrase and elocatorphrase, then split them into entity components
+			//1. join entityphrase and elocatorphrase, then split them into entity components, sorted from child to parent organ
 			components = joinAndSplit(entity, locator);
 
 			//2. create syn_ring for each component
@@ -290,29 +337,37 @@ public class EntitySearcher1 extends EntitySearcher {
 			//split: separate adjective organs ('nasal') and modified organ ('bone');
 			//separate spatial term  ('dorsal') and modified organ ('fin'), but keep "dorsal margin" as one part;
 			//split on " of ".
-			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");
+			//ArrayList<String> entityphrases = sort(entityphrase.split("\\s*(,| of )\\s*"));//sort: turn 'ventral radial process' to 'process, ventral radial'
+			String spatialphraseptn = "(?:"+Dictionary.singlewordspatialtermptn +")?\\s*"
+					+ "\\b(?:(?:"+Dictionary.allSpatialHeadNouns()+")\\b|\\b(?:"+TermOutputerUtilities.adjectiveorganptn+"))";
+			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");//sort: turn 'ventral radial process' to 'process, ventral radial'
 			for(String phrase: entityphrases){
 				phrase = phrase.trim();
 				if(phrase.length()==0) continue;
 				String phrasecp = phrase;
-				Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)");
+				//Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)"); //this splits on single-word spatial term also
+				Pattern p = Pattern.compile("(.*?)\\b("+spatialphraseptn+")\\b(.*)");
 				Matcher m = p.matcher(phrase);
 				String temp = "";
 				while(m.matches()){
-					temp += m.group(1)+"#"+m.group(2)+"#";
+					//temp += m.group(1)+"#"+m.group(2)+"#";
+					temp += m.group(1)+m.group(2)+"#";
 					phrase = m.group(3);
 					m = p.matcher(phrase);
 				}
 				temp +=phrase.trim();//appending the original string to the tokens separated by #
+				if(debug_permutation) System.err.println("split&join: '"+phrasecp+"' =>'"+temp+"'");
 				String[] temps = temp.split("\\s*#\\s*");
 				ArrayList<EntityComponent> thiscomponents = new ArrayList<EntityComponent>();
-				for(String part: temps){
+				//for(String part: temps){
+				for(int i = temps.length-1; i>=0; i--){
+					String part = temps[i];
 					part = part.trim();
 					if(part.length()>0){
 						//parts.add(t);
 						EntityComponent ec = new EntityComponent(part);
 						ec.setSynRing(this.getSynRing4Phrase(part));
-						if(part.indexOf(" ")<0 && part.matches(Dictionary.spatialtermptn)){
+						if(part.indexOf(" ")<0 && part.matches(Dictionary.singlewordspatialtermptn)){
 							ec.isSpatial(true);
 							ec.isStructure(false);
 						}
@@ -324,7 +379,6 @@ public class EntitySearcher1 extends EntitySearcher {
 					}
 				}
 
-
 				//permute parts in the phrase
 				ArrayList<String> permutations = new ArrayList<String>();
 				EntitySearcher1.permutation(thiscomponents, permutations); 
@@ -333,10 +387,35 @@ public class EntitySearcher1 extends EntitySearcher {
 				ec.isStructure(true); //each phrase representing a structure
 				ec.setPermutations(permutations);
 				components.add(ec);
-				
+
 			}
 			return components;
 		}
+
+		/**
+		 * sort organs so parent organs come later
+		 * turn 'ventral radial process' to 'process, ventral radial'
+		 * turn 'radial ventral region' to 'ventral region, radial'
+		 * @param phrases: phrases without comma or 'of'
+		 * @return sorted list of strings
+		 */
+		/*private ArrayList<String> sort(String[] phrases){
+			ArrayList<String> sorted = new ArrayList<String>();
+			for(String phrase: phrases){
+				Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)");
+				Matcher m = p.matcher(phrase);
+				String temp = "";
+				while(m.matches()){
+					temp += m.group(1)+"#"+m.group(2)+"#";
+					phrase = m.group(3);
+					m = p.matcher(phrase);
+				}
+				temp +=phrase.trim();//appending the original string to the tokens separated by #
+				String[] temps = temp.split("\\s*#\\s*");
+				for(int)
+			}
+			return sorted;
+		}*/
 
 		/**
 		 * Set syn ring for each compoent. Treat syn rings for different permutations the alternatives in the syn ring
@@ -487,7 +566,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				System.out.println(ep.toString());
 		}
 	}
-	}
+}
 
 
 

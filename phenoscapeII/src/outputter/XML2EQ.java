@@ -220,6 +220,9 @@ public class XML2EQ {
 	 * text::long and rounded along entire length
 	 * 5 EQ::[E]lateral wall [Q]long [EL]metapterygoid channel
 	 * 6 EQ::[E]lateral wall [Q]rounded [along entire length] [EL]metapterygoid channel
+	 * 
+	 * 
+	 * some of the EQs don't have a Q part: StateStatementParser.
 	 */
 	private void outputEQs4CharacterUnit() throws Exception {
 
@@ -658,7 +661,7 @@ public class XML2EQ {
 				EntityProposals ep = EQ.getEntity();
 				for(Entity e: ep.getProposals()){
 					if(e instanceof SimpleEntity) entitylabel = ((SimpleEntity)e).getLabel();
-					else entitylabel = ((CompositeEntity)e).getPrimaryEntity().getLabel();
+					else entitylabel = ((CompositeEntity)e).getTheSimpleEntity().getLabel();
 					if(matchWithKeyEntities(entitylabel)){
 						keyEQ = EQ;
 						QualityProposals qp = EQ.getQuality();
@@ -825,7 +828,7 @@ public class XML2EQ {
 			for(Entity keyentity: keyentityp.getProposals()){
 				String label = null;
 				if(keyentity instanceof SimpleEntity) label = ((SimpleEntity)keyentity).getLabel();
-				if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getPrimaryEntity().getLabel();
+				if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getTheSimpleEntity().getLabel();
 				if(label !=null && label.compareTo(entitylabel)==0) return true;
 			}
 		}		
@@ -946,7 +949,7 @@ public class XML2EQ {
 						}
 						else
 						{
-							e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+							e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
 							if(((CompositeEntity)E).isOntologized()==true)
 							{
 								if(e.length()>0) hasentity = true; 
@@ -956,12 +959,14 @@ public class XML2EQ {
 					}
 
 					//if any Q is good?
-					for(Quality Q: aEQp.getQuality().getProposals()){
-						String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
-
-						if(q==null) q="";
-
-						if(q.length()>0) hasquality = true;
+					if(aEQp.getQuality()!=null){
+						for(Quality Q: aEQp.getQuality().getProposals()){
+							String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
+	
+							if(q==null) q="";
+	
+							if(q.length()>0) hasquality = true;
+						}
 					}
 					if(haskeyentity && hasquality) completestateeqs.add(aEQp);
 					if(!hasquality) incompletestateids.add(stateid); //none of the EQs for the state has a ontologized quality

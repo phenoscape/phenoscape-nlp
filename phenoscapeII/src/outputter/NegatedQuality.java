@@ -9,7 +9,8 @@ package outputter;
  */
 public class NegatedQuality extends Quality {
 	Quality parentQuality;
-	public static FormalRelation negation = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
+	FormalRelation negation = Dictionary.complementof;
+	
 	
 
 	/**

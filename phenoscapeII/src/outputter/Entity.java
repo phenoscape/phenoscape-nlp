@@ -6,38 +6,38 @@ public abstract class Entity implements FormalConcept{
 	
 	public String getPrimaryEntityString(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getString(); 
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getString(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getString(); 
 		return null; //return null for other cases
 	}
 	
 	public String getPrimaryEntityLabel(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getLabel(); 
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getLabel(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getLabel(); 
 		if(this instanceof REntity) return ((REntity)this).getEntity().getPrimaryEntityLabel();
 		return null; //return null for other cases
 	}
 	
 	public String getPrimaryEntityID(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getId(); 
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getId(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getId(); 
 		return null; //return null for other cases
 	}
 	
 	public String getPrimaryEntityOWLClassIRI(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getClassIRI(); 
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getClassIRI(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getClassIRI(); 
 		return null; //return null for other cases
 	}
 	
 	public boolean isOntologized(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).isOntologized(); 
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().isOntologized(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().isOntologized(); 
 		return false; //return false for other cases
 	}
 
 	public float getPrimaryEntityScore() {
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getConfidienceScore();
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getPrimaryEntity().getConfidienceScore(); 
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getConfidienceScore(); 
 		return 0f;
 	}
 	

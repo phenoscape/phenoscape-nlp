@@ -49,10 +49,7 @@ public class EntitySearcher3 extends EntitySearcher {
 			SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
 			if(sentity!=null){
 				//relation & entity locator
-				FormalRelation rel = new FormalRelation();
-				rel.setString("part of");
-				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				rel.setId("BFO:000050");
+				FormalRelation rel =  Dictionary.partof;
 				rel.setConfidenceScore((float)1.0);
 				REntity rentity = new REntity(rel, entityl);
 				//composite entity

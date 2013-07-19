@@ -54,7 +54,7 @@ public class StateStatementParser extends Parser {
 			pathRelationUnderCharacter = XPath
 					.newInstance(".//statement[@statement_type='character']/relation");
 			pathCharacter = XPath.newInstance(".//character");
-			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true']");
+			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true'][@name!='count']");
 			pathStructure = XPath.newInstance(".//structure");
 		} catch (Exception e) {
 			LOGGER.error("", e);
@@ -143,7 +143,6 @@ public class StateStatementParser extends Parser {
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']|.//*[@constraintid='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null && structure.getAttributeValue("processed")==null){
 					//standing-alone structure: could be entity or quality
-					String t="";
 					String sname = Utilities.getStructureName(root, sid);		
 					EntityParser ep = new EntityParser(statement, root, sid, sname, keyentities, this instanceof BinaryCharacterStatementParser);
 					if(ep.getEntity()!=null){
@@ -218,8 +217,9 @@ public class StateStatementParser extends Parser {
 					LOGGER.debug(".."+qp.toString());
 				}
 			}
-			Utilities.postcompose(entities, postcomps); //assuming the same entities being returned in the loop
-			
+			Utilities.postcompose(entities, postcomps); //postcomp the entities 
+														//assuming the same entities being returned in the loop
+														
 			//other qualities
 			List<Element> characters = pathCharacter.selectNodes(statement);	
 			characters.removeAll(postcompchars);
@@ -349,10 +349,7 @@ public class StateStatementParser extends Parser {
 						EntityProposals ep3 = new EntityProposals();
 						for(Entity e2: ep2.getProposals())
 						{
-							FormalRelation rel = new FormalRelation();
-							rel.setString("part of");
-							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-							rel.setId("BFO:000050");
+							FormalRelation rel = Dictionary.partof;
 							rel.setConfidenceScore((float)1.0);
 							REntity rentity = foundpart? new REntity(rel, e2): new REntity(rel, e1);
 							CompositeEntity centity = new CompositeEntity();
@@ -649,11 +646,11 @@ public class StateStatementParser extends Parser {
 					this.EQStatements.add(eqp);
 				}
 			}			
-		} else if(entities!=null && entities.size()>0){ //no qualities
+		} else if(entities!=null && entities.size()>0 && this instanceof BinaryCharacterStatementParser){ //no qualities identified so far
 				for (EntityProposals entityp : entities) {
 					EQProposals eqp = new EQProposals();
 					eqp.setEntity(entityp);
-					eqp.setQuality(null);
+					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
 					eqp.setSource(this.src);
 					eqp.setCharacterId(this.characterid);
 					eqp.setStateId(this.stateid);
@@ -786,10 +783,7 @@ public class StateStatementParser extends Parser {
 								entity.setConfidenceScore(1f);
 								CompositeEntity ce = new CompositeEntity();
 								ce.addEntity(entity);								
-								FormalRelation rel = new FormalRelation();
-								rel.setString("part of");
-								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-								rel.setId("BFO:000050");
+								FormalRelation rel = Dictionary.partof;
 								rel.setConfidenceScore((float) 1.0);
 								REntity rentity = new REntity(rel, key);
 								ce.addEntity(rentity);

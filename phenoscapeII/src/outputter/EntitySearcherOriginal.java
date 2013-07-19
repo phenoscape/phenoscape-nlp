@@ -68,13 +68,15 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//System.out.println("search entity: "+entityphrase);
 		//create and maintain a cache for entity search?: yes, created in EntityParser
 		LOGGER.debug("EntitySearcherOriginal: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
+
+		
 		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
 			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
 			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
-			FormalRelation bearer = new FormalRelation("", "bearer_of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
+			FormalRelation bearer = Dictionary.bearerof; 
 			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
 			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
 			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
@@ -120,6 +122,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		elocatorphrase = elocatorphrase.replaceAll("laterosensory", "sensory");
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
+
 
 		LOGGER.debug("EntitySearcherOriginal calls EntitySearcher0");
 		return new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
@@ -444,6 +447,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//return null;
 	}
 	
+
 	/**
 	 * look into text context for statements containing structid 
 	 * to determin the target the context is most close to. for example

@@ -79,10 +79,7 @@ public class EntitySearcher6 extends EntitySearcher {
 					anatomicalentity.setString(entityphrase.substring(entityphrase.lastIndexOf(" ")).trim());
 					anatomicalentity.setXMLid(structid);
 					//construct relation
-					FormalRelation rel = new FormalRelation();
-					rel.setString("part of");
-					rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-					rel.setId("BFO:000050");
+					FormalRelation rel =  Dictionary.partof;
 					rel.setConfidenceScore((float)1.0);
 					
 					EntityProposals ep = new EntityProposals(); 
@@ -194,10 +191,7 @@ public class EntitySearcher6 extends EntitySearcher {
 		sentity.confidenceScore=0f;
 		if(entityl.getString().length()>0){
 			//relation & entity locator
-			FormalRelation rel = new FormalRelation();
-			rel.setString("part of");
-			rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-			rel.setId("BFO:000050");
+			FormalRelation rel =  Dictionary.partof;
 			rel.setConfidenceScore((float)1.0);
 			REntity rentity = new REntity(rel, entityl);
 			//composite entity

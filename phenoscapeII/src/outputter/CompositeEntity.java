@@ -6,13 +6,17 @@ package outputter;
 import java.util.ArrayList;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  *post-composed entity = entity [and relation SOME entity]+
  *
  *e.g.:
  *1. proximal region AND (part_of SOME (clavicle blade AND in_right_side_of SOME multi-cellular organism))) 
  *2. lamina AND (part_of SOME (anterior region and part_of SOME scapula)))
+ *
+ *A AND (part_of (B AND part_of C)) is a typical case of nested post-composed entity
+ *A AND (part_of B) AND (part_of C) is not a typical (and could be wrong) case of nested post-composed entity, but one could have
+ *A AND (part_of B) AND (bearer_of 'increased size')
  */
 public class CompositeEntity extends Entity {
 	//SimpleEntity entity; //the first entity in the post-composed entity
@@ -23,12 +27,24 @@ public class CompositeEntity extends Entity {
 	 * 
 	 */
 	public CompositeEntity() {
-		// TODO Auto-generated constructor stub
 		entities = new ArrayList<Entity>();
 	}
 
-	public SimpleEntity getPrimaryEntity(){
+	public SimpleEntity getTheSimpleEntity(){
 		return (SimpleEntity) entities.get(0);
+	}
+	
+	/**
+	 * 
+	 * @return the first REntity with relation 'part_of'
+	 */
+	public REntity getEntityLocator(){
+		for(Entity entity: entities){
+			if(entity instanceof REntity && ((REntity)entity).getRelation().getClassIRI().compareTo(Dictionary.partofiri)==0){
+				return (REntity) entity;
+			}					
+		}
+		return null;
 	}
 	/**
 	 * add new components to this CompositEentity: add another "and"
@@ -83,10 +99,7 @@ public class CompositeEntity extends Entity {
 		return entities;
 	}
 	
-	
-	public Entity getEntity(int index){
-		return entities.get(index);
-	}
+
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
@@ -96,7 +109,7 @@ public class CompositeEntity extends Entity {
 		return sb.toString().replaceFirst("\\s+and $", "");
 	}
 	public boolean isOntologized() {
-		return this.getPrimaryEntity().id != null;
+		return this.getTheSimpleEntity().id != null;
 	}
 
 

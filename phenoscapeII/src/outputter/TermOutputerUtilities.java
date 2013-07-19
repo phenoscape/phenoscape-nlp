@@ -57,7 +57,14 @@ public class TermOutputerUtilities {
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};
-		
+		//get organ adjectives from Dictionary
+		Enumeration<String> organs = Dictionary.organadjectives.keys();
+		while(organs.hasMoreElements()){
+			ArrayList<String> adjs = Dictionary.organadjectives.get(organs.nextElement());
+			for(String adj: adjs){
+				if(adj.trim().length()>0)adjectiveorganptn+=adj.trim()+"|";
+			}
+		}
 		//for each entity ontology
 		for(String onto: entityontologies){
 			if(onto.endsWith(".owl")){
@@ -65,14 +72,13 @@ public class TermOutputerUtilities {
 				OWLentityOntoAPIs.add(api);
 				if(onto.endsWith(ApplicationUtilities.getProperty("ontology.uberon")+".owl")){
 					uberon = api.getOntology();
-					Enumeration<String> organs = api.organadjective.keys();
+					organs = api.organadjectives.keys();
 					while(organs.hasMoreElements()){
-						ArrayList<String> adjs = api.organadjective.get(organs.nextElement());
+						ArrayList<String> adjs = api.organadjectives.get(organs.nextElement());
 						for(String adj: adjs){
 							if(adj.length()>0)adjectiveorganptn += adj+"|"; 
 						}						
-					}
-					adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
+					}	
 				}
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format
@@ -84,6 +90,7 @@ public class TermOutputerUtilities {
 				OBOentityOntoAPIs.add(o2d);
 			}*/
 		}
+		adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
 		
 		//for each entity ontology
 		for(String onto: qualityontologies){
@@ -163,7 +170,7 @@ public class TermOutputerUtilities {
 	}
 	
 	private static String[] findTargetParent(OWLAccessorImpl pato, String classid, String[] result){
-		OWLClass c = pato.getOWLClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
+		OWLClass c = pato.getOWLClassByIRI(Dictionary.baseiri+classid.replaceAll(":", "_"));
 		if(c!=null){
 			 if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
 				 result[0] = pato.getID(c);

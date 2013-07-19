@@ -54,10 +54,7 @@ public class EntitySearcher4 extends EntitySearcher {
 					//nested part_of relation
 					if(entityl.getString().length()>0){ //maxilla
 						//relation & entity locator: inner
-						FormalRelation rel = new FormalRelation();
-						rel.setString("part of");
-						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						FormalRelation rel =  Dictionary.partof;
 						rel.setConfidenceScore((float)1.0);
 						REntity rentity = new REntity(rel, entityl);
 						//composite entity = entity locator for sentity
@@ -65,10 +62,7 @@ public class EntitySearcher4 extends EntitySearcher {
 						centity.addEntity(sentity1); //anterior region
 						centity.addEntity(rentity);	//^part_of(maxilla)	
 						//relation & entity locator:outer 
-						rel = new FormalRelation();
-						rel.setString("part of");
-						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						rel =  Dictionary.partof;
 						rel.setConfidenceScore((float)1.0);
 						rentity = new REntity(rel, centity);
 						centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
@@ -83,10 +77,7 @@ public class EntitySearcher4 extends EntitySearcher {
 						return entities;
 					}else{//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 						//relation & entity locator: 
-						FormalRelation rel = new FormalRelation();
-						rel.setString("part of");
-						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						FormalRelation rel =  Dictionary.partof;
 						rel.setConfidenceScore((float)1.0);
 						REntity rentity = new REntity(rel, sentity);
 						//composite entity = entity locator for sentity

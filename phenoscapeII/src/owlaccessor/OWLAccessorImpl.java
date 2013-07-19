@@ -79,7 +79,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 
 	public static Hashtable<String,Hashtable<String,String>> adjectiveorgans = new Hashtable<String,Hashtable<String,String>>(); //adj => {classID => label}
 	
-	public static Hashtable<String,ArrayList<String>> organadjective = new Hashtable<String,ArrayList<String>> (); //organ => adjective
+	public static Hashtable<String,ArrayList<String>> organadjectives = new Hashtable<String,ArrayList<String>> (); //organ => adjective
 	/** The source. */
 	private String source;
 	private OWLOntology rootOnt;
@@ -305,12 +305,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 				if(anno.toString().contains("UBPROP_0000007") ){//has_relational_adjective
 					String adj = anno.getValue().toString();//"zeugopodial"^^xsd:string
 					adj = adj.substring(0, adj.indexOf("^^")).replace("\"", "");
-					ArrayList<String> adjectives = this.organadjective.get(this.getLabel(c));
+					ArrayList<String> adjectives = this.organadjectives.get(this.getLabel(c));
 					if(adjectives ==null){
 						adjectives = new ArrayList<String>();
 					}
 					adjectives.add(adj);
-					this.organadjective.put(this.getLabel(c),adjectives);
+					this.organadjectives.put(this.getLabel(c),adjectives);
 					
 					Hashtable<String, String> organs = this.adjectiveorgans.get(adj);
 					if(organs ==null){

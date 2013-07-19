@@ -89,6 +89,7 @@ public class CharacterHandler {
 	 */
 	private void parseEntity(){
 		Element structure = chara.getParentElement();
+		String temp="";
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
@@ -530,12 +531,7 @@ public class CharacterHandler {
 			relation = negation==true?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
 		}
 
-		FormalRelation rel = new FormalRelation();
-
-		rel.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
-		rel.setString("inheres_in");
-		rel.setId("BFO:0000052");
-		rel.setLabel("inheres_in");
+		FormalRelation rel = Dictionary.iheresin;
 
 		if(this.entity!=null)
 		{
