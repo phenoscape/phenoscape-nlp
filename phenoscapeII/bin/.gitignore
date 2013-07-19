@@ -1,6 +1,7 @@
+/XMLschemas
 /conceptmapping
+/log4j.properties
 /oboaccessor
 /outputter
-/log4j.properties
 /owlaccessor
 /preprocessing

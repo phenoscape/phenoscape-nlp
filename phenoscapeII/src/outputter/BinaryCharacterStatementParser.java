@@ -36,8 +36,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		}
 	}
 
-	public BinaryCharacterStatementParser(TermOutputerUtilities ontoutil) {
-		super(ontoutil, null, null);
+	public BinaryCharacterStatementParser(TermOutputerUtilities ontoutil, String characterlabel) {
+		super(ontoutil, null, null,characterlabel);
 	}
 
 	/**

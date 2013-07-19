@@ -35,6 +35,7 @@ public class StateStatementParser extends Parser {
 	String src;
 	String characterid;
 	String stateid;
+	String characterlabel;
 	String text;
 	ArrayList<String> qualityclue;
 	ArrayList<EntityProposals> keyentities; //use this when changes made here are used somewhere else.
@@ -62,13 +63,15 @@ public class StateStatementParser extends Parser {
 	}
 
 	/**
+	 * @param characterlabel 
 	 * 
 	 */
 	public StateStatementParser(TermOutputerUtilities ontoutil,
-			ArrayList<EntityProposals> keyentities, ArrayList<String> qualityclue) {
+			ArrayList<EntityProposals> keyentities, ArrayList<String> qualityclue, String characterlabel) {
 		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;
+		this.characterlabel = characterlabel;
 	}
 
 	private ArrayList<EntityProposals> clone(ArrayList<EntityProposals> keyentities) {
@@ -641,6 +644,7 @@ public class StateStatementParser extends Parser {
 					eqp.setCharacterId(this.characterid);
 					eqp.setStateId(this.stateid);
 					eqp.setDescription(text);
+					eqp.setCharacterlabel(this.characterlabel);
 					if (this instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{
@@ -658,6 +662,7 @@ public class StateStatementParser extends Parser {
 					eqp.setCharacterId(this.characterid);
 					eqp.setStateId(this.stateid);
 					eqp.setDescription(text);
+					eqp.setCharacterlabel(this.characterlabel);
 					if (this instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{

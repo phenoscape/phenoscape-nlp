@@ -127,10 +127,10 @@ public class XML2EQ {
 		// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
 		stmt.execute("drop table if exists " + outputtable);
 		System.out.println("create table if not exists " + outputtable
-				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
+				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
 				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))");
 		stmt.execute("create table if not exists " + outputtable
-				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), stateID varchar(100), description text, "
+				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
 				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))" );
 
 		pathStructure = XPath.newInstance(".//structure");
@@ -164,7 +164,7 @@ public class XML2EQ {
 				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
-					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil);
+					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil,characterstatement.getChildText("text"));
 					bcsp.parse(characterstatement, root);
 					allEQs = bcsp.getEQStatements();
 				}else{
@@ -174,7 +174,7 @@ public class XML2EQ {
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
 					ArrayList<String> qualityclue = csp.getQualityClue();
-					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
+					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue,characterstatement.getChildText("text"));
 					for(Element statestatement: statestatements){
 						LOGGER.debug("XML2EQ: processing state statement...");
 						ssp.parse(statestatement, root);
@@ -322,9 +322,9 @@ public class XML2EQ {
 		qualitylabel = qualitylabel.replaceAll(",$", "");
 		qualityid = qualityid.replaceAll(",$", "");
 		
-		String sql = "insert into "+this.outputtable +" (source,characterID,stateID,description, entity,"+
+		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
 					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
-					 "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		System.out.println(sql);
 		
@@ -332,19 +332,20 @@ public class XML2EQ {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
 			preparedStatement.setString(1, eQ.sourceFile);
 			preparedStatement.setString(2, eQ.characterId);
-			preparedStatement.setString(3,eQ.stateId);
-			preparedStatement.setString(4,eQ.description);
-			preparedStatement.setString(5,entity);
-			preparedStatement.setString(6,entitylabel);
-			preparedStatement.setString(7,entityid);
-			preparedStatement.setString(8,quality);
-			preparedStatement.setString(9,qualitylabel);
-			preparedStatement.setString(10,qualityid);
-			preparedStatement.setString(11,relatedentity);
-			preparedStatement.setString(12,relatedentitylabel);
-			preparedStatement.setString(13,relatedentityid);
-
+			preparedStatement.setString(3,eQ.characterlabel);
+			preparedStatement.setString(4,eQ.stateId);
+			preparedStatement.setString(5,eQ.description);
+			preparedStatement.setString(6,entity);
+			preparedStatement.setString(7,entitylabel);
+			preparedStatement.setString(8,entityid);
+			preparedStatement.setString(9,quality);
+			preparedStatement.setString(10,qualitylabel);
+			preparedStatement.setString(11,qualityid);
+			preparedStatement.setString(12,relatedentity);
+			preparedStatement.setString(13,relatedentitylabel);
+			preparedStatement.setString(14,relatedentityid);
 			preparedStatement.executeUpdate();
+			
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}

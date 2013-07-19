@@ -593,7 +593,7 @@ public class CharacterStatementParser extends Parser {
 	private void postcomposeWithQuality(ArrayList<EntityProposals> entities, String structureid, Element statement, Element root) {
 		try{
 			Element structure = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+structureid+"'");
-			StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>());
+			StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>(),statement.getChildText("text"));
 			List<Element> relations = XPath.selectNodes(statement, ".//relation[@from='"+structureid+"']"); 
 			ArrayList<String> StructuredQualities = new ArrayList<String>();//scope of this variable?
 			for(Element relation: relations){

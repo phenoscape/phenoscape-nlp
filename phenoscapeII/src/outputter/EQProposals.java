@@ -82,6 +82,15 @@ public class EQProposals{
 		// TODO Auto-generated method stub
 		return this.type;
 	}
+	public String getCharacterlabel() {
+		return characterlabel;
+	}
+
+	public void setCharacterlabel(String characterlabel) {
+		this.characterlabel = characterlabel;
+	}
+	String characterlabel;
+
 
 	/*public Entity getRelatedEntity( ){
 		return this.relatedEntity  ;
@@ -109,6 +118,7 @@ public class EQProposals{
 		eq1.setStateId(this.getStateId()); //TODO: change it for states
 		eq1.setDescription(this.getDescription());
 		eq1.setType(this.getType());
+		eq1.setCharacterlabel(this.getCharacterlabel());
 		return eq1;
 	}
 	
