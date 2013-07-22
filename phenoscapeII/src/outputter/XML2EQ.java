@@ -687,9 +687,10 @@ public class XML2EQ {
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
 						//TODO consider negation
-						Quality q = (Quality) new TermSearcher().searchTerm(ngram, "quality"); 
-						if(q!=null){
-							String qlabel = q.getLabel();
+						ArrayList<FormalConcept> qs =  new TermSearcher().searchTerm(ngram, "quality"); 
+						if(qs!=null){
+							for(FormalConcept fc: qs){
+							String qlabel = fc.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);
 							if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
 								//EQStatementProposals EQp = relatedEQ(stateid, ngram);
@@ -713,6 +714,7 @@ public class XML2EQ {
 									//EQp.add(EQ);
 									allEQs.add(EQp);
 								}
+							}
 								//accept this result for this stateid
 								/*EQStatement EQ = EQp.getProposals().get(0); //assuming there is only one candidate???
 								EQ.setEntity(keyEQ.getEntity());

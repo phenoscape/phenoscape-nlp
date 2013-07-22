@@ -15,6 +15,9 @@ public class QualityProposals implements Proposals {
 	public QualityProposals() {		
 	}
 	
+	/**
+	 * TODO: change Object to something more precise.
+	 */
 	public boolean add(Object q){
 		if(q instanceof Quality){
 			proposals.add((Quality)q);

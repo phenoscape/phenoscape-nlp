@@ -74,29 +74,42 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
-			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
-			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
-			FormalRelation bearer = Dictionary.bearerof; 
-			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
-			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
-			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
-			CompositeEntity ce1 = new CompositeEntity();
-			ce1.setString("female");
-			ce1.addEntity(organism);
-			ce1.addEntity(re1);
+			//female:
+			ArrayList<FormalConcept> femalefcs = new TermSearcher().searchTerm("female", "quality");
 			EntityProposals ep = new EntityProposals();
-			ep.setPhrase("female"); //the phrase set this proposal apart from the other one
-			ep.add(ce1);
-			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce1.toString());
+			FormalRelation bearer = Dictionary.bearerof;
+			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity").get(0);
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity for 'female'");
+			for(FormalConcept fc: femalefcs){
+				Quality female = (Quality)fc;
+				REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
+
+				CompositeEntity ce1 = new CompositeEntity();
+				ce1.setString("female");
+				ce1.addEntity(organism);
+				ce1.addEntity(re1);
+				ep.setPhrase("female"); //the phrase set this proposal apart from the other one
+				ep.add(ce1);
+				LOGGER.debug(".."	+ce1.toString());
+			}
+		
 			eps.add(ep); //add one entity
-			CompositeEntity ce2 = new CompositeEntity();
-			ce2.addEntity(organism);
-			ce2.addEntity(re2);
-			ce2.setClassIRI("male");
+			
+			//male:
+			ArrayList<FormalConcept>  malefcs = new TermSearcher().searchTerm("male", "quality");
 			ep = new EntityProposals();
 			ep.setPhrase("male");//the phrase set this proposal apart from the other one
-			ep.add(ce2);
-			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce2.toString());
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity for 'male'");
+			for(FormalConcept fc: malefcs){
+				Quality male = (Quality)fc;
+				REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 	
+				CompositeEntity ce2 = new CompositeEntity();
+				ce2.addEntity(organism);
+				ce2.addEntity(re2);
+				ce2.setClassIRI("male");
+				ep.add(ce2);
+				LOGGER.debug(".."+ce2.toString());
+			}
 			eps.add(ep); //add the other entity
 			LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returned two EntityProposals");
 			return eps;

@@ -29,12 +29,15 @@ public class EntitySearcher0 extends EntitySearcher {
 		//no entity locator: try direct match, for examples: "bone of humerus", "posterior dorsal fin"
 		if(elocatorphrase==null || elocatorphrase.length()==0){
 			LOGGER.debug("search entity '"+entityphrase+"'");
-			SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
+			ArrayList<FormalConcept> entity = new TermSearcher().searchTerm(entityphrase, "entity");
 			if(entity!=null){	
 				EntityProposals ep = new EntityProposals();
 				//ep.setPhrase(entityphrase);
 				ep.setPhrase(originalentityphrase);
-				ep.add(entity);
+				for(FormalConcept fc: entity){
+					ep.add((SimpleEntity)fc);
+				}
+				//ep.add(entity);
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				//entities.add(ep);
 				Utilities.addEntityProposals(entities, ep);
@@ -50,12 +53,15 @@ public class EntitySearcher0 extends EntitySearcher {
 			if(elocatorphrase.length()>0)
 			{
 				LOGGER.debug("search entity '"+entityphrase+" of "+elocatorphrase+"'");
-				SimpleEntity entity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
+				ArrayList<FormalConcept> entity = new TermSearcher().searchTerm(entityphrase+" of "+elocatorphrase, "entity");
 				if(entity!=null){	
 					EntityProposals ep = new EntityProposals();
 					//ep.setPhrase(entityphrase);
 					ep.setPhrase(originalentityphrase);
-					ep.add(entity);
+					for(FormalConcept fc: entity){
+						ep.add((SimpleEntity)fc);
+					}
+					//ep.add(entity);
 					ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 					//entities.add(ep);
 					Utilities.addEntityProposals(entities, ep);

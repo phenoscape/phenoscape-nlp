@@ -339,15 +339,21 @@ public class TermOutputerUtilities {
 			//TODO: update other copies of the method
 			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
 		}else{
+			//merge original and exact results: radial [original] = 'radials', radial[exact]='radius bone'
 			List<OWLClass> matchclass = matches.get("original");
 			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "original", owlapi);
-				return result;
+				//return result;
 			}
-			
 			matchclass = matches.get("exact");
 			if(matchclass!=null && matchclass.size()!=0){
-				result = collectResult(term, matchclass, type, "exact", owlapi);
+				Hashtable<String, String> temp = collectResult(term, matchclass, type, "exact", owlapi);
+				if(result!=null){
+					merge(result, temp);
+					return result;
+				}
+				return temp;
+			}else if(result!=null){
 				return result;
 			}
 			
@@ -367,7 +373,23 @@ public class TermOutputerUtilities {
 	}
 	
 	/**
-	 * 
+	 * merge temp to result
+	 * @param result
+	 * @param temp
+	 */
+	private void merge(Hashtable<String, String> result,
+			Hashtable<String, String> temp) {
+		Hashtable<String, String> merged = new Hashtable<String, String>();
+		result.put("term",  (result.get("term")+";"+temp.get("term")).replaceAll("(^;|;$)", ""));
+		result.put("querytype",  (result.get("querytype")+";"+temp.get("querytype")).replaceAll("(^;|;$)", ""));
+		result.put("matchtype", (result.get("matchtype")+";"+temp.get("matchtype")).replaceAll("(^;|;$)", ""));
+		result.put("id", (result.get("id")+";"+temp.get("id")).replaceAll("(^;|;$)", ""));
+		result.put("label",(result.get("label")+";"+temp.get("label")).replaceAll("(^;|;$)", ""));
+		result.put("iri", (result.get("iri")+";"+temp.get("iri")).replaceAll("(^;|;$)", ""));	
+	}
+
+	/**
+	 * if multiple matches, use ";" to connect the matches
 	 * @param term
 	 * @param matches
 	 * @param querytype

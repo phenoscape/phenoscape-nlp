@@ -51,13 +51,16 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 	@Override
 	public void handle() {
 
-		SimpleEntity entityl = new SimpleEntity();
-		entityl.setString(elocatorphrase);
+		ArrayList<SimpleEntity> entityls = new ArrayList<SimpleEntity>();
+		//entityl.setString(elocatorphrase);
 		if(elocatorphrase.length()>0) {
-			SimpleEntity result = (SimpleEntity)new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
-			if(result!=null){
-				entityl = result;
-				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found a match: "+result.toString());
+			ArrayList<FormalConcept> results = new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
+			if(results!=null){
+				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found match: ");
+				for(FormalConcept result: results){
+					entityls.add((SimpleEntity)result);
+					LOGGER.debug(".." +result.toString());
+				}
 			}else{
 				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found no match");
 			}
@@ -87,66 +90,68 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 				if(spatialentities!=null) LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found match");
 				for(EntityProposals sentityp: sentityps){
 					for(Entity sentity: sentityp.getProposals()){
-						for(FormalConcept spatialentity: spatialentities){
-							SimpleEntity sentity1 = (SimpleEntity) spatialentity;
-							if(sentity1!=null){//ventral region
-								//nested part_of relation
-								if(entityl.getString().length()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
-									//relation & entity locator: inner
-									FormalRelation rel = Dictionary.partof;
-									rel.setConfidenceScore((float)1.0);
-									REntity rentity = null;
-									if(sentity instanceof CompositeEntity){
-										//sentity should not have any post-composed quality, so need not consider it
-										rentity = ((CompositeEntity) sentity).getEntityLocator();
-										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
-									}else if(entityl.getString().length()>0){
-										rentity = new REntity(rel, entityl);
-									}
-									//composite entity = entity locator for sentity
-									CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
-									centity.addEntity(sentity1); //anterior region
-									centity.addEntity(rentity);	//^part_of(maxilla)	
-									//relation & entity locator:outer 
-									rel = Dictionary.partof;
-									rel.setConfidenceScore((float)1.0);
-									rentity = new REntity(rel, centity);
-									centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
-									centity.addEntity(sentity); //process
-									centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
-									centity.setString(this.originalentityphrase);
-									EntityProposals centityp = new EntityProposals();
-									//centityp.setPhrase(sentity.getString());//use the primary entity's phrase
-									centityp.setPhrase(this.originalentityphrase);
-									centityp.add(centity);
-									//entities.add(centityp);
-									Utilities.addEntityProposals(entities, centityp);
-									LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centityp.toString());
-									//return entities;
-									//return;
-								}else{//anterior maxilla 
-									//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
-									//relation & entity locator: 
-									FormalRelation rel = Dictionary.partof;
-									rel.setConfidenceScore((float)1.0);
-									REntity rentity = new REntity(rel, sentity);
-									//composite entity = entity locator for sentity
-									CompositeEntity centity = new CompositeEntity(); 
-									centity.addEntity(sentity1); 
-									centity.addEntity(rentity);	
-									centity.setString(this.originalentityphrase);
-									EntityProposals centityp = new EntityProposals();
-									//centityp.setPhrase(sentity1.getString());
-									centityp.setPhrase(this.originalentityphrase);
-									centityp.add(centity);
-									//entities.add(centityp);
-									Utilities.addEntityProposals(entities, centityp);
-									LOGGER.debug("without entity locator, SME form a composite entity proposals: "+centityp.toString());
-									//return entities;
-									//return;
-								}	
-							}else{
-								LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found no match");
+						for(SimpleEntity entityl: entityls){
+							for(FormalConcept spatialentity: spatialentities){
+								SimpleEntity sentity1 = (SimpleEntity) spatialentity;
+								if(sentity1!=null){//ventral region
+									//nested part_of relation
+									if(elocatorphrase.length()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
+										//relation & entity locator: inner
+										FormalRelation rel = Dictionary.partof;
+										rel.setConfidenceScore((float)1.0);
+										REntity rentity = null;
+										if(sentity instanceof CompositeEntity){
+											//sentity should not have any post-composed quality
+											rentity = ((CompositeEntity) sentity).getEntityLocator();
+											sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
+										}else if(elocatorphrase.length()>0){
+											rentity = new REntity(rel, entityl);
+										}
+										//composite entity = entity locator for sentity
+										CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
+										centity.addEntity(sentity1); //anterior region
+										centity.addEntity(rentity);	//^part_of(maxilla)	
+										//relation & entity locator:outer 
+										rel = Dictionary.partof;
+										rel.setConfidenceScore((float)1.0);
+										rentity = new REntity(rel, centity);
+										centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
+										centity.addEntity(sentity); //process
+										centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
+										centity.setString(this.originalentityphrase);
+										EntityProposals centityp = new EntityProposals();
+										//centityp.setPhrase(sentity.getString());//use the primary entity's phrase
+										centityp.setPhrase(this.originalentityphrase);
+										centityp.add(centity);
+										//entities.add(centityp);
+										Utilities.addEntityProposals(entities, centityp);
+										LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centityp.toString());
+										//return entities;
+										//return;
+									}else{//anterior maxilla 
+										//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
+										//relation & entity locator: 
+										FormalRelation rel = Dictionary.partof;
+										rel.setConfidenceScore((float)1.0);
+										REntity rentity = new REntity(rel, sentity);
+										//composite entity = entity locator for sentity
+										CompositeEntity centity = new CompositeEntity(); 
+										centity.addEntity(sentity1); 
+										centity.addEntity(rentity);	
+										centity.setString(this.originalentityphrase);
+										EntityProposals centityp = new EntityProposals();
+										//centityp.setPhrase(sentity1.getString());
+										centityp.setPhrase(this.originalentityphrase);
+										centityp.add(centity);
+										//entities.add(centityp);
+										Utilities.addEntityProposals(entities, centityp);
+										LOGGER.debug("without entity locator, SME form a composite entity proposals: "+centityp.toString());
+										//return entities;
+										//return;
+									}	
+								}else{
+									LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found no match");
+								}
 							}
 						}
 					}

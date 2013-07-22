@@ -605,6 +605,23 @@ public class Utilities {
 		entities.add(ep);
 	}
 	
+	/**
+	 * add qp to qualities, grouping proposals with the same phrase/string together
+	 * @param qualities
+	 * @param qp
+	 */
+	public static void addQualityProposals(ArrayList<QualityProposals> qualities,
+			QualityProposals qp) {
+
+		for(QualityProposals aqp: qualities){
+			if(qp.getPhrase().compareTo(aqp.getPhrase())==0){
+				aqp.add(qp);
+				return;
+			}
+		}
+		qualities.add(qp);
+	}
+	
 	
 	
 	/**

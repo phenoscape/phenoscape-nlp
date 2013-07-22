@@ -67,7 +67,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(structname, false,1);
 			if(relationalquality!=null) parseforQuality(this.structname, this.structid);
 			else{
-				Quality quality= searchForSimpleQuality(this.structname);
+				ArrayList<Quality> quality= searchForSimpleQuality(this.structname);
 				if(quality!=null) parseforQuality(this.structname, this.structid);
 				else{
 					if(removeSpatialConstraint(this.structid)){
@@ -353,25 +353,28 @@ public class Structure2Quality implements AnnotationStrategy{
 			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion
 		quality=quality.trim();
 
-		Quality result = searchForSimpleQuality(quality);
+		ArrayList<Quality> results = searchForSimpleQuality(quality);
 
-		if (result != null) {
+		if (results != null) {
 			if (negated) {
-				String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
-				Quality parentquality = new Quality();
-				parentquality.setString(parentinfo[1]);
-				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);
 				QualityProposals qproposals = new QualityProposals();
-				qproposals.add(new NegatedQuality(result, parentquality));
-				this.qualities.add(qproposals);
+				for(Quality result: results){
+					String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
+					Quality parentquality = new Quality();
+					parentquality.setString(parentinfo[1]);
+					parentquality.setLabel(parentinfo[1]);
+					parentquality.setId(parentinfo[0]);
+					qproposals.add(new NegatedQuality(result, parentquality));
+					this.qualities.add(qproposals);
+				}
 				this.identifiedqualities.add(qualityid);
 				//to remove negated character and prevent from processed in the future
 				this.detach_characters.add(chara_detach);
-
 			} else {
 				QualityProposals qproposals = new QualityProposals();
-				qproposals.add(result);
+				for(Quality result: results){
+					qproposals.add(result);
+				}
 				this.qualities.add(qproposals);
 				this.identifiedqualities.add(qualityid);
 			}
@@ -381,16 +384,23 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	}
 
-	private Quality searchForSimpleQuality(String quality) {
-		Quality result;
+	private ArrayList<Quality> searchForSimpleQuality(String quality) {
+		ArrayList<FormalConcept> result;
 		TermSearcher ts = new TermSearcher();
 		for(;;)
 		{
-			result = (Quality) ts.searchTerm(quality, "quality");
+			result =  ts.searchTerm(quality, "quality");
 			if((result!=null)||quality.length()==0)
 				break;
 			quality =(quality.indexOf(" ")!=-1)?quality.substring(quality.indexOf(" ")).trim():"";
 		}
-		return result;
+		
+		if(result!=null){
+			ArrayList<Quality> qualities = new ArrayList<Quality>();
+			for(FormalConcept fc: result) qualities.add((Quality)fc);
+			return qualities;
+		}else{
+			return null;
+		}
 	}
 }
