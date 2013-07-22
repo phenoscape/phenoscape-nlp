@@ -250,7 +250,7 @@ public class CharacterHandler {
 			for(FormalConcept resultfc: results){
 				Quality result = (Quality)resultfc;
 				//qualities involving length should be handled with related entity
-	
+
 				if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
 				{
 					this.resolve=true;
@@ -282,7 +282,7 @@ public class CharacterHandler {
 			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
 			//xml: structure: caudal fin, character:heterocercal
 			//=> heterocercal tail: present
-			
+
 			if(this.entity!=null){
 				for(int i = 0; i<entity.size(); i++){
 					EntityProposals ep = entity.get(i);
@@ -300,7 +300,7 @@ public class CharacterHandler {
 					}
 				}
 			}
-			
+
 			/*if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
 				for(Entity e: entity.getProposals()){
 					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
@@ -321,23 +321,26 @@ public class CharacterHandler {
 
 		//still not successful, check other matches
 		QualityProposals qproposals = null;
-		for(FormalConcept aquality: ts.getCandidateMatches(quality, "quality")){
-			if((qualityclues!=null)&&(qualityclues.size()!=0)){
-				for(String clue: qualityclues){
-					ArrayList<FormalConcept> qclues = ts.searchTerm(clue, "quality");
-					for(FormalConcept qcluefc: qclues){
-						Quality qclue = (Quality)qcluefc;
-					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
-						aquality.setConfidenceScore(1.0f); //increase confidence score
-					}					
+		ArrayList<FormalConcept> fcs = ts.getCandidateMatches(quality, "quality");
+		if(fcs!=null){
+			for(FormalConcept aquality: fcs){
+				if((qualityclues!=null)&&(qualityclues.size()!=0)){
+					for(String clue: qualityclues){
+						ArrayList<FormalConcept> qclues = ts.searchTerm(clue, "quality");
+						for(FormalConcept qcluefc: qclues){
+							Quality qclue = (Quality)qcluefc;
+							if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
+								aquality.setConfidenceScore(1.0f); //increase confidence score
+							}					
+						}
 					}
 				}
+				//no clue or clue was not helpful
+				if(qproposals ==null) qproposals = new QualityProposals();
+				qproposals.add((Quality)aquality);
+				Utilities.addQualityProposals(qualities, qproposals);//correct grouping of proposals
+				//this.qualities.add(qproposals); //incorrect, separated proposals from the same phrase 
 			}
-			//no clue or clue was not helpful
-			if(qproposals ==null) qproposals = new QualityProposals();
-			qproposals.add((Quality)aquality);
-			Utilities.addQualityProposals(qualities, qproposals);//correct grouping of proposals
-			//this.qualities.add(qproposals); //incorrect, separated proposals from the same phrase 
 		}
 		if((this.qualities.size()==0)&&(quality.equals("")==false)){
 			Quality result=new Quality();
@@ -447,7 +450,7 @@ public class CharacterHandler {
 			primary_quality = ts.searchTerm(quality, "quality");
 		}
 		QualityProposals qp = new QualityProposals();
-		
+
 		for(FormalConcept fc: primary_quality){
 			qp.add(fc);
 		}
@@ -943,7 +946,7 @@ public class CharacterHandler {
 			 if(this.entity==null)
 			 {
 				 //this.entity = this.keyentities.get(0);
-				this.entity = this.keyentities;
+				 this.entity = this.keyentities;
 				 this.primaryentities.addAll(this.entity);
 			 }
 
