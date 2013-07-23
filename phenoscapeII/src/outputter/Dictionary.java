@@ -35,8 +35,8 @@ public class Dictionary {
 	//Changed by Zilong
 	public static String selfreference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
-	public static String spatialtermptn="";
-	public static String singlewordspatialtermptn="";
+	public static String spatialtermptn="medioventral|";
+	public static String singlewordspatialtermptn="medioventral|";
 	public static String multiwordsspatialtermptn="";
 
 	public static String prefixes = "post|pre|post-|pre-";

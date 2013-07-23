@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import oboaccessor.OBO2DB;
 
 import org.apache.log4j.Logger;
+import org.atteo.evo.inflector.English;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
@@ -557,7 +558,12 @@ public class TermOutputerUtilities {
 	}
 	
 	public static String toPlural(String b) {
-		return Dictionary.plurals.get(b);
+		String p = Dictionary.plurals.get(b); //before CharaParser runs, Dictionary.plurals is almost empty
+		if(p == null){
+			p = English.plural(b);
+		}
+		if(p == null) return b;
+		return p;
 	}
 
 	/**
