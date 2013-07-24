@@ -57,7 +57,14 @@ public class TermOutputerUtilities {
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};
-		
+		//get organ adjectives from Dictionary
+		Enumeration<String> organs = Dictionary.organadjectives.keys();
+		while(organs.hasMoreElements()){
+			ArrayList<String> adjs = Dictionary.organadjectives.get(organs.nextElement());
+			for(String adj: adjs){
+				if(adj.trim().length()>0)adjectiveorganptn+=adj.trim()+"|";
+			}
+		}
 		//for each entity ontology
 		for(String onto: entityontologies){
 			if(onto.endsWith(".owl")){
@@ -65,14 +72,13 @@ public class TermOutputerUtilities {
 				OWLentityOntoAPIs.add(api);
 				if(onto.endsWith(ApplicationUtilities.getProperty("ontology.uberon")+".owl")){
 					uberon = api.getOntology();
-					Enumeration<String> organs = api.organadjective.keys();
+					organs = api.organadjectives.keys();
 					while(organs.hasMoreElements()){
-						ArrayList<String> adjs = api.organadjective.get(organs.nextElement());
+						ArrayList<String> adjs = api.organadjectives.get(organs.nextElement());
 						for(String adj: adjs){
 							if(adj.length()>0)adjectiveorganptn += adj+"|"; 
 						}						
-					}
-					adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
+					}	
 				}
 				//this.alladjectiveorgans.add(api.adjectiveorgans);
 			}/*else if(onto.endsWith(".obo")){ //no longer take OBO format
@@ -84,6 +90,7 @@ public class TermOutputerUtilities {
 				OBOentityOntoAPIs.add(o2d);
 			}*/
 		}
+		adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
 		
 		//for each entity ontology
 		for(String onto: qualityontologies){
@@ -163,7 +170,7 @@ public class TermOutputerUtilities {
 	}
 	
 	private static String[] findTargetParent(OWLAccessorImpl pato, String classid, String[] result){
-		OWLClass c = pato.getOWLClassByIRI(Dictionary.patoiri+classid.replaceAll(":", "_"));
+		OWLClass c = pato.getOWLClassByIRI(Dictionary.baseiri+classid.replaceAll(":", "_"));
 		if(c!=null){
 			 if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
 				 result[0] = pato.getID(c);
@@ -327,19 +334,26 @@ public class TermOutputerUtilities {
 		
 		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
+			return null;
 			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
 			//TODO: update other copies of the method
 			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
 		}else{
+			//merge original and exact results: radial [original] = 'radials', radial[exact]='radius bone'
 			List<OWLClass> matchclass = matches.get("original");
 			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "original", owlapi);
-				return result;
+				//return result;
 			}
-			
 			matchclass = matches.get("exact");
 			if(matchclass!=null && matchclass.size()!=0){
-				result = collectResult(term, matchclass, type, "exact", owlapi);
+				Hashtable<String, String> temp = collectResult(term, matchclass, type, "exact", owlapi);
+				if(result!=null){
+					merge(result, temp);
+					return result;
+				}
+				return temp;
+			}else if(result!=null){
 				return result;
 			}
 			
@@ -359,7 +373,23 @@ public class TermOutputerUtilities {
 	}
 	
 	/**
-	 * 
+	 * merge temp to result
+	 * @param result
+	 * @param temp
+	 */
+	private void merge(Hashtable<String, String> result,
+			Hashtable<String, String> temp) {
+		Hashtable<String, String> merged = new Hashtable<String, String>();
+		result.put("term",  (result.get("term")+";"+temp.get("term")).replaceAll("(^;|;$)", ""));
+		result.put("querytype",  (result.get("querytype")+";"+temp.get("querytype")).replaceAll("(^;|;$)", ""));
+		result.put("matchtype", (result.get("matchtype")+";"+temp.get("matchtype")).replaceAll("(^;|;$)", ""));
+		result.put("id", (result.get("id")+";"+temp.get("id")).replaceAll("(^;|;$)", ""));
+		result.put("label",(result.get("label")+";"+temp.get("label")).replaceAll("(^;|;$)", ""));
+		result.put("iri", (result.get("iri")+";"+temp.get("iri")).replaceAll("(^;|;$)", ""));	
+	}
+
+	/**
+	 * if multiple matches, use ";" to connect the matches
 	 * @param term
 	 * @param matches
 	 * @param querytype

@@ -4,6 +4,11 @@
  */
 package fna.charactermarkup;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -15,6 +20,7 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.filter.ElementFilter;
@@ -23,7 +29,9 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
 
 import outputter.ApplicationUtilities;
+import outputter.SpatialModifiedEntityStrategy;
 import conceptmapping.*;
+import fna.parsing.PhraseMarker;
 
 /**
  * @author hongcui fnaglossaryfixed: move verbs such as comprising from the
@@ -33,7 +41,7 @@ import conceptmapping.*;
 
 @SuppressWarnings({ "unchecked", "unused", "static-access" })
 public class CharacterAnnotatorChunked {
-
+	private static final Logger LOGGER = Logger.getLogger(CharacterAnnotatorChunked.class);   
 	private Element statement = null;
 	private ChunkedSentence cs = null;
 	private static ArrayList<Element> subjects = new ArrayList<Element>();
@@ -74,6 +82,9 @@ public class CharacterAnnotatorChunked {
 	private String sentsrc;
 	private boolean nosubject;
 	private boolean debugextraattributes=false;
+	private ArrayList<String> phrases;
+	private Hashtable<String, String> p2sphrases;
+	
 
 	/**
 	 * 
@@ -86,10 +97,10 @@ public class CharacterAnnotatorChunked {
 		this.nosubject = false;
 		this.characters = characters;
 		if (this.evaluation)
-			this.partofinference = false; // partofinterference causes huge
-		// number of "relations"
+			this.partofinference = false; // partofinterference causes huge number of "relations"
+		
+		// collect life_style terms
 		try {
-			// collect life_style terms
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select distinct term from " + this.glosstable + " where category='life_style'");
 			while (rs.next()) {
@@ -100,6 +111,26 @@ public class CharacterAnnotatorChunked {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		//prematched structure names:
+		File file = new File(ApplicationUtilities.getProperty("uberonphrases.update.bin"));
+		File p2sfile = new File(ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
+		ObjectInputStream in;
+		try {
+			in = new ObjectInputStream(new FileInputStream(
+					file));
+			// Deserialize the object
+			phrases = (ArrayList<String>) in.readObject(); 
+			in.close();
+			in = new ObjectInputStream(new FileInputStream(
+					p2sfile));
+			// Deserialize the object
+			p2sphrases = (Hashtable<String, String>) in.readObject(); 
+			in.close();
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
+		
 	}
 
 	/**
@@ -189,7 +220,7 @@ public class CharacterAnnotatorChunked {
 		// }
 
 		/*Normalization*/
-		normalizeModifierCharacters();
+		normalizeModifierCharacters(sentsrc);
 		removeIsolatedCharacters();
 		removeIsolatedWholeOrganismPlaceholders();
 		annotateBareStatements();
@@ -230,7 +261,8 @@ public class CharacterAnnotatorChunked {
     
     *TODO: how about 'contact btw A and B'?
 	 */
-	private void normalizeModifierCharacters() {
+	private void normalizeModifierCharacters(String sentsrc) {
+		String t="";
 		if(this.statement.getAttributeValue("statement_type").compareTo("character")==0){
 			List<Element> children = this.statement.getChildren("structure");
 			ArrayList<Element> characters = new ArrayList<Element>();
@@ -238,7 +270,8 @@ public class CharacterAnnotatorChunked {
 				List<Element> charas = children.get(0).getChildren("character");
 				for(Element chara : charas) characters.add(chara);
 			}
-			if(children.size()>1){
+			if(characters.size()>=1){
+				LOGGER.debug(sentsrc+" is normalized");
 				Element firststructure=children.get(1);
 				for(Element character: characters){
 					character.setAttribute("is_modifier", "true");
@@ -3308,7 +3341,7 @@ public class CharacterAnnotatorChunked {
 					e.setAttribute("name_original", o.replaceAll("_", " "));
 				}else{
 					if(isPrematched(o)){
-						e.setAttribute("name", o.replaceAll("_", " ").trim()); //prematched phrases from uberon
+						e.setAttribute("name", getSingularPhrase(o.replaceAll("_", " ")).trim()); //prematched phrases from uberon
 						e.setAttribute("name_original", o.replaceAll("_", " ").trim());
 					}
 					else{
@@ -3404,16 +3437,33 @@ public class CharacterAnnotatorChunked {
 		return results;
 	}
 
+	/**
+	 * 
+	 * @param phrase: endochondral elements
+	 * @return endochondral element
+	 */
+	private String getSingularPhrase(String phrase) {
+		String s = p2sphrases.get(phrase);
+		if(s!=null) return s;
+		return phrase;
+	}
+
+	/**
+	 * 
+	 * @param o: endochondral_elements
+	 * @return
+	 */
 	private boolean isPrematched(String o) {
 		Statement stmt =null;
 		ResultSet rs =null;
 		try {
 			// collect life_style terms
-			stmt = conn.createStatement();
+			/*stmt = conn.createStatement();
 			rs = stmt.executeQuery("select distinct term from " + this.glosstable + " where term ='"+o+"'");
 			if (rs.next()) {
 				return true;
-			}
+			}*/
+			if(phrases.contains(o.replaceAll("_", " "))) return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally{

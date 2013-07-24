@@ -63,7 +63,7 @@ public class SynRingVariation {
 			synring = Dictionary.opening;
 		
 		//find owlapi for UBERON
-		for(OWLAccessorImpl temp:XML2EQ.ontoutil.OWLentityOntoAPIs){
+		for(OWLAccessorImpl temp:TermOutputerUtilities.OWLentityOntoAPIs){
 			if(temp.getSource().indexOf(ApplicationUtilities.getProperty("ontology.uberon"))>1){
 				owlapi=temp;
 				break;
@@ -73,19 +73,24 @@ public class SynRingVariation {
 		//expanding the synring with synonyms
 		for(String form:synring.split("\\|"))
 		{
-			if(!synring.matches("\\b("+form+")\\b")) synring+="|"+form; //don't add duplicates
+			if(!form.matches("\\b("+synring+")\\b")) synring+="|"+form; //don't add duplicates
 			ontosynonyms = owlapi.getSynonymLabelsbyPhrase(form,"entity");
 			for(String syn:ontosynonyms)
-				if(!synring.matches("\\b("+form+")\\b")) synring+="|"+syn;
+				if(!form.matches("\\b("+synring+")\\b")) synring+="|"+syn;
 		}
 		
 		//fetch adjective organs
-		ArrayList<String> adjectives = (ArrayList<String>) owlapi.organadjective.get(structure);
-		if(adjectives!=null){
-			for(String adjectiveform: adjectives){
-				if(!synring.matches("\\b("+adjectiveform+")\\b")) synring+="|"+adjectiveform;
-			}
+		ArrayList<String> adjectives = new ArrayList<String> ();
+		if(OWLAccessorImpl.organadjectives.get(structure)!=null) adjectives.addAll(OWLAccessorImpl.organadjectives.get(structure));
+		if(OWLAccessorImpl.adjectiveorgans.get(structure)!=null) adjectives.addAll(OWLAccessorImpl.adjectiveorgans.get(structure).values());
+		if(Dictionary.organadjectives.get(structure)!=null) adjectives.addAll(Dictionary.organadjectives.get(structure)); //those not covered in ontologies
+		if(Dictionary.adjectiveorgans.get(structure)!=null) adjectives.addAll(Dictionary.adjectiveorgans.get(structure));
+		
+		for(String adjectiveform: adjectives){
+			if(!adjectiveform.matches("\\b("+synring+")\\b")) synring+="|"+adjectiveform;
 		}
+		
+		
 		return synring;
 	}
 
@@ -98,7 +103,7 @@ public class SynRingVariation {
 		//String forms = prefixSpatial(spatial);
 		OWLAccessorImpl owlapi=null;
 
-		for(OWLAccessorImpl temp:XML2EQ.ontoutil.OWLentityOntoAPIs){
+		for(OWLAccessorImpl temp:TermOutputerUtilities.OWLentityOntoAPIs){
 			if(temp.getSource().indexOf(ApplicationUtilities.getProperty("ontology.bspo"))>=1){
 				owlapi=temp;
 				break;

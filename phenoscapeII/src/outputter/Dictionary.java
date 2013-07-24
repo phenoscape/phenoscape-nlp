@@ -35,7 +35,9 @@ public class Dictionary {
 	//Changed by Zilong
 	public static String selfreference = "counterpart";//Extendible
 	public static String contact="connection|contact|interconnection";//Extendible
-	public static String spatialtermptn="";
+	public static String spatialtermptn="medioventral|";
+	public static String singlewordspatialtermptn="medioventral|";
+	public static String multiwordsspatialtermptn="";
 
 	public static String prefixes = "post|pre|post-|pre-";
 	public static String negation = "absent|lacking";
@@ -73,9 +75,29 @@ public class Dictionary {
 	
 	/** special ontology classes **/
 	public static String mcorganism="UBERON:0000468"; //multi-cellular organism
-	public static String anatprojection = "anatomical projection";
 	public static String cellquality = "http://purl.obolibrary.org/obo/PATO_0001396";
-	public static String patoiri="http://purl.obolibrary.org/obo/";
+	public static String baseiri="http://purl.obolibrary.org/obo/";
+	public static String partofiri = baseiri+"BFO_000050";
+	public static FormalRelation partof = new FormalRelation();
+	public static FormalRelation iheresin = new FormalRelation();
+	public static FormalRelation bearerof = new FormalRelation();
+	public static FormalRelation complementof = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
+	static{
+		partof.setString("");
+		partof.setLabel("part_of");
+		partof.setId("BFO:000050");
+		partof.setClassIRI(baseiri+"BFO_000050");
+		
+		iheresin.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
+		iheresin.setString("");
+		iheresin.setId("BFO:0000052");
+		iheresin.setLabel("inheres_in");
+		
+		bearerof.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
+		bearerof.setString("");
+		bearerof.setLabel("bearer_of");
+		bearerof.setId("BFO:0000053"); 
+	}
 	
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
 	public static Hashtable<String, String> plurals = new Hashtable<String, String>();
@@ -89,6 +111,23 @@ public class Dictionary {
 	{
 		complementRelations.put("in contact with", "separated from");
 		complementRelations.put("fused with", "unfused from");
+	}
+	//to hold organ names and their adjective forms that are not covered by ontologies
+	public static Hashtable<String, ArrayList<String>> organadjectives = new Hashtable<String, ArrayList<String>>();
+	
+	static{
+		ArrayList<String> tmp = new ArrayList<String>();
+		tmp.add("radial");
+		organadjectives.put("radius", tmp);
+	}
+	
+	//to hold organ names and their adjective forms that are not covered by ontologies
+	public static Hashtable<String, ArrayList<String>> adjectiveorgans = new Hashtable<String, ArrayList<String>>();
+		
+	static{
+		ArrayList<String> tmp = new ArrayList<String>();
+		tmp.add("radius");
+		adjectiveorgans.put("radial", tmp);
 	}
 	//to hold antonyms of measures
 	// As per discussion with prof. this is not needed, we will use complement of  as of now.
@@ -193,8 +232,15 @@ public class Dictionary {
 				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
 				if(term.length()>0){					
 					spatialtermptn += term+"|";
+					if(term.indexOf(" ")>0){
+						multiwordsspatialtermptn += term+"|";
+					}else{
+						singlewordspatialtermptn += term+"|";
+					}
 				}
 			}
+			singlewordspatialtermptn = singlewordspatialtermptn.replaceFirst("\\|$", "");
+			multiwordsspatialtermptn = multiwordsspatialtermptn.replaceFirst("\\|$", "");
 			spatialtermptn = spatialtermptn.replaceFirst("\\|$", "");
 			
 			//sorting according to length of the string 
@@ -343,7 +389,8 @@ public class Dictionary {
 		String shn = Dictionary.spatialheadnouns+"|";
 		String[] terms = Dictionary.spatialheadnouns.split("\\|");
 		for(String term: terms){
-			shn+=Dictionary.headnounsyns.get(term);
+			String syns = Dictionary.headnounsyns.get(term);
+			if(syns!=null) shn +=syns +"|";
 		}
 		return shn.replaceAll("\\|+", "|").replaceAll("(^\\||\\|$)", "");
 	}

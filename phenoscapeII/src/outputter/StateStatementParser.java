@@ -31,7 +31,7 @@ import owlaccessor.OWLAccessorImpl;
 public class StateStatementParser extends Parser {
 	//ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
 	private static final Logger LOGGER = Logger.getLogger(StateStatementParser.class);   
-	ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
+	protected ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
 	String src;
 	String characterid;
 	String stateid;
@@ -55,7 +55,7 @@ public class StateStatementParser extends Parser {
 			pathRelationUnderCharacter = XPath
 					.newInstance(".//statement[@statement_type='character']/relation");
 			pathCharacter = XPath.newInstance(".//character");
-			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true']");
+			pathPostCompCharacter = XPath.newInstance(".//character[@is_modifier='true'][@name!='count']");
 			pathStructure = XPath.newInstance(".//structure");
 		} catch (Exception e) {
 			LOGGER.error("", e);
@@ -149,7 +149,6 @@ public class StateStatementParser extends Parser {
 				Element relation = (Element) XPath.selectSingleNode(statement, ".//relation[@from='"+sid+"']|.//relation[@to='"+sid+"']|.//*[@constraintid='"+sid+"']");
 				if(structure.getChildren().isEmpty() && relation==null && structure.getAttributeValue("processed")==null){
 					//standing-alone structure: could be entity or quality
-					String t="";
 					String sname = Utilities.getStructureName(root, sid);		
 					EntityParser ep = new EntityParser(statement, root, sid, sname, keyentities, this instanceof BinaryCharacterStatementParser);
 					if(ep.getEntity()!=null){
@@ -214,7 +213,7 @@ public class StateStatementParser extends Parser {
 				entities = new ArrayList<EntityProposals>();
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
-				parserCharacters(character, statement, root, entities, qualities);
+				parserCharacter(character, statement, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
 			if(postcomps.size()>0){
@@ -223,8 +222,9 @@ public class StateStatementParser extends Parser {
 					LOGGER.debug(".."+qp.toString());
 				}
 			}
-			Utilities.postcompose(entities, postcomps); //assuming the same entities being returned in the loop
-			
+			Utilities.postcompose(entities, postcomps); //postcomp the entities 
+														//assuming the same entities being returned in the loop
+														
 			//other qualities
 			List<Element> characters = pathCharacter.selectNodes(statement);	
 			characters.removeAll(postcompchars);
@@ -233,16 +233,19 @@ public class StateStatementParser extends Parser {
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
 				constructEQProposals(qualities, entities);
 			}else{
+				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
 					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'...");
 					entities = new ArrayList<EntityProposals>();
 					qualities = new ArrayList<QualityProposals>();
 					if(character.getParentElement()==null) continue;
-					parserCharacters(character, statement, root, entities, qualities);
+					parserCharacter(character, statement, root, entities, qualities);
+					if(entities!=null && entities.size()>0) lastentities = entities; //remember the last entity
+					if(entities==null || entities.size()==0) entities = lastentities; //if no entity found, use the last entity
 					LOGGER.debug("SSP: parsed entities:");
-					for(EntityProposals ep: entities) LOGGER.debug(ep.toString());
+					for(EntityProposals ep: entities) LOGGER.debug(".."+ep.toString());
 					LOGGER.debug("SSP: parsed qualities:");
-					for(QualityProposals qp: qualities) LOGGER.debug(qp.toString());
+					for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					Utilities.postcompose(entities, postcomps);
 					constructEQProposals(qualities, entities);
@@ -262,7 +265,7 @@ public class StateStatementParser extends Parser {
 	 * @param entities
 	 * @param qualities
 	 */
-	public void parserCharacters(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+	public void parserCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
 		ArrayList<EntityProposals> entity = null;
 		boolean donotresolve=false;
 		// may contain relational quality
@@ -354,10 +357,7 @@ public class StateStatementParser extends Parser {
 						EntityProposals ep3 = new EntityProposals();
 						for(Entity e2: ep2.getProposals())
 						{
-							FormalRelation rel = new FormalRelation();
-							rel.setString("part of");
-							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-							rel.setId("BFO:000050");
+							FormalRelation rel = Dictionary.partof;
 							rel.setConfidenceScore((float)1.0);
 							REntity rentity = foundpart? new REntity(rel, e2): new REntity(rel, e1);
 							CompositeEntity centity = new CompositeEntity();
@@ -508,6 +508,7 @@ public class StateStatementParser extends Parser {
 					|| (relation.getAttributeValue("to").equals(structid))) {
 				// relation.detach();
 				flag = 0; //bad relation
+				LOGGER.debug("break on bad relation: "+relation.getAttributeValue("id"));
 				break;
 			} 
 		}
@@ -610,14 +611,18 @@ public class StateStatementParser extends Parser {
 			ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 			if (maybesubject && e.size()>0
 					&& this.keyentities != null) {
-				entities = resolve(e, keyentitiesclone);
+				entities.clear();
+				entities.addAll(resolve(e, keyentitiesclone));
 			} else if (maybesubject && e.size()==0
 					&& this.keyentities != null) {
-				entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
+				entities.clear();
+				entities.addAll(keyentitiesclone); //to avoid accidental changes to this.keyentities
 			} else if (e.size()>0) {
+				entities.clear();
 				entities.addAll(e);
 			} else {
-				entities = keyentitiesclone; 
+				entities.clear();
+				entities.addAll(keyentitiesclone); 
 				// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 				//hong: hasn't this case been handled already above?
 			}
@@ -626,15 +631,19 @@ public class StateStatementParser extends Parser {
 			if(spatialmodifier!=null)
 			{
 				ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
-				spatialmodifiers.addAll(spatialmodifier);							
-				entities = resolveFinalEntities(entities,spatialmodifiers);
+				spatialmodifiers.addAll(spatialmodifier);
+				entities.clear();
+				entities.addAll(resolveFinalEntities(entities,spatialmodifiers));
+				//entities = resolveFinalEntities(entities,spatialmodifiers);
 			}
 
 			if(entitylocator!=null)
 			{
 				ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
-				entitylocators.addAll(entitylocator);							
-				entities = resolveFinalEntities(entitylocators,entities);
+				entitylocators.addAll(entitylocator);		
+				entities.clear();
+				entities.addAll(resolveFinalEntities(entitylocators,entities));
+				//entities = resolveFinalEntities(entitylocators,entities);
 			}
 
 			if(q.size()==0)
@@ -674,11 +683,11 @@ public class StateStatementParser extends Parser {
 					this.EQStatements.add(eqp);
 				}
 			}			
-		} else if(entities!=null && entities.size()>0){ //no qualities
+		} else if(entities!=null && entities.size()>0 && this instanceof BinaryCharacterStatementParser){ //no qualities identified so far
 				for (EntityProposals entityp : entities) {
 					EQProposals eqp = new EQProposals();
 					eqp.setEntity(entityp);
-					eqp.setQuality(null);
+					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
 					eqp.setSource(this.src);
 					eqp.setCharacterId(this.characterid);
 					eqp.setStateId(this.stateid);
@@ -812,10 +821,7 @@ public class StateStatementParser extends Parser {
 								entity.setConfidenceScore(1f);
 								CompositeEntity ce = new CompositeEntity();
 								ce.addEntity(entity);								
-								FormalRelation rel = new FormalRelation();
-								rel.setString("part of");
-								rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-								rel.setId("BFO:000050");
+								FormalRelation rel = Dictionary.partof;
 								rel.setConfidenceScore((float) 1.0);
 								REntity rentity = new REntity(rel, key);
 								ce.addEntity(rentity);
@@ -899,9 +905,13 @@ public class StateStatementParser extends Parser {
 	
 	//public ArrayList<EQStatementProposals> getEQStatements() {
 	public ArrayList<EQProposals> getEQStatements() {
+		//TODO: for the same E, if Q elongated is there, remove Q:shape 
 		return this.EQStatements;
 	}
 
+	public void clearEQStatements() {
+		this.EQStatements.clear();		
+	}
 	/**
 	 * @param args
 	 */
@@ -909,5 +919,7 @@ public class StateStatementParser extends Parser {
 		// TODO Auto-generated method stub
 
 	}
+
+
 
 }

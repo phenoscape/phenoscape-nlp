@@ -9,7 +9,8 @@ package outputter;
  */
 public class NegatedQuality extends Quality {
 	Quality parentQuality;
-	public static FormalRelation negation = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
+	FormalRelation negation = Dictionary.complementof;
+	
 	
 
 	/**
@@ -26,13 +27,13 @@ public class NegatedQuality extends Quality {
 	 * @param iri
 	 */
 	public NegatedQuality(String string, String label, String id, Quality parentQuality) {
-		super(string, label, id);
+		super("not "+string, label, id);
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
 	}
 
 	public NegatedQuality(Quality quality, Quality parentQuality) {
-		super(quality.getString(), quality.getLabel(), quality.getId());
+		super("not "+quality.getString(), quality.getLabel(), quality.getId());
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
 	}

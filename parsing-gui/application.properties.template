@@ -11,6 +11,8 @@ database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&pas
 #fill in ontology.dir, uberphrases.bin, wordnet.dictionary, and the file name of uberon ontology without .owl extension
 ontology.dir=
 uberonphrases.bin=
+uberonphrases.update.bin=
+uberonphrases.p2s.bin=
 wordnet.dictionary=
 ontology.uberon=
 

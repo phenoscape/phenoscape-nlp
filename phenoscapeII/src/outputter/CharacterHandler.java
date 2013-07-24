@@ -89,6 +89,7 @@ public class CharacterHandler {
 	 */
 	private void parseEntity(){
 		Element structure = chara.getParentElement();
+		String temp="";
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
@@ -193,7 +194,9 @@ public class CharacterHandler {
 				for(EntityProposals relatedentity: relatedentities){
 					QualityProposals qproposals = new QualityProposals();
 					qproposals.add(new RelationalQuality(relationalquality, relatedentity));
-					this.qualities.add(qproposals);
+					qproposals.setPhrase(quality);
+					Utilities.addQualityProposals(qualities, qproposals);
+					//this.qualities.add(qproposals);
 				}
 			}
 			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==true){// A and B: fused
@@ -242,43 +245,50 @@ public class CharacterHandler {
 		//not a relational quality, is this a simple quality or a negated quality?
 
 		TermSearcher ts = new TermSearcher();
-		Quality result = (Quality) ts.searchTerm(quality, "quality");
+		ArrayList<FormalConcept> results = ts.searchTerm(quality, "quality");
 
-		if(result!=null){ //has a strong match
-			//qualities involving length should be handled with related entity
+		if(results!=null){ //has a strong match
+			QualityProposals qproposals = new QualityProposals();
+			for(FormalConcept resultfc: results){
+				Quality result = (Quality)resultfc;
+				//qualities involving length should be handled with related entity
 
-			if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
-			{
-				this.resolve=true;
+				if((result.getLabel()!=null)&&result.getLabel().matches(".*(length|width|size|depth|broad)"))
+				{
+					this.resolve=true;
+				}
+				//the below if loop is used to reset the string to original value of quality
+				if((quality!=qualitycopy))
+				{
+					result.setString(qualitycopy);
+				}
+				if(negated){
+					/*TODO use parent classes Jim use for parent classes*/
+					String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
+					Quality parentquality = new Quality();
+					parentquality.setString(parentinfo[1]);
+					parentquality.setLabel(parentinfo[1]);
+					parentquality.setId(parentinfo[0]);		
+					qproposals.add(new NegatedQuality(result, parentquality));
+					qproposals.setPhrase("not "+quality);
+					Utilities.addQualityProposals(qualities, qproposals);
+					//this.qualities.add(qproposals);
+					//return;
+				}else{
+					qproposals.add(result);
+					qproposals.setPhrase(quality);
+					Utilities.addQualityProposals(qualities, qproposals);
+					//this.qualities.add(qproposals);
+					//return;
+				}
 			}
-			//the below if loop is used to reset the string to original value of quality
-			if((quality!=qualitycopy))
-			{
-				result.setString(qualitycopy);
-			}
-			if(negated){
-				/*TODO use parent classes Jim use for parent classes*/
-				String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
-				Quality parentquality = new Quality();
-				parentquality.setString(parentinfo[1]);
-				parentquality.setLabel(parentinfo[1]);
-				parentquality.setId(parentinfo[0]);		
-				QualityProposals qproposals = new QualityProposals();
-				qproposals.add(new NegatedQuality(result, parentquality));
-				this.qualities.add(qproposals);
-				return;
-			}else{
-				QualityProposals qproposals = new QualityProposals();
-				qproposals.add(result);
-				this.qualities.add(qproposals);
-				return;
-			}
+			return;
 		}else{//no match for quality, could it be something else?
 			//try to match it in entity ontologies	  
 			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
 			//xml: structure: caudal fin, character:heterocercal
 			//=> heterocercal tail: present
-			
+
 			if(this.entity!=null){
 				for(int i = 0; i<entity.size(); i++){
 					EntityProposals ep = entity.get(i);
@@ -288,7 +298,8 @@ public class CharacterHandler {
 							ces.handle();
 							if(ces.getEntity()!=null && ces.getQuality()!=null){
 								ep = ces.getEntity();//update
-								this.qualities.add(ces.getQuality());
+								//this.qualities.add(ces.getQuality());
+								Utilities.addQualityProposals(qualities, ces.getQuality());
 								this.entity.set(i, ep);
 								return;
 							}
@@ -296,7 +307,7 @@ public class CharacterHandler {
 					}
 				}
 			}
-			
+
 			/*if((this.entity!=null)&&(this.entity.higestScore()>=0.8f)){
 				for(Entity e: entity.getProposals()){
 					Character2EntityStrategy2 ces = new Character2EntityStrategy2(e, quality);
@@ -316,26 +327,38 @@ public class CharacterHandler {
 
 
 		//still not successful, check other matches
-		for(FormalConcept aquality: ts.getCandidateMatches()){
-			if((qualityclues!=null)&&(qualityclues.size()!=0))
-				for(String clue: qualityclues){
-					Quality qclue = (Quality)ts.searchTerm(clue, "quality");
-					if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
-						aquality.setConfidenceScore(1.0f); //increase confidence score
-					}					
+		QualityProposals qproposals = null;
+		ArrayList<FormalConcept> fcs = ts.getCandidateMatches(quality, "quality");
+		if(fcs!=null){
+			for(FormalConcept aquality: fcs){
+				if((qualityclues!=null)&&(qualityclues.size()!=0)){
+					for(String clue: qualityclues){
+						ArrayList<FormalConcept> qclues = ts.searchTerm(clue, "quality");
+						for(FormalConcept qcluefc: qclues){
+							Quality qclue = (Quality)qcluefc;
+							if(aquality.getLabel().compareToIgnoreCase(clue)==0 || ontoutil.isChildQuality(aquality.getClassIRI(), qclue.getClassIRI()) ){
+								aquality.setConfidenceScore(1.0f); //increase confidence score
+							}					
+						}
+					}
 				}
-			//no clue or clue was not helpful
-			QualityProposals qproposals = new QualityProposals();
-			qproposals.add((Quality)aquality);
-			this.qualities.add(qproposals); //keep confidence score as is
+				//no clue or clue was not helpful
+				if(qproposals ==null) qproposals = new QualityProposals();
+				qproposals.add((Quality)aquality);
+				qproposals.setPhrase(quality);
+				Utilities.addQualityProposals(qualities, qproposals);//correct grouping of proposals
+				//this.qualities.add(qproposals); //incorrect, separated proposals from the same phrase 
+			}
 		}
 		if((this.qualities.size()==0)&&(quality.equals("")==false)){
-			result=new Quality();
+			Quality result=new Quality();
 			result.string=quality;
 			result.confidenceScore= 0.0f; //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
-			QualityProposals qproposals = new QualityProposals();
+			if(qproposals ==null) qproposals = new QualityProposals();
 			qproposals.add(result);
-			this.qualities.add(qproposals);
+			qproposals.setPhrase(quality);
+			Utilities.addQualityProposals(qualities, qproposals);//correct grouping of proposals
+			//this.qualities.add(qproposals); //incorrect, separated proposals from the same phrase 
 		}
 		return;
 
@@ -429,14 +452,17 @@ public class CharacterHandler {
 		}
 
 		TermSearcher ts = new TermSearcher();
-		Quality primary_quality = (Quality) ts.searchTerm(quality, "quality");
+		ArrayList<FormalConcept> primary_quality = ts.searchTerm(quality, "quality");
 		if((primary_quality==null) &&(flag=true))//removes the increased or decreased and check for the plain quality
 		{
 			quality = quality.substring(quality.indexOf(" "));
-			primary_quality = (Quality) ts.searchTerm(quality, "quality");
+			primary_quality = ts.searchTerm(quality, "quality");
 		}
 		QualityProposals qp = new QualityProposals();
-		qp.add(primary_quality);
+		qp.setPhrase(quality);
+		for(FormalConcept fc: primary_quality){
+			qp.add(fc);
+		}
 
 		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
 		String structureid = structure.getAttributeValue("id");
@@ -450,7 +476,8 @@ public class CharacterHandler {
 			qp.add(rq);
 			if(rq!=null)
 			{
-				this.qualities.add(qp);
+				Utilities.addQualityProposals(qualities, qp); //correct grouping
+				//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
 			}
 		}
 		return true;
@@ -512,10 +539,11 @@ public class CharacterHandler {
 		String relation;
 		Entity relatedentity=null;
 		QualityProposals qp = new QualityProposals();
-
+		qp.setPhrase(primaryquality+":"+secondaryquality);
+		
 		TermSearcher ts = new TermSearcher();
-		Quality primary_quality = (Quality) ts.searchTerm(primaryquality, "quality");
-		Quality secondary_quality = (Quality) ts.searchTerm(secondaryquality, "quality");	
+		ArrayList<FormalConcept> primary_quality =  ts.searchTerm(primaryquality, "quality");
+		ArrayList<FormalConcept> secondary_quality = ts.searchTerm(secondaryquality, "quality");	
 
 		if(modifier.matches(".*(not|no).*"))
 		{
@@ -530,24 +558,26 @@ public class CharacterHandler {
 			relation = negation==true?"increased_in_magnitude_relative_to":"decreased_in_magnitude_relative_to";
 		}
 
-		FormalRelation rel = new FormalRelation();
-
-		rel.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
-		rel.setString("inheres_in");
-		rel.setId("BFO:0000052");
-		rel.setLabel("inheres_in");
+		FormalRelation rel = Dictionary.iheresin;
 
 		if(this.entity!=null)
 		{
 			for(EntityProposals ep: this.entity)
 			{
 				for(Entity e: ep.getProposals())
-			//for(Entity e:this.entity.getProposals())
+					//for(Entity e:this.entity.getProposals())
 				{
-				relatedentity = e; 
-				REntity related = new REntity(rel,relatedentity);
-				CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
-				qp.add(compquality);
+					for(FormalConcept pfc: primary_quality){
+						Quality primary_qualityq = (Quality)pfc;
+						for(FormalConcept sfc: secondary_quality){
+							Quality secondary_qualityq = (Quality)sfc;
+							relatedentity = e; 
+							REntity related = new REntity(rel,relatedentity);
+							//CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
+							CompositeQuality compquality = new CompositeQuality(primary_qualityq,secondary_qualityq,relation,related);
+							qp.add(compquality);
+						}
+					}
 				}
 			}
 		} else
@@ -558,16 +588,22 @@ public class CharacterHandler {
 				{
 					for(Entity e: ep.getProposals())
 					{
-						relatedentity = e;
-						REntity related = new REntity(rel,relatedentity);
-						CompositeQuality compquality = new CompositeQuality(primary_quality,secondary_quality,relation,related);
-						qp.add(compquality);
+						for(FormalConcept pfc: primary_quality){
+							Quality primary_qualityq = (Quality)pfc;
+							for(FormalConcept sfc: secondary_quality){
+								Quality secondary_qualityq = (Quality)sfc;
+								relatedentity = e;
+								REntity related = new REntity(rel,relatedentity);
+								CompositeQuality compquality = new CompositeQuality(primary_qualityq,secondary_qualityq,relation,related);
+								qp.add(compquality);
+							}
+						}
 					}
 				}
 			}
 		}
-
-		this.qualities.add(qp);
+		Utilities.addQualityProposals(qualities, qp);
+		//this.qualities.add(qp);
 
 		return true;
 	}
@@ -876,6 +912,8 @@ public class CharacterHandler {
 				 {
 					 this.qualities.clear();
 					 this.qualities.addAll(tobesolvedentity.s2q.qualities);
+					 tobesolvedentity.s2q.detach_character();
+					 tobesolvedentity.s2q.cleanHandledStructures();
 					 if(tobesolvedentity.s2q.primaryentities.size()>0)//relational quality might contain primary entities
 					 {
 						 this.primaryentities.clear();
@@ -919,7 +957,7 @@ public class CharacterHandler {
 			 if(this.entity==null)
 			 {
 				 //this.entity = this.keyentities.get(0);
-				this.entity = this.keyentities;
+				 this.entity = this.keyentities;
 				 this.primaryentities.addAll(this.entity);
 			 }
 

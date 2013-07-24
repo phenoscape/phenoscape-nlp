@@ -195,6 +195,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				q.setConfidenceScore((float)1.0);
 				qp.add(q);
 				eqp.setQuality(qp);//update qp
+				//check for any positive state statement present(yes,true etc.), if so assign that state to it
 				//create absent quality
 				Quality absent = new Quality();
 				absent.setString("absent");
@@ -205,7 +206,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				qp.add(absent);
 				EQProposals falseeq = eqp.clone();
 				falseeq.setQuality(qp);
-				negativestatements.add(falseeq);			
+				negativestatements.add(falseeq);
+				//handle negative statements at the last
 			}else{//has q, generate and add negated quality
 				int flag=0;
 				QualityProposals negativeqp = new QualityProposals();

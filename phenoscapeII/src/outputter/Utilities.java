@@ -595,7 +595,10 @@ public class Utilities {
 	 */
 	public static void addEntityProposals(ArrayList<EntityProposals> entities,
 			EntityProposals ep) {
-
+		
+		for(EntityProposals aep: entities){
+			if(aep.equals(ep)) return;
+		}
 		for(EntityProposals aep: entities){
 			if(ep.getPhrase().compareTo(aep.getPhrase())==0){
 				aep.add(ep);
@@ -605,10 +608,33 @@ public class Utilities {
 		entities.add(ep);
 	}
 	
+	/**
+	 * add qp to qualities, grouping proposals with the same phrase/string together
+	 * not adding duplicates
+	 * @param qualities
+	 * @param qp
+	 */
+	public static void addQualityProposals(ArrayList<QualityProposals> qualities,
+			QualityProposals qp) {
+		for(QualityProposals aqp: qualities){
+			if(aqp.equals(qp)) return;
+		}
+		
+		for(QualityProposals aqp: qualities){
+			if(qp.getPhrase().compareTo(aqp.getPhrase())==0){
+				aqp.add(qp);
+				return;
+			}
+		}
+		qualities.add(qp);
+	}
+	
 	
 	
 	/**
 	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity
+	 * entity: carpal bone quality:ossified, twisted
+	 * => carpal bone (bearer_of ossisied) and (bearer_of twisted)
 	 * @param entities
 	 * @param qualities
 	 * 
@@ -619,6 +645,8 @@ public class Utilities {
 			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
 			boolean postcomped = false;
 			for (Entity e: eps){
+				CompositeEntity ce = new CompositeEntity(); //all qualities are composed into the ce or ecopy, if the latter is a compositie entity
+				Entity ecopy = (Entity) e.clone(); //create fresh copy
 				for(QualityProposals quality: qualities){
 					ArrayList<Quality> qps = quality.getProposals();
 					for(Quality q: qps){
@@ -629,7 +657,7 @@ public class Utilities {
 							ArrayList<Quality> relations = relation.getProposals();
 							for(Quality r : relations){
 								if(r.isOntologized() && isRestrictedRelation(r.getId())){
-									Entity ecopy = (Entity) e.clone(); //create fresh copy
+									//Entity ecopy = (Entity) e.clone(); //create fresh copy
 									//increase confidence
 									//create RE and create compositeEntity
 									FormalRelation fr = new FormalRelation();
@@ -645,7 +673,7 @@ public class Utilities {
 											postcomped = true;
 											epsresult.add(ecopy); //save a proposal
 										}else{
-											CompositeEntity ce = new CompositeEntity(); 
+											//CompositeEntity ce = new CompositeEntity(); 
 											ce.addEntity(ecopy);
 											ce.addEntity(re);		
 											postcomped = true;
@@ -656,16 +684,12 @@ public class Utilities {
 							}
 						}else{
 							//bear_of some Ossified: quality Ossified must be treated as a simple entity to form a composite entity
-							Entity ecopy = (Entity) e.clone();
+							//Entity ecopy = (Entity) e.clone();
 							SimpleEntity qentity = Utilities.wrapQualityAs(q);
-							FormalRelation fr = new FormalRelation();
-							fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
+							FormalRelation fr = Dictionary.bearerof;
 							fr.setConfidenceScore(1f);
-							fr.setId("BFO:0000053");
-							fr.setLabel("bearer_of");
-							fr.setString("");
 							REntity re = new REntity(fr, qentity); //bearer of some Ossified
-							CompositeEntity ce = new CompositeEntity(); 
+							//CompositeEntity ce = new CompositeEntity(); 
 							ce.addEntity(ecopy);
 							ce.addEntity(re);											
 							epsresult.add(ce); //save a proposal

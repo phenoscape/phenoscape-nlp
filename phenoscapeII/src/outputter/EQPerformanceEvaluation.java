@@ -249,7 +249,7 @@ public class EQPerformanceEvaluation {
 					ArrayList<String> tvalues = new ArrayList<String>();
 					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
-						String[] vs = v.split("\\s*,\\s*");
+						String[] vs = v.split("\\s*(@,)\\s*");
 						for(String v1 : vs){
 							if(v1.length()>0) tvalues.add(v1);//holds all the entity proposals of this EQ statement
 						}
@@ -617,9 +617,9 @@ public class EQPerformanceEvaluation {
 		System.out.println("inside match a state");
 		//one state may have N EQs
 		float matchscore = 0;
-		String entityproposals[] = entity.replace("\"","").split(",");
-		String qualityproposals[] = quality.replace("\"","").split(",");
-		String relatedentityproposals[] = relatedentity.replace("\"","").split(",");
+		String entityproposals[] = entity.replace("\"","").split("(@,)");
+		String qualityproposals[] = quality.replace("\"","").split("(@,)");
+		String relatedentityproposals[] = relatedentity.replace("\"","").split("(@,)");
 		Hashtable<String,Float> group = new Hashtable<String,Float>();
 //Gives score of all the proposals against all the gold standards
 		for(int i = 0; i < aState.size(); i++){//Parsing through multiple EQ's of each state(gold standard)

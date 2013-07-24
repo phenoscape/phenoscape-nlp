@@ -39,8 +39,9 @@ import owlaccessor.OWLAccessorImpl;
 		// = something connecting two bones =>to be handled by KeyEnttityFinder
  */
 public class EntitySearcherOriginal extends EntitySearcher {
-	
-	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);   
+
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);  
+	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	/**
 	 * * Search a phrase A B C
 	 * search A B C
@@ -68,39 +69,54 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//System.out.println("search entity: "+entityphrase);
 		//create and maintain a cache for entity search?: yes, created in EntityParser
 		LOGGER.debug("EntitySearcherOriginal: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
+
+
 		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
-			Quality female = (Quality) new TermSearcher().searchTerm("female", "quality");
-			Quality male = (Quality) new TermSearcher().searchTerm("male", "quality");
-			FormalRelation bearer = new FormalRelation("", "bearer_of", "BFO:0000053", "http://purl.obolibrary.org/obo/");
-			REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
-			REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 		
-			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity");
-			CompositeEntity ce1 = new CompositeEntity();
-			ce1.setString("female");
-			ce1.addEntity(organism);
-			ce1.addEntity(re1);
+			//female:
+			ArrayList<FormalConcept> femalefcs = new TermSearcher().searchTerm("female", "quality");
 			EntityProposals ep = new EntityProposals();
-			ep.setPhrase("female"); //the phrase set this proposal apart from the other one
-			ep.add(ce1);
-			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce1.toString());
+			FormalRelation bearer = Dictionary.bearerof;
+			SimpleEntity organism = (SimpleEntity) new TermSearcher().searchTerm("multi-cellular organism", "entity").get(0);
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity for 'female'");
+			for(FormalConcept fc: femalefcs){
+				Quality female = (Quality)fc;
+				REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
+
+				CompositeEntity ce1 = new CompositeEntity();
+				ce1.setString("female");
+				ce1.addEntity(organism);
+				ce1.addEntity(re1);
+				ep.setPhrase("female"); //the phrase set this proposal apart from the other one
+				ep.add(ce1);
+				LOGGER.debug(".."	+ce1.toString());
+			}
+		
 			eps.add(ep); //add one entity
-			CompositeEntity ce2 = new CompositeEntity();
-			ce2.addEntity(organism);
-			ce2.addEntity(re2);
-			ce2.setClassIRI("male");
+			
+			//male:
+			ArrayList<FormalConcept>  malefcs = new TermSearcher().searchTerm("male", "quality");
 			ep = new EntityProposals();
 			ep.setPhrase("male");//the phrase set this proposal apart from the other one
-			ep.add(ce2);
-			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity "+ce2.toString());
+			LOGGER.debug("EntitySearcherOriginal: formed EntityProposals with CompositeEntity for 'male'");
+			for(FormalConcept fc: malefcs){
+				Quality male = (Quality)fc;
+				REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 	
+				CompositeEntity ce2 = new CompositeEntity();
+				ce2.addEntity(organism);
+				ce2.addEntity(re2);
+				ce2.setClassIRI("male");
+				ep.add(ce2);
+				LOGGER.debug(".."+ce2.toString());
+			}
 			eps.add(ep); //add the other entity
 			LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returned two EntityProposals");
 			return eps;
 		}
-		
-		
+
+
 		//each of entityphrase and elocatorphrase may be multiple names separated by ","
 		if(entityphrase.indexOf(",")>0){
 			String temp = entityphrase.indexOf(",")>0 ? entityphrase.substring(0, entityphrase.indexOf(",")).trim() : entityphrase; // the first seg
@@ -109,10 +125,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			else elocatorphrase = ltemp+","+elocatorphrase; //all remaining segs, separate by ","
 			entityphrase = temp;
 		}
-		
+
 		entityphrase = Utilities.transform(entityphrase);
 		elocatorphrase = Utilities.transform(elocatorphrase);
-		
+
 		//special case: dealing with process
 		entityphrase = entityphrase.replaceAll("("+Dictionary.process+")", "process");
 		elocatorphrase = elocatorphrase.replaceAll("("+Dictionary.process+")", "process");
@@ -121,13 +137,61 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//entityphrase = entityphrase.replaceAll("body scale", "dermal scale");
 		//elocatorphrase = elocatorphrase.replaceAll("body scale", "dermal scale");
 
+
 		LOGGER.debug("EntitySearcherOriginal calls EntitySearcher0");
-		return new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+		ArrayList<EntityProposals> entities =  new EntitySearcher0().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		
+		if(entities==null){
+			//If not found in Ontology, then return the phrase as simpleentity string
+			//TODO return "some anatomical entity" or other high level concepts. 
+			//don't forget the entityl
+			LOGGER.debug("EntitySearcherOriginal: no match in ontology is found for '"+entityphrase+"','"+elocatorphrase+"', form string-based proposals...");
+			EntityProposals ep = new EntityProposals();
+			entities = new ArrayList<EntityProposals>();
+			SimpleEntity sentity = new SimpleEntity();
+			sentity.setString(entityphrase);
+			sentity.confidenceScore=0f;
+			if(elocatorphrase.length()>0){
+				//relation & entity locator
+				FormalRelation rel =  Dictionary.partof;
+				rel.setConfidenceScore((float)1.0);
+				SimpleEntity entityl = new SimpleEntity();
+				entityl.setString(elocatorphrase);
+				REntity rentity = new REntity(rel, entityl);
+				//composite entity
+				CompositeEntity centity = new CompositeEntity();
+				centity.addEntity(sentity);
+				centity.addEntity(rentity);
+				//EntityProposals entities = new EntityProposals();
+				//ep.setPhrase(sentity.getString());
+				centity.setString(originalentityphrase);
+				ep.setPhrase(originalentityphrase);
+				ep.add(centity);
+				LOGGER.debug("add a proposal:"+centity.toString());
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
+			}else{
+				//EntityProposals entities = new EntityProposals();
+				//ep.setPhrase(sentity.getString());
+				ep.setPhrase(originalentityphrase);
+				ep.add(sentity);
+				LOGGER.debug("add a proposal:"+sentity.toString());
+				//entities.add(ep);
+				Utilities.addEntityProposals(entities, ep);
+			}
+
+		}
+		LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
+		for(EntityProposals aep: entities){
+			LOGGER.debug("..EntityProposals: "+aep.toString());
+		}
+		return entities;
+		
+
 		/*(String[] entitylocators = null;
 		if(elocatorphrase.length()>0) entitylocators = elocatorphrase.split("\\s*,\\s*");
 		String[] entityphrasetokens = entityphrase.split("\\s+");
-		
+
 		//case of bone of humerus: join entity and entity locator
 		if(prep.contains("part_of")){
 			String phrase = entityphrase+" of "+elocatorphrase;
@@ -151,9 +215,9 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				}
 			}			
 		}
-		
+
 		//anterior margin of maxilla => anterior margin^part_of(maxilla)): entity = anterior margin, locator = maxilla
-		
+
 		//search entity and entity locator separately
 		SimpleEntity entityl = new SimpleEntity();
 		entityl.setString(elocatorphrase);
@@ -185,9 +249,9 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				return sentity;
 			}
 		}
-		
+
 		//re-arranging word in entity, first search for entity locator
-				
+
 		//"maxillary process" => process^part_of(maxilla) : entity = process, locator = maxilla
 		//TODO: process of maxilla case
 		String adjIDlabel = TermSearcher.adjectiveOrganSearch(entityphrasetokens[0]);
@@ -212,12 +276,12 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				centity.addEntity(sentity);
 				centity.addEntity(rentity);
 				return centity;
-				
+
 			}else{
 				//TODO
 			}			
 		}
-		
+
 		//anterior process of the maxilla => process^part_of(anterior region^part_of(maxilla)): entity = process, locator = anterior region, maxilla
 		if(entityphrasetokens[0].matches("("+Dictionary.spatialtermptn+")")){
 			String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //process
@@ -268,7 +332,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				//TODO
 			}
 		}
-		
+
 		//TODO
 		/*
 		 * Changed by Zilong: deal with spatial terms. 
@@ -276,7 +340,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//String[] entityTerms=entity.toLowerCase().trim().split("\\s+");
 		//if contains spatial terms
 		//if(this.dictionary.spatialterms.contains(entityTerms[0])){
-			//if the entity contains the spatial head noun 
+		//if the entity contains the spatial head noun 
 		//	if(dictionary.spatialHeadNoun.contains(entityTerms[entityTerms.length-1])){
 		//		String ne=entityTerms[0]+" region";//spatial term + region
 		//		String nel=entityTerms[entityTerms.length-1]+","+entitylocator;
@@ -288,26 +352,26 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		/*case: Mesethmoid flares anteriorly-> E: anterior region(part_of(mesethmoid bone)), Q: decreased width*/
 		/*need more supporting cases. For now, comment it out to avoid interference with cases like ventrally directed*/
 		//String[] qualityTerms=quality.toLowerCase().trim().replaceAll("[\\[\\]]", "").split("\\s+");
-//		if(this.spatialterms.contains(qualityTerms[qualityTerms.length-1].replaceFirst("ly$", ""))){
-//			//if the quality contains the spatial term's adverb form.
-//			String ne = qualityTerms[qualityTerms.length-1].replaceFirst("ly$", "")+" region";
-//			String nel = entity+((entitylocator==null||entitylocator.equals(""))?"":(","+entitylocator));
-//			String nq = quality.toLowerCase().trim().replaceAll("\\[.*\\]", "");
-//			
-//			EQ.put("entity", ne);
-//			EQ.put("entitylocator", nel);
-//			EQ.put("quality", nq);
-//			
-//		}
+		//		if(this.spatialterms.contains(qualityTerms[qualityTerms.length-1].replaceFirst("ly$", ""))){
+		//			//if the quality contains the spatial term's adverb form.
+		//			String ne = qualityTerms[qualityTerms.length-1].replaceFirst("ly$", "")+" region";
+		//			String nel = entity+((entitylocator==null||entitylocator.equals(""))?"":(","+entitylocator));
+		//			String nq = quality.toLowerCase().trim().replaceAll("\\[.*\\]", "");
+		//			
+		//			EQ.put("entity", ne);
+		//			EQ.put("entitylocator", nel);
+		//			EQ.put("quality", nq);
+		//			
+		//		}
 		/*end handling spatial terms*/
-		
+
 		/* TODO
 		 * Changed by Zilong: change any self-reference word to the keyentity(es)
 		 * To add any new self-reference word, please modify the instance variable
 		 * "selfReference." 
 		 * 
 		 * */
-		
+
 		//if(entity.toLowerCase().trim().matches("("+Dictionary.selfReference+")")){
 		//	EQ.put("entity", this.keyentities.get(0));
 		//}
@@ -318,13 +382,13 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//	EQ.put("qualitymodifier", this.keyentities.get(0));
 		//}
 		/*End dealing with self reference terms*/
-		
+
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
 		//Epibranchial 1: (2) absent E: Epibranchial 1 cartilage, Q: absent E: Epibranchial 1 bone, Q: absent
 		//The curator should use both the cartilage and bone terms to annotate state 2 because the author clearly differentiates between the two.
-		 
+
 		//search with regular expression  "epibranchial .*" to find possible missing headnouns 
 		/*
 		if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
@@ -346,7 +410,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				return sentity;
 			}
 		}	
-		
+
 		//finding the splitting point: body scale => scale of body
 		String[] tokens = entityphrase.split("\\s+");
 		for(int split = 0; split <= tokens.length-2; split++){
@@ -369,7 +433,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				return centity;
 			}
 		}
-		
+
 		//still not find a match, remove the last term in the entityphrase, when what is left is not just a spatial term 
 		//"humeral deltopectoral crest apex" => "humeral deltopectoral crest"	
 		//TODO "some part" of humerus; "some quality"
@@ -377,8 +441,8 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		//Changed by Zilong:
 		//enhanced entity format condition to exclude the spatial terms: in order to solve the problem that 
 		//"rostral tubule" will match "anterior side" because rostral is synonymous with anterior
-		
-		
+
+
 		tokens = entityphrase.split("\\s+");
 		if(tokens.length>=2){ //to prevent "rostral tubule" from entering the subsequent process 
 			String shortened = entityphrase.substring(0, entityphrase.lastIndexOf(" ")).trim();
@@ -396,7 +460,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				}
 			}			
 		}
-	
+
 		//shrinking 
 		/*int size = entityphrasetokens.length - 1;
 		for(int i = 0; i <= size; i++){
@@ -439,11 +503,12 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				}
 			}				
 		}*/		
-		
-		
+
+
 		//return null;
 	}
-	
+
+
 	/**
 	 * look into text context for statements containing structid 
 	 * to determin the target the context is most close to. for example
@@ -475,7 +540,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		}		
 		return null;
 	}
-	
+
 
 	/**
 	 * Valid.
@@ -484,19 +549,19 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	 * @return true, if successful
 	 * @throws Exception the exception
 	 */
-//	private boolean valid(String organphrase) throws Exception{
-//
-//			String text = organphrase.replaceAll("[<>]", "");
-//			boolean flag1= false;
-//			boolean flag2 = false;
-//			Statement stmt = conn.createStatement();
-//			ResultSet rs = stmt.executeQuery("select count(*) from "+dataprefix+"_markedsentence where markedsent like '%"+organphrase+"%'");
-//			if(rs.next() && rs.getInt(1)>0) flag1=true;
-//			rs = stmt.executeQuery("select count(*) from "+dataprefix+"_sentence where sentence like '%"+text+"%'");
-//			if(rs.next() && rs.getInt(1)>0) flag2=true;
-//			return flag1&&flag2;
-//
-//	}
+	//	private boolean valid(String organphrase) throws Exception{
+	//
+	//			String text = organphrase.replaceAll("[<>]", "");
+	//			boolean flag1= false;
+	//			boolean flag2 = false;
+	//			Statement stmt = conn.createStatement();
+	//			ResultSet rs = stmt.executeQuery("select count(*) from "+dataprefix+"_markedsentence where markedsent like '%"+organphrase+"%'");
+	//			if(rs.next() && rs.getInt(1)>0) flag1=true;
+	//			rs = stmt.executeQuery("select count(*) from "+dataprefix+"_sentence where sentence like '%"+text+"%'");
+	//			if(rs.next() && rs.getInt(1)>0) flag2=true;
+	//			return flag1&&flag2;
+	//
+	//	}
 
 	/*
 	@Override
@@ -512,9 +577,9 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			String structid, String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep, int ingroup) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	*/
+	 */
 
 
 	/**
@@ -549,5 +614,5 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		}
 	}
 
-	
+
 }

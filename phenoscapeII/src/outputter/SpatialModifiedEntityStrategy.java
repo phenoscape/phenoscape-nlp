@@ -51,13 +51,16 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 	@Override
 	public void handle() {
 
-		SimpleEntity entityl = new SimpleEntity();
-		entityl.setString(elocatorphrase);
+		ArrayList<SimpleEntity> entityls = new ArrayList<SimpleEntity>();
+		//entityl.setString(elocatorphrase);
 		if(elocatorphrase.length()>0) {
-			SimpleEntity result = (SimpleEntity)new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
-			if(result!=null){
-				entityl = result;
-				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found a match: "+result.toString());
+			ArrayList<FormalConcept> results = new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
+			if(results!=null){
+				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found match: ");
+				for(FormalConcept result: results){
+					entityls.add((SimpleEntity)result);
+					LOGGER.debug(".." +result.toString());
+				}
 			}else{
 				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found no match");
 			}
@@ -76,60 +79,82 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 			//if(entityphrasetokens[0].matches("("+Dictionary.spatialtermptn+")")){
 			//String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //anything after the spatial term
 			//SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
-			if(newentity.length()<=0) return;
-			LOGGER.debug("SME search for entity '"+newentity+"'");
-			ArrayList<EntityProposals> sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, elocatorphrase, originalentityphrase, prep); //advanced search
+			
+			
+			ArrayList<EntityProposals> sentityps = null;
+			if(newentity.length()<=0){
+				//entityls => sentityps
+				EntityProposals ep = new EntityProposals();
+				boolean populated = false;
+				for(SimpleEntity se: entityls){
+					ep.add(se);
+					populated = true;
+				}
+				if(populated){
+					sentityps = new ArrayList<EntityProposals> ();
+					sentityps.add(ep);
+					//empty entityls
+					entityls = new ArrayList<SimpleEntity>();
+				}
+			}else{
+				LOGGER.debug("SME search for entity '"+newentity+"'");
+				sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, elocatorphrase, originalentityphrase, prep); //advanced search
+			}
+			
 			if(sentityps!=null){
 				entities = new ArrayList<EntityProposals>();
 				LOGGER.debug("SME found match for entity, now search for spatial term  '"+spatialterm+"'");
 				//SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(spatialterm, "entity");
-				ArrayList<FormalConcept> spatialentities = new TermSearcher().regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
+				ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
 				if(spatialentities!=null) LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found match");
+				EntityProposals centityp = new EntityProposals();
+				centityp.setPhrase(this.originalentityphrase);
 				for(EntityProposals sentityp: sentityps){
 					for(Entity sentity: sentityp.getProposals()){
 						for(FormalConcept spatialentity: spatialentities){
 							SimpleEntity sentity1 = (SimpleEntity) spatialentity;
-							if(sentity1!=null){
+							if(sentity1!=null){//ventral region
 								//nested part_of relation
-								if(entityl.getString().length()>0){ //anterior process of maxilla 
+								if(entityls.size()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
 									//relation & entity locator: inner
-									FormalRelation rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
+									FormalRelation rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
-									REntity rentity = new REntity(rel, entityl);
-									//composite entity = entity locator for sentity
-									CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
-									centity.addEntity(sentity1); //anterior region
-									centity.addEntity(rentity);	//^part_of(maxilla)	
-									//relation & entity locator:outer 
-									rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
-									rel.setConfidenceScore((float)1.0);
-									rentity = new REntity(rel, centity);
-									centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
-									centity.addEntity(sentity); //process
-									centity.addEntity(rentity);	//^part_of(anterior region^part_of(maxilla))
-									centity.setString(this.originalentityphrase);
-									EntityProposals centityp = new EntityProposals();
-									//centityp.setPhrase(sentity.getString());//use the primary entity's phrase
-									centityp.setPhrase(this.originalentityphrase);
-									centityp.add(centity);
-									//entities.add(centityp);
-									Utilities.addEntityProposals(entities, centityp);
-									LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centityp.toString());
-									//return entities;
-									//return;
+									ArrayList<REntity> rentities = new ArrayList<REntity>();
+									REntity re = null;
+									//TODO: what if both conditions are true?
+									if(sentity instanceof CompositeEntity){
+										//sentity should not have any post-composed quality
+										re = ((CompositeEntity) sentity).getEntityLocator();
+										rentities.add(re);
+										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
+									}else if(entityls.size()>0){
+										for(SimpleEntity entityl: entityls){
+											re = new REntity(rel, entityl);
+											rentities.add(re);
+										}
+									}
+
+									for(REntity rentity: rentities){
+										//composite entity = entity locator for sentity
+										CompositeEntity centity = new CompositeEntity(); //anterior region^part_of(maxilla)
+										centity.addEntity(sentity1); //anterior region
+										centity.addEntity(rentity);	//^part_of(maxilla)	
+										//relation & entity locator:outer 
+										rel = Dictionary.partof;
+										rel.setConfidenceScore((float)1.0);
+										REntity rentity2 = new REntity(rel, centity);
+										centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
+										centity.addEntity(sentity); //process
+										centity.addEntity(rentity2);	//^part_of(anterior region^part_of(maxilla))
+										centity.setString(this.originalentityphrase);
+										centityp.add(centity);
+										LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centity.toString());
+										//entities.add(centityp);
+									}
 								}else{//anterior maxilla 
 									//corrected 6/1/13 [basal scutes]: sentity1 be the entity; sentity is the entity locator
 									//relation & entity locator: 
-									FormalRelation rel = new FormalRelation();
-									rel.setString("part_of");
-									rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-									rel.setId("BFO:000050");
+									FormalRelation rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
 									REntity rentity = new REntity(rel, sentity);
 									//composite entity = entity locator for sentity
@@ -137,15 +162,8 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 									centity.addEntity(sentity1); 
 									centity.addEntity(rentity);	
 									centity.setString(this.originalentityphrase);
-									EntityProposals centityp = new EntityProposals();
-									//centityp.setPhrase(sentity1.getString());
-									centityp.setPhrase(this.originalentityphrase);
 									centityp.add(centity);
-									//entities.add(centityp);
-									Utilities.addEntityProposals(entities, centityp);
 									LOGGER.debug("without entity locator, SME form a composite entity proposals: "+centityp.toString());
-									//return entities;
-									//return;
 								}	
 							}else{
 								LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found no match");
@@ -153,6 +171,7 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 						}
 					}
 				}
+				Utilities.addEntityProposals(entities, centityp);
 			}
 		}
 

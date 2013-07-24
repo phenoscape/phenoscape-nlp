@@ -179,9 +179,10 @@ public class XML2EQ {
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue,characterstatement.getChildText("text"));
 					for(Element statestatement: statestatements){
 						LOGGER.debug("XML2EQ: processing state statement...");
+						System.out.println("text: " + statestatement.getChildText("text"));
 						ssp.parse(statestatement, root);
 						allEQs.addAll(ssp.getEQStatements());
-						ssp.EQStatements.clear();
+						ssp.clearEQStatements();
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}
@@ -228,9 +229,9 @@ public class XML2EQ {
 	 * text::long and rounded along entire length
 	 * 5 EQ::[E]lateral wall [Q]long [EL]metapterygoid channel
 	 * 6 EQ::[E]lateral wall [Q]rounded [along entire length] [EL]metapterygoid channel
-	 * @param charactertext 
-	 * @param sourcefile 
-	 * @param characterId 
+	 * 
+	 * 
+	 * some of the EQs don't have a Q part: StateStatementParser.
 	 */
 	private void outputEQs4CharacterUnit() throws Exception {
 
@@ -901,7 +902,7 @@ private String sort(String groups)
 				EntityProposals ep = EQ.getEntity();
 				for(Entity e: ep.getProposals()){
 					if(e instanceof SimpleEntity) entitylabel = ((SimpleEntity)e).getLabel();
-					else entitylabel = ((CompositeEntity)e).getPrimaryEntity().getLabel();
+					else entitylabel = ((CompositeEntity)e).getTheSimpleEntity().getLabel();
 					if(matchWithKeyEntities(entitylabel)){
 						keyEQ = EQ;
 						QualityProposals qp = EQ.getQuality();
@@ -927,9 +928,10 @@ private String sort(String groups)
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
 						//TODO consider negation
-						Quality q = (Quality) new TermSearcher().searchTerm(ngram, "quality"); 
-						if(q!=null){
-							String qlabel = q.getLabel();
+						ArrayList<FormalConcept> qs =  new TermSearcher().searchTerm(ngram, "quality"); 
+						if(qs!=null){
+							for(FormalConcept fc: qs){
+							String qlabel = fc.getLabel();
 							String cp = commonParent(qlabel, qualitylabels);
 							if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
 								//EQStatementProposals EQp = relatedEQ(stateid, ngram);
@@ -953,6 +955,7 @@ private String sort(String groups)
 									//EQp.add(EQ);
 									allEQs.add(EQp);
 								}
+							}
 								//accept this result for this stateid
 								/*EQStatement EQ = EQp.getProposals().get(0); //assuming there is only one candidate???
 								EQ.setEntity(keyEQ.getEntity());
@@ -1068,7 +1071,7 @@ private String sort(String groups)
 			for(Entity keyentity: keyentityp.getProposals()){
 				String label = null;
 				if(keyentity instanceof SimpleEntity) label = ((SimpleEntity)keyentity).getLabel();
-				if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getPrimaryEntity().getLabel();
+				if(keyentity instanceof CompositeEntity) label = ((CompositeEntity)keyentity).getTheSimpleEntity().getLabel();
 				if(label !=null && label.compareTo(entitylabel)==0) return true;
 			}
 		}		
@@ -1189,7 +1192,7 @@ private String sort(String groups)
 						}
 						else
 						{
-							e= ((CompositeEntity)E).getPrimaryEntity().getLabel();
+							e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
 							if(((CompositeEntity)E).isOntologized()==true)
 							{
 								if(e.length()>0) hasentity = true; 
@@ -1199,12 +1202,14 @@ private String sort(String groups)
 					}
 
 					//if any Q is good?
-					for(Quality Q: aEQp.getQuality().getProposals()){
-						String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
-
-						if(q==null) q="";
-
-						if(q.length()>0) hasquality = true;
+					if(aEQp.getQuality()!=null){
+						for(Quality Q: aEQp.getQuality().getProposals()){
+							String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
+	
+							if(q==null) q="";
+	
+							if(q.length()>0) hasquality = true;
+						}
 					}
 					if(haskeyentity && hasquality) completestateeqs.add(aEQp);
 					if(!hasquality) incompletestateids.add(stateid); //none of the EQs for the state has a ontologized quality

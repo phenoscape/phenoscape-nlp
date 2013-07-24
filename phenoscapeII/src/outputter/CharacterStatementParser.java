@@ -420,12 +420,8 @@ public class CharacterStatementParser extends Parser {
 			
 			LOGGER.debug("CSP: remaining entities: post-compose with 'part_of':");
 			
-			FormalRelation fr = new FormalRelation();
-			fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
+			FormalRelation fr = Dictionary.partof;
 			fr.setConfidenceScore(0.5f);
-			fr.setId("BFO:0000050");
-			fr.setLabel("part_of");
-			fr.setString("");
 			//remaining entities
 			//compose entities using 'part_of' relation
 			//test cases: 
@@ -560,12 +556,8 @@ public class CharacterStatementParser extends Parser {
 						qentity.setId(elp.getId());
 						qentity.setLabel(elp.getLabel());
 						qentity.setString(elp.getString());
-						FormalRelation fr = new FormalRelation();
-						fr.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000050");
+						FormalRelation fr = Dictionary.partof;
 						fr.setConfidenceScore(0.5f);
-						fr.setId("BFO:0000050");
-						fr.setLabel("part of");
-						fr.setString("");
 						REntity re = new REntity(fr, qentity); 
 						CompositeEntity ce = new CompositeEntity(); 
 						ce.addEntity(ecopy);
@@ -613,7 +605,7 @@ public class CharacterStatementParser extends Parser {
 			for(Element character: characters){
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
-				ssp.parserCharacters(character, statement, root, entities1, qualities);
+				ssp.parserCharacter(character, statement, root, entities1, qualities);
 				//entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
 					Utilities.postcompose(entities, qualities);
