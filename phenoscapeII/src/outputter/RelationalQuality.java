@@ -137,10 +137,10 @@ public class RelationalQuality extends Quality {
 		{
 			score*=q.getConfidienceScore();
 		}
-		for(Entity e:this.relatedentity.getProposals())
+/*		for(Entity e:this.relatedentity.getProposals())
 		{
 			score*=e.getConfidienceScore();
-		}
+		}*///Not needed as per discussion with Hong
 		return score;
 	}
 	

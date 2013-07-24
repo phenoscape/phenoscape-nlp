@@ -20,7 +20,8 @@ import org.jdom.xpath.XPath;
  * parse out Entities and Qualities, form EQ directly without access state statements as they are just binary values, i.e., T/F. (not two different vaules, but binary values)
  */
 public class BinaryCharacterStatementParser extends StateStatementParser {
-	private static final Logger LOGGER = Logger.getLogger(BinaryCharacterStatementParser.class);   
+	private static final Logger LOGGER = Logger.getLogger(BinaryCharacterStatementParser.class);  
+	public String characterlabel;
 	/**
 	 * @param ontologyIRIs
 	 */
@@ -38,6 +39,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 
 	public BinaryCharacterStatementParser(TermOutputerUtilities ontoutil, String characterlabel) {
 		super(ontoutil, null, null,characterlabel);
+		this.characterlabel=characterlabel;
 	}
 
 	/**
@@ -178,7 +180,10 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		for(EQProposals eqp: this.EQStatements){
 			//for(EQStatement eq: eqp.getProposals()){
 			//update q for all eq candidates
-
+			if((eqp.getCharacterlabel()==null)||(eqp.getCharacterlabel()==""))
+			{
+				eqp.setCharacterlabel(this.characterlabel);
+			}
 			QualityProposals qp = eqp.getQuality();
 			if(qp==null){//no qp, create qp
 				//q = "present"
@@ -231,7 +236,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 									}
 								}
 								else
-								{
+								{// takes the quality details from relationalslim
 									complementQuality = Utilities.removeprepositions(complementQuality);
 									Hashtable<String,String> cq = Dictionary.relationalqualities.get(complementQuality);
 									Set<String> keys = cq.keySet();
@@ -277,7 +282,150 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		}
 		//}
 		this.EQStatements.addAll(negativestatements);
+		populateStateLabel(this.EQStatements,root);
+
 	}
+	
+	/*
+	 * 
+	 * This method populates the state statement for all binary statements
+	 * The first binary state statement id and label will be populated
+	 */
+
+/*	private void populateStateLabel(ArrayList<EQProposals> eqstatements,Element root) {
+
+		try {
+		
+			Element state = (Element) XMLNormalizer.pathStateStatement.selectSingleNode(root);
+			Element Text = (Element) XMLNormalizer.pathText.selectSingleNode(state);
+			String stateid = state.getAttributeValue("state_id");
+			String text = Text.getTextTrim();
+					
+			System.out.println(text);
+			
+			for(EQProposals eqp:eqstatements)
+			{
+				eqp.setDescription(text);
+				eqp.setStateId(stateid);
+			}
+			
+			
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}	
+
+		
+	}*/
+
+	/*
+	 * 
+	 * This method populates the state statement for all binary statements
+	 * 
+	 */
+
+	@SuppressWarnings("unchecked")
+	private void populateStateLabel(ArrayList<EQProposals> eqstatements,Element root) {
+
+		try {
+		
+			List<Element> states =  XMLNormalizer.pathStateStatement.selectNodes(root);
+			Hashtable<String,String> binary = new Hashtable<String,String>();
+			
+			//Stores the information about positive and negative states
+			for (Element state : states) {
+				Element text = (Element) pathText2.selectSingleNode(state);
+				String value = text.getTextTrim();
+				if(value.matches("(" + Dictionary.binaryTvalues + ")"))
+				{
+					binary.put("positive", state.getAttributeValue("state_id")+"@@"+value);
+				}
+				
+				if(value.matches("(" + Dictionary.binaryFvalues + ")"))
+				{
+					binary.put("negative", state.getAttributeValue("state_id")+"@@"+value);
+				}
+			}
+			//Checks if the quality proposal is a negated quality or false values
+			for(EQProposals eqp:eqstatements)
+			{
+				QualityProposals qp = eqp.getQuality();
+				for(Quality q:qp.proposals)
+				{
+					if(q!=null)
+					{
+					if((q instanceof NegatedQuality)||(q.getLabel().matches(".*(" + Dictionary.binaryFvalues + ")")))
+					{
+						eqp.setStateId(binary.get("negative")!=null?binary.get("negative").split("@@")[0]:(binary.get("positive")!=null?binary.get("positive").split("@@")[0]:""));
+						eqp.setDescription(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:""));
+						break;
+					}else
+					{
+						eqp.setStateId(binary.get("positive")!=null?binary.get("positive").split("@@")[0]:(binary.get("negative")!=null?binary.get("negative").split("@@")[0]:""));
+						eqp.setDescription(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:""));
+						break;
+					}
+					}
+				}
+			}
+			
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}	
+
+		
+	}
+	
+/*	private void populateStateLabel(ArrayList<EQProposals> eqstatements,Element root) {
+
+		try {
+		
+			ArrayList<Element> states = (ArrayList<Element>) XMLNormalizer.pathStateStatement.selectNodes(root);
+			String assigned="";
+			
+			for(EQProposals eqp:eqstatements)
+			{
+				QualityProposals quality = eqp.getQuality();
+				
+				for(Quality q:quality.proposals)
+				{
+					int flag=0;
+					for(Element state:states)
+					{
+						Element Text = (Element) XMLNormalizer.pathText.selectSingleNode(state);
+						String text = Text.getTextTrim();
+						
+						if((assigned.equals("present")==false)||((text.matches("("+Dictionary.binaryTvalues +")")==true)&&(q.getLabel().matches("("+Dictionary.binaryTvalues +")")==true)))
+						{
+							eqp.setStateId(state.getAttributeValue("state_id"));
+							eqp.setDescription(text);
+							flag=1;
+							assigned="present";
+							break;
+						}
+						
+						if((assigned.equals("absent")==false)||(text.matches("("+Dictionary.binaryFvalues +")")==true)&&(q.getLabel().matches("("+Dictionary.binaryFvalues +")")==true)))
+						{
+							eqp.setStateId(state.getAttributeValue("state_id"));
+							eqp.setDescription(text);
+							assigned="absent";
+							flag=1;
+							break;
+						}
+
+					}
+					if(flag==1)
+						break;
+					
+				}
+			}
+			
+			
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		}	
+
+		
+	}*/
 
 	/**
 	 * construct EQstatement from standalone <structure>, as in "anal fin/absent|present" 
@@ -329,6 +477,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				eqp.setStateId(super.stateid);
 				eqp.setDescription(super.text);
 				eqp.setType("character");
+				eqp.setCharacterlabel(super.characterlabel);
 				this.EQStatements.add(eqp);
 			}			
 		}catch(Exception e){

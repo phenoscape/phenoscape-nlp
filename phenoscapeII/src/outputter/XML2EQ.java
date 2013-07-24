@@ -9,9 +9,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -128,10 +130,10 @@ public class XML2EQ {
 		stmt.execute("drop table if exists " + outputtable);
 		System.out.println("create table if not exists " + outputtable
 				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))");
+				+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
 		stmt.execute("create table if not exists " + outputtable
 				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-				+ " entity varchar(2000),entitylabel varchar(2000), entityid varchar(2000), " + "quality varchar(2000),qualitylabel varchar(2000), qualityid varchar(2000),"+"relatedentity varchar(2000),relatedentitylabel varchar(2000), relatedentityid varchar(2000))" );
+				+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
 
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
@@ -188,6 +190,10 @@ public class XML2EQ {
 				LOGGER.error("", e);
 			}
 		}
+		
+		HTMLOutput output = new HTMLOutput();
+		output.outputHTML(this.tableprefix,"curator",3);
+
 		elk.dispose();
 	}
 
@@ -253,74 +259,87 @@ public class XML2EQ {
 		//Read all Entity Proposals and store as comma separated values
 		for(Entity e:eQ.entity.getProposals())
 		{
-			entitylabel+=e.getLabel()+" Score:"+e.getConfidienceScore()+",";
+			entitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
 			if(e instanceof CompositeEntity)
 			{
-				entity+=((CompositeEntity) e).getFullString()+" Score:"+e.getConfidienceScore()+",";
-				entityid+=((CompositeEntity) e).getFullID()+" Score:"+e.getConfidienceScore()+",";
+				entity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidienceScore()+"]@,";
+				entityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidienceScore()+"]@,";
 			}
 			else
 			{
-				entity+=e.getString()+" Score:"+e.getConfidienceScore()+",";
-				entityid+=e.getId()+" Score:"+e.getConfidienceScore()+",";
+				entity+=e.getString()+" Score:["+e.getConfidienceScore()+"]@,";
+				entityid+=e.getId()+" Score:["+e.getConfidienceScore()+"]@,";
 			}
 		}
 		
-		entity = entity.replaceAll(",$", "");
-		entitylabel = entitylabel.replaceAll(",$", "");
-		entityid = entityid.replaceAll(",$", "");
+		entity = entity.replaceAll("(@,)$", "");
+		entitylabel = entitylabel.replaceAll("(@,)$", "");
+		entityid = entityid.replaceAll("(@,)$", "");
+		entity =sort(entity);
+		entitylabel =sort(entitylabel);
+		entityid =sort(entityid);
 		
 		//Read all Quality Proposals and store as comma separated values
 		for(Quality q:eQ.quality.getProposals())
 		{
 			if(q instanceof RelationalQuality)
 			{
-				quality+=q.getString()+" Score:"+q.getConfidienceScore()+",";
-				qualityid+=q.getId()+" Score:"+q.getConfidienceScore()+",";
-				qualitylabel+=q.getLabel()+" Score:"+q.getConfidienceScore()+",";
+				System.out.println();
+				quality+=q.getString()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualityid+=q.getId()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 				//Reading all related entities and store as comma separated values
 				for(Entity e:((RelationalQuality) q).relatedentity.getProposals())
 				{
-					relatedentitylabel+=e.getLabel()+" Score:"+e.getConfidienceScore()+",";
+					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
 					if(e instanceof CompositeEntity)
 					{
-						relatedentity+=((CompositeEntity) e).getFullString()+" Score:"+e.getConfidienceScore()+",";
-						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:"+e.getConfidienceScore()+",";
+						relatedentity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidienceScore()+"]@,";
+						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidienceScore()+"]@,";
 					}
 					else
 					{
-						relatedentity+=e.getString()+" Score:"+e.getConfidienceScore()+",";
-						relatedentityid+=e.getId()+" Score:"+e.getConfidienceScore()+",";
+						relatedentity+=e.getString()+" Score:["+e.getConfidienceScore()+"]@,";
+						relatedentityid+=e.getId()+" Score:["+e.getConfidienceScore()+"]@,";
 					}
 				}
 			}
 			else if((q instanceof CompositeQuality))
 			{
-				quality+=((CompositeQuality)q).getFullString()+" Score:"+q.getConfidienceScore()+",";
-				qualityid+=((CompositeQuality)q).getId()+" Score:"+q.getConfidienceScore()+",";
-				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:"+q.getConfidienceScore()+",";
+				quality+=((CompositeQuality)q).getFullString()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualityid+=((CompositeQuality)q).getId()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 
 			}
 			else if((q instanceof NegatedQuality))
 			{
-				quality+=((NegatedQuality)q).getFullString()+" Score:"+q.getConfidienceScore()+",";
-				qualityid+=((NegatedQuality)q).getFullId()+" Score:"+q.getConfidienceScore()+",";
-				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:"+q.getConfidienceScore()+",";
+				quality+=((NegatedQuality)q).getFullString()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualityid+=((NegatedQuality)q).getFullId()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 			}
 			else
 			{
-				quality+=q.getString()+" Score:"+q.getConfidienceScore()+",";
-				qualityid+=q.getId()+" Score:"+q.getConfidienceScore()+",";
-				qualitylabel+=q.getLabel()+" Score:"+q.getConfidienceScore()+",";
+				quality+=q.getString()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualityid+=q.getId()+" Score:["+q.getConfidienceScore()+"]@,";
+				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 			}
 		}
 		
-		relatedentity = relatedentity.replaceAll(",$", "");
-		relatedentitylabel = relatedentitylabel.replaceAll(",$", "");
-		relatedentityid = relatedentityid.replaceAll(",$", "");
-		quality = quality.replaceAll(",$", "");
-		qualitylabel = qualitylabel.replaceAll(",$", "");
-		qualityid = qualityid.replaceAll(",$", "");
+		relatedentity = relatedentity.replaceAll("(@,)$", "");
+		relatedentitylabel = relatedentitylabel.replaceAll("(@,)$", "");
+		relatedentityid = relatedentityid.replaceAll("(@,)$", "");
+		quality = quality.replaceAll("(@,)$", "");
+		qualitylabel = qualitylabel.replaceAll("(@,)$", "");
+		qualityid = qualityid.replaceAll("(@,)$", "");
+		
+		quality = sort(quality);
+		qualitylabel = sort(qualitylabel);
+		qualityid = sort(qualityid);
+		
+		relatedentity = sort(relatedentity);
+		relatedentitylabel = sort(relatedentitylabel);
+		relatedentityid = sort(relatedentityid);
+		
 		
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
 					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
@@ -352,6 +371,76 @@ public class XML2EQ {
 		
 		
 	}
+
+	/*
+	 * 
+	 * sort the proposals according to the confidence scores
+	 * 
+	 */
+private String sort(String groups) 
+{
+
+	String individualstrings[] = groups.split("(@,)");//Splitting original Proposals into individual tokens upon ],(Comma alone cannot be used, so using ],)
+	
+
+	String sortedstring ="";
+	
+
+	Hashtable <Float,ArrayList<String>> holder = new Hashtable <Float,ArrayList<String>>();
+	//Extracting the float value and creating an has Float, String
+	for(String token:individualstrings)
+	{
+		if((token!=null) &&(token.equals("")==false))
+		{System.out.println(token);
+		Float value = Float.parseFloat(token.split("(\\[)")[1].replaceAll("]$", ""));
+		
+		if(holder.get(value)==null)
+		{
+			ArrayList<String> list = new ArrayList<String>();
+			list.add(token);
+			holder.put(value, list);
+		}
+		else
+		{
+			ArrayList<String> list = holder.get(value);
+			list.add(token);
+			holder.put(value, list);
+		}
+	}
+	}
+	//sorting the Keyset of the hashtable
+	Set<Float> keys =holder.keySet();
+	Object keyarray[] = keys.toArray();
+	ArrayList<Float> sortedkeys = new ArrayList<Float>();
+	
+	for(int i=0;i<keyarray.length;i++)
+	{
+		for(int j=i+1;j<keyarray.length;j++)
+		{
+			if((Float)keyarray[i]<(Float)keyarray[j])
+			{
+				Float temp = (Float) keyarray[i];
+				keyarray[i] = keyarray[j];
+				keyarray[j] = temp;
+			}
+		}
+	}
+	
+	//Iterating through the sorted keyset and creating the sorted final String
+	
+	for(int i=0;i<keyarray.length;i++)
+	{
+		ArrayList<String> templist = holder.get(keyarray[i]);
+		Collections.sort(templist);
+		
+		for(String temp:templist)
+		{
+			sortedstring+=temp+",";
+		}
+	}
+	return sortedstring.replaceAll(",$", "");
+	
+}
 
 /*	private ArrayList<String> printEntity(ArrayList<Entity> proposals) {
 
@@ -1319,7 +1408,6 @@ public class XML2EQ {
 	public static void main(String[] args) {
 
 		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
-		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
 		String prefix =ApplicationUtilities.getProperty("table.prefix");

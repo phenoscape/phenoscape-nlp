@@ -33,7 +33,7 @@ public class XMLNormalizer {
 	public static XPath pathWholeOrganismStructure;
 	public static XPath pathNonWholeOrganismStructure;
 	public static XPath pathCharacter;
-	private static XPath pathText;
+	public static XPath pathText;
 	
 	
 	static{

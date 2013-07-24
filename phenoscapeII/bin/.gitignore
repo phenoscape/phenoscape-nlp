@@ -1,7 +1,4 @@
-/XMLschemas
+/.gitignore
 /conceptmapping
-/log4j.properties
 /oboaccessor
 /outputter
-/owlaccessor
-/preprocessing

@@ -12,6 +12,7 @@ public class EQProposals{
 	QualityProposals quality;
 	String sourceFile;
 	String characterId;
+	String characterlabel;
 	String stateId;
 	String description;
 	private String type;
@@ -89,7 +90,6 @@ public class EQProposals{
 	public void setCharacterlabel(String characterlabel) {
 		this.characterlabel = characterlabel;
 	}
-	String characterlabel;
 
 
 	/*public Entity getRelatedEntity( ){

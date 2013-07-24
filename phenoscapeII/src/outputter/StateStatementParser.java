@@ -108,7 +108,10 @@ public class StateStatementParser extends Parser {
 		parseCharactersFormEQ(statement, root);
 		LOGGER.debug("StateStatementParser: parsing standalone structures...");
 		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
+		//populate characterlabel, if it is null
+		populateCharacterLabel();
 	}
+
 
 	protected void parseMetadata(Element statement, Element root) {
 		this.src = root.getAttributeValue(ApplicationUtilities
@@ -214,7 +217,6 @@ public class StateStatementParser extends Parser {
 				parserCharacters(character, statement, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
-			
 			if(postcomps.size()>0){
 				LOGGER.debug("SSP: found postcomp qualities: ");
 				for(QualityProposals qp: postcomps){
@@ -382,6 +384,25 @@ public class StateStatementParser extends Parser {
 	}
 
 
+	/*
+	 * If the character label is null, populate it in the final eqproposal
+	 * 
+	 * 
+	 */
+	
+	private void populateCharacterLabel() {
+
+		//sets the characterlabel
+		for(EQProposals eqp:this.EQStatements)
+		{
+			if((eqp.getCharacterlabel()==null)||(eqp.getCharacterlabel()==""))
+			{
+				eqp.setCharacterlabel(this.characterlabel);
+			}
+		}
+	}
+	
+	
 	/*
 	 protected void parseCharacters(Element statement, Element root) {
 		//then parse characters. Check, if the parent structure itself is a quality, if so use relationalquality strategy else use characterhandler.

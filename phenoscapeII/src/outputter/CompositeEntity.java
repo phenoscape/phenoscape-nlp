@@ -266,6 +266,7 @@ public class CompositeEntity extends Entity {
 				{
 					FormalRelation related = ((REntity) e).getRelation();
 					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI());
+					relation.setConfidenceScore(related.getConfidienceScore());
 					if(((REntity)e).getEntity() instanceof SimpleEntity)
 					{
 						REntity re = new REntity(relation,((SimpleEntity)(((REntity)e).getEntity())).clone());
