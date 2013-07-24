@@ -223,9 +223,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							{
 								@SuppressWarnings("static-access")
 
-								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
+/*								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
 								if(complementQuality==null)
-								{
+								{*/
 									String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q1.getId()); 
 									if(parentinfo!=null)
 									{
@@ -236,7 +236,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 										NegatedQuality nq = new NegatedQuality(q1, parentquality);
 										nqp.proposals.add(nq);
 									}
-								}
+/*								}
 								else
 								{// takes the quality details from relationalslim
 									complementQuality = Utilities.removeprepositions(complementQuality);
@@ -251,7 +251,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 										nqp.proposals.add(negated);
 
 									}
-								}
+								}*/
 							}
 						}
 						RelationalQuality rq = new RelationalQuality(nqp,relatedentity);

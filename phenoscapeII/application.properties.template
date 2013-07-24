@@ -21,3 +21,10 @@ ontology.uberon=
 source.attribute.name=source_pdf
 unknown.structure.name=whole_organism
 elk.printmessage=false
+
+
+#XML2EQ output Sources
+output.dir=
+
+#charparser
+charparser.version = 

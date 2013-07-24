@@ -210,18 +210,18 @@ public class HTMLOutput {
 			output.println("</CENTER><BR><BR>");
 
 			output.println("<CENTER>");
-			output.println("<TABLE BORDER=\"1\" width=\"200%\">");			
+			output.println("<TABLE BORDER=\"1\" width=\"250%\">");			
 			output.println("<col width=\"5%\"/>");
-			output.println("<col width=\"8%\"/>");
 			output.println("<col width=\"5%\"/>");
-			output.println("<col width=\"8%\"/>");
 			output.println("<col width=\"5%\"/>");
-			output.println("<col width=\"8%\"/>");
-			output.println("<col width=\"15%\"/>");
-			output.println("<col width=\"8%\"/>");
-			output.println("<col width=\"15%\"/>");
-			output.println("<col width=\"8%\"/>");
-			output.println("<col width=\"15%\"/>");
+			output.println("<col width=\"5%\"/>");
+			output.println("<col width=\"5%\"/>");
+			output.println("<col width=\"5%\"/>");
+			output.println("<col width=\"20%\"/>");
+			output.println("<col width=\"5%\"/>");
+			output.println("<col width=\"20%\"/>");
+			output.println("<col width=\"5%\"/>");
+			output.println("<col width=\"20%\"/>");
 			
 			output.println("<TR>");
 
@@ -290,15 +290,15 @@ public class HTMLOutput {
 						int eqcount=1;
 						for(EQHolder eq:eqs)
 						{
-							entityid += eqcount+". *"+eq.getEntityid().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
-							entitylabel += eqcount+". *"+eq.getEntitylabel().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
+							entityid += eqcount+". *"+eq.getEntityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							entitylabel += eqcount+". *"+eq.getEntitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
 							if((eq.getRelatedentityid()!=null)&&(eq.getRelatedentityid().equals("")==false))
 							{
-							relatedentityid += eqcount+". *"+eq.getRelatedentityid().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
-							relatedentitylabel += eqcount+". *"+eq.getRelatedentitylabel().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
+							relatedentityid += eqcount+". *"+eq.getRelatedentityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							relatedentitylabel += eqcount+". *"+eq.getRelatedentitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
 							}
-							qualityid += eqcount+". *"+eq.getQualityid().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
-							qualitylabel += eqcount+". *"+eq.getQualitylabel().replaceAll("(Score:)","").replaceAll(",", "<BR>")+"<BR>";
+							qualityid += eqcount+". *"+eq.getQualityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							qualitylabel += eqcount+". *"+eq.getQualitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
 						eqcount++;
 						}
 						
