@@ -264,13 +264,15 @@ public class CharacterAnnotatorChunked {
 	private void normalizeModifierCharacters(String sentsrc) {
 		String t="";
 		if(this.statement.getAttributeValue("statement_type").compareTo("character")==0){
+			//gather data
 			List<Element> children = this.statement.getChildren("structure");
 			ArrayList<Element> characters = new ArrayList<Element>();
 			if(children.size()>0 && children.get(0).getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0){
 				List<Element> charas = children.get(0).getChildren("character");
 				for(Element chara : charas) characters.add(chara);
 			}
-			if(characters.size()>=1){
+			//make changes
+			if(characters.size()>=1 && children.size()>1){
 				LOGGER.debug(sentsrc+" is normalized");
 				Element firststructure=children.get(1);
 				for(Element character: characters){
