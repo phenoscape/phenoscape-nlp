@@ -22,6 +22,8 @@ import outputter.ApplicationUtilities;
 import outputter.Dictionary;
 import owlaccessor.OWLAccessorImpl;
 
+import org.atteo.evo.inflector.English;
+
 /**
  * @author Hong Updates
  *
@@ -559,8 +561,7 @@ public class TermOutputerUtilities {
 	public static String toPlural(String b) {
 		String p = Dictionary.plurals.get(b); //before CharaParser runs, Dictionary.plurals is almost empty
 		if(p == null){
-			//p = English.plural(b);
-			p = p;
+			p = English.plural(b);
 		}
 		if(p == null) return b;
 		return p;
