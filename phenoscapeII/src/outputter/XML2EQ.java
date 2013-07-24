@@ -159,7 +159,7 @@ public class XML2EQ {
 				//allEQs = new ArrayList<EQStatementProposals>();
 				allEQs = new ArrayList<EQProposals>();
 				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
-				LOGGER.debug("text: " + characterstatement.getChildText("text"));
+				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
 					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil);
@@ -175,10 +175,10 @@ public class XML2EQ {
 					StateStatementParser ssp = new StateStatementParser(ontoutil, keyentities, qualityclue);
 					for(Element statestatement: statestatements){
 						LOGGER.debug("XML2EQ: processing state statement...");
-						LOGGER.debug("text: " + statestatement.getChildText("text"));
+						System.out.println("text: " + statestatement.getChildText("text"));
 						ssp.parse(statestatement, root);
 						allEQs.addAll(ssp.getEQStatements());
-						ssp.EQStatements.clear();
+						ssp.clearEQStatements();
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}

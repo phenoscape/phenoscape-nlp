@@ -40,7 +40,8 @@ import owlaccessor.OWLAccessorImpl;
  */
 public class EntitySearcherOriginal extends EntitySearcher {
 
-	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);   
+	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);  
+	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	/**
 	 * * Search a phrase A B C
 	 * search A B C
@@ -179,11 +180,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				Utilities.addEntityProposals(entities, ep);
 			}
 
-			LOGGER.debug("EntitySearcher6 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
-			for(EntityProposals aep: entities){
-				LOGGER.debug("..EntityProposals: "+aep.toString());
-			}
-
+		}
+		LOGGER.debug("EntitySearcherOriginal completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
+		for(EntityProposals aep: entities){
+			LOGGER.debug("..EntityProposals: "+aep.toString());
 		}
 		return entities;
 		

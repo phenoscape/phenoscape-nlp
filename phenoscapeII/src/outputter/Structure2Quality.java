@@ -3,6 +3,7 @@ package outputter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -37,7 +38,7 @@ public class Structure2Quality implements AnnotationStrategy{
 	XPath pathrelationfromStructure;
 	ArrayList<Entity> bilateral = new ArrayList<Entity>();
 	ArrayList<EntityProposals> keyentities;
-	HashSet<String> identifiedqualities;
+	HashSet<String> identifiedqualities;//list of unique xml id of the structures found to be quality
 	List<Element> detach_characters = new ArrayList<Element>();
 
 
@@ -198,7 +199,9 @@ public class Structure2Quality implements AnnotationStrategy{
 									for(EntityProposals relatedentity: Relatedentity){
 										RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
 										qproposals.add(rq);  //need fix: these rqs don't belong to the same QualityProposal!, should be A in_contact_with B and C and D
-										this.qualities.add(qproposals);
+										qproposals.setPhrase(quality);
+										//this.qualities.add(qproposals);
+										Utilities.addQualityProposals(qualities, qproposals);
 										this.identifiedqualities.add(qualityid);	
 									}
 								}
@@ -218,7 +221,9 @@ public class Structure2Quality implements AnnotationStrategy{
 								RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
 								QualityProposals qproposals = new QualityProposals();
 								qproposals.add(rq);
-								this.qualities.add(qproposals);
+								qproposals.setPhrase(quality);
+								//this.qualities.add(qproposals);
+								Utilities.addQualityProposals(qualities, qproposals);
 								this.identifiedqualities.add(qualityid);
 							}
 							if(chara_detach!=null)
@@ -235,7 +240,9 @@ public class Structure2Quality implements AnnotationStrategy{
 					RelationalQuality rq = new RelationalQuality(relationalquality, this.keyentities.get(i));
 					QualityProposals qproposals = new QualityProposals();
 					qproposals.add(rq); 
-					this.qualities.add(qproposals);
+					qproposals.setPhrase(quality);
+					//this.qualities.add(qproposals);
+					Utilities.addQualityProposals(qualities, qproposals);
 					this.identifiedqualities.add(qualityid);
 				}
 				this.primaryentities.add(this.keyentities.get(0)); //if keyentities = [A, B, C, D] then primaryentity=A;
@@ -262,7 +269,9 @@ public class Structure2Quality implements AnnotationStrategy{
 							RelationalQuality rq = new RelationalQuality(relationalquality, relatedentities.get(i));
 							QualityProposals qproposals = new QualityProposals();
 							qproposals.add(rq);
-							this.qualities.add(qproposals);
+							qproposals.setPhrase(quality);
+							//this.qualities.add(qproposals);
+							Utilities.addQualityProposals(qualities, qproposals);
 							this.identifiedqualities.add(qualityid);
 						}
 						this.primaryentities.addAll(entities.get("Primary Entity"));
@@ -277,7 +286,9 @@ public class Structure2Quality implements AnnotationStrategy{
 				RelationalQuality rq = new RelationalQuality(relationalquality, new EntityProposals());
 				QualityProposals qproposals = new QualityProposals();
 				qproposals.add(rq);
-				this.qualities.add(qproposals);
+				qproposals.setPhrase(quality);
+				//this.qualities.add(qproposals);
+				Utilities.addQualityProposals(qualities, qproposals);
 				this.identifiedqualities.add(qualityid);			
 			}
 			return;
@@ -285,9 +296,8 @@ public class Structure2Quality implements AnnotationStrategy{
 
 
 		// may need to consider constraints, which may provide a related entity
-
-
 		// not a relational quality, is this a simple quality or a negated
+		
 		//simple quality == quality character value + quality
 		// quality?
 		if((characters!=null)&&(characters.size()>0))
@@ -297,7 +307,6 @@ public class Structure2Quality implements AnnotationStrategy{
 		}
 		else
 			checkForSimpleQuality(null,quality,qualityid,negated,chara_detach);
-
 		//detach_character(); need to be invoked only when S2Q is being accpeted by the calling function
 		return;
 	}
@@ -347,43 +356,53 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	//a separate function is created to handle structures(quality) with characters and without characters
 
+	@SuppressWarnings("unchecked")
 	private void checkForSimpleQuality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-
 		if(chara!=null)
-			quality=chara.getAttributeValue("value")+" "+quality; //large + expansion
+			quality=chara.getAttributeValue("value")+" "+quality; //large + 'expansion'
 		quality=quality.trim();
 
 		ArrayList<Quality> results = searchForSimpleQuality(quality);
-
+		//results now hold different qualities, not proposals for the same quality
+		results.addAll((Collection<? extends Quality>) new TermSearcher().searchTerm(chara.getAttributeValue("value"), "quality"));
 		if (results != null) {
 			if (negated) {
-				QualityProposals qproposals = new QualityProposals();
-				for(Quality result: results){
-					String[] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId());
+				for(Quality result: results){ 
+					String[] parentinfo = TermOutputerUtilities.retreiveParentInfoFromPATO(result.getId());
 					Quality parentquality = new Quality();
 					parentquality.setString(parentinfo[1]);
 					parentquality.setLabel(parentinfo[1]);
 					parentquality.setId(parentinfo[0]);
-					qproposals.add(new NegatedQuality(result, parentquality));
-					this.qualities.add(qproposals);
+					QualityProposals qproposals = new QualityProposals();//results hold different qualities, not proposals for the same quality
+					NegatedQuality nquality = new NegatedQuality(result, parentquality);
+					qproposals.add(nquality);	
+					qproposals.setPhrase(nquality.getString());
+					//this.qualities.add(qproposals);
+					Utilities.addQualityProposals(qualities, qproposals);
 				}
 				this.identifiedqualities.add(qualityid);
 				//to remove negated character and prevent from processed in the future
 				this.detach_characters.add(chara_detach);
 			} else {
-				QualityProposals qproposals = new QualityProposals();
 				for(Quality result: results){
+					QualityProposals qproposals = new QualityProposals();
+					qproposals.setPhrase(result.getString());
 					qproposals.add(result);
+					Utilities.addQualityProposals(qualities, qproposals);
 				}
-				this.qualities.add(qproposals);
+				//this.qualities.add(qproposals);
 				this.identifiedqualities.add(qualityid);
 			}
 			if(chara!=null)	
 				this.detach_characters.add(chara);
 		}
-
 	}
 
+	/**
+	 * 
+	 * @param quality: modifier/character + structure/quality, for example, elongate rod
+	 * @return
+	 */
 	private ArrayList<Quality> searchForSimpleQuality(String quality) {
 		ArrayList<FormalConcept> result;
 		TermSearcher ts = new TermSearcher();

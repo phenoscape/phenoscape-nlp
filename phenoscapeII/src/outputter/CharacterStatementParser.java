@@ -605,7 +605,7 @@ public class CharacterStatementParser extends Parser {
 			for(Element character: characters){
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
-				ssp.parserCharacters(character, statement, root, entities1, qualities);
+				ssp.parserCharacter(character, statement, root, entities1, qualities);
 				//entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
 					Utilities.postcompose(entities, qualities);

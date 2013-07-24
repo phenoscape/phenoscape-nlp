@@ -18,6 +18,9 @@ public class EntityProposals implements Proposals {
 	public EntityProposals() {		
 	}
 	
+	public boolean equals(EntityProposals ep){
+		return this.toString().compareTo(ep.toString())==0;
+	}
 	public boolean add(Object e){
 		if(e instanceof Entity){
 			proposals.add((Entity)e);

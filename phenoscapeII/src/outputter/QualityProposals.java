@@ -1,6 +1,7 @@
 package outputter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * @author Hong Cui
@@ -15,6 +16,9 @@ public class QualityProposals implements Proposals {
 	public QualityProposals() {		
 	}
 	
+	public boolean equals(QualityProposals qp){
+		return this.toString().compareTo(qp.toString())==0;
+	}
 	/**
 	 * TODO: change Object to something more precise.
 	 */
@@ -40,10 +44,12 @@ public class QualityProposals implements Proposals {
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-
+		int count=1;
+		sb.append(System.getProperty("line.separator"));
 		for(Quality q:proposals)
 		{
-			sb.append(q.toString());
+			sb.append("Q"+count+":"+q.toString()+System.getProperty("line.separator"));
+			count++;
 		}
 		return sb.toString();
 	}

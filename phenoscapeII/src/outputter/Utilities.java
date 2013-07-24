@@ -595,7 +595,10 @@ public class Utilities {
 	 */
 	public static void addEntityProposals(ArrayList<EntityProposals> entities,
 			EntityProposals ep) {
-
+		
+		for(EntityProposals aep: entities){
+			if(aep.equals(ep)) return;
+		}
 		for(EntityProposals aep: entities){
 			if(ep.getPhrase().compareTo(aep.getPhrase())==0){
 				aep.add(ep);
@@ -607,12 +610,16 @@ public class Utilities {
 	
 	/**
 	 * add qp to qualities, grouping proposals with the same phrase/string together
+	 * not adding duplicates
 	 * @param qualities
 	 * @param qp
 	 */
 	public static void addQualityProposals(ArrayList<QualityProposals> qualities,
 			QualityProposals qp) {
-
+		for(QualityProposals aqp: qualities){
+			if(aqp.equals(qp)) return;
+		}
+		
 		for(QualityProposals aqp: qualities){
 			if(qp.getPhrase().compareTo(aqp.getPhrase())==0){
 				aqp.add(qp);

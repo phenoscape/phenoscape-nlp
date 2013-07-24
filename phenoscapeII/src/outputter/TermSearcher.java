@@ -256,6 +256,8 @@ public class TermSearcher {
 		//word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to dorsal-fin: fix it early, not here because search word may be regular expressions
 		word = word.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal to
 		word = word.replaceAll("(?<=\\w)shaped", "-shaped");
+		if(word.compareTo("elongate")==0) word = "elongated";
+		if(word.compareTo("directed")==0) word = "direction";
 		return word;
 	}
 

@@ -31,7 +31,7 @@ import owlaccessor.OWLAccessorImpl;
 public class StateStatementParser extends Parser {
 	//ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
 	private static final Logger LOGGER = Logger.getLogger(StateStatementParser.class);   
-	ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
+	protected ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
 	String src;
 	String characterid;
 	String stateid;
@@ -207,7 +207,7 @@ public class StateStatementParser extends Parser {
 				entities = new ArrayList<EntityProposals>();
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
-				parserCharacters(character, statement, root, entities, qualities);
+				parserCharacter(character, statement, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
 			
@@ -228,16 +228,19 @@ public class StateStatementParser extends Parser {
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
 				constructEQProposals(qualities, entities);
 			}else{
+				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
 					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'...");
 					entities = new ArrayList<EntityProposals>();
 					qualities = new ArrayList<QualityProposals>();
 					if(character.getParentElement()==null) continue;
-					parserCharacters(character, statement, root, entities, qualities);
+					parserCharacter(character, statement, root, entities, qualities);
+					if(entities!=null && entities.size()>0) lastentities = entities; //remember the last entity
+					if(entities==null || entities.size()==0) entities = lastentities; //if no entity found, use the last entity
 					LOGGER.debug("SSP: parsed entities:");
-					for(EntityProposals ep: entities) LOGGER.debug(ep.toString());
+					for(EntityProposals ep: entities) LOGGER.debug(".."+ep.toString());
 					LOGGER.debug("SSP: parsed qualities:");
-					for(QualityProposals qp: qualities) LOGGER.debug(qp.toString());
+					for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					Utilities.postcompose(entities, postcomps);
 					constructEQProposals(qualities, entities);
@@ -257,7 +260,7 @@ public class StateStatementParser extends Parser {
 	 * @param entities
 	 * @param qualities
 	 */
-	public void parserCharacters(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+	public void parserCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
 		ArrayList<EntityProposals> entity = null;
 		boolean donotresolve=false;
 		// may contain relational quality
@@ -481,6 +484,7 @@ public class StateStatementParser extends Parser {
 					|| (relation.getAttributeValue("to").equals(structid))) {
 				// relation.detach();
 				flag = 0; //bad relation
+				LOGGER.debug("break on bad relation: "+relation.getAttributeValue("id"));
 				break;
 			} 
 		}
@@ -583,14 +587,18 @@ public class StateStatementParser extends Parser {
 			ArrayList<EntityProposals> keyentitiesclone =  clone(this.keyentities);
 			if (maybesubject && e.size()>0
 					&& this.keyentities != null) {
-				entities = resolve(e, keyentitiesclone);
+				entities.clear();
+				entities.addAll(resolve(e, keyentitiesclone));
 			} else if (maybesubject && e.size()==0
 					&& this.keyentities != null) {
-				entities = keyentitiesclone; //to avoid accidental changes to this.keyentities
+				entities.clear();
+				entities.addAll(keyentitiesclone); //to avoid accidental changes to this.keyentities
 			} else if (e.size()>0) {
+				entities.clear();
 				entities.addAll(e);
 			} else {
-				entities = keyentitiesclone; 
+				entities.clear();
+				entities.addAll(keyentitiesclone); 
 				// what if it is a subject, but not an entit at all? - Hariharan(So added this code)
 				//hong: hasn't this case been handled already above?
 			}
@@ -599,15 +607,19 @@ public class StateStatementParser extends Parser {
 			if(spatialmodifier!=null)
 			{
 				ArrayList<EntityProposals> spatialmodifiers = new ArrayList<EntityProposals>();
-				spatialmodifiers.addAll(spatialmodifier);							
-				entities = resolveFinalEntities(entities,spatialmodifiers);
+				spatialmodifiers.addAll(spatialmodifier);
+				entities.clear();
+				entities.addAll(resolveFinalEntities(entities,spatialmodifiers));
+				//entities = resolveFinalEntities(entities,spatialmodifiers);
 			}
 
 			if(entitylocator!=null)
 			{
 				ArrayList<EntityProposals> entitylocators = new ArrayList<EntityProposals>();
-				entitylocators.addAll(entitylocator);							
-				entities = resolveFinalEntities(entitylocators,entities);
+				entitylocators.addAll(entitylocator);		
+				entities.clear();
+				entities.addAll(resolveFinalEntities(entitylocators,entities));
+				//entities = resolveFinalEntities(entitylocators,entities);
 			}
 
 			if(q.size()==0)
@@ -867,9 +879,13 @@ public class StateStatementParser extends Parser {
 	
 	//public ArrayList<EQStatementProposals> getEQStatements() {
 	public ArrayList<EQProposals> getEQStatements() {
+		//TODO: for the same E, if Q elongated is there, remove Q:shape 
 		return this.EQStatements;
 	}
 
+	public void clearEQStatements() {
+		this.EQStatements.clear();		
+	}
 	/**
 	 * @param args
 	 */
@@ -877,5 +893,7 @@ public class StateStatementParser extends Parser {
 		// TODO Auto-generated method stub
 
 	}
+
+
 
 }
