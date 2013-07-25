@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import conceptmapping.TermOutputerUtilities;
+import outputter.TermOutputerUtilities;
 import fna.parsing.ApplicationUtilities;
 import fna.parsing.ParsingException;
 import fna.parsing.TaxonIndexer;
@@ -91,7 +91,7 @@ public class PhraseMarker {
 			String result = phrase;
 			String noun = phrase.substring(phrase.lastIndexOf(" ")).trim();
 			String modifier = phrase.substring(0, phrase.lastIndexOf(" ")).trim();
-			String pnoun = noun.matches("\\d+")? noun : TermOutputerUtilities.toPlural(noun);
+			String pnoun = noun.matches("\\d+")? noun : outputter.TermOutputerUtilities.toPlural(noun);
 			if(pnoun.compareTo(noun)!=0){
 				result += "|"+modifier+" "+pnoun;
 				this.newphrases.put(modifier+" "+pnoun, phrase); //plural=>singluar
