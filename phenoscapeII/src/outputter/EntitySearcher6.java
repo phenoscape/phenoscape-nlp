@@ -13,6 +13,7 @@ import org.jdom.xpath.XPath;
 /**
  * @author Hong Cui
  *
+ * use wild cards 
  */
 public class EntitySearcher6 extends EntitySearcher {
 	private static final Logger LOGGER = Logger.getLogger(EntitySearcher6.class);   
@@ -48,7 +49,7 @@ public class EntitySearcher6 extends EntitySearcher {
 		ArrayList<SimpleEntity> entityls = new ArrayList<SimpleEntity>();
 		//entityl.setString(elocatorphrase);
 		if(entitylocators!=null) {
-			ArrayList<FormalConcept> result = new TermSearcher().searchTerm(elocatorphrase, "entity");
+			ArrayList<FormalConcept> result = new TermSearcher().searchTerm(elocatorphrase, "entity"); //should it call EntitySearcherOriginal? decided not to.
 			if(result!=null){
 				//entityl = result;
 				LOGGER.debug("search for locator '"+elocatorphrase+"' found match: ");
@@ -70,8 +71,8 @@ public class EntitySearcher6 extends EntitySearcher {
 				//SimpleEntity sentity = (SimpleEntity) new TermSearcher().searchTerm(shortened, "entity");
 				//search shortened and other strings with the same starting words
 				//ArrayList<FormalConcept> shortentities = TermSearcher.regexpSearchTerm(shortened, "entity");
-
-				ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
+				//ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
+				ArrayList<FormalConcept> sentities = new TermSearcher().searchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
 				if(sentities!=null){
 					LOGGER.debug("search for entity '"+shortened+"\\b.*' found match, forming proposals...");
 					//construct anatomicalentity
@@ -141,7 +142,7 @@ public class EntitySearcher6 extends EntitySearcher {
 							//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
 							//TODO: change labels to ids
 						}
-						if(sentity!=null){//if entity matches
+				
 							//entity
 							//if(entityl.getString().length()>0){
 							if(elocatorphrase.length()>0){
@@ -177,7 +178,7 @@ public class EntitySearcher6 extends EntitySearcher {
 								ep.add(sentity); //add the other
 								LOGGER.debug("add a proposal without anatomical entity:"+sentity.toString());
 							}
-						}
+						
 					}
 					//entities.add(ep);
 					Utilities.addEntityProposals(entities, ep);

@@ -105,7 +105,8 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 				entities = new ArrayList<EntityProposals>();
 				LOGGER.debug("SME found match for entity, now search for spatial term  '"+spatialterm+"'");
 				//SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(spatialterm, "entity");
-				ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
+				//ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
+				ArrayList<FormalConcept> spatialentities = new TermSearcher().searchTerm(spatialterm, "entity");//anterior + region: simple search
 				if(spatialentities!=null) LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found match");
 				EntityProposals centityp = new EntityProposals();
 				centityp.setPhrase(this.originalentityphrase);

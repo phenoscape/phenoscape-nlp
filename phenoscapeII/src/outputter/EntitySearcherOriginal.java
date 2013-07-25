@@ -43,25 +43,11 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	private static final Logger LOGGER = Logger.getLogger(EntitySearcherOriginal.class);  
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	/**
-	 * * Search a phrase A B C
-	 * search A B C
-	 * if succeeds, search the parent entity locator + A B C [tooth => ceratobranchial 5 tooth]
-	 * if succeeds, entityphrase = p.e.l + A B C, entitylocator = entitylocator - p.e.l
-	 * if fails, entityphrase = A B C, entitylocator = entitylocator
-	 * if fails, search B C
-	 * if succeeds, entityphrase = B C, entitylocator = (entityphrase - B C), entitylocator
-	 * if fails, search C
-	 * if succeeds, entityphrase = C, entitylocator = (entityphrase - C), entitylocator
-	 * if fails, search the parent entity locator
-	 * if succeeds, entitylable = p.e.l*, entitylocator = entitylocator - p.e.l
-	 * if fails, search the next parent entity locator
-	 * ....
-	 *
-	 * @param entityphrase the entityphrase
+	 * @param entityphrase: the entityphrase, which could be original entityphrase or part of it wrapped as syn-ring regular expression passed in by other EntitySearchers
 	 * @param elocatorphrase the elocatorphras
 	 * @param originalentityphrase the originalentityphrase
 	 * @param preposition used between entityphrase and elocatorphrase
-	 * @return null or an entity (simple or composite) [6-key Hashtable<String, String>: keys: entity, entityid, entitylabel, entitylocator, entitylocatorid, entitylocatorlabel]
+	 * @return null or ArrayList of (often one) entityproposals 
 	 * @throws Exception the exception
 	 */
 	@SuppressWarnings("unchecked")
@@ -71,7 +57,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		LOGGER.debug("EntitySearcherOriginal: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 
 
-		//'sexes' =>multi-cellular organism organism 'bearer of' female/male
+		//special case: 'sexes' =>multi-cellular organism organism 'bearer of' female/male
 		String origname = Utilities.getOriginalStructureName(root, structid);
 		if(origname!=null && origname.compareTo("sexes")==0){
 			ArrayList<EntityProposals> eps = new ArrayList<EntityProposals>();
@@ -84,7 +70,6 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			for(FormalConcept fc: femalefcs){
 				Quality female = (Quality)fc;
 				REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
-
 				CompositeEntity ce1 = new CompositeEntity();
 				ce1.setString("female");
 				ce1.addEntity(organism);
@@ -93,7 +78,6 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				ep.add(ce1);
 				LOGGER.debug(".."	+ce1.toString());
 			}
-		
 			eps.add(ep); //add one entity
 			
 			//male:
@@ -126,8 +110,8 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			entityphrase = temp;
 		}
 
-		entityphrase = Utilities.transform(entityphrase);
-		elocatorphrase = Utilities.transform(elocatorphrase);
+		entityphrase = Utilities.transformIndexedStructures(entityphrase);
+		elocatorphrase = Utilities.transformIndexedStructures(elocatorphrase);
 
 		//special case: dealing with process
 		entityphrase = entityphrase.replaceAll("("+Dictionary.process+")", "process");

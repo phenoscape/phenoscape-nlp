@@ -14,6 +14,8 @@ import org.jdom.xpath.XPath;
 /**
  * 
  * @author Hong Cui
+ * strategy for phrases that omitted the head noun, for example epibranchial, which
+ * may match Epibranchial bone, Epibranchial element, or Epibranchial cartilage
  *
  */
 public class EntitySearcher5 extends EntitySearcher {
@@ -27,6 +29,9 @@ public class EntitySearcher5 extends EntitySearcher {
 			String entityphrase, String elocatorphrase,
 			String originalentityphrase, String prep) {
 		LOGGER.debug("EntitySearcher5: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
+		
+		//TODO take care of elocatorphrase
+		
 		//bone, cartilage,  element
 		//Epibranchial 1: (0) present and ossified E: Epibranchial 1 bone, Q: present
 		//Epibranchial 1: (1) present and cartilaginous E: Epibranchial 1 cartilage, Q: present
@@ -34,9 +39,11 @@ public class EntitySearcher5 extends EntitySearcher {
 		//The curator should use both the cartilage and bone terms to annotate state 2 because the author clearly differentiates between the two.
 		 
 		//search with regular expression  "epibranchial .*" to find possible missing headnouns 
+		entityphrase = entityphrase.replaceFirst("^\\(\\?:", "").replaceFirst("\\)$", "");	
 		if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
-			ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
+			//ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
+			ArrayList<FormalConcept> regexpresults = new TermSearcher().searchTerm(entityphrase+" .*", "entity");
 			if(regexpresults!=null){
 				LOGGER.debug("search entity '"+entityphrase+" .*' found match");
 				for(FormalConcept regexpresult: regexpresults){

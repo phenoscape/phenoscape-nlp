@@ -17,8 +17,8 @@ static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<Str
 	public static LinkedHashSet<String> toAdjective(String word)
 	{
 		//if the word is found in cache it returns it else, adjective forms are generated and a copy is stored in cache
-		//if(adjectivecache.get(word)!=null)
-		//	return adjectivecache.get(word);
+		if(adjectivecache.get(word)!=null)
+			return adjectivecache.get(word);
 			
 		String suffix[] = adjective_suffixes.split("\\|");
 		ArrayList<String> wordforms = stemforms(word);//Stems the word and return all the stemmed form
@@ -45,8 +45,6 @@ static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<Str
 			word=word.substring(0,word.lastIndexOf("s"));
 			wordforms.add(word);
 			}
-		
-		
 		for(String suf:suffix)
 			{
 			if((word.lastIndexOf(suf)!=-1)&&(word.matches(".*("+suf+")$")==true))

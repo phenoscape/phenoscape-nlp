@@ -93,7 +93,7 @@ public class EntityProposals implements Proposals {
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		int count = 1;
-		sb.append(System.getProperty("line.separator"));
+		//sb.append(System.getProperty("line.separator"));
 		for(Entity e:proposals)
 		{
 			sb.append("P"+count+":"+e.toString()+System.getProperty("line.separator"));

@@ -45,7 +45,7 @@ public class QualityProposals implements Proposals {
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		int count=1;
-		sb.append(System.getProperty("line.separator"));
+		//sb.append(System.getProperty("line.separator"));
 		for(Quality q:proposals)
 		{
 			sb.append("Q"+count+":"+q.toString()+System.getProperty("line.separator"));
