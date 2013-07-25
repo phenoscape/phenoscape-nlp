@@ -45,7 +45,7 @@ public class EQPerformanceEvaluation {
 	private String answertable;
 	private String prtablefields;
 	private String prtableEQs;
-	private String prtableTranslations;
+	private String prtablestates;
 	private boolean printfields = false;
 	private boolean printEQs = false;
 	private boolean printTranslations = false;
@@ -69,6 +69,7 @@ public class EQPerformanceEvaluation {
 		this.answertable = answertable;
 		this.prtableEQs = prtable+"_EQs";
 		this.prtablefields = prtable+"_fields";
+		this.prtablestates = prtable+"_states";
 		this.substringcache= new Hashtable<String, Hashtable<String, Float>>();
 		this.equivalencecache = new Hashtable<String,Hashtable<String,String>>();
 		try {
@@ -86,7 +87,7 @@ public class EQPerformanceEvaluation {
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
 				Statement stmt = conn.createStatement();
-
+				//Holds the precision and recall values of each and every fields
 				String sql ="create table if not exists "+prtablefields+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
 						"entitylabelp float(4,2), entitylabelr float(4,2), " +
 						"entityidp float(4,2), entityidr float(4,2), " +
@@ -96,10 +97,21 @@ public class EQPerformanceEvaluation {
 						"RelatedEntityidp float(4,2), RelatedEntityidr float(4,2)" +
 						")";
 				stmt.execute(sql);
-
+				//Holds the table level EQ Precision and recall values
 				stmt.execute("create table if not exists "+prtableEQs+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
 						"exactp float(4,2), exactr float(4,2)" +
 						")");
+				
+				stmt.execute(sql);
+				//Holds the state level EQ Precision and recall values
+				System.out.println("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
+						"stateprecision float(4,2), staterecall float(4,2)" +
+						")");
+				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
+						"stateprecision float(4,2), staterecall float(4,2)" +
+						")");
+				
+				
 
 			}
 		}catch(Exception e){
@@ -139,8 +151,8 @@ public class EQPerformanceEvaluation {
 			stmt.close();
 
 			readResultsfromDatabase();
-			compareFields();//precision and recall for each of the fields
-			readResultsfromDatabase();
+		//	compareFields();//precision and recall for each of the fields
+		//	readResultsfromDatabase();
 			compareEQs(); //for raw/labeled EQ statements
 
 		}catch(Exception e){
@@ -536,13 +548,15 @@ public class EQPerformanceEvaluation {
 		System.out.println("inside compare eq's");
 		nowislabel=false;
 
-		int totalgenerated = 0;
-		int totalinanswer = 0;
+		int totalgenerated = 0;//charparser
+		int totalinanswer = 0;//gold standard
 		float eqmatchscore =0;
 		float statescore =0;
 		float totalscore =0;
 		String prstring = "";
 		String fieldstring = "";
+		float stateprecision=0;
+		float staterecall =0;
 		
 		for(int i = 0; i<astates.size(); i++){//Gold standard
 			totalinanswer += astates.get(i).size();//Gives in number of EQ's in this state => gold standard
@@ -588,13 +602,22 @@ public class EQPerformanceEvaluation {
 				statescore+=maxscore;
 			}
 			System.out.println("State score"+i+"   "+statescore);
+			
+			stateprecision = tstates.get(i).size()==0? -1 :(float)statescore/tstates.get(i).size();
+			staterecall = astates.get(i).size()==0? -1 :(float)statescore/astates.get(i).size();
+			
+			fieldstring = "stateid,stateprecision,staterecall";
+			prstring =astates.get(i).get(0).get("stateid")+","+stateprecision+","+staterecall;
+			
+			this.insertInto(this.prtablestates, fieldstring, prstring);
 
+			
 			totalscore+=statescore;
 		}
-		fieldstring+= "exactp, exactr, partialp, partialr";
+		fieldstring = "exactp, exactr, partialp, partialr";
 		float precision = totalgenerated==0? -1 : (float)totalscore/totalgenerated;
 		float recall = totalinanswer==0? -1 : (float)totalscore/totalinanswer;
-		prstring += precision +","+ recall +",0" +",0"+"";
+		prstring  = precision +","+ recall +",0" +",0"+"";
 
 
 		this.insertInto(this.prtableEQs, fieldstring, prstring);
@@ -834,7 +857,7 @@ public class EQPerformanceEvaluation {
 
 		for (int i = start; i <= end; i++) {
 			
-			if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo).*")==true)
+			if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo|RO|ro).*")==true)
 			{
 				if(c[i].matches(".*(bspo|BSPO).*")==false)
 					elk = this.elkentity;
@@ -960,7 +983,7 @@ public class EQPerformanceEvaluation {
 			{
 				String replace = (String)((char)(alphabets+i)+"@@");
 				candidate = candidate.replace(key.trim(), replace.trim());
-				if(substringmap.get(key).equals(key))
+				if(substringmap.get(key).equals(key))//to map the partial and exact matchings
 				{
 					reference = reference.replace(key.trim(), replace);
 				}
@@ -974,7 +997,7 @@ public class EQPerformanceEvaluation {
 		}
 
 		String tokens[] = candidate.split(" ");
-		//replacing unmatched tokens with alphabets
+		//replacing unmatched tokens with alphabets @@ is used to distinguish alphabets from normal text
 		for(int j=0;j<tokens.length;j++)
 		{
 			if((tokens[j].contains("@@")==false)&&(tokens[j].trim().equals("")==false))

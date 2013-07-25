@@ -150,6 +150,7 @@ public class XML2EQ {
 	@SuppressWarnings("unchecked")
 	public void outputEQs() {
 		File[] xmlfiles = this.source.listFiles();
+
 		for (File f : xmlfiles) {
 			try{
 				String src = f.getName();
@@ -191,9 +192,8 @@ public class XML2EQ {
 				LOGGER.error("", e);
 			}
 		}
-		
 		HTMLOutput output = new HTMLOutput();
-		output.outputHTML(this.tableprefix,"curator",3);
+		output.outputHTML(this.outputtable,"curator",3);
 
 		elk.dispose();
 	}
@@ -238,7 +238,7 @@ public class XML2EQ {
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
 		this.insertEQs2Table(EQ);
-			System.out.println(EQ.toString());
+		//	System.out.println(EQ.toString());
 		}
 
 	}
@@ -345,8 +345,6 @@ public class XML2EQ {
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
 					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
 					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-		System.out.println(sql);
 		
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
@@ -392,7 +390,7 @@ private String sort(String groups)
 	for(String token:individualstrings)
 	{
 		if((token!=null) &&(token.equals("")==false))
-		{System.out.println(token);
+		{
 		Float value = Float.parseFloat(token.split("(\\[)")[1].replaceAll("]$", ""));
 		
 		if(holder.get(value)==null)
@@ -436,10 +434,10 @@ private String sort(String groups)
 		
 		for(String temp:templist)
 		{
-			sortedstring+=temp+",";
+			sortedstring+=temp+"@,";
 		}
 	}
-	return sortedstring.replaceAll(",$", "");
+	return sortedstring.replaceAll("(@,)$", "");
 	
 }
 

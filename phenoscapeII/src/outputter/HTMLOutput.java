@@ -23,12 +23,15 @@ public class HTMLOutput {
 	/**
 	 * @param args
 	 */
-	
+	/*
+	 * Creates new DB connection
+	 * 
+	 */
 	public static void GetDBConnection()
 	{
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://localhost/biocreative2012?user=root&password=forda444");
+			Class.forName(ApplicationUtilities.getProperty("database.driverPath"));
+			conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -36,7 +39,17 @@ public class HTMLOutput {
 		}
 	}
 	
-	public static void fetchFromDB(ArrayList<String> character_state, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, ArrayList<EQHolder>>>> characters, String tablename, int numberofcurators) throws SQLException
+	/*
+	 * Fetches all the character,state eq statements from the database.
+	 * 
+	 * @param character_state contains all the character,state information
+	 * @param characters holds all the EQ statements belonging a state,character combination
+	 * @param outputtable contains the output from the previous step
+	 * @param curatortablename contains the curatortable names which should be outputted along with original input
+	 * @param number of curators contains the number of curator result against which charparser output is being compared to
+	 * 
+	 */
+	public static void fetchFromDB(ArrayList<String> character_state, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, ArrayList<EQHolder>>>> characters, String outputtable, String curatortablename, int numberofcurators) throws SQLException
 	{
 		ResultSet rs;
 		String sql;
@@ -53,7 +66,7 @@ public class HTMLOutput {
 			String characteridlabel="";
 			String stateidlabel="";
 			
-			sql = "select characterlabel,statelabel,entitylabel,entityid,qualitylabel,qualityid,relatedentitylabel,relatedentityid from  biocreative2012.swartz_after_xml2eq"+
+			sql = "select characterlabel,statelabel,entitylabel,entityid,qualitylabel,qualityid,relatedentitylabel,relatedentityid from  "+ApplicationUtilities.getProperty("database.name")+"."+outputtable+
 				  " where characterid = '"+characterid +"' and stateid='"+stateid+"'";
 			
 			rs = stmt.executeQuery(sql);
@@ -83,7 +96,7 @@ public class HTMLOutput {
 			
 			for(int count=0;count<numberofcurators;count++)
 			{
-				sql = "select entitylabel,entityid,qualitylabel,qualityid,relatedentitylabel,relatedentityid from biocreative2012."+tablename+(count+1)+
+				sql = "select entitylabel,entityid,qualitylabel,qualityid,relatedentitylabel,relatedentityid from "+ApplicationUtilities.getProperty("database.name")+"."+curatortablename+(count+1)+
 					  " where characterid = '"+characterid +"' and stateid='"+stateid+"'";
 				
 				rs = stmt.executeQuery(sql);
@@ -104,7 +117,7 @@ public class HTMLOutput {
 					
 				}
 				
-				individualstateeqs.put(tablename+(count+1), curator1state);
+				individualstateeqs.put(curatortablename+(count+1), curator1state);
 				
 			}
 						stateeqs.put(stateidlabel, individualstateeqs);
@@ -123,7 +136,7 @@ public class HTMLOutput {
 	}
 	
 	/*
-	 * Print the ontology version in the output HTML
+	 * Prints the ontology and charparser versions in the output HTML
 	 * 
 	 * 
 	 */
@@ -133,7 +146,6 @@ public class HTMLOutput {
 		output.println("<CENTER> <TABLE border = 2> <TR> <TH COLSPAN =\"2\">");
 		output.println("<B>Ontology Versions</B>");
 		output.println("</TH></TR>");
-		System.out.println();
 		for(OWLAccessorImpl api: XML2EQ.ontoutil.OWLqualityOntoAPIs)
 		{
 			String S[]=api.getSource().split("[\\\\.]");
@@ -179,7 +191,7 @@ public class HTMLOutput {
 	 * @output: Prints an HTML output with charparser and curators result for a characterid and stateid combination
 	 */
 	
-	public static void outputHTML(String filename,String tablename, int numberofcurators)
+	public static void outputHTML(String outputtable,String curatortablename, int numberofcurators)
 	{
 
 		String columns[] = {"CharacterID","CharacterLabel","StateID","StateLabel","Source of EQ","EntityID",
@@ -187,8 +199,8 @@ public class HTMLOutput {
 		Statement stmt;
 		ArrayList<String> character_state = new ArrayList<String>();
 		try {
-			PrintWriter output = new PrintWriter(new FileWriter(ApplicationUtilities.getProperty("output.dir")+filename+".html"));
-			System.out.println(ApplicationUtilities.getProperty("output.dir")+filename+".html");
+			PrintWriter output = new PrintWriter(new FileWriter(ApplicationUtilities.getProperty("output.dir")+outputtable+".html"));
+			System.out.println(ApplicationUtilities.getProperty("output.dir")+outputtable+"_output.html");
 			output.println("<HTML>");
 			output.println("<HEAD>");
 			output.println("<TITLE>");
@@ -202,7 +214,7 @@ public class HTMLOutput {
 			if(XML2EQ.ontoutil!=null)
 			{
 				try {
-					version(output,"1.0");
+					version(output,ApplicationUtilities.getProperty("charparser.version"));
 				} catch (OWLOntologyCreationException e) {
 					e.printStackTrace();
 				}
@@ -238,7 +250,7 @@ public class HTMLOutput {
 		
 				stmt = conn.createStatement();
 			
-			String sql = "select distinct characterid, stateid from  biocreative2012.swartz_after_xml2eq";
+			String sql = "select distinct characterid, stateid from  "+ApplicationUtilities.getProperty("database.name")+"."+outputtable;
 			ResultSet rs = stmt.executeQuery(sql);
 			
 			while(rs.next())
@@ -250,7 +262,7 @@ public class HTMLOutput {
 				}
 			}
 			LinkedHashMap<String,LinkedHashMap<String,LinkedHashMap<String,ArrayList<EQHolder>>>> characters = new LinkedHashMap<String,LinkedHashMap<String,LinkedHashMap<String,ArrayList<EQHolder>>>>();
-			fetchFromDB(character_state,characters,tablename,numberofcurators);
+			fetchFromDB(character_state,characters,outputtable,curatortablename,numberofcurators);
 			
 			for(String characteridlabel:characters.keySet())//Iterates through all the characters
 			{
@@ -290,15 +302,15 @@ public class HTMLOutput {
 						int eqcount=1;
 						for(EQHolder eq:eqs)
 						{
-							entityid += eqcount+". *"+eq.getEntityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
-							entitylabel += eqcount+". *"+eq.getEntitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							entityid += eqcount+". *"+eq.getEntityid().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
+							entitylabel += eqcount+". *"+eq.getEntitylabel().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
 							if((eq.getRelatedentityid()!=null)&&(eq.getRelatedentityid().equals("")==false))
 							{
-							relatedentityid += eqcount+". *"+eq.getRelatedentityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
-							relatedentitylabel += eqcount+". *"+eq.getRelatedentitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							relatedentityid += eqcount+". *"+eq.getRelatedentityid().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
+							relatedentitylabel += eqcount+". *"+eq.getRelatedentitylabel().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
 							}
-							qualityid += eqcount+". *"+eq.getQualityid().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
-							qualitylabel += eqcount+". *"+eq.getQualitylabel().replaceAll("(Score:)","").replaceAll(", *", "<BR>")+"<BR>";
+							qualityid += eqcount+". *"+eq.getQualityid().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
+							qualitylabel += eqcount+". *"+eq.getQualitylabel().replaceAll("(Score:)","").replaceAll("@,", "<BR>*")+"<BR>";
 						eqcount++;
 						}
 						
