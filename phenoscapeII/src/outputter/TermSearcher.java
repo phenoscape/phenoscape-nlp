@@ -102,7 +102,7 @@ public class TermSearcher {
 		//3. phrase with hyphens, replace hyphens with spaces
 		if(phrase.indexOf("-")>0){ //caudal-fin
 			//caudal-fin|caudal fin
-			String[] tokens = phrase.split("[^$():?*+ ]+");
+			String[] tokens = phrase.split("[$^():?*+ ]+");
 			for(String token: tokens){
 				if(token.contains("-")){
 					String tcopy = token;
@@ -123,7 +123,7 @@ public class TermSearcher {
 
 		//4. phrase with /, assuming one / in the phrase.
 		if(phrase.indexOf("/")>0){ //xyz bone/tendon
-			String[] tokens = phrase.split("[^$():?*+ ]+");
+			String[] tokens = phrase.split("[$^():?*+ ]+"); //^ can't be the first in []
 			for(String token: tokens){
 				if(token.contains("/")){
 					String tcopy = token;
@@ -164,7 +164,7 @@ public class TermSearcher {
 		if(phrasetype.compareTo("quality")==0)
 		{
 			//TODO: Handle cases like divergent from => ending with a preposition
-			String[] tokens = phrase.split("[^$():?*+ ]+");
+			String[] tokens = phrase.split("[$^():?*+ ]+");
 			for(String token: tokens){
 				LinkedHashSet<String> phraseforms = Wordforms.toAdjective(token);
 				String regexp = "";

@@ -284,7 +284,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		}
 		//}
 		this.EQStatements.addAll(negativestatements);
-		populateStateLabel(this.EQStatements,root);
+		if(XML2EQ.recordperformance) populateStateLabel(this.EQStatements,root);
 
 	}
 	

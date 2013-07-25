@@ -74,6 +74,7 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
 	public static ELKReasoner elk; 
+	static boolean recordperformance = false;
 	static{
 		try{
 			//TODO: figure out why the two calls give different results?
@@ -114,27 +115,28 @@ public class XML2EQ {
 		this.glosstable = glosstable;
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
+		if(recordperformance){
+			if(dictionary.conn == null){
+				Class.forName("com.mysql.jdbc.Driver");
+				dictionary.conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			}
 
-		if(dictionary.conn == null){
-			Class.forName("com.mysql.jdbc.Driver");
-			dictionary.conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+
+			Statement stmt = dictionary.conn.createStatement();
+			// label and id fields are ontology-related fields
+			// other fields are raw text
+			// entity and quality fields are atomic
+			// qualitynegated fields are alternative to quality and is composed as "not quality" for qualitynegated, "not(quality)" for qualitynegatedlabel, the "quality" has id
+			// qualityid
+			// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
+			stmt.execute("drop table if exists " + outputtable);
+			System.out.println("create table if not exists " + outputtable
+					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
+					+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
+			stmt.execute("create table if not exists " + outputtable
+					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
+					+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
 		}
-
-		Statement stmt = dictionary.conn.createStatement();
-		// label and id fields are ontology-related fields
-		// other fields are raw text
-		// entity and quality fields are atomic
-		// qualitynegated fields are alternative to quality and is composed as "not quality" for qualitynegated, "not(quality)" for qualitynegatedlabel, the "quality" has id
-		// qualityid
-		// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
-		stmt.execute("drop table if exists " + outputtable);
-		System.out.println("create table if not exists " + outputtable
-				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-				+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
-		stmt.execute("create table if not exists " + outputtable
-				+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-				+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
-
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
 		pathCharacter = XPath.newInstance(".//character");
@@ -191,9 +193,11 @@ public class XML2EQ {
 				LOGGER.error("", e);
 			}
 		}
-		
-		HTMLOutput output = new HTMLOutput();
-		output.outputHTML(this.tableprefix,"curator",3);
+
+		if(recordperformance){
+			HTMLOutput output = new HTMLOutput();
+			output.outputHTML(this.tableprefix,"curator",3);
+		}
 
 		elk.dispose();
 	}
@@ -237,15 +241,15 @@ public class XML2EQ {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
-		this.insertEQs2Table(EQ);
+			if(recordperformance) this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
 
 	}
 
-	
-	
-	
+
+
+
 	private void insertEQs2Table(EQProposals eQ)
 	{
 		String entity ="";
@@ -272,14 +276,14 @@ public class XML2EQ {
 				entityid+=e.getId()+" Score:["+e.getConfidienceScore()+"]@,";
 			}
 		}
-		
+
 		entity = entity.replaceAll("(@,)$", "");
 		entitylabel = entitylabel.replaceAll("(@,)$", "");
 		entityid = entityid.replaceAll("(@,)$", "");
 		entity =sort(entity);
 		entitylabel =sort(entitylabel);
 		entityid =sort(entityid);
-		
+
 		//Read all Quality Proposals and store as comma separated values
 		for(Quality q:eQ.quality.getProposals())
 		{
@@ -325,29 +329,29 @@ public class XML2EQ {
 				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 			}
 		}
-		
+
 		relatedentity = relatedentity.replaceAll("(@,)$", "");
 		relatedentitylabel = relatedentitylabel.replaceAll("(@,)$", "");
 		relatedentityid = relatedentityid.replaceAll("(@,)$", "");
 		quality = quality.replaceAll("(@,)$", "");
 		qualitylabel = qualitylabel.replaceAll("(@,)$", "");
 		qualityid = qualityid.replaceAll("(@,)$", "");
-		
+
 		quality = sort(quality);
 		qualitylabel = sort(qualitylabel);
 		qualityid = sort(qualityid);
-		
+
 		relatedentity = sort(relatedentity);
 		relatedentitylabel = sort(relatedentitylabel);
 		relatedentityid = sort(relatedentityid);
-		
-		
+
+
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
-					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
-					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				"entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
+				"(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		System.out.println(sql);
-		
+
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
 			preparedStatement.setString(1, eQ.sourceFile);
@@ -365,12 +369,12 @@ public class XML2EQ {
 			preparedStatement.setString(13,relatedentitylabel);
 			preparedStatement.setString(14,relatedentityid);
 			preparedStatement.executeUpdate();
-			
+
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
-		
+
+
 	}
 
 	/*
@@ -378,88 +382,88 @@ public class XML2EQ {
 	 * sort the proposals according to the confidence scores
 	 * 
 	 */
-private String sort(String groups) 
-{
-
-	String individualstrings[] = groups.split("(@,)");//Splitting original Proposals into individual tokens upon ],(Comma alone cannot be used, so using ],)
-	
-
-	String sortedstring ="";
-	
-
-	Hashtable <Float,ArrayList<String>> holder = new Hashtable <Float,ArrayList<String>>();
-	//Extracting the float value and creating an has Float, String
-	for(String token:individualstrings)
+	private String sort(String groups) 
 	{
-		if((token!=null) &&(token.equals("")==false))
-		{System.out.println(token);
-		Float value = Float.parseFloat(token.split("(\\[)")[1].replaceAll("]$", ""));
-		
-		if(holder.get(value)==null)
+
+		String individualstrings[] = groups.split("(@,)");//Splitting original Proposals into individual tokens upon ],(Comma alone cannot be used, so using ],)
+
+
+		String sortedstring ="";
+
+
+		Hashtable <Float,ArrayList<String>> holder = new Hashtable <Float,ArrayList<String>>();
+		//Extracting the float value and creating an has Float, String
+		for(String token:individualstrings)
 		{
-			ArrayList<String> list = new ArrayList<String>();
-			list.add(token);
-			holder.put(value, list);
-		}
-		else
-		{
-			ArrayList<String> list = holder.get(value);
-			list.add(token);
-			holder.put(value, list);
-		}
-	}
-	}
-	//sorting the Keyset of the hashtable
-	Set<Float> keys =holder.keySet();
-	Object keyarray[] = keys.toArray();
-	ArrayList<Float> sortedkeys = new ArrayList<Float>();
-	
-	for(int i=0;i<keyarray.length;i++)
-	{
-		for(int j=i+1;j<keyarray.length;j++)
-		{
-			if((Float)keyarray[i]<(Float)keyarray[j])
+			if((token!=null) &&(token.equals("")==false))
+			{System.out.println(token);
+			Float value = Float.parseFloat(token.split("(\\[)")[1].replaceAll("]$", ""));
+
+			if(holder.get(value)==null)
 			{
-				Float temp = (Float) keyarray[i];
-				keyarray[i] = keyarray[j];
-				keyarray[j] = temp;
+				ArrayList<String> list = new ArrayList<String>();
+				list.add(token);
+				holder.put(value, list);
+			}
+			else
+			{
+				ArrayList<String> list = holder.get(value);
+				list.add(token);
+				holder.put(value, list);
+			}
 			}
 		}
-	}
-	
-	//Iterating through the sorted keyset and creating the sorted final String
-	
-	for(int i=0;i<keyarray.length;i++)
-	{
-		ArrayList<String> templist = holder.get(keyarray[i]);
-		Collections.sort(templist);
-		
-		for(String temp:templist)
-		{
-			sortedstring+=temp+",";
-		}
-	}
-	return sortedstring.replaceAll(",$", "");
-	
-}
+		//sorting the Keyset of the hashtable
+		Set<Float> keys =holder.keySet();
+		Object keyarray[] = keys.toArray();
+		ArrayList<Float> sortedkeys = new ArrayList<Float>();
 
-/*	private ArrayList<String> printEntity(ArrayList<Entity> proposals) {
+		for(int i=0;i<keyarray.length;i++)
+		{
+			for(int j=i+1;j<keyarray.length;j++)
+			{
+				if((Float)keyarray[i]<(Float)keyarray[j])
+				{
+					Float temp = (Float) keyarray[i];
+					keyarray[i] = keyarray[j];
+					keyarray[j] = temp;
+				}
+			}
+		}
+
+		//Iterating through the sorted keyset and creating the sorted final String
+
+		for(int i=0;i<keyarray.length;i++)
+		{
+			ArrayList<String> templist = holder.get(keyarray[i]);
+			Collections.sort(templist);
+
+			for(String temp:templist)
+			{
+				sortedstring+=temp+",";
+			}
+		}
+		return sortedstring.replaceAll(",$", "");
+
+	}
+
+	/*	private ArrayList<String> printEntity(ArrayList<Entity> proposals) {
 
 		ArrayList<String> entitystrings = new ArrayList<String>();
 		String entity ="";
 		String entitylabel="";
 		String entityid="";
-		
+
 		for(Entity e:proposals)
 		{
 			if(e instanceof CompositeEntity)
 			{
 				ArrayList<String> entitystring = printEntity(((CompositeEntity) e).getEntities());
-				
+
 				entity+=entitystring.get(0);
 				entitylabel+=entitystring.get(1);
 				entityid+=entitystring.get(2);
-				
+
 			}
 			else{
 				entity+=e.getString()+",";
@@ -467,11 +471,11 @@ private String sort(String groups)
 				entityid+=e.getId()+",";
 			}
 		}
-		
+
 		entitystrings.add(entity.replaceAll(",$",""));
 		entitystrings.add(entitylabel.replaceAll(",$",""));
 		entitystrings.add(entityid.replaceAll(",$",""));
-		
+
 		return entitystrings;
 	}*/
 
@@ -931,31 +935,31 @@ private String sort(String groups)
 						ArrayList<FormalConcept> qs =  new TermSearcher().searchTerm(ngram, "quality"); 
 						if(qs!=null){
 							for(FormalConcept fc: qs){
-							String qlabel = fc.getLabel();
-							String cp = commonParent(qlabel, qualitylabels);
-							if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
-								//EQStatementProposals EQp = relatedEQ(stateid, ngram);
-								EQProposals EQp = relatedEQ(stateid, ngram);
-								if(EQp==null){ //add one
-									//EQp = new EQStatementProposals();
-									EQp = new EQProposals();
-									//EQStatement EQ = new EQStatement();
-									//add metadata
-									String characterid = "";
-									try{
-										Element statement = (Element) XPath.selectSingleNode(root, ".//statement[@state_id='"+stateid+"']");
-										characterid = statement.getAttributeValue("character_id");
-									}catch(Exception e){
-										LOGGER.error("", e);
+								String qlabel = fc.getLabel();
+								String cp = commonParent(qlabel, qualitylabels);
+								if(cp!=null && cp.matches(".*?\\b("+dictionary.patoupperclasses+")\\b.*")){//TODO matches parent quality or any of its offsprings is fine.
+									//EQStatementProposals EQp = relatedEQ(stateid, ngram);
+									EQProposals EQp = relatedEQ(stateid, ngram);
+									if(EQp==null){ //add one
+										//EQp = new EQStatementProposals();
+										EQp = new EQProposals();
+										//EQStatement EQ = new EQStatement();
+										//add metadata
+										String characterid = "";
+										try{
+											Element statement = (Element) XPath.selectSingleNode(root, ".//statement[@state_id='"+stateid+"']");
+											characterid = statement.getAttributeValue("character_id");
+										}catch(Exception e){
+											LOGGER.error("", e);
+										}
+										EQp.setSource(src);
+										EQp.setCharacterId(characterid);
+										EQp.setStateId(stateid);
+										EQp.setDescription(text);
+										//EQp.add(EQ);
+										allEQs.add(EQp);
 									}
-									EQp.setSource(src);
-									EQp.setCharacterId(characterid);
-									EQp.setStateId(stateid);
-									EQp.setDescription(text);
-									//EQp.add(EQ);
-									allEQs.add(EQp);
 								}
-							}
 								//accept this result for this stateid
 								/*EQStatement EQ = EQp.getProposals().get(0); //assuming there is only one candidate???
 								EQ.setEntity(keyEQ.getEntity());
@@ -1205,9 +1209,9 @@ private String sort(String groups)
 					if(aEQp.getQuality()!=null){
 						for(Quality Q: aEQp.getQuality().getProposals()){
 							String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
-	
+
 							if(q==null) q="";
-	
+
 							if(q.length()>0) hasquality = true;
 						}
 					}
@@ -1342,7 +1346,7 @@ private String sort(String groups)
 	 * @param entitylabel
 	 */
 	//private void inheritEntityLocator(EQStatement EQ, String entity){
-		private void inheritEntityLocator(EQProposals EQ, String entity){
+	private void inheritEntityLocator(EQProposals EQ, String entity){
 
 		/*	String elid = EQ.get("entitylocatorid");
 		for(Entity keyentity: this.keyentities){
@@ -1411,7 +1415,7 @@ private String sort(String groups)
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"tested/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
