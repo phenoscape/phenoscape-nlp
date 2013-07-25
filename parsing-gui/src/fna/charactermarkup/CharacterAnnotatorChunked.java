@@ -30,6 +30,7 @@ import org.jdom.xpath.*;
 
 import outputter.ApplicationUtilities;
 import outputter.SpatialModifiedEntityStrategy;
+import outputter.TermOutputerUtilities;
 import conceptmapping.*;
 import fna.parsing.PhraseMarker;
 

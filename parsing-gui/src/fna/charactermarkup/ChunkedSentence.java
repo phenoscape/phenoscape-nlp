@@ -14,9 +14,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
+
+import outputter.TermOutputerUtilities;
 import conceptmapping.*;
 
 

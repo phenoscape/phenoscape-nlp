@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 
+import outputter.TermOutputerUtilities;
 import fna.charactermarkup.ChunkedSentence;
 import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
-
 import conceptmapping.*;
 
 /**
