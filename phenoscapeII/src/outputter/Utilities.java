@@ -368,7 +368,7 @@ public class Utilities {
 	 *            : entity1, entity2
 	 * @return
 	 */
-	public static String transform(String entitylist) {
+	public static String transformIndexedStructures(String entitylist) {
 		entitylist = entitylist.replaceAll("(?<=\\w)- (?=\\w)", "-");
 		String transformed = entityhash.get(entitylist);
 		if (transformed != null)
@@ -707,6 +707,8 @@ public class Utilities {
 		if(Dictionary.resrelationQ.get(id) == null) return false;
 		return true;
 	}
+
+
 	
 	
 }

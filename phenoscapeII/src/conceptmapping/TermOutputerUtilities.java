@@ -16,13 +16,12 @@ import java.util.regex.Pattern;
 import oboaccessor.OBO2DB;
 
 import org.apache.log4j.Logger;
+import org.atteo.evo.inflector.English;
 import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
 import outputter.Dictionary;
 import owlaccessor.OWLAccessorImpl;
-
-import org.atteo.evo.inflector.English;
 
 /**
  * @author Hong Updates

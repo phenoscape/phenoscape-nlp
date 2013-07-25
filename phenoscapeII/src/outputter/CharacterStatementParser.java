@@ -418,7 +418,7 @@ public class CharacterStatementParser extends Parser {
 			//Check ELK if there is actually a part of relationship, if yes proceed
 //			else if they are involved in any relation as from then, they can key entity
 			
-			LOGGER.debug("CSP: remaining entities: post-compose with 'part_of':");
+			//LOGGER.debug("CSP: remaining entities: post-compose with 'part_of':");
 			
 			FormalRelation fr = Dictionary.partof;
 			fr.setConfidenceScore(0.5f);
@@ -430,11 +430,6 @@ public class CharacterStatementParser extends Parser {
 			ArrayList<String> orderedIDs = partofwholeorder(this.structureIDs, root);//reverse the order in original text
 			for(String sid: orderedIDs){
 				ArrayList<EntityProposals> entities = this.entityHash.get(sid);
-				LOGGER.debug("CSP: add entities from structure "+sid+" to part_of chain:");
-					for(EntityProposals aep: entities){
-						LOGGER.debug(".."+aep.toString());
-					}
-				
 				if(this.keyentities==null){
 					this.keyentities = entities;
 				}else if(this.keyentities.size()==0){
@@ -442,6 +437,10 @@ public class CharacterStatementParser extends Parser {
 				}else{
 					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
+						LOGGER.debug("CSP: add to part_of chain:");
+						for(EntityProposals aep: entities){
+							LOGGER.debug(".."+aep.toString());
+						}
 					}
 					else
 					{

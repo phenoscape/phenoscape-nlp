@@ -133,8 +133,8 @@ public class TermOutputer {
 		termProcessed = termProcessed.replaceAll("_", "-");
 		
 		//Step 2: transform plurals to singular. Only for entities. 
-		if(type.compareTo(this.entitytable)==0 && TermOutputerUtilities.isPlural(termProcessed)){
-			termProcessed=TermOutputerUtilities.toSingular(termProcessed);
+		if(type.compareTo(this.entitytable)==0 && outputter.TermOutputerUtilities.isPlural(termProcessed)){
+			termProcessed=outputter.TermOutputerUtilities.toSingular(termProcessed);
 		}
 		
 		return termProcessed;

@@ -1411,8 +1411,8 @@ private String sort(String groups)
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"tested/";
+		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
 		String prefix =ApplicationUtilities.getProperty("table.prefix");

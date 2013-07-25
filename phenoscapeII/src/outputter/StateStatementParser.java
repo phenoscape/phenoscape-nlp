@@ -783,7 +783,8 @@ public class StateStatementParser extends Parser {
 		{
 			// if e is whole_organism
 			EntityProposals ep = (EntityProposals) entityitr.next();
-			if (ep.getPhrase().replace("_", " ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
+			if (ep.getPhrase().replace(" ", "_").compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0 || 
+					ep.getPhrase().compareTo(ApplicationUtilities.getProperty("unknown.structure.name")) == 0) 
 				entityitr.remove();
 		}
 

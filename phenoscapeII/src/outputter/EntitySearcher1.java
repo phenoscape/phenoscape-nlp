@@ -75,7 +75,8 @@ public class EntitySearcher1 extends EntitySearcher {
 		boolean found = false;
 		LOGGER.debug("search variations one by one...");
 		for(String variation: variations){
-			ArrayList<FormalConcept> entityfcs = new TermSearcher().regexpSearchTerm(variation, "entity"); //remove indexes from variation before search
+			//ArrayList<FormalConcept> entityfcs = new TermSearcher().regexpSearchTerm(variation, "entity"); //remove indexes from variation before search
+			ArrayList<FormalConcept> entityfcs = new TermSearcher().searchTerm(variation, "entity"); //remove indexes from variation before search
 			//check for the strength of the match: related synonyms: (?:(?:crista) (?:parotica)) entity=>tegmen tympani
 			if(entityfcs!=null){
 				for(FormalConcept entity:entityfcs){
@@ -209,8 +210,8 @@ public class EntitySearcher1 extends EntitySearcher {
 			}
 		}
 		//if(found) return entities;
-		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntitySearcher5");
-		ArrayList<EntityProposals> entity = new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
+		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntitySearcher4");
+		ArrayList<EntityProposals> entity = new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		//proximal tarsal element:
 		//SpaticalModifiedEntity: phrase=proximal region entity=proximal region score=1.0 and (part_of some phrase=tarsal\b.* entity=tarsal bone score=0.5) 
 		//EntitySearcher5: phrase=proximal tarsal\b.* entity=proximal tarsal bone score=0.5
@@ -218,11 +219,11 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(entity!=null){
 			//entities.addAll(entity);
 			for(EntityProposals aep: entity){
-				LOGGER.debug("..ES5 adds proposals: "+aep.toString());
+				LOGGER.debug("..ES4 adds proposals: "+aep.toString());
 				Utilities.addEntityProposals(entities, aep);
 			}
 		}else{
-			LOGGER.debug("..ES5 found no match");
+			LOGGER.debug("..ES4 found no match");
 		}
 
 

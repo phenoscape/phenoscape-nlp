@@ -358,13 +358,17 @@ public class Structure2Quality implements AnnotationStrategy{
 
 	@SuppressWarnings("unchecked")
 	private void checkForSimpleQuality(Element chara, String quality, String qualityid, boolean negated, Element chara_detach) {
-		if(chara!=null)
+		if(chara!=null){
 			quality=chara.getAttributeValue("value")+" "+quality; //large + 'expansion'
+		}
 		quality=quality.trim();
 
 		ArrayList<Quality> results = searchForSimpleQuality(quality);
-		//results now hold different qualities, not proposals for the same quality
-		results.addAll((Collection<? extends Quality>) new TermSearcher().searchTerm(chara.getAttributeValue("value"), "quality"));
+		if(chara!=null){
+			//results now hold different qualities, not proposals for the same quality
+			ArrayList<FormalConcept> results2 =new TermSearcher().searchTerm(chara.getAttributeValue("value"), "quality");
+			if(results2!=null) results.addAll((Collection<? extends Quality>) results2);
+		}
 		if (results != null) {
 			if (negated) {
 				for(Quality result: results){ 
