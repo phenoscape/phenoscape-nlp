@@ -151,8 +151,8 @@ public class EQPerformanceEvaluation {
 			stmt.close();
 
 			readResultsfromDatabase();
-		//	compareFields();//precision and recall for each of the fields
-		//	readResultsfromDatabase();
+			compareFields();//precision and recall for each of the fields
+			readResultsfromDatabase();
 			compareEQs(); //for raw/labeled EQ statements
 
 		}catch(Exception e){
