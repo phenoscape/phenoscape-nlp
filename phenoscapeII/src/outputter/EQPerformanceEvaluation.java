@@ -77,7 +77,6 @@ public class EQPerformanceEvaluation {
 			this.elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"pato.owl"));
 			this.elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"bspo.owl"));
 		} catch (OWLOntologyCreationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		initFields();
@@ -110,6 +109,7 @@ public class EQPerformanceEvaluation {
 				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
 						"stateprecision float(4,2), staterecall float(4,2)" +
 						")");
+				stmt.execute("delete from "+prtablestates);
 				
 				
 
@@ -443,7 +443,12 @@ public class EQPerformanceEvaluation {
 			//The below cache is used to speed up the lookup process
 			if(this.substringcache.get(a.trim()+","+v.trim())==null)
 			{
-			getMatchingSubstrings(a,v,0,a.split(" ").length-1,substrings ,field,elk,equivalence);
+				System.out.println("Candidate  "+a);
+				System.out.println("Reference  "+v);
+				System.out.println("after getmatching"+System.currentTimeMillis());
+			//getMatchingSubstrings(a,v,0,a.split(" ").length-1,substrings ,field,elk,equivalence);
+				substring(a,v,substrings ,field,elk,equivalence);
+			System.out.println("after getmatching"+System.currentTimeMillis());
 			this.substringcache.put(a.trim()+","+v.trim(), substrings);
 			this.equivalencecache.put(a.trim()+","+v.trim(), equivalence);
 			}
@@ -831,6 +836,220 @@ public class EQPerformanceEvaluation {
 
 
 	}
+	
+	
+	//-------------------------------------------------------
+	
+	/*
+	 * 
+	 * populates the substring array
+	 * 	
+	 */
+		public  void substring(String candidate,String reference,Hashtable<String,Float> substrings,String type,ELKReasoner elk,Hashtable<String,String> equivalence)
+		{
+			long start = System.currentTimeMillis();
+			long end;
+			System.out.println("Inside substring "+System.currentTimeMillis());
+			int[][] match = new int[candidate.split(" ").length][reference.split(" ").length];
+			float[][] scores = new float[candidate.split(" ").length][reference.split(" ").length];
+			String[][] matchingstring = new String[candidate.split(" ").length][reference.split(" ").length];
+			
+			String c[] = candidate.split(" ");
+			String r[] = reference.split(" ");
+
+			
+			for(int i=0;i<candidate.split(" ").length;i++)
+			{
+				if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo|RO|ro).*")==true)
+				{
+					if(c[i].matches(".*(bspo|BSPO).*")==false)
+						elk = this.elkentity;
+					else
+						elk = this.elkspatial;
+				}
+				else
+				{
+					elk = this.elkquality;
+				}
+				
+				for(int j=0;j<reference.split(" ").length;j++)
+				{
+					float score =0;
+					if(c[i].equals(r[j]))
+					{
+						score=1;
+					} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
+					{
+						score=(float) 0.75;
+					} else if((c[i].matches(".*(pato|PATO).*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
+					{
+						score=(float) 0.75;
+					}
+					
+					if(score>0)
+					{
+						if(i==0||j==0)
+						{
+							match[i][j] =1;
+							scores[i][j] = score;
+							matchingstring[i][j] = c[i];
+						}
+						else
+						{
+							match[i][j] = match[i-1][j-1]+1;
+							scores[i][j] = scores[i-1][j-1]+score;
+							matchingstring[i][j] = matchingstring[i-1][j-1]+" "+c[i];
+						}
+					}
+				}
+			}
+			end = System.currentTimeMillis();
+			
+			System.out.println("end of substring "+System.currentTimeMillis());
+			System.out.println("Difference"+ (end-start));
+			
+			getNonOverlappingSubstrings(match,matchingstring,scores,candidate.split(" "),reference.split(" "),substrings, equivalence);
+
+		}
+		/*
+		 * 
+		 * Gets all the non overlapping substring
+		 */
+		private void getNonOverlappingSubstrings(int[][] match,String[][] matchingstring, float[][] scores,String input[],String reference[],Hashtable<String, Float> substrings,Hashtable<String, String> equivalence) {
+
+			System.out.println("Inside getnonoverlapping "+System.currentTimeMillis());
+
+			int rows= input.length;
+			int columns = reference.length;
+			int max = matrixIsZero(match,rows,columns);
+
+			while(max!=0)
+			{
+				float finalscore=0;
+				String finalstring="";
+				for(int i = rows-1;i>=0;i--)
+				{
+					for(int j=columns-1;j>=0;j--)
+					{
+						if(match[i][j] == max)
+						{
+							String temp="";
+							finalscore = scores[i][j];
+							for(int count=0;count<max;count++)//breaking condition
+							{
+								if(((i-count)>=0)&&((j-count)>=0))
+								{
+									temp = input[i-count]+" "+temp;
+									//correctmatrix(match,j-count,rows,columns);
+								}
+								else
+									break;
+							}
+							correctmatrix(match,i,j,rows,columns,max);
+							if(temp.equals("")==false)
+							{
+								substrings.put(temp.trim(), finalscore);
+								equivalence.put(temp.trim(), temp.trim());
+							}
+						}
+					}
+				}
+				max = matrixIsZero(match,rows,columns);
+			}
+			System.out.println("end of getnonoverlapping "+System.currentTimeMillis());
+
+		}
+		
+		
+		/*
+		 * 
+		 * removes redundancy
+		 * it zeroes the columns and rows involved to make sure that no overlap happens again
+		 */
+		
+	private static void correctmatrix(int[][] match, int currentrow, int currentcolumn, int row, int totalcolumns, int length) {
+
+		//making all columns except current column as 0
+		length=length-1;
+		for(int i=0;i<row;i++)
+		{
+			for(int j=(currentcolumn-length);j<currentcolumn;j++)
+			{
+				match[i][j] = 0;
+			}
+		}
+		for(int i=0;i<row;i++)
+		{
+			if(match[i][currentcolumn]>0)
+			{
+				match[i][currentcolumn] =0;
+				int k=i;
+				for(int j=currentcolumn+1;j<totalcolumns;j++)
+				{
+					k++;
+						if(((k<row)&&(j<totalcolumns))&&(match[k][j]>0))
+						{
+							match[k][j]= match[k-1][j-1]+1;
+						}else
+							break;
+
+				}
+				
+			}
+		}
+		//cleaning all the rows involved
+		for(int i=(currentrow-length);i<currentrow;i++)
+		{
+			for(int j=0;j<totalcolumns;j++)
+			{
+				match[i][j] =0;
+			}
+		}
+		
+		for(int i=0;i<totalcolumns;i++)
+		{
+			if(match[currentrow][i]>0)
+			{
+				match[currentrow][i] = 0;
+				int k=i;
+				for(int j=currentrow+1;j<row;j++)
+				{
+					k++;
+					if((k<totalcolumns)&&(match[j][k]>0))
+					{
+						match[j][k]=match[j-1][k-1]+1;
+					}
+					else
+						break;
+				}
+			}
+		}
+		}
+
+	/*
+	 * returns maximum value in the current matrix else return 0, saying there is no match
+	 * 
+	 */
+		private static int matrixIsZero(int[][] match, int rows, int columns) {
+
+			int max=0;
+			for(int i=0;i<rows;i++)
+			{
+				for(int j=0;j<columns;j++)
+				{
+					if(max<match[i][j])
+					{
+						max= match[i][j];
+					}
+				}
+			}
+			return max;
+		}
+
+
+		
+		
+	//-------------------------------------------------------
 	/*
 	 * @param type can be "entity" or "quality"
 	 * @param substringmatches holds the substring and the score of that substring
@@ -930,7 +1149,6 @@ public class EQPerformanceEvaluation {
 			}
 			else
 			{
-				//System.out.println("--end of function-----");
 				return;
 			}
 		} else 
@@ -976,7 +1194,6 @@ public class EQPerformanceEvaluation {
 		String referencecopy = reference;
 		//replaces each matching chunk with an alphabet followed by @@(delimiter) in both reference and candidate strings
 		keys = sort(keys);// The longest matching substring should be replaced first
-		
 		for(String key:keys)
 		{
 			if(key!="")
@@ -1168,22 +1385,22 @@ public class EQPerformanceEvaluation {
 	    	referenceposition ="";
 	    for (int x = Integer.parseInt(pos[p].split(",")[0]), y = Integer.parseInt(pos[p].split(",")[1]);
 	         x != 0 && y != 0; ) {
-			if (lengths[x][y] == lengths[x-1][y])
+			if (lengths[x][y] == lengths[x-1][y])//moving horizontally
 			{
 				x--;
 			}
-			else if (lengths[x][y] == lengths[x][y-1])
+			else if (lengths[x][y] == lengths[x][y-1])//moving vertically
 			{
 				y--;
 			}
-			else {
+			else {//reading the string
 				assert a.charAt(x-1) == b.charAt(y-1);
 				sb.append(a.charAt(x-1));
 				candidateposition=(x-1)+" "+candidateposition;
 				referenceposition=(y-1)+" "+referenceposition;
 				x--;
 				y--;
-			}	
+			}	//if more than one subsequence is formed, then they are resolved on the basis of top score among them
 			if(finalsb==null)
 				{
 				finalsb=sb;
@@ -1206,7 +1423,9 @@ public class EQPerformanceEvaluation {
 		//System.out.println(sb.reverse().toString());
 		return position;
 	}
-
+	
+//returns the string with maximum score
+	
 	private static StringBuffer resolveBasedOnScore(StringBuffer finalsb,
 			StringBuffer sb, Hashtable<String, Float> chunkscore) {
 		
@@ -1215,6 +1434,8 @@ public class EQPerformanceEvaluation {
 		
 		for(int i=0;i<temp.length;i++)
 		{
+			System.out.println(temp[i]);
+			System.out.println(chunkscore.get(temp[i]+""));
 			score1+=chunkscore.get(temp[i]+"");
 		}
 		
