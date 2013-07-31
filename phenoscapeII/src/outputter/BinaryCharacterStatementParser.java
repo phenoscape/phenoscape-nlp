@@ -236,7 +236,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 										NegatedQuality nq = new NegatedQuality(q1, parentquality);
 										nqp.proposals.add(nq);
 									}
-/*								}
+								/*}
 								else
 								{// takes the quality details from relationalslim
 									complementQuality = Utilities.removeprepositions(complementQuality);
@@ -353,7 +353,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				QualityProposals qp = eqp.getQuality();
 				for(Quality q:qp.proposals)
 				{
-					if(q!=null)
+					if((q!=null)&&(q.getLabel()!=null))
 					{
 					if((q instanceof NegatedQuality)||(q.getLabel().matches(".*(" + Dictionary.binaryFvalues + ")")))
 					{

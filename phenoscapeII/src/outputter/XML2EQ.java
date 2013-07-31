@@ -152,6 +152,7 @@ public class XML2EQ {
 	@SuppressWarnings("unchecked")
 	public void outputEQs() {
 		File[] xmlfiles = this.source.listFiles();
+
 		for (File f : xmlfiles) {
 			try{
 				String src = f.getName();
@@ -194,10 +195,12 @@ public class XML2EQ {
 			}
 		}
 
+
 		if(recordperformance){
 			HTMLOutput output = new HTMLOutput();
 			output.outputHTML(this.tableprefix,"curator",3);
 		}
+
 
 		elk.dispose();
 	}
@@ -241,6 +244,7 @@ public class XML2EQ {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
+
 			if(recordperformance) this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
@@ -347,10 +351,8 @@ public class XML2EQ {
 
 
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
-				"entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
-				"(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-		System.out.println(sql);
+					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
+					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
@@ -396,7 +398,7 @@ public class XML2EQ {
 		for(String token:individualstrings)
 		{
 			if((token!=null) &&(token.equals("")==false))
-			{System.out.println(token);
+			{
 			Float value = Float.parseFloat(token.split("(\\[)")[1].replaceAll("]$", ""));
 
 			if(holder.get(value)==null)
@@ -411,7 +413,7 @@ public class XML2EQ {
 				list.add(token);
 				holder.put(value, list);
 			}
-			}
+		}
 		}
 		//sorting the Keyset of the hashtable
 		Set<Float> keys =holder.keySet();
@@ -440,10 +442,10 @@ public class XML2EQ {
 
 			for(String temp:templist)
 			{
-				sortedstring+=temp+",";
+				sortedstring+=temp+"@,";
 			}
 		}
-		return sortedstring.replaceAll(",$", "");
+		return sortedstring.replaceAll("(@,)$", "");
 
 	}
 
