@@ -129,6 +129,10 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		return "phrase="+this.string+" entity="+this.label+ " score="+this.confidenceScore;
 	}
 	
+	public String content(){
+		return this.classIRI;
+	}
+	
 	//Clones the simple entity
 	public SimpleEntity clone() {
 

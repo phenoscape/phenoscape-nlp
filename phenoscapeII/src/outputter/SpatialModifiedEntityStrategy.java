@@ -5,6 +5,7 @@ package outputter;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,9 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 	private String structid;
 	private String prep;
 	private String originalentityphrase;
+	
+	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
+	private static ArrayList<String> nomatchcache = new ArrayList<String>();
 
 	/**
 	 * [the expression is a query expanded with syn rings, 
@@ -50,23 +54,33 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 	 */
 	@Override
 	public void handle() {
-
-		ArrayList<SimpleEntity> entityls = new ArrayList<SimpleEntity>();
+		//search cache
+		if(SpatialModifiedEntityStrategy.nomatchcache.contains(entityphrase+"+"+elocatorphrase)){
+			entities = null;
+			return;
+		}
+		if(SpatialModifiedEntityStrategy.cache.get(entityphrase+"+"+elocatorphrase)!=null){
+			entities = SpatialModifiedEntityStrategy.cache.get(entityphrase+"+"+elocatorphrase);
+			return;
+		}
+		
+		ArrayList<EntityProposals> entityls = new ArrayList<EntityProposals>();
 		//entityl.setString(elocatorphrase);
 		if(elocatorphrase.length()>0) {
-			ArrayList<FormalConcept> results = new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
+			//ArrayList<FormalConcept> results = new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
+			ArrayList<EntityProposals> results = new EntitySearcherOriginal().searchEntity(root, structid, elocatorphrase, "",originalentityphrase, prep);
 			if(results!=null){
-				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found match: ");
-				for(FormalConcept result: results){
-					entityls.add((SimpleEntity)result);
+				LOGGER.debug("SME...searched locator '"+elocatorphrase+"' found match: ");
+				for(EntityProposals result: results){
+					entityls.add(result);
 					LOGGER.debug(".." +result.toString());
 				}
 			}else{
-				LOGGER.debug("SME search for locator '"+elocatorphrase+"' found no match");
+				LOGGER.debug("SME...not match for locator '"+elocatorphrase+"'");
 			}
 		}
-		String t= "";
-		Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")\\s+("+Dictionary.allSpatialHeadNouns()+")?");
+
+		Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")\\b\\s*\\b("+Dictionary.allSpatialHeadNouns()+")?\\b");
 		Matcher m = p.matcher(entityphrase);
 		if(m.find()){
 			String spatialterm = entityphrase.substring(m.start(), m.end()).trim();
@@ -74,40 +88,34 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 			if(spatialterm.indexOf(" ")<0) spatialterm += " region";
 			//take synonyms into account
 			spatialterm = synVariation(spatialterm);
-			LOGGER.debug("SME formed spatial term '"+spatialterm+"'");
+			LOGGER.debug("SME...formed spatial term '"+spatialterm+"'");
 			//entityphrase='ventral surface'
 			//if(entityphrasetokens[0].matches("("+Dictionary.spatialtermptn+")")){
 			//String newentity = Utilities.join(entityphrasetokens, 1, entityphrasetokens.length-1, " "); //anything after the spatial term
 			//SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
-			
-			
+
+
 			ArrayList<EntityProposals> sentityps = null;
-			if(newentity.length()<=0){
+			if(newentity.length()<=0){//e.g. search for 'ventral surface'
 				//entityls => sentityps
-				EntityProposals ep = new EntityProposals();
-				boolean populated = false;
-				for(SimpleEntity se: entityls){
-					ep.add(se);
-					populated = true;
-				}
-				if(populated){
-					sentityps = new ArrayList<EntityProposals> ();
-					sentityps.add(ep);
-					//empty entityls
-					entityls = new ArrayList<SimpleEntity>();
+				if(entityls.size()>0){
+					sentityps = entityls;
+					//create a empty entityls
+					entityls = new ArrayList<EntityProposals>();
 				}
 			}else{
-				LOGGER.debug("SME search for entity '"+newentity+"'");
-				sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, elocatorphrase, originalentityphrase, prep); //advanced search
+				LOGGER.debug("SME...calls EntitySearcherOriginal for newentity '"+newentity/*+","+elocatorphrase*/+"'");
+				//sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, elocatorphrase, originalentityphrase, prep); //advanced search
+				sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, "", originalentityphrase, prep); //advanced search
 			}
-			
+
 			if(sentityps!=null){
-				entities = new ArrayList<EntityProposals>();
-				LOGGER.debug("SME found match for entity, now search for spatial term  '"+spatialterm+"'");
+				LOGGER.debug("SME...now search for spatial term  '"+spatialterm+"'");
 				//SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(spatialterm, "entity");
 				//ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
 				ArrayList<FormalConcept> spatialentities = new TermSearcher().searchTerm(spatialterm, "entity");//anterior + region: simple search
-				if(spatialentities!=null) LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found match");
+				if(spatialentities!=null) LOGGER.debug("...found match");
+				boolean found = false;
 				EntityProposals centityp = new EntityProposals();
 				centityp.setPhrase(this.originalentityphrase);
 				for(EntityProposals sentityp: sentityps){
@@ -123,15 +131,17 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 									ArrayList<REntity> rentities = new ArrayList<REntity>();
 									REntity re = null;
 									//TODO: what if both conditions are true?
-									if(sentity instanceof CompositeEntity){
+									if(sentity instanceof CompositeEntity){//entitylocator is in sentity
 										//sentity should not have any post-composed quality
 										re = ((CompositeEntity) sentity).getEntityLocator();
 										rentities.add(re);
 										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
 									}else if(entityls.size()>0){
-										for(SimpleEntity entityl: entityls){
-											re = new REntity(rel, entityl);
-											rentities.add(re);
+										for(EntityProposals ep: entityls){
+											for(Entity entityl: ep.getProposals()){
+												re = new REntity(rel, entityl);
+												rentities.add(re);
+											}
 										}
 									}
 
@@ -149,7 +159,8 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 										centity.addEntity(rentity2);	//^part_of(anterior region^part_of(maxilla))
 										centity.setString(this.originalentityphrase);
 										centityp.add(centity);
-										LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centity.toString());
+										found = true;
+										//LOGGER.debug("with entity locator, SME form a composite entity proposals: "+centity.toString());
 										//entities.add(centityp);
 									}
 								}else{//anterior maxilla 
@@ -164,7 +175,8 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 									centity.addEntity(rentity);	
 									centity.setString(this.originalentityphrase);
 									centityp.add(centity);
-									LOGGER.debug("without entity locator, SME form a composite entity proposals: "+centityp.toString());
+									found = true;
+									//LOGGER.debug("without entity locator, SME form a composite entity proposals: "+centityp.toString());
 								}	
 							}else{
 								LOGGER.debug("SME search for spatial term  '"+spatialterm+"' found no match");
@@ -172,7 +184,21 @@ public class SpatialModifiedEntityStrategy implements AnnotationStrategy {
 						}
 					}
 				}
-				Utilities.addEntityProposals(entities, centityp);
+				
+				
+				
+				if(found){
+					if(entities==null) 	entities = new ArrayList<EntityProposals>();
+					Utilities.addEntityProposals(entities, centityp);
+					LOGGER.debug("SpatialModifiedEntityStrategy completed, returns");
+					for(EntityProposals ep: entities){
+						LOGGER.debug(".."+ep.toString());
+					}
+				}
+				
+				//caching
+				if(entities==null) SpatialModifiedEntityStrategy.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+				else SpatialModifiedEntityStrategy.cache.put(entityphrase+"+"+elocatorphrase, entities);
 			}
 		}
 

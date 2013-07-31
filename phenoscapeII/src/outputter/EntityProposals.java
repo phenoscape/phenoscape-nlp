@@ -19,7 +19,7 @@ public class EntityProposals implements Proposals {
 	}
 	
 	public boolean equals(EntityProposals ep){
-		return this.toString().compareTo(ep.toString())==0;
+		return this.content().compareTo(ep.content())==0;
 	}
 	public boolean add(Object e){
 		if(e instanceof Entity){
@@ -99,9 +99,17 @@ public class EntityProposals implements Proposals {
 			sb.append("P"+count+":"+e.toString()+System.getProperty("line.separator"));
 			count++;
 		}
-		return sb.toString();
+		return sb.toString().replaceFirst(System.getProperty("line.separator")+"$", "");
 	}
 	
+	public String content(){
+		StringBuffer sb = new StringBuffer();
+		for(Entity e:proposals)
+		{
+			sb.append(e.content());
+		}
+		return sb.toString();
+	}
 	public EntityProposals clone() {
 		
 		EntityProposals epclone = new EntityProposals();

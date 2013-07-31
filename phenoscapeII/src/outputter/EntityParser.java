@@ -20,8 +20,10 @@ import org.jdom.xpath.XPath;
 public class EntityParser {
 	private static final Logger LOGGER = Logger.getLogger(EntityParser.class);   
 	//caches: key = structid
-	private static Hashtable<String, ArrayList<EntityProposals>> entitycache = new Hashtable<String, ArrayList<EntityProposals>>() ;
+	private static Hashtable<String, ArrayList<EntityProposals>> entitycache = new Hashtable<String, ArrayList<EntityProposals>>() ; //structureid => results
 	private static Hashtable<String, Structure2Quality> s2qcache = new Hashtable<String, Structure2Quality> ();
+	private static ArrayList<String> nomatchentitycache = new ArrayList<String>(); //structureid
+	private static ArrayList<String> nomatchs2qcache = new ArrayList<String>();
 	//private Hashtable<String, EntityProposals> spaitialmodifiercache;
 	//private Hashtable<String, HashSet<String>> identifiedqualitiescache;
 	
@@ -35,21 +37,29 @@ public class EntityParser {
 		this.keyentities = keyentities; 
 		if(entitycache.get(structureid)!=null){
 			entity = entitycache.get(structureid);
+		}else if(s2qcache.get(structureid)!=null){
 			s2q =  s2qcache.get(structureid);
+		}else if(nomatchentitycache.contains(structureid)){
+			entity = null;
+		}else if(nomatchs2qcache.contains(structureid)){
+			s2q = null;
 		}else{
 			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
 					 "|//relation[@name='in'][@from='" + structureid + "']" +
 					 "|//relation[@name='on'][@from='" + structureid + "']", 0);
 			LOGGER.debug("EntityParser calls EntitySearcherOriginal to search '"+structurename+","+parents+"'");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
-			boolean record = false;
-			LOGGER.debug("EntityParser recorded matched proposals: ");
-			for(EntityProposals ep: entity){ 
-				record= true;
-				LOGGER.debug(".."+ep.toString());
+			if(this.entity!=null){
+				LOGGER.debug("EntityParser recorded matched proposals: ");
+				for(EntityProposals ep: entity){ 
+					LOGGER.debug(".."+ep.toString());
+				}
+				entitycache.put(structureid, entity);
+			}else{
+				EntityParser.nomatchentitycache.add(structureid);
+				LOGGER.debug("EntityParser found no matching entities for '"+structurename+","+parents+"'");
 			}
-			if(!record) LOGGER.debug("EntityParser found no matching entities for '"+structurename+","+parents+"'");
-			entitycache.put(structureid, entity);
+
 			// could the 'structure' be a quality?
 			//is the structure a simple quality?
 			/*Quality result = (Quality) new TermSearcher().searchTerm(structurename, "quality");
@@ -72,6 +82,7 @@ public class EntityParser {
 				s2qcache.put(structureid, rq);
 				LOGGER.debug("EntityParser recorded candidate s2q");
 			}else{
+				EntityParser.nomatchs2qcache.add(structureid);
 				LOGGER.debug("EntityParser found no matching qualities for '"+structurename+","+parents+"'");
 			}
 			//resolveStructure(); //EntityParser doesn't have info to resolve this.

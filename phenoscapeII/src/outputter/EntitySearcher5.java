@@ -20,8 +20,11 @@ import org.jdom.xpath.XPath;
  */
 public class EntitySearcher5 extends EntitySearcher {
 	private static final Logger LOGGER = Logger.getLogger(EntitySearcher5.class);   
+	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
+	private static ArrayList<String> nomatchcache = new ArrayList<String>();
+	
 	public EntitySearcher5() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	@Override
@@ -30,6 +33,9 @@ public class EntitySearcher5 extends EntitySearcher {
 			String originalentityphrase, String prep) {
 		LOGGER.debug("EntitySearcher5: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 		
+		//search cache
+		if(EntitySearcher5.nomatchcache.contains(entityphrase+"+"+elocatorphrase)) return null;
+		if(EntitySearcher5.cache.get(entityphrase+"+"+elocatorphrase)!=null) return EntitySearcher5.cache.get(entityphrase+"+"+elocatorphrase);
 		//TODO take care of elocatorphrase
 		
 		//bone, cartilage,  element
@@ -38,52 +44,66 @@ public class EntitySearcher5 extends EntitySearcher {
 		//Epibranchial 1: (2) absent E: Epibranchial 1 cartilage, Q: absent E: Epibranchial 1 bone, Q: absent
 		//The curator should use both the cartilage and bone terms to annotate state 2 because the author clearly differentiates between the two.
 		 
+
 		//search with regular expression  "epibranchial .*" to find possible missing headnouns 
-		entityphrase = entityphrase.replaceFirst("^\\(\\?:", "").replaceFirst("\\)$", "");	
-		if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
+		String aentityphrase = entityphrase.replaceFirst("^\\(\\?:", "").replaceFirst("\\)$", "");	
+		//if(entityphrase.indexOf(" ")<0 && entityphrase.compareTo(originalentityphrase)==0){
+		if(aentityphrase.indexOf(" ")<0){
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
 			//ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
-			ArrayList<FormalConcept> regexpresults = new TermSearcher().searchTerm(entityphrase+" .*", "entity");
+			ArrayList<FormalConcept> regexpresults = new TermSearcher().searchTerm(aentityphrase+" .*", "entity");
 			if(regexpresults!=null){
-				LOGGER.debug("search entity '"+entityphrase+" .*' found match");
+				LOGGER.debug("...search entity '"+aentityphrase+" .*' found match");
 				for(FormalConcept regexpresult: regexpresults){
 					regexpresult.setString(originalentityphrase+"["+regexpresult.getString()+"]"); //record originalentityphrase for grouping entity proposals later
-					headnouns.put(regexpresult.getLabel().replace(entityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI()); //don't trim headnoun
+					headnouns.put(regexpresult.getLabel().replace(aentityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI()); //don't trim headnoun
 				}			
 			}else{
-				LOGGER.debug("search entity '"+entityphrase+" .*' found no match");
+				LOGGER.debug("...search entity '"+aentityphrase+" .*' found no match");
 			}
 			//search headnouns in the context: coronoid .* => coronoid process of ulna
+			//headnouns may have leading or trailing spaces, perserve them: hindlimb intermedium; intermedium (fore)
 			String nouns = searchContext(root, structid, headnouns); //bone, cartilaginous
 			
 			if(nouns != null){
-				LOGGER.debug("found candidate headnouns '"+nouns+"', forming proposals...");
+				LOGGER.debug("...found candidate headnouns '"+nouns+"', forming proposals...");
 				EntityProposals ep = new EntityProposals();
+				ArrayList<EntityProposals> entities = null;
 				//ep.setPhrase(entityphrase+" .*");
 				ep.setPhrase(originalentityphrase);
-				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				String[] choices = nouns.split(",");
 				float score = 1.0f/choices.length;
+				boolean found = false;
 				for(String noun: choices){
 					String[] idiri = headnouns.get(noun).split("#");
 					SimpleEntity sentity = new SimpleEntity();
-					sentity.setString(entityphrase+" .*");
-					sentity.setLabel(entityphrase+noun);
+					sentity.setString(aentityphrase+" .*");
+					sentity.setLabel(noun.startsWith(" ")? aentityphrase+noun: noun+aentityphrase);
 					sentity.setId(idiri[0]);
 					sentity.setConfidenceScore(score);
 					sentity.setClassIRI(idiri[1]);
 					ep.add(sentity);
-					LOGGER.debug("..add a proposal:"+sentity);
+					LOGGER.debug(".....add a proposal:"+sentity);
+					found = true;
 				}
 				//entities.add(ep);
-				Utilities.addEntityProposals(entities, ep);
-				LOGGER.debug("EntitySearcher5 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
-				for(EntityProposals aep: entities){
-					LOGGER.debug("..EntityProposals: "+aep.toString());
+				if(found){
+					if(entities==null) entities = new ArrayList<EntityProposals>();
+					Utilities.addEntityProposals(entities, ep);
+
+					//logging
+					LOGGER.debug("EntitySearcher5 completed search for '"+aentityphrase+"[orig="+originalentityphrase+"]' and returns:");
+					for(EntityProposals aep: entities){
+						LOGGER.debug("..: "+aep.toString());
+					}	
+					
+					if(entities==null) EntitySearcher5.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+					else EntitySearcher5.cache.put(entityphrase+"+"+elocatorphrase, entities);
+					
+					return entities;
 				}
-				return entities;
 			}else{
-				LOGGER.debug("candidate headnouns is null, search failed");
+				LOGGER.debug("...candidate headnouns is null, search failed");
 			}
 				/*else{
 			
@@ -100,7 +120,10 @@ public class EntitySearcher5 extends EntitySearcher {
 				}
 				
 			}*/
+			//caching
 		}
+		EntitySearcher5.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+		LOGGER.debug("...search for entity '"+entityphrase+"' found no match");
 		LOGGER.debug("EntitySearcher5 calls EntitySearcher6");
 		return new EntitySearcher6().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			

@@ -20,7 +20,8 @@ public interface FormalConcept {
 	String getId();
 	String getClassIRI();
 	float getConfidienceScore();
-	String toString();
+	String toString(); //for display
+	String content(); //for comparison, including identifying info such as classIRI
 	boolean isOntologized();
 	
 }

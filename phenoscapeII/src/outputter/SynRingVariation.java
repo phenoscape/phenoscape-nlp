@@ -32,6 +32,7 @@ public class SynRingVariation {
 	//private String leadspatialtermvariation="";
 	//private String headnounvariation="";
 	private static final Logger LOGGER = Logger.getLogger(SynRingVariation.class);   
+	private static Hashtable<String, String> cache = new Hashtable<String, String>();
 	/**
 	 * 
 	 * @param phrase
@@ -53,7 +54,11 @@ public class SynRingVariation {
 	 */
 	//TODO check duplicates: (?:(?:opening|foramina|foramen|foramens|perforation|orifice|opening|foramina|bone foramen|foramen|foramens|bone foramen|perforation|orifice|orifice))
 	public static String getSynRing4Structure(String structure) {
-		String synring = structure;
+		if(structure.length()==0) return "";
+		String synring = cache.get(structure);
+		if(synring!=null) return synring;
+		
+		synring = structure;
 		OWLAccessorImpl owlapi=null;
 		ArrayList<String> ontosynonyms;
 		//grab a synring from Dictionary
@@ -90,7 +95,7 @@ public class SynRingVariation {
 			if(!adjectiveform.matches("\\b("+synring+")\\b")) synring+="|"+adjectiveform;
 		}
 		
-		
+		cache.put(structure, synring);
 		return synring;
 	}
 
@@ -100,6 +105,9 @@ public class SynRingVariation {
 	 * @return: a string of synonym ring like "anterior|syn1|syn2"
 	 */
 	public static String getSynRing4Spatial(String spatial) {
+		if(spatial.length()==0) return "";
+		String synring = cache.get(spatial);
+		if(synring!=null) return synring;
 		//String forms = prefixSpatial(spatial);
 		OWLAccessorImpl owlapi=null;
 
@@ -112,12 +120,14 @@ public class SynRingVariation {
 		}
 		
 	
-		String synring = spatial;
+		synring = spatial;
 		ArrayList<String> ontosynonyms = owlapi.getSynonymLabelsbyPhrase(spatial,"spatial");
 		for(String syn:ontosynonyms){
 			if(!synring.matches("\\b("+syn+")\\b"))
 				synring +="|"+syn;
 		}
+		
+		cache.put(spatial, synring);
 		return synring;
 		
 	}

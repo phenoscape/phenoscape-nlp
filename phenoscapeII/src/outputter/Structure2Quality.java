@@ -93,11 +93,23 @@ public class Structure2Quality implements AnnotationStrategy{
 	private boolean removeSpatialConstraint(String structid) throws JDOMException {
 
 		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+structid+"']");
-		if((structure.getAttributeValue("constraint")!=null)&&(structure.getAttributeValue("constraint").matches(Dictionary.spatialtermptn)))
+		String constraint = structure.getAttributeValue("constraint");
+		if((constraint!=null)&& constraint.matches(Dictionary.spatialtermptn))
 		{
 			this.structname = structure.getAttributeValue("name");
-			LOGGER.debug("Structure2Quality calls EntitySearcherOriginal to search structure constraint '"+structure.getAttributeValue("constraint")+"'");
-			this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
+			LOGGER.debug("Structure2Quality calls EntitySearcherOriginal to search structure constraint '"+constraint+"'");
+			//this.spatialmodifier =  new EntitySearcherOriginal().searchEntity(root, "", structure.getAttributeValue("constraint"), "", "","");
+			ArrayList<FormalConcept> results =  new TermSearcher().searchTerm(constraint, "entity"); //simple search
+			if(results!=null && results.size()>0){ 
+				EntityProposals ep = new EntityProposals();
+				for(FormalConcept fc: results){
+					SimpleEntity se = (SimpleEntity)fc;
+					ep.setPhrase(constraint);
+					ep.add(se);
+				}
+				this.spatialmodifier = new ArrayList<EntityProposals>();
+				Utilities.addEntityProposals(spatialmodifier, ep);
+			}
 			return true;
 		}
 		return false;

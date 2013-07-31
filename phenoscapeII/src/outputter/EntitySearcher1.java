@@ -21,7 +21,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 /**
- * @author updates
+ * @author Hong Cui
  * it searches different variations of the E/EL compositions using all the elements.
  * 
  * For examples: 
@@ -36,6 +36,8 @@ import org.jdom.input.SAXBuilder;
 public class EntitySearcher1 extends EntitySearcher {
 	private static final Logger LOGGER = Logger.getLogger(EntitySearcher1.class);   
 	private static boolean debug_permutation = false;
+	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
+	private static ArrayList<String> nomatchcache = new ArrayList<String>();
 	//boolean debug = true;
 
 	/**
@@ -54,7 +56,11 @@ public class EntitySearcher1 extends EntitySearcher {
 			String originalentityphrase, String prep) {
 		LOGGER.debug("EntitySearcher1: search '"+entityphrase+"[orig="+originalentityphrase+"]'");
 
-		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+		//search cache
+		if(EntitySearcher1.nomatchcache.contains(entityphrase+"+"+elocatorphrase)) return null;
+		if(EntitySearcher1.cache.get(entityphrase+"+"+elocatorphrase)!=null) return EntitySearcher1.cache.get(entityphrase+"+"+elocatorphrase);
+		
+		ArrayList<EntityProposals> entities = null;
 		EntityProposals ep = new EntityProposals(); //search results
 		//entityphrase =  "posterior radials";
 		//elocatorphrase = "anterior dorsal fin";
@@ -63,18 +69,19 @@ public class EntitySearcher1 extends EntitySearcher {
 		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity or an entity locator
 
 		//construct pre-composed variations: selected permutations without repetition 
-		ArrayList<String> variations  = new ArrayList<String>();
+		ArrayList<String> variations  = new ArrayList<String>(); 
 		//permutation on synrings that are results of subcomponents permutation
 		permutation(components, variations); 
-		LOGGER.debug(System.getProperty("line.separator")+"search variations...");
-		LOGGER.debug("'"+entityphrase+" , "+elocatorphrase+"' generated "+variations.size()+" variations:");
+		LOGGER.debug("...created variations");
+		//LOGGER.debug("'"+entityphrase+" , "+elocatorphrase+"' generated "+variations.size()+" variations:");
 		for(String variation : variations)
-			LOGGER.debug(".."+variation);
+			LOGGER.debug("....."+variation);
 
 		//search variations for pre-composed terms one by one, return all the results
 		boolean found = false;
-		LOGGER.debug("search variations one by one...");
+		//LOGGER.debug("search variations one by one...");
 		for(String variation: variations){
+			LOGGER.debug("...search variation '"+variation+"'");
 			//ArrayList<FormalConcept> entityfcs = new TermSearcher().regexpSearchTerm(variation, "entity"); //remove indexes from variation before search
 			ArrayList<FormalConcept> entityfcs = new TermSearcher().searchTerm(variation, "entity"); //remove indexes from variation before search
 			//check for the strength of the match: related synonyms: (?:(?:crista) (?:parotica)) entity=>tegmen tympani
@@ -86,16 +93,22 @@ public class EntitySearcher1 extends EntitySearcher {
 						ep.add((Entity)entity); //all variations are alternative entities (i.e. proposals) for the phrase
 					}
 				}
-				LOGGER.debug("search variation '"+variation+"' found match: "+ep.toString());
+				LOGGER.debug("...found match: "+ep.toString());
 			}
 		}
 		if(found){
 			//entities.add(ep);
+			if(entities==null) entities = new ArrayList<EntityProposals>();
 			Utilities.addEntityProposals(entities, ep);
-			LOGGER.debug("EntitySearcher1 found matched variations, returns entity proposals:");
-			for(EntityProposals aep: entities){
-				LOGGER.debug("..EntityProposals:"+aep.toString());
-			}
+			
+			//LOGGER.debug("EntitySearcher1 found matched variations, returns:");
+			//for(EntityProposals aep: entities){
+			//	LOGGER.debug("..:"+aep.toString());
+			//}
+			
+			//caching
+			if(entities==null) EntitySearcher1.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+			else EntitySearcher1.cache.put(entityphrase+"+"+elocatorphrase, entities);
 			return entities;
 		}
 
@@ -111,49 +124,53 @@ public class EntitySearcher1 extends EntitySearcher {
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
 
 			if(components.size()==1){
-				LOGGER.debug("find components size = 1");
+				//LOGGER.debug("find components size = 1");
 				//has one component only, split the component into entity and entitylocator
-				ArrayList<String> perms = components.get(0).getPermutations();
+				ArrayList<String> perms = components.get(0).getPermutations(); //perms are not reg exps
 				for(String perm : perms){
 					if(perm.indexOf(" of ")<0) continue; //there must be another variation with " of " that is equivalent to this variation
 					if(this.debug_permutation) System.err.println("variation to split: "+perm);
 					String[] parts = perm.split("\\s+of\\s+");
-					for(int l = 0; l < parts.length-1; l++){ //length of entity
-						entityphrase = Utilities.join(parts, 0, l, " of ");
-						elocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
-						LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
-						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-						eels.handle();
-						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
-						if(entity != null){
-							found = true;
-							//ep.add(entity);
-							//entities.add(ep);
-							//entities.addAll(entity);						
-							for(EntityProposals aep: entity){
-								Utilities.addEntityProposals(entities, aep);
-								LOGGER.debug("..EEL adds proposals:"+aep);
+					if(parts.length>1){
+						for(int l = 0; l < parts.length-1; l++){ //length of entity
+							String aentityphrase = Utilities.join(parts, 0, l, " of ");	
+							String aelocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
+							//LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+							EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
+							eels.handle();
+							ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+							if(entity != null){
+								found = true;
+								//ep.add(entity);
+								//entities.add(ep);
+								//entities.addAll(entity);	
+								if(entities==null) entities = new ArrayList<EntityProposals>();
+								for(EntityProposals aep: entity){
+									Utilities.addEntityProposals(entities, aep);
+									//LOGGER.debug("..EEL adds proposals:"+aep);
+								}
+							}else{
+								//LOGGER.debug("..EEL found no match");
 							}
-						}else{
-							LOGGER.debug("..EEL found no match");
 						}
 					}
 				}
 			}else{
-				LOGGER.debug("find components size > 1");
+				//LOGGER.debug("find components size > 1");
 				//has multiple components
 				//use the first n as entity
+				String aentityphrase="", aelocatorphrase="";
 				for(int n = 1; n < components.size()-1; n++){
 					for(int i = 0; i < n; i++){ //
 						ArrayList<String> perms = components.get(i).getPermutations();
 						String vars = "";
 						for(String perm : perms){
-							vars += perm+"|";
+							vars += perm+"|"; //include all perms in search
 						}
 						vars = vars.replaceFirst("\\|$", "");
-						entityphrase +="(?:"+vars+") of ";
+						aentityphrase +="(?:"+vars+") of ";
 					}
-					entityphrase = entityphrase.replaceFirst(" of $", "");
+					aentityphrase = aentityphrase.replaceFirst(" of $", "");
 					//use the rest as entity locators
 					for(int i = n; i < components.size(); i++){ //
 						ArrayList<String> perms = components.get(i).getPermutations();
@@ -162,25 +179,30 @@ public class EntitySearcher1 extends EntitySearcher {
 							vars += perm+"|";
 						}
 						vars = vars.replaceFirst("\\|$", "");
-						elocatorphrase +="(?:"+vars+") of ";
+						aelocatorphrase +="(?:"+vars+") of ";
 					}
-					elocatorphrase = elocatorphrase.replaceFirst(" of $", "");
+					aelocatorphrase = aelocatorphrase.replaceFirst(" of $", "").trim();
 
-					LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
-					EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
-					eels.handle();
-					ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
-					if(entity != null){
-						found = true;
-						//ep.add(entity);
-						//entities.add(ep);
-						//entities.addAll(entity);						
-						for(EntityProposals aep: entity){
-							Utilities.addEntityProposals(entities, aep);
-							LOGGER.debug("..EEL adds proposals:"+aep);
+					//LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+					//entityphrase = entityphrase.replaceFirst("(\\(\\?:|\\)|\\|)", "");
+					//elocatorphrase = elocatorphrase.replaceFirst("(\\(\\?:|\\)|\\|)", "");
+					if(elocatorphrase.length()>0){
+						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
+						eels.handle();
+						ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
+						if(entity != null){
+							found = true;
+							//ep.add(entity);
+							//entities.add(ep);
+							//entities.addAll(entity);	
+							if(entities==null) entities = new ArrayList<EntityProposals>();
+							for(EntityProposals aep: entity){
+								Utilities.addEntityProposals(entities, aep);
+								//LOGGER.debug("..EEL adds proposals:"+aep);
+							}
+						}else{
+							//LOGGER.debug("..EEL found no match");
 						}
-					}else{
-						LOGGER.debug("..EEL found no match");
 					}
 				}
 			}
@@ -190,26 +212,27 @@ public class EntitySearcher1 extends EntitySearcher {
 		//deal with spatial expressions
 		if(hasspatial){
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls SpatialModifiedEntityStrategy");
-			//i.e. EntitySearch4, but more flexible: may call the strategy on different entity/entity locator combinations
+
 			//TODO: need more work: what's entityphrase and elocatorphrase?
 			SpatialModifiedEntityStrategy smes = new SpatialModifiedEntityStrategy(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 			smes.handle();
 			ArrayList<EntityProposals> entity = smes.getEntities();
 			if(entity != null){
 				found = true;
-
 				//ep.add(entity);
 				//entities.add(ep);
 				//entities.addAll(entity); //add a list of different entities: both sexes => female and male
+				if(entities==null) entities = new ArrayList<EntityProposals>();
 				for(EntityProposals aep: entity){
-					LOGGER.debug("..SME adds proposals: "+aep.toString());
+					//LOGGER.debug("..SME adds proposals: "+aep.toString());
 					Utilities.addEntityProposals(entities, aep);
 				}
 			}else{
-				LOGGER.debug("SME found no match");
+				//LOGGER.debug("SME found no match");
 			}
 		}
 		//if(found) return entities;
+		
 		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntitySearcher4");
 		ArrayList<EntityProposals> entity = new EntitySearcher4().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 		//proximal tarsal element:
@@ -218,19 +241,27 @@ public class EntitySearcher1 extends EntitySearcher {
 		//TODO: save both or select one? 
 		if(entity!=null){
 			//entities.addAll(entity);
+			if(entities==null) entities = new ArrayList<EntityProposals>();
 			for(EntityProposals aep: entity){
-				LOGGER.debug("..ES4 adds proposals: "+aep.toString());
+				//LOGGER.debug("..ES4 adds proposals: "+aep.toString());
 				Utilities.addEntityProposals(entities, aep);
 			}
 		}else{
-			LOGGER.debug("..ES4 found no match");
+			//LOGGER.debug("..ES4 found no match");
 		}
 
-
-		LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
-		for(EntityProposals aep: entities){
-			LOGGER.debug("..EntityProposals:"+aep.toString());
+		//logging
+		if(entities!=null){
+			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
+			for(EntityProposals aep: entities){
+				LOGGER.debug("..:"+aep.toString());
+			}
 		}
+		
+		//caching
+		if(entities==null) EntitySearcher1.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+		else EntitySearcher1.cache.put(entityphrase+"+"+elocatorphrase, entities);
+		
 		return entities;
 		//return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
@@ -298,9 +329,9 @@ public class EntitySearcher1 extends EntitySearcher {
 			ArrayList<EntityComponent> components) {
 		//if(lastindex>=0 && lastindex<components.size() && clone.get(lastindex).isStructure() && lastindex < newindex){
 		if(lastindex>=0 && clone.get(lastindex).isStructure() && lastindex < newindex){
-			return (oldprefix+"("+lastindex+") of "+components.get(i).getSynRing()).trim();
+			return (oldprefix+"("+lastindex+") of "+components.get(i).getPhrase()).trim();
 		}
-		return (oldprefix+"("+lastindex+") "+components.get(i).getSynRing()).trim();
+		return (oldprefix+"("+lastindex+") "+components.get(i).getPhrase()).trim();
 	}
 
 	private static ArrayList<EntityComponent> clone(
@@ -326,7 +357,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			components = joinAndSplit(entity, locator);
 
 			//2. create syn_ring for each component
-			setSynRings(components);
+			//setSynRings(components);
 		}
 
 		/**
@@ -346,7 +377,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			//ArrayList<String> entityphrases = sort(entityphrase.split("\\s*(,| of )\\s*"));//sort: turn 'ventral radial process' to 'process, ventral radial'
 			String spatialphraseptn = "(?:"+Dictionary.singlewordspatialtermptn +")?\\s*"
 					+ "\\b(?:(?:"+Dictionary.allSpatialHeadNouns()+")\\b|\\b(?:"+TermOutputerUtilities.adjectiveorganptn+"))";
-			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");//sort: turn 'ventral radial process' to 'process, ventral radial'
+			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");
 			for(String phrase: entityphrases){
 				phrase = phrase.trim();
 				if(phrase.length()==0) continue;
@@ -372,7 +403,7 @@ public class EntitySearcher1 extends EntitySearcher {
 					if(part.length()>0){
 						//parts.add(t);
 						EntityComponent ec = new EntityComponent(part);
-						ec.setSynRing(this.getSynRing4Phrase(part));
+						//ec.setSynRing(this.getSynRing4Phrase(part));
 						if(part.indexOf(" ")<0 && part.matches(Dictionary.singlewordspatialtermptn)){
 							ec.isSpatial(true);
 							ec.isStructure(false);
@@ -389,7 +420,12 @@ public class EntitySearcher1 extends EntitySearcher {
 				ArrayList<String> permutations = new ArrayList<String>();
 				EntitySearcher1.permutation(thiscomponents, permutations); 
 				//save EntityComponent
-				EntityComponent ec = new EntityComponent(phrasecp);
+				String thephrase = "";
+				for(String permu : permutations){ //A B; B of A
+					thephrase += permu+"|"; //A B|B of A
+				}
+				thephrase = "(?:"+thephrase.replaceFirst("\\|$", "").trim()+")";
+				EntityComponent ec = new EntityComponent(thephrase);
 				ec.isStructure(true); //each phrase representing a structure
 				ec.setPermutations(permutations);
 				components.add(ec);
@@ -424,10 +460,10 @@ public class EntitySearcher1 extends EntitySearcher {
 		}*/
 
 		/**
-		 * Set syn ring for each compoent. Treat syn rings for different permutations the alternatives in the syn ring
+		 * Set the syn ring for each component. Treat syn rings for different permutations the alternatives in the syn ring
 		 * @param components
 		 */
-		private void setSynRings(ArrayList<EntityComponent> components) {
+		/*private void setSynRings(ArrayList<EntityComponent> components) {
 			for(EntityComponent component: components){
 				String synring = "";
 				ArrayList<String> permus = component.getPermutations();
@@ -437,24 +473,14 @@ public class EntitySearcher1 extends EntitySearcher {
 				}
 				component.setSynRing("(?:"+synring.replaceFirst("\\|$", "").trim()+")");
 			}
-		}
+		}*/
 
 		/**
 		 * dorsal fin
 		 * @param phrase: (?:(?:shoulder) (?:girdle)) or dorsal fin
 		 * @return (?:dorsal|dorsal side) (?:fin)
 		 */
-		private String getSynRing4Phrase(String phrase){
-			String synring = "";
-			phrase = phrase.replaceAll("(\\(\\?:|\\))", ""); //(?:(?:shoulder) (?:girdle)) =>shoulder girdle
-			String[] tokens = phrase.split("\\s+");
-			//may use a more sophisticated approach to construct ngrams: A B C => A B C;A (B C); (A B) C;
-			for(int i = 0; i < tokens.length; i++){
-				if(tokens[i].matches(Dictionary.spatialtermptn)) synring += "(?:"+SynRingVariation.getSynRing4Spatial(tokens[i])+")"+" ";
-				else synring += "(?:"+SynRingVariation.getSynRing4Structure(tokens[i])+")"+" ";
-			}
-			return synring;
-		}
+		
 		public  ArrayList<EntityComponent> getComponents(){
 			return this.components;
 		}
@@ -488,7 +514,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	 *
 	 */
 	private class EntityComponent{
-		String synring; //for the component and is the permutations concatenated as alternatives
+		//String synring; //for the component and is the permutations concatenated as alternatives
 		String phrase; //e.g. posterior dorsal fin, or fin
 		ArrayList<String> permutations; // permutations of the parts (represented as synrings) in the phrase
 		boolean spatial = false;
@@ -497,6 +523,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		public EntityComponent(String phrase){ this.phrase = phrase;}
 
 		public String getPhrase(){return this.phrase;}
+		
 		public void setPermutations(ArrayList<String> permutations) {
 			this.permutations = permutations;					
 		}
@@ -509,7 +536,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		 * 
 		 * @param synring
 		 */
-		public void setSynRing(String synring) {this.synring = synring;}
+		//public void setSynRing(String synring) {this.synring = synring;}
 
 		/**
 		 * used only for one-word spatial terms
@@ -523,7 +550,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		 */
 		public void isStructure(boolean isstructure) {this.structure = isstructure;}
 
-		public String getSynRing(){	return this.synring;}
+		//public String getSynRing(){	return this.synring;}
 
 		/**
 		 * used only for one-word spatial terms

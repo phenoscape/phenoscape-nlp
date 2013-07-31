@@ -17,7 +17,7 @@ public class QualityProposals implements Proposals {
 	}
 	
 	public boolean equals(QualityProposals qp){
-		return this.toString().compareTo(qp.toString())==0;
+		return this.content().compareTo(qp.content())==0;
 	}
 	/**
 	 * TODO: change Object to something more precise.
@@ -50,6 +50,16 @@ public class QualityProposals implements Proposals {
 		{
 			sb.append("Q"+count+":"+q.toString()+System.getProperty("line.separator"));
 			count++;
+		}
+		return sb.toString();
+	}
+	
+	public String content(){
+		StringBuffer sb = new StringBuffer();
+
+		for(Quality q:proposals)
+		{
+			sb.append(q.content());
 		}
 		return sb.toString();
 	}

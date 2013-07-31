@@ -111,6 +111,15 @@ public class CompositeEntity extends Entity {
 		}
 		return sb.toString().replaceFirst("\\s+and $", "");
 	}
+	
+	public String content(){
+		StringBuffer sb = new StringBuffer();
+		for(Entity e: entities){
+			sb.append(e.content()+" and ");
+		}
+		return sb.toString().replaceFirst("\\s+and $", "");
+	}
+	
 	public boolean isOntologized() {
 		return this.getTheSimpleEntity().id != null;
 	}

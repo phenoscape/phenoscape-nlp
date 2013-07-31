@@ -243,9 +243,9 @@ public class StateStatementParser extends Parser {
 					if(entities!=null && entities.size()>0) lastentities = entities; //remember the last entity
 					if(entities==null || entities.size()==0) entities = lastentities; //if no entity found, use the last entity
 					LOGGER.debug("SSP: parsed entities:");
-					for(EntityProposals ep: entities) LOGGER.debug(".."+ep.toString());
+					if(entities!=null) for(EntityProposals ep: entities) LOGGER.debug(".."+ep.toString());
 					LOGGER.debug("SSP: parsed qualities:");
-					for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
+					if(qualities!=null) for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					Utilities.postcompose(entities, postcomps);
 					constructEQProposals(qualities, entities);

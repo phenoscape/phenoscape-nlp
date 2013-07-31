@@ -48,6 +48,10 @@ public class REntity extends Entity{
 	public String toString(){
 		return "("+this.relation.toString()+" some "+entity.toString()+")";
 	}
+	
+	public String content(){
+		return "("+this.relation.content()+" some "+entity.content()+")";
+	}
 	/**
 	 * @param args
 	 */

@@ -129,6 +129,10 @@ public class Quality implements FormalConcept {
 	public String toString(){
 		return "phrase="+this.string+" quality="+this.label+ " score="+this.confidenceScore;
 	}
+	
+	public String content(){
+		return this.classIRI;
+	}
 }
 
 

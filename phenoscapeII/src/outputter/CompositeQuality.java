@@ -89,4 +89,8 @@ public class CompositeQuality extends Quality {
 		return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+this.relatedentity.toString()+")";
 	}
 
+	public String content(){
+		
+		return this.mainquality.content()+"^"+this.restrictedrelation+"("+this.comparedquality.content()+this.relatedentity.content()+")";
+	}
 }

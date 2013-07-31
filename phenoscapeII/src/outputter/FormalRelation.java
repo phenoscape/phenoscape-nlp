@@ -114,6 +114,10 @@ public class FormalRelation implements FormalConcept {
 	}
 
 	@Override
+	public String content() {
+		return this.classIRI;
+	}
+	@Override
 	public boolean isOntologized() {
 		return this.id != null;
 	}
@@ -127,6 +131,8 @@ public class FormalRelation implements FormalConcept {
 		fr.setString(this.string);
 		return fr;
 	}
+
+
 
 
 }
