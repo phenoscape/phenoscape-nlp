@@ -195,7 +195,6 @@ public class XML2EQ {
 			}
 		}
 
-
 		if(recordperformance){
 			HTMLOutput output = new HTMLOutput();
 			output.outputHTML(this.tableprefix,"curator",3);
@@ -244,7 +243,6 @@ public class XML2EQ {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
-
 			if(recordperformance) this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
@@ -353,7 +351,6 @@ public class XML2EQ {
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
 					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
 					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
 			preparedStatement.setString(1, eQ.sourceFile);
@@ -379,11 +376,6 @@ public class XML2EQ {
 
 	}
 
-	/*
-	 * 
-	 * sort the proposals according to the confidence scores
-	 * 
-	 */
 	private String sort(String groups) 
 	{
 
