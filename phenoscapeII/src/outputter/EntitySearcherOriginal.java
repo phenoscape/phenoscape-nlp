@@ -44,7 +44,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	private static ArrayList<String> nomatchcache = new ArrayList<String>();
 	/**
-	 * @param entityphrase: the entityphrase, which could be original entityphrase or part of it wrapped as syn-ring regular expression passed in by other EntitySearchers
+	 * @param entityphrase: the entityphrase, which could be original entityphrase or regular expression such as (?:A of B| B A) of (?: C D | D of C) passed in by other EntitySearchers
 	 * @param elocatorphrase the elocatorphras
 	 * @param originalentityphrase the originalentityphrase
 	 * @param preposition used between entityphrase and elocatorphrase
@@ -598,15 +598,16 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		if(xml!=null){
 			Element root = xml.getRootElement();
 			String structid ="o560";
-			String entityphrase = "proximal tarsal element";
+			String entityphrase = "postfrontal dorsal element";
 			//String entityphrase = "posterior postfrontal";
 			//String entityphrase = "posterior supraorbital postfrontal";
-			String elocatorphrase = "";
+			String elocatorphrase = "condyle of femur";
 			String prep = "";
 			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
 			System.out.println("result:");
-			for(EntityProposals ep: eps )
-				System.out.println(ep.toString());
+			if(eps!=null)
+				for(EntityProposals ep: eps )
+					System.out.println(ep.toString());
 		}
 	}
 

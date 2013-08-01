@@ -366,36 +366,31 @@ public class CharacterHandler {
 
 	private String format(String quality) {
 		boolean negation = false;
-		if(((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches("(size|count|ratio)"))))
+		if(((this.chara.getAttributeValue("name")!=null)&&(this.chara.getAttributeValue("name").matches(".*?_?(size|count|ratio)_?.*"))))
 		{
-			if(this.chara.getAttributeValue("name").equals("size"))
+			if(this.chara.getAttributeValue("name").matches(".*?_?size_?.*"))
 			{
 				quality="size";
 			}
-			else if(this.chara.getAttributeValue("name").equals("count"))
+			else if(this.chara.getAttributeValue("name").matches(".*?_?count_?.*"))
 			{
 				quality="count";
 			}
-			else if(this.chara.getAttributeValue("name").equals("ratio"))
+			else if(this.chara.getAttributeValue("name").equals(".*?_?ratio_?.*"))
 			{
 				quality = "ratio";
 			}
-			else
-			{
-
-			}
-
 		}
 
-		if(quality.matches(".*(width|height|length|depth|size).*"))
+		if(quality.matches(".*_?(width|height|length|depth|size)_?.*"))
 		{
 			if(this.chara.getAttributeValue("modifier")!=null)
 			{
-				if(this.chara.getAttributeValue("modifier").matches(".*(not|no).*"))
+				if(this.chara.getAttributeValue("modifier").matches(".*\\b(not|no)\\b.*"))
 				{
 					negation = true;
 				}
-				if(this.chara.getAttributeValue("modifier").matches(".*(more|great|wide|broad|large).*"))
+				if(this.chara.getAttributeValue("modifier").matches(".*\\b(more|great|wide|broad|large)\\b.*"))
 				{
 					quality = (negation==false?"increased ":"decreased ")+quality;
 				}
@@ -405,11 +400,11 @@ public class CharacterHandler {
 				}
 			} else if(this.chara.getAttributeValue("value")!=null)
 			{
-				if(this.chara.getAttributeValue("value").matches(".*(not|no).*"))
+				if(this.chara.getAttributeValue("value").matches(".*\\b(not|no)\\b.*"))
 				{
 					negation = true;
 				}
-				if(this.chara.getAttributeValue("value").matches(".*(more|great|wide|broad|large).*"))
+				if(this.chara.getAttributeValue("value").matches(".*\\b(more|great|wide|broad|large)\\b.*"))
 				{
 					quality = (negation==false?"increased ":"decreased ")+quality;
 				}

@@ -47,6 +47,7 @@ public class EntitySearcher1 extends EntitySearcher {
 
 	}
 	//TODO patterns s0fd16381: maxillae, anterior end of 
+	//entityphrase could be reg exp such as (?:A of B| B A) of (?: C D | D of C) or a simple string
 	/* (non-Javadoc)
 	 * @see outputter.EntitySearcher#searchEntity(org.jdom.Element, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, int)
 	 */
@@ -65,6 +66,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		//entityphrase =  "posterior radials";
 		//elocatorphrase = "anterior dorsal fin";
 		//save phrases as components
+		String t = "";
 		EntityComponents ecs = new EntityComponents(entityphrase, elocatorphrase);
 		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity or an entity locator
 
@@ -117,9 +119,13 @@ public class EntitySearcher1 extends EntitySearcher {
 		//(the attachment of spatial terms to parent entity is different from attachement of a child entity to parent entity)
 		//like EntitySearch2, but more flexible: may call the strategy on different entity/entity locator combinations
 		//TODO: need more work: what's entityphrase and elocatorphrase?
-		boolean hasspatial = ecs.containsSpatial();
+		boolean startwithspatial = false;
+		Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")\\b\\s*\\b("+Dictionary.allSpatialHeadNouns()+")?\\b");
+		Matcher m = p.matcher(entityphrase);
+		if(m.find()) startwithspatial = true;
+		//boolean hasspatial = ecs.containsSpatial();
 		//if(elocatorphrase.trim().length()>0 && !hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
-		if(!hasspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
+		if(!startwithspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
 
@@ -158,34 +164,44 @@ public class EntitySearcher1 extends EntitySearcher {
 			}else{
 				//LOGGER.debug("find components size > 1");
 				//has multiple components
-				//use the first n as entity
-				String aentityphrase="", aelocatorphrase="";
-				for(int n = 1; n < components.size()-1; n++){
+				//use the first n as entity, the remaining as entity locator
+				//form simple string, not reg exp for entity and locator
+				for(int n = 1; n < components.size(); n++){
+					String aentityphrase="", aelocatorphrase="";
 					for(int i = 0; i < n; i++){ //
-						ArrayList<String> perms = components.get(i).getPermutations();
+						String var = components.get(i).getPhrase().split("\\|")[0];
+						var = var.replaceAll("[(:?)]", "");
+						aentityphrase += var+" of ";
+						/*ArrayList<String> perms = components.get(i).getPermutations();
 						String vars = "";
 						for(String perm : perms){
 							vars += perm+"|"; //include all perms in search
 						}
 						vars = vars.replaceFirst("\\|$", "");
 						aentityphrase +="(?:"+vars+") of ";
+						*/
 					}
-					aentityphrase = aentityphrase.replaceFirst(" of $", "");
+					aentityphrase = aentityphrase.replaceFirst(" of $", ""); // (?:A of B| B A) of (?: C D | D of C)
 					//use the rest as entity locators
 					for(int i = n; i < components.size(); i++){ //
+						String var = components.get(i).getPhrase().split("\\|")[0];
+						var = var.replaceAll("[(:?)]", "");
+						aelocatorphrase += var+" of ";
+						/*
 						ArrayList<String> perms = components.get(i).getPermutations();
 						String vars = "";
 						for(String perm : perms){
 							vars += perm+"|";
 						}
 						vars = vars.replaceFirst("\\|$", "");
-						aelocatorphrase +="(?:"+vars+") of ";
+						aelocatorphrase +="(?:"+vars+") of ";*/
 					}
-					aelocatorphrase = aelocatorphrase.replaceFirst(" of $", "").trim();
+					aelocatorphrase = aelocatorphrase.replaceFirst(" of $", "").trim();//similar to aentityphrase: (?:A of B| B A) of (?: C D | D of C)
 
 					//LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
 					//entityphrase = entityphrase.replaceFirst("(\\(\\?:|\\)|\\|)", "");
 					//elocatorphrase = elocatorphrase.replaceFirst("(\\(\\?:|\\)|\\|)", "");
+					LOGGER.debug("ES1->EEL...entity:'"+aentityphrase+"' entitylocator:'"+aelocatorphrase+"'");
 					if(elocatorphrase.length()>0){
 						EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
 						eels.handle();
@@ -210,7 +226,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		//if(found) return entities;
 
 		//deal with spatial expressions
-		if(hasspatial){
+		if(startwithspatial){
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls SpatialModifiedEntityStrategy");
 
 			//TODO: need more work: what's entityphrase and elocatorphrase?
@@ -372,29 +388,50 @@ public class EntitySearcher1 extends EntitySearcher {
 			entityphrase = entityphrase+","+elocatorphrase; //join
 
 			//split: separate adjective organs ('nasal') and modified organ ('bone');
-			//separate spatial term  ('dorsal') and modified organ ('fin'), but keep "dorsal margin" as one part;
+			//keep spatial term  ('dorsal') and modified organ ('fin') together, keep "dorsal margin" as one part, separate them from other parts
 			//split on " of ".
-			//ArrayList<String> entityphrases = sort(entityphrase.split("\\s*(,| of )\\s*"));//sort: turn 'ventral radial process' to 'process, ventral radial'
-			String spatialphraseptn = "(?:"+Dictionary.singlewordspatialtermptn +")?\\s*"
-					+ "\\b(?:(?:"+Dictionary.allSpatialHeadNouns()+")\\b|\\b(?:"+TermOutputerUtilities.adjectiveorganptn+"))";
+			//String spatialphraseptn = "(?:"+Dictionary.singlewordspatialtermptn +")?\\s*"
+			//		+ "\\b(?:(?:"+Dictionary.allSpatialHeadNouns()+")\\b|\\b(?:"+TermOutputerUtilities.adjectiveorganptn+"))";
+			String singleptn = "((?:"+Dictionary.singlewordspatialtermptn +")\\b\\s*\\b(?:"+Dictionary.allSpatialHeadNouns()+")?\\b\\s*)|"
+					+ "\\b("+TermOutputerUtilities.adjectiveorganptn+")\\b\\s*";
+			String spatialphrasesptn = "((?:"+singleptn+")+)"; //allow selection of either single spatial term, spatial phrase, or organadjective, or combination of spatial and organadjs
 			String[] entityphrases = entityphrase.split("\\s*(,| of )\\s*");
+			//order of the phrases matters
 			for(String phrase: entityphrases){
 				phrase = phrase.trim();
 				if(phrase.length()==0) continue;
 				String phrasecp = phrase;
+				//phrase = "medioventral axis radial element";
 				//Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)"); //this splits on single-word spatial term also
-				Pattern p = Pattern.compile("(.*?)\\b("+spatialphraseptn+")\\b(.*)");
+				Pattern p = Pattern.compile("(.*?)\\b"+spatialphrasesptn+"\\b(.*)");
 				Matcher m = p.matcher(phrase);
 				String temp = "";
 				while(m.matches()){
 					//temp += m.group(1)+"#"+m.group(2)+"#";
-					temp += m.group(1)+m.group(2)+"#";
-					phrase = m.group(3);
+					//temp += m.group(1)+m.group(2)+"#";
+					//phrase = m.group(3);
+					temp += m.group(1);
+					phrase = m.group(5);
+					String matched = m.group(2);
+					Pattern p1 = Pattern.compile(singleptn);
+					Matcher m1 = p1.matcher(matched);
+					while(m1.find()){
+						if(m1.group(1)!=null && m1.group(1).length()>0){ //spatial
+							if(m1.group(1).trim().indexOf(" ")>0) temp +="#"+m1.group(1)+"#";
+							else temp +="#"+m1.group(1);
+							matched = matched.substring(m1.end(1)).trim();
+						}
+						if(m1.group(2)!=null && m1.group(2).length()>0){
+							temp +="#"+m1.group(2)+"#";
+							matched = matched.substring(m1.end(2)).trim();
+						}
+						m1 = p1.matcher(matched);
+					}
 					m = p.matcher(phrase);
 				}
 				temp +=phrase.trim();//appending the original string to the tokens separated by #
 				if(debug_permutation) System.err.println("split&join: '"+phrasecp+"' =>'"+temp+"'");
-				String[] temps = temp.split("\\s*#\\s*");
+				String[] temps = temp.split("\\s*#+\\s*");
 				ArrayList<EntityComponent> thiscomponents = new ArrayList<EntityComponent>();
 				//for(String part: temps){
 				for(int i = temps.length-1; i>=0; i--){
@@ -500,10 +537,10 @@ public class EntitySearcher1 extends EntitySearcher {
 		public boolean containsSpatial(){
 			//[dorsal radials, posterior dorsal fin] => true
 			//[anterior process, maxilla] => true
-			for(EntityComponent cp: components){
-				if(cp.getPhrase().matches(".*?\\b("+Dictionary.spatialtermptn+")\\b.*"))
+			//for(EntityComponent cp: components){
+				if(components.get(0).getPhrase().matches(".*?\\b("+Dictionary.spatialtermptn+")\\b.*"))
 					return true;
-			}
+			//}
 			return false;
 		}
 	}
@@ -594,7 +631,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			String elocatorphrase = "posterior dorsal fin";
 			String prep = "";
 			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
-			System.out.println("result:");
+			System.out.println("final result:");
 			for(EntityProposals ep: eps)
 				System.out.println(ep.toString());
 		}
