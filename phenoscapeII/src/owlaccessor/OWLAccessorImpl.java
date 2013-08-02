@@ -56,7 +56,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private Set<OWLOntology> onts;
 
 	/** The allclasses. */
-	private Set<OWLClass> allclasses=new HashSet<OWLClass>();
+	public Set<OWLClass> allclasses=new HashSet<OWLClass>();
 	
 	/** The PATO relational slim. */
 	private Set<OWLClass> relationalSlim = new HashSet<OWLClass>();

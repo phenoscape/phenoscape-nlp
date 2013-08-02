@@ -21,7 +21,9 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
+import org.semanticweb.elk.owlapi.ElkReasonerConfiguration;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
+import org.semanticweb.elk.reasoner.config.ReasonerConfiguration;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ParserException;
@@ -77,7 +79,11 @@ public class ELKReasoner{
 		dataFactory = man.getOWLDataFactory();
 		this.ont = ont;
 		OWLReasonerFactory reasonerFactory = new ElkReasonerFactory();
-		Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);
+		Logger.getLogger("org.semanticweb.elk").setLevel(Level.ERROR);	
+/*		final ElkReasonerConfiguration elkConfig = new ElkReasonerConfiguration(); 
+		// Set the number of workers to 4 or any other number 
+		elkConfig.getElkConfiguration().setParameter(ReasonerConfiguration.NUM_OF_WORKING_THREADS,"4"); 
+		reasoner = reasonerFactory.createReasoner(ont,elkConfig);	*/
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();
 	}
@@ -90,6 +96,10 @@ public class ELKReasoner{
 		ont = man.loadOntologyFromOntologyDocument(ontologyfile);
 		// Create an ELK reasoner.
 		reasonerFactory = new ElkReasonerFactory();
+		/*		final ElkReasonerConfiguration elkConfig = new ElkReasonerConfiguration(); 
+		// Set the number of workers to 4 or any other number 
+		elkConfig.getElkConfiguration().setParameter(ReasonerConfiguration.NUM_OF_WORKING_THREADS,"4"); 
+		reasoner = reasonerFactory.createReasoner(ont,elkConfig);	*/
 		reasoner = reasonerFactory.createReasoner(ont);
 		getClassesWithLateralSides();//populates the lateral sides cache 
 	}
