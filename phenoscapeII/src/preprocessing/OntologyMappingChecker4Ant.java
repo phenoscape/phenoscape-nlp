@@ -12,7 +12,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import outputter.TermSearcher;
+import outputter.search.TermSearcher;
 
 /**
  * @author Hong Updates

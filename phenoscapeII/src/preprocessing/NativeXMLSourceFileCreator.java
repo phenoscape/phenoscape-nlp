@@ -17,13 +17,14 @@ import java.sql.Statement;
 
 
 
+
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.Document;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-import outputter.TermSearcher;
+import outputter.search.TermSearcher;
 
 
 

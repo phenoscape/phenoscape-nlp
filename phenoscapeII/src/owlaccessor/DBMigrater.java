@@ -10,7 +10,7 @@ import java.util.*;
 import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
-import outputter.TermSearcher;
+import outputter.search.TermSearcher;
 
 /**
  * This class extracts all terms, their IDs and synonyms from an OWL ontology to a database table.

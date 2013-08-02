@@ -1,9 +1,10 @@
 package owlaccessor;
 
 import java.util.ArrayList;
+
 import org.junit.Test;
 
-import outputter.Dictionary;
+import outputter.knowledge.Dictionary;
 
 
 public class TestOWLAccessor2 {

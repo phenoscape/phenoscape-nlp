@@ -23,8 +23,9 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 
 
+
 import outputter.ApplicationUtilities;
-import outputter.TermSearcher;
+import outputter.search.TermSearcher;
 
 /**
  * @author Hong Cui

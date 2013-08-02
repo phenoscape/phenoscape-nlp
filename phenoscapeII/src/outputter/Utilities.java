@@ -20,6 +20,18 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
+import outputter.data.CompositeEntity;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalRelation;
+import outputter.data.Quality;
+import outputter.data.QualityProposals;
+import outputter.data.REntity;
+import outputter.data.RelationalQuality;
+import outputter.data.SimpleEntity;
+import outputter.knowledge.Dictionary;
+import outputter.search.SynRingVariation;
+
 /**
  * @author Hong Cui
  *
@@ -363,10 +375,10 @@ public class Utilities {
 	/**
 	 * fifth abc => abc 5
 	 * abc_1 => abc 1
-	 * 
-	 * @param entitylist
-	 *            : entity1, entity2
-	 * @return
+	 * abc_1_to_3 => abc 1, abc 2, abc 3
+	 * @param entitylist: a comma-separated list of (maybe indexed) structures: entity1, entity2
+	 * @return a comma-separated list of the same structures with all covered indexes enumerated and turned to numbers.
+	 *         If input string is not indexed structures, the original string will be returned. 
 	 */
 	public static String transformIndexedStructures(String entitylist) {
 		entitylist = entitylist.replaceAll("(?<=\\w)- (?=\\w)", "-");
@@ -597,7 +609,13 @@ public class Utilities {
 			EntityProposals ep) {
 		
 		for(EntityProposals aep: entities){
-			if(aep.equals(ep)) return;
+			for(Entity ex: aep.getProposals()){
+				for(Entity in: ep.getProposals()){
+					if(ex.content().compareTo(in.content())==0){
+						ep.getProposals().remove(in); //deduplicate
+					}
+				}
+			}
 		}
 		for(EntityProposals aep: entities){
 			if(ep.getPhrase().compareTo(aep.getPhrase())==0){
@@ -617,7 +635,13 @@ public class Utilities {
 	public static void addQualityProposals(ArrayList<QualityProposals> qualities,
 			QualityProposals qp) {
 		for(QualityProposals aqp: qualities){
-			if(aqp.equals(qp)) return;
+			for(Quality qx: aqp.getProposals()){
+				for(Quality in: qp.getProposals()){
+					if(qx.content().compareTo(in.content())==0){
+						qp.getProposals().remove(in);//deduplicate
+					}
+				}
+			}
 		}
 		
 		for(QualityProposals aqp: qualities){
@@ -640,6 +664,7 @@ public class Utilities {
 	 * 
 	 */
 	public static void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+		if(entities==null) return;
 		for(EntityProposals entity: entities){
 			ArrayList<Entity> eps = entity.getProposals();
 			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
@@ -708,7 +733,18 @@ public class Utilities {
 		return true;
 	}
 
-
+	public static String getSynRing4Phrase(String phrase){
+		String synring = "";
+		if(phrase.length()==0) return synring;
+		phrase = phrase.replaceAll("(\\(\\?:|\\))", ""); //(?:(?:shoulder) (?:girdle)) =>shoulder girdle
+		String[] tokens = phrase.split("\\s+");
+		//may use a more sophisticated approach to construct ngrams: A B C => A B C;A (B C); (A B) C;
+		for(int i = 0; i < tokens.length; i++){
+			if(tokens[i].matches(Dictionary.spatialtermptn)) synring += "(?:"+SynRingVariation.getSynRing4Spatial(tokens[i])+")"+" ";
+			else synring += "(?:"+SynRingVariation.getSynRing4Structure(tokens[i])+")"+" ";
+		}
+		return synring.trim();
+	}
 	
 	
 }
