@@ -260,6 +260,7 @@ public class EQPerformanceEvaluation {
 					System.out.println("EQ"+eqcount);
 					ArrayList<String> tvalues = new ArrayList<String>();
 					String v = EQ.get(field).toLowerCase();
+					System.out.println("v=== "+v);
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*(@,)\\s*");
 						for(String v1 : vs){
