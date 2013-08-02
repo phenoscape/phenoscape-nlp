@@ -1,4 +1,4 @@
-package outputter.dataholder;
+package outputter.data;
 
 import org.semanticweb.owlapi.model.OWLClass;
 

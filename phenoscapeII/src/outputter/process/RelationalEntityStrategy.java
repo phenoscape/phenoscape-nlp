@@ -30,13 +30,14 @@ import org.jdom.xpath.XPath;
 
 
 
+
 import outputter.XML2EQ;
-import outputter.dataholder.CompositeEntity;
-import outputter.dataholder.Entity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.FormalRelation;
-import outputter.dataholder.REntity;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.CompositeEntity;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalRelation;
+import outputter.data.REntity;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 
 public class RelationalEntityStrategy implements AnnotationStrategy{

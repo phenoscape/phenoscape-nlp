@@ -1,7 +1,7 @@
 /**
  * 
  */
-package outputter.dataholder;
+package outputter.data;
 
 import outputter.knowledge.Dictionary;
 

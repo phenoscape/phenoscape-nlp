@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 
 import outputter.Utilities;
 import outputter.XML2EQ;
-import outputter.dataholder.Quality;
-import outputter.dataholder.QualityProposals;
+import outputter.data.Quality;
+import outputter.data.QualityProposals;
 
 public class PermittedRelations {	
 	private static final Logger LOGGER = Logger.getLogger(PermittedRelations.class);   

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import org.jdom.Element;
 
-import outputter.dataholder.EntityProposals;
+import outputter.data.EntityProposals;
 import outputter.knowledge.TermOutputerUtilities;
 
 /**

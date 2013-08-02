@@ -17,7 +17,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
-import outputter.dataholder.FormalRelation;
+import outputter.data.FormalRelation;
 import owlaccessor.OWLAccessorImpl;
 import edu.mit.jwi.IDictionary;
 

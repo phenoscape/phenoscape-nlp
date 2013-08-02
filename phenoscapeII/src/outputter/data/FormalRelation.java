@@ -1,26 +1,23 @@
-package outputter.dataholder;
+package outputter.data;
 
+public class FormalRelation implements FormalConcept {
+	String string; //phrase
+	String label; //lable of the class representing the phrase in an ontology
+	String id; //id of the class representing the phrase in an ontology
+	String classIRI; //class iri of the class representing the phrase in an ontology
+	float confidenceScore; //the confidence the system has in the id and classIRI represent the semantics of the string.
 
-public class Quality implements FormalConcept {
-	protected String string; //phrase
-	protected String label; //lable of the class representing the phrase in an ontology
-	protected String id; //id of the class representing the phrase in an ontology
-	protected String classIRI; //class iri of the class representing the phrase in an ontology
-	protected String type; //quality or negated quality
-	protected float confidenceScore; //the confidence the system has in the id and classIRI represent the semantics of the string.
-	
-	public Quality() {
-		// TODO Auto-generated constructor stub
+	public FormalRelation() {
 	}
 
 	/**
 	 * 
 	 */
-	public Quality(String string, String label, String id) {
+	public FormalRelation(String string, String label, String id, String iri) {
 		this.string = string;
 		this.label = label;
 		this.id = id;
-		
+		this.classIRI = iri;	
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +46,7 @@ public class Quality implements FormalConcept {
 		this.id = id;
 
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setClassIRI(java.lang.String)
 	 */
@@ -59,19 +56,12 @@ public class Quality implements FormalConcept {
 
 	}
 
-
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setConfidenceScore(float)
 	 */
 	@Override
 	public void setConfidenceScore(float score) {
 		this.confidenceScore = score;
-
-	}
-	
-
-	public void setType(String type) {
-		this.type = type;
 
 	}
 
@@ -101,7 +91,7 @@ public class Quality implements FormalConcept {
 		
 		return this.id;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#getClassIRI()
 	 */
@@ -109,6 +99,7 @@ public class Quality implements FormalConcept {
 	public String getClassIRI() {
 		return this.classIRI;
 	}
+
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#getConfidienceScore()
 	 */
@@ -117,24 +108,31 @@ public class Quality implements FormalConcept {
 	
 		return this.confidenceScore;
 	}
-
-	public String getType(){
-		return this.type;
+	
+	public String toString(){
+		return this.label;
 	}
 
+	@Override
+	public String content() {
+		return this.classIRI;
+	}
 	@Override
 	public boolean isOntologized() {
 		return this.id != null;
 	}
-	
-	public String toString(){
-		return "phrase="+this.string+" quality="+this.label+ " score="+this.confidenceScore;
+
+	public FormalRelation clone(){
+		FormalRelation fr = new FormalRelation();
+		fr.setClassIRI(this.classIRI);
+		fr.setConfidenceScore(this.confidenceScore);
+		fr.setId(this.id);
+		fr.setLabel(this.label);
+		fr.setString(this.string);
+		return fr;
 	}
-	
-	public String content(){
-		return this.classIRI;
-	}
+
+
+
+
 }
-
-
-

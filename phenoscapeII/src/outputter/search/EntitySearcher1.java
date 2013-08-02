@@ -21,9 +21,9 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import outputter.Utilities;
-import outputter.dataholder.Entity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.FormalConcept;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalConcept;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.TermOutputerUtilities;
 

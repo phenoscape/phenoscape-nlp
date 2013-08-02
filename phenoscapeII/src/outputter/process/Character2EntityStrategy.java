@@ -11,11 +11,11 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 
 import outputter.XML2EQ;
-import outputter.dataholder.Entity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.Quality;
-import outputter.dataholder.QualityProposals;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.Quality;
+import outputter.data.QualityProposals;
+import outputter.data.SimpleEntity;
 import owlaccessor.OWLAccessorImpl;
 
 /**

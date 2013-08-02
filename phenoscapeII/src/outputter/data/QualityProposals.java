@@ -1,4 +1,4 @@
-package outputter.dataholder;
+package outputter.data;
 
 import java.util.ArrayList;
 import java.util.Comparator;

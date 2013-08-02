@@ -10,7 +10,7 @@ import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
 import outputter.Utilities;
-import outputter.dataholder.EntityProposals;
+import outputter.data.EntityProposals;
 import outputter.search.EntitySearcherOriginal;
 
 

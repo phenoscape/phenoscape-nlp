@@ -13,13 +13,13 @@ import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 import outputter.Utilities;
-import outputter.dataholder.CompositeEntity;
-import outputter.dataholder.Entity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.FormalConcept;
-import outputter.dataholder.FormalRelation;
-import outputter.dataholder.REntity;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.CompositeEntity;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalConcept;
+import outputter.data.FormalRelation;
+import outputter.data.REntity;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 
 /**

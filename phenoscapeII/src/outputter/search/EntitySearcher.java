@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
-import outputter.dataholder.EntityProposals;
+import outputter.data.EntityProposals;
 
 /**
  * @author Hong Cui

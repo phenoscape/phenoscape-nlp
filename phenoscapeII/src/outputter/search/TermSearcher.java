@@ -17,9 +17,9 @@ import org.apache.log4j.Logger;
 
 import outputter.Utilities;
 import outputter.XML2EQ;
-import outputter.dataholder.FormalConcept;
-import outputter.dataholder.Quality;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.FormalConcept;
+import outputter.data.Quality;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.Wordforms;
 

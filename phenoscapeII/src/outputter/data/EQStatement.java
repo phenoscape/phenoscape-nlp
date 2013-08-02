@@ -1,32 +1,34 @@
 /**
  * 
  */
-package outputter.dataholder;
+package outputter.data;
 
+import java.io.File;
 
 /**
- * @author Hong Cui
- *
+ * @author updates
+ * store and access information about an EQ statement
  */
-public class EQProposals{
-	EntityProposals entity;
-	QualityProposals quality;
-	private String sourceFile;
+public class EQStatement {
+	String sourceFile;
 	String characterId;
-	String characterlabel;
 	String stateId;
 	String description;
+	Entity entity;
+	Quality quality;
 	private String type;
 	float confidenceScore;
+	//Entity relatedEntity;
 	
+
 	/**
 	 * 
 	 */
-	public EQProposals() {
+	public EQStatement() {
 	}
 	
 	public void setSource(String source){
-		this.setSourceFile(source);
+		this.sourceFile = source;
 	}
 	
 	public void setCharacterId(String characterId){
@@ -37,11 +39,11 @@ public class EQProposals{
 		this.stateId = stateId;
 	}
 	
-	public void setEntity(EntityProposals entity){
+	public void setEntity(Entity entity){
 		this.entity = entity;
 	}
 	
-	public void setQuality(QualityProposals quality){
+	public void setQuality(Quality quality){
 		this.quality = quality;
 	}
 	
@@ -53,12 +55,13 @@ public class EQProposals{
 		this.type = type;
 	}
 	
+
 	/*public void setRelatedEntity(Entity entity){
 		this.relatedEntity = entity;
 	}*/
 	
 	public String getSource(){
-		return this.getSourceFile();
+		return this.sourceFile;
 	}
 	public String getCharacterId(){
 		return this.characterId;
@@ -68,11 +71,11 @@ public class EQProposals{
 		return this.stateId  ;
 	}
 	
-	public EntityProposals getEntity( ){
+	public Entity getEntity( ){
 		return this.entity  ;
 	}
 	
-	public QualityProposals getQuality( ){
+	public Quality getQuality( ){
 		return this.quality  ;
 	}
 	
@@ -84,34 +87,34 @@ public class EQProposals{
 		// TODO Auto-generated method stub
 		return this.type;
 	}
-	public String getCharacterlabel() {
-		return characterlabel;
-	}
-
-	public void setCharacterlabel(String characterlabel) {
-		this.characterlabel = characterlabel;
-	}
-
 
 	/*public Entity getRelatedEntity( ){
 		return this.relatedEntity  ;
 	}*/
 	
 	public float calculateConfidenceScore(){
-		return this.entity.higestScore()*this.quality.higestScore();
+		return this.entity.getConfidienceScore()*this.quality.getConfidienceScore();
 	}
 	
 	public String toString(){
 		
-		return System.getProperty("line.separator")+
-				"E proposals:"+this.entity.toString()+
-				System.getProperty("line.separator")+
-				"Q proposals:"+this.quality.toString();
+		StringBuffer sb = new StringBuffer();
+		sb.append("text:"+this.description+System.getProperty("line.separator"));
+		sb.append("Entity:"+ entity.toString()+System.getProperty("line.separator"));
+		
+		if(quality instanceof RelationalQuality)
+		{
+			sb.append("Quality:"+(((RelationalQuality) quality).getQuality()!=null?((RelationalQuality) quality).getQuality().toString():"")+System.getProperty("line.separator"));
+			sb.append("Related Entity:"+(((RelationalQuality) quality).getRelatedEntity()!=null?((RelationalQuality) quality).getRelatedEntity().toString():"")+System.getProperty("line.separator"));
+		}
+		else
+			sb.append("Quality:"+(quality!=null?quality.toString():"")+System.getProperty("line.separator"));
+		return sb.toString();
 		
 	}
 	
-	public EQProposals clone(){
-		EQProposals eq1 = new EQProposals();
+	public EQStatement clone(){
+		EQStatement eq1 = new EQStatement();
 		eq1.setCharacterId(this.getCharacterId());
 		eq1.setEntity(this.getEntity());
 		eq1.setQuality(this.getQuality());
@@ -119,18 +122,7 @@ public class EQProposals{
 		eq1.setStateId(this.getStateId()); //TODO: change it for states
 		eq1.setDescription(this.getDescription());
 		eq1.setType(this.getType());
-		eq1.setCharacterlabel(this.getCharacterlabel());
 		return eq1;
-	}
-	
-	/**
-	 * cross product between entity proposals and quality proposals
-	 * @return
-	 */
-	public String EQStatementsInHTML(){
-		StringBuffer sb = new StringBuffer();
-		//TODO 
-		return sb.toString();
 	}
 	/**
 	 * @param args
@@ -140,12 +132,7 @@ public class EQProposals{
 
 	}
 
-	public String getSourceFile() {
-		return sourceFile;
-	}
 
-	public void setSourceFile(String sourceFile) {
-		this.sourceFile = sourceFile;
-	}
+
 
 }

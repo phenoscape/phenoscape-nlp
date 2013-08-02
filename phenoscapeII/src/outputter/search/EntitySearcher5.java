@@ -12,9 +12,9 @@ import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
 import outputter.Utilities;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.FormalConcept;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalConcept;
+import outputter.data.SimpleEntity;
 
 /**
  * 

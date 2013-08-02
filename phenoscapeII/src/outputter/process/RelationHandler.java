@@ -17,12 +17,12 @@ import org.jdom.xpath.XPath;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
-import outputter.dataholder.EQProposals;
-import outputter.dataholder.Entity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.Quality;
-import outputter.dataholder.QualityProposals;
-import outputter.dataholder.RelationalQuality;
+import outputter.data.EQProposals;
+import outputter.data.Entity;
+import outputter.data.EntityProposals;
+import outputter.data.Quality;
+import outputter.data.QualityProposals;
+import outputter.data.RelationalQuality;
 import outputter.knowledge.PermittedRelations;
 import outputter.search.EntitySearcherOriginal;
 

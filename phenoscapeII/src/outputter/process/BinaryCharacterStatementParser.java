@@ -17,12 +17,12 @@ import org.jdom.xpath.XPath;
 
 import outputter.Utilities;
 import outputter.XML2EQ;
-import outputter.dataholder.EQProposals;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.NegatedQuality;
-import outputter.dataholder.Quality;
-import outputter.dataholder.QualityProposals;
-import outputter.dataholder.RelationalQuality;
+import outputter.data.EQProposals;
+import outputter.data.EntityProposals;
+import outputter.data.NegatedQuality;
+import outputter.data.Quality;
+import outputter.data.QualityProposals;
+import outputter.data.RelationalQuality;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.TermOutputerUtilities;
 import outputter.prep.XMLNormalizer;

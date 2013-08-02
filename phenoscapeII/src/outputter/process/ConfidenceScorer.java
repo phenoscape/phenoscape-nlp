@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import org.jdom.Element;
 
-import outputter.dataholder.EQProposals;
+import outputter.data.EQProposals;
 
 /**
  * @author updates

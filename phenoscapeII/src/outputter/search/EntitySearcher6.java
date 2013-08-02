@@ -12,12 +12,12 @@ import org.jdom.xpath.XPath;
 
 import outputter.Utilities;
 import outputter.XML2EQ;
-import outputter.dataholder.CompositeEntity;
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.FormalConcept;
-import outputter.dataholder.FormalRelation;
-import outputter.dataholder.REntity;
-import outputter.dataholder.SimpleEntity;
+import outputter.data.CompositeEntity;
+import outputter.data.EntityProposals;
+import outputter.data.FormalConcept;
+import outputter.data.FormalRelation;
+import outputter.data.REntity;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 
 /**

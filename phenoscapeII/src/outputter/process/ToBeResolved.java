@@ -5,8 +5,8 @@ package outputter.process;
 
 import java.util.ArrayList;
 
-import outputter.dataholder.EntityProposals;
-import outputter.dataholder.QualityProposals;
+import outputter.data.EntityProposals;
+import outputter.data.QualityProposals;
 
 /**
  * @author updates
