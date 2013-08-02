@@ -20,6 +20,18 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
+import outputter.dataholder.CompositeEntity;
+import outputter.dataholder.Entity;
+import outputter.dataholder.EntityProposals;
+import outputter.dataholder.FormalRelation;
+import outputter.dataholder.Quality;
+import outputter.dataholder.QualityProposals;
+import outputter.dataholder.REntity;
+import outputter.dataholder.RelationalQuality;
+import outputter.dataholder.SimpleEntity;
+import outputter.knowledge.Dictionary;
+import outputter.search.SynRingVariation;
+
 /**
  * @author Hong Cui
  *

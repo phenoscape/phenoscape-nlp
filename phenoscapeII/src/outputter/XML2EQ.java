@@ -21,6 +21,27 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
+import outputter.dataholder.CompositeEntity;
+import outputter.dataholder.CompositeQuality;
+import outputter.dataholder.EQProposals;
+import outputter.dataholder.Entity;
+import outputter.dataholder.EntityProposals;
+import outputter.dataholder.FormalConcept;
+import outputter.dataholder.NegatedQuality;
+import outputter.dataholder.Quality;
+import outputter.dataholder.QualityProposals;
+import outputter.dataholder.RelationalQuality;
+import outputter.dataholder.SimpleEntity;
+import outputter.knowledge.Dictionary;
+import outputter.knowledge.ELKReasoner;
+import outputter.knowledge.TermOutputerUtilities;
+import outputter.output.HTMLOutput;
+import outputter.prep.XMLNormalizer;
+import outputter.process.BinaryCharacterStatementParser;
+import outputter.process.CharacterStatementParser;
+import outputter.process.StateStatementParser;
+import outputter.search.TermSearcher;
+
 
 
 /* annotation guideline: http://phenoscape.org/wiki/Guide_to_Character_Annotation */
@@ -74,7 +95,7 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
 	public static ELKReasoner elk; 
-	static boolean recordperformance = false;
+	private static boolean recordperformance = true;
 	static{
 		try{
 			//TODO: figure out why the two calls give different results?
@@ -115,7 +136,7 @@ public class XML2EQ {
 		this.glosstable = glosstable;
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
-		if(recordperformance){
+		if(isRecordperformance()){
 			if(dictionary.conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				dictionary.conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
@@ -133,9 +154,13 @@ public class XML2EQ {
 			System.out.println("create table if not exists " + outputtable
 					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
 					+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
+			//stmt.execute("create table if not exists " + outputtable
+			//		+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
+			//		+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
 			stmt.execute("create table if not exists " + outputtable
 					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-					+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
+					+ " entity text,entitylabel text, entityid text, " + "quality text,qualitylabel text, qualityid text,"+"relatedentity text,relatedentitylabel text, relatedentityid text)" );
+
 		}
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
@@ -195,9 +220,9 @@ public class XML2EQ {
 			}
 		}
 
-		if(recordperformance){
+		if(isRecordperformance()){
 			HTMLOutput output = new HTMLOutput();
-			output.outputHTML(this.tableprefix,"curator",3);
+			output.outputHTML(this.outputtable,"curator",0);
 		}
 
 
@@ -243,7 +268,7 @@ public class XML2EQ {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
-			if(recordperformance) this.insertEQs2Table(EQ);
+			if(isRecordperformance()) this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
 
@@ -264,7 +289,7 @@ public class XML2EQ {
 		String relatedentitylabel="";
 		String relatedentityid="";
 		//Read all Entity Proposals and store as comma separated values
-		for(Entity e:eQ.entity.getProposals())
+		for(Entity e: eQ.getEntity().getProposals())
 		{
 			entitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
 			if(e instanceof CompositeEntity)
@@ -287,7 +312,7 @@ public class XML2EQ {
 		entityid =sort(entityid);
 
 		//Read all Quality Proposals and store as comma separated values
-		for(Quality q:eQ.quality.getProposals())
+		for(Quality q:eQ.getQuality().getProposals())
 		{
 			if(q instanceof RelationalQuality)
 			{
@@ -296,7 +321,7 @@ public class XML2EQ {
 				qualityid+=q.getId()+" Score:["+q.getConfidienceScore()+"]@,";
 				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
 				//Reading all related entities and store as comma separated values
-				for(Entity e:((RelationalQuality) q).relatedentity.getProposals())
+				for(Entity e:((RelationalQuality) q).getRelatedentity().getProposals())
 				{
 					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
 					if(e instanceof CompositeEntity)
@@ -353,11 +378,11 @@ public class XML2EQ {
 					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
-			preparedStatement.setString(1, eQ.sourceFile);
-			preparedStatement.setString(2, eQ.characterId);
-			preparedStatement.setString(3,eQ.characterlabel);
-			preparedStatement.setString(4,eQ.stateId);
-			preparedStatement.setString(5,eQ.description);
+			preparedStatement.setString(1, eQ.getSourceFile());
+			preparedStatement.setString(2, eQ.getCharacterId());
+			preparedStatement.setString(3,eQ.getCharacterlabel());
+			preparedStatement.setString(4,eQ.getStateId());
+			preparedStatement.setString(5,eQ.getDescription());
 			preparedStatement.setString(6,entity);
 			preparedStatement.setString(7,entitylabel);
 			preparedStatement.setString(8,entityid);
@@ -1409,7 +1434,7 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"tested/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");;
@@ -1424,6 +1449,14 @@ public class XML2EQ {
 		}
 
 
+	}
+
+	public static boolean isRecordperformance() {
+		return recordperformance;
+	}
+
+	public static void setRecordperformance(boolean recordperformance) {
+		XML2EQ.recordperformance = recordperformance;
 	}
 
 }

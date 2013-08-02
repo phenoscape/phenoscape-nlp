@@ -24,8 +24,8 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import outputter.ApplicationUtilities;
-import outputter.TermSearcher;
 import outputter.XML2EQ;
+import outputter.search.TermSearcher;
 
 // TODO: Auto-generated Javadoc
 //import org.semanticweb.owlapi.util.SimpleIRIMapper;
