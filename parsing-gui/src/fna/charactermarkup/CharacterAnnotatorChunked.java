@@ -29,8 +29,8 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
 
 import outputter.ApplicationUtilities;
-import outputter.knowledge.TermOutputerUtilities;
 import outputter.search.SpatialModifiedEntityStrategy;
+import outputter.knowledge.TermOutputerUtilities;
 import conceptmapping.*;
 import fna.parsing.PhraseMarker;
 
