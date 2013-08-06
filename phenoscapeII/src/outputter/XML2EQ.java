@@ -1437,7 +1437,7 @@ public class XML2EQ {
 		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
-		String outputtable=ApplicationUtilities.getProperty("table.output");;
+		String outputtable=ApplicationUtilities.getProperty("table.output");
 		String prefix =ApplicationUtilities.getProperty("table.prefix");
 		String glosstable = "fishglossaryfixed";
 

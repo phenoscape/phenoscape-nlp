@@ -119,14 +119,33 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 				sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  newentity, "", originalentityphrase, prep); //advanced search
 			}
 
-			if(sentityps!=null){
-				LOGGER.debug("SME...now search for spatial term  '"+spatialterm+"'");
-				//SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(spatialterm, "entity");
-				//ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
-				ArrayList<FormalConcept> spatialentities = new TermSearcher().searchTerm(spatialterm, "entity");//anterior + region: simple search
-				if(spatialentities!=null) LOGGER.debug("...found match");
-				boolean found = false;
-				EntityProposals centityp = new EntityProposals();
+			LOGGER.debug("SME...now search for spatial term  '"+spatialterm+"'");
+			//SimpleEntity sentity1 = (SimpleEntity)new TermSearcher().searchTerm(spatialterm, "entity");
+			//ArrayList<FormalConcept> spatialentities = TermSearcher.regexpSearchTerm(spatialterm, "entity");//anterior + region: simple search
+			ArrayList<FormalConcept> spatialentities = new TermSearcher().searchTerm(spatialterm, "entity");//anterior + region: simple search
+			if(spatialentities!=null) LOGGER.debug("...found match");
+			else{
+				//create phrase-based spatialentities
+				SimpleEntity spatial = new SimpleEntity();
+				spatial.setString(spatialterm);
+				spatial.setConfidenceScore(1f);
+				spatialentities = new ArrayList<FormalConcept>();
+				spatialentities.add(spatial);
+			}
+			boolean found = false;
+			EntityProposals centityp = new EntityProposals();
+			
+			if(sentityps==null){ //standalone spatial term such as 'ventral region'
+				//if(spatialentities!=null){
+					found = true;
+					for(FormalConcept spatialentity: spatialentities){
+						SimpleEntity sentity1 = (SimpleEntity) spatialentity;
+						if(sentity1!=null){
+							centityp.add(sentity1);
+						}
+					}
+				//}
+			}else{
 				centityp.setPhrase(this.originalentityphrase);
 				for(EntityProposals sentityp: sentityps){
 					for(Entity sentity: sentityp.getProposals()){
@@ -194,22 +213,23 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 						}
 					}
 				}
-				
-				
-				
-				if(found){
-					if(entities==null) 	entities = new ArrayList<EntityProposals>();
-					Utilities.addEntityProposals(entities, centityp);
-					LOGGER.debug("SpatialModifiedEntityStrategy completed, returns");
-					for(EntityProposals ep: entities){
-						LOGGER.debug(".."+ep.toString());
-					}
-				}
-				
-				//caching
-				if(entities==null) SpatialModifiedEntityStrategy.nomatchcache.add(entityphrase+"+"+elocatorphrase);
-				else SpatialModifiedEntityStrategy.cache.put(entityphrase+"+"+elocatorphrase, entities);
+
 			}
+			
+			
+			
+			if(found){
+				if(entities==null) 	entities = new ArrayList<EntityProposals>();
+				Utilities.addEntityProposals(entities, centityp);
+				LOGGER.debug("SpatialModifiedEntityStrategy completed, returns");
+				for(EntityProposals ep: entities){
+					LOGGER.debug(".."+ep.toString());
+				}
+			}
+			
+			//caching
+			if(entities==null) SpatialModifiedEntityStrategy.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+			else SpatialModifiedEntityStrategy.cache.put(entityphrase+"+"+elocatorphrase, entities);
 		}
 
 

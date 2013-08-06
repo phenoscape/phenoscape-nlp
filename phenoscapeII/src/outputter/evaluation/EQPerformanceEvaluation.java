@@ -1254,7 +1254,9 @@ public class EQPerformanceEvaluation {
 		//String candidate = "the cat sat on the mat";
 		//	String reference = "the cat was sat on the mat";
 		//System.out.println(meteor(candidate,reference,1,1));
-		work(database, "input", "goldstandard","NewEQEval");
+		String resulttable = ApplicationUtilities.getProperty("table.output");
+		String goldstandard = "goldstandard";
+		work(database, resulttable, goldstandard,"NewEQEval");
 		
 		//maxChunks("28135","13528635",0,3);
 

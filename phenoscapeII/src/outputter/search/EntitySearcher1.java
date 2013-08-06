@@ -314,11 +314,18 @@ public class EntitySearcher1 extends EntitySearcher {
 	}
 
 
-
+	/**
+	 * collect permutations of a list of components
+	 * @param prefix: current output sequence
+	 * @param components: remaining components to be added to the sequence
+	 * @param variations: permutations collected so far
+	 * @param clone: the original components
+	 * @param lastindex: index of the last component in the original components(clone) that was added to the prefix. 
+	 */
 	private static void permutation(String prefix, ArrayList<EntityComponent> components, ArrayList<String> variations,  ArrayList<EntityComponent> clone, int lastindex) {
 		int n = components.size();
 		if (n == 0){
-			if(!clone.get(lastindex).isSpatial()){ //the last component can not be a spatial term
+			if(!clone.get(lastindex).isSpatial() || lastindex == 0){ //the last component can not be a spatial term, if there are multiple components (lastindex!=0)
 				variations.add(prefix+"("+lastindex+")");
 				if(debug_permutation) System.err.println("variation: "+prefix+"("+lastindex+")");
 			}

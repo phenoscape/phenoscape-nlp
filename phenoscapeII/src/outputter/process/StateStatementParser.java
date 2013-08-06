@@ -372,21 +372,39 @@ public class StateStatementParser extends Parser {
 						for(Entity e2: ep2.getProposals())
 						{
 							FormalRelation rel = Dictionary.partof;
-							rel.setConfidenceScore((float)1.0);
-							REntity rentity = foundpart? new REntity(rel, e2): new REntity(rel, e1);
-							CompositeEntity centity = new CompositeEntity();
-							//composite entity
-							if(e1 instanceof SimpleEntity)
-							{
-								centity.addEntity(foundpart? e1 : e2);
-								centity.addEntity(rentity);
+							if(foundpart){				
+								rel.setConfidenceScore((float)1.0);
+								REntity rentity = new REntity(rel, e2);
+								CompositeEntity centity = new CompositeEntity();
+								//composite entity
+								if(e1 instanceof SimpleEntity)
+								{
+									centity.addEntity(e1);
+									centity.addEntity(rentity);
+								}
+								else
+								{
+									centity = ((CompositeEntity) e1).clone();
+									((CompositeEntity)centity).addParentEntity(rentity);
+								}
+								ep3.add(centity);
+							}else{							
+								rel.setConfidenceScore((float)1.0);
+								REntity rentity = new REntity(rel, e1);
+								CompositeEntity centity = new CompositeEntity();
+								//composite entity
+								if(e2 instanceof SimpleEntity)
+								{
+									centity.addEntity(e2);
+									centity.addEntity(rentity);
+								}
+								else
+								{
+									centity = ((CompositeEntity) e2).clone();
+									((CompositeEntity)centity).addParentEntity(rentity);
+								}
+								ep3.add(centity);
 							}
-							else
-							{
-								centity = ((CompositeEntity) (foundpart? e1 : e2)).clone();
-								((CompositeEntity)centity).addParentEntity(rentity);
-							}
-							ep3.add(centity);
 						}
 						finalentities.add(ep3);
 					}
@@ -628,13 +646,13 @@ public class StateStatementParser extends Parser {
 				entities.clear();
 				entities.addAll(resolve(e, keyentitiesclone));
 			} else if (maybesubject && e.size()==0
-					&& this.keyentities != null) {
+					&& keyentitiesclone != null) {
 				entities.clear();
 				entities.addAll(keyentitiesclone); //to avoid accidental changes to this.keyentities
 			} else if (e.size()>0) {
 				entities.clear();
 				entities.addAll(e);
-			} else {
+			} else if(keyentitiesclone != null) {
 				entities.clear();
 				entities.addAll(keyentitiesclone); 
 				// what if it is a subject, but not an entit at all? - Hariharan(So added this code)

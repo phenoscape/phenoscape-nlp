@@ -34,16 +34,16 @@ public class TermSearcher {
 	private static final Logger LOGGER = Logger.getLogger(TermSearcher.class);
 	/** The strong entity id cache. */
 	public static Hashtable<String, ArrayList<FormalConcept>> entityIDCache = new Hashtable<String, ArrayList<FormalConcept>>(); // term=>
-																																	// {id,
-																																	// label}
+	// {id,
+	// label}
 
 	/** The strong quality id cache. */
 	public static Hashtable<String, ArrayList<FormalConcept>> qualityIDCache = new Hashtable<String, ArrayList<FormalConcept>>();
 
 	/** The candidate entity id cache. */
 	public static Hashtable<String, ArrayList<FormalConcept>> entityCandidateIDCache = new Hashtable<String, ArrayList<FormalConcept>>(); // term=>
-																																			// {id,
-																																			// label}
+	// {id,
+	// label}
 
 	/** The candidate quality id cache. */
 	public static Hashtable<String, ArrayList<FormalConcept>> qualityCandidateIDCache = new Hashtable<String, ArrayList<FormalConcept>>();
@@ -88,7 +88,7 @@ public class TermSearcher {
 		ArrayList<FormalConcept> result = this.searchCache(phrase, phrasetype);
 		if (result == null && this.nomatchCache.contains(phrase))
 			return null;
-		else if (result != null)
+		else if (result != null && result.size()>0)
 			return result;
 
 		String query = formatExpand(phrase); // expand with syn-ring
@@ -120,7 +120,7 @@ public class TermSearcher {
 
 		ArrayList<FormalConcept> strongmatch = getStrongMatch(query,
 				phrasetype, results, 1f);
-		if (strongmatch != null)
+		if (strongmatch != null && strongmatch.size()>0)
 			return strongmatch;
 		// /if landed here, all matches based on the original phrase are weak
 		// matches.
@@ -157,7 +157,7 @@ public class TermSearcher {
 			}
 			// phrase = phrase.replaceAll("-", " ");
 			strongmatch = getStrongMatch(query, phrasetype, results, 1f);
-			if (strongmatch != null)
+			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 
 			// TODO: latero-sensory => sensory
@@ -170,7 +170,7 @@ public class TermSearcher {
 		// 4. phrase with /, assuming one / in the phrase.
 		if (query.indexOf("/") > 0) { // xyz bone/tendon
 			String[] tokens = query.split("[$^():?*+.| ]+"); // ^ can't be the
-															// first in []
+			// first in []
 			for (String token : tokens) {
 				if (token.contains("/")) {
 					String tcopy = token;
@@ -179,7 +179,7 @@ public class TermSearcher {
 				}
 			}
 			strongmatch = getStrongMatch(query, phrasetype, results, 1f);
-			if (strongmatch != null)
+			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 
 			// if landed here, all matches based on this reform are weak
@@ -234,7 +234,7 @@ public class TermSearcher {
 			}
 
 			strongmatch = getStrongMatch(query, phrasetype, results, 0.8f);
-			if (strongmatch != null)
+			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 			candidatematches.addAll(results);
 			results = new ArrayList<Hashtable<String, String>>();
@@ -319,7 +319,7 @@ public class TermSearcher {
 		// dorsal-fin: fix it early, not here because search word may be regular
 		// expressions
 		query = query.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal
-													// to
+		// to
 		query = query.replaceAll("(?<=\\w)shaped", "-shaped");
 		if (query.compareTo("elongate") == 0)
 			query = "elongated";
@@ -533,7 +533,8 @@ public class TermSearcher {
 		if (type.compareTo("quality") == 0) {
 			result = qualityIDCache.get(term);
 		}
-		return result;
+		if(result!=null && result.size()>0) return result;
+		return null;
 	}
 
 	private static void cacheIt(String term, ArrayList<FormalConcept> aresult,
@@ -599,11 +600,13 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("ventral .*? radial .*? process",
-				"quality");
-		for (FormalConcept fc : quality)
-			System.out.println(fc.getLabel());
+		ArrayList<FormalConcept> quality = ts.searchTerm("posterolateral margin",
+				"entity");
+		if(quality!=null){
+			for (FormalConcept fc : quality)
+				System.out.println(fc.getLabel());
 
+		}
 	}
 
 }
