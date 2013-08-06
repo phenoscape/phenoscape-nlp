@@ -196,7 +196,21 @@ public class XML2EQ {
 				if(isBinary(statestatements)){
 					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil,characterstatement.getChildText("text"));
 					bcsp.parse(characterstatement, root);
-					allEQs = bcsp.getEQStatements();
+					if(bcsp.getEQStatements().size()==0){
+						for(Element statestatement: statestatements){
+							EQProposals empty = new EQProposals();
+							empty.setSourceFile(src);
+							empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
+							empty.setCharacterlabel(characterstatement.getChildText("text"));
+							empty.setStateId(statestatement.getAttributeValue("state_id"));
+							empty.setDescription(statestatement.getChildText("text"));
+							empty.setEntity(new EntityProposals());
+							empty.setQuality(new QualityProposals());
+							allEQs.add(empty);
+						}
+					}else{
+						allEQs = bcsp.getEQStatements();
+					}
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					csp.parse(characterstatement, root);
@@ -209,11 +223,25 @@ public class XML2EQ {
 						LOGGER.debug("XML2EQ: processing state statement...");
 						System.out.println("text: " + statestatement.getChildText("text"));
 						ssp.parse(statestatement, root);
-						allEQs.addAll(ssp.getEQStatements());
+						if(ssp.getEQStatements().size()==0){
+							EQProposals empty = new EQProposals();
+							empty.setSourceFile(src);
+							empty.setCharacterId(statestatement.getAttributeValue("character_id"));
+							empty.setCharacterlabel(characterstatement.getChildText("text"));
+							empty.setStateId(statestatement.getAttributeValue("state_id"));
+							empty.setDescription(statestatement.getChildText("text"));
+							empty.setEntity(new EntityProposals());
+							empty.setQuality(new QualityProposals());
+							allEQs.add(empty);
+						}else{
+							allEQs.addAll(ssp.getEQStatements());
+						}
 						ssp.clearEQStatements();
+						
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}
+				
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
 				LOGGER.error("", e);
