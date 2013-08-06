@@ -19,7 +19,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
 
-import outputter.TermOutputerUtilities;
+import outputter.knowledge.TermOutputerUtilities;
 import conceptmapping.*;
 
 

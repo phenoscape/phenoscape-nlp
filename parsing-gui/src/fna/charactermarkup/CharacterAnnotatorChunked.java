@@ -29,8 +29,8 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.*;
 
 import outputter.ApplicationUtilities;
-import outputter.SpatialModifiedEntityStrategy;
-import outputter.TermOutputerUtilities;
+import outputter.knowledge.TermOutputerUtilities;
+import outputter.search.SpatialModifiedEntityStrategy;
 import conceptmapping.*;
 import fna.parsing.PhraseMarker;
 
@@ -287,17 +287,16 @@ public class CharacterAnnotatorChunked {
 	}
 
 	/**
-	 * count = "none" =>count = 0
+	 * count = "none" =>presence = "absent"
 	 */
 	private void standardization() {
 		try {
 			/* count = "none" =>count = 0 */
 			List<Element> es = StanfordParser.path1.selectNodes(this.statement);
 			for (Element e : es) {
-				e.setAttribute("value", "0");
+				e.setAttribute("value", "absent");
+				e.setAttribute("name", "presence");
 			}
-
-
 
 			/*
 			 * <structure id="o437" name="tooth"> <character name="presence"
