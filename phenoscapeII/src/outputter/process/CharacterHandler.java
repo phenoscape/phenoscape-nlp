@@ -437,12 +437,12 @@ public class CharacterHandler {
 		}
 		return quality;
 	}
-
-	/*
-	 * 
+		
+	/**
 	 * handles case where same property of two different structures are being discussed
 	 * Here, the first entity is being identified by this.entity and related entity is identified by constraintid
-	 * 
+	 * @return always return true
+	 * @throws Exception
 	 */
 	private boolean specialCaseDifferentStructures() throws Exception {
 
@@ -485,15 +485,17 @@ public class CharacterHandler {
 		String structurename = Utilities.getStructureName(root, structureid);
 		EntityParser rep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
 		structure.setAttribute("processed", "true");
-
-		for(EntityProposals ep: rep.getEntity()){
-			RelationalQuality rq = new RelationalQuality(qp,ep);
-			qp = new QualityProposals();
-			qp.add(rq);
-			if(rq!=null)
-			{
-				Utilities.addQualityProposals(qualities, qp); //correct grouping
-				//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
+		
+		if(rep!=null && rep.getEntity()!=null){
+			for(EntityProposals ep: rep.getEntity()){
+				RelationalQuality rq = new RelationalQuality(qp,ep);
+				qp = new QualityProposals();
+				qp.add(rq);
+				if(rq!=null)
+				{
+					Utilities.addQualityProposals(qualities, qp); //correct grouping
+					//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
+				}
 			}
 		}
 		return true;
@@ -722,10 +724,12 @@ public class CharacterHandler {
 	}
 
 
-	//Adds Related entities and Primary entities to existing identified entities. Also remove duplicates in the entities
+	/**
+	 * Adds Related entities and Primary entities to existing identified entities. Also remove duplicates in the entities
+	 * @param entities
+	 * @param relationalquality
+	 */
 	private void addREPE(Hashtable<String, ArrayList<EntityProposals>> entities, QualityProposals relationalquality) {
-
-
 
 		ArrayList<EntityProposals> primaryentities = entities.get("Primary Entity");
 		ArrayList<EntityProposals> relatedentities = entities.get("Related Entities");
@@ -735,13 +739,33 @@ public class CharacterHandler {
 			for(EntityProposals relatedentity: relatedentities){
 				QualityProposals qproposals = new QualityProposals();
 				qproposals.add(new RelationalQuality(relationalquality, relatedentity));
-				this.qualities.add(qproposals);
+				//this.qualities.add(qproposals);
+				Utilities.addQualityProposals(qualities, qproposals);
 			}
 			if(primaryentities.size()>0)
 			{
 				ListIterator<EntityProposals> itr1 = primaryentities.listIterator();
 				//to remove duplicate entities
 				while(itr1.hasNext())
+				{
+					boolean duplicate = false;
+					EntityProposals ep1 = (EntityProposals) itr1.next();
+					for(Entity en1: ep1.getProposals())
+					{
+						ListIterator<EntityProposals> itr2 = this.primaryentities.listIterator();
+						while(itr2.hasNext())
+						{
+							EntityProposals ep2 = (EntityProposals) itr2.next();							
+							for(Entity en2:ep2.getProposals()){//add more conditions to analyze and handle bilateral entities
+								if(en2.content().compareTo(en1.content())==0)
+									duplicate = true;			
+							}
+							
+						}
+					}
+					if(!duplicate) Utilities.addEntityProposals(this.primaryentities, ep1);
+				}
+				/*while(itr1.hasNext())
 				{
 					EntityProposals ep1 = (EntityProposals) itr1.next();
 					for(Entity en1: ep1.getProposals())
@@ -752,11 +776,12 @@ public class CharacterHandler {
 							EntityProposals ep2 = (EntityProposals) itr2.next();
 							for(Entity en2:ep2.getProposals())//add more conditions to analyze and handle bilateral entities
 								if(en2.getPrimaryEntityLabel().equals(en1.getPrimaryEntityLabel()))
-									itr1.remove();
+									itr1.remove();	//caused IllegalState exception when there are duplicates							
 						}
 					}
 				}
 				this.primaryentities.addAll(primaryentities);
+				*/
 			}
 		}
 
@@ -789,7 +814,7 @@ public class CharacterHandler {
 
 			 if(characters.size()>1)
 			 {
-				 if(!chara.getParentElement().getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+				 if(chara.getParentElement().getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0)
 				 {
 					 primaryentities.addAll(this.entity);//Since this is the identified entity of this character
 				 }
@@ -833,7 +858,7 @@ public class CharacterHandler {
 		 ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
 		 Hashtable<String,ArrayList<EntityProposals>> entities = new Hashtable<String,ArrayList<EntityProposals>>();
 
-		 if(ParentStructure.getAttributeValue("name").replaceAll("_", " ").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
+		 if(ParentStructure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
 		 {
 			 if(this.keyentities.size()>1)//If keyentities.size> 1, first entity is a primary entity and the rest are related entities
 			 {

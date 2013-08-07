@@ -287,17 +287,16 @@ public class CharacterAnnotatorChunked {
 	}
 
 	/**
-	 * count = "none" =>count = 0
+	 * count = "none" =>presence = "absent"
 	 */
 	private void standardization() {
 		try {
 			/* count = "none" =>count = 0 */
 			List<Element> es = StanfordParser.path1.selectNodes(this.statement);
 			for (Element e : es) {
-				e.setAttribute("value", "0");
+				e.setAttribute("value", "absent");
+				e.setAttribute("name", "presence");
 			}
-
-
 
 			/*
 			 * <structure id="o437" name="tooth"> <character name="presence"
@@ -2892,7 +2891,7 @@ public class CharacterAnnotatorChunked {
 					}
 				}
 			}
-			processCharacterText(tokens, structures, null, false); // process part 1,
+			processCharacterText(tokens, structures, null, true); // process part 1,
 			// which applies to
 			// all
 			// lateststructures,

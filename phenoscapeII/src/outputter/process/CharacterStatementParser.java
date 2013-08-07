@@ -22,6 +22,7 @@ import org.jdom.xpath.XPath;
 import outputter.Utilities;
 import outputter.XML2EQ;
 import outputter.data.CompositeEntity;
+import outputter.data.EQProposals;
 import outputter.data.Entity;
 import outputter.data.EntityProposals;
 import outputter.data.FormalRelation;
@@ -102,7 +103,7 @@ public class CharacterStatementParser extends Parser {
 	 * TODO under construction
 	 */
 	@Override
-	public void parse(Element statement, Element root) {
+	public void parse(Element statement, Element root, EQProposals notused) {
 		try {
 			parseForQualityClue(statement); 
 			parseForEntities(statement, root, true);
@@ -234,7 +235,9 @@ public class CharacterStatementParser extends Parser {
 						name=name.replaceAll("(\\(|\\))", "");//used to address case 'fang relative-to (dentary_tooth) size' check with prof.
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
+						LOGGER.debug("CSP: '"+name+"' is decomposed into "+names.length);
 						for(String aname: names){
+							LOGGER.debug("CSP: searching "+aname);
 							String parents = parseStructure(statement, root,
 									fromcharacterdescription, /*entities, s2qs,*/
 									structureid, aname); //use the same structureid for all structures
@@ -606,7 +609,7 @@ public class CharacterStatementParser extends Parser {
 				}
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
-			    ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities);
+			    ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities, null);
 			    //entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
 					Utilities.postcompose(entities, qualities);

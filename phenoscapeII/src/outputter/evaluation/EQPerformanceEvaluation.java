@@ -45,8 +45,6 @@ import outputter.knowledge.ELKReasoner;
 public class EQPerformanceEvaluation {
 	private static final Logger LOGGER = Logger.getLogger(EQPerformanceEvaluation.class);   
 	private Connection conn;
-	private String username ="root";
-	private String password = "forda444";
 	private String testtable;
 	private String answertable;
 	private String prtablefields;
@@ -90,8 +88,7 @@ public class EQPerformanceEvaluation {
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
-				conn = DriverManager.getConnection(URL);
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 				Statement stmt = conn.createStatement();
 				//Holds the precision and recall values of each and every fields
 				String sql ="create table if not exists "+prtablefields+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
@@ -1254,7 +1251,9 @@ public class EQPerformanceEvaluation {
 		//String candidate = "the cat sat on the mat";
 		//	String reference = "the cat was sat on the mat";
 		//System.out.println(meteor(candidate,reference,1,1));
-		work(database, "input", "goldstandard","NewEQEval");
+		String resulttable = ApplicationUtilities.getProperty("table.output");
+		String goldstandard = "goldstandard";
+		work(database, resulttable, goldstandard,"evaluationrecords");
 		
 		//maxChunks("28135","13528635",0,3);
 

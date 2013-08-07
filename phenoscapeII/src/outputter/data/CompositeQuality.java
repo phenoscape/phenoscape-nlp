@@ -47,6 +47,10 @@ public class CompositeQuality extends Quality {
 		return this.mainquality.getLabel()+"^"+this.restrictedrelation+"("+this.comparedquality.getLabel()+"^"+this.relatedentity.getRelation().getLabel()+"("+((REntity)this.relatedentity).getEntity().getLabel()+"))";
 	}
 	
+	public String getLabel(){
+		return this.mainquality.getLabel();
+	}
+	
 	public String getFullId()
 	{
 		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
@@ -59,11 +63,7 @@ public class CompositeQuality extends Quality {
 		}
 	}
 	
-	@Override	
-	public String getLabel()
-	{
-		return this.mainquality.getLabel();
-	}
+
 	@Override
 	public float getConfidienceScore() {
 		

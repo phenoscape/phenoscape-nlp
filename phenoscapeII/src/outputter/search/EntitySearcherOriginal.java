@@ -91,6 +91,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 					ce1.setString("female");
 					ce1.addEntity(organism);
 					ce1.addEntity(re1);
+					ce1.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000383");
 					ep.setPhrase("female"); //the phrase set this proposal apart from the other one
 					ep.add(ce1);
 					created = true;
@@ -111,9 +112,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 					Quality male = (Quality)fc;
 					REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 	
 					CompositeEntity ce2 = new CompositeEntity();
+					ce2.setString("male");
 					ce2.addEntity(organism);
 					ce2.addEntity(re2);
-					ce2.setClassIRI("male");
+					ce2.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000384");
 					ep.add(ce2);
 					created = true;
 					LOGGER.debug(".."+ce2.toString());

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.jdom.Element;
 
+import outputter.data.EQProposals;
 import outputter.data.EntityProposals;
 import outputter.knowledge.TermOutputerUtilities;
 
@@ -25,7 +26,7 @@ public abstract class Parser {
 		this.ontoutil = ontoutil;
 	}
 
-	protected abstract void parse(Element statement, Element root);
+	protected abstract void parse(Element statement, Element root, EQProposals empty);
 	
 	protected void setParseContextSubjects(ArrayList<EntityProposals> subjects) {
 		this.subjectEntities = subjects;
