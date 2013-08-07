@@ -2891,7 +2891,7 @@ public class CharacterAnnotatorChunked {
 					}
 				}
 			}
-			processCharacterText(tokens, structures, null, false); // process part 1,
+			processCharacterText(tokens, structures, null, true); // process part 1,
 			// which applies to
 			// all
 			// lateststructures,
