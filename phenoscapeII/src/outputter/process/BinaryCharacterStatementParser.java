@@ -33,7 +33,7 @@ import outputter.prep.XMLNormalizer;
  */
 public class BinaryCharacterStatementParser extends StateStatementParser {
 	private static final Logger LOGGER = Logger.getLogger(BinaryCharacterStatementParser.class);  
-	public String characterlabel;
+	//public String characterlabel;
 	/**
 	 * @param ontologyIRIs
 	 */
@@ -51,7 +51,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 
 	public BinaryCharacterStatementParser(TermOutputerUtilities ontoutil, String characterlabel) {
 		super(ontoutil, null, null,characterlabel);
-		this.characterlabel=characterlabel;
+		//this.characterlabel=characterlabel;
+
 	}
 
 	/**
@@ -179,23 +180,23 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	}*/
 
 	/**
-	 * @param statement: the character statement in a binary statement 
+	 * @param statement: a character statement that is a binary statement 
 	 */
-	public void parse(Element statement, Element root){
+	public void parse(Element statement, Element root, EQProposals posempty, EQProposals negempty){
 		ArrayList<EQProposals> negativestatements = new ArrayList<EQProposals>();
-		super.parseMetadata(statement, root);
-		super.parseRelationsFormEQ(statement, root);
-		super.parseCharactersFormEQ(statement, root);
+		//super.parseMetadata(statement, root, posempty);
+		super.parseRelationsFormEQ(statement, root, posempty);
+		super.parseCharactersFormEQ(statement, root, posempty);
 		if(this.EQStatements.size()==0){
-			parseStandaloneStructures(statement, root);
+			parseStandaloneStructures(statement, root, posempty);
 		}
 		for(EQProposals eqp: this.EQStatements){
 			//for(EQStatement eq: eqp.getProposals()){
 			//update q for all eq candidates
-			if((eqp.getCharacterlabel()==null)||(eqp.getCharacterlabel()==""))
+			/*if((eqp.getCharacterlabel()==null)||(eqp.getCharacterlabel()==""))
 			{
 				eqp.setCharacterlabel(this.characterlabel);
-			}
+			}*/
 			QualityProposals qp = eqp.getQuality();
 			if(qp==null){//no qp, create qp
 				//q = "present"
@@ -217,6 +218,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				qp = new QualityProposals();
 				qp.add(absent);
 				EQProposals falseeq = eqp.clone();
+				falseeq.setStateId(negempty.getStateId());
+				falseeq.setStateText(negempty.getStateText());
 				falseeq.setQuality(qp);
 				negativestatements.add(falseeq);
 				//handle negative statements at the last
@@ -270,6 +273,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 						negativeqp.add(rq);
 						EQProposals falseeq = eqp.clone();
 						falseeq.setQuality(negativeqp);
+						falseeq.setStateId(negempty.getStateId());
+						falseeq.setStateText(negempty.getStateText());
 						negativestatements.add(falseeq);	
 					}else{ //not relational, generate and add the negated quality
 						if(q.getId()!=null)
@@ -286,6 +291,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 								negativeqp.add(nq);
 								EQProposals falseeq = eqp.clone();
 								falseeq.setQuality(negativeqp);
+								falseeq.setStateId(negempty.getStateId());
+								falseeq.setStateText(negempty.getStateText());
 								negativestatements.add(falseeq);	
 							}
 						}
@@ -296,7 +303,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		}
 		//}
 		this.EQStatements.addAll(negativestatements);
-		if(XML2EQ.isRecordperformance()) populateStateLabel(this.EQStatements,root);
+		//if(XML2EQ.isRecordperformance()) populateStateLabel(this.EQStatements,root);
 
 	}
 	
@@ -370,12 +377,12 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					if((q instanceof NegatedQuality)||(q.getLabel().matches(".*(" + Dictionary.binaryFvalues + ")")))
 					{
 						eqp.setStateId(binary.get("negative")!=null?binary.get("negative").split("@@")[0]:(binary.get("positive")!=null?binary.get("positive").split("@@")[0]:""));
-						eqp.setDescription(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:""));
+						eqp.setStateText(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:""));
 						break;
 					}else
 					{
 						eqp.setStateId(binary.get("positive")!=null?binary.get("positive").split("@@")[0]:(binary.get("negative")!=null?binary.get("negative").split("@@")[0]:""));
-						eqp.setDescription(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:""));
+						eqp.setStateText(binary.get("positive")!=null?binary.get("positive").split("@@")[1]:(binary.get("negative")!=null?binary.get("negative").split("@@")[1]:""));
 						break;
 					}
 					}
@@ -446,7 +453,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 * @param statement
 	 * @param root
 	 */
-	private void parseStandaloneStructures(Element statement, Element root) {
+	private void parseStandaloneStructures(Element statement, Element root, EQProposals empty) {
 		try{
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
@@ -484,14 +491,15 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			}*/
 
 			for(EntityProposals entityp: entities){
-				EQProposals eqp= new EQProposals();
+				//EQProposals eqp= new EQProposals();
+				EQProposals eqp= empty.clone();
 				eqp.setEntity(entityp);
-				eqp.setSource(super.src);
-				eqp.setCharacterId(super.characterid);
-				eqp.setStateId(super.stateid);
-				eqp.setDescription(super.text);
+				//eqp.setSource(super.src);
+				//eqp.setCharacterId(super.characterid);
+				//eqp.setStateId(super.stateid);
+				eqp.setStateText(statement.getChildText("text"));
 				eqp.setType("character");
-				eqp.setCharacterlabel(super.characterlabel);
+				//eqp.setCharacterlabel(super.characterlabel);
 				this.EQStatements.add(eqp);
 			}			
 		}catch(Exception e){

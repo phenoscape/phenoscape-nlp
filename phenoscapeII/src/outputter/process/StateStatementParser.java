@@ -46,11 +46,11 @@ public class StateStatementParser extends Parser {
 	//ArrayList<EQStatementProposals> EQStatements = new ArrayList<EQStatementProposals>();
 	private static final Logger LOGGER = Logger.getLogger(StateStatementParser.class);   
 	protected ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
-	String src;
-	String characterid;
-	String stateid;
-	String characterlabel;
-	String text;
+	//String src;
+	//String characterid;
+	//String stateid;
+	//String characterlabel;
+	//String text;
 	ArrayList<String> qualityclue;
 	ArrayList<EntityProposals> keyentities; //use this when changes made here are used somewhere else.
 	//ArrayList<EntityProposals> keyentitiesclone; //use this for local operation
@@ -85,7 +85,7 @@ public class StateStatementParser extends Parser {
 		super(ontoutil);
 		this.keyentities = keyentities;
 		this.qualityclue = qualityclue;
-		this.characterlabel = characterlabel;
+		//this.characterlabel = characterlabel;
 	}
 
 	private ArrayList<EntityProposals> clone(ArrayList<EntityProposals> keyentities) {
@@ -112,22 +112,22 @@ public class StateStatementParser extends Parser {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void parse(Element statement, Element root) {
+	public void parse(Element statement, Element root, EQProposals empty) {
 		//refactored by extracting the following three methods
-		LOGGER.debug("StateStatementParser: parsing metadata...");
-		parseMetadata(statement, root);
+		//LOGGER.debug("StateStatementParser: parsing metadata...");
+		//parseMetadata(statement, root);
 		LOGGER.debug("StateStatementParser: parsing relations...");
-		parseRelationsFormEQ(statement, root);
+		parseRelationsFormEQ(statement, root, empty);
 		LOGGER.debug("StateStatementParser: parsing characters...");
-		parseCharactersFormEQ(statement, root);
+		parseCharactersFormEQ(statement, root, empty);
 		LOGGER.debug("StateStatementParser: parsing standalone structures...");
-		parseStandaloneStructures(statement, root); //not needed by BinaryCharacterStatementParser.
+		parseStandaloneStructures(statement, root, empty); //not needed by BinaryCharacterStatementParser.
 		//populate characterlabel, if it is null
-		populateCharacterLabel();
+		//populateCharacterLabel();
 	}
 
 
-	protected void parseMetadata(Element statement, Element root) {
+	/*protected void parseMetadata(Element statement, Element root) {
 		this.src = root.getAttributeValue(ApplicationUtilities
 				.getProperty("source.attribute.name"));
 		this.characterid = statement.getAttributeValue("character_id");
@@ -139,13 +139,19 @@ public class StateStatementParser extends Parser {
 		} catch (JDOMException e) {
 			LOGGER.error("", e);
 		}
-	}
+	}*/
 
-	@SuppressWarnings("unchecked")
-	private void parseStandaloneStructures(Element statement, Element root) {
-		// last, standing alone structures (without characters 
-		// and are not the subject of a relation or a character constraint)
+	/**
+	 * last, standing alone structures (without characters 
+		and are not the subject of a relation or a character constraint)
 		//TODO: could it really be a quality?
+	 * @param statement
+	 * @param root
+	 * @param empty
+	 */
+	@SuppressWarnings("unchecked")
+	private void parseStandaloneStructures(Element statement, Element root, EQProposals empty) {
+
 
 		//if a real entity, construct EQs of 'entity/present' 
 		//The following case is handled by the wildcard entity search strategy 	  
@@ -171,7 +177,7 @@ public class StateStatementParser extends Parser {
 						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
 						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
 						//this.constructEQStatementProposals(qualities, primentities);	
-						this.constructEQProposals(qualities, primentities);	
+						this.constructEQProposals(qualities, primentities, empty);	
 					}
 					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					//entities.addAll(ep);
@@ -206,7 +212,7 @@ public class StateStatementParser extends Parser {
 				qp.add(q);
 				qualities.add(qp);
 				//constructEQStatementProposals(qualities, entities1);
-				constructEQProposals(qualities, entities1);
+				constructEQProposals(qualities, entities1, empty);
 				entities1.clear();
 			}
 		}catch(Exception e){
@@ -214,7 +220,7 @@ public class StateStatementParser extends Parser {
 		}
 	}
 
-	protected void parseCharactersFormEQ(Element statement, Element root) {
+	protected void parseCharactersFormEQ(Element statement, Element root, EQProposals empty) {
 		//then parse characters. 
 		try {
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
@@ -245,7 +251,7 @@ public class StateStatementParser extends Parser {
 			
 			if(characters.size()<=0){
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
-				constructEQProposals(qualities, entities);
+				constructEQProposals(qualities, entities, empty);
 			}else{
 				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
@@ -262,7 +268,7 @@ public class StateStatementParser extends Parser {
 					if(qualities!=null) for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					Utilities.postcompose(entities, postcomps);
-					constructEQProposals(qualities, entities);
+					constructEQProposals(qualities, entities, empty);
 				}
 			}
 			
@@ -422,7 +428,7 @@ public class StateStatementParser extends Parser {
 	 * 
 	 */
 	
-	private void populateCharacterLabel() {
+	/*private void populateCharacterLabel() {
 
 		//sets the characterlabel
 		for(EQProposals eqp:this.EQStatements)
@@ -432,7 +438,7 @@ public class StateStatementParser extends Parser {
 				eqp.setCharacterlabel(this.characterlabel);
 			}
 		}
-	}
+	}*/
 	
 	
 	/*
@@ -513,7 +519,7 @@ public class StateStatementParser extends Parser {
 	 * @param root
 	 */
 
-	protected void parseRelationsFormEQ(Element statement, Element root) {
+	protected void parseRelationsFormEQ(Element statement, Element root, EQProposals empty) {
 		ArrayList<String> StructuredQualities = new ArrayList<String>();//scope of this variable?
 		List<Element> relations;
 		try {
@@ -521,10 +527,10 @@ public class StateStatementParser extends Parser {
 			for (Element relation : relations) {
 				ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 				List<QualityProposals> q = new ArrayList<QualityProposals>();
-				int flag = parseRelation(relation, root, StructuredQualities, entities,  q);
+				int flag = parseRelation(relation, root, StructuredQualities, entities,  q, empty);
 				if(flag==1){
 					//constructEQStatementProposals(q, entities);
-					constructEQProposals(q, entities);
+					constructEQProposals(q, entities, empty);
 				}
 			}
 		} catch (JDOMException e) {
@@ -533,7 +539,7 @@ public class StateStatementParser extends Parser {
 	}
 
 
-	public int parseRelation(Element relation, Element root, ArrayList<String> StructuredQualities, ArrayList<EntityProposals> entities,  List<QualityProposals> q){
+	public int parseRelation(Element relation, Element root, ArrayList<String> StructuredQualities, ArrayList<EntityProposals> entities,  List<QualityProposals> q, EQProposals empty){
 		int flag = 1; //should the relation be retained or ignored. 1 = retain
 		for (String structid : StructuredQualities){ //StructuredQualities: initially empty, populated with the ids of 'bad' structures (that are really quliaties") 
 			if ((relation.getAttributeValue("from").equals(structid)) //the structure involved in the relation is actually a quality
@@ -618,6 +624,7 @@ public class StateStatementParser extends Parser {
 				}
 				if (rh.otherEQs!=null && rh.otherEQs.size() > 0)
 				{
+					addMeta(rh.otherEQs, empty);
 					this.EQStatements.addAll(rh.otherEQs);
 				}
 				if(rh.entitylocator!=null)
@@ -695,18 +702,37 @@ public class StateStatementParser extends Parser {
 		return flag;
 	}
 
-	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities){
+	/**
+	 * copy meta info about the EQ to otherEQs
+	 * @param otherEQs
+	 * @param empty
+	 */
+	private void addMeta(ArrayList<EQProposals> EQs, EQProposals empty) {
+		if(empty==null) return;
+		
+		for(EQProposals EQ: EQs){
+			EQ.setSource(empty.getSource());
+			EQ.setCharacterId(empty.getCharacterId());
+			EQ.setCharacterText(empty.getCharacterText());
+			EQ.setStateId(empty.getStateId());
+			EQ.setStateText(empty.getStateText());
+			EQ.setType(empty.getType());
+		}
+	}
+
+	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities, EQProposals empty){
 		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
-					EQProposals eqp = new EQProposals();
+					//EQProposals eqp = new EQProposals();
+					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(qualityp);
-					eqp.setSource(this.src);
-					eqp.setCharacterId(this.characterid);
-					eqp.setStateId(this.stateid);
-					eqp.setDescription(text);
-					eqp.setCharacterlabel(this.characterlabel);
+					//eqp.setSource(this.src);
+					//eqp.setCharacterId(this.characterid);
+					//eqp.setStateId(this.stateid);
+					//eqp.setDescription(text);
+					//eqp.setCharacterlabel(this.characterlabel);
 					if (this instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{
@@ -717,14 +743,15 @@ public class StateStatementParser extends Parser {
 			}			
 		} else if(entities!=null && entities.size()>0 && this instanceof BinaryCharacterStatementParser){ //no qualities identified so far
 				for (EntityProposals entityp : entities) {
-					EQProposals eqp = new EQProposals();
+					//EQProposals eqp = new EQProposals();
+					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
-					eqp.setSource(this.src);
-					eqp.setCharacterId(this.characterid);
-					eqp.setStateId(this.stateid);
-					eqp.setDescription(text);
-					eqp.setCharacterlabel(this.characterlabel);
+					//eqp.setSource(this.src);
+					//eqp.setCharacterId(this.characterid);
+					//eqp.setStateId(this.stateid);
+					//eqp.setDescription(text);
+					//eqp.setCharacterlabel(this.characterlabel);
 					if (this instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{

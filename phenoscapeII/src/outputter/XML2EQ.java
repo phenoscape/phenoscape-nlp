@@ -151,9 +151,9 @@ public class XML2EQ {
 			// qualityid
 			// qualitymodifier/label/id and entitylocator/label/id may hold multiple values separated by "," which preserves the order of multiple values
 			stmt.execute("drop table if exists " + outputtable);
-			System.out.println("create table if not exists " + outputtable
-					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-					+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
+			//System.out.println("create table if not exists " + outputtable
+			//		+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
+			//		+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))");
 			//stmt.execute("create table if not exists " + outputtable
 			//		+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
 			//		+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
@@ -189,21 +189,44 @@ public class XML2EQ {
 				System.out.println("[" + count + "]" + src);
 				count++;
 				//allEQs = new ArrayList<EQStatementProposals>();
-				allEQs = new ArrayList<EQProposals>();
-				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
+				allEQs = new ArrayList<EQProposals>(); //allEQs from an xml file
+				List<Element> characterstatements = XMLNormalizer.pathCharacterStatement.selectNodes(root);
+				Element characterstatement = merge(characterstatements);
 				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
+					EQProposals posempty = new EQProposals();
+					EQProposals negempty = new EQProposals();
+					boolean pos = false; //used for incomplete binary statements: only one value (T/F) is present
+					boolean neg = false;
+					for(Element statestatement: statestatements){
+						EQProposals empty = new EQProposals();
+						empty.setSourceFile(src);
+						empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
+						empty.setCharacterText(characterstatement.getChildText("text"));
+						empty.setStateId(statestatement.getAttributeValue("state_id"));
+						empty.setStateText(statestatement.getChildText("text"));
+						if(statestatement.getChildText("text").matches(Dictionary.binaryTvalues)){
+							posempty = empty;
+							pos = true;
+						}else{
+							negempty = empty;
+							neg = true;
+						}
+					}
+					if(! pos) posempty = negempty;
+					if(! neg) negempty = posempty;
+					
 					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil,characterstatement.getChildText("text"));
-					bcsp.parse(characterstatement, root);
+					bcsp.parse(characterstatement, root, posempty, negempty);
 					if(bcsp.getEQStatements().size()==0){
 						for(Element statestatement: statestatements){
 							EQProposals empty = new EQProposals();
 							empty.setSourceFile(src);
 							empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
-							empty.setCharacterlabel(characterstatement.getChildText("text"));
+							empty.setCharacterText(characterstatement.getChildText("text"));
 							empty.setStateId(statestatement.getAttributeValue("state_id"));
-							empty.setDescription(statestatement.getChildText("text"));
+							empty.setStateText(statestatement.getChildText("text"));
 							empty.setEntity(new EntityProposals());
 							empty.setQuality(new QualityProposals());
 							allEQs.add(empty);
@@ -213,7 +236,7 @@ public class XML2EQ {
 					}
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
-					csp.parse(characterstatement, root);
+					csp.parse(characterstatement, root, null);
 					keyentities = csp.getKeyEntities();
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
@@ -222,14 +245,22 @@ public class XML2EQ {
 					for(Element statestatement: statestatements){
 						LOGGER.debug("XML2EQ: processing state statement...");
 						System.out.println("text: " + statestatement.getChildText("text"));
-						ssp.parse(statestatement, root);
+						EQProposals empty = new EQProposals();
+						empty.setSourceFile(src);
+						empty.setCharacterId(statestatement.getAttributeValue("character_id"));
+						empty.setCharacterText(characterstatement.getChildText("text"));
+						empty.setStateId(statestatement.getAttributeValue("state_id"));
+						empty.setStateText(statestatement.getChildText("text"));
+						empty.setType("state");
+						String t = "";
+						ssp.parse(statestatement, root, empty);
 						if(ssp.getEQStatements().size()==0){
-							EQProposals empty = new EQProposals();
+							//EQProposals empty = new EQProposals();
 							empty.setSourceFile(src);
 							empty.setCharacterId(statestatement.getAttributeValue("character_id"));
-							empty.setCharacterlabel(characterstatement.getChildText("text"));
+							empty.setCharacterText(characterstatement.getChildText("text"));
 							empty.setStateId(statestatement.getAttributeValue("state_id"));
-							empty.setDescription(statestatement.getChildText("text"));
+							empty.setStateText(statestatement.getChildText("text"));
 							empty.setEntity(new EntityProposals());
 							empty.setQuality(new QualityProposals());
 							allEQs.add(empty);
@@ -241,7 +272,6 @@ public class XML2EQ {
 					}
 					fixIncompleteStates(src, root);//try to fix states with incomplete EQs by drawing info from  EQs from other states
 				}
-				
 				outputEQs4CharacterUnit();
 			}catch(Exception e){
 				LOGGER.error("", e);
@@ -257,6 +287,35 @@ public class XML2EQ {
 		elk.dispose();
 	}
 
+	
+	/**
+	 * merge multiple character statements into one
+	 * replace those statements with the merged one
+	 * @param characterstatements
+	 * @return merged
+	 */
+	private Element merge(List<Element> characterstatements) {
+		if(characterstatements.size()==1) return characterstatements.get(0);
+		Element merged = characterstatements.get(0);
+		Element parent = characterstatements.get(0).getParentElement();
+		merged.detach();
+		parent.addContent(merged);
+		String mergedtext = merged.getChildText("text").trim() + " ";
+		for(int i = 1; i < characterstatements.size(); i++){
+			Element e = characterstatements.get(i);
+			mergedtext += e.getChildText("text")+" ";
+			e.getChild("text").detach();
+			List<Element> children = e.getChildren();
+			for(int j = 0; j<children.size(); j++){
+				Element c = children.get(j);
+				c.detach();
+				merged.addContent(c);
+			}
+			e.detach();
+		}
+		merged.getChild("text").setText(mergedtext.trim());
+		return merged;
+	}
 
 	/**
 	 * use workbench to select/keep only the ones in the workbench
@@ -408,9 +467,9 @@ public class XML2EQ {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
 			preparedStatement.setString(1, eQ.getSourceFile());
 			preparedStatement.setString(2, eQ.getCharacterId());
-			preparedStatement.setString(3,eQ.getCharacterlabel());
+			preparedStatement.setString(3,eQ.getCharacterText());
 			preparedStatement.setString(4,eQ.getStateId());
-			preparedStatement.setString(5,eQ.getDescription());
+			preparedStatement.setString(5,eQ.getStateText());
 			preparedStatement.setString(6,entity);
 			preparedStatement.setString(7,entitylabel);
 			preparedStatement.setString(8,entityid);
@@ -1002,7 +1061,7 @@ public class XML2EQ {
 										EQp.setSource(src);
 										EQp.setCharacterId(characterid);
 										EQp.setStateId(stateid);
-										EQp.setDescription(text);
+										EQp.setStateText(text);
 										//EQp.add(EQ);
 										allEQs.add(EQp);
 									}
@@ -1043,7 +1102,7 @@ public class XML2EQ {
 	private EQProposals relatedEQ(String stateid, String ngram) {
 		ArrayList<EQProposals> EQs = this.getEQsforState(stateid);
 		for(EQProposals EQ: EQs){
-			String value = EQ.getDescription();
+			String value = EQ.getStateText();
 			if(value!=null && value.length()>0 && (value.contains(ngram) || ngram.contains(value))){
 				return EQ;
 			}			

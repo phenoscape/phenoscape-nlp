@@ -50,13 +50,16 @@ public class AddIds2PatternsGoldstandard {
 			int count = 0;
 			while(rs.next()){
 				String[] ids = getIds(rs.getString("characterlabel"), rs.getString("statelabel"));//0: charaid, 1:stateid
-				if(ids[0]!=null && ids[1]!=null && ids[0].length()>0 && ids[1].length()>0) System.out.println("found ids for record #"+ count);
-				else 
+				if(ids[0]!=null && ids[1]!=null && ids[0].length()>0 && ids[1].length()>0){
+					//System.out.println("found ids for record #"+ count);
+					Statement update = conn.createStatement();
+					update.execute("update "+this.goldtablename+" set characterid='"+ids[0]+"', stateid='"+ids[1]+"'"
+							+ " where characterlabel='"+rs.getString("characterlabel")+"' and  statelabel='"+rs.getString("statelabel")+"'");
+				}else{ 
 					System.out.println("not found ids for record #"+ count + " "+ rs.getString("characterlabel") +"]["+ rs.getString("statelabel"));
+				}
 				count++;
-				//Statement update = conn.createStatement();
-				//update.execute("update "+this.goldtablename+" set characterid='"+ids[0]+"' stateid='"+ids[1]+"'"
-				//		+ " where characterlabel='"+rs.getString("characterlabel")+"' statelabel='"+rs.getString("statelabel")+"'");
+				
 			}	
 		}catch(Exception e){
 			e.printStackTrace();

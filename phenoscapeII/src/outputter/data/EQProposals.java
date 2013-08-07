@@ -13,9 +13,9 @@ public class EQProposals{
 	QualityProposals quality;
 	private String sourceFile;
 	String characterId;
-	String characterlabel;
+	String characterText;
 	String stateId;
-	String description;
+	String stateText;
 	private String type;
 	float confidenceScore;
 	
@@ -45,8 +45,8 @@ public class EQProposals{
 		this.quality = quality;
 	}
 	
-	public void setDescription(String description){
-		this.description = description;
+	public void setStateText(String description){
+		this.stateText = description;
 	}
 	
 	public void setType(String type) {
@@ -76,20 +76,20 @@ public class EQProposals{
 		return this.quality  ;
 	}
 	
-	public String getDescription(){
-		return this.description;
+	public String getStateText(){
+		return this.stateText;
 	}
 	
 	public String getType() {
 		// TODO Auto-generated method stub
 		return this.type;
 	}
-	public String getCharacterlabel() {
-		return characterlabel;
+	public String getCharacterText() {
+		return characterText;
 	}
 
-	public void setCharacterlabel(String characterlabel) {
-		this.characterlabel = characterlabel;
+	public void setCharacterText(String characterlabel) {
+		this.characterText = characterlabel;
 	}
 
 
@@ -117,9 +117,9 @@ public class EQProposals{
 		eq1.setQuality(this.getQuality());
 		eq1.setSource(this.getSource());
 		eq1.setStateId(this.getStateId()); //TODO: change it for states
-		eq1.setDescription(this.getDescription());
+		eq1.setStateText(this.getStateText());
 		eq1.setType(this.getType());
-		eq1.setCharacterlabel(this.getCharacterlabel());
+		eq1.setCharacterText(this.getCharacterText());
 		return eq1;
 	}
 	

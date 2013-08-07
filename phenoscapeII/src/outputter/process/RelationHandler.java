@@ -257,7 +257,7 @@ public class RelationHandler {
 
 							Element statement = relelement.getParentElement();
 							eqproposals.setCharacterId(statement.getAttributeValue("character_id"));
-							eqproposals.setDescription(statement.getChildText("text"));
+							eqproposals.setStateText(statement.getChildText("text"));
 							eqproposals.setSource(root.getAttributeValue(ApplicationUtilities
 									.getProperty("source.attribute.name")));
 							eqproposals.setStateId(statement.getAttribute("state_id") == null ? ""
@@ -316,7 +316,7 @@ public class RelationHandler {
 							eqproposals.setQuality(absentp);
 							Element statement = relelement.getParentElement();
 							eqproposals.setCharacterId(statement.getAttributeValue("character_id"));
-							eqproposals.setDescription(statement.getChildText("text"));
+							eqproposals.setStateText(statement.getChildText("text"));
 							eqproposals.setSource(root.getAttributeValue(ApplicationUtilities
 									.getProperty("source.attribute.name")));
 							eqproposals.setStateId(statement.getAttribute("state_id") == null ? ""
