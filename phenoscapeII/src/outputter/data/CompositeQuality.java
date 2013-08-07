@@ -59,6 +59,11 @@ public class CompositeQuality extends Quality {
 		}
 	}
 	
+	@Override	
+	public String getLabel()
+	{
+		return this.mainquality.getLabel();
+	}
 	@Override
 	public float getConfidienceScore() {
 		
