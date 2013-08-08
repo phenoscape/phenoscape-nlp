@@ -154,8 +154,8 @@ public class EQPerformanceEvaluation {
 			stmt.close();
 
 			readResultsfromDatabase();
-			compareFields();//precision and recall for each of the fields
-			readResultsfromDatabase();
+			//compareFields();//precision and recall for each of the fields
+			//readResultsfromDatabase();
 			compareEQs(); //for raw/labeled EQ statements
 
 		}catch(Exception e){
@@ -619,10 +619,10 @@ public class EQPerformanceEvaluation {
 			
 			totalscore+=statescore;
 		}
-		fieldstring = "exactp, exactr, partialp, partialr";
+		fieldstring = "exactp, exactr";
 		float precision = totalgenerated==0? -1 : (float)totalscore/totalgenerated;
 		float recall = totalinanswer==0? -1 : (float)totalscore/totalinanswer;
-		prstring  = precision +","+ recall +",0" +",0"+"";
+		prstring  = precision +","+ recall +"";
 
 
 		this.insertInto(this.prtableEQs, fieldstring, prstring);
