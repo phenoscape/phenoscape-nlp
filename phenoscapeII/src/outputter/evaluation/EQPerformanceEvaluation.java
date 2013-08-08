@@ -154,8 +154,8 @@ public class EQPerformanceEvaluation {
 			stmt.close();
 
 			readResultsfromDatabase();
-			//compareFields();//precision and recall for each of the fields
-			//readResultsfromDatabase();
+			compareFields();//precision and recall for each of the fields
+			readResultsfromDatabase();
 			compareEQs(); //for raw/labeled EQ statements
 
 		}catch(Exception e){
@@ -571,6 +571,7 @@ public class EQPerformanceEvaluation {
 			statescore=0;
 			int eqcount=0;
 			System.out.println("state"+i);
+
 			for(Hashtable<String, String> tEQ : tstates.get(i)){
 				System.out.println("EQ==="+eqcount++);
 				String entity = tEQ.get("entityid");//contains entity proposals seprated by comma
@@ -597,13 +598,14 @@ public class EQPerformanceEvaluation {
 				for(String key2:keys2)
 				{
 					System.out.println("gs=== "+key2+" match score"+eqmatch.get(key2));
-					if((maxscore<eqmatch.get(key2))&&(gsmatched.matches(key2)==false)) //reading each of the eq's and finding the best match
+					if((maxscore<eqmatch.get(key2))&&(gsmatched.contains(key2)==false)) //reading each of the eq's and finding the best match
 					{
 						maxscore=eqmatch.get(key2);
 						matched=key2;
 					}
 				}
 				gsmatched+=" "+matched;//used to track the gold standards already matched
+				gsmatched=gsmatched.trim();
 				statescore+=maxscore;
 			}
 			System.out.println("State score"+i+"   "+statescore);
@@ -618,6 +620,7 @@ public class EQPerformanceEvaluation {
 
 			
 			totalscore+=statescore;
+			
 		}
 		fieldstring = "exactp, exactr";
 		float precision = totalgenerated==0? -1 : (float)totalscore/totalgenerated;
