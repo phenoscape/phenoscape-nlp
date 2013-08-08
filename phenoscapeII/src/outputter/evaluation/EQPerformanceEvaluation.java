@@ -110,7 +110,7 @@ public class EQPerformanceEvaluation {
 				System.out.println("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
 						"stateprecision float(4,2), staterecall float(4,2)" +
 						")");
-				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(700) primary key, " +
+				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
 						"stateprecision float(4,2), staterecall float(4,2)" +
 						")");
 				
