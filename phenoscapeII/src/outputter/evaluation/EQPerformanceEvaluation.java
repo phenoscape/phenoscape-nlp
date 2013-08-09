@@ -110,7 +110,7 @@ public class EQPerformanceEvaluation {
 				System.out.println("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
 						"stateprecision float(4,2), staterecall float(4,2)" +
 						")");
-				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(700) primary key, " +
+				stmt.execute("create table if not exists "+prtablestates+" (stateid varchar(100) primary key, " +
 						"stateprecision float(4,2), staterecall float(4,2)" +
 						")");
 				
@@ -266,7 +266,16 @@ public class EQPerformanceEvaluation {
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*(@,)\\s*");
 						for(String v1 : vs){
-							if(v1.length()>0) tvalues.add(v1);//holds all the entity proposals of this EQ statement
+							if(v1.length()>0)
+							{
+								if(v1.contains("score")==true)
+								{
+								tvalues.add((v1.substring(0, v1.indexOf("score")-1)).trim());//holds all the entity proposals of this EQ statement
+								}else
+								{
+								tvalues.add(v1.trim());
+								}
+							}
 						}
 					}
 					System.out.println("total number of proposals"+tvalues.size());
@@ -459,7 +468,7 @@ public class EQPerformanceEvaluation {
 				
 			}
 			count = replaceSubString(a,v,substrings,equivalence);
-			count = count/a.split(" ").length;
+			count = count/a.split(" ").length; // to reduce it to value of 0.0 - 1.0
 
 		}
 		return count;
@@ -571,8 +580,8 @@ public class EQPerformanceEvaluation {
 			statescore=0;
 			int eqcount=0;
 			System.out.println("state"+i);
-
-			for(Hashtable<String, String> tEQ : tstates.get(i)){
+			
+				for(Hashtable<String, String> tEQ : tstates.get(i)){
 				System.out.println("EQ==="+eqcount++);
 				String entity = tEQ.get("entityid");//contains entity proposals seprated by comma
 				String relatedentitylabel = tEQ.get("relatedentityid");//ditto
@@ -610,8 +619,8 @@ public class EQPerformanceEvaluation {
 			}
 			System.out.println("State score"+i+"   "+statescore);
 			
-			stateprecision = tstates.get(i).size()==0? -1 :(float)statescore/tstates.get(i).size();
-			staterecall = astates.get(i).size()==0? -1 :(float)statescore/astates.get(i).size();
+			stateprecision = tstates.get(i).size()==0? 0 :(float)statescore/tstates.get(i).size();
+			staterecall = astates.get(i).size()==0? 0 :(float)statescore/astates.get(i).size();
 			
 			fieldstring = "stateid,stateprecision,staterecall";
 			prstring ="'"+astates.get(i).get(0).get("stateid")+"',"+stateprecision+","+staterecall;
@@ -620,6 +629,7 @@ public class EQPerformanceEvaluation {
 
 			
 			totalscore+=statescore;
+			
 			
 		}
 		fieldstring = "exactp, exactr";
@@ -651,6 +661,7 @@ public class EQPerformanceEvaluation {
 		String entityproposals[] = entity.replace("\"","").split("(@,)");
 		String qualityproposals[] = quality.replace("\"","").split("(@,)");
 		String relatedentityproposals[] = relatedentity.replace("\"","").split("(@,)");
+		
 		Hashtable<String,Float> group = new Hashtable<String,Float>();
 //Gives score of all the proposals against all the gold standards
 		for(int i = 0; i < aState.size(); i++){//Parsing through multiple EQ's of each state(gold standard)
@@ -661,6 +672,7 @@ public class EQPerformanceEvaluation {
 				{
 					for(int p=0;p<relatedentityproposals.length;p++)
 					{
+						
 						float epscore = matchInState(entityproposals[j], relatedentityproposals[p], qualityproposals[k], aState.get(i), suffix);
 						
 						if(epscore > matchscore)
@@ -711,7 +723,19 @@ public class EQPerformanceEvaluation {
 	{
 		//System.out.println("inside match in state");
 		float totalscore=0;
-		
+		if(entity.equals("")==false)
+		{
+		entity = (entity.substring(0,entity.indexOf("Score")-1)).trim();
+		}
+		if(relatedentity.equals("")==false)
+		{
+			relatedentity = (relatedentity.substring(0,relatedentity.indexOf("Score")-1)).trim();
+		}
+		if(quality.equals("")==false)
+		{
+			quality = (quality.substring(0,quality.indexOf("Score")-1)).trim();
+		}
+
 		totalscore+=getIdMatchScore(entity.toLowerCase(),EQ.get("entityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(relatedentity.toLowerCase(),EQ.get("relatedentityid").toLowerCase(),"entity");
 		totalscore+=getIdMatchScore(quality.toLowerCase(),EQ.get("qualityid").toLowerCase(),"quality");
