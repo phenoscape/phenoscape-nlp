@@ -152,11 +152,12 @@ public class EQPerformanceEvaluation {
 				}
 			}
 			stmt.close();
-
+			System.out.println(System.currentTimeMillis());
 			readResultsfromDatabase();
 			compareFields();//precision and recall for each of the fields
 			readResultsfromDatabase();
 			compareEQs(); //for raw/labeled EQ statements
+			System.out.println(System.currentTimeMillis());
 
 		}catch(Exception e){
 			LOGGER.error("", e);
@@ -363,8 +364,8 @@ public class EQPerformanceEvaluation {
 			System.out.println("\t\t\t\tgeneratedfield======"+counts.get("generated"+field));
 			System.out.println("\t\t\t inanswerfield======"+counts.get("inanswer"+field));
 
-			float p = Float.parseFloat(counts.get("generated"+field))==0? -1 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("generated"+field));
-			float r = Float.parseFloat(counts.get("inanswer"+field)) ==0? -1 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("inanswer"+field));
+			float p = Float.parseFloat(counts.get("generated"+field))==0? 0 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("generated"+field));
+			float r = Float.parseFloat(counts.get("inanswer"+field)) ==0? 0 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("inanswer"+field));
 			prstring += p+","+r+",";
 		}
 		prstring = prstring.replaceFirst(",$", "");
@@ -633,8 +634,8 @@ public class EQPerformanceEvaluation {
 			
 		}
 		fieldstring = "exactp, exactr";
-		float precision = totalgenerated==0? -1 : (float)totalscore/totalgenerated;
-		float recall = totalinanswer==0? -1 : (float)totalscore/totalinanswer;
+		float precision = totalgenerated==0? 0 : (float)totalscore/totalgenerated;
+		float recall = totalinanswer==0? 0 : (float)totalscore/totalinanswer;
 		prstring  = precision +","+ recall +"";
 
 
