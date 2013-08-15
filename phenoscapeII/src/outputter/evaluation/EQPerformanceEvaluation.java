@@ -159,6 +159,7 @@ public class EQPerformanceEvaluation {
 				}
 			}
 			stmt.close();
+
 			LOGGER.debug(System.currentTimeMillis());
 			//long startTime = System.currentTimeMillis();
 			readResultsfromDatabase();			
@@ -170,10 +171,12 @@ public class EQPerformanceEvaluation {
 			//System.out.println("time spent on comparing fields was " + (stopTime2 - stopTime)/60000f + " minutes.");
 
 			readResultsfromDatabase();
+
 			//long stopTime3 = System.currentTimeMillis();
 			//System.out.println("time spent on reading results [again] was " + (stopTime3 - stopTime2)/60000f + " minutes.");
 
 			compareEQs(); //for raw/labeled EQ statements
+
 
 			//long stopTime4 = System.currentTimeMillis();
 			//System.out.println("time spent on comare EQs was " + (stopTime4 - stopTime3)/60000f + " minutes.");
@@ -652,6 +655,7 @@ public class EQPerformanceEvaluation {
 			int counter=0;
 			statescore=0;
 			int eqcount=0;
+
 			LOGGER.debug("state"+i);
 			
 				for(Hashtable<String, String> tEQ : tstates.get(i)){
@@ -944,6 +948,7 @@ public class EQPerformanceEvaluation {
 				max = matrixIsZero(match,rows,columns);
 			}
 			LOGGER.debug("end of getnonoverlapping "+System.currentTimeMillis());
+
 
 		}
 		

@@ -70,6 +70,10 @@ public class NegatedQuality extends Quality {
 		return this.parentQuality.getId()+" and ("+negation.getId()+" some "+this.getId()+")";
 	}
 	
+	public String getLabel()
+	{
+		return this.parentQuality.getLabel()+" and ("+negation.getLabel()+" some "+this.getLabel()+")";
+	}
 	/**
 	 * not waisted => shape and complement_of some waisted
 	 */

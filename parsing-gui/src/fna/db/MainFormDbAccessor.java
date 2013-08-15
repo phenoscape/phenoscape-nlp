@@ -465,7 +465,7 @@ public class MainFormDbAccessor {
 			stmt.execute(createprefixTable);
 			rset = stmt.executeQuery("select * from datasetprefix order by time_last_accessed desc");
 			while (rset.next()) {
-				datasetPrefixes.add(rset.getString("prefix"));
+				datasetPrefixes.add(rset.getString("prefix"));//collects all the prefixes used in this system
 			}
 		}catch (SQLException exe) {
 			LOGGER.error("Couldn't execute db query in MainFormDbAccessor:datasetPrefixRetriever", exe);

@@ -64,6 +64,7 @@ public class CompositeQuality extends Quality {
 		}
 	}
 	
+
 	@Override
 	public float getConfidienceScore() {
 		
