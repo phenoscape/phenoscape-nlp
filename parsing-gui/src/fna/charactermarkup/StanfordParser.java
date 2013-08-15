@@ -82,6 +82,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	static public XPath path21;
 	static public XPath path22;
 	static public XPath path23;
+	static public XPath path24;
 	static public XPath rb;
 	static{
 		try{
@@ -110,6 +111,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path21 = XPath.newInstance(".//PP");
 			path22 = XPath.newInstance(".//PP/CC");
 			path23 = XPath.newInstance(".//NN|.//NNS");
+			
+			path24 = XPath.newInstance(".//text");
 			
 			rb = XPath.newInstance(".//ADVP/RB");
 			
@@ -383,6 +386,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 								System.out.println();
 								System.out.println(i+"["+src+"]: "+cs.toString());
 							}
+							
 							statement = cac.annotate(src, src, cs); 
 							
 							description.addContent(statement);

@@ -135,7 +135,7 @@ public class ChunkedSentence {
 		this.conn = conn;
 		this.type = type;
 		
-		try{
+		/*try{
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select term from "+glosstable+" where category='character'");
 			while(rs.next()){
@@ -143,7 +143,9 @@ public class ChunkedSentence {
 			}
 		}catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
+		
+		nouns.addAll(Arrays.asList(characters.split("\\|")));
 		
 		this.sentsrc = sentsrc;
 		this.sentid = id;

@@ -85,8 +85,7 @@ public class CharacterAnnotatorChunked {
 	private boolean debugextraattributes=false;
 	private ArrayList<String> phrases;
 	private Hashtable<String, String> p2sphrases;
-	
-
+	private Pattern chptn ;
 	/**
 	 * 
 	 */
@@ -112,7 +111,8 @@ public class CharacterAnnotatorChunked {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		//construct chptn
+		chptn = Pattern.compile("\\b("+this.characters+")\\b", Pattern.CASE_INSENSITIVE);
 		//prematched structure names:
 		File file = new File(ApplicationUtilities.getProperty("uberonphrases.update.bin"));
 		File p2sfile = new File(ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
@@ -161,7 +161,7 @@ public class CharacterAnnotatorChunked {
 		String[] ids = sentsrc.split("_");
 		String charaid = ids[0];
 		String stateid = null;
-		;
+		
 		if (ids.length > 1) {
 			stateid = ids[1];
 		}
@@ -188,12 +188,13 @@ public class CharacterAnnotatorChunked {
 
 		int i = 0;
 		String token = cs.getTokenAt(i++);
-		while (token.length() == 0) {
+		while (token.length() == 0 || token.matches(ChunkedSentence.stop)) {
 			token = cs.getTokenAt(i++);
 		}
 		if (token.startsWith("z[") || token.startsWith("l[") || token.startsWith("u[")) {
 			annotateByChunk(cs, false);
-		} else {
+		}else {
+		
 			establishSubject("("+ApplicationUtilities.getProperty("unknown.structure.name")+")", false);
 			cs.setInSegment(true);
 			cs.setRightAfterSubject(true);
@@ -228,6 +229,7 @@ public class CharacterAnnotatorChunked {
 		//manus digits i-iii => manus digit i, manus digit ii, manus digit iii
 		decomposeMultipleStructures();//Changed by Zilong
 		standardization();
+		markCharacterInText();
 
 
 		if (printAnnotation) {
@@ -238,6 +240,32 @@ public class CharacterAnnotatorChunked {
 		return this.statement;
 	}
 
+
+	/**
+	 * if a character statement contains character terms, mark them as [character] in the text
+	 */
+	private void markCharacterInText() {
+		try{
+			List<Element> texts = StanfordParser.path24.selectNodes(this.statement);
+			for(Element text: texts){
+				Element statement = text.getParentElement();
+				if (statement.getAttribute("state_id") == null){ 
+					String string = statement.getChild("text").getTextTrim();	
+					Matcher m = chptn.matcher(string);
+					String marked = "";
+					while(m.find()){
+						marked += string.substring(0, m.start()) +"["+m.group(1)+"]";
+						string = string.substring(m.end());
+						m = chptn.matcher(string);
+					}
+					marked +=string;
+					this.statement.getChild("text").setText(marked.trim());
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * for character type:
@@ -263,14 +291,17 @@ public class CharacterAnnotatorChunked {
     *TODO: how about 'contact btw A and B'?
 	 */
 	private void normalizeModifierCharacters(String sentsrc) {
-		String t="";
+
 		if(this.statement.getAttributeValue("statement_type").compareTo("character")==0){
 			//gather data
 			List<Element> children = this.statement.getChildren("structure");
 			ArrayList<Element> characters = new ArrayList<Element>();
 			if(children.size()>0 && children.get(0).getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0){
 				List<Element> charas = children.get(0).getChildren("character");
-				for(Element chara : charas) characters.add(chara);
+				for(Element chara : charas){
+					if(chara.getAttributeValue("name").compareTo("character")!=0) //characters such as shape and number are dealt with later
+						characters.add(chara);
+				}
 			}
 			//make changes
 			if(characters.size()>=1 && children.size()>1){
@@ -402,11 +433,6 @@ public class CharacterAnnotatorChunked {
 		for (Element chara : chars) {
 			if(chara.getAttributes().size()>2) continue; //isolated characters should only have name and value attributes.
 			String v = chara.getAttributeValue("value");
-			if (this.statement.getAttribute("state_id") == null){ //if a character statement, mark the [character]
-				String text = this.statement.getChild("text").getTextTrim();
-				text = text.replaceAll(v, "[" + v + "]");
-				this.statement.getChild("text").setText(text);
-			}
 			List<Element> childreninorder = chara.getParentElement().getContent(new ElementFilter()); 
 			Element nextchara = null;
 			int i = childreninorder.indexOf(chara);
