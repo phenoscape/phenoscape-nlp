@@ -32,6 +32,7 @@ import outputter.data.Quality;
 import outputter.data.QualityProposals;
 import outputter.data.RelationalQuality;
 import outputter.data.SimpleEntity;
+import outputter.evaluation.EQPerformanceEvaluation;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.ELKReasoner;
 import outputter.knowledge.TermOutputerUtilities;
@@ -100,7 +101,7 @@ public class XML2EQ {
 		try{
 			//TODO: figure out why the two calls give different results?
 			//elk = new ELKReasoner(TermOutputerUtilities.uberon);
-			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"));
+			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), true);
 			/*OWLOntology elkonto = elk.getOntology();
 			System.out.println(elkonto.getAxiomCount());
 			System.out.println(TermOutputerUtilities.uberon.getAxiomCount());
@@ -1531,6 +1532,13 @@ public class XML2EQ {
 		try {
 			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);
 			x2e.outputEQs();
+			if(srcdir.indexOf("/final/")>0){
+				String resulttable = ApplicationUtilities.getProperty("table.output");
+				String goldstandard = "goldstandard";
+				//long startTime = System.currentTimeMillis();
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords");		
+				pe.evaluate();
+			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}

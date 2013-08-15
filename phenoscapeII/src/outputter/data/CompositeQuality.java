@@ -13,7 +13,7 @@ public class CompositeQuality extends Quality {
 
 	Quality mainquality;
 	Quality comparedquality;
-	String  restrictedrelation;
+	String  restrictedrelation; //TODO: check with Hari, should this be a formal concept too?
 	REntity relatedentity;
 
 	public CompositeQuality(Quality primary_quality, Quality secondary_quality, String relation, Entity relatedentity) {
@@ -29,6 +29,7 @@ public class CompositeQuality extends Quality {
 		// TODO Auto-generated constructor stub
 	}
 	*/
+
 	
 	public String getFullString()
 	{

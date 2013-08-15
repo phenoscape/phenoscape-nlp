@@ -29,21 +29,38 @@ public class Dictionary {
 	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
-	public static String process="process|crest|ridge|tentacule|shelf|flange|ramus";
+	
+	//synonym rings
+	public static String process="process|crest|ridge|ridges|tentacule|tentacules|shelf|shelves|flange|flanges|lamella|lamellae|lamina|laminae|projection|projections";
 	public static String opening = "opening|foramina|foramen|foramens|perforation|orifice"; 
 	public static String joint ="joint|articulation";
+	public static String contact="connection|contact|interconnection";//Extendible
+	
+	public static Hashtable<String, String> synrings = new Hashtable<String, String>();
+	static{
+		synrings.put(process, "anatomical projection");
+		synrings.put(opening, opening);
+		synrings.put(joint, joint);
+		synrings.put(contact, contact);
+		
+	}
+	
+	//others
 	public static String binaryTvalues = "present|true|yes|usually|with";//added present/absent
 	public static String binaryFvalues = "absent|false|no|rarely|without";
+	public static String negation = "absent|lacking";
 	public static String positionprep = "of|part_of|in|on|between";
 	//Changed by Zilong
 	public static String selfreference = "counterpart";//Extendible
-	public static String contact="connection|contact|interconnection";//Extendible
+	public static String prefixes = "post|pre|post-|pre-";
+	
+	//spatial
 	public static String spatialtermptn="medioventral|";
 	public static String singlewordspatialtermptn="medioventral|";
 	public static String multiwordsspatialtermptn="";
 
-	public static String prefixes = "post|pre|post-|pre-";
-	public static String negation = "absent|lacking";
+
+
 
 	//By Zilong: Update by Hong: Zilong's modifications have all be over-written. 
 	//sometimes, spatial terms could be used as adjectives to modify head nouns. 

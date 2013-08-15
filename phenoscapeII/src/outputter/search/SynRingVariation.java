@@ -4,6 +4,7 @@
 package outputter.search;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -65,10 +66,16 @@ public class SynRingVariation {
 		OWLAccessorImpl owlapi=null;
 		ArrayList<String> ontosynonyms;
 		//grab a synring from Dictionary
-		if(structure.matches("\\b("+Dictionary.process+")\\b"))
-			synring = Dictionary.process;
-		if(structure.matches("\\b("+Dictionary.opening+")\\b"))
-			synring = Dictionary.opening;
+		Enumeration<String> ptn = Dictionary.synrings.keys();
+		while(ptn.hasMoreElements()){
+			//if(structure.matches("\\b("+Dictionary.process+")\\b"))
+			//	synring = "anatomical projection";
+			//if(structure.matches("\\b("+Dictionary.opening+")\\b"))
+			//	synring = Dictionary.opening;
+			String syn = ptn.nextElement();
+			if(structure.matches("\\b("+syn+")\\b"))
+				synring = Dictionary.synrings.get(syn);
+		}
 		
 		//find owlapi for UBERON
 		for(OWLAccessorImpl temp:TermOutputerUtilities.OWLentityOntoAPIs){

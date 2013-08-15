@@ -610,9 +610,11 @@ public class Utilities {
 		
 		for(EntityProposals aep: entities){
 			for(Entity ex: aep.getProposals()){
-				for(Entity in: ep.getProposals()){
+				ArrayList<Entity> eproposals = ep.getProposals();
+				for(int i = 0; i < eproposals.size(); i++){
+					Entity in = eproposals.get(i);
 					if(ex.content().compareTo(in.content())==0){
-						ep.getProposals().remove(in); //deduplicate
+						eproposals.remove(in); //deduplicate
 					}
 				}
 			}
@@ -636,9 +638,11 @@ public class Utilities {
 			QualityProposals qp) {
 		for(QualityProposals aqp: qualities){
 			for(Quality qx: aqp.getProposals()){
-				for(Quality in: qp.getProposals()){
+				ArrayList<Quality> qproposals = qp.getProposals();
+				for(int i = 0; i<qproposals.size(); i++){
+					Quality in = qproposals.get(i);
 					if(qx.content().compareTo(in.content())==0){
-						qp.getProposals().remove(in);//deduplicate
+						qproposals.remove(in);//deduplicate
 					}
 				}
 			}

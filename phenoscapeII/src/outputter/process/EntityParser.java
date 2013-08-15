@@ -37,15 +37,22 @@ public class EntityParser {
 	private HashSet<String> identifiedqualities;
 	private ArrayList<EntityProposals> keyentities;
 
+	/*
+	 * Structureid: to handle pubis-ischium case, multiple structureids may be constructed from one structureid using '#' and an index, for example "o1#0", "o1#1"
+	 * the copy should be used for saving to and looking up in caches
+	 * the real structureid is used in process.
+	 */
 	public EntityParser(Element statement, Element root, String structureid, String structurename, ArrayList<EntityProposals> keyentities, boolean keyelement) {
+		String structureidcopy = structureid;
+		if(structureid.indexOf("#")>0) structureid = structureid.substring(0, structureid.indexOf("#"));
 		this.keyentities = keyentities; 
-		if(entitycache.get(structureid)!=null){
-			entity = entitycache.get(structureid);
-		}else if(s2qcache.get(structureid)!=null){
-			s2q =  s2qcache.get(structureid);
-		}else if(nomatchentitycache.contains(structureid)){
+		if(entitycache.get(structureidcopy)!=null){
+			entity = entitycache.get(structureidcopy);
+		}else if(s2qcache.get(structureidcopy)!=null){
+			s2q =  s2qcache.get(structureidcopy);
+		}else if(nomatchentitycache.contains(structureidcopy)){
 			entity = null;
-		}else if(nomatchs2qcache.contains(structureid)){
+		}else if(nomatchs2qcache.contains(structureidcopy)){
 			s2q = null;
 		}else{
 			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
@@ -58,9 +65,9 @@ public class EntityParser {
 				for(EntityProposals ep: entity){ 
 					LOGGER.debug(".."+ep.toString());
 				}
-				entitycache.put(structureid, entity);
+				entitycache.put(structureidcopy, entity);
 			}else{
-				EntityParser.nomatchentitycache.add(structureid);
+				EntityParser.nomatchentitycache.add(structureidcopy);
 				LOGGER.debug("EntityParser found no matching entities for '"+structurename+","+parents+"'");
 			}
 
@@ -83,10 +90,10 @@ public class EntityParser {
 			// if this.entity is not ontologized, then take the qualities else retain the entities
 			if(rq.qualities.size()>0){
 				s2q = rq;
-				s2qcache.put(structureid, rq);
+				s2qcache.put(structureidcopy, rq);
 				LOGGER.debug("EntityParser recorded candidate s2q");
 			}else{
-				EntityParser.nomatchs2qcache.add(structureid);
+				EntityParser.nomatchs2qcache.add(structureidcopy);
 				LOGGER.debug("EntityParser found no matching qualities for '"+structurename+","+parents+"'");
 			}
 			//resolveStructure(); //EntityParser doesn't have info to resolve this.

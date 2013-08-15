@@ -220,6 +220,7 @@ public class TermSearcher {
 			// preposition
 			String[] tokens = query.split("[$^():?*+.| ]+");
 			for (String token : tokens) {
+				if(token.length()==0) continue;
 				LinkedHashSet<String> phraseforms = Wordforms
 						.toAdjective(token);
 				String regexp = "";
@@ -227,7 +228,7 @@ public class TermSearcher {
 					if (form.trim().length() > 0)
 						regexp += form + "|";
 				}
-				regexp = regexp.replaceFirst("\\|$", "");
+				regexp = regexp.replaceFirst("\\|+$", "");
 				if (regexp.contains("|"))
 					regexp = "(?:" + regexp + ")";
 				query = query.replaceAll("\\b" + token + "\\b", regexp);
@@ -600,12 +601,11 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("posterolateral margin",
-				"entity");
+		ArrayList<FormalConcept> quality = ts.searchTerm("torsion",
+				"quality");
 		if(quality!=null){
 			for (FormalConcept fc : quality)
 				System.out.println(fc.getLabel());
-
 		}
 	}
 

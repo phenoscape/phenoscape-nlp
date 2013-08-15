@@ -19,10 +19,12 @@ static Hashtable<String,LinkedHashSet<String>> adjectivecache =new Hashtable<Str
 		//if the word is found in cache it returns it else, adjective forms are generated and a copy is stored in cache
 		if(adjectivecache.get(word)!=null)
 			return adjectivecache.get(word);
+		LinkedHashSet<String> forms = new LinkedHashSet<String>();
+		if(word.trim().length()==0) return forms;
 			
 		String suffix[] = adjective_suffixes.split("\\|");
 		ArrayList<String> wordforms = stemforms(word);//Stems the word and return all the stemmed form
-		LinkedHashSet<String> forms = new LinkedHashSet<String>();
+
 		forms.addAll(wordforms);
 		for(String word1:wordforms)
 		{

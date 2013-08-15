@@ -45,6 +45,7 @@ public class REntity extends Entity{
 	
 	/**
 	 * (part_of some clavicle blade)
+	 * TODO: print () with entity is a composite entity
 	 */
 	public String toString(){
 		return "("+this.relation.toString()+" some "+entity.toString()+")";

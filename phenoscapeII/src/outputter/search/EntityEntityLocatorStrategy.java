@@ -16,6 +16,7 @@ import outputter.data.Entity;
 import outputter.data.EntityProposals;
 import outputter.data.FormalRelation;
 import outputter.data.REntity;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 
 /**
@@ -108,6 +109,18 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 						for(EntityProposals sentityp: sentityps){
 							LOGGER.debug("....."+sentityp.toString());
 							for(Entity sentity: sentityp.getProposals()){
+								SimpleEntity bspo = null;
+								//sentityps could be a spatial entity, so the final E need to be composed using the spatial convention of SpatialModifiedEntity.
+								if(sentity instanceof CompositeEntity && sentity.getPrimaryEntityID().contains("BSPO:")){
+									bspo = ((CompositeEntity)sentity).getTheSimpleEntity();
+									sentity = ((CompositeEntity)sentity).getEntityLocator().getEntity();
+								}
+								if(bspo!=null){//composition with a spatial entity
+									CompositeEntity ce = new CompositeEntity();
+									ce.addEntity(bspo);
+									ce.addEntity(rentity);
+									rentity = new REntity(rel, ce);
+								}
 								//check elk: can sentity be part of entityl? 'intermedium (fore)' is part of 'manus'
 								//if true for any proposal, return it
 								//otherwise, return all
@@ -126,7 +139,7 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 								if(confirmed){
 									if(confirmedcentityp==null) confirmedcentityp = new EntityProposals();
 									confirmedcentityp.setPhrase(this.originalentityphrase);
-									//confirmedcentityp.add(centity);
+									//confirmedcentityp.add(centity); //no explicit composition needed
 									confirmedcentityp.add(sentity);
 									sentity.setConfidenceScore(1f);
 									confirmed = false;

@@ -236,12 +236,14 @@ public class CharacterStatementParser extends Parser {
 						String[] names = name.split("[_|/]");
 						underscoredStructureIDs.add(structureid);
 						LOGGER.debug("CSP: '"+name+"' is decomposed into "+names.length);
+						int index = 0;
 						for(String aname: names){
 							LOGGER.debug("CSP: searching "+aname);
 							String parents = parseStructure(statement, root,
 									fromcharacterdescription, /*entities, s2qs,*/
-									structureid, aname); //use the same structureid for all structures
+									structureid+"#"+index, aname); //use the same structureid for all structures
 							checked += structureid+","+parents+",";
+							index++;
 						}
 						//entityHash.put(structureid, entities);
 						//qualityHash.put(structureid, s2qs);
@@ -266,13 +268,15 @@ public class CharacterStatementParser extends Parser {
 
 	private String parseStructure(Element statement, Element root,
 			boolean fromcharacterdescription, String structureid, String structurename) {
+		String structureidcopy = structureid;
+		if(structureid.indexOf("#")>0) structureid = structureid.substring(0, structureid.indexOf("#"));
 		String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
 				 "|//relation[@name='in'][@from='" + structureid + "']" +
 				 "|//relation[@name='on'][@from='" + structureid + "']", 0); //list of structures separated with ","
 		if(debug){
 			System.out.println("parse structure:"+structurename);
 		}
-		EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, fromcharacterdescription);
+		EntityParser ep = new EntityParser(statement, root, structureidcopy, structurename, null, fromcharacterdescription);
 		if(ep.getEntity()!=null){
 			ArrayList<EntityProposals> entities;
 			if(this.entityHash.get(structureid)==null){

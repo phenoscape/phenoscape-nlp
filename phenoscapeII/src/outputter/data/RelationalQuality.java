@@ -5,7 +5,7 @@ package outputter.data;
 
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public class RelationalQuality extends Quality {
@@ -50,8 +50,13 @@ public class RelationalQuality extends Quality {
 		this.setRelatedentity(relatedentity);
 	}
 	
+
 	public String toString(){
 		return "quality="+this.getRelationalquality().toString()+" related entity="+this.getRelatedentity().toString();
+	}
+	
+	public String content(){
+		return this.getRelationalquality().content()+" "+this.getRelatedentity().content();
 	}
 	
 	public String getString()

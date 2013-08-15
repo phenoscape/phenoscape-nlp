@@ -10,6 +10,7 @@ import outputter.knowledge.Dictionary;
  *
  */
 public class NegatedQuality extends Quality {
+	Quality quality;
 	Quality parentQuality;
 	FormalRelation negation = Dictionary.complementof;
 	
@@ -28,18 +29,22 @@ public class NegatedQuality extends Quality {
 	 * @param id
 	 * @param iri
 	 */
-	public NegatedQuality(String string, String label, String id, Quality parentQuality) {
-		super("not "+string, label, id);
+	public NegatedQuality(String string, String label, String id, String classIRI, Quality parentQuality) {
+		super("not "+string, label, id, classIRI);
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
 	}
 
 	public NegatedQuality(Quality quality, Quality parentQuality) {
-		super("not "+quality.getString(), quality.getLabel(), quality.getId());
+		super("not "+quality.getString(), quality.getLabel(), quality.getId(), quality.getClassIRI());
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
 	}
 	
+	
+	public String content(){
+		return parentQuality.content()+" and "+negation.content()+" some "+super.content();
+	}
 	
 	public void setParentQuality(Quality parentQuality){
 		this.parentQuality = parentQuality;

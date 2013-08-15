@@ -73,7 +73,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		//entityphrase =  "posterior radials";
 		//elocatorphrase = "anterior dorsal fin";
 		//save phrases as components
-		String t = "";
+
 		EntityComponents ecs = new EntityComponents(entityphrase, elocatorphrase);
 		ArrayList<EntityComponent> components = ecs.getComponents(); //each component is an entity or an entity locator
 
@@ -148,7 +148,7 @@ public class EntitySearcher1 extends EntitySearcher {
 						for(int l = 0; l < parts.length-1; l++){ //length of entity
 							String aentityphrase = Utilities.join(parts, 0, l, " of ");	
 							String aelocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
-							//LOGGER.debug("..EEL search: entity '"+entityphrase+"' and locator '"+elocatorphrase+"'");
+							LOGGER.debug("..EEL search: entity '"+aentityphrase+"' and locator '"+aelocatorphrase+"'");
 							EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
 							eels.handle();
 							ArrayList<EntityProposals> entity = eels.getEntities(); //a list of different entities: both sexes => female and male
@@ -419,7 +419,7 @@ public class EntitySearcher1 extends EntitySearcher {
 				//Pattern p = Pattern.compile("(.*?)\\b("+Dictionary.spatialtermptn+"|"+TermOutputerUtilities.adjectiveorganptn+")\\b(.*)"); //this splits on single-word spatial term also
 				Pattern p = Pattern.compile("(.*?)\\b"+spatialphrasesptn+"\\b(.*)");
 				Matcher m = p.matcher(phrase);
-				String temp = "";
+				String temp = ""+"";
 				while(m.matches()){
 					//temp += m.group(1)+"#"+m.group(2)+"#";
 					//temp += m.group(1)+m.group(2)+"#";
@@ -432,7 +432,7 @@ public class EntitySearcher1 extends EntitySearcher {
 					while(m1.find()){
 						if(m1.group(1)!=null && m1.group(1).length()>0){ //spatial
 							if(m1.group(1).trim().indexOf(" ")>0) temp +="#"+m1.group(1)+"#";
-							else temp +="#"+m1.group(1);
+							else temp +="#"+m1.group(1)+" ";
 							matched = matched.substring(m1.end(1)).trim();
 						}
 						if(m1.group(2)!=null && m1.group(2).length()>0){
@@ -444,8 +444,12 @@ public class EntitySearcher1 extends EntitySearcher {
 					m = p.matcher(phrase);
 				}
 				temp +=phrase.trim();//appending the original string to the tokens separated by #
+				temp = temp.trim();
 				if(debug_permutation) System.err.println("split&join: '"+phrasecp+"' =>'"+temp+"'");
-				String[] temps = temp.split("\\s*#+\\s*");
+				String[] temps = temp.replaceAll("\\s+",  " ").replaceAll("(^#+|#+$)", "").split("\\s*#+\\s*");
+				/*if(temps.length==1){ //if the split didn't split, force split on spaces
+					temps = temp.split("\\s+"); 
+				}*/
 				ArrayList<EntityComponent> thiscomponents = new ArrayList<EntityComponent>();
 				//for(String part: temps){
 				for(int i = temps.length-1; i>=0; i--){

@@ -16,10 +16,11 @@ public class Quality implements FormalConcept {
 	/**
 	 * 
 	 */
-	public Quality(String string, String label, String id) {
+	public Quality(String string, String label, String id, String classIRI) {
 		this.string = string;
 		this.label = label;
 		this.id = id;
+		this.classIRI = classIRI;
 		
 	}
 
