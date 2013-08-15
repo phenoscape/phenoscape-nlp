@@ -40,6 +40,10 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 	private String prep;
 	private String originalentityphrase;
 	
+	//search results:
+	private ArrayList<EntityProposals> entityls;
+	private ArrayList<EntityProposals> sentityps;
+	
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	private static ArrayList<String> nomatchcache = new ArrayList<String>();
 
@@ -74,7 +78,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			return;
 		}
 		
-		ArrayList<EntityProposals> entityls = new ArrayList<EntityProposals>();
+		//ArrayList<EntityProposals> entityls = new ArrayList<EntityProposals>();
 		//entityl.setString(elocatorphrase);
 		if(elocatorphrase.length()>0) {
 			//ArrayList<FormalConcept> results = new TermSearcher().searchTerm(elocatorphrase, "entity"); //change this to EntitySearcherOriginal?
@@ -82,6 +86,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			if(results!=null){
 				LOGGER.debug("SME...searched locator '"+elocatorphrase+"' found match: ");
 				for(EntityProposals result: results){
+					if(entityls==null) entityls = new ArrayList<EntityProposals>();
 					entityls.add(result);
 					LOGGER.debug(".." +result.toString());
 				}
@@ -105,13 +110,14 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			//SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(newentity, "entity");
 
 
-			ArrayList<EntityProposals> sentityps = null;
+			//ArrayList<EntityProposals> sentityps = null;
 			if(newentity.length()<=0){//e.g. search for 'ventral surface'
 				//entityls => sentityps
-				if(entityls.size()>0){
+				if(entityls!=null && entityls.size()>0){
 					sentityps = entityls;
 					//create a empty entityls
-					entityls = new ArrayList<EntityProposals>();
+					//entityls = new ArrayList<EntityProposals>();
+					entityls = null;
 				}
 			}else{
 				LOGGER.debug("SME...calls EntitySearcherOriginal for newentity '"+newentity/*+","+elocatorphrase*/+"'");
@@ -137,6 +143,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			
 			if(sentityps==null){ //standalone spatial term such as 'ventral region'
 				//if(spatialentities!=null){
+				//TODO consider partial results?
 					found = true;
 					for(FormalConcept spatialentity: spatialentities){
 						SimpleEntity sentity1 = (SimpleEntity) spatialentity;
@@ -153,7 +160,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 							SimpleEntity sentity1 = (SimpleEntity) spatialentity;
 							if(sentity1!=null){//ventral region
 								//nested part_of relation
-								if(entityls.size()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
+								if(entityls!=null && entityls.size()>0 || sentity instanceof CompositeEntity){ //anterior process of maxilla 
 									//relation & entity locator: inner
 									FormalRelation rel = Dictionary.partof;
 									rel.setConfidenceScore((float)1.0);
@@ -165,7 +172,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 										re = ((CompositeEntity) sentity).getEntityLocator();
 										rentities.add(re);
 										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
-									}else if(entityls.size()>0){
+									}else if(entityls!=null && entityls.size()>0){
 										for(EntityProposals ep: entityls){
 											for(Entity entityl: ep.getProposals()){
 												re = new REntity(rel, entityl);
@@ -268,6 +275,22 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 		}else{
 			return spatialterm;
 		}
+	}
+	
+	/**
+	 * search result for entity
+	 * @return
+	 */
+	public ArrayList<EntityProposals> getEntityResult() {
+		return this.sentityps;
+	}
+
+	/**
+	 * search result for entity locator
+	 * @return
+	 */
+	public ArrayList<EntityProposals> getEntityLocatorResult() {
+		return this.entityls;
 	}
 
 	public ArrayList<EntityProposals> getEntities() {

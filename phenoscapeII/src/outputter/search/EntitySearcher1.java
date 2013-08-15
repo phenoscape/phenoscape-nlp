@@ -70,6 +70,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		
 		ArrayList<EntityProposals> entities = null;
 		EntityProposals ep = new EntityProposals(); //search results
+		ArrayList<EntityProposals> partialmatches = null;
 		//entityphrase =  "posterior radials";
 		//elocatorphrase = "anterior dorsal fin";
 		//save phrases as components
@@ -135,7 +136,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(!startwithspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
-
+			ArrayList<EntityProposals> bestpartialresults = null;
 			if(components.size()==1){
 				//LOGGER.debug("find components size = 1");
 				//has one component only, split the component into entity and entitylocator
@@ -163,7 +164,14 @@ public class EntitySearcher1 extends EntitySearcher {
 									//LOGGER.debug("..EEL adds proposals:"+aep);
 								}
 							}else{
-								//LOGGER.debug("..EEL found no match");
+								//LOGGER.debug("..EEL didn't return composed entity");
+								ArrayList<EntityProposals> eresult = eels.getEntityResult();
+								ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
+								ArrayList<EntityProposals> best = best(eresult, elresult);
+								if(bestpartialresults==null){
+									bestpartialresults = new ArrayList<EntityProposals>();
+									bestpartialresults.addAll(best);
+								}
 							}
 						}
 					}
@@ -224,7 +232,9 @@ public class EntitySearcher1 extends EntitySearcher {
 								//LOGGER.debug("..EEL adds proposals:"+aep);
 							}
 						}else{
-							//LOGGER.debug("..EEL found no match");
+							//LOGGER.debug("..EEL didn't return composed entity");
+							ArrayList<EntityProposals> eresult = eels.getEntityResult();
+							ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
 						}
 					}
 				}
@@ -251,7 +261,10 @@ public class EntitySearcher1 extends EntitySearcher {
 					Utilities.addEntityProposals(entities, aep);
 				}
 			}else{
-				//LOGGER.debug("SME found no match");
+				//LOGGER.debug("..SME didn't return composed entity");
+				ArrayList<EntityProposals> eresult = smes.getEntityResult();
+				ArrayList<EntityProposals> elresult = smes.getEntityLocatorResult();
+				
 			}
 		}
 		//if(found) return entities;
@@ -291,6 +304,11 @@ public class EntitySearcher1 extends EntitySearcher {
 
 
 
+	private ArrayList<EntityProposals> best(ArrayList<EntityProposals> eresult,
+			ArrayList<EntityProposals> elresult) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	/**
 	 * 'posterior radials,anterior dorsal fin' generated 2 variations:
 		..(?:(?:posterior|posterior side) (?:radials)) of (?:(?:fin) of (?:anterior|anterior side) (?:dorsal|dorsal side)|(?:anterior|anterior side) (?:dorsal|dorsal side) (?:fin))
@@ -447,9 +465,10 @@ public class EntitySearcher1 extends EntitySearcher {
 				temp = temp.trim();
 				if(debug_permutation) System.err.println("split&join: '"+phrasecp+"' =>'"+temp+"'");
 				String[] temps = temp.replaceAll("\\s+",  " ").replaceAll("(^#+|#+$)", "").split("\\s*#+\\s*");
-				/*if(temps.length==1){ //if the split didn't split, force split on spaces
-					temps = temp.split("\\s+"); 
-				}*/
+				if(temps.length==1){ //if the split didn't split, force split on spaces
+					ArrayList<FormalConcept> test = new TermSearcher().searchTerm(phrasecp, "entity"); 
+					if(test==null) temps = temp.split("\\s+"); 
+				}
 				ArrayList<EntityComponent> thiscomponents = new ArrayList<EntityComponent>();
 				//for(String part: temps){
 				for(int i = temps.length-1; i>=0; i--){

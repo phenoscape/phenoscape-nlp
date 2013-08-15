@@ -33,6 +33,10 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 	private String originalentityphrase;
 	private static final Logger LOGGER = Logger.getLogger(EntityEntityLocatorStrategy.class);   
 	
+	//search results:
+	private ArrayList<EntityProposals> entitylps; 
+	private ArrayList<EntityProposals> sentityps;
+	
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	private static ArrayList<String> nomatchcache = new ArrayList<String>();
 	/**
@@ -73,7 +77,7 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 
 		//SimpleEntity entityl = new SimpleEntity();
 		//entityl.setString(elocatorphrase);
-		ArrayList<EntityProposals> entitylps = new ArrayList<EntityProposals>();
+		//ArrayList<EntityProposals> entitylps = new ArrayList<EntityProposals>();
 		//entitylp.setPhrase(elocatorphrase);
 		if(entitylocators!=null) {
 			//SimpleEntity result = (SimpleEntity) new TermSearcher().searchTerm(elocatorphrase, "entity");
@@ -91,8 +95,8 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 		}
 		//SimpleEntity sentity = (SimpleEntity)new TermSearcher().searchTerm(entityphrase, "entity");
 		
-		ArrayList<EntityProposals> sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  entityphrase, "", originalentityphrase, prep); //advanced search
-		if(sentityps!=null){//if entity matches
+		sentityps = new EntitySearcherOriginal().searchEntity(root, structid,  entityphrase, "", originalentityphrase, prep); //advanced search
+		if(sentityps!=null && entitylps!=null){//if entity matches
 			//entity
 			for(EntityProposals entitylp: entitylps){
 				if(entitylp.getPhrase().length()>0){
@@ -207,6 +211,26 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 		}
 	}
 
+	/**
+	 * search result for entity
+	 * @return
+	 */
+	public ArrayList<EntityProposals> getEntityResult() {
+		return this.sentityps;
+	}
+
+	/**
+	 * search result for entity locator
+	 * @return
+	 */
+	public ArrayList<EntityProposals> getEntityLocatorResult() {
+		return this.entitylps;
+	}
+	
+	/**
+	 * composite entities with entity and locator
+	 * @return
+	 */
 	public ArrayList<EntityProposals> getEntities() {
 		return entities;
 	}

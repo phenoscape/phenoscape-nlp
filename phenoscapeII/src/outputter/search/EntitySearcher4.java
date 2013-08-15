@@ -95,7 +95,7 @@ public class EntitySearcher4 extends EntitySearcher {
 							found = true;
 						}
 					}else{
-						ep.add(sentity); //add the other
+						ep.add(sentity); //no locator
 						LOGGER.debug(".."+sentity.toString());
 						found = true;
 					}
