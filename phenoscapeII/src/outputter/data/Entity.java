@@ -1,8 +1,10 @@
 package outputter.data;
 
+import java.util.Comparator;
+
 import org.semanticweb.owlapi.model.OWLClass;
 
-public abstract class Entity implements FormalConcept{
+public abstract class Entity implements FormalConcept, Comparator<Entity>{
 	
 	public String getPrimaryEntityString(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getString(); 
@@ -41,6 +43,7 @@ public abstract class Entity implements FormalConcept{
 		return 0f;
 	}
 	
+	
 	public Entity clone(){
 		return this.clone();
 	}
@@ -62,6 +65,8 @@ public abstract class Entity implements FormalConcept{
 	public abstract String getString() ;
 
 	@Override
+	public abstract String content() ;
+	@Override
 	public abstract String getLabel();
 
 	@Override
@@ -72,5 +77,7 @@ public abstract class Entity implements FormalConcept{
 
 	@Override
 	public abstract float getConfidienceScore();
+	
+	
 
 }

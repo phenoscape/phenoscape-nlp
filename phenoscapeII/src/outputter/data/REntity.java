@@ -150,4 +150,12 @@ public class REntity extends Entity{
 		return new REntity(fr, e);
 	}
 
+	public int compare(Entity e1, Entity e2){
+		return e1.content().compareTo(e2.content());
+	}
+	
+	public boolean equals(Entity e){
+		if(this.content().compareTo(e.content())==0) return true;
+		return false;
+	}
 }

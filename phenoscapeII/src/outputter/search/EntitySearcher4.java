@@ -79,12 +79,15 @@ public class EntitySearcher4 extends EntitySearcher {
 			LOGGER.debug("search for entity '"+aentityphrase+"' found match, forming proposals...");
 			boolean found = false;
 			EntityProposals ep = new EntityProposals();
+			ep.setPhrase(originalentityphrase);
 			for(FormalConcept sentityfc: sentities){				
 				SimpleEntity sentity = (SimpleEntity)sentityfc;
+				sentity.setConfidenceScore(1f/sentities.size());
 				if(sentity!=null){//if entity matches
 					if(elocatorphrase.length()>0){
 						for(FormalConcept fc: entityls){
 							SimpleEntity entityl = (SimpleEntity)fc;
+							entityl.setConfidenceScore(1f/entityls.size());
 							//relation & entity locator
 							CompositeEntity centity = new CompositeEntity();
 							centity.addEntity(sentity);								

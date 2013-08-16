@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,9 +24,12 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import outputter.Utilities;
+import outputter.data.CompositeEntity;
 import outputter.data.Entity;
 import outputter.data.EntityProposals;
 import outputter.data.FormalConcept;
+import outputter.data.REntity;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.TermOutputerUtilities;
 
@@ -122,6 +128,7 @@ public class EntitySearcher1 extends EntitySearcher {
 			return entities;
 		}
 
+		ArrayList<EntityProposals> bestpartialresults = null;
 		//failed to find pre-composed terms, try to post-compose using part_of
 		//call on EntityEntityLocatorStrategy on expressions without spatial terms:
 		//(the attachment of spatial terms to parent entity is different from attachement of a child entity to parent entity)
@@ -136,7 +143,6 @@ public class EntitySearcher1 extends EntitySearcher {
 		if(!startwithspatial){//call EELS strategy when there is an entity locator to avoid infinite loop. 
 			//ep.setPhrase(entityphrase);
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 calls EntityEntityLocatorStrategy");
-			ArrayList<EntityProposals> bestpartialresults = null;
 			if(components.size()==1){
 				//LOGGER.debug("find components size = 1");
 				//has one component only, split the component into entity and entitylocator
@@ -167,10 +173,17 @@ public class EntitySearcher1 extends EntitySearcher {
 								//LOGGER.debug("..EEL didn't return composed entity");
 								ArrayList<EntityProposals> eresult = eels.getEntityResult();
 								ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
-								ArrayList<EntityProposals> best = best(eresult, elresult);
-								if(bestpartialresults==null){
-									bestpartialresults = new ArrayList<EntityProposals>();
-									bestpartialresults.addAll(best);
+								ArrayList<EntityProposals> best = null;
+								if(eresult!=null) best = best(eresult);
+								else if(elresult!=null) best = best(elresult);
+								if(best!=null){
+									if(bestpartialresults==null){
+										bestpartialresults = new ArrayList<EntityProposals>();
+										bestpartialresults.addAll(best);
+									}else{
+										bestpartialresults.addAll(best);
+										bestpartialresults = best(bestpartialresults);
+									}
 								}
 							}
 						}
@@ -235,6 +248,18 @@ public class EntitySearcher1 extends EntitySearcher {
 							//LOGGER.debug("..EEL didn't return composed entity");
 							ArrayList<EntityProposals> eresult = eels.getEntityResult();
 							ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
+							ArrayList<EntityProposals> best = null;
+							if(eresult!=null) best = best(eresult);
+							else if(elresult!=null) best = best(elresult);
+							if(best!=null){
+								if(bestpartialresults==null){
+									bestpartialresults = new ArrayList<EntityProposals>();
+									bestpartialresults.addAll(best);
+								}else{
+									bestpartialresults.addAll(best);
+									bestpartialresults = best(bestpartialresults);
+								}
+							}
 						}
 					}
 				}
@@ -264,7 +289,18 @@ public class EntitySearcher1 extends EntitySearcher {
 				//LOGGER.debug("..SME didn't return composed entity");
 				ArrayList<EntityProposals> eresult = smes.getEntityResult();
 				ArrayList<EntityProposals> elresult = smes.getEntityLocatorResult();
-				
+				ArrayList<EntityProposals> best = null;
+				if(eresult!=null) best = best(eresult);
+				else if(elresult!=null) best = best(elresult);
+				if(best!=null){
+					if(bestpartialresults==null){
+						bestpartialresults = new ArrayList<EntityProposals>();
+						bestpartialresults.addAll(best);
+					}else{
+						bestpartialresults.addAll(best);
+						bestpartialresults = best(bestpartialresults);
+					}
+				}
 			}
 		}
 		//if(found) return entities;
@@ -283,9 +319,14 @@ public class EntitySearcher1 extends EntitySearcher {
 				Utilities.addEntityProposals(entities, aep);
 			}
 		}else{
-			//LOGGER.debug("..ES4 found no match");
+			LOGGER.debug("ES4.. found no match");
 		}
 
+		if(entities == null){		
+				LOGGER.debug("..no better match, use bestpartialresults");
+				//bestpartialresults
+				entities = bestpartialresults;
+		}
 		//logging
 		if(entities!=null){
 			LOGGER.debug(System.getProperty("line.separator")+"EntitySearcher1 completed search for '"+entityphrase+"[orig="+originalentityphrase+"]' and returns:");
@@ -302,12 +343,61 @@ public class EntitySearcher1 extends EntitySearcher {
 		//return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
-
-
-	private ArrayList<EntityProposals> best(ArrayList<EntityProposals> eresult,
-			ArrayList<EntityProposals> elresult) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	/**
+	 * find the best (covers the most concepts in the original search phrases) proposals
+	 * P1:phrase=(?:lobe) entity=lobe score=1.0 and (part_of some phrase=(?:(?:caudal) (?:fin)) entity=caudal fin score=1.0)
+	 * P2:phrase=(?:caudal) (?:fin) .*? (?:lobe) entity=caudal fin upper lobe score=1.0
+	   P3:phrase=(?:caudal) (?:fin) .*? (?:lobe) entity=caudal fin lower lobe score=1.0
+	 * @param proposals
+	 * @param elocatorphrase 
+	 * @param entityphrase 
+	 * @return a set of best proposals
+	 */
+	private ArrayList<EntityProposals> best(ArrayList<EntityProposals> proposals) {
+		Hashtable<String, Set<Entity>> scores = new Hashtable<String, Set<Entity>>();
+		int max = -1;
+		for(EntityProposals ep: proposals){
+			for(Entity e: ep.getProposals()){
+				String tokens = getTokens(e, "");				
+				String[] covered = tokens.trim().split("\\s+");
+				int c = (new HashSet<String>(Arrays.asList(covered))).size();
+				Set<Entity> ps = scores.get(c+"");
+				if(ps==null){
+					ps = new HashSet<Entity>();
+				}
+				ps.add(e);
+				scores.put(c+"", ps);
+				if(c>max) max = c;
+			}
+		}
+		EntityProposals best = new EntityProposals();
+		for(Entity e: scores.get(max+""))
+			best.add(e);
+		
+		ArrayList<EntityProposals> results = new ArrayList<EntityProposals>();
+		results.add(best);
+		return results;
+	}
+	
+	/**
+	 * 
+	 * @param e
+	 * @param tokens
+	 * @return may contain trailing space and multiple spaces in tokens
+	 */
+	private String getTokens(Entity e, String tokens) {	
+		if(e instanceof SimpleEntity) return e.getString().replaceAll("(\\(\\?:|\\)|\\.\\*\\?)", "")+" ";
+		else if(e instanceof CompositeEntity){
+			ArrayList<Entity> es = ((CompositeEntity) e).getEntities();
+			for(Entity e1: es){
+				tokens +=getTokens(e1, tokens); //
+			}
+		}else if(e instanceof REntity){
+			Entity e1 = ((REntity) e).getEntity();
+			return getTokens(e1, tokens);
+		}
+		return tokens;
 	}
 	/**
 	 * 'posterior radials,anterior dorsal fin' generated 2 variations:

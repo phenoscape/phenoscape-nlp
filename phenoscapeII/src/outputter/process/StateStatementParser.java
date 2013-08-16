@@ -858,7 +858,26 @@ public class StateStatementParser extends Parser {
 		if(results!=null)
 			return results;
 
+		
 		return (ArrayList<EntityProposals>) keyentities;
+		//TODO should return 'e part of keyentities' or simply 'e', not keyentities?
+		/*for(EntityProposals ep: e){
+			for(Entity en: ep.getProposals()){
+				for(EntityProposals epl: keyentities){
+					for(Entity enl: epl.getProposals()){
+						if(en instanceof CompositeEntity){
+							((CompositeEntity) en).addParentEntity(new REntity(Dictionary.partof, enl));
+						}else{
+							CompositeEntity ce = new CompositeEntity();
+							ce.addEntity(en);
+							ce.addEntity(new REntity(Dictionary.partof, enl));
+							en = ce; //to check.
+						}
+					}
+				}
+			}
+		}
+		return (ArrayList<EntityProposals>) e;*/
 	}
 
 
