@@ -319,14 +319,14 @@ public class TermSearcher {
 		// word = word.replaceAll("[()]", ""); // turn dorsal-(fin) to
 		// dorsal-fin: fix it early, not here because search word may be regular
 		// expressions
-		query = query.replaceAll("-to\\b", " to"); // turn dorsal-to to dorsal
-		// to
+		query = query.replaceAll("-to\\b", " to"); // turn dorsal-to to 'dorsal to'
 		query = query.replaceAll("(?<=\\w)shaped", "-shaped");
 		if (query.compareTo("elongate") == 0)
 			query = "elongated";
 		if (query.compareTo("directed") == 0)
 			query = "direction";
 
+		String querycp = query;
 		// syn-ring expand: 
 		String[] tokens = query.split("[$^():?*+.| ]+");
 		Set<String> tokenset = new HashSet<String>(Arrays.asList(tokens));
@@ -337,7 +337,7 @@ public class TermSearcher {
 				query = query.replaceAll("\\b" + tcopy + "\\b", token);
 			}
 		}
-		return query;
+		return querycp+"|"+query;
 	}
 
 	public static String adjectiveOrganSearch(String term) {
@@ -601,8 +601,8 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("torsion",
-				"quality");
+		ArrayList<FormalConcept> quality = ts.searchTerm("(?:dorsal_crest)",
+				"entity");
 		if(quality!=null){
 			for (FormalConcept fc : quality)
 				System.out.println(fc.getLabel());

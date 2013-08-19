@@ -164,4 +164,6 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		if(this.content().compareTo(e.content())==0) return true;
 		return false;
 	}
+	
+
 }

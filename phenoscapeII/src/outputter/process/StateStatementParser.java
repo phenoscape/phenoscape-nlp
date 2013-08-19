@@ -233,6 +233,7 @@ public class StateStatementParser extends Parser {
 				entities = new ArrayList<EntityProposals>();
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
+				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
 				parserCharacter(character, statement, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
@@ -859,25 +860,33 @@ public class StateStatementParser extends Parser {
 			return results;
 
 		
-		return (ArrayList<EntityProposals>) keyentities;
-		//TODO should return 'e part of keyentities' or simply 'e', not keyentities?
-		/*for(EntityProposals ep: e){
+		return (ArrayList<EntityProposals>) keyentities; //best of the three
+		//return (ArrayList<EntityProposals>) e.clone(); //2nd
+		//*TODO should return 'e part of keyentities' or simply 'e', not keyentities? //worst
+		/*ArrayList<EntityProposals> resolved = new ArrayList<EntityProposals> ();
+		for(EntityProposals ep: e){
+			EntityProposals updated = new EntityProposals();
 			for(Entity en: ep.getProposals()){
 				for(EntityProposals epl: keyentities){
+					if(ep.equals(epl)) break;
 					for(Entity enl: epl.getProposals()){
+						if(en.equals(enl)) break;
+						CompositeEntity ce = new CompositeEntity();
 						if(en instanceof CompositeEntity){
-							((CompositeEntity) en).addParentEntity(new REntity(Dictionary.partof, enl));
+							ce.addEntity(en.clone());//caused infinite nesting without cloning
+							ce.addParentEntity(new REntity(Dictionary.partof, enl.clone()));
+							updated.add(ce);
 						}else{
-							CompositeEntity ce = new CompositeEntity();
-							ce.addEntity(en);
-							ce.addEntity(new REntity(Dictionary.partof, enl));
-							en = ce; //to check.
+							ce.addEntity(en.clone());
+							ce.addEntity(new REntity(Dictionary.partof, enl.clone()));
+							updated.add(ce);
 						}
 					}
 				}
 			}
+			resolved.add(updated);
 		}
-		return (ArrayList<EntityProposals>) e;*/
+		return (ArrayList<EntityProposals>) resolved;*/
 	}
 
 

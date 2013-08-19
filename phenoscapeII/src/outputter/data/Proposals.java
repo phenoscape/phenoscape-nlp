@@ -10,7 +10,7 @@ import java.util.ArrayList;
  *
  */
 public interface Proposals {
-
+    //change object to a superclass of QualityP and EntityP.
 	public boolean add(Object c);
 	public Object getProposals();
 	public String getPhrase();

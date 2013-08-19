@@ -151,10 +151,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 		for(String aentityphrase: entityphrases){
 			for(String aelocatorphrase: elocatorphrases){
 
-				aentityphrase = aentityphrase.replaceAll("("+Dictionary.process+")", "process");
-				aelocatorphrase = aelocatorphrase.replaceAll("("+Dictionary.process+")", "process");
-				aentityphrase = aentityphrase.replaceAll("latero-sensory", "sensory");
-				aelocatorphrase = aelocatorphrase.replaceAll("laterosensory", "sensory");
+				aentityphrase = aentityphrase.replaceAll("\\b("+Dictionary.process+")\\b", "process");
+				aelocatorphrase = aelocatorphrase.replaceAll("\\b("+Dictionary.process+")\\b", "process");
+				aentityphrase = aentityphrase.replaceAll("\\blatero-sensory\\b", "sensory");
+				aelocatorphrase = aelocatorphrase.replaceAll("\\blaterosensory\\b", "sensory");
 				//aentityphrase = aentityphrase.replaceAll("body scale", "dermal scale");
 				//aelocatorphrase = aelocatorphrase.replaceAll("body scale", "dermal scale");
 

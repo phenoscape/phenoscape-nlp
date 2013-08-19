@@ -287,7 +287,7 @@ public class Utilities {
 				if (structure == null) {
 					sname = "ERROR"; // this should never happen
 				} else {
-					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name"));
+					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name").replaceAll("\\s+", "_"));
 				}
 				result += sname + ",";
 			}catch(Exception e){

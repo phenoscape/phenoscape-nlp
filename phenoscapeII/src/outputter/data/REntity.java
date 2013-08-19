@@ -158,4 +158,6 @@ public class REntity extends Entity{
 		if(this.content().compareTo(e.content())==0) return true;
 		return false;
 	}
+	
+
 }

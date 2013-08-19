@@ -110,7 +110,6 @@ public class CharacterHandler {
 	 */
 	private void parseEntity(){
 		Element structure = chara.getParentElement();
-		String temp="";
 		if(structure.getAttributeValue("name").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){
 			String structureid = structure.getAttributeValue("id");
 			String structurename = Utilities.getStructureName(root, structureid);
