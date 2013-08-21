@@ -212,7 +212,7 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 	}
 
 	/**
-	 * search result for entity
+	 * search result for entity (partial)
 	 * @return
 	 */
 	public ArrayList<EntityProposals> getEntityResult() {
@@ -220,7 +220,7 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 	}
 
 	/**
-	 * search result for entity locator
+	 * search result for entity locator (partial)
 	 * @return
 	 */
 	public ArrayList<EntityProposals> getEntityLocatorResult() {

@@ -135,13 +135,13 @@ public class RelationalQuality extends Quality {
 	
 	
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 		
 		float score=1.0f;
 		
 		for(Quality q:this.getRelationalquality().getProposals())
 		{
-			score*=q.getConfidienceScore();
+			score*=q.getConfidenceScore();
 		}
 /*		for(Entity e:this.relatedentity.getProposals())
 		{

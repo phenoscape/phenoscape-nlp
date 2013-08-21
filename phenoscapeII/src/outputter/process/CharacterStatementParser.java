@@ -571,7 +571,7 @@ public class CharacterStatementParser extends Parser {
 						Entity ecopy = (Entity) e.clone();
 						SimpleEntity qentity = new SimpleEntity();
 						qentity.setClassIRI(elp.getClassIRI());
-						qentity.setConfidenceScore(elp.getConfidienceScore());
+						qentity.setConfidenceScore(elp.getConfidenceScore());
 						qentity.setId(elp.getId());
 						qentity.setLabel(elp.getLabel());
 						qentity.setString(elp.getString());

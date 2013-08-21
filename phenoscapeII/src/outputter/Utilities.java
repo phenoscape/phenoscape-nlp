@@ -593,7 +593,7 @@ public class Utilities {
 	public static SimpleEntity wrapQualityAs(Quality q) {
 		SimpleEntity qentity = new SimpleEntity();
 		qentity.setClassIRI(q.getClassIRI());
-		qentity.setConfidenceScore(q.getConfidienceScore());
+		qentity.setConfidenceScore(q.getConfidenceScore());
 		qentity.setId(q.getId());
 		qentity.setLabel(q.getLabel());
 		qentity.setString(q.getString());
@@ -691,7 +691,7 @@ public class Utilities {
 									//create RE and create compositeEntity
 									FormalRelation fr = new FormalRelation();
 									fr.setClassIRI(r.getClassIRI());
-									fr.setConfidenceScore(r.getConfidienceScore());
+									fr.setConfidenceScore(r.getConfidenceScore());
 									fr.setId(r.getId());
 									fr.setLabel(r.getLabel());
 									fr.setString(r.getString());

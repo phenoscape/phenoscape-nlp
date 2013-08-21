@@ -1,5 +1,6 @@
 package outputter.data;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import org.semanticweb.owlapi.model.OWLClass;
@@ -38,8 +39,8 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 	}
 
 	public float getPrimaryEntityScore() {
-		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getConfidienceScore();
-		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getConfidienceScore(); 
+		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getConfidenceScore();
+		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getConfidenceScore(); 
 		return 0f;
 	}
 	
@@ -76,7 +77,9 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 	public abstract String getClassIRI();
 
 	@Override
-	public abstract float getConfidienceScore();
+	public abstract float getConfidenceScore();
+
+	public abstract ArrayList<Entity> getIndividualEntities(); 
 	
 	
 

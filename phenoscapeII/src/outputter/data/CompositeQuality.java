@@ -66,9 +66,9 @@ public class CompositeQuality extends Quality {
 	
 
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 		
-		return this.mainquality.getConfidienceScore()*this.comparedquality.getConfidienceScore()*this.relatedentity.getConfidienceScore();
+		return this.mainquality.getConfidenceScore()*this.comparedquality.getConfidenceScore()*this.relatedentity.getConfidenceScore();
 
 	}
 	

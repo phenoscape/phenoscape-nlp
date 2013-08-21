@@ -379,16 +379,16 @@ public class XML2EQ {
 		//Read all Entity Proposals and store as comma separated values
 		for(Entity e: eQ.getEntity().getProposals())
 		{
-			entitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
+			entitylabel+=e.getLabel()+" Score:["+e.getConfidenceScore()+"]@,";
 			if(e instanceof CompositeEntity)
 			{
-				entity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidienceScore()+"]@,";
-				entityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidienceScore()+"]@,";
+				entity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
+				entityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
 			}
 			else
 			{
-				entity+=e.getString()+" Score:["+e.getConfidienceScore()+"]@,";
-				entityid+=e.getId()+" Score:["+e.getConfidienceScore()+"]@,";
+				entity+=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
+				entityid+=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
 			}
 		}
 
@@ -405,43 +405,43 @@ public class XML2EQ {
 			if(q instanceof RelationalQuality)
 			{
 				System.out.println();
-				quality+=q.getString()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualityid+=q.getId()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
+				quality+=q.getString()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualityid+=q.getId()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
 				//Reading all related entities and store as comma separated values
 				for(Entity e:((RelationalQuality) q).getRelatedentity().getProposals())
 				{
-					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidienceScore()+"]@,";
+					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidenceScore()+"]@,";
 					if(e instanceof CompositeEntity)
 					{
-						relatedentity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidienceScore()+"]@,";
-						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidienceScore()+"]@,";
+						relatedentity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
+						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
 					}
 					else
 					{
-						relatedentity+=e.getString()+" Score:["+e.getConfidienceScore()+"]@,";
-						relatedentityid+=e.getId()+" Score:["+e.getConfidienceScore()+"]@,";
+						relatedentity+=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
+						relatedentityid+=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
 					}
 				}
 			}
 			else if((q instanceof CompositeQuality))
 			{
-				quality+=((CompositeQuality)q).getFullString()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualityid+=((CompositeQuality)q).getId()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:["+q.getConfidienceScore()+"]@,";
+				quality+=((CompositeQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualityid+=((CompositeQuality)q).getId()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
 
 			}
 			else if((q instanceof NegatedQuality))
 			{
-				quality+=((NegatedQuality)q).getFullString()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualityid+=((NegatedQuality)q).getFullId()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:["+q.getConfidienceScore()+"]@,";
+				quality+=((NegatedQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualityid+=((NegatedQuality)q).getFullId()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
 			}
 			else
 			{
-				quality+=q.getString()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualityid+=q.getId()+" Score:["+q.getConfidienceScore()+"]@,";
-				qualitylabel+=q.getLabel()+" Score:["+q.getConfidienceScore()+"]@,";
+				quality+=q.getString()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualityid+=q.getId()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
 			}
 		}
 

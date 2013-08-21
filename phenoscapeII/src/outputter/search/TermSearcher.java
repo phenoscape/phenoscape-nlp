@@ -149,6 +149,7 @@ public class TermSearcher {
 			String[] tokens = query.split("[$^():?*+.| ]+");
 			for (String token : tokens) {
 				if (token.contains("-")) {
+					//token = token.replaceAll("\\\\b", "");
 					String tcopy = token;
 					token = "(:?" + token + "|" + token.replaceAll("-", " ")
 							+ ")";
@@ -221,6 +222,7 @@ public class TermSearcher {
 			String[] tokens = query.split("[$^():?*+.| ]+");
 			for (String token : tokens) {
 				if(token.length()==0) continue;
+				token = token.replaceAll("\\\\b", "");
 				LinkedHashSet<String> phraseforms = Wordforms
 						.toAdjective(token);
 				String regexp = "";
@@ -332,6 +334,7 @@ public class TermSearcher {
 		Set<String> tokenset = new HashSet<String>(Arrays.asList(tokens));
 		for (String token : tokenset) {
 			if(token.length()>0){
+				token = token.replaceAll("\\\\b", "");
 				String tcopy = token;
 				token = Utilities.getSynRing4Phrase(token);
 				query = query.replaceAll("\\b" + tcopy + "\\b", token);

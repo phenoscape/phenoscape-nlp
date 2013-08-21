@@ -51,6 +51,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	private static boolean debug_permutation = false;
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	private static ArrayList<String> nomatchcache = new ArrayList<String>();
+	private static final float partial = 0.8f;
 	//boolean debug = true;
 
 	/**
@@ -76,7 +77,6 @@ public class EntitySearcher1 extends EntitySearcher {
 		
 		ArrayList<EntityProposals> entities = null;
 		EntityProposals ep = new EntityProposals(); //search results
-		ArrayList<EntityProposals> partialmatches = null;
 		//entityphrase =  "posterior radials";
 		//elocatorphrase = "anterior dorsal fin";
 		//save phrases as components
@@ -155,6 +155,7 @@ public class EntitySearcher1 extends EntitySearcher {
 						for(int l = 0; l < parts.length-1; l++){ //length of entity
 							String aentityphrase = Utilities.join(parts, 0, l, " of ");	
 							String aelocatorphrase =  Utilities.join(parts, l+1, parts.length-1, " of ");
+							System.out.println("..EEL search: entity '"+aentityphrase+"' and locator '"+aelocatorphrase+"'");
 							LOGGER.debug("..EEL search: entity '"+aentityphrase+"' and locator '"+aelocatorphrase+"'");
 							EntityEntityLocatorStrategy eels = new EntityEntityLocatorStrategy(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
 							eels.handle();
@@ -170,19 +171,27 @@ public class EntitySearcher1 extends EntitySearcher {
 									//LOGGER.debug("..EEL adds proposals:"+aep);
 								}
 							}else{
-								//LOGGER.debug("..EEL didn't return composed entity");
+								
 								ArrayList<EntityProposals> eresult = eels.getEntityResult();
 								ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
 								ArrayList<EntityProposals> best = null;
-								if(eresult!=null) best = best(eresult);
-								else if(elresult!=null) best = best(elresult);
+								if(eresult!=null) best = removeRedundancy(eresult);
+								else if(elresult!=null) best = removeRedundancy(elresult);
 								if(best!=null){
 									if(bestpartialresults==null){
 										bestpartialresults = new ArrayList<EntityProposals>();
 										bestpartialresults.addAll(best);
 									}else{
 										bestpartialresults.addAll(best);
-										bestpartialresults = best(bestpartialresults);
+										bestpartialresults = removeRedundancy(bestpartialresults);
+									}
+								}
+								if(bestpartialresults!=null){
+									LOGGER.debug("..EEL return partial matches");
+									System.out.println("..EEL return partial matches");
+									for(EntityProposals aep: bestpartialresults){
+										LOGGER.debug("..:"+aep.toString());
+										System.out.println("..:"+aep.toString());
 									}
 								}
 							}
@@ -249,15 +258,23 @@ public class EntitySearcher1 extends EntitySearcher {
 							ArrayList<EntityProposals> eresult = eels.getEntityResult();
 							ArrayList<EntityProposals> elresult = eels.getEntityLocatorResult();
 							ArrayList<EntityProposals> best = null;
-							if(eresult!=null) best = best(eresult);
-							else if(elresult!=null) best = best(elresult);
+							if(eresult!=null) best = removeRedundancy(eresult);
+							else if(elresult!=null) best = removeRedundancy(elresult);
 							if(best!=null){
 								if(bestpartialresults==null){
 									bestpartialresults = new ArrayList<EntityProposals>();
 									bestpartialresults.addAll(best);
 								}else{
 									bestpartialresults.addAll(best);
-									bestpartialresults = best(bestpartialresults);
+									bestpartialresults = removeRedundancy(bestpartialresults);
+								}
+							}
+							if(bestpartialresults!=null){
+								System.out.println("..EEL return partial matches");
+								LOGGER.debug("..EEL return partial matches");
+								for(EntityProposals aep: bestpartialresults){
+									LOGGER.debug("..:"+aep.toString());
+									System.out.println("..:"+aep.toString());
 								}
 							}
 						}
@@ -290,15 +307,23 @@ public class EntitySearcher1 extends EntitySearcher {
 				ArrayList<EntityProposals> eresult = smes.getEntityResult();
 				ArrayList<EntityProposals> elresult = smes.getEntityLocatorResult();
 				ArrayList<EntityProposals> best = null;
-				if(eresult!=null) best = best(eresult);
-				else if(elresult!=null) best = best(elresult);
+				if(eresult!=null) best = removeRedundancy(eresult);
+				else if(elresult!=null) best = removeRedundancy(elresult);
 				if(best!=null){
 					if(bestpartialresults==null){
 						bestpartialresults = new ArrayList<EntityProposals>();
 						bestpartialresults.addAll(best);
 					}else{
 						bestpartialresults.addAll(best);
-						bestpartialresults = best(bestpartialresults);
+						bestpartialresults = removeRedundancy(bestpartialresults);
+					}
+				}
+				if(bestpartialresults!=null){
+					System.out.println("..SME return partial matches");
+					LOGGER.debug("..SME return partial matches");
+					for(EntityProposals aep: bestpartialresults){
+						LOGGER.debug("..:"+aep.toString());
+						System.out.println("..:"+aep.toString());
 					}
 				}
 			}
@@ -322,10 +347,18 @@ public class EntitySearcher1 extends EntitySearcher {
 			LOGGER.debug("ES4.. found no match");
 		}
 
-		if(entities == null){		
-				LOGGER.debug("..no better match, use bestpartialresults");
-				//bestpartialresults
+		if(entities == null){	
+			if(bestpartialresults!=null){
+				LOGGER.debug("..no better match, use bestpartialresults:");	
+				System.out.println("..no better match, use bestpartialresults:");
+				bestpartialresults = removeRedundancy(bestpartialresults);
+				bestpartialresults =lowerscore(bestpartialresults);
 				entities = bestpartialresults;
+				for(EntityProposals aep: entities){
+					LOGGER.debug("..:"+aep.toString());
+					System.out.println("..:"+aep.toString());
+				}
+			}
 		}
 		//logging
 		if(entities!=null){
@@ -343,7 +376,45 @@ public class EntitySearcher1 extends EntitySearcher {
 		//return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
-	
+	/**
+	 * partial results should have a lower score
+	 * @param bestpartialresults
+	 * @return
+	 */
+	private ArrayList<EntityProposals> lowerscore(
+			ArrayList<EntityProposals> bestpartialresults) {
+		for(EntityProposals ep: bestpartialresults){
+			for(Entity e: ep.getProposals()){
+				e.setConfidenceScore(e.getConfidenceScore()*partial);
+			}
+		}
+		return bestpartialresults;
+	}
+	/**
+	 * remove redundant matches of parts
+	 * @param bestpartialresults
+	 * @return the unique, longest matches
+	 */
+	private ArrayList<EntityProposals> removeRedundancy(
+			ArrayList<EntityProposals> bestpartialresults) {
+		ArrayList<EntityProposals> tobecleaned = new ArrayList<EntityProposals>();
+		for(int i = 0; i<bestpartialresults.size(); i++){
+			for(int j = i+1; j<bestpartialresults.size(); j++){
+				EntityProposals ep1 = bestpartialresults.get(i);
+				EntityProposals ep2 = bestpartialresults.get(j);
+				if(ep1.equals(ep2) || ep1.content().contains(ep2.content())){
+					tobecleaned.add(ep2);
+				}else if (ep2.content().contains(ep1.content())){
+					tobecleaned.add(ep1);
+				}
+			}
+		}
+		
+		for(EntityProposals ep: tobecleaned){
+			bestpartialresults.remove(ep);
+		}
+		return bestpartialresults;
+	}
 	/**
 	 * find the best (covers the most concepts in the original search phrases) proposals
 	 * P1:phrase=(?:lobe) entity=lobe score=1.0 and (part_of some phrase=(?:(?:caudal) (?:fin)) entity=caudal fin score=1.0)
@@ -354,7 +425,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	 * @param entityphrase 
 	 * @return a set of best proposals
 	 */
-	private ArrayList<EntityProposals> best(ArrayList<EntityProposals> proposals) {
+	/*private ArrayList<EntityProposals> best(ArrayList<EntityProposals> proposals) {
 		Hashtable<String, Set<Entity>> scores = new Hashtable<String, Set<Entity>>();
 		int max = -1;
 		for(EntityProposals ep: proposals){
@@ -378,7 +449,7 @@ public class EntitySearcher1 extends EntitySearcher {
 		ArrayList<EntityProposals> results = new ArrayList<EntityProposals>();
 		results.add(best);
 		return results;
-	}
+	}*/
 	
 	/**
 	 * 
@@ -387,7 +458,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	 * @return may contain trailing space and multiple spaces in tokens
 	 */
 	private String getTokens(Entity e, String tokens) {	
-		if(e instanceof SimpleEntity) return e.getString().replaceAll("(\\(\\?:|\\)|\\.\\*\\?)", "")+" ";
+		if(e instanceof SimpleEntity) return e.getString().substring(0, e.getString().indexOf("|")).replaceAll("(\\(\\?:|\\)|\\.\\*\\?)", "")+" ";
 		else if(e instanceof CompositeEntity){
 			ArrayList<Entity> es = ((CompositeEntity) e).getEntities();
 			for(Entity e1: es){

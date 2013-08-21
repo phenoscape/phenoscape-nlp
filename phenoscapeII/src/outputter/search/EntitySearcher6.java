@@ -150,7 +150,7 @@ public class EntitySearcher6 extends EntitySearcher {
 						return entities;
 					}
 					//else, record results that meet certain criteria
-					LOGGER.debug("entity and entity locator are not related");
+					LOGGER.debug("entity and entity locator (if exists) are not related");
 					ArrayList<EntityProposals> entities = null;
 					found = false;
 					for(FormalConcept sentityfc: sentities){				

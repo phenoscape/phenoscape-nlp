@@ -262,12 +262,12 @@ public class CompositeEntity extends Entity {
 	}
 
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 		
 		float score=1.0f;
 		for(Entity e:this.getEntities())
 		{			
-				score*=e.getConfidienceScore();	
+				score*=e.getConfidenceScore();	
 		}
 		
 		return score;
@@ -290,7 +290,7 @@ public class CompositeEntity extends Entity {
 				{
 					FormalRelation related = ((REntity) e).getRelation();
 					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI());
-					relation.setConfidenceScore(related.getConfidienceScore());
+					relation.setConfidenceScore(related.getConfidenceScore());
 					if(((REntity)e).getEntity() instanceof SimpleEntity)
 					{
 						REntity re = new REntity(relation,((SimpleEntity)(((REntity)e).getEntity())).clone());
@@ -321,5 +321,14 @@ public class CompositeEntity extends Entity {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public ArrayList<Entity> getIndividualEntities() {
+		ArrayList<Entity> individuals = new ArrayList<Entity>();
+		for(Entity e: this.entities){
+			individuals.addAll(e.getIndividualEntities());
+		}
+		return individuals;
 	}
 }

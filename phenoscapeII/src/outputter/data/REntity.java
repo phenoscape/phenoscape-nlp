@@ -3,6 +3,8 @@
  */
 package outputter.data;
 
+import java.util.ArrayList;
+
 
 /**
  * @author Hong Cui
@@ -127,9 +129,9 @@ public class REntity extends Entity{
 	}
 
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 		//multiple of all confidence scores
-		return this.relation.getConfidienceScore()*this.entity.getConfidienceScore();
+		return this.relation.getConfidenceScore()*this.entity.getConfidenceScore();
 	}
 
 	//@Override
@@ -157,6 +159,13 @@ public class REntity extends Entity{
 	public boolean equals(Entity e){
 		if(this.content().compareTo(e.content())==0) return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<Entity> getIndividualEntities() {
+		ArrayList<Entity> individuals = new ArrayList<Entity>();
+		individuals.addAll(entity.getIndividualEntities());
+		return individuals;
 	}
 	
 

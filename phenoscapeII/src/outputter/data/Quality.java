@@ -114,7 +114,7 @@ public class Quality implements FormalConcept {
 	 * @see outputter.FormalConcept#getConfidienceScore()
 	 */
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 	
 		return this.confidenceScore;
 	}

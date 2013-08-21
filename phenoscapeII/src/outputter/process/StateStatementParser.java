@@ -260,6 +260,7 @@ public class StateStatementParser extends Parser {
 					entities = new ArrayList<EntityProposals>();
 					qualities = new ArrayList<QualityProposals>();
 					if(character.getParentElement()==null) continue;
+					if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
 					parserCharacter(character, statement, root, entities, qualities);
 					if(entities!=null && entities.size()>0) lastentities = entities; //remember the last entity
 					if(entities==null || entities.size()==0) entities = lastentities; //if no entity found, use the last entity
@@ -903,18 +904,27 @@ public class StateStatementParser extends Parser {
 					for(Entity key: keye.getProposals()){
 						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
 						{
-							if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(),
-									key.getPrimaryEntityOWLClassIRI())) {
-								// key is entity locator of e
-								entity.setConfidenceScore(1f);
-								CompositeEntity ce = new CompositeEntity();
-								ce.addEntity(entity);								
-								FormalRelation rel = Dictionary.partof;
-								rel.setConfidenceScore((float) 1.0);
-								REntity rentity = new REntity(rel, key);
-								ce.addEntity(rentity);
-								key = ce; // replace key with the composite entity in keyentities
-								flag=1;
+							ArrayList<Entity> entities = entity.getIndividualEntities();
+							ArrayList<Entity> keys = key.getIndividualEntities();
+							for(Entity aentity: entities){
+								for(Entity akey: keys){
+									//if (XML2EQ.elk.isPartOf(entity.getPrimaryEntityOWLClassIRI(), key.getPrimaryEntityOWLClassIRI())) {
+									if (XML2EQ.elk.isPartOf(aentity.getPrimaryEntityOWLClassIRI(), akey.getPrimaryEntityOWLClassIRI())) {
+
+										// key is entity locator of e
+										entity.setConfidenceScore(1f);
+										CompositeEntity ce = new CompositeEntity();
+										ce.addEntity(entity);								
+										FormalRelation rel = Dictionary.partof;
+										rel.setConfidenceScore((float) 1.0);
+										REntity rentity = new REntity(rel, key);
+										ce.addEntity(rentity);
+										key = ce; // replace key with the composite entity in keyentities
+										flag=1;
+										break;
+									}
+								}
+								if(flag==1) break;
 							}
 						}
 					}
@@ -947,24 +957,22 @@ public class StateStatementParser extends Parser {
 					for(Entity key: keye.getProposals()){
 						if((key.isOntologized()==true)&&(entity.isOntologized()==true))
 						{
-							if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(),
-									key.getPrimaryEntityOWLClassIRI())) {
-								// reset key to the subclass
-								keye.reset();
-								entity.setConfidenceScore(1f);
-								keye.add(entity);
-								keye.setPhrase(entity.getString());
-								/*CompositeEntity ce = new CompositeEntity();
-							ce.addEntity(entity);
-							FormalRelation rel = new FormalRelation();
-							rel.setString("part of");
-							rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-							rel.setId("BFO:000050");
-							rel.setConfidenceScore((float) 1.0);
-							REntity rentity = new REntity(rel, key);
-							ce.addEntity(rentity);
-							key = ce; // replace key with the composite entity in keyentities*/
-								flag=1;
+							ArrayList<Entity> entities = entity.getIndividualEntities();
+							ArrayList<Entity> keys = key.getIndividualEntities();
+							for(Entity aentity: entities){
+								for(Entity akey: keys){
+									if (XML2EQ.elk.isSubClassOf(aentity.getPrimaryEntityOWLClassIRI(), akey.getPrimaryEntityOWLClassIRI())) {	
+										//if (XML2EQ.elk.isSubClassOf(entity.getPrimaryEntityOWLClassIRI(), key.getPrimaryEntityOWLClassIRI())) {
+										// reset this key proposals to the subclass
+										keye.reset();
+										entity.setConfidenceScore(1f);
+										keye.add(entity);
+										keye.setPhrase(entity.getString());
+										flag=1;
+										break;
+									}
+								}
+								if(flag==1) break;
 							}
 						}
 					}

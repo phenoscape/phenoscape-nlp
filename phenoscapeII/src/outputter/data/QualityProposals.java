@@ -68,7 +68,7 @@ public class QualityProposals implements Proposals {
 		float max = 0f;
 		for(Quality quality: proposals){
 			if(quality.isOntologized()){
-				float score = quality.getConfidienceScore();
+				float score = quality.getConfidenceScore();
 				if(score > max){
 					max = score; 
 				}
@@ -82,7 +82,7 @@ public class QualityProposals implements Proposals {
 		float max = 0f;
 		for(Quality quality: proposals){
 			if(quality.isOntologized()){
-				float score = quality.getConfidienceScore();
+				float score = quality.getConfidenceScore();
 				if(score > max){
 					theone = quality; 
 				}
@@ -95,7 +95,7 @@ public class QualityProposals implements Proposals {
 		ArrayList<Quality> results = new ArrayList<Quality>();
 		for(Quality quality: proposals){
 			if(quality.isOntologized()){
-				float score = quality.getConfidienceScore();
+				float score = quality.getConfidenceScore();
 				if(score > threshold){
 					results.add(quality); 
 				}

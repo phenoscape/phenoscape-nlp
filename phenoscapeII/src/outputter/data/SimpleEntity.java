@@ -3,6 +3,8 @@
  */
 package outputter.data;
 
+import java.util.ArrayList;
+
 
 /**
  * @author updates
@@ -114,7 +116,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	 * @see outputter.FormalConcept#getConfidienceScore()
 	 */
 	@Override
-	public float getConfidienceScore() {
+	public float getConfidenceScore() {
 	
 		return this.confidenceScore;
 	}
@@ -140,7 +142,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 			SimpleEntity entity1 = new SimpleEntity();
 			entity1.setId(this.getId());
 			entity1.setClassIRI(this.getClassIRI());
-			entity1.setConfidenceScore(this.getConfidienceScore());
+			entity1.setConfidenceScore(this.getConfidenceScore());
 			entity1.setString(this.getString());
 			entity1.setLabel(this.getLabel());
 		return entity1;
@@ -163,6 +165,13 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	public boolean equals(Entity e){
 		if(this.content().compareTo(e.content())==0) return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<Entity> getIndividualEntities() {
+		ArrayList<Entity> individuals = new ArrayList<Entity>();
+		individuals.add(this);
+		return individuals;
 	}
 	
 

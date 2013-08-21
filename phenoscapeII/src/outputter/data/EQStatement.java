@@ -93,7 +93,7 @@ public class EQStatement {
 	}*/
 	
 	public float calculateConfidenceScore(){
-		return this.entity.getConfidienceScore()*this.quality.getConfidienceScore();
+		return this.entity.getConfidenceScore()*this.quality.getConfidenceScore();
 	}
 	
 	public String toString(){
