@@ -234,7 +234,7 @@ public class StateStatementParser extends Parser {
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
-				parserCharacter(character, statement, root, entities, qualities);
+				parserCharacter(character, statement, root, entities, qualities);//groov -> grooved
 				postcomps.addAll(qualities);
 			}
 			if(postcomps.size()>0){
@@ -256,7 +256,7 @@ public class StateStatementParser extends Parser {
 			}else{
 				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
-					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'...");
+					LOGGER.debug("SSP: parsing character '"+character.getAttributeValue("value")+"'....");
 					entities = new ArrayList<EntityProposals>();
 					qualities = new ArrayList<QualityProposals>();
 					if(character.getParentElement()==null) continue;

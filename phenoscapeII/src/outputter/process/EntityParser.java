@@ -83,12 +83,16 @@ public class EntityParser {
 				if (relationalquality != null) quality = relationalquality;
 			}*/
 			
-			Structure2Quality rq = new Structure2Quality(root, structurename, structureid, keyentities);
-			rq.handle();
+			Structure2Quality rq = null;
+			//structures involved in constraints should not be checked for quality (the resulting quality would be mistakenly applied to keyentities) 
+			if(!isConstraint(root, structureid)){
+				rq = new Structure2Quality(root, structurename, structureid, keyentities);
+				rq.handle();
+			}
 			//If any structure is a quality detach all the structures containing the structure id
 			
 			// if this.entity is not ontologized, then take the qualities else retain the entities
-			if(rq.qualities.size()>0){
+			if(rq!=null && rq.qualities.size()>0){
 				s2q = rq;
 				s2qcache.put(structureidcopy, rq);
 				LOGGER.debug("EntityParser recorded candidate s2q");
@@ -98,6 +102,22 @@ public class EntityParser {
 			}
 			//resolveStructure(); //EntityParser doesn't have info to resolve this.
 		}
+	}
+
+	/**
+	 * 
+	 * @param root
+	 * @param structureid
+	 * @return
+	 */
+	private boolean isConstraint(Element root, String structureid) {
+		try{
+			XPath constraintid = XPath.newInstance("//character[@constraintid='"+structureid+"']");
+			if(constraintid.selectSingleNode(root)!=null) return true;
+		}catch(Exception e){
+			LOGGER.error("", e);
+		}
+		return false;
 	}
 
 	/**

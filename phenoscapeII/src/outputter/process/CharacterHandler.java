@@ -207,7 +207,7 @@ public class CharacterHandler {
 		//is the candidate a relational quality?
 		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(quality, false,1);
 		if(relationalquality!=null){
-			//attempts to find related entity in contraints
+			//attempts to find related entity in constraints
 			// constraints = qualitymodifier if quality is a relational quality
 			if (chara.getAttribute("constraintid") != null) {
 				ArrayList<EntityProposals> relatedentities = findEntityInConstraints();
