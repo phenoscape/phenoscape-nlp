@@ -2,7 +2,8 @@
  * 
  */
 package outputter;
-
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -285,6 +286,7 @@ public class Utilities {
 				Element structure = (Element) XPath.selectSingleNode(root, "//structure[@id='" + structid + "']");
 				String sname = "";
 				if (structure == null) {
+					System.out.println((new XMLOutputter(Format.getPrettyFormat())).outputString(root));
 					sname = "ERROR"; // this should never happen
 				} else {
 					sname = ((structure.getAttribute("constraint") == null ? "" : structure.getAttributeValue("constraint")) + " " + structure.getAttributeValue("name").replaceAll("\\s+", "_"));

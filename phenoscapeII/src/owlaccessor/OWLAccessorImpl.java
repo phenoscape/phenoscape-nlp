@@ -85,6 +85,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private OWLOntology rootOnt;
 
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
+	private final static String temp = "TEMP";
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -992,7 +993,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public String getID(OWLClass c) {
 
 		String id = c.getIRI().toString();//<http://purl.obolibrary.org/obo/UBERON_4000163>
-		return id.substring(id.lastIndexOf('/')+1).replace('_', ':');
+		if(id.contains("/provisional/")){//http://purl.bioontology.org/ontology/provisional/00c13bdf-061f-4734-a72f-d5702ee17d73
+			return temp +":"+id.substring(id.lastIndexOf('/')+1);
+		}else{
+			return id.substring(id.lastIndexOf('/')+1).replace('_', ':');
+		}
 		/*Set<OWLAnnotation> ids = new HashSet<OWLAnnotation>();
 		for (OWLOntology ont:onts){		
 			ids.addAll(c.getAnnotations(ont, df.getOWLAnnotationProperty(IRI.create("http://www.geneontology.org/formats/oboInOwl#id"))));

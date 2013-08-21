@@ -75,6 +75,11 @@ public class XMLNormalizer {
 			//Fixing size to corresponding measure
 			fixSizeForRespectiveMeasureOnlyCharacterStatements(root);
 			collapsePreps(root); //A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
+			
+			
+			//XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+			//System.out.println(outputter.outputString(root));
+			
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}

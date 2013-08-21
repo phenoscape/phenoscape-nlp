@@ -105,7 +105,8 @@ public class EntitySearcher1 extends EntitySearcher {
 				for(FormalConcept entity:entityfcs){
 					if(entity!=null){
 						found = true;
-						ep.setPhrase(entityphrase);
+						//ep.setPhrase(entityphrase);
+						ep.setPhrase(originalentityphrase);
 						ep.add((Entity)entity); //all variations are alternative entities (i.e. proposals) for the phrase
 					}
 				}
@@ -347,13 +348,14 @@ public class EntitySearcher1 extends EntitySearcher {
 			LOGGER.debug("ES4.. found no match");
 		}
 
-		if(entities == null){	
+		if(entities == null || isOriginatedFromPartialResults(entities)){	
 			if(bestpartialresults!=null){
 				LOGGER.debug("..no better match, use bestpartialresults:");	
 				System.out.println("..no better match, use bestpartialresults:");
 				bestpartialresults = removeRedundancy(bestpartialresults);
 				bestpartialresults =lowerscore(bestpartialresults);
-				entities = bestpartialresults;
+				if(entities==null) entities = new ArrayList<EntityProposals>();
+				entities.addAll(bestpartialresults);
 				for(EntityProposals aep: entities){
 					LOGGER.debug("..:"+aep.toString());
 					System.out.println("..:"+aep.toString());
@@ -376,6 +378,22 @@ public class EntitySearcher1 extends EntitySearcher {
 		//return new EntitySearcher5().searchEntity(root, structid, entityphrase, elocatorphrase, originalentityphrase, prep);
 	}
 
+	/**
+	 * when entities are based on partial results, their confidence score is less than this.partial
+	 * @param entities
+	 * @return true if all entities are from partial
+	 */
+	private boolean isOriginatedFromPartialResults(
+			ArrayList<EntityProposals> entities) {
+		for(EntityProposals ep: entities){
+			for(Entity e: ep.getProposals()){
+				if(e.getConfidenceScore()>this.partial){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	/**
 	 * partial results should have a lower score
 	 * @param bestpartialresults
