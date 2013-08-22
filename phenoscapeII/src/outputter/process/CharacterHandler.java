@@ -6,6 +6,7 @@ package outputter.process;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +38,7 @@ import outputter.knowledge.TermOutputerUtilities;
 import outputter.search.EntitySearcherOriginal;
 import outputter.search.TermSearcher;
 
+
 /**
  * @author hong cui
  * Handles a character of a structure
@@ -54,6 +56,7 @@ public class CharacterHandler {
 	ArrayList<String> qualityclues; //may have multiple qualityclues: "color and shape of abc"
 	private ArrayList<EntityProposals> keyentities;
 	boolean fromcharacterstatement = false;
+	public static final String prepositions = "above|across|after|along|among|amongst|around|as|at|before|behind|beneath|between|beyond|by|for|from|in|into|near|of|off|on|onto|out|outside|over|than|throughout|to|toward|towards|up|upward|with|without";
 
 	//results
 	ArrayList<EntityProposals> entity; //the entity result will be saved here, which may be null, indicating the key entities parsed from the character statement should be used for this character
@@ -67,6 +70,7 @@ public class CharacterHandler {
 	private ToBeResolved tobesolvedentity;
 	ArrayList<EntityProposals> relatedentities = new ArrayList<EntityProposals>();
 	ArrayList<Entity> bilateral = new ArrayList<Entity>();
+	static final private String specialprep = "by|through|via";
 	static XPath pathCharacterUnderStucture;
 
 	private static final Logger LOGGER = Logger.getLogger(CharacterHandler.class);   
@@ -209,42 +213,66 @@ public class CharacterHandler {
 		if(relationalquality!=null){
 			//attempts to find related entity in constraints
 			// constraints = qualitymodifier if quality is a relational quality
+			boolean usedconstraint = false;
 			if (chara.getAttribute("constraintid") != null) {
 				ArrayList<EntityProposals> relatedentities = findEntityInConstraints();
+				String constraint = chara.getAttributeValue("constraint").trim();
+				//check and see if prep of the relation need to be matched: 'separated from' <> 'separated by'
+				String prep = constraint.contains(" ")? constraint.substring(0, constraint.indexOf(" ")): constraint;
+				boolean check = false;
+				if(prep.matches(this.specialprep )) check = true;
+				for(Quality rq: relationalquality.getProposals()){
+					String label = rq.getLabel();
+					String labelprep = label.contains(" ")? label.substring(0, constraint.indexOf(" ")): label;
+					if(!check || (check && labelprep.matches(CharacterHandler.prepositions) && labelprep.compareTo(prep)==0)){
+						for(EntityProposals relatedentity: relatedentities){
+							QualityProposals qproposals = new QualityProposals();
+							qproposals.add(new RelationalQuality(relationalquality, relatedentity));
+							qproposals.setPhrase(quality);
+							Utilities.addQualityProposals(qualities, qproposals);
+							usedconstraint = true;
+							//this.qualities.add(qproposals);
+						}
+					}
+				}
+				/*ArrayList<EntityProposals> relatedentities = findEntityInConstraints();
 				for(EntityProposals relatedentity: relatedentities){
 					QualityProposals qproposals = new QualityProposals();
 					qproposals.add(new RelationalQuality(relationalquality, relatedentity));
 					qproposals.setPhrase(quality);
 					Utilities.addQualityProposals(qualities, qproposals);
 					//this.qualities.add(qproposals);
-				}
+				}*/
 			}
-			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==true){// A and B: fused
-				//Processes structures with same characters(RQ's) to be related => Hariharan
-				Hashtable<String,ArrayList<EntityProposals>> entities = this.processStructuresWithSameCharacters(this.chara.getParentElement().getParentElement());
-				addREPE(entities,relationalquality);
-			}//check whether the parent structure(this.entity) is a bilateral entity
-			else if((this.entity!=null)&&(checkBilateral(this.entity)==true))//bilateral structures: fused
-			{
-				this.primaryentities.clear();//Since among the primary entities only some are bilateral and is relevant to this character/relational quality => Hariharan
-				for(Entity e:this.bilateral)
+			if(!usedconstraint){
+				if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())){// A and B: fused
+					//Processes structures with same characters(RQ's) to be related => Hariharan
+					Hashtable<String,ArrayList<EntityProposals>> entities = this.processStructuresWithSameCharacters(this.chara.getParentElement().getParentElement());
+					addREPE(entities,relationalquality);
+				}//check whether the parent structure(this.entity) is a bilateral entity
+				else if((this.entity!=null)&&(checkBilateral(this.entity)==true))//bilateral structures: fused
 				{
-					RelationalEntityStrategy re = new RelationalEntityStrategy(e);
-					re.handle();
-					Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+					this.primaryentities.clear();//Since among the primary entities only some are bilateral and is relevant to this character/relational quality => Hariharan
+					for(Entity e:this.bilateral)
+					{
+						RelationalEntityStrategy re = new RelationalEntityStrategy(e);
+						re.handle();
+						Hashtable<String,ArrayList<EntityProposals>> entities = re.getEntities();
+						addREPE(entities,relationalquality);
+					}
+				}
+				else /* if(!structuresWithSameCharacters(this.chara.getParentElement().getParentElement()))*///if entity is null,then structure is whole_organism, it should be handled here
+					//single, non-bilateral structure: fused: for example whole_organism:fused
+				{
+					//Handling characters that belong to a single structure => Hariharan
+
+					Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
 					addREPE(entities,relationalquality);
 				}
-			}
-			else if(structuresWithSameCharacters(this.chara.getParentElement().getParentElement())==false)//if entity is null,then structure is whole_organism, it should be handled here
-				//single, non-bilateral structure: fused: for example whole_organism:fused
-			{
-				//Handling characters that belong to a single structure => Hariharan
-				Hashtable<String,ArrayList<EntityProposals>> entities = SingleStructures();
-				addREPE(entities,relationalquality);
-			}
-			else
+				/*else
 			{
 				//Handle using text
+			}*/
 			}
 			if((this.primaryentities.size()>0)&&(this.qualities.size()>0))
 				donotresolve=true;
@@ -867,7 +895,8 @@ public class CharacterHandler {
 				 primaryentities.add(this.keyentities.get(0));
 
 			 }
-			 else if((this.keyentities.size()==1)&&(this.checkBilateral(this.keyentities)==true))//If keyentities.size==1, the it can be a bilateral entity
+			 //TODO: this.checkBilateral = true, but RelationalEntityStrategy return no results -- the formal check only the primary entity in a composite, the latter check the REntities as well
+			 else if((this.keyentities.size()==1)&&(this.checkBilateral(this.keyentities)))//If keyentities.size==1, the it can be a bilateral entity
 			 {
 				 //call bilateral strategy on the single key entity
 				 for(Entity e:this.bilateral)
@@ -879,9 +908,11 @@ public class CharacterHandler {
 					 primaryentities.addAll(entities1.get("Primary Entity"));
 				 }
 			 }
-			 else
+			 else if(this.keyentities.size()==1)
 			 {
-				 //TODO process text
+				 //use the the keyentities as both primary and related entities
+				 relatedentities.addAll((Collection<? extends EntityProposals>) keyentities.clone());
+				 primaryentities.addAll((Collection<? extends EntityProposals>) keyentities.clone());
 			 }
 
 			 entities.put("Related Entities", relatedentities);

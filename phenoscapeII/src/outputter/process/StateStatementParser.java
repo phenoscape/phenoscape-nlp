@@ -234,7 +234,7 @@ public class StateStatementParser extends Parser {
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
-				parserCharacter(character, statement, root, entities, qualities);//groov -> grooved
+				parserCharacter(character, statement, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
 			if(postcomps.size()>0){

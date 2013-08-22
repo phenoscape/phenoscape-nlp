@@ -29,6 +29,7 @@ public class PermittedRelations {
 		if(qp!=null) return qp;
 		//TODO: handle negated relations
 		QualityProposals qproposals = new QualityProposals();
+		qproposals.setPhrase(relation);
 		Quality relationalquality = new Quality();
 		relation = Utilities.removeprepositions(relation);
 		//Adding the below adjective forms to address issue => separate => separated, so it matches ontology

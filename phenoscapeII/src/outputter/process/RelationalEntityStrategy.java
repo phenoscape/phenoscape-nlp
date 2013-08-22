@@ -77,7 +77,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 
 				EntityProposals RelatedEP = new EntityProposals();
 				EntityProposals PrimaryEP = new EntityProposals();
-				
+
 				//Cloning to modify this object and create new related and primary entities
 			
 				//If it is a simple entity add part of multicellular organism
@@ -103,9 +103,13 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 						//Cloning to prevent the original entity from being modified
 						CompositeEntity bilateralclone1 = ((CompositeEntity)this.bilateralentity).clone();
 						CompositeEntity bilateralclone2 = ((CompositeEntity)this.bilateralentity).clone();
-						//Creating related entities by appending in right side of relation to the bilateral structure
-						for(Entity e:((CompositeEntity) bilateralclone1).getEntities())
+						
+						//Creating related entities by appending 'in right side of' relation to the bilateral structure
+						//for(Entity e:((CompositeEntity) bilateralclone1).getEntities())
+						ArrayList<Entity> entities = ((CompositeEntity) bilateralclone1).getEntities();
+						for(int i = 0; i < entities.size(); i++ )
 						{
+							Entity e = entities.get(i);
 							if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
 							{
 								if(e instanceof REntity)
@@ -118,13 +122,26 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									centity1.addEntity(entity1);
 									((REntity) e).setEntity(centity1);
 									RelatedEP.add(bilateralclone1);
-									
+								}else if(e instanceof SimpleEntity && i ==0)
+								{
+									//A (part of B) => A (part of (C part of B)): replace the RE following the SE
+									//C = 'dorsal region'
+									REntity re = (REntity) entities.get(i+1);
+									CompositeEntity centity1 = new CompositeEntity(); //C part of B									
+									centity1.addEntity(Dictionary.dorsalregion);
+									centity1.addEntity(re.clone());
+									re.setEntity(centity1);
+									entities.set(i+1, re);
+									RelatedEP.add(bilateralclone1);
 								}
 							}
 						}	
 						//Creating primary entities by appending in right side of relation to the bilateral structure
-						for(Entity e:((CompositeEntity) bilateralclone2).getEntities())
+						//for(Entity e:((CompositeEntity) bilateralclone2).getEntities())
+						entities = ((CompositeEntity) bilateralclone2).getEntities();
+						for(int i = 0; i < entities.size(); i++ )
 						{
+							Entity e = entities.get(i);
 							if(XML2EQ.elk.lateralsidescache.get(e.getPrimaryEntityLabel())!=null)
 							{
 								if(e instanceof REntity)
@@ -139,6 +156,17 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									((REntity) e).setEntity(centity2);
 									PrimaryEP.add(bilateralclone2);
 									
+								}else if(e instanceof SimpleEntity && i ==0)
+								{
+									//A (part of B) => A (part of (C part of B)): replace the RE following the SE
+									//C = 'ventral region'
+									REntity re = (REntity) entities.get(i+1);
+									CompositeEntity centity1 = new CompositeEntity(); //C part of B									
+									centity1.addEntity(Dictionary.ventralregion);
+									centity1.addEntity(re.clone());
+									re.setEntity(centity1);
+									entities.set(i+1, re);
+									PrimaryEP.add(bilateralclone2);
 								}
 							}
 						}	

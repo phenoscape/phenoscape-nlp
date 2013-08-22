@@ -17,7 +17,9 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
+import outputter.data.Entity;
 import outputter.data.FormalRelation;
+import outputter.data.SimpleEntity;
 import owlaccessor.OWLAccessorImpl;
 import edu.mit.jwi.IDictionary;
 
@@ -112,6 +114,9 @@ public class Dictionary {
 	public static FormalRelation iheresin = new FormalRelation();
 	public static FormalRelation bearerof = new FormalRelation();
 	public static FormalRelation complementof = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
+	public static Entity dorsalregion = new SimpleEntity();
+	public static Entity ventralregion = new SimpleEntity();
+	
 	static{
 		partof.setString("");
 		partof.setLabel("part_of");
@@ -127,6 +132,20 @@ public class Dictionary {
 		bearerof.setString("");
 		bearerof.setLabel("bearer_of");
 		bearerof.setId("BFO:0000053"); 
+		
+		dorsalregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO:0000079");
+		dorsalregion.setString("");
+		dorsalregion.setLabel("dorsal region");
+		dorsalregion.setId("BSPO:0000079"); 
+		dorsalregion.setConfidenceScore(0.5f);
+		
+		
+		ventralregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO:0000084");
+		ventralregion.setString("");
+		ventralregion.setLabel("ventral region");
+		ventralregion.setId("BSPO:0000084");
+		ventralregion.setConfidenceScore(0.5f);
+		
 	}
 	
 	public static Hashtable<String, String> singulars = new Hashtable<String, String>();
@@ -153,6 +172,7 @@ public class Dictionary {
 	
 	//to hold organ names and their adjective forms that are not covered by ontologies
 	public static Hashtable<String, ArrayList<String>> adjectiveorgans = new Hashtable<String, ArrayList<String>>();
+	
 		
 	static{
 		ArrayList<String> tmp = new ArrayList<String>();
