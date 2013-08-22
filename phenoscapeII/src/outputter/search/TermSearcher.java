@@ -117,7 +117,7 @@ public class TermSearcher {
 
 		// 1. search the original phrase/reg exp
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
-
+		String temp="";
 		ArrayList<FormalConcept> strongmatch = getStrongMatch(query,
 				phrasetype, results, 1f);
 		if (strongmatch != null && strongmatch.size()>0)
@@ -426,8 +426,8 @@ public class TermSearcher {
 			Hashtable<String, String> multiplevalues) {
 		// multiplevalues: keys: term, label, id, iri
 		ArrayList<Hashtable<String, String>> splited = new ArrayList<Hashtable<String, String>>();
-		//String[] terms = multiplevalues.get("term").split(";");
-		String term = multiplevalues.get("term");
+		String[] terms = multiplevalues.get("term").split(";");
+		//String term = multiplevalues.get("term");
 		String[] labels = multiplevalues.get("label").split(";");
 		String[] ids = multiplevalues.get("id").split(";");
 		String[] iris = multiplevalues.get("iri").split(";");
@@ -437,7 +437,7 @@ public class TermSearcher {
 		} else {
 			for (int i = 0; i < labels.length; i++) {
 				Hashtable<String, String> one = new Hashtable<String, String>();
-				one.put("term", term);
+				one.put("term", terms[0]);
 				one.put("label", labels[i]);
 				one.put("id", ids[i]);
 				one.put("iri", iris[i]);
@@ -609,7 +609,7 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("(?:groove)",
+		ArrayList<FormalConcept> quality = ts.searchTerm("caudal_fin .*? lobe",
 				"entity");
 		if(quality!=null){
 			for (FormalConcept fc : quality)

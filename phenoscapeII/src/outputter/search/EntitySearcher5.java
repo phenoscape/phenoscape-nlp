@@ -57,18 +57,25 @@ public class EntitySearcher5 extends EntitySearcher {
 			Hashtable<String, String> headnouns = new Hashtable<String, String>();
 			//ArrayList<FormalConcept> regexpresults = TermSearcher.regexpSearchTerm(entityphrase+" .*", "entity");
 			ArrayList<FormalConcept> regexpresults = new TermSearcher().searchTerm(aentityphrase+" .*", "entity");
+			String nouns = null;
 			if(regexpresults!=null){
 				LOGGER.debug("...search entity '"+aentityphrase+" .*' found match");
 				for(FormalConcept regexpresult: regexpresults){
 					regexpresult.setString(originalentityphrase+"["+regexpresult.getString()+"]"); //record originalentityphrase for grouping entity proposals later
 					headnouns.put(regexpresult.getLabel().replace(aentityphrase, ""), regexpresult.getId()+"#"+regexpresult.getClassIRI()); //don't trim headnoun
-				}			
+				}	
+				
+				if(regexpresults.size()<10){
+					//search headnouns in the context: coronoid .* => coronoid process of ulna
+					//headnouns may have leading or trailing spaces, perserve them: hindlimb intermedium; intermedium (fore)
+						nouns= searchContext(root, structid, headnouns); //bone, cartilaginous
+				}
 			}else{
 				LOGGER.debug("...search entity '"+aentityphrase+" .*' found no match");
 			}
-			//search headnouns in the context: coronoid .* => coronoid process of ulna
-			//headnouns may have leading or trailing spaces, perserve them: hindlimb intermedium; intermedium (fore)
-			String nouns = searchContext(root, structid, headnouns); //bone, cartilaginous
+			
+
+			
 			
 			if(nouns != null){
 				LOGGER.debug("...found candidate headnouns '"+nouns+"', forming proposals...");
@@ -77,7 +84,7 @@ public class EntitySearcher5 extends EntitySearcher {
 				//ep.setPhrase(entityphrase+" .*");
 				ep.setPhrase(originalentityphrase);
 				String[] choices = nouns.split(",");
-				float score = 1.0f/choices.length;
+				float score = 1.0f/regexpresults.size();
 				boolean found = false;
 				for(String noun: choices){
 					String[] idiri = headnouns.get(noun).split("#");

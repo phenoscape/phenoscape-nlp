@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -375,19 +376,48 @@ public class TermOutputerUtilities {
 	}
 	
 	/**
-	 * merge temp to result
+	 * merge exact match 'temp' to original match 'result'
+	 * remove redundant results
 	 * @param result
 	 * @param temp
 	 */
 	private void merge(Hashtable<String, String> result,
 			Hashtable<String, String> temp) {
-		Hashtable<String, String> merged = new Hashtable<String, String>();
-		result.put("term",  (result.get("term")+";"+temp.get("term")).replaceAll("(^;|;$)", ""));
-		result.put("querytype",  (result.get("querytype")+";"+temp.get("querytype")).replaceAll("(^;|;$)", ""));
-		result.put("matchtype", (result.get("matchtype")+";"+temp.get("matchtype")).replaceAll("(^;|;$)", ""));
-		result.put("id", (result.get("id")+";"+temp.get("id")).replaceAll("(^;|;$)", ""));
-		result.put("label",(result.get("label")+";"+temp.get("label")).replaceAll("(^;|;$)", ""));
-		result.put("iri", (result.get("iri")+";"+temp.get("iri")).replaceAll("(^;|;$)", ""));	
+		result.put("term",  result.get("term"));
+		result.put("querytype",  result.get("querytype"));
+		result.put("matchtype", result.get("matchtype")); //original+exact
+		
+		ArrayList<String> rids = new ArrayList<String>(Arrays.asList(result.get("id").split(";")));
+		ArrayList<String> rlabels = new ArrayList<String>(Arrays.asList(result.get("label").split(";")));
+		ArrayList<String> riris = new ArrayList<String>(Arrays.asList(result.get("iri").split(";")));
+		ArrayList<String> tids = new ArrayList<String>(Arrays.asList(temp.get("id").split(";")));
+		ArrayList<String> tlabels = new ArrayList<String>(Arrays.asList(temp.get("label").split(";")));
+		ArrayList<String> tiris = new ArrayList<String>( Arrays.asList(temp.get("iri").split(";")));
+		for(int i = 0; i<rids.size(); i++){
+			if(tids.contains(rids.get(i))){//deduplicate
+				tids.remove(rids.get(i));
+				tlabels.remove(rlabels.get(i));
+				tiris.remove(riris.get(i));
+			}
+		}
+		
+		String ids = ""; 
+		String labels = ""; 
+		String iris = "";
+		for(int i = 0; i<rids.size(); i++){
+			ids +=rids.get(i)+";";
+			labels +=rlabels.get(i)+";";
+			iris +=riris.get(i)+";";
+		}
+		for(int i = 0; i<tids.size(); i++){
+			ids +=tids.get(i)+";";
+			labels +=tlabels.get(i)+";";
+			iris +=tiris.get(i)+";";
+		}
+		
+		result.put("id", ids.replaceAll("(^;|;$)", ""));
+		result.put("label",labels.replaceAll("(^;|;$)", ""));
+		result.put("iri", iris.replaceAll("(^;|;$)", ""));	
 	}
 
 	/**

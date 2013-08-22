@@ -824,7 +824,7 @@ public class EntitySearcher1 extends EntitySearcher {
 	public static void main(String[] args) {
 		//Posterior radials in posterior-dorsal-fin
 		EntitySearcher1 eso = new EntitySearcher1();
-		String src = "C:/Users/updates/CharaParserTest/EQ-swartz_FixedGloss/target/final/Swartz 2012.xml_states1004.xml";
+		String src = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/test/011_patterns.xml_se063847a-767d-434d-aedd-fd4bce8f5cb3.xml";
 		SAXBuilder builder = new SAXBuilder();
 		Document xml = null;
 		try {
@@ -836,15 +836,15 @@ public class EntitySearcher1 extends EntitySearcher {
 		}
 		if(xml!=null){
 			Element root = xml.getRootElement();
-			String structid ="o5";
+			String structid ="o1141";
 			//String entityphrase = "posterior postfrontal";
 			//String entityphrase ="heterocercal";
 			//String elocatorphrase = "";
 			//String entityphrase = "posterior supraorbital postfrontal";
 			//String entityphrase ="posterior radials";
 			//String elocatorphrase = "anterior dorsal fin";
-			String entityphrase = "posterior radial";
-			String elocatorphrase = "posterior dorsal fin";
+			String entityphrase = "main";
+			String elocatorphrase = "";
 			String prep = "";
 			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
 			System.out.println("final result:");
