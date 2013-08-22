@@ -201,19 +201,15 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			if(qp==null){//no qp, create qp
 				//q = "present"
 				qp = new QualityProposals();
-				Quality q = new Quality();
+				Quality q = Dictionary.present;
 				q.setString("present");
-				q.setLabel("PATO:present");
-				q.setId("PATO:0000467");
 				q.setConfidenceScore((float)1.0);
 				qp.add(q);
 				eqp.setQuality(qp);//update qp
 				//check for any positive state statement present(yes,true etc.), if so assign that state to it
 				//create absent quality
-				Quality absent = new Quality();
+				Quality absent = Dictionary.absent;
 				absent.setString("absent");
-				absent.setLabel("PATO:absent");
-				absent.setId("PATO:0000462");
 				absent.setConfidenceScore((float)1.0);
 				qp = new QualityProposals();
 				qp.add(absent);

@@ -1018,8 +1018,8 @@ public class XML2EQ {
 						keyEQ = EQ;
 						QualityProposals qp = EQ.getQuality();
 						for(Quality q: qp.getProposals()){
-							String qlabel = q.getLabel();
-							if(qlabel.compareTo("absent")!=0) qualitylabels.add(qlabel); //ignore absent
+							String qiri = q.getClassIRI();
+							if(qiri.compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q.getLabel()); //ignore absent
 						}
 					}
 				}
@@ -1522,7 +1522,7 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");

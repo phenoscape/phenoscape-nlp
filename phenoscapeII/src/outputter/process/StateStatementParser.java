@@ -204,10 +204,8 @@ public class StateStatementParser extends Parser {
 				}
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 				QualityProposals qp = new QualityProposals();
-				Quality q = new Quality();
+				Quality q = Dictionary.present;
 				q.setString("present");
-				q.setId("PATO:0000467");
-				q.setLabel("present");
 				q.setConfidenceScore(1f);
 				qp.add(q);
 				qualities.add(qp);
@@ -222,19 +220,31 @@ public class StateStatementParser extends Parser {
 
 	protected void parseCharactersFormEQ(Element statement, Element root, EQProposals empty) {
 		//then parse characters. 
+		try{
+			List<Element> structures = pathStructure.selectNodes(statement);
+			for(Element structure: structures){
+				parseCharactersFromStructure(structure, root, empty);
+			}
+		}catch(Exception e){
+			LOGGER.error("", e);
+		}
+	}
+
+	private void parseCharactersFromStructure(Element structure, Element root,
+			EQProposals empty) {
 		try {
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
-			
+
 			//if any one of the characters is a post-comp quality, the entity needs to be post-comped
-			List<Element> postcompchars = pathPostCompCharacter.selectNodes(statement);
+			List<Element> postcompchars = pathPostCompCharacter.selectNodes(structure);
 			ArrayList<QualityProposals> postcomps = new ArrayList<QualityProposals>();
 			for(Element character: postcompchars){
 				entities = new ArrayList<EntityProposals>();
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
-				parserCharacter(character, statement, root, entities, qualities);
+				parseCharacter(character, structure, root, entities, qualities);
 				postcomps.addAll(qualities);
 			}
 			if(postcomps.size()>0){
@@ -244,12 +254,12 @@ public class StateStatementParser extends Parser {
 				}
 			}
 			Utilities.postcompose(entities, postcomps); //postcomp the entities 
-														//assuming the same entities being returned in the loop
-														
+			//assuming the same entities being returned in the loop
+
 			//other qualities
-			List<Element> characters = pathCharacter.selectNodes(statement);	
+			List<Element> characters = pathCharacter.selectNodes(structure);	
 			characters.removeAll(postcompchars);
-			
+
 			if(characters.size()<=0){
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
 				constructEQProposals(qualities, entities, empty);
@@ -261,7 +271,7 @@ public class StateStatementParser extends Parser {
 					qualities = new ArrayList<QualityProposals>();
 					if(character.getParentElement()==null) continue;
 					if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
-					parserCharacter(character, statement, root, entities, qualities);
+					parseCharacter(character, structure, root, entities, qualities);
 					if(entities!=null && entities.size()>0) lastentities = entities; //remember the last entity
 					if(entities==null || entities.size()==0) entities = lastentities; //if no entity found, use the last entity
 					LOGGER.debug("SSP: parsed entities:");
@@ -273,7 +283,7 @@ public class StateStatementParser extends Parser {
 					constructEQProposals(qualities, entities, empty);
 				}
 			}
-			
+
 		} catch (JDOMException e) {
 			LOGGER.error("", e);
 		}
@@ -287,7 +297,7 @@ public class StateStatementParser extends Parser {
 	 * @param entities
 	 * @param qualities
 	 */
-	public void parserCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+	public void parseCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
 		ArrayList<EntityProposals> entity = null;
 		boolean donotresolve=false;
 		// may contain relational quality
@@ -689,10 +699,8 @@ public class StateStatementParser extends Parser {
 
 			if(q.size()==0)
 			{
-				Quality present = new Quality();
+				Quality present = Dictionary.present;
 				present.setString("present");
-				present.setLabel("PATO:present");
-				present.setId("PATO:0000467");
 				present.setConfidenceScore((float)1.0);
 
 				QualityProposals qp = new QualityProposals();
@@ -761,7 +769,30 @@ public class StateStatementParser extends Parser {
 					}
 					this.EQStatements.add(eqp);
 				}					
-		}
+		}else if(entities!=null && entities.size()>0){ //no qualities => "present"
+			for (EntityProposals entityp : entities) {
+				//EQProposals eqp = new EQProposals();
+				EQProposals eqp = empty.clone();
+				eqp.setEntity(entityp);
+				Quality q = Dictionary.present;
+				q.setConfidenceScore(1f);
+				QualityProposals qp = new QualityProposals();
+				qp.add(q);
+				qp.setPhrase("present");
+				eqp.setQuality(qp); //this may be filled later for BinaryStateStatements
+				//eqp.setSource(this.src);
+				//eqp.setCharacterId(this.characterid);
+				//eqp.setStateId(this.stateid);
+				//eqp.setDescription(text);
+				//eqp.setCharacterlabel(this.characterlabel);
+				if (this instanceof StateStatementParser){
+					eqp.setType("state");
+				}else{
+					eqp.setType("character");
+				}
+				this.EQStatements.add(eqp);
+			}					
+	}
 		
 	}
 	

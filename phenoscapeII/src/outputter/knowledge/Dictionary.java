@@ -19,6 +19,7 @@ import outputter.ApplicationUtilities;
 import outputter.Utilities;
 import outputter.data.Entity;
 import outputter.data.FormalRelation;
+import outputter.data.Quality;
 import outputter.data.SimpleEntity;
 import owlaccessor.OWLAccessorImpl;
 import edu.mit.jwi.IDictionary;
@@ -116,6 +117,8 @@ public class Dictionary {
 	public static FormalRelation complementof = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
 	public static Entity dorsalregion = new SimpleEntity();
 	public static Entity ventralregion = new SimpleEntity();
+	public static Quality present = new Quality();
+	public static Quality absent = new Quality();
 	
 	static{
 		partof.setString("");
@@ -133,18 +136,26 @@ public class Dictionary {
 		bearerof.setLabel("bearer_of");
 		bearerof.setId("BFO:0000053"); 
 		
-		dorsalregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO:0000079");
+		dorsalregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO_0000079");
 		dorsalregion.setString("");
 		dorsalregion.setLabel("dorsal region");
 		dorsalregion.setId("BSPO:0000079"); 
-		dorsalregion.setConfidenceScore(0.5f);
 		
 		
-		ventralregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO:0000084");
+		ventralregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO_0000084");
 		ventralregion.setString("");
 		ventralregion.setLabel("ventral region");
 		ventralregion.setId("BSPO:0000084");
-		ventralregion.setConfidenceScore(0.5f);
+		
+		present.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000467");
+		present.setString("");
+		present.setLabel("present");
+		present.setId("PATO:0000467");
+		
+		absent.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000462");
+		absent.setString("");
+		absent.setLabel("absent");
+		absent.setId("PATO:0000462");
 		
 	}
 	

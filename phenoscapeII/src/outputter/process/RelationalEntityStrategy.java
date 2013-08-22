@@ -127,8 +127,10 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									//A (part of B) => A (part of (C part of B)): replace the RE following the SE
 									//C = 'dorsal region'
 									REntity re = (REntity) entities.get(i+1);
-									CompositeEntity centity1 = new CompositeEntity(); //C part of B									
-									centity1.addEntity(Dictionary.dorsalregion);
+									CompositeEntity centity1 = new CompositeEntity(); //C part of B	
+									Entity dr = Dictionary.dorsalregion;
+									dr.setConfidenceScore(0.5f);
+									centity1.addEntity(dr);
 									centity1.addEntity(re.clone());
 									re.setEntity(centity1);
 									entities.set(i+1, re);
@@ -161,8 +163,10 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									//A (part of B) => A (part of (C part of B)): replace the RE following the SE
 									//C = 'ventral region'
 									REntity re = (REntity) entities.get(i+1);
-									CompositeEntity centity1 = new CompositeEntity(); //C part of B									
-									centity1.addEntity(Dictionary.ventralregion);
+									CompositeEntity centity1 = new CompositeEntity(); //C part of B		
+									Entity vr = Dictionary.ventralregion;
+									vr.setConfidenceScore(0.5f);
+									centity1.addEntity(vr);
 									centity1.addEntity(re.clone());
 									re.setEntity(centity1);
 									entities.set(i+1, re);

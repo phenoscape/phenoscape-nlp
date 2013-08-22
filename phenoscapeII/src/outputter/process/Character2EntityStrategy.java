@@ -16,6 +16,7 @@ import outputter.data.EntityProposals;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
 import outputter.data.SimpleEntity;
+import outputter.knowledge.Dictionary;
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -72,10 +73,9 @@ public class Character2EntityStrategy implements AnnotationStrategy{
 						e.setClassIRI(asubclass.getIRI().toString());
 						this.entity.add(e);
 						
-						Quality q = new Quality();
+						Quality q = Dictionary.present;
 						q.setString("present");
-						q.setId("PATO:0000467");
-						q.setLabel("present");
+						q.setConfidenceScore(1f);
 						this.quality.add(q);
 						break;
 					}

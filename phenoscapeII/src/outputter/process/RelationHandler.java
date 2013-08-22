@@ -23,6 +23,7 @@ import outputter.data.EntityProposals;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
 import outputter.data.RelationalQuality;
+import outputter.knowledge.Dictionary;
 import outputter.knowledge.PermittedRelations;
 import outputter.search.EntitySearcherOriginal;
 
@@ -243,10 +244,8 @@ public class RelationHandler {
 							this.otherEQs.add(eqproposals);*/
 
 						EQProposals eqproposals = new EQProposals();
-						Quality present = new Quality();
+						Quality present = Dictionary.present;
 						present.setString("present");
-						present.setLabel("PATO:present");
-						present.setId("PATO:0000467");
 						present.setConfidenceScore((float)1.0);
 						QualityProposals presentp = new QualityProposals();
 						presentp.add(present);
@@ -303,10 +302,8 @@ public class RelationHandler {
 						}
 					}*/
 					EQProposals eqproposals = new EQProposals();
-					Quality absent = new Quality();
+					Quality absent = Dictionary.absent;
 					absent.setString("absent");
-					absent.setLabel("PATO:absent");
-					absent.setId("PATO:0000462");
 					absent.setConfidenceScore((float)1.0);
 					QualityProposals absentp = new QualityProposals();
 					absentp.add(absent);
@@ -332,10 +329,8 @@ public class RelationHandler {
 			}else if(relation.matches("\\b(found|located)\\b.*"))// This handles pattern 4.1
 			{
 
-				Quality present = new Quality();
+				Quality present = Dictionary.present;
 				present.setString("present");
-				present.setLabel("PATO:present");
-				present.setId("PATO:0000467");
 				present.setConfidenceScore((float)1.0);
 
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
