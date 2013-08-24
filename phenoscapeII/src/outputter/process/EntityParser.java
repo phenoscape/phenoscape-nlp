@@ -85,7 +85,7 @@ public class EntityParser {
 			
 			Structure2Quality rq = null;
 			//structures involved in constraints should not be checked for quality (the resulting quality would be mistakenly applied to keyentities) 
-			if(!isConstraint(root, structureid)){
+			if(!Utilities.isConstraint(root, structureid)){
 				rq = new Structure2Quality(root, structurename, structureid, keyentities);
 				rq.handle();
 			}
@@ -104,21 +104,7 @@ public class EntityParser {
 		}
 	}
 
-	/**
-	 * 
-	 * @param root
-	 * @param structureid
-	 * @return
-	 */
-	private boolean isConstraint(Element root, String structureid) {
-		try{
-			XPath constraintid = XPath.newInstance("//character[@constraintid='"+structureid+"']");
-			if(constraintid.selectSingleNode(root)!=null) return true;
-		}catch(Exception e){
-			LOGGER.error("", e);
-		}
-		return false;
-	}
+	
 
 	/**
 	 * return a clone so subsequent changes to entities will not be proprogated to the entity cache.

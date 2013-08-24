@@ -56,7 +56,7 @@ public class RelationalQuality extends Quality {
 	}
 	
 	public String content(){
-		return this.getRelationalquality().content()+" "+this.getRelatedentity().content();
+		return this.relationalquality.content()+" "+this.relatedentity.content();
 	}
 	
 	public String getString()

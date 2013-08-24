@@ -209,7 +209,10 @@ public class ELKReasoner{
 	/**
 	 * this method was largely taken from examples published on OWL API website.
 	 * but it does not gather all the restrictions ('inherited anonymous classes').
-	 * @param classIRI
+	 * 
+	 * is subclassIRI a subclass of something with part partIRI, in other words, 
+	 * can this subclassIRI has part partIRI? 
+	 * @param subclassIRI
 	 * @param partIRI
 	 * @return
 	 */

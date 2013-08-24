@@ -4,6 +4,7 @@
 package outputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -659,7 +660,21 @@ public class Utilities {
 		qualities.add(qp);
 	}
 	
-	
+	/**
+	 * 
+	 * @param root
+	 * @param structureid
+	 * @return
+	 */
+	public static boolean isConstraint(Element root, String structureid) {
+		try{
+			XPath constraintid = XPath.newInstance("//character[@constraintid='"+structureid+"']");
+			if(constraintid.selectSingleNode(root)!=null) return true;
+		}catch(Exception e){
+			LOGGER.error("", e);
+		}
+		return false;
+	}
 	
 	/**
 	 * type of each quality (simple or relational) determines the relation to be used to postcompose an entity

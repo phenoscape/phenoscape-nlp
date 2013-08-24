@@ -27,6 +27,10 @@ public class QualityProposals implements Proposals {
 			proposals.add((Quality)q);
 			return true;
 		}
+		if(q instanceof QualityProposals){
+			proposals.addAll(((QualityProposals) q).getProposals());
+			return true;
+		}
 		return false;
 	}
 

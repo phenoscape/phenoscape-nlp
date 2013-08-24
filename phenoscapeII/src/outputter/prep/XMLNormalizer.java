@@ -76,6 +76,8 @@ public class XMLNormalizer {
 			fixSizeForRespectiveMeasureOnlyCharacterStatements(root);
 			collapsePreps(root); //A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">
 			
+			//merge segments in the character statement
+			mergeCharacterStatement(root);
 			
 			//XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
 			//System.out.println(outputter.outputString(root));
@@ -84,6 +86,42 @@ public class XMLNormalizer {
 			LOGGER.error("", e);
 		}
 	}
+
+	/**
+	 * merge multiple character statements into one
+	 * replace those statements with the merged one
+	 * 
+	 * @param characterstatements
+	 * @return merged
+	 */
+	private void mergeCharacterStatement(Element root) {
+		try{
+			List<Element> characterstatements = pathCharacterStatement.selectNodes(root);
+			if(characterstatements.size()==1) return;
+			Element merged = characterstatements.get(0);
+			//Element parent = characterstatements.get(0).getParentElement();
+			//merged.detach();
+			//parent.addContent(merged);
+			String mergedtext = merged.getChildText("text").trim() + " ";
+			for(int i = 1; i < characterstatements.size(); i++){
+				Element e = characterstatements.get(i);
+				mergedtext += e.getChildText("text")+" ";
+				e.getChild("text").detach();
+				List<Element> children = e.getChildren();
+				while(children.size()>0){
+					Element c = children.get(0);
+					c.detach();
+					merged.addContent(c);
+				}
+				e.detach();
+			}
+			merged.getChild("text").setText(mergedtext.trim());
+		}catch(Exception e){
+			LOGGER.error("", e);
+		}
+	}
+
+	
 
 	/**
 	 * A with a row of B => <structure name="B" constraint="a row of"><relation name="with" from="A" to="B">

@@ -191,8 +191,7 @@ public class XML2EQ {
 				count++;
 				//allEQs = new ArrayList<EQStatementProposals>();
 				allEQs = new ArrayList<EQProposals>(); //allEQs from an xml file
-				List<Element> characterstatements = XMLNormalizer.pathCharacterStatement.selectNodes(root);
-				Element characterstatement = merge(characterstatements);
+				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
 				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
 				if(isBinary(statestatements)){
@@ -289,35 +288,7 @@ public class XML2EQ {
 	}
 
 	
-	/**
-	 * merge multiple character statements into one
-	 * replace those statements with the merged one
-	 * @param characterstatements
-	 * @return merged
-	 */
-	private Element merge(List<Element> characterstatements) {
-		if(characterstatements.size()==1) return characterstatements.get(0);
-		Element merged = characterstatements.get(0);
-		Element parent = characterstatements.get(0).getParentElement();
-		merged.detach();
-		parent.addContent(merged);
-		String mergedtext = merged.getChildText("text").trim() + " ";
-		for(int i = 1; i < characterstatements.size(); i++){
-			Element e = characterstatements.get(i);
-			mergedtext += e.getChildText("text")+" ";
-			e.getChild("text").detach();
-			List<Element> children = e.getChildren();
-			for(int j = 0; j<children.size(); j++){
-				Element c = children.get(j);
-				c.detach();
-				merged.addContent(c);
-			}
-			e.detach();
-		}
-		merged.getChild("text").setText(mergedtext.trim());
-		return merged;
-	}
-
+	
 	/**
 	 * use workbench to select/keep only the ones in the workbench
 	 */

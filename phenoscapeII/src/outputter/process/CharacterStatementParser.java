@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 
 import outputter.Utilities;
@@ -224,6 +226,8 @@ public class CharacterStatementParser extends Parser {
 		try{
 			//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			//ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
+			XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+			System.out.println(outputter.outputString(root));
 			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
 			ArrayList<String> RelatedStructures = new ArrayList<String>(); //keep a record on related entities, which should not be processed again
 			for(Element structure: structures){
@@ -327,6 +331,11 @@ public class CharacterStatementParser extends Parser {
 	private void resolve(/*ArrayList<EntityProposals> entities,
 			ArrayList<Structure2Quality> s2qs,*/ Element statement, Element root) {
 		boolean foundaentity = false;
+		
+		//remove any structureid that are part of character constraint
+		
+		
+		
 		//1. 'pubis_ischium': these are the key entities
 		//TODO: what about "A_B joint": should have a entity search strategy to handle this
 		int count = 0;
@@ -412,7 +421,7 @@ public class CharacterStatementParser extends Parser {
 		}		
 		
 		//remaining s2qs
-		if(this.qualityHash!=null){
+		if(this.qualityHash!=null && this.qualityHash.size()>0){
 			Enumeration<String> keys = this.qualityHash.keys();
 			while(keys.hasMoreElements()){
 				String sid = keys.nextElement();
@@ -455,17 +464,43 @@ public class CharacterStatementParser extends Parser {
 				}else if(this.keyentities.size()==0){
 					this.keyentities.addAll(entities);
 				}else{
-					if(checkForPartOfRelation(entities)==true){//Checks ELKReasoner whether the keyentities are part of entities
+					/*ArrayList<EntityProposals> part =  checkForPartOfRelation(entities);
+					if(part !=null){
+						if(!part.equals(entities)){
+							addEntityLocators(this.keyentities, entities);
+							LOGGER.debug("CSP: add to part_of chain:");
+							for(EntityProposals aep: entities){
+								LOGGER.debug(".."+aep.toString());
+							}
+						}else{
+							addEntityLocators(entities, this.keyentities);
+							LOGGER.debug("CSP: add to part_of chain:");
+							for(EntityProposals aep: entities){
+								LOGGER.debug(".."+aep.toString());
+							}
+						}
+					}else{
+						ArrayList<EntityProposals> subclass =  checkForSubclassRelation(entities);
+						if(subclass==null){
+							this.keyentities.addAll(entities);
+						}else if(subclass.equals(entities)){
+							
+						}
+					}*/
+					
+					if(checkForPartOfRelation(entities)){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
 						LOGGER.debug("CSP: add to part_of chain:");
 						for(EntityProposals aep: entities){
 							LOGGER.debug(".."+aep.toString());
 						}
-					}
+					}else if(!checkForSubclassRelation(entities)){
+						this.keyentities.addAll(entities);
+					}/*
 					else
 					{
 						this.keyentities.addAll(entities);
-					}
+					}*/
 				}
 			}
 			//reverse the order back to original-like
@@ -494,9 +529,9 @@ public class CharacterStatementParser extends Parser {
 	/**
 	 * are keyentities part of any of the entities?
 	 * @param entities
-	 * @return
+	 * @return the part or null if part_of relation is not supported.
 	 */
-	private boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
+	private /*ArrayList<EntityProposals>*/ boolean checkForPartOfRelation(ArrayList<EntityProposals> entities) {
 		
 		for(EntityProposals ep1 : this.keyentities)
 		{
@@ -510,17 +545,56 @@ public class CharacterStatementParser extends Parser {
 						{
 						if(XML2EQ.elk.isPartOf(e1.getClassIRI(),e2.getClassIRI()))
 						{
-							return true;
+							return true /*this.keyentities*/;
 						}
+						
+						//if(XML2EQ.elk.isPartOf(e2.getClassIRI(),e1.getClassIRI()))
+						//{
+						//	return this.entities;
+						//}
 						}
 					}
 				}
 			}
 		}
 		
-		return false;
+		return /*null*/ false;
 	}
 
+	/**
+	 * are keyentities part of any of the entities?
+	 * @param entities
+	 * @return
+	 */
+	private boolean /*ArrayList<EntityProposals>*/ checkForSubclassRelation(ArrayList<EntityProposals> entities) {
+		
+		for(EntityProposals ep1 : this.keyentities)
+		{
+			for(Entity e1: ep1.getProposals())
+			{
+				for(EntityProposals ep2:entities)
+				{
+					for(Entity e2:ep2.getProposals())
+					{
+						if((e1.getClassIRI()!=null)&&(e2.getClassIRI()!=null))
+						{
+							if(XML2EQ.elk.isSubClassOf(e1.getClassIRI(),e2.getClassIRI()))
+							{
+								return true /*keyentities*/;
+							}
+
+							/*if(XML2EQ.elk.isSubClassOf(e2.getClassIRI(),e1.getClassIRI()))
+							{
+								return entities;
+							}*/
+						}
+					}
+				}
+			}
+		}
+		
+		return false /*null*/;
+	}
 
 	/**
 	 * Order the structures shared btw structureIDs and entityHash,
