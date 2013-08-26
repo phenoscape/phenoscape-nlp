@@ -226,8 +226,8 @@ public class CharacterStatementParser extends Parser {
 		try{
 			//ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			//ArrayList<Structure2Quality> s2qs = new ArrayList<Structure2Quality>();
-			XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-			System.out.println(outputter.outputString(root));
+			//XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
+			//System.out.println(outputter.outputString(root));
 			List<Element> structures = XMLNormalizer.pathNonWholeOrganismStructure.selectNodes(statement);
 			ArrayList<String> RelatedStructures = new ArrayList<String>(); //keep a record on related entities, which should not be processed again
 			for(Element structure: structures){
@@ -330,9 +330,8 @@ public class CharacterStatementParser extends Parser {
 	 */
 	private void resolve(/*ArrayList<EntityProposals> entities,
 			ArrayList<Structure2Quality> s2qs,*/ Element statement, Element root) {
-		boolean foundaentity = false;
 		
-		//remove any structureid that are part of character constraint
+		//TODO: remove any structureid that are part of character constraint
 		
 		
 		
@@ -343,33 +342,37 @@ public class CharacterStatementParser extends Parser {
 			LOGGER.debug("CSP: resolving underscored structures...  ");
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 
-//get quality from relations and characters from each of the structures and post compose entities with the quality
+			//get quality from relations and characters from each of the structures and post compose entities with the quality
 			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
 				LOGGER.debug("CSP: entities from underscored structures (qualityclue is not 'ratio'):");
-					for(EntityProposals aep: entities){
-						LOGGER.debug(".."+aep.toString());
-					}
+				for(EntityProposals aep: entities){
+					LOGGER.debug(".."+aep.toString());
+				}
 				LOGGER.debug("CSP: post-composed with quality...");
 				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
-				foundaentity = true;
+				Set<String> keys = this.entityHash.keySet(); //save as keyentities
+				for(String key:keys)
+				{
+					this.keyentities.addAll(this.entityHash.get(key));
+				}	
 				this.qualityHash.remove(structid);
 				//remove from s2q with a structid < the first struct id 
 				if(count==0) removeS2Qbefore(structid);
-				this.structureIDs.remove(structid);
+				this.structureIDs.remove(structid);//no more resolution should be done on the structid
 			}
-			else if((entities!=null)&&(this.qualityClue.contains("ratio")==true))//if the quality clue has ratio then, just return all th entities
+			else if((entities!=null)&&(this.qualityClue.contains("ratio")==true))//if the quality clue has ratio then, just return all the entities
 			{
 				Set<String> keys = this.entityHash.keySet();
 				for(String key:keys)
 				{
 					this.keyentities.addAll(this.entityHash.get(key));
-					foundaentity = true;
-					this.qualityHash.remove(structid);
-					//remove from s2q with a structid < the first struct id 
-					if(count==0) removeS2Qbefore(structid);
-					this.structureIDs.remove(structid);
-				}
+				}	
+				this.qualityHash.remove(structid);
+				//remove from s2q with a structid < the first struct id 
+				if(count==0) removeS2Qbefore(structid);
+				this.structureIDs.remove(structid);//no more resolution should be done on the structid
 			}
+
 			count++;
 		}
 		

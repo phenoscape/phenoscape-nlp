@@ -143,7 +143,7 @@ public class RelationHandler {
 	}
 
 	private void parseEntity(){
-		if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
+		if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))!=0){ //otherwise, this.entity remains null
 			//parents separated by comma (,).
 			//String t="";
 			//String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + fromstructid + "']", 0);
@@ -338,7 +338,7 @@ public class RelationHandler {
 				aquality.add(present);	
 				quality.add(aquality);
 
-				if(fromstructname.replace("_"," ").compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
+				if(fromstructname.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0)
 				{
 					this.entitylocator = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname,"",tostructname,"");
 				}
