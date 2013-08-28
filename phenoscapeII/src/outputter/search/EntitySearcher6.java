@@ -87,10 +87,8 @@ public class EntitySearcher6 extends EntitySearcher {
 			if(!shortened.matches(".*?\\b("+Dictionary.spatialtermptn+")$")){
 				//SimpleEntity sentity = (SimpleEntity) new TermSearcher().searchTerm(shortened, "entity");
 				//search shortened and other strings with the same starting words
-				//ArrayList<FormalConcept> shortentities = TermSearcher.regexpSearchTerm(shortened, "entity");
-				//ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
-				ArrayList<FormalConcept> sentities = new TermSearcher().searchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
-				if(sentities!=null){
+				ArrayList<FormalConcept> shortentities = new TermSearcher().searchTerm(shortened, "entity");
+				if(shortentities!=null){
 					LOGGER.debug("search for entity '"+shortened+"\\b.*' found match, forming proposals...");
 					//construct anatomicalentity
 					SimpleEntity anatomicalentity = new SimpleEntity();
@@ -100,6 +98,145 @@ public class EntitySearcher6 extends EntitySearcher {
 					anatomicalentity.setLabel("anatomical entity");
 					anatomicalentity.setString(aentityphrase.substring(aentityphrase.lastIndexOf(" ")).trim());
 					anatomicalentity.setXMLid(structid);
+					//construct relation
+					FormalRelation rel =  Dictionary.partof;
+					rel.setConfidenceScore((float)1.0);
+
+					EntityProposals ep = new EntityProposals(); 
+					ep.setPhrase(originalentityphrase);
+					boolean found = false;
+					for(FormalConcept sentityfc: shortentities){
+						//if sentity part_of entityl holds, then sentity's conf score = 1 and return the result
+						SimpleEntity sentity = (SimpleEntity)sentityfc;
+						if(sentity.isOntologized() && entityls!=null /*&& entityls.isOntologized()*/){
+							for(FormalConcept fc: entityls){
+								SimpleEntity entityl = (SimpleEntity)fc;
+								if(XML2EQ.elk.isSubclassOfWithPart(entityl.getClassIRI(), sentity.getClassIRI())){
+									LOGGER.debug("'"+entityl.getLabel() +"' and '"+sentity.getLabel() + "' are related, increase confidence score");
+									found = true;
+									sentity.setConfidenceScore(1f);
+									CompositeEntity centity = new CompositeEntity();
+									centity.addEntity(anatomicalentity);//anatomical entity ...								
+									centity.addParentEntity(new REntity(rel, sentity)); // part of sentity ...
+									centity.addParentEntity(new REntity(rel, entityl)); //part of entityl
+									//ep.setPhrase(sentity.getString());
+									ep.add(centity);//add one proposal with anatomical entity
+									LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
+									/*centity = new CompositeEntity();
+									centity.addEntity(sentity);
+									centity.addParentEntity(new REntity(rel, entityl)); //part of entityl
+									centity.setString(originalentityphrase);
+									ep.add(centity); //add the other proposal without anatomical entity	
+									LOGGER.debug("add the other proposal without anatomical entity:"+centity.toString());*/		
+								}
+							}
+						}
+					}
+					if(found){
+						ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+						//entities.add(ep);
+						Utilities.addEntityProposals(entities, ep);
+						LOGGER.debug("EntitySearcher6 returns:");
+						for(EntityProposals aep: entities){
+							LOGGER.debug("..EntityProposals: "+aep.toString());
+						}
+						
+						//caching
+						if(entities==null) EntitySearcher6.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+						else EntitySearcher6.cache.put(entityphrase+"+"+elocatorphrase, entities);
+						
+						return entities;
+					}
+					//else, record results that meet certain criteria
+					LOGGER.debug("entity and entity locator (if exists) are not related");
+					ArrayList<EntityProposals> entities = null;
+					found = false;
+					for(FormalConcept sentityfc: shortentities){				
+						SimpleEntity sentity = (SimpleEntity)sentityfc;
+						//consider only the matches that are one word longer and don't have of/and in the labels
+						String label = sentity.getLabel();
+						String added = label.replaceFirst(shortened, "").trim();
+						if(label.indexOf(" of ")>=0 || label.indexOf(" and ")>=0 || added.indexOf(" ")>0) continue;
+
+						if(sentity.getId().compareTo(Dictionary.mcorganism)==0){
+							//too general "body scale", try to search for "scale"
+							//TODO: multi-cellular organism is too general a syn for body. "body" could mean something more restricted depending on the context.
+							//TODO: change labels to ids
+						}
+
+						//entity
+						//if(entityl.getString().length()>0){
+						if(elocatorphrase.length()>0){
+							for(FormalConcept fc: entityls){
+								found = true;
+								SimpleEntity entityl = (SimpleEntity)fc;
+								//relation & entity locator
+								CompositeEntity centity = new CompositeEntity();
+								centity.addEntity(anatomicalentity);
+								centity.addParentEntity(new REntity(rel, sentity));
+								centity.addParentEntity(new REntity(rel, entityl));
+								centity.setString(originalentityphrase);
+								//ep.setPhrase(sentity.getString());
+								//ep.setPhrase(originalentityphrase);
+								ep.add(centity); //add one
+								LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
+								/*centity = new CompositeEntity();
+								centity.addEntity(sentity);								
+								centity.addParentEntity(new REntity(rel, entityl));
+								centity.setString(originalentityphrase);
+								ep.add(centity); //add the other	
+								LOGGER.debug("add a proposal without anatomical entity:"+centity.toString());*/
+								
+							}
+						}else{
+							//EntityProposals entities = new EntityProposals();
+							found = true;
+							CompositeEntity centity = new CompositeEntity();
+							centity.addEntity(anatomicalentity);
+							centity.addParentEntity(new REntity(rel, sentity));
+							centity.setString(originalentityphrase);
+							//ep.setPhrase(sentity.getString());
+							ep.setPhrase(originalentityphrase);
+							ep.add(centity); //add one
+							LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
+							/*ep.add(sentity); //add the other
+							LOGGER.debug("add a proposal without anatomical entity:"+sentity.toString());*/
+						
+						}
+
+					}
+					//entities.add(ep);
+					if(found){
+						if(entities==null) entities = new ArrayList<EntityProposals>();
+						Utilities.addEntityProposals(entities, ep);
+						LOGGER.debug("EntitySearcher6 returns:");
+						for(EntityProposals aep: entities){
+							LOGGER.debug("..EntityProposals: "+aep.toString());
+						}
+						
+						//caching
+						if(entities==null) EntitySearcher6.nomatchcache.add(entityphrase+"+"+elocatorphrase);
+						else EntitySearcher6.cache.put(entityphrase+"+"+elocatorphrase, entities);
+						return entities;
+					}
+				}				
+						
+				
+				
+				//if failed, try wildcard 
+				
+				//ArrayList<FormalConcept> sentities = TermSearcher.regexpSearchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
+				ArrayList<FormalConcept> sentities = new TermSearcher().searchTerm(shortened+"\\b.*", "entity"); //candidate matches for the same entity
+				if(sentities!=null){
+					LOGGER.debug("search for entity '"+shortened+"\\b.*' found match, forming proposals...");
+					//construct anatomicalentity
+					/*SimpleEntity anatomicalentity = new SimpleEntity();
+					anatomicalentity.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0001062");
+					anatomicalentity.setConfidenceScore(0.8f);
+					anatomicalentity.setId("UBERON:0001062");
+					anatomicalentity.setLabel("anatomical entity");
+					anatomicalentity.setString(aentityphrase.substring(aentityphrase.lastIndexOf(" ")).trim());
+					anatomicalentity.setXMLid(structid);*/
 					//construct relation
 					FormalRelation rel =  Dictionary.partof;
 					rel.setConfidenceScore((float)1.0);
@@ -117,14 +254,14 @@ public class EntitySearcher6 extends EntitySearcher {
 									LOGGER.debug("'"+entityl.getLabel() +"' and '"+sentity.getLabel() + "' are related, increase confidence score");
 									found = true;
 									sentity.setConfidenceScore(1f);
-									CompositeEntity centity = new CompositeEntity();
+									/*CompositeEntity centity = new CompositeEntity();
 									centity.addEntity(anatomicalentity);//anatomical entity ...								
 									centity.addParentEntity(new REntity(rel, sentity)); // part of sentity ...
 									centity.addParentEntity(new REntity(rel, entityl)); //part of entityl
 									//ep.setPhrase(sentity.getString());
 									ep.add(centity);//add one proposal with anatomical entity
-									LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
-									centity = new CompositeEntity();
+									LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());*/
+									CompositeEntity centity = new CompositeEntity();
 									centity.addEntity(sentity);
 									centity.addParentEntity(new REntity(rel, entityl)); //part of entityl
 									centity.setString(originalentityphrase);
@@ -172,7 +309,7 @@ public class EntitySearcher6 extends EntitySearcher {
 							for(FormalConcept fc: entityls){
 								SimpleEntity entityl = (SimpleEntity)fc;
 								//relation & entity locator
-								CompositeEntity centity = new CompositeEntity();
+								/*CompositeEntity centity = new CompositeEntity();
 								centity.addEntity(anatomicalentity);
 								centity.addParentEntity(new REntity(rel, sentity));
 								centity.addParentEntity(new REntity(rel, entityl));
@@ -180,8 +317,8 @@ public class EntitySearcher6 extends EntitySearcher {
 								//ep.setPhrase(sentity.getString());
 								//ep.setPhrase(originalentityphrase);
 								ep.add(centity); //add one
-								LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
-								centity = new CompositeEntity();
+								LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());*/
+								CompositeEntity centity = new CompositeEntity();
 								centity.addEntity(sentity);								
 								centity.addParentEntity(new REntity(rel, entityl));
 								centity.setString(originalentityphrase);
@@ -191,14 +328,14 @@ public class EntitySearcher6 extends EntitySearcher {
 							}
 						}else{
 							//EntityProposals entities = new EntityProposals();
-							CompositeEntity centity = new CompositeEntity();
+							/*CompositeEntity centity = new CompositeEntity();
 							centity.addEntity(anatomicalentity);
 							centity.addParentEntity(new REntity(rel, sentity));
 							centity.setString(originalentityphrase);
 							//ep.setPhrase(sentity.getString());
 							ep.setPhrase(originalentityphrase);
 							ep.add(centity); //add one
-							LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());
+							LOGGER.debug("add a proposal with anatomical entity:"+centity.toString());*/
 							ep.add(sentity); //add the other
 							LOGGER.debug("add a proposal without anatomical entity:"+sentity.toString());
 							found = true;

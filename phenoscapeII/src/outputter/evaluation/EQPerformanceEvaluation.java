@@ -335,9 +335,9 @@ public class EQPerformanceEvaluation {
 						for(String v1 : vs){
 							if(v1.length()>0)
 							{
-								if(v1.contains("score")==true)
+								if(v1.contains("Score")==true)
 								{
-								tvalues.add((v1.substring(0, v1.indexOf("score")-1)).trim());//holds all the entity proposals of this EQ statement
+								tvalues.add((v1.substring(0, v1.indexOf("Score")-1)).trim());//holds all the entity proposals of this EQ statement
 								}else
 								{
 								tvalues.add(v1.trim());
@@ -803,15 +803,15 @@ public class EQPerformanceEvaluation {
 	{
 		//LOGGER.debug("inside match in state");
 		float totalscore=0;
-		if(entity.equals("")==false)
+		if(entity.equals("")==false && entity.indexOf("Score")>=0)
 		{
 		entity = (entity.substring(0,entity.indexOf("Score")-1)).trim();
 		}
-		if(relatedentity.equals("")==false)
+		if(relatedentity.equals("")==false && relatedentity.indexOf("Score")>=0)
 		{
 			relatedentity = (relatedentity.substring(0,relatedentity.indexOf("Score")-1)).trim();
 		}
-		if(quality.equals("")==false)
+		if(quality.equals("")==false && quality.indexOf("Score")>=0)
 		{
 			quality = (quality.substring(0,quality.indexOf("Score")-1)).trim();
 		}

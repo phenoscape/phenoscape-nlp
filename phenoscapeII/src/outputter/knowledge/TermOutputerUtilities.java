@@ -48,6 +48,7 @@ public class TermOutputerUtilities {
 	public static String adjectiveorganptn="";
 	public static OWLOntology uberon = null;
 	
+	
 		
 		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
 		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
@@ -154,7 +155,20 @@ public class TermOutputerUtilities {
 		return result;
 	}*/
 	
+	/**
+	 * 
+	 * @param classid
+	 * @return parent id and label, or null if classid is null or classid does not exist in pato
+	 */
 	public static String[] retreiveParentInfoFromPATO (String classid){
+		if(classid==null) return null;
+		
+		//translate classid to a PATO id
+		if(!classid.startsWith("PATO")){
+			classid = Dictionary.translateToPATO.get(classid);
+			if(classid==null) return null;
+		}
+		
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -169,6 +183,7 @@ public class TermOutputerUtilities {
 			String [] result = {"",""}; 
 			return findTargetParent(pato, classid, result);
 		}		
+		//return new String[] {"PATO:0000001","quality"};
 		return null;
 	}
 	

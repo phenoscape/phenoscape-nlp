@@ -352,7 +352,7 @@ public class Dictionary {
 		//spatialMaps.put("end", "margin");
 		//spatialMaps.put("segment","region"); // to address basal segment => basal region(only when segment is preceded by spatial term)
 	}
-	//legal relational qualities
+	//legal relational qualities for postcomposition of entities
 	static{	
 		resrelationQ.put("BFO:0000053","bearer_of");
 		resrelationQ.put("RO:0002220","adjacent_to");
@@ -411,12 +411,63 @@ public class Dictionary {
 		}
 		
 	}
+	
+	//this should ideally not be needed, but in reality, many equivalent classes exist cross ontologies but are not treated so
+	//the restrictedrelations for entity postcomposition sometimes have equivalent classes in PATO. PATO classes are need to create negated qualities
+	public final static Hashtable<String, String> translateToPATO = new Hashtable<String, String>(); //used for restricted relationlist
+	static{
+		translateToPATO.put("BFO:0000053","PATO:0000001"); //no better matches, match to 'quality'
+		translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to
+			translateToPATO.put("BSPO:0000096","PATO:0001632");//anterior_to
+			translateToPATO.put("UBERON:anteriorly_connected_to","PATO:0000001");
+			translateToPATO.put("UBERON:attaches_to","PATO:0000001");//attaches_to
+			translateToPATO.put("PHENOSCAPE:extends_from","PATO:0000001");
+			translateToPATO.put("RO:0002150","PATO:0000001");
+			translateToPATO.put("PATO:decreased_in_magnitude_relative_to","PATO:decreased_in_magnitude_relative_to");
+			translateToPATO.put("BSPO:0000107","PATO:0000001");
+			translateToPATO.put("RO:0002202","PATO:0000001");
+			translateToPATO.put("BSPO:0000097","PATO:0001234"); //distal to
+			translateToPATO.put("UBERON:distally_connected_to","PATO:0000001");
+			translateToPATO.put("BSPO:0000098","PATO:0001233");//dorsal_to
+			translateToPATO.put("UBERON:encloses","PATO:0000001");
+			translateToPATO.put("PHENOSCAPE:extends_to","PATO:0000001");
+			translateToPATO.put("PATO:has_cross_section","PATO:has_cross_section");
+			translateToPATO.put("UBERON:has_muscle_insertion","has_muscle_insertion");
+			translateToPATO.put("UBERON:has_muscle_origin","has_muscle_origin");
+			translateToPATO.put("BFO:0000051","has_part");
+			translateToPATO.put("BSPO:0000123","in_anterior_side_of");
+			translateToPATO.put("BSPO:0000125","in_distal_side_of");
+			translateToPATO.put("UBERON:in_lateral_side_of","in_lateral_side_of");
+			translateToPATO.put("BSPO:0000120","in_left_side_of");
+			translateToPATO.put("UBERON:in_median_plane_of","in_median_plane_of");
+			translateToPATO.put("BSPO:0000122","in_posterior_side_of");
+			translateToPATO.put("BSPO:0000124","in_proximal_side_of");
+			translateToPATO.put("BSPO:0000121","in_right_side_of");
+			translateToPATO.put("PATO:increased_in_magnitude_relative_to","PATO:increased_in_magnitude_relative_to");
+			translateToPATO.put("OBO_REL:located_in","PATO:0002261"); //located in
+			translateToPATO.put("RO:0002131","PATO:0001590"); //overlap with
+			translateToPATO.put("BFO:0000050","PATO:0000001");
+			translateToPATO.put("BSPO:passes_through","PATO:0000001");
+			translateToPATO.put("BSPO:0000099","PATO:0001633"); //posterior to
+			translateToPATO.put("UBERON:posteriorly_connected_to","PATO:0000001");
+			translateToPATO.put("BSPO:0000100","PATO:0001195"); //proximal to
+			translateToPATO.put("UBERON:proximally_connected_to","PATO:0000001");
+			translateToPATO.put("PATO:similar_in_magnitude_relative_to","PATO:similar_in_magnitude_relative_to");
+			translateToPATO.put("RO:0002219","PATO:0000001");
+			translateToPATO.put("RO:0002221","PATO:0001772"); //surrounding
+			translateToPATO.put("BSPO:0000102","PATO:0001196"); //ventral to
+			translateToPATO.put("BSPO:0000103","PATO:0000001");
+			translateToPATO.put("PHENOSCAPE:serves_as_attachment_site_for","PATO:0000001");
+			translateToPATO.put("BFO:0000052","PATO:inheres_in");
+			translateToPATO.put("PHENOSCAPE:complement_of","PATO:0000001");	
+	}
 	//syn phrases mapping to relational qualities
 	static{
-	//THis code populates the relationalqualities from Pato - Hariharan	
+		//THis code populates the relationalqualities from Pato - Hariharan	
+		//relations in resrelationQ take a higher priority than the relations from the relationalslim for equivalent relations.
 		File pato_file = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
-		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());
+		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());		
 		for(OWLClass b:a.getRelationalSlim())
 			{
 			String root_form = Utilities.removeprepositions(a.getLabel(b).trim());

@@ -296,8 +296,9 @@ public class CharacterHandler {
 		ArrayList<FormalConcept> results = ts.searchTerm(quality, "quality");
 
 		if(results!=null){ //has a strong match
-			QualityProposals qproposals = new QualityProposals();
+			//QualityProposals qproposals = new QualityProposals();
 			for(FormalConcept resultfc: results){
+				QualityProposals qproposals = new QualityProposals();
 				Quality result = (Quality)resultfc;
 				//qualities involving length should be handled with related entity
 
@@ -305,7 +306,7 @@ public class CharacterHandler {
 				{
 					this.resolve=true;
 				}
-				//the below if loop is used to reset the string to original value of quality
+				//the below if-loop is used to reset the string to original value of quality
 				if((quality!=qualitycopy))
 				{
 					result.setString(qualitycopy);
@@ -933,9 +934,7 @@ public class CharacterHandler {
 				 for(String conid: conids){
 					 String relatedentity = Utilities.getStructureName(root, conid);
 					 //parents separated by comma (,).
-					 String relatedentityparents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
-							 "|//relation[@name='in'][@from='" + chara.getAttributeValue("constraintid")  + "']" +
-							 "|//relation[@name='on'][@from='" + chara.getAttributeValue("constraintid")  + "']", 0);
+					 String relatedentityparents = Utilities.getNamesOnPartOfChain(root, chara.getAttributeValue("constraintid"));
 					 ArrayList<EntityProposals> result = new EntitySearcherOriginal().searchEntity(root, conid, relatedentity, relatedentityparents, relatedentity,"part_of");	
 					 if(result!=null) entities.addAll(result);
 				 }

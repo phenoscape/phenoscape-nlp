@@ -235,7 +235,8 @@ public class StateStatementParser extends Parser {
 		try {
 			ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 			ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
-
+			ArrayList<EntityProposals> thisentities = new ArrayList<EntityProposals>();
+			
 			//if any one of the characters is a post-comp quality, the entity needs to be post-comped
 			List<Element> postcompchars = pathPostCompCharacter.selectNodes(structure);
 			ArrayList<QualityProposals> postcomps = new ArrayList<QualityProposals>();
@@ -244,7 +245,7 @@ public class StateStatementParser extends Parser {
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
 				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
-				parseCharacter(character, structure, root, entities, qualities);
+				if(thisentities.size()==0) thisentities = parseCharacter(character, structure, root, entities, qualities); //this character's entity, may be shared among all postcompchars
 				postcomps.addAll(qualities);
 			}
 			if(postcomps.size()>0){
@@ -253,16 +254,17 @@ public class StateStatementParser extends Parser {
 					LOGGER.debug(".."+qp.toString());
 				}
 			}
-			Utilities.postcompose(entities, postcomps); //postcomp the entities 
-			//assuming the same entities being returned in the loop
-
-			//other qualities
-			List<Element> characters = pathCharacter.selectNodes(structure);	
-			characters.removeAll(postcompchars);
+			
+			//all qualities
+			List<Element> characters = pathCharacter.selectNodes(structure);
+			if(thisentities.size()>0){
+				Utilities.postcompose(thisentities, postcomps); //postcomp this entities 
+				characters.removeAll(postcompchars);
+			}
 
 			if(characters.size()<=0){
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
-				constructEQProposals(qualities, entities, empty);
+				constructEQProposals(qualities, thisentities, empty);
 			}else{
 				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
@@ -279,7 +281,7 @@ public class StateStatementParser extends Parser {
 					LOGGER.debug("SSP: parsed qualities:");
 					if(qualities!=null) for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
-					Utilities.postcompose(entities, postcomps);
+					//Utilities.postcompose(entities, postcomps); //attachement site: rugose scar or pit, rugose should not be postcomp to attachment site.
 					constructEQProposals(qualities, entities, empty);
 				}
 			}
@@ -296,8 +298,9 @@ public class StateStatementParser extends Parser {
 	 * @param root
 	 * @param entities
 	 * @param qualities
+	 * @return local entities (not resolved with keyentities)
 	 */
-	public void parseCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+	public ArrayList<EntityProposals> parseCharacter(Element character, Element statement, Element root, ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
 		ArrayList<EntityProposals> entity = null;
 		boolean donotresolve=false;
 		// may contain relational quality
@@ -327,6 +330,7 @@ public class StateStatementParser extends Parser {
 		ch.handle();
 		qualities.addAll(ch.getQualities());
 		entity = ch.getPrimaryentities();
+		ArrayList<EntityProposals> result = entity==null? new ArrayList<EntityProposals>() :  (ArrayList<EntityProposals>)entity.clone();
 		donotresolve=ch.donotresolve;
 		//}
 		if(donotresolve == false)
@@ -356,7 +360,7 @@ public class StateStatementParser extends Parser {
 		{
 			entities.addAll(resolveFinalEntities(entities,ch.entityparts));
 		}
-		
+		return result;
 	}
 	
 	

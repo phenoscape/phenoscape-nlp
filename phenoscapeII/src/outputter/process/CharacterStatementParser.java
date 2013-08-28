@@ -274,9 +274,9 @@ public class CharacterStatementParser extends Parser {
 			boolean fromcharacterdescription, String structureid, String structurename) {
 		String structureidcopy = structureid;
 		if(structureid.indexOf("#")>0) structureid = structureid.substring(0, structureid.indexOf("#"));
-		String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
-				 "|//relation[@name='in'][@from='" + structureid + "']" +
-				 "|//relation[@name='on'][@from='" + structureid + "']", 0); //list of structures separated with ","
+		//part of relations: part of, in, on
+		String parents = Utilities.getIdsOnPartOfChain(root, structureid); //list of structures separated with ","
+		
 		if(debug){
 			System.out.println("parse structure:"+structurename);
 		}
@@ -340,7 +340,7 @@ public class CharacterStatementParser extends Parser {
 		int count = 0;
 		for (String structid: this.underscoredStructureIDs){
 			LOGGER.debug("CSP: resolving underscored structures...  ");
-			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
+			ArrayList<EntityProposals> entities = this.entityHash.get(structid); //one id has multiple entities
 
 			//get quality from relations and characters from each of the structures and post compose entities with the quality
 			if((entities!=null)&&(this.qualityClue.contains("ratio")==false)){
@@ -370,22 +370,38 @@ public class CharacterStatementParser extends Parser {
 				this.qualityHash.remove(structid);
 				//remove from s2q with a structid < the first struct id 
 				if(count==0) removeS2Qbefore(structid);
-				this.structureIDs.remove(structid);//no more resolution should be done on the structid
+				this.structureIDs.remove(structid);//no more resolution should be done on this structid
 			}
 
 			count++;
 		}
 		
-		for(int i = 0; i < this.structureIDs.size(); i++){
-			String structid = this.structureIDs.get(i);
+		//postcompose all entities
+		//for(int i = 0; i < this.structureIDs.size(); i++){
+		for(int i = this.structureIDs.size()-1; i >=0; i--){ //reserve the order so post-composition candidates are post-composed first if needed.
+			String structid = this.structureIDs.get(i);			
+			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
+			
+			LOGGER.debug("CSP:post-composed with quality...");
+			ArrayList<String> usedids = postcomposeWithQuality(entities, structid, statement, root); //update entities in this entityHash
+			for(String usedid: usedids){
+				this.entityHash.remove(usedid);
+				this.structureIDs.remove(usedid);
+			}
+		}
+		
+
+		//2. go over remaining structureIDs, accept multiple entities from one structureid, remove qualities that also have a matched entity
+		for(int i = 0; i < this.structureIDs.size(); i++){ //reserve the order so post-composition candidates are post-composed first if needed.
+			String structid = this.structureIDs.get(i);			
 			ArrayList<EntityProposals> entities = this.entityHash.get(structid);
 			if(entities!=null && entities.size()>1){ //entities resulted from 1 structureid
 				LOGGER.debug("CSP: entities from one structures:");
 				for(EntityProposals aep: entities){
 					LOGGER.debug(".."+aep.toString());
 				}
-				LOGGER.debug("CSP:post-composed with quality...");
-				postcomposeWithQuality(entities, structid, statement, root);
+				//LOGGER.debug("CSP:post-composed with quality...");
+				//postcomposeWithQuality(entities, structid, statement, root);
 				this.keyentities = entities;	
 				this.entityHash.remove(structid);
 				this.qualityHash = null;
@@ -399,7 +415,7 @@ public class CharacterStatementParser extends Parser {
 			
 			if(qualityHash !=null && this.qualityHash.get(structid)!=null && entityHash!=null && entities!=null){		
 				ArrayList<Structure2Quality> s2qs = this.qualityHash.get(structid);
-				boolean entitywin = entityWin(entities, s2qs);
+				boolean entitywin = entityWin(entities, s2qs); //default to entity win
 				
 					LOGGER.debug("CSP: selecting btw entity and quality for structure: "+structid);
 				
@@ -423,7 +439,7 @@ public class CharacterStatementParser extends Parser {
 			
 		}		
 		
-		//remaining s2qs
+		//3. remaining s2qs: structureids that matched to quality alone (no entity match)
 		if(this.qualityHash!=null && this.qualityHash.size()>0){
 			Enumeration<String> keys = this.qualityHash.keys();
 			while(keys.hasMoreElements()){
@@ -446,6 +462,7 @@ public class CharacterStatementParser extends Parser {
 			}
 		}
 
+		//4. remaining entities
 		if(this.entityHash!=null && this.entityHash.size()>0){
 			//Check ELK if there is actually a part of relationship, if yes proceed
 //			else if they are involved in any relation as from then, they can key entity
@@ -673,19 +690,23 @@ public class CharacterStatementParser extends Parser {
 	 * if an entity has a character *modifier* in the original text, use the character (simple or relational quality) 
 	 * to post-compose the entity. for example "white hair: absent" => E: hair bearer of white: Q: absent
 	 * 
+	 * 
 	 * note, one structureid may be associated with multiple structures, for example 'pubis_ischium'
 	 * characters associated with the structureid 
 	 * @param entities
+	 * @return a list of structureids whose entities are used in postcomposition
 	 */
 	@SuppressWarnings("unchecked")
-	private void postcomposeWithQuality(ArrayList<EntityProposals> entities, String structureid, Element statement, Element root) {
+	private ArrayList<String> postcomposeWithQuality(ArrayList<EntityProposals> entities, String structureid, Element statement, Element root) {
+		ArrayList<String> usedids = new ArrayList<String>();
 		try{
 			Element structure = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+structureid+"'");
 			StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>(),statement.getChildText("text"));
+			//post-compose with relations
 			List<Element> relations = XPath.selectNodes(statement, ".//relation[@from='"+structureid+"']"); 
 			ArrayList<String> StructuredQualities = new ArrayList<String>();//scope of this variable?
 			for(Element relation: relations){
-				if(relation.getAttribute("to")!=null && checked.contains(relation.getAttributeValue("to")+",")){
+				if(relation.getAttribute("to")!=null && Utilities.partofrelations.contains(relation.getAttributeValue("name"))){
 					continue; //part_of relations have already been dealt with in EntityParser
 				}
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
@@ -693,10 +714,13 @@ public class CharacterStatementParser extends Parser {
 			    ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities, null);
 			    //entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
+					//post-compose the related entity before use the quality in the result
 					Utilities.postcompose(entities, qualities);
+					usedids.add(relation.getAttributeValue("to"));
 				}
 			}
 			
+			//post-compose with characters
 			List<Element> characters = structure.getChildren("character");
 			for(Element character: characters){
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
@@ -710,6 +734,7 @@ public class CharacterStatementParser extends Parser {
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}		
+		return usedids;
 	}
 
 	

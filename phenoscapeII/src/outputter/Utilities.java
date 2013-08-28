@@ -45,6 +45,13 @@ public class Utilities {
 	private static Pattern p2 = Pattern.compile("(.*?)(\\d+) to (\\d+)");
 	private static Pattern p1 = Pattern.compile("(first|second|third|forth|fouth|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\\b(.*)");
 	public static String preposition = "of|in|on|between|with|from|to|into|toward";
+	private static int relationlength = 3;
+	public static ArrayList<String> partofrelations = new ArrayList<String>();
+	static{
+		partofrelations.add("part_of");
+		partofrelations.add("in");
+		partofrelations.add("on");
+	}
 
 	/**
 	 * 
@@ -159,6 +166,7 @@ public class Utilities {
 	 * @param root
 	 * @param xpath
 	 *            : "//relation[@name='part_of'][@from='"+structid+"']"
+	 * @count number of rounds in the iteration
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -215,9 +223,9 @@ public class Utilities {
 						xpath += "//relation[@name='part_of'][@from='" + id + "']|//relation[@name='in'][@from='" + id + "']|//relation[@name='on'][@from='" + id + "']|";
 				}
 			}
-			if (xpath.length() > 0 && count < 3) {
+			if (xpath.length() > 0 && count < Utilities.relationlength ) {
 				xpath = xpath.replaceFirst("\\|$", "");
-				path += getStructureChain(root, xpath, count++);
+				path += getStructureChainIds(root, xpath, count++);
 			} else {
 				return path.replaceFirst(",$", "");
 			}
@@ -766,8 +774,28 @@ public class Utilities {
 		}
 		return synring.trim();
 	}
+
+	public static String getIdsOnPartOfChain(Element root, String structureid) {
+		return getStructureChainIds(root, partofXpath(structureid), 0);
+		
+	}
 	
+	public static String getNamesOnPartOfChain(Element root, String structureid) {
+		return getStructureChain(root, partofXpath(structureid), 0);	
+	}
 	
+	/*
+	 * return: "//relation[@name='part_of'][@from='" + structureid + "']" +
+				"|//relation[@name='in'][@from='" + structureid + "']" +
+				"|//relation[@name='on'][@from='" + structureid + "']"
+	 */
+	public static String partofXpath(String structureid){
+		String path = "";
+		for(String partof: partofrelations){
+			path += "//relation[@name='"+partof+"'][@from='" + structureid + "']|";
+		}
+		return path.replaceFirst("\\|+$","");
+	}
 }
 
 

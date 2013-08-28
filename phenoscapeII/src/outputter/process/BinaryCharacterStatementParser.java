@@ -232,12 +232,11 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 						{
 							if(q1.getId()!=null)
 							{
-								@SuppressWarnings("static-access")
-
+								
 /*								String complementQuality = Dictionary.complementRelations.get(q1.getLabel());
 								if(complementQuality==null)
 								{*/
-									String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(q1.getId()); 
+									String [] parentinfo = TermOutputerUtilities.retreiveParentInfoFromPATO(q1.getId()); 
 									if(parentinfo!=null)
 									{
 										Quality parentquality = new Quality();
@@ -459,9 +458,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			for(Element structure: structures){
 				String structureid = structure.getAttributeValue("id");
 				if(!checked.contains(structureid+",")){
-					String parents = Utilities.getStructureChainIds(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
-							"|//relation[@name='in'][@from='" + structureid + "']" +
-							"|//relation[@name='on'][@from='" + structureid + "']", 0);
+					String parents = Utilities.getIdsOnPartOfChain(root, structureid);
 					String structurename = Utilities.getStructureName(root, structureid);
 					EntityParser ep = new EntityParser(statement, root, structureid, structurename, null, true);
 					if(ep.getEntity()!=null) entities.addAll(ep.getEntity());

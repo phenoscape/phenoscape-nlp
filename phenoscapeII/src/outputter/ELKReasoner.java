@@ -49,6 +49,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -191,6 +192,23 @@ public class ELKReasoner{
 		return false;
 	}	
 
+	public boolean isEquivalent(String classIRI1, String classIRI2){
+		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
+		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+		OWLClass class1 = dataFactory.getOWLClass(IRI.create(classIRI1));
+		OWLClass class2 = dataFactory.getOWLClass(IRI.create(classIRI2));
+		return isEquivalentClass(class1, class2);
+	}
+
+	public boolean isEquivalentClass(OWLClass class1, OWLClassExpression class2) {
+		/* this doesn't work: returns wrong value
+		 * reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+		Node<OWLClass> eqclasses = reasoner.getEquivalentClasses(class1);
+		return eqclasses.getEntities().contains(class2);*/
+		Set<OWLOntology> onts = this.ont.getImportsClosure();
+		Set<OWLClassExpression> classes = class1.getEquivalentClasses(onts);
+		return classes.contains(class2) || class1.equals(class2);
+	}
 	/**
 	 * is class1 a part of class2
 	 * @param class1IRI
@@ -348,18 +366,32 @@ public class ELKReasoner{
 			String superclassIRI = "http://purl.obolibrary.org/obo/UBERON_0000062"; //organ
 			System.out.println(elk.isSubClassOf(subclassIRI, superclassIRI));		
 			 */
-			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON:0003606"; //limb long bone
+			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON_0003606"; //limb long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
 			/*String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
 			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";*/
-			System.out.println("______________________________________________________________________________________________________________");
+			//String classIRI1 = "http://purl.obolibrary.obo/obo/UBERON_4100000";
+			//String classIRI2 = "http://purl.obolibrary.obo/obo/UBERON_4100000";
+			//String classIRI1 = "http://purl.obolibrary.org/obo/UBERON_2001794"; //orbitosphenoid-prootic joint
+			//String classIRI2 = "http://purl.obolibrary.org/obo/UBERON_0000982"; //skeletal joint
+			//String classIRI1 = "http://purl.obolibrary.org/obo/UBERON_0002217"; //synovial joint
+			//String classIRI2 = "http://purl.obolibrary.org/obo/UBERON_0000982"; //skeletal joint
+			//String classIRI1 = "http://purl.obolibrary.org/obo/UBERON_0011134"; //nosynovial joint
+			//System.out.println(elk.isEquivalent(classIRI1, classIRI2)); //class A is not an "equivalent" class of itself
+			
+			OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
+			OWLClass joint1 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0002217")); //synovial joint
+			OWLClass joint2 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0011134")); //nonsynovial joint
+			OWLClassExpression joint1or2 = elk.dataFactory.getOWLObjectUnionOf(joint1, joint2);
+			System.out.println(elk.isEquivalentClass(joint, joint1or2));
+			
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));	
 
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));
 
 			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584"));
-		//	elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
+		    //elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
 			elk.dispose();
 
 		} catch (OWLOntologyCreationException e) {

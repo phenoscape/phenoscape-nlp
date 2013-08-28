@@ -55,9 +55,7 @@ public class EntityParser {
 		}else if(nomatchs2qcache.contains(structureidcopy)){
 			s2q = null;
 		}else{
-			String parents = Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + structureid + "']" +
-					 "|//relation[@name='in'][@from='" + structureid + "']" +
-					 "|//relation[@name='on'][@from='" + structureid + "']", 0);
+			String parents = Utilities.getNamesOnPartOfChain(root, structureid);
 			LOGGER.debug("EntityParser calls EntitySearcherOriginal to search '"+structurename+","+parents+"'");
 			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
 			if(this.entity!=null){

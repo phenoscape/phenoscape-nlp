@@ -91,12 +91,12 @@ public class RelationHandler {
 
 
 	private void resolve() {
-		// TODO implement it
+	
 		//if fromstructure name overlaps with name of keyentities, resolve to entity
 		if(this.keyentities!=null){
 			for(EntityProposals ep: this.keyentities){
 				for(Entity e: ep.getProposals()){
-					if(contains(e.getString(), fromstructname)){//
+					if(contains(e.getPrimaryEntityString(), fromstructname)){//
 						this.entity = this.tobesolvedentity.getEntityCandidate();
 						this.tobesolvedentity.setQualityCandidate(null);
 						this.tobesolvedentity.setStructure2Quality(null);
@@ -177,9 +177,7 @@ public class RelationHandler {
 		//TODO negation
 
 		QualityProposals relationalquality = PermittedRelations.matchInPermittedRelation(relation, negation,1);
-		tostructname = tostructname + "," + Utilities.getStructureChain(root, "//relation[@name='part_of'][@from='" + tostructid + "']" +
-				"|//relation[@name='in'][@from='" + tostructid + "']" +
-				"|//relation[@name='on'][@from='" + tostructid + "']", 0); //in/on = part_of?
+		tostructname = tostructname + "," + Utilities.getNamesOnPartOfChain(root, tostructid); //in/on = part_of?
 		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			String t = "";

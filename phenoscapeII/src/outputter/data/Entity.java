@@ -13,6 +13,8 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 		return null; //return null for other cases
 	}
 	
+	
+	
 	public String getPrimaryEntityLabel(){
 		if(this instanceof SimpleEntity) return ((SimpleEntity)this).getLabel(); 
 		if(this instanceof CompositeEntity) return ((CompositeEntity)this).getTheSimpleEntity().getLabel(); 
