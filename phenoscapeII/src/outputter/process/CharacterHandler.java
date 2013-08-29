@@ -309,12 +309,14 @@ public class CharacterHandler {
 				//the below if-loop is used to reset the string to original value of quality
 				if((quality!=qualitycopy))
 				{
+					result.setSearchString(qualitycopy);
 					result.setString(qualitycopy);
 				}
 				if(negated){
 					/*TODO use parent classes Jim use for parent classes*/
 					String [] parentinfo = ontoutil.retreiveParentInfoFromPATO(result.getId()); 
 					Quality parentquality = new Quality();
+					parentquality.setSearchString("");
 					parentquality.setString(parentinfo[1]);
 					parentquality.setLabel(parentinfo[1]);
 					parentquality.setId(parentinfo[0]);		
@@ -401,6 +403,7 @@ public class CharacterHandler {
 		}
 		if((this.qualities.size()==0)&&(quality.equals("")==false)){
 			Quality result=new Quality();
+			result.setSearchString(quality);
 			result.setString(quality);
 			result.setConfidenceScore(0.0f); //TODO: confidence score of no-ontologized term = goodness of the phrase for ontology
 			if(qproposals ==null) qproposals = new QualityProposals();
@@ -858,7 +861,8 @@ public class CharacterHandler {
 					 Element ParentStructure = character.getParentElement();
 					 if(!ParentStructure.getAttributeValue("name").equals(ApplicationUtilities.getProperty("unknown.structure.name")))
 					 {
-						 ArrayList<EntityProposals> entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), ParentStructure.getAttributeValue("name"), "", "","");				
+						 ArrayList<EntityProposals> entity  = new EntitySearcherOriginal().searchEntity(root, ParentStructure.getAttributeValue("id"), 
+								 ParentStructure.getAttributeValue("name"), "", ParentStructure.getAttributeValue("name"),"");				
 						 if(entity!=null)  relatedentities.addAll(entity); 
 						 character.detach();
 					 }
@@ -935,7 +939,7 @@ public class CharacterHandler {
 					 String relatedentity = Utilities.getStructureName(root, conid);
 					 //parents separated by comma (,).
 					 String relatedentityparents = Utilities.getNamesOnPartOfChain(root, chara.getAttributeValue("constraintid"));
-					 ArrayList<EntityProposals> result = new EntitySearcherOriginal().searchEntity(root, conid, relatedentity, relatedentityparents, relatedentity,"part_of");	
+					 ArrayList<EntityProposals> result = new EntitySearcherOriginal().searchEntity(root, conid, relatedentity, relatedentityparents, relatedentity+"+"+relatedentityparents,"part_of");	
 					 if(result!=null) entities.addAll(result);
 				 }
 				 return entities;

@@ -89,9 +89,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 					REntity re1 = new REntity(bearer, Utilities.wrapQualityAs(female)); //may alternatively relax REntity to allow Quality 
 					CompositeEntity ce1 = new CompositeEntity();
 					ce1.setString("female");
+					ce1.setSearchString("");
 					ce1.addEntity(organism);
 					ce1.addEntity(re1);
-					ce1.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000383");
+					ce1.setClassIRI(Dictionary.baseiri+"PATO_0000383");
 					ep.setPhrase("female"); //the phrase set this proposal apart from the other one
 					ep.add(ce1);
 					created = true;
@@ -113,9 +114,10 @@ public class EntitySearcherOriginal extends EntitySearcher {
 					REntity re2 = new REntity(bearer, Utilities.wrapQualityAs(male)); 	
 					CompositeEntity ce2 = new CompositeEntity();
 					ce2.setString("male");
+					ce2.setSearchString("");
 					ce2.addEntity(organism);
 					ce2.addEntity(re2);
-					ce2.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000384");
+					ce2.setClassIRI(Dictionary.baseiri+"PATO_0000384");
 					ep.add(ce2);
 					created = true;
 					LOGGER.debug(".."+ce2.toString());
@@ -614,7 +616,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 			//String entityphrase = "posterior supraorbital postfrontal";
 			String elocatorphrase = "condyle of femur";
 			String prep = "";
-			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase, prep);
+			ArrayList<EntityProposals> eps = eso.searchEntity(root, structid,  entityphrase, elocatorphrase, entityphrase+"+"+elocatorphrase, prep);
 			System.out.println("result:");
 			if(eps!=null)
 				for(EntityProposals ep: eps )

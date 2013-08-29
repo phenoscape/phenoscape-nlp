@@ -244,6 +244,7 @@ public class RelationHandler {
 						EQProposals eqproposals = new EQProposals();
 						Quality present = Dictionary.present;
 						present.setString("present");
+						present.setSearchString("");
 						present.setConfidenceScore((float)1.0);
 						QualityProposals presentp = new QualityProposals();
 						presentp.add(present);
@@ -302,6 +303,7 @@ public class RelationHandler {
 					EQProposals eqproposals = new EQProposals();
 					Quality absent = Dictionary.absent;
 					absent.setString("absent");
+					absent.setSearchString("");
 					absent.setConfidenceScore((float)1.0);
 					QualityProposals absentp = new QualityProposals();
 					absentp.add(absent);
@@ -329,6 +331,7 @@ public class RelationHandler {
 
 				Quality present = Dictionary.present;
 				present.setString("present");
+				present.setSearchString("");
 				present.setConfidenceScore((float)1.0);
 
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();

@@ -215,7 +215,7 @@ public class Structure2Quality implements AnnotationStrategy{
 							structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ toid.trim() + "']");
 							Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
 							String tostructname = Utilities.getStructureName(root, toid);
-							Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+							Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", tostructname,"");	
 							if(Relatedentity!=null){
 								if(count==0){
 									this.primaryentities.addAll(Relatedentity); //set the first be the primary
@@ -243,7 +243,7 @@ public class Structure2Quality implements AnnotationStrategy{
 						structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
 						Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
 						String tostructname = Utilities.getStructureName(root, tostructid);
-						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", "","");	
+						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", tostructname,"");	
 						if(Relatedentity!=null)
 						{
 							for(EntityProposals relatedentity: Relatedentity){
@@ -406,6 +406,7 @@ public class Structure2Quality implements AnnotationStrategy{
 				for(Quality result: results){ 
 					String[] parentinfo = TermOutputerUtilities.retreiveParentInfoFromPATO(result.getId());
 					Quality parentquality = new Quality();
+					parentquality.setSearchString("");
 					parentquality.setString(parentinfo[1]);
 					parentquality.setLabel(parentinfo[1]);
 					parentquality.setId(parentinfo[0]);

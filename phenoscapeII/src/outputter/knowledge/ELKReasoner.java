@@ -197,15 +197,15 @@ public class ELKReasoner{
 		return classes.contains(class2) || class1.equals(class2);
 	}
 	/**
-	 * is class1 a part of class2
-	 * @param class1IRI
+	 * is part a part_of whole?
+	 * @param part
 	 * @param whole
 	 * @return
 	 */
 	public boolean isPartOf(String part, String whole) {
 		if(partofcache.get(part+" "+whole)!=null) return partofcache.get(part+" "+whole).booleanValue();
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
-		OWLClassExpression partofclass2 = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
+		OWLClassExpression partofwhole = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
 		// Create a fresh name
 		/*OWLClass newclass = dataFactory.getOWLClass(IRI.create("temp_partof_"+whole));
 		OWLAxiom axiom = dataFactory.getOWLEquivalentClassesAxiom(newclass,partofclass2);
@@ -215,7 +215,7 @@ public class ELKReasoner{
 		boolean result =  isSubClassOf(part, newclass.getIRI().toString());
 		man.removeAxiom(ont, axiom);
 		*/
-		Set<OWLClass> subclasses = reasoner.getSubClasses(partofclass2, false).getFlattened();
+		Set<OWLClass> subclasses = reasoner.getSubClasses(partofwhole, false).getFlattened();
 		boolean result = subclasses.contains(dataFactory.getOWLClass(IRI.create(part)));
 		
 		partofcache.put(part+" "+whole, new Boolean(result));
@@ -372,16 +372,18 @@ public class ELKReasoner{
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));	
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));
 
-			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachement site, ischium
-			//System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_0004765")); //ischium, skeletal element
+			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachment site, ischium
+			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site
+			System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_0004765")); //ischium, skeletal element
 
-			OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
+			/*OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
 			OWLClass joint1 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0002217")); //synovial joint
 			OWLClass joint2 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0011134")); //nonsynovial joint
 			OWLClassExpression joint1or2 = elk.dataFactory.getOWLObjectUnionOf(joint1, joint2);
-			System.out.println(elk.isEquivalentClass(joint, joint1or2));
+			System.out.println(elk.isEquivalentClass(joint, joint1or2));*/
+			
 		    //elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
+			
 			elk.dispose();
 
 		} catch (OWLOntologyCreationException e) {

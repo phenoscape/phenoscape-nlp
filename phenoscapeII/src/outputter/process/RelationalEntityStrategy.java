@@ -199,6 +199,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 			id="BSPO:0000120";
 
 		FormalRelation rel = new FormalRelation();
+		rel.setSearchString("");
 		rel.setString(relation);
 		rel.setLabel(Dictionary.resrelationQ.get(id));
 		rel.setId(id);
@@ -206,6 +207,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 
 		SimpleEntity entity = new SimpleEntity();
 		entity.setLabel("multicellular organism");
+		entity.setSearchString("");
 		entity.setString("multicellular organism");
 		entity.setId("UBERON:0000468");
 		entity.setConfidenceScore((float)1.0);

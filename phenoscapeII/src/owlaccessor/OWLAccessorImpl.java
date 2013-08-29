@@ -25,6 +25,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import outputter.ApplicationUtilities;
 import outputter.XML2EQ;
+import outputter.knowledge.Dictionary;
 import outputter.search.TermSearcher;
 
 // TODO: Auto-generated Javadoc
@@ -85,7 +86,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private OWLOntology rootOnt;
 
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
-	private final static String temp = "TEMP";
+	public final static String temp = "TEMP";
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -1011,6 +1012,20 @@ public class OWLAccessorImpl implements OWLAccessor {
 			return this.getRefinedOutput(((OWLAnnotation) ids.toArray()[0])
 					.toString());
 		}*/
+	}
+	
+	/**
+	 * form the IRI using the shorthand id
+	 * assuming all IRIs come from the baseiri and provisionaliri
+	 * @param id: provisiona id may be "PATOTEMP:UUID"
+	 * @return
+	 */
+	public static String getIRI(String id) {
+		if(id.startsWith(OWLAccessorImpl.temp)){
+			return Dictionary.provisionaliri+id.substring(id.indexOf(":")+1);
+		}else{
+			return Dictionary.baseiri+id.replace(':', '_');
+		}
 	}
 	
 	//added by Hariharan to return Manager that was created by constructor Task1

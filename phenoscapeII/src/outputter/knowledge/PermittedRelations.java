@@ -11,6 +11,7 @@ import outputter.Utilities;
 import outputter.XML2EQ;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
+import owlaccessor.OWLAccessorImpl;
 
 public class PermittedRelations {	
 	private static final Logger LOGGER = Logger.getLogger(PermittedRelations.class);   
@@ -28,6 +29,7 @@ public class PermittedRelations {
 		QualityProposals qp = cache.get(relation+negation+flag);
 		if(qp!=null) return qp;
 		//TODO: handle negated relations
+		String relationcp = relation;
 		QualityProposals qproposals = new QualityProposals();
 		qproposals.setPhrase(relation);
 		Quality relationalquality = new Quality();
@@ -55,10 +57,12 @@ public class PermittedRelations {
 			
 			if(qualityholder.containsKey(rel))
 			{
-				relationalquality.setString(rel);
+				relationalquality.setSearchString(rel);
+				relationalquality.setString(relationcp);
 				relationalquality.setId(retrieve_id(rel,qualityholder));
 				relationalquality.setLabel(retrieve_label(rel,qualityholder));
 				relationalquality.setConfidenceScore((float)1.0);
+				relationalquality.setClassIRI(OWLAccessorImpl.getIRI(retrieve_id(rel,qualityholder)));
 				qproposals.add(relationalquality);
 				cache.put(relation+negation+flag, qproposals);
 				return qproposals;
@@ -80,10 +84,12 @@ public class PermittedRelations {
 				relation_ID=getbestrelation(forms,relation,flag);
 				if(relation_ID!=null)
 				{
-					relationalquality.setString(relation);
+					relationalquality.setSearchString(relation);
+					relationalquality.setString(relationcp);
 					relationalquality.setId(relation_ID[0]);
 					relationalquality.setLabel(relation_ID[1]);
 					relationalquality.setConfidenceScore((float)1.0);
+					relationalquality.setClassIRI(OWLAccessorImpl.getIRI(relation_ID[0]));
 					qproposals.add(relationalquality);
 					cache.put(relation+negation+flag, qproposals);
 					return qproposals;

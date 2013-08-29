@@ -57,7 +57,7 @@ public class EntityParser {
 		}else{
 			String parents = Utilities.getNamesOnPartOfChain(root, structureid);
 			LOGGER.debug("EntityParser calls EntitySearcherOriginal to search '"+structurename+","+parents+"'");
-			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename, "part_of");	
+			this.entity = new EntitySearcherOriginal().searchEntity(root, structureid, structurename, parents, structurename+"+"+parents, "part_of");	
 			if(this.entity!=null){
 				LOGGER.debug("EntityParser recorded matched proposals: ");
 				for(EntityProposals ep: entity){ 

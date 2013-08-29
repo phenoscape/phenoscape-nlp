@@ -1,31 +1,33 @@
 package outputter.data;
 
 public class FormalRelation implements FormalConcept {
-	String string; //phrase
+	String searchString; //phrase
 	String label; //lable of the class representing the phrase in an ontology
 	String id; //id of the class representing the phrase in an ontology
 	String classIRI; //class iri of the class representing the phrase in an ontology
 	float confidenceScore; //the confidence the system has in the id and classIRI represent the semantics of the string.
-
+	String string;
+	
 	public FormalRelation() {
 	}
 
 	/**
 	 * 
 	 */
-	public FormalRelation(String string, String label, String id, String iri) {
-		this.string = string;
+	public FormalRelation(String string, String label, String id, String iri, String searchstring) {
+		this.searchString = searchstring;
 		this.label = label;
 		this.id = id;
 		this.classIRI = iri;	
+		this.string = string;
 	}
 
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setString(java.lang.String)
 	 */
 	@Override
-	public void setString(String string) {
-		this.string = string;
+	public void setSearchString(String searchstring) {
+		this.searchString = searchstring;
 
 	}
 
@@ -69,9 +71,9 @@ public class FormalRelation implements FormalConcept {
 	 * @see outputter.FormalConcept#getString()
 	 */
 	@Override
-	public String getString() {
+	public String getSearchString() {
 		
-		return this.string;
+		return this.searchString;
 	}
 
 	/* (non-Javadoc)
@@ -128,8 +130,20 @@ public class FormalRelation implements FormalConcept {
 		fr.setConfidenceScore(this.confidenceScore);
 		fr.setId(this.id);
 		fr.setLabel(this.label);
+		fr.setSearchString(this.searchString);
 		fr.setString(this.string);
 		return fr;
+	}
+
+	@Override
+	public void setString(String string) {
+		this.string = string;
+		
+	}
+
+	@Override
+	public String getString() {
+		return this.string;
 	}
 
 

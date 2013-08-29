@@ -30,12 +30,12 @@ public class RelationalQuality extends Quality {
 	}*/
 
 	public RelationalQuality(QualityProposals relationalquality, EntityProposals relatedentity) {
-		this.setRelationalquality(relationalquality);
-		this.setRelatedentity(relatedentity);
+		this.relationalquality = relationalquality;
+		this.relatedentity = relatedentity;
 		
 	}
 	public QualityProposals getQuality(){
-		return getRelationalquality();
+		return relationalquality;
 	}
 	
 	public void setQuality(QualityProposals relationalquality){
@@ -43,26 +43,29 @@ public class RelationalQuality extends Quality {
 	}
 	
 	public EntityProposals getRelatedEntity(){
-		return getRelatedentity();
+		return relatedentity;
 	}
 	
 	public void setRelatedEntity(EntityProposals relatedentity){
-		this.setRelatedentity(relatedentity);
+		this.relatedentity = relatedentity;
 	}
 	
+	public void setRelationalquality(QualityProposals relationalquality) {
+		this.relationalquality = relationalquality;
+	}
 
 	public String toString(){
-		return "quality="+this.getRelationalquality().toString()+" related entity="+this.getRelatedentity().toString();
+		return "quality="+this.relationalquality.toString()+" related entity="+this.relatedentity.toString();
 	}
 	
 	public String content(){
 		return this.relationalquality.content()+" "+this.relatedentity.content();
 	}
 	
-	public String getString()
+	/*public String getSearchString()
 	{
 		String quality="";
-		for(Quality q:this.getRelationalquality().getProposals())
+		for(Quality q:this.relationalquality.getProposals())
 		{
 			if((q instanceof CompositeQuality))
 			{
@@ -72,21 +75,21 @@ public class RelationalQuality extends Quality {
 				quality+=((NegatedQuality)q).getFullString()+",";
 			}else if(q instanceof RelationalQuality)
 			{
-				quality+=q.getString()+",";
+				quality+=q.getSearchString()+",";
 			}
 			else
 			{
-				quality+=q.getString();
+				quality+=q.getSearchString();
 			}
 			
 		}
 		return quality.replaceAll(",$", "");
-	}
+	}*/
 	
 	public String getId()
 	{
 		String id="";
-		for(Quality q:this.getRelationalquality().getProposals())
+		for(Quality q:this.relationalquality.getProposals())
 		{
 			if((q instanceof CompositeQuality))
 			{
@@ -107,11 +110,35 @@ public class RelationalQuality extends Quality {
 		return id.replaceAll(",$", "");
 	}
 	
+	public String getIRI()
+	{
+		String iri="";
+		for(Quality q:this.relationalquality.getProposals())
+		{
+			if((q instanceof CompositeQuality))
+			{
+				iri+=((CompositeQuality)q).getFullIRI()+",";
+			}else if((q instanceof NegatedQuality))
+			{
+				iri+=((NegatedQuality)q).getFullIRI()+",";
+			}else if(q instanceof RelationalQuality)
+			{
+				iri+=q.getClassIRI()+",";
+			}
+			else
+			{
+				iri+=q.getClassIRI();
+			}
+			
+		}
+		return iri.replaceAll(",$", "");
+	}
+	
 	public String getLabel()
 	{
 
 		String label="";
-		for(Quality q:this.getRelationalquality().getProposals())
+		for(Quality q:this.relationalquality.getProposals())
 		{
 			if((q instanceof CompositeQuality))
 			{
@@ -139,7 +166,7 @@ public class RelationalQuality extends Quality {
 		
 		float score=1.0f;
 		
-		for(Quality q:this.getRelationalquality().getProposals())
+		for(Quality q:this.relationalquality.getProposals())
 		{
 			score*=q.getConfidenceScore();
 		}
@@ -158,20 +185,6 @@ public class RelationalQuality extends Quality {
 
 	}
 
-	public EntityProposals getRelatedentity() {
-		return relatedentity;
-	}
 
-	public void setRelatedentity(EntityProposals relatedentity) {
-		this.relatedentity = relatedentity;
-	}
-
-	public QualityProposals getRelationalquality() {
-		return relationalquality;
-	}
-
-	public void setRelationalquality(QualityProposals relationalquality) {
-		this.relationalquality = relationalquality;
-	}
 
 }

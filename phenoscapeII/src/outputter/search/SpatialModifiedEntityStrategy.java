@@ -133,6 +133,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			else{
 				//create phrase-based spatialentities
 				SimpleEntity spatial = new SimpleEntity();
+				spatial.setSearchString(spatialterm);
 				spatial.setString(spatialterm);
 				spatial.setConfidenceScore(1f);
 				spatialentities = new ArrayList<FormalConcept>();

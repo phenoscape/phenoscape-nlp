@@ -81,7 +81,7 @@ public class TermSearcher {
 	 */
 	public ArrayList<FormalConcept> searchTerm(String phrase, String phrasetype) {
 		phrase = phrase.trim();
-
+		String cleanphrase = phrase.replaceAll("[()?:]", "");
 		if (phrase.length() == 0)
 			return null;
 		// search cache
@@ -101,12 +101,9 @@ public class TermSearcher {
 			// 'process' => 'anatomical projection' UBERON:0004529
 			if (query.matches("\\W*process\\W*")
 					|| query.matches("\\W*process(\\|process)+\\W*")) {
-				SimpleEntity se = new SimpleEntity();
-				se.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0004529");
-				se.setConfidenceScore(1f);
-				se.setId("UBERON:0004529");
-				se.setLabel("anatomical projection");
-				se.setString(query);
+				SimpleEntity se = Dictionary.anatomicalprojection;
+				se.setSearchString(query);
+				se.setString(cleanphrase);
 				if (result == null)
 					result = new ArrayList<FormalConcept>();
 				result.add(se);
@@ -118,7 +115,7 @@ public class TermSearcher {
 		// 1. search the original phrase/reg exp
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
 		String temp="";
-		ArrayList<FormalConcept> strongmatch = getStrongMatch(query,
+		ArrayList<FormalConcept> strongmatch = getStrongMatch(cleanphrase, query,
 				phrasetype, results, 1f);
 		if (strongmatch != null && strongmatch.size()>0)
 			return strongmatch;
@@ -157,7 +154,7 @@ public class TermSearcher {
 				}
 			}
 			// phrase = phrase.replaceAll("-", " ");
-			strongmatch = getStrongMatch(query, phrasetype, results, 1f);
+			strongmatch = getStrongMatch(cleanphrase, query, phrasetype, results, 1f);
 			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 
@@ -179,7 +176,7 @@ public class TermSearcher {
 					query = query.replaceAll("\\b" + tcopy + "\\b", token);
 				}
 			}
-			strongmatch = getStrongMatch(query, phrasetype, results, 1f);
+			strongmatch = getStrongMatch(cleanphrase, query, phrasetype, results, 1f);
 			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 
@@ -236,7 +233,7 @@ public class TermSearcher {
 				query = query.replaceAll("\\b" + token + "\\b", regexp);
 			}
 
-			strongmatch = getStrongMatch(query, phrasetype, results, 0.8f);
+			strongmatch = getStrongMatch(cleanphrase, query, phrasetype, results, 0.8f);
 			if (strongmatch != null && strongmatch.size()>0)
 				return strongmatch;
 			candidatematches.addAll(results);
@@ -265,12 +262,12 @@ public class TermSearcher {
 		// keep weaker matches
 		if (candidatematches.size() == 0)
 			TermSearcher.cacheIt(phrase, null, phrasetype);
-		cacheCandidateMataches(query, phrasetype, .5f);
+		cacheCandidateMataches(cleanphrase, query, phrasetype, .5f);
 		return getCandidateMatches(query, phrasetype);
 		//return null;
 	}
 
-	private void cacheCandidateMataches(String term, String type,
+	private void cacheCandidateMataches(String term, String query, String type,
 			float confscore) {
 		ArrayList<FormalConcept> concepts = null;
 		for (Hashtable<String, String> aresult : candidatematches) {
@@ -279,7 +276,8 @@ public class TermSearcher {
 				for (Hashtable<String, String> result : resultlist) {
 					if (type.compareTo("entity") == 0) {
 						SimpleEntity entity = new SimpleEntity();
-						entity.setString(result.get("term"));
+						entity.setSearchString(result.get("term"));
+						entity.setString(term);
 						entity.setLabel(result.get("label"));
 						entity.setId(result.get("id"));
 						entity.setClassIRI(result.get("iri"));
@@ -291,7 +289,8 @@ public class TermSearcher {
 						concepts.add(entity);
 					} else {
 						Quality quality = new Quality();
-						quality.setString(result.get("term"));
+						quality.setSearchString(result.get("term"));
+						quality.setString(term);
 						quality.setLabel(result.get("label").split(";")[0]);
 						quality.setId(result.get("id").split(";")[0]);
 						quality.setClassIRI(result.get("iri").split(";")[0]);
@@ -306,7 +305,7 @@ public class TermSearcher {
 			}
 		}
 		if (concepts != null)
-			cacheCandidates(term, concepts, type);
+			cacheCandidates(query, concepts, type);
 	}
 
 	/**
@@ -364,17 +363,17 @@ public class TermSearcher {
 	 * if there is any matches via related, broad, narrow synonyms are not
 	 * considered strong
 	 * 
-	 * @param term
+	 * @param query
 	 * @param type
 	 * @param results
 	 * @return null if no match, otherwise, an arraylist of FormalConcepts
 	 * @throws Exception
 	 */
 
-	private ArrayList<FormalConcept> getStrongMatch(String term, String type,
+	private ArrayList<FormalConcept> getStrongMatch(String term, String query, String type,
 			ArrayList<Hashtable<String, String>> results, float confscore) {
 		ArrayList<FormalConcept> concepts = null;
-		XML2EQ.ontoutil.searchOntologies(term, type, results);
+		XML2EQ.ontoutil.searchOntologies(query, type, results);
 		if (results != null && results.size() > 0) {
 			// loop through results to find the closest match
 			// return original or exact match
@@ -385,7 +384,8 @@ public class TermSearcher {
 					for (Hashtable<String, String> result : resultlist) {
 						if (type.compareTo("entity") == 0) {
 							SimpleEntity entity = new SimpleEntity();
-							entity.setString(result.get("term"));
+							entity.setSearchString(result.get("term"));
+							entity.setString(term);
 							entity.setLabel(result.get("label"));
 							entity.setId(result.get("id"));
 							entity.setClassIRI(result.get("iri"));
@@ -397,7 +397,8 @@ public class TermSearcher {
 							// return entity;
 						} else {
 							Quality quality = new Quality();
-							quality.setString(result.get("term"));
+							quality.setSearchString(result.get("term"));
+							quality.setString(term);
 							quality.setLabel(result.get("label"));
 							quality.setId(result.get("id"));
 							quality.setClassIRI(result.get("iri"));
@@ -411,7 +412,7 @@ public class TermSearcher {
 					}
 				}
 			}
-			cacheIt(term, concepts, type);
+			cacheIt(query, concepts, type);
 		}
 		return concepts;
 	}

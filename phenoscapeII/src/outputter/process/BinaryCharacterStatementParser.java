@@ -202,6 +202,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				//q = "present"
 				qp = new QualityProposals();
 				Quality q = Dictionary.present;
+				q.setSearchString("");
 				q.setString("present");
 				q.setConfidenceScore((float)1.0);
 				qp.add(q);
@@ -209,6 +210,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				//check for any positive state statement present(yes,true etc.), if so assign that state to it
 				//create absent quality
 				Quality absent = Dictionary.absent;
+				absent.setSearchString("");
 				absent.setString("absent");
 				absent.setConfidenceScore((float)1.0);
 				qp = new QualityProposals();
@@ -225,8 +227,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				for(Quality q: qp.getProposals()){
 					if(q instanceof RelationalQuality) //relational, generate and add negated quality
 					{
-						QualityProposals thisqp = ((RelationalQuality)q).getRelationalquality();
-						EntityProposals relatedentity = ((RelationalQuality)q).getRelatedentity();
+						QualityProposals thisqp = ((RelationalQuality)q).getQuality();
+						EntityProposals relatedentity = ((RelationalQuality)q).getRelatedEntity();
 						QualityProposals nqp = new QualityProposals();
 						for(Quality q1:thisqp.getProposals())
 						{
@@ -240,6 +242,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 									if(parentinfo!=null)
 									{
 										Quality parentquality = new Quality();
+										parentquality.setSearchString("");
 										parentquality.setString(parentinfo[1]);
 										parentquality.setLabel(parentinfo[1]);
 										parentquality.setId(parentinfo[0]);
@@ -279,6 +282,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 							if(parentinfo!=null)
 							{
 								Quality parentquality = new Quality();
+								parentquality.setSearchString("");
 								parentquality.setString(parentinfo[1]);
 								parentquality.setLabel(parentinfo[1]);
 								parentquality.setId(parentinfo[0]);

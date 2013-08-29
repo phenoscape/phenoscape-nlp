@@ -33,6 +33,7 @@ import outputter.data.RelationalQuality;
 import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 import outputter.search.SynRingVariation;
+import owlaccessor.OWLAccessorImpl;
 
 /**
  * @author Hong Cui
@@ -607,6 +608,7 @@ public class Utilities {
 		qentity.setConfidenceScore(q.getConfidenceScore());
 		qentity.setId(q.getId());
 		qentity.setLabel(q.getLabel());
+		qentity.setSearchString(q.getSearchString());
 		qentity.setString(q.getString());
 		return qentity;
 	}
@@ -719,6 +721,7 @@ public class Utilities {
 									fr.setConfidenceScore(r.getConfidenceScore());
 									fr.setId(r.getId());
 									fr.setLabel(r.getLabel());
+									fr.setSearchString(r.getSearchString());
 									fr.setString(r.getString());
 									for(Entity e1: rentity.getProposals()){
 										REntity re = new REntity(fr, e1);
@@ -796,6 +799,8 @@ public class Utilities {
 		}
 		return path.replaceFirst("\\|+$","");
 	}
+
+
 }
 
 

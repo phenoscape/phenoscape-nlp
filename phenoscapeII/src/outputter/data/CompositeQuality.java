@@ -64,7 +64,17 @@ public class CompositeQuality extends Quality {
 		}
 	}
 	
-
+	public String getFullIRI() {
+		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
+		{
+		return this.mainquality.getClassIRI()+"^"+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+"^"+this.relatedentity.getRelation().getClassIRI()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullIRI()+"))";
+		}
+		else
+		{
+		return this.mainquality.getClassIRI()+"^"+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+"^"+this.relatedentity.getRelation().getClassIRI()+"("+((REntity)this.relatedentity).getEntity().getClassIRI()+"))";
+		}
+	}
+	
 	@Override
 	public float getConfidenceScore() {
 		
@@ -76,19 +86,19 @@ public class CompositeQuality extends Quality {
 	{
 		return null;
 	}
-	public Quality getMainquality() {
+	public Quality getMainQuality() {
 		return mainquality;
 	}
 
-	public Quality getComparedquality() {
+	public Quality getComparedQuality() {
 		return comparedquality;
 	}
 
-	public String getRestrictedrelation() {
+	public String getRestrictedRelation() {
 		return restrictedrelation;
 	}
 
-	public REntity getRelatedentity() {
+	public REntity getRelatedEntity() {
 		return relatedentity;
 	}
 	
@@ -101,4 +111,6 @@ public class CompositeQuality extends Quality {
 		
 		return this.mainquality.content()+"^"+this.restrictedrelation+"("+this.comparedquality.content()+this.relatedentity.content()+")";
 	}
+
+
 }

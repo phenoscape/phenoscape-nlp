@@ -11,8 +11,8 @@ import java.util.ArrayList;
  *
  */
 public class SimpleEntity extends Entity implements FormalConcept{
-	String string; //phrase
-	String xmlid;
+	String string; 
+	String searchString;
 	String label; //lable of the class representing the phrase in an ontology
 	String id; //id of the class representing the phrase in an ontology
 	String classIRI; //class iri of the class representing the phrase in an ontology
@@ -26,18 +26,19 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	/**
 	 * 
 	 */
-	public SimpleEntity(String string, String label, String id, String iri) {
+	public SimpleEntity(String string, String label, String id, String iri, String searchstring) {
 		this.string = string;
 		this.label = label;
 		this.id = id;
 		this.classIRI = iri;	
+		this.searchString = searchstring;
 	}
 
 	/* (non-Javadoc)
 	 * @see outputter.FormalConcept#setString(java.lang.String)
 	 */
 	@Override
-	public void setString(String string) {
+	public void setSearchString(String string) {
 		this.string = string;
 
 	}
@@ -81,7 +82,7 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	 * @see outputter.FormalConcept#getString()
 	 */
 	@Override
-	public String getString() {
+	public String getSearchString() {
 		
 		return this.string;
 	}
@@ -138,25 +139,16 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	
 	//Clones the simple entity
 	public SimpleEntity clone() {
-
 			SimpleEntity entity1 = new SimpleEntity();
 			entity1.setId(this.getId());
 			entity1.setClassIRI(this.getClassIRI());
 			entity1.setConfidenceScore(this.getConfidenceScore());
+			entity1.setSearchString(this.getSearchString());
 			entity1.setString(this.getString());
 			entity1.setLabel(this.getLabel());
 		return entity1;
 	}
 
-	//@Override
-	public void setXMLid(String xmlid) {
-		this.xmlid = xmlid;
-	}
-
-	//@Override
-	public String getXMLid() {
-		return this.xmlid;
-	}
 
 	public int compare(Entity e1, Entity e2){
 		return e1.content().compareTo(e2.content());
@@ -172,6 +164,17 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		ArrayList<Entity> individuals = new ArrayList<Entity>();
 		individuals.add(this);
 		return individuals;
+	}
+
+	@Override
+	public void setString(String string) {
+		this.string = string;
+		
+	}
+
+	@Override
+	public String getString() {
+		return this.string;
 	}
 	
 

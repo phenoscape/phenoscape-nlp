@@ -380,7 +380,7 @@ public class XML2EQ {
 				qualityid+=q.getId()+" Score:["+q.getConfidenceScore()+"]@,";
 				qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
 				//Reading all related entities and store as comma separated values
-				for(Entity e:((RelationalQuality) q).getRelatedentity().getProposals())
+				for(Entity e:((RelationalQuality) q).getRelatedEntity().getProposals())
 				{
 					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidenceScore()+"]@,";
 					if(e instanceof CompositeEntity)
@@ -979,6 +979,8 @@ public class XML2EQ {
 					if(qlabel.compareTo("absent")!=0) qualitylabels.add(qlabel); //ignore absent
 				}
 			}*/
+			
+			//collect qualities from complete states
 			for(EQProposals EQ: completestateids){
 				String entitylabel = null;
 				EntityProposals ep = EQ.getEntity();
@@ -988,9 +990,20 @@ public class XML2EQ {
 					if(matchWithKeyEntities(entitylabel)){
 						keyEQ = EQ;
 						QualityProposals qp = EQ.getQuality();
-						for(Quality q: qp.getProposals()){
-							String qiri = q.getClassIRI();
-							if(qiri.compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q.getLabel()); //ignore absent
+						for(Quality q: qp.getProposals()){ //what if q is a RelationalQuality?
+							if(q instanceof RelationalQuality){
+								for(Quality q1: ((RelationalQuality) q).getQuality().getProposals()){
+									if(q1.getClassIRI().compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q1.getLabel()); //ignore absent
+								}
+							}else if(q instanceof NegatedQuality){
+								Quality q1 = ((NegatedQuality) q).getQuality();
+								if(q1.getClassIRI().compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q1.getLabel()); //ignore absent
+							}else if(q instanceof CompositeQuality){
+								Quality q1 = ((CompositeQuality) q).getMainQuality();
+								if(q1.getClassIRI().compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q1.getLabel()); //ignore absent
+							}else{ //simple quality
+								if(q.getClassIRI().compareTo(Dictionary.absent.getClassIRI())!=0) qualitylabels.add(q.getLabel()); //ignore absent
+							}
 						}
 					}
 				}

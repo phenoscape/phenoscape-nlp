@@ -668,6 +668,7 @@ public class CharacterStatementParser extends Parser {
 						qentity.setConfidenceScore(elp.getConfidenceScore());
 						qentity.setId(elp.getId());
 						qentity.setLabel(elp.getLabel());
+						qentity.setSearchString(elp.getSearchString());
 						qentity.setString(elp.getString());
 						FormalRelation fr = Dictionary.partof;
 						fr.setConfidenceScore(0.5f);

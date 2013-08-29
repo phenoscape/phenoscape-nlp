@@ -89,15 +89,10 @@ public class EntitySearcher6 extends EntitySearcher {
 				//search shortened and other strings with the same starting words
 				ArrayList<FormalConcept> shortentities = new TermSearcher().searchTerm(shortened, "entity");
 				if(shortentities!=null){
-					LOGGER.debug("search for entity '"+shortened+"\\b.*' found match, forming proposals...");
+					LOGGER.debug("search for entity '"+shortened+"' found match, forming proposals...");
 					//construct anatomicalentity
-					SimpleEntity anatomicalentity = new SimpleEntity();
-					anatomicalentity.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0001062");
-					anatomicalentity.setConfidenceScore(0.8f);
-					anatomicalentity.setId("UBERON:0001062");
-					anatomicalentity.setLabel("anatomical entity");
+					SimpleEntity anatomicalentity = Dictionary.anatomicalentity;
 					anatomicalentity.setString(aentityphrase.substring(aentityphrase.lastIndexOf(" ")).trim());
-					anatomicalentity.setXMLid(structid);
 					//construct relation
 					FormalRelation rel =  Dictionary.partof;
 					rel.setConfidenceScore((float)1.0);

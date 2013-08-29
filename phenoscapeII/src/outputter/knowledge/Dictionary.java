@@ -108,54 +108,81 @@ public class Dictionary {
 	
 	/** special ontology classes **/
 	public static String mcorganism="UBERON:0000468"; //multi-cellular organism
-	public static String cellquality = "http://purl.obolibrary.org/obo/PATO_0001396";
-	public static String baseiri="http://purl.obolibrary.org/obo/";
+	
+	public final static String baseiri="http://purl.obolibrary.org/obo/";
+	public static String cellquality = baseiri+"PATO_0001396";
+	public final static String provisionaliri = "http://purl.bioontology.org/ontology/provisional/";
 	public static String partofiri = baseiri+"BFO_000050";
 	public static FormalRelation partof = new FormalRelation();
 	public static FormalRelation iheresin = new FormalRelation();
 	public static FormalRelation bearerof = new FormalRelation();
-	public static FormalRelation complementof = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", ""); //TODO add iri
+	public static FormalRelation complementof = new FormalRelation("no", "complement_of", "PHENOSCAPE_complement_of", "", ""); //TODO add iri
 	public static Entity dorsalregion = new SimpleEntity();
 	public static Entity ventralregion = new SimpleEntity();
 	public static Quality present = new Quality();
 	public static Quality absent = new Quality();
+	public static SimpleEntity anatomicalentity = new SimpleEntity();
+	public static SimpleEntity anatomicalprojection = new SimpleEntity();
 	
 	static{
+		partof.setSearchString("");
 		partof.setString("");
 		partof.setLabel("part_of");
 		partof.setId("BFO:000050");
 		partof.setClassIRI(baseiri+"BFO_000050");
 		
-		iheresin.setClassIRI("http://purl.obolibrary.org/obo/pato#inheres_in");
-		iheresin.setString("");
+		iheresin.setClassIRI(baseiri+"pato#inheres_in");
+		iheresin.setSearchString("");
 		iheresin.setId("BFO:0000052");
 		iheresin.setLabel("inheres_in");
+		iheresin.setString("");
 		
-		bearerof.setClassIRI("http://purl.obolibrary.org/obo/BFO_0000053");
-		bearerof.setString("");
+		bearerof.setClassIRI(baseiri+"BFO_0000053");
+		bearerof.setSearchString("");
 		bearerof.setLabel("bearer_of");
 		bearerof.setId("BFO:0000053"); 
+		bearerof.setString("");
 		
-		dorsalregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO_0000079");
-		dorsalregion.setString("");
+		dorsalregion.setClassIRI(baseiri+"BSPO_0000079");
+		dorsalregion.setSearchString("");
 		dorsalregion.setLabel("dorsal region");
 		dorsalregion.setId("BSPO:0000079"); 
+		dorsalregion.setString("");
 		
 		
-		ventralregion.setClassIRI("http://purl.obolibrary.org/obo/BSPO_0000084");
-		ventralregion.setString("");
+		ventralregion.setClassIRI(baseiri+"BSPO_0000084");
+		ventralregion.setSearchString("");
 		ventralregion.setLabel("ventral region");
 		ventralregion.setId("BSPO:0000084");
+		ventralregion.setString("");
 		
-		present.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000467");
-		present.setString("");
+		present.setClassIRI(baseiri+"PATO_0000467");
+		present.setSearchString("");
 		present.setLabel("present");
 		present.setId("PATO:0000467");
+		present.setString("");
 		
-		absent.setClassIRI("http://purl.obolibrary.org/obo/PATO_0000462");
-		absent.setString("");
+		absent.setClassIRI(baseiri+"PATO_0000462");
+		absent.setSearchString("");
 		absent.setLabel("absent");
 		absent.setId("PATO:0000462");
+		absent.setString("");
+		
+
+		anatomicalentity.setClassIRI(baseiri+"UBERON_0001062");
+		anatomicalentity.setConfidenceScore(0.8f);
+		anatomicalentity.setId("UBERON:0001062");
+		anatomicalentity.setLabel("anatomical entity");
+		anatomicalentity.setSearchString("");
+		anatomicalentity.setString("");
+		
+
+		anatomicalprojection.setClassIRI("http://purl.obolibrary.org/obo/UBERON_0004529");
+		anatomicalprojection.setConfidenceScore(1f);
+		anatomicalprojection.setId("UBERON:0004529");
+		anatomicalprojection.setLabel("anatomical projection");
+		anatomicalprojection.setSearchString("");
+		anatomicalprojection.setString("");
 		
 	}
 	

@@ -23,6 +23,7 @@ import outputter.knowledge.Dictionary;
 public class CompositeEntity extends Entity {
 	//SimpleEntity entity; //the first entity in the post-composed entity
     ArrayList<Entity> entities; //relation + entity
+    String searchString;
     String string;
 
 	/**
@@ -128,14 +129,13 @@ public class CompositeEntity extends Entity {
 
 
 	@Override
-	public void setString(String string) {
-		this.string = string;
+	public void setSearchString(String searchstring) {
+		this.searchString = searchstring;
 		
 	}
 
 	@Override
 	public void setLabel(String label) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -157,22 +157,21 @@ public class CompositeEntity extends Entity {
 		
 	}
 
-	@Override
+	//@Override
 	/**
-	 * return the concatenation of the string of all entities
+	 * return the concatenation of the search string of all entities
 	 */
-	public String getString() {
-		/*String str = "";
+	/*public String getSearchString() {
+		String str = "";
 		for(Entity e: this.entities){
 			if(e instanceof SimpleEntity){
-				str += e.getString()+" ";
+				str += e.getSearchString()+"#";
 			}else if(e instanceof REntity){
-				str += ((REntity)e).getEntity().getString()+" ";
+				str += ((REntity)e).getEntity().getSearchString()+" ";
 			}
 		}
-		return str;*/
-		return this.string;
-	}
+		return str;
+	}*/
 
 	@Override	
 	public String getLabel() {
@@ -224,6 +223,28 @@ public class CompositeEntity extends Entity {
 	
 	}
 	
+	public String getFullIRI() {
+		String id="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				id+=e.getId()+" and ";
+			}
+			else if( e instanceof CompositeEntity)
+			{
+				id+=((CompositeEntity) e).getFullIRI();
+			}
+			else
+			{
+				id+=((REntity) e).getClassIRI()+" and ";
+			}
+				
+		}
+		
+		id = id.replaceAll("(and )$", "");
+		return id.trim();
+	}
 	
 	public String getFullString()
 	{
@@ -250,6 +271,30 @@ public class CompositeEntity extends Entity {
 		return string.trim();	
 	}
 	
+	public String getSearchString()
+	{
+
+		String string="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				string+=e.getSearchString()+" # ";
+			}
+			else if(e instanceof CompositeEntity)
+			{
+				string+=((CompositeEntity) e).getSearchString();
+			}
+			else
+			{
+				string+=((REntity) e).getSearchString()+" # ";
+			}
+				
+		}
+		
+		string = string.replaceAll("(# )$", "");
+		return string.trim();	
+	}
 	
 	@Override
 	public String getId() {
@@ -289,7 +334,7 @@ public class CompositeEntity extends Entity {
 				else//e is related entity
 				{
 					FormalRelation related = ((REntity) e).getRelation();
-					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI());
+					FormalRelation relation = new FormalRelation(related.getString(),related.getLabel(),related.getId(),related.getClassIRI(), related.getSearchString());
 					relation.setConfidenceScore(related.getConfidenceScore());
 					if(((REntity)e).getEntity() instanceof SimpleEntity)
 					{
@@ -331,4 +376,17 @@ public class CompositeEntity extends Entity {
 		}
 		return individuals;
 	}
+
+	@Override
+	public void setString(String string) {
+		this.string = string;
+		
+	}
+
+	@Override
+	public String getString() {
+		return string;
+	}
+
+
 }

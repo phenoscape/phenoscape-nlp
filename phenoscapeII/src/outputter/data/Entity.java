@@ -52,7 +52,7 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 	}
 
 	@Override
-	public abstract void setString(String string);
+	public abstract void setSearchString(String string);
 	@Override
 	public abstract void setLabel(String label);
 
@@ -65,7 +65,7 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 	@Override
 	public abstract void setConfidenceScore(float score);
 	@Override
-	public abstract String getString() ;
+	public abstract String getSearchString() ;
 
 	@Override
 	public abstract String content() ;

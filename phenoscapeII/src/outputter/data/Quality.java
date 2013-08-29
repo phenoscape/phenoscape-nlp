@@ -2,7 +2,8 @@ package outputter.data;
 
 
 public class Quality implements FormalConcept {
-	protected String string; //phrase
+	protected String searchString;
+	protected String string; 
 	protected String label; //lable of the class representing the phrase in an ontology
 	protected String id; //id of the class representing the phrase in an ontology
 	protected String classIRI; //class iri of the class representing the phrase in an ontology
@@ -16,11 +17,12 @@ public class Quality implements FormalConcept {
 	/**
 	 * 
 	 */
-	public Quality(String string, String label, String id, String classIRI) {
+	public Quality(String string, String label, String id, String classIRI, String searchstring) {
 		this.string = string;
 		this.label = label;
 		this.id = id;
 		this.classIRI = classIRI;
+		this.searchString = searchstring;
 		
 	}
 
@@ -28,8 +30,8 @@ public class Quality implements FormalConcept {
 	 * @see outputter.FormalConcept#setString(java.lang.String)
 	 */
 	@Override
-	public void setString(String string) {
-		this.string = string;
+	public void setSearchString(String searchstring) {
+		this.searchString = string;
 
 	}
 
@@ -80,9 +82,22 @@ public class Quality implements FormalConcept {
 	 * @see outputter.FormalConcept#getString()
 	 */
 	@Override
-	public String getString() {
-		
-		return this.string;
+	public String getSearchString() {
+		if(this instanceof NegatedQuality){
+			return ((NegatedQuality)this).getQuality().getSearchString();
+		}else if(this instanceof CompositeQuality){
+			return ((CompositeQuality)this).getMainQuality().getSearchString()+"#"+
+					((CompositeQuality)this).getComparedQuality().getSearchString();
+		}else if(this instanceof RelationalQuality){
+			String searchstring = "";
+			QualityProposals qp = ((RelationalQuality)this).getQuality();
+			for(Quality q: qp.getProposals()){
+				searchstring += q.getSearchString()+"#";
+			}
+			return searchstring.replaceFirst("#$", "");
+		}else{
+			return this.searchString;
+		}
 	}
 
 	/* (non-Javadoc)
@@ -134,6 +149,17 @@ public class Quality implements FormalConcept {
 	
 	public String content(){
 		return this.classIRI;
+	}
+
+	@Override
+	public void setString(String string) {
+		this.string = string;
+		
+	}
+
+	@Override
+	public String getString() {
+		return this.string;
 	}
 }
 

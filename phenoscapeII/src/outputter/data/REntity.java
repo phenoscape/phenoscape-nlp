@@ -65,7 +65,7 @@ public class REntity extends Entity{
 	}
 
 	@Override
-	public void setString(String string) {
+	public void setSearchString(String string) {
 		
 	}
 
@@ -94,13 +94,11 @@ public class REntity extends Entity{
 	}
 
 	@Override
-	public String getString() {
-		
+	public String getSearchString() {	
 		if(entity instanceof CompositeEntity)
-		return "("+this.relation.getString()+" some ("+((CompositeEntity)entity).getFullString()+")"+")";
+		return this.relation.getSearchString()+"#"+((CompositeEntity)entity).getSearchString();
 		else
-		return "("+this.relation.getString()+" some "+entity.getString()+""+")";
-		
+		return this.relation.getSearchString()+"#"+entity.getSearchString();
 	}
 
 	@Override
@@ -133,18 +131,6 @@ public class REntity extends Entity{
 		//multiple of all confidence scores
 		return this.relation.getConfidenceScore()*this.entity.getConfidenceScore();
 	}
-
-	//@Override
-	public void setXMLid(String xmlid) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	//@Override
-	public String getXMLid() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	public REntity clone(){
 		FormalRelation fr = this.relation.clone();
@@ -166,6 +152,18 @@ public class REntity extends Entity{
 		ArrayList<Entity> individuals = new ArrayList<Entity>();
 		individuals.addAll(entity.getIndividualEntities());
 		return individuals;
+	}
+
+	@Override
+	public void setString(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getString() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

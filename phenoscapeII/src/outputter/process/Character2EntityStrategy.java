@@ -22,14 +22,14 @@ import owlaccessor.OWLAccessorImpl;
 /**
  * @author Hong Cui
  * This class tests and see if the <character> is really a subclass of the subject entity, 
- * if so it will turn the <character> to an entity and set its quality to "present" 
+ * if so it will turn the <character> into an entity and set its quality to "present" 
  */
 public class Character2EntityStrategy implements AnnotationStrategy{
 	private static final Logger LOGGER = Logger.getLogger(Character2EntityStrategy.class);   
 	EntityProposals entity; //result of the computation
 	QualityProposals quality; //result of the computation, if set, it's "present"
 	Entity subjectentity; //subject of the character, keyentity.
-	String subclass;
+	String subclass; //the <character>
 	/**
 	 * 
 	 */
@@ -67,6 +67,7 @@ public class Character2EntityStrategy implements AnnotationStrategy{
 						//use the subclass as the entity, quality=present
 						//TODO: is there a need to consider character constraint which may contain an entity locator?
 						SimpleEntity e = new SimpleEntity();
+						e.setSearchString(this.subclass);
 						e.setString(this.subclass);
 						e.setId(owlimpl.getID(asubclass));//heterocercal tail
 						e.setLabel(owlimpl.getLabel(asubclass));
@@ -74,6 +75,7 @@ public class Character2EntityStrategy implements AnnotationStrategy{
 						this.entity.add(e);
 						
 						Quality q = Dictionary.present;
+						q.setSearchString("");
 						q.setString("present");
 						q.setConfidenceScore(1f);
 						this.quality.add(q);

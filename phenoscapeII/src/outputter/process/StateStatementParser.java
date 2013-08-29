@@ -206,6 +206,7 @@ public class StateStatementParser extends Parser {
 				QualityProposals qp = new QualityProposals();
 				Quality q = Dictionary.present;
 				q.setString("present");
+				q.setSearchString("");
 				q.setConfidenceScore(1f);
 				qp.add(q);
 				qualities.add(qp);
@@ -704,6 +705,7 @@ public class StateStatementParser extends Parser {
 			if(q.size()==0)
 			{
 				Quality present = Dictionary.present;
+				present.setSearchString("");
 				present.setString("present");
 				present.setConfidenceScore((float)1.0);
 

@@ -29,16 +29,18 @@ public class NegatedQuality extends Quality {
 	 * @param id
 	 * @param iri
 	 */
-	public NegatedQuality(String string, String label, String id, String classIRI, Quality parentQuality) {
-		super("not "+string, label, id, classIRI);
+	public NegatedQuality(String string, String label, String id, String classIRI, String searchstring, Quality parentQuality) {
+		super("not "+string, label, id, classIRI, searchstring);
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
+		this.quality = new Quality(string, label, id, classIRI, searchstring) ;
 	}
 
 	public NegatedQuality(Quality quality, Quality parentQuality) {
-		super("not "+quality.getString(), quality.getLabel(), quality.getId(), quality.getClassIRI());
+		super("not "+quality.getString(), quality.getLabel(), quality.getId(), quality.getClassIRI(), "not "+quality.getSearchString());
 		this.parentQuality = parentQuality;
 		negation.setConfidenceScore(1);
+		this.quality = quality;
 	}
 	
 	
@@ -53,7 +55,11 @@ public class NegatedQuality extends Quality {
 	public Quality getParentQuality(){
 		return this.parentQuality;
 	}
-
+	
+	public Quality getQuality(){
+		return this.quality;
+	}
+	
 	public String getFullString()
 	{		
 		//return this.parentQuality.getString()+" and ("+negation.getLabel()+" some "+this.string+")";
@@ -68,6 +74,10 @@ public class NegatedQuality extends Quality {
 	public String getFullId()
 	{
 		return this.parentQuality.getId()+" and ("+negation.getId()+" some "+this.id+")";
+	}
+	
+	public String getFullIRI() {
+		return this.parentQuality.getClassIRI()+" and ("+negation.getClassIRI()+" some "+this.classIRI+")";
 	}
 	
 	public String getLabel()
@@ -87,5 +97,7 @@ public class NegatedQuality extends Quality {
 		// TODO Auto-generated method stub
 
 	}
+
+
 
 }
