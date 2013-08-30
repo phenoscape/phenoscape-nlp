@@ -59,8 +59,10 @@ public class Dictionary {
 	}
 	
 	//others
-	public static String binaryTvalues = "present|true|yes|usually|with";//added present/absent
-	public static String binaryFvalues = "absent|false|no|rarely|without";
+	public static String binaryTvalues1 = "present|with";//added present/absent
+	public static String binaryFvalues1 = "absent|without";
+	public static String binaryTvalues2 = "true|yes|usually";//added present/absent
+	public static String binaryFvalues2 = "false|no|rarely";
 	public static String negation = "absent|lacking";
 	public static String positionprep = "of|part_of|in|on|between";
 	//Changed by Zilong

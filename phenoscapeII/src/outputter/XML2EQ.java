@@ -194,7 +194,8 @@ public class XML2EQ {
 				Element characterstatement = (Element) XMLNormalizer.pathCharacterStatement.selectSingleNode(root);
 				System.out.println("text: " + characterstatement.getChildText("text"));
 				List<Element> statestatements = XMLNormalizer.pathStateStatement.selectNodes(root);
-				if(isBinary(statestatements)){
+				int btype = isBinary(statestatements);
+				if(btype>0){
 					EQProposals posempty = new EQProposals();
 					EQProposals negempty = new EQProposals();
 					boolean pos = false; //used for incomplete binary statements: only one value (T/F) is present
@@ -206,7 +207,7 @@ public class XML2EQ {
 						empty.setCharacterText(characterstatement.getChildText("text"));
 						empty.setStateId(statestatement.getAttributeValue("state_id"));
 						empty.setStateText(statestatement.getChildText("text"));
-						if(statestatement.getChildText("text").matches(Dictionary.binaryTvalues)){
+						if(statestatement.getChildText("text").matches(Dictionary.binaryTvalues1+"|"+Dictionary.binaryTvalues2)){
 							posempty = empty;
 							pos = true;
 						}else{
@@ -214,10 +215,10 @@ public class XML2EQ {
 							neg = true;
 						}
 					}
-					if(! pos) posempty = negempty;
+					if(! pos) posempty = negempty; //these two steps are needed only for incomplete statements (e.g., with only postive or negative states)
 					if(! neg) negempty = posempty;
 					
-					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil,characterstatement.getChildText("text"));
+					BinaryCharacterStatementParser bcsp = new BinaryCharacterStatementParser(ontoutil,characterstatement.getChildText("text"), btype);
 					bcsp.parse(characterstatement, root, posempty, negempty);
 					if(bcsp.getEQStatements().size()==0){
 						for(Element statestatement: statestatements){
@@ -856,7 +857,7 @@ public class XML2EQ {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	private Element getFalseState(List<Element> states) {
 		// copy or negate the EQ for each state
 		for (Element state : states) {
@@ -867,9 +868,9 @@ public class XML2EQ {
 			}
 		}
 		return null;
-	}
+	}*/
 
-	private Element getTrueState(List<Element> states) {
+	/*private Element getTrueState(List<Element> states) {
 		// copy or negate the EQ for each state
 		for (Element state : states) {
 			Element text = state.getChild("text");
@@ -879,7 +880,7 @@ public class XML2EQ {
 			} 
 		}
 		return null;
-	}
+	}*/
 	/**
 	 * BinaryCharacter: those taking yes/no or present/absent as character states.
 	 * 
@@ -925,21 +926,30 @@ public class XML2EQ {
 	 * yes but interrupted by Meckelian foramina or fenestrae
 	 * yes by prearticular 
 	 * @param states
-	 * @return
+	 * @return -1: not a binary statement; 1: present/absent; 2: yes/no
 	 */
-	private boolean isBinary(List<Element> states) throws Exception {
+	private int isBinary(List<Element> states) throws Exception {
 		if (states.size() == 0)
-			return false;
-
+			return -1;
+		boolean pa1 = true;
+		boolean yn2 = true;
 		for (Element state : states) {
 			Element text = (Element) pathText2.selectSingleNode(state);
 			String value = text.getTextTrim();
-			if (!value.matches("(" + Dictionary.binaryTvalues + "|" + Dictionary.binaryFvalues + ")")) {
-				return false;
+			if (!value.matches("(" + Dictionary.binaryTvalues1 + "|" + Dictionary.binaryFvalues1 +"|"+ Dictionary.binaryTvalues2 + "|" + Dictionary.binaryFvalues2 + ")")) {
+				return -1;
+			}
+			if (!value.matches("(" + Dictionary.binaryTvalues2 + "|" + Dictionary.binaryFvalues2 + ")")) {
+				yn2 = false;
+			}
+			if (!value.matches("(" + Dictionary.binaryTvalues1 + "|" + Dictionary.binaryFvalues1 + ")")) {
+				pa1 = false;
 			}
 		}
 
-		return true;
+		if(yn2) return 2;
+		if(pa1) return 1;
+		return -1;
 	}
 
 	//check allEQs to identify the case like
