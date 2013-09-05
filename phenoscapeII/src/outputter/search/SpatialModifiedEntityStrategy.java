@@ -46,6 +46,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 	
 	private static Hashtable<String, ArrayList<EntityProposals>> cache = new Hashtable<String, ArrayList<EntityProposals>>();
 	private static ArrayList<String> nomatchcache = new ArrayList<String>();
+	public static Pattern spatialptn = Pattern.compile("^("+Dictionary.spatialtermptn+")\\b\\s*\\b("+Dictionary.allSpatialHeadNouns()+")?\\b");
 
 	/**
 	 * [the expression is a query expanded with syn rings, 
@@ -95,8 +96,8 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 			}
 		}
 
-		Pattern p = Pattern.compile("^("+Dictionary.spatialtermptn+")\\b\\s*\\b("+Dictionary.allSpatialHeadNouns()+")?\\b");
-		Matcher m = p.matcher(entityphrase);
+		
+		Matcher m = spatialptn.matcher(entityphrase);
 		if(m.find()){
 			String spatialterm = entityphrase.substring(m.start(), m.end()).trim();
 			String newentity = entityphrase.substring(m.end()).trim();
@@ -168,18 +169,18 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 									ArrayList<REntity> rentities = new ArrayList<REntity>();
 									REntity re = null;
 									//TODO: what if both conditions are true?
-									if(sentity instanceof CompositeEntity){//entitylocator is in sentity
-										//sentity should not have any post-composed quality
-										re = ((CompositeEntity) sentity).getEntityLocator();
-										rentities.add(re);
-										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
-									}else if(entityls!=null && entityls.size()>0){
+									if(entityls!=null && entityls.size()>0){
 										for(EntityProposals ep: entityls){
 											for(Entity entityl: ep.getProposals()){
 												re = new REntity(rel, entityl);
 												rentities.add(re);
 											}
 										}
+									}else if(sentity instanceof CompositeEntity){//entitylocator is in sentity
+										//sentity should not have any post-composed quality
+										re = ((CompositeEntity) sentity).getEntityLocator();
+										rentities.add(re);
+										sentity = ((CompositeEntity) sentity).getTheSimpleEntity();
 									}
 
 									for(REntity rentity: rentities){

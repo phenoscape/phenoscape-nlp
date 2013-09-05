@@ -724,6 +724,7 @@ public class CharacterStatementParser extends Parser {
 			//post-compose with characters
 			List<Element> characters = structure.getChildren("character");
 			for(Element character: characters){
+				if(character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
 				ssp.parseCharacter(character, statement, root, entities1, qualities);

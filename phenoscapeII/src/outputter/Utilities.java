@@ -620,7 +620,7 @@ public class Utilities {
 	 */
 	public static void addEntityProposals(ArrayList<EntityProposals> entities,
 			EntityProposals ep) {
-		
+		if(ep==null) return;
 		for(EntityProposals aep: entities){
 			for(Entity ex: aep.getProposals()){
 				ArrayList<Entity> eproposals = ep.getProposals();
@@ -649,6 +649,7 @@ public class Utilities {
 	 */
 	public static void addQualityProposals(ArrayList<QualityProposals> qualities,
 			QualityProposals qp) {
+		if(qp==null) return;
 		for(QualityProposals aqp: qualities){
 			for(Quality qx: aqp.getProposals()){
 				ArrayList<Quality> qproposals = qp.getProposals();

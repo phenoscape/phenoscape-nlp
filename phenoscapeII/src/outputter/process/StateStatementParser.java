@@ -245,7 +245,7 @@ public class StateStatementParser extends Parser {
 				entities = new ArrayList<EntityProposals>();
 				qualities = new ArrayList<QualityProposals>();
 				if(character.getParentElement()==null) continue;
-				if(character.getAttributes().size()==2 && character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
+				if(character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
 				if(thisentities.size()==0) thisentities = parseCharacter(character, structure, root, entities, qualities); //this character's entity, may be shared among all postcompchars
 				postcomps.addAll(qualities);
 			}
