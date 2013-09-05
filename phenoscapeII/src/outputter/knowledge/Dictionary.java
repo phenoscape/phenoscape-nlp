@@ -446,8 +446,8 @@ public class Dictionary {
 	public final static Hashtable<String, String> translateToPATO = new Hashtable<String, String>(); //used for restricted relationlist
 	public static final String spatialOntoPrefix = "BSPO";
 	static{
-		translateToPATO.put("BFO:0000053","PATO:0000001"); //no better matches, match to 'quality'
-		translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to
+		    translateToPATO.put("BFO:0000053","PATO:0000001"); //bearer_of
+		    translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to
 			translateToPATO.put("BSPO:0000096","PATO:0001632");//anterior_to
 			translateToPATO.put("UBERON:anteriorly_connected_to","PATO:0000001");
 			translateToPATO.put("UBERON:attaches_to","PATO:0000001");//attaches_to
@@ -476,18 +476,18 @@ public class Dictionary {
 			translateToPATO.put("PATO:increased_in_magnitude_relative_to","PATO:increased_in_magnitude_relative_to");
 			translateToPATO.put("OBO_REL:located_in","PATO:0002261"); //located in
 			translateToPATO.put("RO:0002131","PATO:0001590"); //overlap with
-			translateToPATO.put("BFO:0000050","PATO:0000001");
-			translateToPATO.put("BSPO:passes_through","PATO:0000001");
+			translateToPATO.put("BFO:0000050","part_of");
+			translateToPATO.put("BSPO:passes_through","passes_through");
 			translateToPATO.put("BSPO:0000099","PATO:0001633"); //posterior to
 			translateToPATO.put("UBERON:posteriorly_connected_to","PATO:0000001");
 			translateToPATO.put("BSPO:0000100","PATO:0001195"); //proximal to
-			translateToPATO.put("UBERON:proximally_connected_to","PATO:0000001");
+			translateToPATO.put("UBERON:proximally_connected_to","proximally_connected_to");
 			translateToPATO.put("PATO:similar_in_magnitude_relative_to","PATO:similar_in_magnitude_relative_to");
-			translateToPATO.put("RO:0002219","PATO:0000001");
+			translateToPATO.put("RO:0002219","surrounded_by");
 			translateToPATO.put("RO:0002221","PATO:0001772"); //surrounding
 			translateToPATO.put("BSPO:0000102","PATO:0001196"); //ventral to
-			translateToPATO.put("BSPO:0000103","PATO:0000001");
-			translateToPATO.put("PHENOSCAPE:serves_as_attachment_site_for","PATO:0000001");
+			translateToPATO.put("BSPO:0000103","vicinity_of");
+			translateToPATO.put("PHENOSCAPE:serves_as_attachment_site_for","serves_as_attachment_site_for");
 			translateToPATO.put("BFO:0000052","PATO:inheres_in");
 			translateToPATO.put("PHENOSCAPE:complement_of","PATO:0000001");	
 	}

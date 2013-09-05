@@ -34,6 +34,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.reasoner.InferenceType;
+import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
@@ -59,6 +60,33 @@ public class ELKReasoner{
 	public TreeMap<String,Boolean> subclasscache = new TreeMap<String,Boolean>();//results of isSubClassOf
 	public TreeMap<String,Boolean> partofcache = new TreeMap<String,Boolean>();//results of isPartOf
 	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
+	
+	public static Hashtable<String, String> equivalent = new Hashtable<String, String>();
+	static{	
+		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002220","http_//purl.obolibrary.org/obo/PATO_0002259"); //adjacent to
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000096","http_//purl.obolibrary.org/obo/PATO_0001632");//anterior_to
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000097","http_//purl.obolibrary.org/obo/PATO_0001234"); //distal to
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000098","http_//purl.obolibrary.org/obo/PATO_0001233");//dorsal_to
+		equivalent.put("http_//purl.obolibrary.org/obo/OBO_REL_located_in","http_//purl.obolibrary.org/obo/PATO_0002261"); //located in
+		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002131","http_//purl.obolibrary.org/obo/PATO_0001590"); //overlap with
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000099","http_//purl.obolibrary.org/obo/PATO_0001633"); //posterior to
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000100","http_//purl.obolibrary.org/obo/PATO_0001195"); //proximal to
+		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002221","http_//purl.obolibrary.org/obo/PATO_0001772"); //surrounding
+		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000102","http_//purl.obolibrary.org/obo/PATO_0001196"); //ventral to
+		equivalent.put("http_//purl.obolibrary.org/obo/BFO_0000052","http_//purl.obolibrary.org/obo/PATO_inheres_in");
+		
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0002259","http_//purl.obolibrary.org/obo/PATO_0002259"); //adjacent to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001632","http_//purl.obolibrary.org/obo/PATO_0001632");//anterior_to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001234","http_//purl.obolibrary.org/obo/PATO_0001234"); //distal to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001233","http_//purl.obolibrary.org/obo/PATO_0001233");//dorsal_to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0002261","http_//purl.obolibrary.org/obo/PATO_0002261"); //located in
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001590","http_//purl.obolibrary.org/obo/PATO_0001590"); //overlap with
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001633","http_//purl.obolibrary.org/obo/PATO_0001633"); //posterior to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001195","http_//purl.obolibrary.org/obo/PATO_0001195"); //proximal to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001772","http_//purl.obolibrary.org/obo/PATO_0001772"); //surrounding
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001196","http_//purl.obolibrary.org/obo/PATO_0001196"); //ventral to
+		equivalent.put("http_//purl.obolibrary.org/obo/PATO_inheres_in","http_//purl.obolibrary.org/obo/PATO_inheres_in");
+	}
 
 	public ELKReasoner(OWLOntology ont, boolean prereason) throws OWLOntologyCreationException{
 		if(!this.printmessage) LOGGER.setLevel(Level.ERROR);
@@ -181,20 +209,29 @@ public class ELKReasoner{
 
 	public boolean isEquivalent(String classIRI1, String classIRI2){
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
+		
+		if(equivalent.get(classIRI1)!=null && equivalent.get(classIRI2)!=null && 
+				equivalent.get(classIRI1).compareTo(equivalent.get(classIRI2))==0)
+			return true;
+		
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass class1 = dataFactory.getOWLClass(IRI.create(classIRI1));
 		OWLClass class2 = dataFactory.getOWLClass(IRI.create(classIRI2));
 		return isEquivalentClass(class1, class2);
 	}
 
-	public boolean isEquivalentClass(OWLClass class1, OWLClassExpression class2) {
-		/* this doesn't work: returns wrong value
-		 * reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
+	public boolean isEquivalentClass(OWLClass class1, OWLClass class2) {
+		// ELK version
+		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		Node<OWLClass> eqclasses = reasoner.getEquivalentClasses(class1);
-		return eqclasses.getEntities().contains(class2);*/
+		return eqclasses.getEntities().contains(class2);
+		
+		
+		/*OWL API version
 		Set<OWLOntology> onts = this.ont.getImportsClosure();
 		Set<OWLClassExpression> classes = class1.getEquivalentClasses(onts);
 		return classes.contains(class2) || class1.equals(class2);
+		*/
 	}
 	/**
 	 * is part a part_of whole?

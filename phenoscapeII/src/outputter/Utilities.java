@@ -693,10 +693,11 @@ public class Utilities {
 	 * => carpal bone (bearer_of ossisied) and (bearer_of twisted)
 	 * @param entities
 	 * @param qualities
-	 * 
+	 * @return postcomposition success or not
 	 */
-	public static void postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
-		if(entities==null) return;
+	public static boolean postcompose(ArrayList<EntityProposals> entities, ArrayList<QualityProposals> qualities){
+		if(entities==null) return false;
+		boolean success = false;
 		for(EntityProposals entity: entities){
 			ArrayList<Entity> eps = entity.getProposals();
 			ArrayList<Entity> epsresult = new ArrayList<Entity>(); //for saving postcomposed entity proposals 
@@ -757,8 +758,12 @@ public class Utilities {
 				}
 			}
 			//eps = epsresult; //update entities
-			if(postcomped) entity.setProposals(epsresult);
+			if(postcomped){
+				entity.setProposals(epsresult);
+				success = true;
+			}
 		}
+		return success;
 	}
 
 	private static boolean isRestrictedRelation(String id) {
