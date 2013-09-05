@@ -151,6 +151,7 @@ public class SpatialModifiedEntityStrategy implements SearchStrategy {
 						SimpleEntity sentity1 = (SimpleEntity) spatialentity;
 						if(sentity1!=null){
 							centityp.add(sentity1);
+							centityp.setPhrase(originalentityphrase);
 						}
 					}
 				//}

@@ -508,7 +508,7 @@ public class CharacterStatementParser extends Parser {
 						}
 					}*/
 					
-					if(checkForPartOfRelation(entities)){//Checks ELKReasoner whether the keyentities are part of entities
+					if(checkForPartOfRelation(entities) || Utilities.holdsSimpleSpatialEntity(this.keyentities)){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
 						LOGGER.debug("CSP: add to part_of chain:");
 						for(EntityProposals aep: entities){

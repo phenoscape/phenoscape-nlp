@@ -444,6 +444,7 @@ public class Dictionary {
 	//this should ideally not be needed, but in reality, many equivalent classes exist cross ontologies but are not treated so
 	//the restrictedrelations for entity postcomposition sometimes have equivalent classes in PATO. PATO classes are need to create negated qualities
 	public final static Hashtable<String, String> translateToPATO = new Hashtable<String, String>(); //used for restricted relationlist
+	public static final String spatialOntoPrefix = "BSPO";
 	static{
 		translateToPATO.put("BFO:0000053","PATO:0000001"); //no better matches, match to 'quality'
 		translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to

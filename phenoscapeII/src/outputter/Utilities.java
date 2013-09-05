@@ -801,6 +801,22 @@ public class Utilities {
 		return path.replaceFirst("\\|+$","");
 	}
 
+	/**
+	 * 
+	 * @param entities
+	 * @return true if entities hold a simple spatial entity
+	 */
+	public static boolean holdsSimpleSpatialEntity(ArrayList<EntityProposals> entities) {
+		for(EntityProposals ep : entities){
+			for(Entity e: ep.getProposals()){
+				if(e instanceof SimpleEntity){
+					if(e.getId().startsWith(Dictionary.spatialOntoPrefix)) return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 }
 

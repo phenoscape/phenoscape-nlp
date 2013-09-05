@@ -181,13 +181,14 @@ public class RelationHandler {
 		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			String t = "";
-			ArrayList<EntityProposals> relatedentities = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname, relation);
+			ArrayList<EntityProposals> relatedentities = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname+"+", relation);
 			for(EntityProposals relatedentity: relatedentities){
 				RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
 				QualityProposals aquality = new QualityProposals();
 				aquality.add(rq);
-				quality.add(aquality);
+				Utilities.addQualityProposals(quality, aquality);
+				//quality.add(aquality);
 			}
 		}else{//no, the relation should not be considered relational quality
 			//entity locator? parseEntity should have already processed entity locators if any
