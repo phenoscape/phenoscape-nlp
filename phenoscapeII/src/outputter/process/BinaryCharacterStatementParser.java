@@ -230,7 +230,6 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 				for(Quality q: qp.getProposals()){
 					if(q instanceof RelationalQuality) //relational, generate and add negated quality
 					{
-						boolean isRestrictedRelation = 
 						if(this.binaryType==1) postcomposeRelationalQuality(negempty, negativestatements, eqp, q);
 						if(this.binaryType==2) negateRelationalQuality(negempty, negativestatements,
 								eqp, q); // a ventral to b: yes =>
@@ -265,7 +264,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		QualityProposals qp = new QualityProposals();
 		qp.add(q);
 		qualities.add(qp);
-		boolean success = Utilities.postcompose(entities, qualities); //postcompose
+		Utilities.postcompose(entities, qualities); //postcompose
 		//update eqp
 		eqp.setEntity(entities.get(0));
 		qp = new QualityProposals();
