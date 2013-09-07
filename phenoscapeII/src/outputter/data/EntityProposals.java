@@ -4,12 +4,13 @@
 package outputter.data;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * @author Hong Cui
  * This class holds 0 - n proposals for one entity phrase
  */
-public class EntityProposals implements Proposals {
+public class EntityProposals implements Proposals, Comparator {
 	ArrayList<Entity> proposals = new ArrayList<Entity>();
 	String phrase = "";
 	/**
@@ -18,9 +19,7 @@ public class EntityProposals implements Proposals {
 	public EntityProposals() {		
 	}
 	
-	public boolean equals(EntityProposals ep){
-		return this.content().compareTo(ep.content())==0;
-	}
+
 	public boolean add(Object e){
 		if(e instanceof Entity){
 			proposals.add((Entity)e);
@@ -131,5 +130,20 @@ public class EntityProposals implements Proposals {
 
 	public void setProposals(ArrayList<Entity> proposals) {
 		this.proposals = proposals;		
+	}
+
+	@Override
+	public int compare(Object arg0, Object arg1) {
+		if(arg0 instanceof EntityProposals && arg1 instanceof EntityProposals){
+			return ((EntityProposals)arg0).content().compareTo(((EntityProposals)arg1).content());
+		}
+		return -1;
+	}
+	
+	@Override
+	public boolean equals(Object ep){
+		if(ep instanceof EntityProposals)
+		return this.content().compareTo(((EntityProposals)ep).content())==0;
+		else return false;
 	}
 }

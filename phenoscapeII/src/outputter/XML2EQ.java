@@ -237,7 +237,15 @@ public class XML2EQ {
 					}
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
-					csp.parse(characterstatement, root, null);
+					EQProposals empty = new EQProposals();
+					empty.setSourceFile(src);
+					empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
+					empty.setCharacterText(characterstatement.getChildText("text"));
+					empty.setStateId(characterstatement.getAttributeValue("state_id"));
+					empty.setStateText(characterstatement.getChildText("text"));
+					empty.setType("character");
+					csp.parse(characterstatement, root, empty);
+					allEQs.addAll(csp.getEQStatements());
 					keyentities = csp.getKeyEntities();
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
@@ -246,14 +254,14 @@ public class XML2EQ {
 					for(Element statestatement: statestatements){
 						LOGGER.debug("XML2EQ: processing state statement...");
 						System.out.println("text: " + statestatement.getChildText("text"));
-						EQProposals empty = new EQProposals();
+						empty = new EQProposals();
 						empty.setSourceFile(src);
 						empty.setCharacterId(statestatement.getAttributeValue("character_id"));
 						empty.setCharacterText(characterstatement.getChildText("text"));
 						empty.setStateId(statestatement.getAttributeValue("state_id"));
 						empty.setStateText(statestatement.getChildText("text"));
 						empty.setType("state");
-						String t = "";
+
 						ssp.parse(statestatement, root, empty);
 						if(ssp.getEQStatements().size()==0){
 							//EQProposals empty = new EQProposals();

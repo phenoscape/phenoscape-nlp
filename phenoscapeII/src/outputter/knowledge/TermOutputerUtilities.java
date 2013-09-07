@@ -346,6 +346,62 @@ public class TermOutputerUtilities {
 	 * @return 5-key hashtable: term, querytype, id, label, matchtype, iri
 	 */
 	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
+		Hashtable<String, String> oresult = null; //original
+		Hashtable<String, String> eresult = null; //exact
+		Hashtable<String, String> nresult = null; //narrow
+		Hashtable<String, String> rresult = null; //related
+		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
+		//should be
+		
+		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
+		if(matches == null || matches.size() ==0){
+			return null;
+			//TODO: besides phrase based search, consider also make use of the relations and definitions used in ontology
+			//TODO: update other copies of the method
+			//task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
+		}else{
+			//merge original and exact results: radial [original] = 'radials', radial[exact]='radius bone'
+			List<OWLClass> matchclass = matches.get("original");
+			if(matchclass!=null && matchclass.size()!=0){
+				oresult = collectResult(term, matchclass, type, "original", owlapi);
+				//return oresult;
+			}
+			matchclass = matches.get("exact");
+			if(matchclass!=null && matchclass.size()!=0){
+				eresult = collectResult(term, matchclass, type, "exact", owlapi);
+				//return eresult;
+			}
+			
+			matchclass = matches.get("narrow");
+			if(matchclass!=null && matchclass.size()!=0){
+				nresult = collectResult(term, matchclass, type, "narrow", owlapi);
+				//return nresult;
+			}
+			
+			matchclass = matches.get("related");
+			if(matchclass!=null && matchclass.size()!=0){
+				rresult = collectResult(term, matchclass, type, "related", owlapi);
+				//return rresult;
+			}
+		}
+		if(Boolean.valueOf(ApplicationUtilities.getProperty("search.exact"))){
+			oresult = this.merge(oresult, eresult);
+			if(oresult==null){
+				oresult =this.merge(oresult, nresult);
+				if(oresult==null){
+					oresult =this.merge(oresult, rresult);
+				}
+			}
+			return oresult;
+		}else{
+			oresult =this.merge(oresult, eresult);
+			oresult =this.merge(oresult, nresult);
+			oresult =this.merge(oresult, rresult);
+			return oresult;
+		}
+		//return null;
+	}
+	/*private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
@@ -367,7 +423,7 @@ public class TermOutputerUtilities {
 			if(matchclass!=null && matchclass.size()!=0){
 				Hashtable<String, String> temp = collectResult(term, matchclass, type, "exact", owlapi);
 				if(result!=null){
-					merge(result, temp);
+					result = merge(result, temp);
 					return result;
 				}
 				return temp;
@@ -388,7 +444,7 @@ public class TermOutputerUtilities {
 			}
 		}
 		return null;
-	}
+	}*/
 	
 	/**
 	 * merge exact match 'temp' to original match 'result'
@@ -396,8 +452,12 @@ public class TermOutputerUtilities {
 	 * @param result
 	 * @param temp
 	 */
-	private void merge(Hashtable<String, String> result,
+	private Hashtable<String, String> merge(Hashtable<String, String> result,
 			Hashtable<String, String> temp) {
+		if(temp == null) return result;
+		if(result == null){
+			return temp;
+		}
 		result.put("term",  result.get("term"));
 		result.put("querytype",  result.get("querytype"));
 		result.put("matchtype", result.get("matchtype")); //original+exact
@@ -433,6 +493,8 @@ public class TermOutputerUtilities {
 		result.put("id", ids.replaceAll("(^;|;$)", ""));
 		result.put("label",labels.replaceAll("(^;|;$)", ""));
 		result.put("iri", iris.replaceAll("(^;|;$)", ""));	
+		
+		return result;
 	}
 
 	/**

@@ -9,22 +9,43 @@ database.driverPath=com.mysql.jdbc.Driver
 database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
 
 #fill in ontology.dir, uberphrases.bin, wordnet.dictionary, file name of the uberon ontology without .owl extension.
-ontology.dir=
-uberonphrases.bin =
-wordnet.dictionary=
-ontology.uberon=
+#ontology.dir=C:/Users/updates/CharaParserTest/Ontologies
+#wordnet.dictionary=C:/Users/updates/CharaParserTest/Ontologies/dict
+#uberonphrases.bin=C:/Users/updates/CharaParserTest/Ontologies/ext_terms.bin
+#uberonphrases.update.bin=C:/Users/updates/CharaParserTest/Ontologies/ext_terms.update.bin
+#uberonphrases.p2s.bin=C:/Users/updates/CharaParserTest/Ontologies/ext_terms_p2s.bin
+#ontology.uberon=ext
+#ontology.bspo=bspo
 
+ontology.dir=
+wordnet.dictionary=
+uberonphrases.bin=
+uberonphrases.update.bin=
+uberonphrases.p2s.bin=
+ontology.uberon=
+ontology.bspo=
+
+##XML2EQ table, source, and output
+#table.prefix=pattern_fixedsource
+#table.output=pattern_fixedsource_xml2eq
+#source.dir=C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/
+#output.dir=C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/EQ
+
+table.prefix=
+table.output=
+source.dir=
+output.dir=
 
 ####################################DO NOT EDIT THE FOLLOWING######################################
+#charparser
+charparser.version = 
 
 #XML Schema
 source.attribute.name=source_pdf
+#unknown.structure.name can NOT have a space
 unknown.structure.name=whole_organism
+#elk message 
 elk.printmessage=false
 
-
-#XML2EQ output Sources
-output.dir=
-
-#charparser
-charparser.version = 
+#search
+search.exact=true

@@ -23,6 +23,7 @@ import outputter.data.EntityProposals;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
 import outputter.data.RelationalQuality;
+import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.PermittedRelations;
 import outputter.search.EntitySearcherOriginal;
@@ -180,15 +181,22 @@ public class RelationHandler {
 		tostructname = tostructname + "," + Utilities.getNamesOnPartOfChain(root, tostructid); //in/on = part_of?
 		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
-			String t = "";
 			ArrayList<EntityProposals> relatedentities = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname+"+", relation);
+			/*if(relatedentities==null){ //form un-ontologized e (because relational quality is a strong, positive indicator the RE should be an entity (not a quality)
+				SimpleEntity relatedentity = new SimpleEntity();
+				relatedentity.setString(tostructname);
+				EntityProposals ep = new EntityProposals();
+				ep.setPhrase(tostructname);
+				ep.add(relatedentity);
+				relatedentities = new ArrayList<EntityProposals>();
+				relatedentities.add(ep);
+			}*/			
 			for(EntityProposals relatedentity: relatedentities){
 				RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();
 				QualityProposals aquality = new QualityProposals();
 				aquality.add(rq);
 				Utilities.addQualityProposals(quality, aquality);
-				//quality.add(aquality);
 			}
 		}else{//no, the relation should not be considered relational quality
 			//entity locator? parseEntity should have already processed entity locators if any

@@ -83,7 +83,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 				//If it is a simple entity add part of multicellular organism
 					if(this.bilateralentity instanceof SimpleEntity)// define
 					{
-						//Related Entity
+						//Related Entity: right
 						SimpleEntity bilateralclone1 = ((SimpleEntity)this.bilateralentity).clone();
 						REntity related1 = this.multicellularrelatedentity("in right side of");
 						CompositeEntity centity = new CompositeEntity();
@@ -91,7 +91,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 						centity.addEntity(related1);
 						RelatedEP.add(centity);
 						
-						//Primary Entities
+						//Primary Entities: left
 						related1 = this.multicellularrelatedentity("in left side of");
 						CompositeEntity centity1 = new CompositeEntity();
 						centity1.addEntity((SimpleEntity)bilateralclone1);
@@ -128,7 +128,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									//C = 'dorsal region'
 									REntity re = (REntity) entities.get(i+1);
 									CompositeEntity centity1 = new CompositeEntity(); //C part of B	
-									Entity dr = Dictionary.dorsalregion;
+									Entity dr = Dictionary.ventralregion;
 									dr.setConfidenceScore(0.5f);
 									centity1.addEntity(dr);
 									centity1.addEntity(re.clone());
@@ -164,7 +164,7 @@ public Hashtable<String, ArrayList<EntityProposals>> getEntities() {
 									//C = 'ventral region'
 									REntity re = (REntity) entities.get(i+1);
 									CompositeEntity centity1 = new CompositeEntity(); //C part of B		
-									Entity vr = Dictionary.ventralregion;
+									Entity vr = Dictionary.dorsalregion;
 									vr.setConfidenceScore(0.5f);
 									centity1.addEntity(vr);
 									centity1.addEntity(re.clone());

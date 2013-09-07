@@ -220,7 +220,7 @@ public class CharacterHandler {
 				//check and see if prep of the relation need to be matched: 'separated from' <> 'separated by'
 				String prep = constraint.contains(" ")? constraint.substring(0, constraint.indexOf(" ")): constraint;
 				boolean check = false;
-				if(prep.matches(this.specialprep )) check = true;
+				if(prep.matches(this.specialprep)) check = true;
 				for(Quality rq: relationalquality.getProposals()){
 					String label = rq.getLabel();
 					String labelprep = label.contains(" ")? label.substring(0, constraint.indexOf(" ")): label;

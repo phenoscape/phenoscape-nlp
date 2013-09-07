@@ -23,6 +23,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.xpath.XPath;
 
 import outputter.data.CompositeEntity;
+import outputter.data.EQProposals;
 import outputter.data.Entity;
 import outputter.data.EntityProposals;
 import outputter.data.FormalRelation;
@@ -32,6 +33,9 @@ import outputter.data.REntity;
 import outputter.data.RelationalQuality;
 import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
+import outputter.process.BinaryCharacterStatementParser;
+import outputter.process.Parser;
+import outputter.process.StateStatementParser;
 import outputter.search.SynRingVariation;
 import owlaccessor.OWLAccessorImpl;
 
@@ -823,6 +827,71 @@ public class Utilities {
 	}
 
 
+	public static void constructEQProposals(Parser parser, ArrayList<EQProposals> EQStatements, List<QualityProposals> qualities, ArrayList<EntityProposals> entities, EQProposals empty){
+		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
+			for (QualityProposals qualityp : qualities){
+				for (EntityProposals entityp : entities) {
+					//EQProposals eqp = new EQProposals();
+					EQProposals eqp = empty.clone();
+					eqp.setEntity(entityp);
+					eqp.setQuality(qualityp);
+					//eqp.setSource(this.src);
+					//eqp.setCharacterId(this.characterid);
+					//eqp.setStateId(this.stateid);
+					//eqp.setDescription(text);
+					//eqp.setCharacterlabel(this.characterlabel);
+					if (parser instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					EQStatements.add(eqp);
+				}
+			}			
+		} else if(entities!=null && entities.size()>0 && parser instanceof BinaryCharacterStatementParser){ //no qualities identified so far
+				for (EntityProposals entityp : entities) {
+					//EQProposals eqp = new EQProposals();
+					EQProposals eqp = empty.clone();
+					eqp.setEntity(entityp);
+					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
+					//eqp.setSource(this.src);
+					//eqp.setCharacterId(this.characterid);
+					//eqp.setStateId(this.stateid);
+					//eqp.setDescription(text);
+					//eqp.setCharacterlabel(this.characterlabel);
+					if (parser instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					EQStatements.add(eqp);
+				}					
+		}else if(entities!=null && entities.size()>0){ //no qualities => "present"
+			for (EntityProposals entityp : entities) {
+				//EQProposals eqp = new EQProposals();
+				EQProposals eqp = empty.clone();
+				eqp.setEntity(entityp);
+				Quality q = Dictionary.present;
+				q.setConfidenceScore(1f);
+				QualityProposals qp = new QualityProposals();
+				qp.add(q);
+				qp.setPhrase("present");
+				eqp.setQuality(qp); //this may be filled later for BinaryStateStatements
+				//eqp.setSource(this.src);
+				//eqp.setCharacterId(this.characterid);
+				//eqp.setStateId(this.stateid);
+				//eqp.setDescription(text);
+				//eqp.setCharacterlabel(this.characterlabel);
+				if (parser instanceof StateStatementParser){
+					eqp.setType("state");
+				}else{
+					eqp.setType("character");
+				}
+				EQStatements.add(eqp);
+			}					
+	}
+		
+	}
 }
 
 

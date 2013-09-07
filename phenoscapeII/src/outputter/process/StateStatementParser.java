@@ -177,7 +177,7 @@ public class StateStatementParser extends Parser {
 						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
 						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
 						//this.constructEQStatementProposals(qualities, primentities);	
-						this.constructEQProposals(qualities, primentities, empty);	
+						Utilities.constructEQProposals(this, this.EQStatements, qualities, primentities, empty);	
 					}
 					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					//entities.addAll(ep);
@@ -211,7 +211,7 @@ public class StateStatementParser extends Parser {
 				qp.add(q);
 				qualities.add(qp);
 				//constructEQStatementProposals(qualities, entities1);
-				constructEQProposals(qualities, entities1, empty);
+				Utilities.constructEQProposals(this, this.EQStatements, qualities, entities1, empty);
 				entities1.clear();
 			}
 		}catch(Exception e){
@@ -265,7 +265,7 @@ public class StateStatementParser extends Parser {
 
 			if(characters.size()<=0){
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
-				constructEQProposals(qualities, thisentities, empty);
+				Utilities.constructEQProposals(this, this.EQStatements, qualities, thisentities, empty);
 			}else{
 				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
@@ -283,7 +283,7 @@ public class StateStatementParser extends Parser {
 					if(qualities!=null) for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					//Utilities.postcompose(entities, postcomps); //attachement site: rugose scar or pit, rugose should not be postcomp to attachment site.
-					constructEQProposals(qualities, entities, empty);
+					Utilities.constructEQProposals(this, this.EQStatements, qualities, entities, empty);
 				}
 			}
 
@@ -547,7 +547,7 @@ public class StateStatementParser extends Parser {
 				int flag = parseRelation(relation, root, StructuredQualities, entities,  q, empty);
 				if(flag==1){
 					//constructEQStatementProposals(q, entities);
-					constructEQProposals(q, entities, empty);
+					Utilities.constructEQProposals(this, this.EQStatements, q, entities, empty);
 				}
 			}
 		} catch (JDOMException e) {
@@ -736,71 +736,7 @@ public class StateStatementParser extends Parser {
 		}
 	}
 
-	private void constructEQProposals(List<QualityProposals> qualities, ArrayList<EntityProposals> entities, EQProposals empty){
-		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
-			for (QualityProposals qualityp : qualities){
-				for (EntityProposals entityp : entities) {
-					//EQProposals eqp = new EQProposals();
-					EQProposals eqp = empty.clone();
-					eqp.setEntity(entityp);
-					eqp.setQuality(qualityp);
-					//eqp.setSource(this.src);
-					//eqp.setCharacterId(this.characterid);
-					//eqp.setStateId(this.stateid);
-					//eqp.setDescription(text);
-					//eqp.setCharacterlabel(this.characterlabel);
-					if (this instanceof StateStatementParser){
-						eqp.setType("state");
-					}else{
-						eqp.setType("character");
-					}
-					this.EQStatements.add(eqp);
-				}
-			}			
-		} else if(entities!=null && entities.size()>0 && this instanceof BinaryCharacterStatementParser){ //no qualities identified so far
-				for (EntityProposals entityp : entities) {
-					//EQProposals eqp = new EQProposals();
-					EQProposals eqp = empty.clone();
-					eqp.setEntity(entityp);
-					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
-					//eqp.setSource(this.src);
-					//eqp.setCharacterId(this.characterid);
-					//eqp.setStateId(this.stateid);
-					//eqp.setDescription(text);
-					//eqp.setCharacterlabel(this.characterlabel);
-					if (this instanceof StateStatementParser){
-						eqp.setType("state");
-					}else{
-						eqp.setType("character");
-					}
-					this.EQStatements.add(eqp);
-				}					
-		}else if(entities!=null && entities.size()>0){ //no qualities => "present"
-			for (EntityProposals entityp : entities) {
-				//EQProposals eqp = new EQProposals();
-				EQProposals eqp = empty.clone();
-				eqp.setEntity(entityp);
-				Quality q = Dictionary.present;
-				q.setConfidenceScore(1f);
-				QualityProposals qp = new QualityProposals();
-				qp.add(q);
-				qp.setPhrase("present");
-				eqp.setQuality(qp); //this may be filled later for BinaryStateStatements
-				//eqp.setSource(this.src);
-				//eqp.setCharacterId(this.characterid);
-				//eqp.setStateId(this.stateid);
-				//eqp.setDescription(text);
-				//eqp.setCharacterlabel(this.characterlabel);
-				if (this instanceof StateStatementParser){
-					eqp.setType("state");
-				}else{
-					eqp.setType("character");
-				}
-				this.EQStatements.add(eqp);
-			}					
-	}
-		
-	}
+
 	
 	
 	/*private void constructEQStatementProposals(
