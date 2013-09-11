@@ -794,7 +794,6 @@ public class CharacterStatementParser extends Parser {
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
 				ssp.parseCharacter(character, statement, root, entities1, qualities);
 				//the constraint of the character may be used in the quality
-				String t="";
 				if(character.getAttribute("constraintid")!=null){
 					String[] cids = character.getAttributeValue("constraintid").trim().split("\\s+");
 					for(String cid: cids){

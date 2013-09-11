@@ -234,47 +234,112 @@ public class Dictionary {
 	}
 	//special cases for singulars and plurals
 	static{
-		//check cache
+		//singluar = plural
+		singulars.put("brit", "brit");
+		singulars.put("buttress", "buttress");
+		singulars.put("callus", "callus");
+		singulars.put("forceps", "forceps");
+		singulars.put("frons", "frons");
+		singulars.put("fry", "fry");
+		singulars.put("media", "media");
+		singulars.put("series", "series");
+		singulars.put("species", "species");
+		singulars.put("sperm", "sperm");
+		
+		//special cases
 		singulars.put("axis", "axis");
 		singulars.put("axes", "axis");
 		singulars.put("bases", "base");
 		singulars.put("boss", "boss");
-		singulars.put("buttress", "buttress");
-		singulars.put("callus", "callus");
-		singulars.put("frons", "frons");
 		singulars.put("grooves", "groove");
 		singulars.put("interstices", "interstice");
 		singulars.put("lens", "len");
-		singulars.put("media", "media");
 		singulars.put("midnerves", "midnerve");
 		singulars.put("process", "process");
-		singulars.put("series", "series");
-		singulars.put("species", "species");
 		singulars.put("teeth", "tooth");
 		singulars.put("valves", "valve");
-		singulars.put("i", "i"); //could add more roman digits
-		singulars.put("ii", "ii");
-		singulars.put("iii", "iii");
-		
-		plurals.put("axis", "axes");
-		plurals.put("base", "bases");		
-		plurals.put("groove", "grooves");
-		plurals.put("interstice", "interstices");
-		plurals.put("len", "lens");
+		singulars.put("catenabe", "catena");
+		singulars.put("fusules", "fusula");
+		singulars.put("pseudocoelomata", "pseudocoelomates");
+		singulars.put("setules", "setula");
+		singulars.put("ephyre", "ephyra");
+		singulars.put("ephyrae", "ephyra");
+		singulars.put("ephyrula", "ephyra");
+		singulars.put("fusules", "fusula");
+		singulars.put("mollusks", "mollusca");
+		singulars.put("molluscs", "mollusca");
+		singulars.put("malli", "malleus");
+		singulars.put("anthocyathia", "anthocyathus");
+		singulars.put("perradia", "perradius");
+		singulars.put("genera", "genus");
+		singulars.put("latera", "latus");
+		singulars.put("corpora", "corpus");
+		singulars.put("incudes", "incus");
+		singulars.put("parasides", "parapsis");
+		singulars.put("coremata", "corematis");
+		singulars.put("crepides", "crepis");
+		singulars.put("falces", "falx");
+		singulars.put("glochines", "glochis");
+		singulars.put("irises", "iris");
+		singulars.put("irides", "iris");
+		singulars.put("proboscises", "proboscis");
+		singulars.put("proglottides", "proglottis");
+		singulars.put("pharynges", "pharynx");
+		singulars.put("pharynxes", "pharynx");
+
+		//pl = sing
+		plurals.put("brit", "brit");
+		plurals.put("buttress", "buttress");
+		plurals.put("callus", "callus");
+		plurals.put("forceps", "forceps");
+		plurals.put("frons", "frons");
+		plurals.put("fry", "fry");
 		plurals.put("media", "media");
-		plurals.put("midnerve", "midnerves");
-		plurals.put("tooth", "teeth");
-		plurals.put("valve", "valves");
+		plurals.put("series", "series");
+		plurals.put("species", "species");
+		plurals.put("sperm", "sperm");
+		//special cases
+		plurals.put("axis", "axes");
+		plurals.put("base", "bases");	
 		plurals.put("boss", "bosses");
 		plurals.put("buttress", "buttresses");
 		plurals.put("callus", "calluses");
-		plurals.put("frons", "fronses");
+		plurals.put("groove", "grooves");
+		plurals.put("interstice", "interstices");
+		plurals.put("len", "lens");
+		plurals.put("midnerve", "midnerves");
 		plurals.put("process", "processes");
-		plurals.put("series", "series");
-		plurals.put("species", "species");
-		plurals.put("i", "i"); //could add more roman digits
-		plurals.put("ii", "ii");
-		plurals.put("iii", "iii");
+		plurals.put("tooth", "teeth");
+		plurals.put("valve", "valves");
+		plurals.put("catena","catenabe");
+		plurals.put("fusula","fusules");
+		plurals.put("pseudocoelomates","pseudocoelomata");
+		plurals.put("setula","setules");
+		//when multiple pls, take one
+		plurals.put("ephyra","ephyre");
+		plurals.put("ephyra","ephyrae");
+		plurals.put("ephyra","ephyrula");
+		plurals.put("fusula","fusules");
+		plurals.put("mollusca","mollusks");
+		plurals.put("mollusca","molluscs");
+		plurals.put("malleus","malli");
+		plurals.put("anthocyathus","anthocyathia");
+		plurals.put("perradius","perradia");
+		plurals.put("genus","genera");
+		plurals.put("latus","latera");
+		plurals.put("corpus","corpora");
+		plurals.put("incus","incudes");
+		plurals.put("parapsis","parasides");
+		plurals.put("corematis","coremata");
+		plurals.put("crepis","crepides");
+		plurals.put("falx","falces");
+		plurals.put("glochis","glochines");
+		plurals.put("iris","irises");
+		plurals.put("iris","irides");
+		plurals.put("proboscis","proboscises");
+		plurals.put("proglottis","proglottides");
+		plurals.put("pharynx","pharynges");
+		plurals.put("pharynx","pharynxes");
 	}
 	//upper level quality classes 
 	static{

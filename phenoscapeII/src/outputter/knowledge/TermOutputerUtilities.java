@@ -47,17 +47,17 @@ public class TermOutputerUtilities {
 	public static String attributes = "";
 	public static String adjectiveorganptn="";
 	public static OWLOntology uberon = null;
-	
-	
-		
-		//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
-		//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
+
+
+
+	//note, the order of the ontolgies listed in the string imply the importance of the ontologies:
+	//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
 	static{
 		//TODO:add GO:bioprocess
 		entityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl",
 				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
-				};
+		};
 		qualityontologies = new String[]{
 				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
 		};
@@ -95,7 +95,7 @@ public class TermOutputerUtilities {
 			}*/
 		}
 		adjectiveorganptn = adjectiveorganptn.replaceAll("(^\\||\\|$)", "");
-		
+
 		//for each entity ontology
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
@@ -114,8 +114,8 @@ public class TermOutputerUtilities {
 		}
 		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
 	}
-	
-	
+
+
 	/**
 	 * constructor may be needed if we need to exclude different parts of ontology.
 	 * @param ontologyfolder
@@ -154,7 +154,7 @@ public class TermOutputerUtilities {
 		}		
 		return result;
 	}*/
-	
+
 	/**
 	 * 
 	 * @param classid
@@ -162,13 +162,13 @@ public class TermOutputerUtilities {
 	 */
 	public static String[] retreiveParentInfoFromPATO (String classid){
 		if(classid==null) return null;
-		
+
 		//translate classid to a PATO id
 		if(!classid.startsWith("PATO")){
 			classid = Dictionary.translateToPATO.get(classid);
 			if(classid==null) return null;
 		}
-		
+
 		//find OWL PATO
 		OWLAccessorImpl pato = null;
 		for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -178,7 +178,7 @@ public class TermOutputerUtilities {
 			}
 		}
 		//find parent
-		
+
 		if(pato!=null){
 			String [] result = {"",""}; 
 			return findTargetParent(pato, classid, result);
@@ -186,14 +186,14 @@ public class TermOutputerUtilities {
 		//return new String[] {"PATO:0000001","quality"};
 		return null;
 	}
-	
+
 	private static String[] findTargetParent(OWLAccessorImpl pato, String classid, String[] result){
 		OWLClass c = pato.getOWLClassByIRI(Dictionary.baseiri+classid.replaceAll(":", "_"));
 		if(c!=null){
-			 if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
-				 result[0] = pato.getID(c);
-				 result[1] = pato.getLabel(c);
-				 return result;
+			if(pato.getLabel(c).matches("\\b"+Dictionary.patoupperclasses+"\\b")){
+				result[0] = pato.getID(c);
+				result[1] = pato.getLabel(c);
+				return result;
 			}else{
 				List<OWLClass> pcs = pato.getParents(c);
 				for(OWLClass pc: pcs){
@@ -211,7 +211,7 @@ public class TermOutputerUtilities {
 	 * @param type: entity or quality
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-/*	public ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
+	/*	public ArrayList<String[]> searchOntologies(String term, String type) throws Exception {
 		//search quality ontologies
 		ArrayList<String[]> results = new ArrayList<String[]>();
 		//boolean added = false;
@@ -263,8 +263,8 @@ public class TermOutputerUtilities {
 		}
 		return null;
 	}
-		
-	
+
+
 	/**
 	 * Search a term in a subgroup of an ontology
 	 * subgroup only applies to PATO relational slim //TODO complete this part.
@@ -273,9 +273,9 @@ public class TermOutputerUtilities {
 	 * @param subgroup: inRelationalSlim
 	 * @return ArrayList of results, one result from an ontology 
 	 */
-	public ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, ArrayList<Hashtable<String, String>> results) {
+	public static ArrayList<Hashtable<String, String>> searchOntologies(String term, String type, ArrayList<Hashtable<String, String>> results) {
 		//search quality or entity ontologies, depending on the type
-		
+
 		//quality
 		if(type.compareTo("quality")==0){
 			for(OWLAccessorImpl api: OWLqualityOntoAPIs){
@@ -293,8 +293,8 @@ public class TermOutputerUtilities {
 				}
 			}*/			
 		}
-		
-		
+
+
 		//entity
 		if(type.compareTo("entity")==0){
 			for(OWLAccessorImpl api: OWLentityOntoAPIs){
@@ -315,7 +315,7 @@ public class TermOutputerUtilities {
 		return results;
 
 	}
-	
+
 	/**
 	 * 
 	 * @param term
@@ -345,14 +345,14 @@ public class TermOutputerUtilities {
 	 * @param slim ?? 
 	 * @return 5-key hashtable: term, querytype, id, label, matchtype, iri
 	 */
-	private Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
+	private static Hashtable<String, String> searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) {
 		Hashtable<String, String> oresult = null; //original
 		Hashtable<String, String> eresult = null; //exact
 		Hashtable<String, String> nresult = null; //narrow
 		Hashtable<String, String> rresult = null; //related
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
-		
+
 		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
 			return null;
@@ -371,13 +371,13 @@ public class TermOutputerUtilities {
 				eresult = collectResult(term, matchclass, type, "exact", owlapi);
 				//return eresult;
 			}
-			
+
 			matchclass = matches.get("narrow");
 			if(matchclass!=null && matchclass.size()!=0){
 				nresult = collectResult(term, matchclass, type, "narrow", owlapi);
 				//return nresult;
 			}
-			
+
 			matchclass = matches.get("related");
 			if(matchclass!=null && matchclass.size()!=0){
 				rresult = collectResult(term, matchclass, type, "related", owlapi);
@@ -385,18 +385,18 @@ public class TermOutputerUtilities {
 			}
 		}
 		if(Boolean.valueOf(ApplicationUtilities.getProperty("search.exact"))){
-			oresult = this.merge(oresult, eresult);
+			oresult = merge(oresult, eresult);
 			if(oresult==null){
-				oresult =this.merge(oresult, nresult);
+				oresult = merge(oresult, nresult);
 				if(oresult==null){
-					oresult =this.merge(oresult, rresult);
+					oresult = merge(oresult, rresult);
 				}
 			}
 			return oresult;
 		}else{
-			oresult =this.merge(oresult, eresult);
-			oresult =this.merge(oresult, nresult);
-			oresult =this.merge(oresult, rresult);
+			oresult = merge(oresult, eresult);
+			oresult = merge(oresult, nresult);
+			oresult = merge(oresult, rresult);
 			return oresult;
 		}
 		//return null;
@@ -405,7 +405,7 @@ public class TermOutputerUtilities {
 		Hashtable<String, String> result = null;
 		//List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
 		//should be
-		
+
 		Hashtable<String, ArrayList<OWLClass>> matches = (Hashtable<String, ArrayList<OWLClass>>)owlapi.retrieveConcept(term);
 		if(matches == null || matches.size() ==0){
 			return null;
@@ -430,13 +430,13 @@ public class TermOutputerUtilities {
 			}else if(result!=null){
 				return result;
 			}
-			
+
 			matchclass = matches.get("narrow");
 			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "narrow", owlapi);
 				return result;
 			}
-			
+
 			matchclass = matches.get("related");
 			if(matchclass!=null && matchclass.size()!=0){
 				result = collectResult(term, matchclass, type, "related", owlapi);
@@ -445,14 +445,14 @@ public class TermOutputerUtilities {
 		}
 		return null;
 	}*/
-	
+
 	/**
 	 * merge exact match 'temp' to original match 'result'
 	 * remove redundant results
 	 * @param result
 	 * @param temp
 	 */
-	private Hashtable<String, String> merge(Hashtable<String, String> result,
+	private static Hashtable<String, String> merge(Hashtable<String, String> result,
 			Hashtable<String, String> temp) {
 		if(temp == null) return result;
 		if(result == null){
@@ -461,7 +461,7 @@ public class TermOutputerUtilities {
 		result.put("term",  result.get("term"));
 		result.put("querytype",  result.get("querytype"));
 		result.put("matchtype", result.get("matchtype")); //original+exact
-		
+
 		ArrayList<String> rids = new ArrayList<String>(Arrays.asList(result.get("id").split(";")));
 		ArrayList<String> rlabels = new ArrayList<String>(Arrays.asList(result.get("label").split(";")));
 		ArrayList<String> riris = new ArrayList<String>(Arrays.asList(result.get("iri").split(";")));
@@ -475,7 +475,7 @@ public class TermOutputerUtilities {
 				tiris.remove(riris.get(i));
 			}
 		}
-		
+
 		String ids = ""; 
 		String labels = ""; 
 		String iris = "";
@@ -489,11 +489,11 @@ public class TermOutputerUtilities {
 			labels +=tlabels.get(i)+";";
 			iris +=tiris.get(i)+";";
 		}
-		
+
 		result.put("id", ids.replaceAll("(^;|;$)", ""));
 		result.put("label",labels.replaceAll("(^;|;$)", ""));
 		result.put("iri", iris.replaceAll("(^;|;$)", ""));	
-		
+
 		return result;
 	}
 
@@ -506,7 +506,7 @@ public class TermOutputerUtilities {
 	 * @param owlapi
 	 * @return 5-key hashtable: term, querytype, id, label, matchtype
 	 */
-	private Hashtable<String, String> collectResult(String term, List<OWLClass> matches, String querytype, String matchtype, OWLAccessorImpl owlapi){
+	private static Hashtable<String, String> collectResult(String term, List<OWLClass> matches, String querytype, String matchtype, OWLAccessorImpl owlapi){
 		if(matches == null || matches.size() ==0) return null;
 		Hashtable<String, String> result = new Hashtable<String, String>();
 		result.put("term",  term);
@@ -545,12 +545,12 @@ public class TermOutputerUtilities {
 	/*private String[] searchOWLOntology(String term, OWLAccessorImpl owlapi, String type) throws Exception {
 		String[] result = null;
 		List<OWLClass> matches = (ArrayList<OWLClass>)owlapi.retrieveConcept(term);
-		
+
 		//Task 2 matches can be null, if the term is looked up into other ontologies - modified by Hariharan
 		if(matches!=null)
 		{
 			Iterator<OWLClass> it = matches.iterator();
-			
+
 			//exact match first
 			while(it.hasNext()){
 				OWLClass c = it.next();
@@ -564,7 +564,7 @@ public class TermOutputerUtilities {
 					return result;
 				}
 			}
-			
+
 			//otherwise, append all possible matches
 			it = matches.iterator();
 			result = new String[]{"", "", ""};
@@ -587,56 +587,56 @@ public class TermOutputerUtilities {
 		return null;
 	}*/
 
-	
+
 	/*
 	 * copied from fna.charactermarkup.Utilities
 	 * */
 	public static String checkWN(String cmdtext){
 		try{
-	 	  		Runtime r = Runtime.getRuntime();	
-		  		Process proc = r.exec(cmdtext);
-			    ArrayList<String> errors = new ArrayList<String>();
-		  	    ArrayList<String> outputs = new ArrayList<String>();
-		  
-	            // any error message?
-	            //StreamGobbler errorGobbler = new 
-	                //StreamGobblerWordNet(proc.getErrorStream(), "ERROR", errors, outputs);            
-	            
-	            // any output?
-	            StreamGobbler outputGobbler = new 
-	                StreamGobblerWordNet(proc.getInputStream(), "OUTPUT", errors, outputs);
-	                
-	            // kick them off
-	            //errorGobbler.start();
-	            
-	            outputGobbler.start();
-	            //outputGobbler.gobble();
-	                                    
-	            // any error???
-	            int exitVal = proc.waitFor();
-	            //System.out.println("ExitValue: " + exitVal);
+			Runtime r = Runtime.getRuntime();	
+			Process proc = r.exec(cmdtext);
+			ArrayList<String> errors = new ArrayList<String>();
+			ArrayList<String> outputs = new ArrayList<String>();
 
-	            StringBuffer sb = new StringBuffer();
-	            for(int i = 0; i<outputs.size(); i++){
-	            	//sb.append(errors.get(i)+" ");
-	            	sb.append(outputs.get(i)+" ");
-	            }
-	            return sb.toString();
-				
-		  	}catch(Exception e){
-		  		LOGGER.error("", e);
-		  	}
-		  	return "";
+			// any error message?
+			//StreamGobbler errorGobbler = new 
+			//StreamGobblerWordNet(proc.getErrorStream(), "ERROR", errors, outputs);            
+
+			// any output?
+			StreamGobbler outputGobbler = new 
+					StreamGobblerWordNet(proc.getInputStream(), "OUTPUT", errors, outputs);
+
+			// kick them off
+			//errorGobbler.start();
+
+			outputGobbler.start();
+			//outputGobbler.gobble();
+
+			// any error???
+			int exitVal = proc.waitFor();
+			//System.out.println("ExitValue: " + exitVal);
+
+			StringBuffer sb = new StringBuffer();
+			for(int i = 0; i<outputs.size(); i++){
+				//sb.append(errors.get(i)+" ");
+				sb.append(outputs.get(i)+" ");
+			}
+			return sb.toString();
+
+		}catch(Exception e){
+			LOGGER.error("", e);
+		}
+		return "";
 	}
 	////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * return null : word not in WN
 	 * return ""   : word is not a noun or is singular
 	 * return aword: word is a pl and singular form is returned
 	 */
 	public static String checkWN4Singular(String word){
-		
+
 		String result = checkWN("wn "+word+" -over");
 		if (result.length()==0){//word not in WN
 			return null;
@@ -646,9 +646,9 @@ public class TermOutputerUtilities {
 		Pattern p = Pattern.compile("(.*?)Overview of noun (\\w+) (.*)");
 		Matcher m = p.matcher(result);
 		while(m.matches()){
-			 t += m.group(2)+" ";
-			 result = m.group(3);
-			 m = p.matcher(result);
+			t += m.group(2)+" ";
+			result = m.group(3);
+			m = p.matcher(result);
 		}
 		if (t.length() ==0){//word is not a noun
 			return "";
@@ -661,7 +661,7 @@ public class TermOutputerUtilities {
 		}
 		return "";//original is a singular
 	}
-	
+
 	public static boolean isPlural(String t) {
 		t = t.replaceAll("\\W", "");
 		if(t.matches("\\b(series|species|fruit)\\b")){
@@ -674,36 +674,42 @@ public class TermOutputerUtilities {
 	}
 
 	public static String toSingular(String word){
-		String s = "";
+		String s = null;
 		word = word.toLowerCase().replaceAll("[(){}]", "").trim(); //bone/tendon
 
 		s = Dictionary.singulars.get(word);
 		if(s!=null) return s;
-		
+
 		if(word.matches("\\w+_[ivx-]+")){
 			Dictionary.singulars.put(word, word);
 			Dictionary.plurals.put(word, word);
 			return word;
 		}
-		
+
+		if(word.matches("[ivx-]+")){
+			Dictionary.singulars.put(word, word);
+			Dictionary.plurals.put(word, word);
+			return word;
+		}
+
 		//adverbs
 		if(word.matches("[a-z]{3,}ly")){
 			Dictionary.singulars.put(word, word);
 			Dictionary.plurals.put(word, word);
 			return word;
 		}
-		
+
 		String wordcopy = word;
 		wordcopy = checkWN4Singular(wordcopy);
 		if(wordcopy != null && wordcopy.length()==0){
 			return word;
 		}else if(wordcopy!=null){
 			Dictionary.singulars.put(word, wordcopy);
-			if(!wordcopy.equals(word)) Dictionary.plurals.put(wordcopy, word);
+			if(wordcopy.compareTo(word)!=0) Dictionary.plurals.put(wordcopy, word); //special cases where sing = pl should be saved in Dictionary
 			if(debug) System.out.println("["+word+"]'s singular is "+wordcopy);
 			return wordcopy;
 		}else{//word not in wn
-		
+
 			Pattern p1 = Pattern.compile("(.*?[^aeiou])ies$");
 			Pattern p2 = Pattern.compile("(.*?)i$");
 			Pattern p3 = Pattern.compile("(.*?)ia$");
@@ -713,7 +719,10 @@ public class TermOutputerUtilities {
 			Pattern p7 = Pattern.compile("(.*?a)e$");
 			Pattern p75 = Pattern.compile("(.*?)us$");
 			Pattern p8 = Pattern.compile("(.*?)s$");
-			//Pattern p9 = Pattern.compile("(.*?[^aeiou])a$");
+			Pattern p9 = Pattern.compile("(.*?)a$");
+			Pattern p10 = Pattern.compile("(.*?ma)ta$"); //stigmata => stigma (20 cases)
+			Pattern p11 = Pattern.compile("(.*?)des$"); //crepides => crepis (4 cases)
+			Pattern p12 = Pattern.compile("(.*?)es$"); // (14 cases)
 			
 			Matcher m1 = p1.matcher(word);
 			Matcher m2 = p2.matcher(word);
@@ -724,41 +733,65 @@ public class TermOutputerUtilities {
 			Matcher m7 = p7.matcher(word);
 			Matcher m75 = p75.matcher(word);
 			Matcher m8 = p8.matcher(word);
-			//Matcher m9 = p9.matcher(word);
+			Matcher m9 = p9.matcher(word);
+			Matcher m10 = p10.matcher(word);
+			Matcher m11 = p10.matcher(word);
+			Matcher m12 = p10.matcher(word);
 			
 			if(m1.matches()){
-			  s = m1.group(1)+"y";
+				s = m1.group(1)+"y";
 			}else if(m2.matches()){
-			  s = m2.group(1)+"us";
+				s = m2.group(1)+"us";
 			}else if(m3.matches()){
-			  s = m3.group(1)+"ium";
+				s = m3.group(1)+"ium";
 			}else if(m4.matches()){
-			  s = m4.group(1);
+				s = m4.group(1);
 			}else if(m5.matches()){
-			  s = m5.group(1)+"f";
+				s = m5.group(1)+"f";
 			}else if(m6.matches()){
-			  s = m6.group(1)+"ex";
+				s = m9.group(1)+"ex";
+				if(!inOntology(s)) s = m9.group(1)+"ix";
+				if(!inOntology(s)) s = null;
 			}else if(m7.matches()){
-			  s = m7.group(1);
+				s = m7.group(1);
 			}else if(m75.matches()){
-			  s = word;
+				s = word;
 			}else if(m8.matches()){
-			  s = m8.group(1);
-			}//else if(m9.matches()){
-			//  s = m9.group(1)+"um";
-			//}
-		  
-		  if(s != null){
-			if(debug) System.out.println("["+word+"]'s singular is "+s);
-			Dictionary.singulars.put(word, s);
-			if(!s.equals(word)) Dictionary.plurals.put(s, word);
-			return s;
-		  }
+				s = m8.group(1);
+			}else if(m9.matches()){
+				s = m9.group(1)+"um";
+				if(!inOntology(s)) s = m9.group(1)+"on";
+				if(!inOntology(s)) s = null;
+			}else if(m10.matches()){
+				s = m10.group(1);
+			}else if(m11.matches()){
+				s = m11.group(1)+"s";
+				if(!inOntology(s)) s = null;
+			}
+			
+			if(s==null & m12.matches()){
+				s = m12.group(1)+"is";
+				if(!inOntology(s)) s = null;
+			}
+
+			if(s != null){
+				if(debug) System.out.println("["+word+"]'s singular is "+s);
+				Dictionary.singulars.put(word, s);
+				if(wordcopy.compareTo(word)!=0) Dictionary.plurals.put(s, word);
+				return s;
+			}
 		}
 		if(debug) System.out.println("["+word+"]'s singular is "+word);
 		return word;
 	}
-	
+
+	private static boolean inOntology(String s) {
+		ArrayList<Hashtable<String, String>> matches = new ArrayList<Hashtable<String, String>> ();
+		TermOutputerUtilities.searchOntologies(s, "entity", matches);
+		if(matches.size()>0) return true; 
+		return false;
+	}
+
 	public static String toPlural(String b) {
 		String p = Dictionary.plurals.get(b); //before CharaParser runs, Dictionary.plurals is almost empty
 		if(p == null){
@@ -783,8 +816,8 @@ public class TermOutputerUtilities {
 		}		
 		return isoffspring;
 	}
-	
-	
+
+
 
 	private boolean isOffSpring(OWLClass cc, OWLClass cp, OWLAccessorImpl api) {
 		List<OWLClass> parents = api.getParents(cc);
