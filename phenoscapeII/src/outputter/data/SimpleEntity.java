@@ -92,7 +92,8 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	 */
 	@Override
 	public String getLabel() {
-		
+		if(this.label==null)
+			return this.string;
 		return this.label;
 	}
 
@@ -177,5 +178,10 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		return this.string;
 	}
 	
-
+    public String getunontologized(){
+    	if(this.getId()==null)
+    		return this.getString()+"#";
+    	return "";
+    }
+    
 }

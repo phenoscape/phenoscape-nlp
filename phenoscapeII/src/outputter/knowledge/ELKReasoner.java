@@ -40,6 +40,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.util.OWLClassExpressionVisitorAdapter;
 
 import outputter.ApplicationUtilities;
+import owlaccessor.OWLAccessorImpl;
 
 
 public class ELKReasoner{
@@ -49,7 +50,8 @@ public class ELKReasoner{
 	private OWLDataFactory dataFactory = man.getOWLDataFactory();
 	private OWLOntology ont;
 	private ElkReasonerFactory reasonerFactory;
-
+	public final static String temp = "TEMP";
+	
 	private final OWLObjectProperty rel = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 	private final OWLClass thing = dataFactory.getOWLClass(IRI.create("http://www.w3.org/2002/07/owl#Thing"));//Thing 
 	private final OWLObjectProperty lateralside = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BSPO_0000126"));//in_lateral_side_of
@@ -179,7 +181,10 @@ public class ELKReasoner{
 		return false;*/
 	}	
 
-	public boolean isEquivalent(String classIRI1, String classIRI2){
+	public boolean isEquivalent(String id1, String id2){
+		
+		String classIRI1 = getIRI(id1);//composes the IRI
+		String classIRI2 = getIRI(id2);//composes the IRI
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		OWLClass class1 = dataFactory.getOWLClass(IRI.create(classIRI1));
@@ -353,9 +358,31 @@ public class ELKReasoner{
 		}
 	}
 
+	public Boolean CheckClassExistence(String id)
+	{
+		String IRI = getIRI(id);
+		 
+		org.semanticweb.owlapi.model.IRI url = org.semanticweb.owlapi.model.IRI.create(IRI);
+		System.out.println(IRI);
+		return ont.containsClassInSignature(url);
+	}
+	
+	public static String getIRI(String id) {
+		if(id.startsWith(OWLAccessorImpl.temp)){
+			return Dictionary.provisionaliri+id.substring(id.indexOf(":")+1);
+		}else{
+			return Dictionary.baseiri+id.replace(':', '_');
+		}
+	}
+	
 	public static void main(String[] argv){
 		try {
 			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), true);
+			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:4200047"));
+			System.out.println("..........class Exists......."+elk.CheckClassExistence("TEMP:4200047"));
+			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:0011584"));
+
+
 			//elk.getClassesWithLateralSides();
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0005621",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//true
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0003098",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//false			
@@ -372,9 +399,9 @@ public class ELKReasoner{
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));	
 			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));
 
-			System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachment site, ischium
-			System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site
-			System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_0004765")); //ischium, skeletal element
+			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachment site, ischium
+			//System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site
+			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_0004765")); //ischium, skeletal element
 
 			/*OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
 			OWLClass joint1 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0002217")); //synovial joint
@@ -383,6 +410,8 @@ public class ELKReasoner{
 			System.out.println(elk.isEquivalentClass(joint, joint1or2));*/
 			
 		    //elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
+			
+	
 			
 			elk.dispose();
 

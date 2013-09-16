@@ -180,7 +180,13 @@ public class CompositeEntity extends Entity {
 		{
 			if(e instanceof SimpleEntity)
 			{
-				label+=e.getLabel()+" and ";
+				if(e.getLabel()!=null)
+				{
+					label+=e.getLabel()+" and ";
+				}else
+				{
+					label+=e.getString()+" and ";
+				}
 			}
 			else if( e instanceof CompositeEntity)
 			{
@@ -188,7 +194,14 @@ public class CompositeEntity extends Entity {
 			}
 			else
 			{
-				label+=((REntity) e).getLabel()+" and ";
+				if(((REntity) e).getLabel()!=null)
+				{
+					label+=((REntity) e).getLabel()+" and ";
+				}
+				else
+				{
+					label+=((REntity) e).getString()+" and ";
+				}
 			}
 				
 		}
@@ -386,6 +399,30 @@ public class CompositeEntity extends Entity {
 	@Override
 	public String getString() {
 		return string;
+	}
+
+	public String getunontologized() {
+
+		String string="";
+		for(Entity e:this.getEntities())
+		{
+			if(e instanceof SimpleEntity)
+			{
+				string+=((SimpleEntity) e).getunontologized();
+			}
+			else if(e instanceof CompositeEntity)
+			{
+				string+=((CompositeEntity) e).getunontologized();
+			}
+			else
+			{
+				string+=((REntity) e).getunontologized();
+			}
+				
+		}
+		
+		string = string.replaceAll("(#)$", "");
+		return string.trim();	
 	}
 
 

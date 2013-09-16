@@ -110,6 +110,32 @@ public class RelationalQuality extends Quality {
 		return id.replaceAll(",$", "");
 	}
 	
+	//created to read the string of th relationalquality proposals
+	
+	public String getFullString()
+	{
+		String qstring="";
+		for(Quality q:this.relationalquality.getProposals())
+		{
+			if((q instanceof CompositeQuality))
+			{
+				qstring+=((CompositeQuality)q).getFullString()+",";
+			}else if((q instanceof NegatedQuality))
+			{
+				qstring+=((NegatedQuality)q).getFullString()+",";
+			}else if(q instanceof RelationalQuality)
+			{
+				qstring+=((RelationalQuality)q).getFullString()+",";
+			}
+			else
+			{
+				qstring+=q.getString();
+			}
+			
+		}
+		return qstring.replaceAll(",$", "");
+	}
+	
 	public String getIRI()
 	{
 		String iri="";
@@ -152,7 +178,7 @@ public class RelationalQuality extends Quality {
 			}
 			else
 			{
-				label+=q.getLabel();
+				label+=q.getLabel()+",";
 			}
 			
 		}
@@ -175,6 +201,30 @@ public class RelationalQuality extends Quality {
 			score*=e.getConfidienceScore();
 		}*///Not needed as per discussion with Hong
 		return score;
+	}
+	
+	public String getUnOntologized() {
+		
+		String unontologizedstring="";
+		for(Quality q:this.relationalquality.getProposals())
+		{
+			if((q instanceof CompositeQuality))
+			{
+				unontologizedstring+=((CompositeQuality)q).getUnOntologized();
+			}else if((q instanceof NegatedQuality))
+			{
+				unontologizedstring+=((NegatedQuality)q).getUnOntologized();
+			}else if(q instanceof RelationalQuality)
+			{
+				unontologizedstring+=q.getUnOntologized();
+			}
+			else
+			{
+				unontologizedstring+=q.getUnOntologized();
+			}
+			
+		}
+		return unontologizedstring;
 	}
 	
 	/**

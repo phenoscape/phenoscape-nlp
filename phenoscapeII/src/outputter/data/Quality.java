@@ -106,7 +106,10 @@ public class Quality implements FormalConcept {
 	@Override
 	public String getLabel() {
 		
+		if(this.label!=null)
 		return this.label;
+		else
+		return this.string;
 	}
 
 	/* (non-Javadoc)
@@ -140,9 +143,39 @@ public class Quality implements FormalConcept {
 
 	@Override
 	public boolean isOntologized() {
+		
+		if(this instanceof RelationalQuality)
+		{
+			return ((RelationalQuality)this).getId() != null;
+		}else if(this instanceof NegatedQuality)
+		{
+			return ((NegatedQuality) this).getFullId() != null;
+		}else if(this instanceof CompositeQuality)
+		{
+			return ((CompositeQuality)this).getFullId() != null;
+		}
+		
 		return this.id != null;
 	}
-	
+	//returns the unontologized strings
+	public String getUnOntologized()
+	{
+		
+		if(this instanceof RelationalQuality)
+		{
+			return((RelationalQuality)this).getUnOntologized();
+		} else if(this instanceof NegatedQuality)
+		{
+			return ((NegatedQuality) this).getUnOntologized();
+		} else if (this instanceof CompositeQuality)
+		{
+			return ((CompositeQuality)this).getUnOntologized();
+		} 
+		if(this.getId()==null)	
+		return this.getString()+"#";
+		else
+		return "";
+	}
 	public String toString(){
 		return "phrase="+this.string+" quality="+this.label+ " score="+this.confidenceScore;
 	}

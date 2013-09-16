@@ -107,6 +107,20 @@ public class CompositeQuality extends Quality {
 		return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+this.relatedentity.toString()+")";
 	}
 
+	public String getUnOntologized()
+	{
+		String unontologized ="";
+		if(this.mainquality.getId()==null)
+		{
+			unontologized = this.mainquality.getUnOntologized()+"#";
+		}
+		if(this.comparedquality.getId()==null)
+		{
+			unontologized+=this.comparedquality.getUnOntologized()+"#";
+		}
+		
+		return unontologized;
+	}
 	public String content(){
 		
 		return this.mainquality.content()+"^"+this.restrictedrelation+"("+this.comparedquality.content()+this.relatedentity.content()+")";

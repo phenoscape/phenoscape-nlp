@@ -26,10 +26,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import outputter.ApplicationUtilities;
+import outputter.knowledge.Dictionary;
 import outputter.knowledge.ELKReasoner;
+import owlaccessor.OWLAccessorImpl;
 
 
 
@@ -55,6 +58,12 @@ public class EQPerformanceEvaluation {
 	private ArrayList<ArrayList<Hashtable<String,String>>> tstates;
 	private Hashtable<String,Hashtable<String,Float>> substringcache;
 	private Hashtable<String,Hashtable<String,String>> equivalencecache;
+	private Hashtable<String,String> existscache = new Hashtable<String,String>();// holds whether a id exists in ontology
+	private Hashtable<String,Hashtable<String,Hashtable<String,String>>> Fieldgsnotontology = new Hashtable<String,Hashtable<String,Hashtable<String,String>>>(); // Stores fieldid<stateid,<original string,modified string>>
+
+	static String relation ="inheres_in|adjacent_to|distal_to|OBO_REL_part_of|part of|inheres in|adjacent to|distal to|PHENOSCAPE_complement_of|complement of|and|some";
+	static String relationid = relation+ "BFO_0000050|BFO_0000052|BFO_0000053";
+	
 
 	private ArrayList<String> states = new ArrayList<String>(); 
 	private ELKReasoner elkentity,elkquality,elkspatial;
@@ -137,6 +146,9 @@ public class EQPerformanceEvaluation {
 		this.fields.add("qualityid");
 		this.fields.add("relatedentitylabel");
 		this.fields.add("relatedentityid");
+		/*this.fields.add("entity");
+		this.fields.add("quality");
+		this.fields.add("relatedentity");*/
 	}
 
 	/**
@@ -181,6 +193,8 @@ public class EQPerformanceEvaluation {
 			//long stopTime4 = System.currentTimeMillis();
 			//System.out.println("time spent on comare EQs was " + (stopTime4 - stopTime3)/60000f + " minutes.");
 			LOGGER.debug(System.currentTimeMillis());
+			
+			compareNonOntologizedGS();
 
 		}catch(Exception e){
 			LOGGER.error("", e);
@@ -231,6 +245,204 @@ public class EQPerformanceEvaluation {
 		//System.out.println("time spent on disposing elks was " + (stopTime - startTime)/60000f + " minutes.");
 		
 
+	}
+
+	private void compareNonOntologizedGS() throws SQLException {
+		
+		
+		//get the set of stateid's
+		//fetch from gold standard and store stateid and gslabel
+		  //capture the index differences of the original label id and nullified ones
+		  //get the corresponding label and extract the matching labels.store them # separated
+		//fetch from charparser output and store stateid and charparser string
+		    //using stateid get the string and unontologized entity string 
+		    //if unontologized string is present then use it, else parse through the string and extract the entities separately
+		           //   separate proposals by @, compare the eq with each one of the GS and arrive at mazimum score
+		
+		
+		Set<String> fields = Fieldgsnotontology.keySet();
+		Hashtable<String,Hashtable<String,String>> field_states = new Hashtable<String,Hashtable<String,String>>();
+		Hashtable<String,String>  gsstates;
+		Hashtable<String,String>  cpstates;
+		Hashtable<String,Float> count = new Hashtable<String,Float>();
+		
+		for(String field:fields)
+		{
+			  gsstates = new Hashtable<String,String>();
+			  cpstates = new Hashtable<String,String>();
+			  getNonOntologizedvaluefromdb(field,Fieldgsnotontology.get(field),gsstates,cpstates,count);
+			  compareNonOntologized(field,gsstates,cpstates,count);
+		}
+		
+		for(String field:fields)
+		{
+			System.out.println(count.get("gs"+field));
+			System.out.println(count.get("cp"+field));
+			System.out.println(count.get("gsmatched"+field));
+
+		}
+
+	}
+
+	private void compareNonOntologized(String field,Hashtable<String, String> gsstates,
+			Hashtable<String, String> cpstates, Hashtable<String,Float> count) {
+
+		float match_score =0;//contains the total matched score
+		Set<String> stateids = gsstates.keySet();//Fetches the states of all the objects
+		//ArrayList<String> gsEQs = new ArrayList<String>();
+		
+		for(String stateid:stateids)// Each of he state id's
+		{
+			String gsstrings = gsstates.get(stateid);
+			String[] gsEQs = gsstrings.split("<>");//Each individual GS array
+			
+			String cpstrings = cpstates.get(stateid);
+			String[] cpEQs = cpstrings.split("<>");//Each individual EQ array
+			Hashtable<String,Float> gseq_matchedscore = new Hashtable<String,Float>();//contains the matched score of all the EQ's of this state
+			//prepopulate  0 in the counts
+/*			for(String gsEQ:gsEQs)
+			{
+				gseq_matchedscore.put(gsEQ, 0.0f);// This will fail, if the GSEQ term is same all over
+			}*/
+			String matched_gs_final ="";
+			for( String cpEQ: cpEQs) // each of charparser EQ's
+			{
+				float max_score_gs_cp_eq =0;//contains maximum score of a GS that best matches this CP
+				String matched_gs ="";
+				for(String gsEQ:gsEQs) // Each of the GS eq's - here we are comparing all GS against a single CP EQ
+				{
+					if(matched_gs_final.contains(gsEQ)==false)
+					{
+					String[] cpEQPs = cpEQ.split("@,");//Each charparser proposals
+					float max_score_gs =0;
+					String GS_CP_final_match ="";
+					for(String cpEQP:cpEQPs)//Each of the charparser proposals
+					{
+						String[] cpindividuallabels = cpEQP.split("#");//each individual objects/entities in each of the proposal
+						String[] gsindividuallabels = gsEQ.split("#");// each of the GS individual objects
+						String pairedCP ="";
+						float final_maxscore =0;
+							for(String gsindividal:gsindividuallabels)// each individual GS objects
+							{
+								float score =0,maxscore=0;;
+								String matchcp ="";//holds the perfect match for this individual gs entity
+								for(String cpeachentities:cpindividuallabels)// each individual cp objects
+								{
+									score=getLabelMatchScore(cpeachentities,gsindividal,field);//returns string to label matching
+									if((maxscore<score)&&(pairedCP.contains(cpeachentities)==false))//need to check contains********
+									{
+									maxscore = score;									
+									matchcp=cpeachentities;
+									}
+								}
+								pairedCP+=matchcp+" ";
+								final_maxscore+=maxscore;// contains the maximum score of this GS with this CP proposal
+							}
+							final_maxscore /=gsindividuallabels.length;//it will give a score in the range of 0 to 1 -( maximum score of this GS with this proposal)
+							if(max_score_gs<final_maxscore)
+							{								
+								max_score_gs = final_maxscore;//stores the final maxscore of this GSeq with this cp
+							}					
+					}
+					if(max_score_gs_cp_eq<max_score_gs)
+					{
+						max_score_gs_cp_eq=max_score_gs;
+						matched_gs = gsEQ;// contains the best matching GS(of all) for this cp EQ
+					}
+				}
+				}
+				matched_gs_final+=matched_gs+" ";////contains the best EQproposal for this GS
+				gseq_matchedscore.put(matched_gs, max_score_gs_cp_eq);//store the maximum score of this GS with this CP				
+			    match_score +=max_score_gs_cp_eq;
+			}
+			
+			
+		}
+		
+		count.put("gsmatched"+field, match_score);
+		
+	}
+
+	private void getNonOntologizedvaluefromdb(String field, Hashtable<String, Hashtable<String, String>> gsnotontology, Hashtable<String, String> gsstates, Hashtable<String, String> cpstates, Hashtable<String, Float> count) throws SQLException {
+		
+		Statement stmt = conn.createStatement();
+
+		String rootfield = field.replace("id", "");
+		String sql;
+		ResultSet rs;
+		Set<String> stateids = gsnotontology.keySet();//this returns the stateid's
+		float countgseq=0,countcpeq=0;//counts the total number of EQ's i charparser and Gold standard seprately
+		
+		for(String stateid:stateids)
+		{
+			//fetching from GS first
+			Hashtable<String,String> eqs = gsnotontology.get(stateid);//this returns the original id string, ontology nullified strings
+			Set<String> eqkeys = eqs.keySet();//this returns each of eq's original id's
+			String multipleeqs ="";
+			for(String eqkey:eqkeys)//this fetches the original label of each of the original id's
+			{
+				
+				Hashtable<String,Integer> nonexist = nonexistentid(eqkey,eqs.get(eqkey));//returns the difference label between original copy and nullified copy along with the index
+				sql = "select "+rootfield+"label from "+this.answertable+" where stateid = '"+stateid+"' and "+rootfield+"id = '"+eqkey+"'";
+				rs = stmt.executeQuery(sql);
+				String unontologized_label ="";
+				if(rs.next())
+				{
+					String label= rs.getString(rootfield+"label");
+					Set<String> ids = nonexist.keySet();
+
+					for(String id:ids)//if multiple temp ids are prsent, their labels are retrieved and stored as "#" separated value
+					{
+						unontologized_label+=extractLabel(unontologized_label, nonexist.get(id))+"#";
+					}
+					
+					unontologized_label= unontologized_label.replaceAll("(#)$", "");
+				}
+				multipleeqs +=unontologized_label+"<>";//<> is the delimiter
+				countgseq++;//counts the number of EQ's in Gold standard
+			}
+			multipleeqs = multipleeqs.replaceAll("(<>)$", "");
+			gsstates.put(stateid, multipleeqs); //Stores stateid,eq's(separated by <>)
+			
+			//fetching charparser information
+			
+				sql = "select "+rootfield+"id, "+rootfield+"label, unontologized"+ rootfield+" from "+this.testtable+" where stateid = '"+stateid+"'";
+				rs = stmt.executeQuery(sql);
+				String final_string="";
+				while(rs.next())
+				{
+					String label = rs.getString(rootfield+"label");
+					String unontologized = rs.getString("unontologized"+rootfield);
+					String rootfieldid = rs.getString(rootfield+"id");
+					
+					if(unontologized.equals("")==false)
+					{
+						final_string += unontologized +"<>";
+					} else
+					{
+						String[] ids = extractids(rootfieldid);
+						ids = clean(ids);
+						String[] labels = label.split("@,");
+						for(String ilabel:labels)
+						{
+						for(int i=0;i<ids.length;i++)
+						{
+							final_string +=extractLabel(label, i)+"#";
+						}
+						final_string +="@,";
+						}
+						final_string.replaceAll("(@,)$", "");
+						final_string +="<>";
+					}
+					countcpeq++;//counts the number of EQ's in this state generated by charparser
+				}
+				final_string.replaceAll("(<>)$", "");
+				cpstates.put(stateid, final_string);// contains charaparser's stateid, final_string which is made of terms inside an id separated by # and each EP separated by @,and EQ separated by <>
+		}
+
+		count.put("gs"+field,countgseq);
+		count.put("cp"+field, countcpeq);
+			
 	}
 
 	private void readResultsfromDatabase() throws SQLException {
@@ -302,22 +514,54 @@ public class EQPerformanceEvaluation {
 		//collecting matched field by field
 		for(String field : this.fields){
 			//long startTime = System.currentTimeMillis();
+			if(field.matches("entity|relatedentity|quality"))
+				continue;
+			
 			float wcount = 0;
 			float tcount = 0;
 			float acount = 0;
 			float tempcount =0;
+			Hashtable<String,Hashtable<String,String>> GSnotontology = new Hashtable<String,Hashtable<String,String>>(); // Stores stateid,<original string,modified string>
+
 			LOGGER.debug("Field========"+field);
 			for(int i = 0; i < astates.size(); i++){
 				LOGGER.debug("state==="+i);
 				ArrayList<String> avalues = new ArrayList<String>();
 				//There is no guarantee that each entity is mapped to same quality of the corresponding gold standard
 				LOGGER.debug("Gold standard total EQ"+astates.get(i).size());
+				
 				for(Hashtable<String, String> EQ :astates.get(i)){//gold standard
 					String v = EQ.get(field).toLowerCase();
+					String stateid = EQ.get("stateid");
 					if(v!=null && v.length()>0){
 						String[] vs = v.split("\\s*,\\s*");// handling multiple values in each statement(field level) => multiple EQ's for gold standard
+						String copy ="";
 						for(String v1 : vs){
-							if(v1.length()>0) avalues.add(v1);// collects the field values from all the EQ's
+							if(v1.length()>0) 
+								{
+								if(field.contains("id")==true)
+								{
+									copy=v1;
+									v1 = checkInOntology(v1,field);//nullifies the term, if it is not present in ontology
+									if(v1.equals(copy)==false)
+									{
+										Hashtable<String,String> temp = new Hashtable<String,String>();
+										if(GSnotontology.get(stateid)!=null)
+										{
+											GSnotontology.get(stateid).put(copy,v1);//stores the copy of the nullified term along with the original string, stateid's
+										} else
+										{
+											temp.put(copy,v1);
+											GSnotontology.put(stateid,temp);
+										}
+									}
+									avalues.add(v1);// collects the field values from all the EQ's
+								}else
+								{
+									avalues.add(v1);
+								}
+								
+								}
 						}
 					}
 				}	
@@ -426,7 +670,10 @@ public class EQPerformanceEvaluation {
 			}
 			//long stopTime = System.currentTimeMillis();
 			//System.out.println("time spent on comparing "+field+" was " + (stopTime - startTime)/60000f + " minutes.");
-
+			if(field.contains("id")==true)
+			{
+				Fieldgsnotontology.put(field, GSnotontology);
+			}
 		}
 
 		//calculate and output P/R measurements
@@ -447,6 +694,77 @@ public class EQPerformanceEvaluation {
 		insertInto(this.prtablefields, fieldstring, prstring);
 		LOGGER.debug("End of compare fields");
 	}
+	
+	//If the id doesn't exists, it nullifies the id and return the string
+private String checkInOntology(String value, String field) {
+	value = value.toUpperCase().trim();
+	if(existscache.get(value)!=null)
+		return existscache.get(value);
+	
+	String[] ids = extractids(value);
+	String valuecopy = value;
+	Boolean exist=false;
+
+	for(String id:ids)
+	{
+		exist=false;
+		id=id.trim();
+		ELKReasoner tempelk=null;
+	if(field.contains("entity"))
+	{
+		if(id.contains("BSPO"))
+		{
+			tempelk = this.elkspatial;
+		} else
+		{
+			tempelk = this.elkentity;
+		}
+			exist=tempelk.CheckClassExistence(id);
+	} else if(field.contains("quality"))
+	{
+		tempelk = this.elkquality;
+		exist=tempelk.CheckClassExistence(id);
+	}	
+	if(exist == false)
+	{
+		value=value.replaceFirst(id, "null");
+	}
+	}
+	existscache.put(valuecopy, value);
+	
+	return value.toLowerCase();
+	}
+
+private static String[] extractids(String value) {
+	value=value.replaceAll("(\\(|\\))", "");
+	String[] temp = value.split("\\s");
+	String id ="";
+	for(String t:temp)
+	{
+	if(t.matches("[A-Z]+[_:][0-9]+")==true)
+	{
+		id+=t+" ";
+	}
+	}
+	id=id.trim();
+	return id.split(" ");
+	}
+
+/*	private boolean checkInOntology(String id) {
+		
+		String iri="";
+		if(id.startsWith(OWLAccessorImpl.temp)){
+			iri=Dictionary.provisionaliri+id.substring(id.indexOf(":")+1);
+		}else{
+			iri=Dictionary.baseiri+id.replace(':', '_');
+		}
+		
+		if(allclasses.contains(iri.trim()))		
+		return true;
+		else
+		return false;
+	}
+*/
 /*
  * 
  * Calculates penalty for ID and label(proposals)
@@ -864,6 +1182,7 @@ public class EQPerformanceEvaluation {
 				for(int j=0;j<reference.split(" ").length;j++)
 				{
 					float score =0;
+					//add code to ignore provisionalid's
 					if(c[i].equals(r[j]))
 					{
 						score=1;
@@ -871,6 +1190,9 @@ public class EQPerformanceEvaluation {
 					{
 						score=(float) 0.75;
 					} else if((c[i].matches(".*(pato|PATO).*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
+					{
+						score=(float) 0.75;
+					} else if(elk.isEquivalent(c[i], r[j]) == true)
 					{
 						score=(float) 0.75;
 					}
@@ -1561,7 +1883,60 @@ public class EQPerformanceEvaluation {
 
 	}
 
+	private static Hashtable<String, Integer> nonexistentid(String original, String modified) {
 
+		String originals[] = extractids(original);
+		String modifieds[] = extractids(modified);
+		originals = clean(originals);
+		modifieds = clean(modifieds);
+		
+		Hashtable<String,Integer> nonexists = new Hashtable<String,Integer>();
+		
+		for(int j=0;j<originals.length;j++)
+		{
+			int i=0;
+			for(i=0;i<modifieds.length;i++)
+			{
+				if(originals[j].equals(modifieds[i])==true)
+				{
+					modifieds[i]="";
+					break;		
+				}
+			}
+			if(i==modifieds.length)
+			{
+				nonexists.put(originals[j], j);
+			}
+		}
+		return nonexists;
+	}
+	
+	private static String[] clean(String[] idarray) {
+
+		String id ="";
+		for(String t:idarray)
+		{
+		if(t.matches("[A-Z]+[_:][0-9]+")==true)
+		{
+			if(t.matches("("+relationid+")")==false)
+			id+=t+" ";
+		}
+		}
+		id=id.trim();
+		return id.split(" ");
+	
+	}
+
+	private static String extractLabel(String label,int index)
+	{
+		String temp = "length and (inheres in some humerus) and (inheres in some ulna)";
+		temp= temp.replaceAll(relation, "");
+		temp= temp.replaceAll("(\\(|\\))", "");
+		temp = temp.replaceAll("(\\s)+", " ");
+		System.out.println(temp.split("\\s")[index]);
+		return "";
+		
+	}
 	/**
 	 * @param args
 	 */

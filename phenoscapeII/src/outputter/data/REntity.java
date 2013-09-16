@@ -103,11 +103,27 @@ public class REntity extends Entity{
 
 	@Override
 	public String getLabel() {
+		String label="";
 
+		if(entity instanceof SimpleEntity)
+		{
+			if(entity.getLabel()!=null)
+			{
+				label+=entity.getLabel();
+			}else
+			{
+				label+=entity.getString();
+			}
+		}
+		else if( entity instanceof CompositeEntity)
+		{
+			label+=((CompositeEntity) entity).getLabel();
+		}
+		
 		if(entity instanceof CompositeEntity)
-		return "("+this.relation.getLabel()+" some ("+entity.getLabel()+")"+")";
+		return "("+this.relation.getLabel()+" some ("+label+")"+")";
 		else
-		return "("+this.relation.getLabel()+" some "+entity.getLabel()+""+")";
+		return "("+this.relation.getLabel()+" some "+label+""+")";
 	}
 
 	@Override
@@ -163,8 +179,34 @@ public class REntity extends Entity{
 	@Override
 	public String getString() {
 		// TODO Auto-generated method stub
-		return null;
+		Entity e = this.entity;
+		if(e instanceof CompositeEntity)
+		{
+		return ("("+this.relation.getLabel()+" some "+((CompositeEntity) e).getFullString()+")");
+		} else if (e instanceof REntity)
+		{
+		return ("("+this.relation.getLabel()+" some "+((REntity) e).getString()+")");
+		}
+		return ("("+this.relation.getLabel()+" some "+e.getString()+")");
 	}
 	
+    public String getunontologized(){
+    	
+    	Entity e = this.entity;
+		if(e instanceof CompositeEntity)
+		{
+		return ((CompositeEntity) e).getunontologized();
+		} else if (e instanceof REntity)
+		{
+		return ((REntity)e).getunontologized();
+		} else if( e instanceof SimpleEntity)
+		{
+		return ((SimpleEntity)e).getunontologized();
+		}
+			
+		return "";
+    	
+    }
+
 
 }

@@ -30,6 +30,7 @@ import outputter.data.FormalConcept;
 import outputter.data.NegatedQuality;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
+import outputter.data.REntity;
 import outputter.data.RelationalQuality;
 import outputter.data.SimpleEntity;
 import outputter.evaluation.EQPerformanceEvaluation;
@@ -160,7 +161,7 @@ public class XML2EQ {
 			//		+ " entity varchar(3000),entitylabel varchar(3000), entityid varchar(3000), " + "quality varchar(3000),qualitylabel varchar(3000), qualityid varchar(3000),"+"relatedentity varchar(3000),relatedentitylabel varchar(3000), relatedentityid varchar(3000))" );
 			stmt.execute("create table if not exists " + outputtable
 					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
-					+ " entity text,entitylabel text, entityid text, " + "quality text,qualitylabel text, qualityid text,"+"relatedentity text,relatedentitylabel text, relatedentityid text)" );
+					+ " entity text,entitylabel text, entityid text, " + "quality text,qualitylabel text, qualityid text,"+"relatedentity text,relatedentitylabel text, relatedentityid text, unontologizedentity text,unontologizedquality text,unontologizedrelatedentity text)" );
 
 		}
 		pathStructure = XPath.newInstance(".//structure");
@@ -348,73 +349,153 @@ public class XML2EQ {
 		String relatedentity ="";
 		String relatedentitylabel="";
 		String relatedentityid="";
+		String tempstring ="",tempid="",tempunontologized="",tempqualityunontologized=""; 
+		String unontologizedentity ="";
+		String unontologizedquality ="";
+		String unontologizedrelatedentity="";		
+		
 		//Read all Entity Proposals and store as comma separated values
 		for(Entity e: eQ.getEntity().getProposals())
 		{
 			entitylabel+=e.getLabel()+" Score:["+e.getConfidenceScore()+"]@,";
 			if(e instanceof CompositeEntity)
 			{
-				entity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
-				entityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
+				tempstring=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
+				tempid=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
+				tempunontologized = ((CompositeEntity) e).getunontologized().replaceAll("(#)$", "");
 			}
 			else
 			{
-				entity+=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
-				entityid+=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
+				tempstring=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
+				tempid=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
+			   if(e instanceof REntity)
+			   {
+				   tempunontologized = ((REntity) e).getunontologized().replaceAll("(#)$", "");
+			   } else
+			   {
+				   tempunontologized = ((SimpleEntity) e).getunontologized().replaceAll("(#)$", "");
+			   }
 			}
+			
+			entity+=tempstring;
+			entityid+=tempid;
+			if(tempunontologized.equals("") == false)
+			{
+				unontologizedentity += tempunontologized+"@,";
+			}
+			
 		}
 
 		entity = entity.replaceAll("(@,)$", "");
 		entitylabel = entitylabel.replaceAll("(@,)$", "");
 		entityid = entityid.replaceAll("(@,)$", "");
-		entity =sort(entity);
+		unontologizedentity = unontologizedentity.replaceAll("(@,)$", "");
+		entity =sort(entity);//sort according to scores
 		entitylabel =sort(entitylabel);
 		entityid =sort(entityid);
-
+		tempstring="";
+		tempid="";
+		tempunontologized="";
 		//Read all Quality Proposals and store as comma separated values
 		for(Quality q:eQ.getQuality().getProposals())
 		{
+			tempqualityunontologized="";
+			
 			if(q instanceof RelationalQuality)
 			{
-				System.out.println();
-				quality+=q.getString()+" Score:["+q.getConfidenceScore()+"]@,";
+				quality+=((RelationalQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
 				qualityid+=q.getId()+" Score:["+q.getConfidenceScore()+"]@,";
-				qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				tempqualityunontologized =((RelationalQuality)q).getUnOntologized().replaceAll("(#)$", "");
+				if(q.isOntologized()==true)
+				{
+					qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				} else
+				{
+					qualitylabel+=((RelationalQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
+				}
+				
 				//Reading all related entities and store as comma separated values
+				tempstring="";
+				tempid="";
+				tempunontologized="";
+				
 				for(Entity e:((RelationalQuality) q).getRelatedEntity().getProposals())
 				{
 					relatedentitylabel+=e.getLabel()+" Score:["+e.getConfidenceScore()+"]@,";
 					if(e instanceof CompositeEntity)
 					{
-						relatedentity+=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
-						relatedentityid+=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
+						tempstring=((CompositeEntity) e).getFullString()+" Score:["+e.getConfidenceScore()+"]@,";
+						tempid=((CompositeEntity) e).getFullID()+" Score:["+e.getConfidenceScore()+"]@,";
+						tempunontologized = ((CompositeEntity) e).getunontologized().replaceAll("(#)$", "");
 					}
 					else
 					{
-						relatedentity+=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
-						relatedentityid+=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
+						tempstring=e.getString()+" Score:["+e.getConfidenceScore()+"]@,";
+						tempid=e.getId()+" Score:["+e.getConfidenceScore()+"]@,";
+						if(e instanceof REntity)
+						 {
+							tempunontologized = ((REntity) e).getunontologized().replaceAll("(#)$", "");
+						 } else
+						 {
+							 tempunontologized = ((SimpleEntity) e).getunontologized().replaceAll("(#)$", "");
+						 }
 					}
+					
+					relatedentity+=tempstring;
+					relatedentityid+=tempid;
+					if(tempunontologized.equals("")==false)
+					{
+						unontologizedrelatedentity+=tempunontologized+"@,";
+					}
+
 				}
 			}
 			else if((q instanceof CompositeQuality))
 			{
 				quality+=((CompositeQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
-				qualityid+=((CompositeQuality)q).getId()+" Score:["+q.getConfidenceScore()+"]@,";
-				qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				qualityid+=((CompositeQuality)q).getFullId()+" Score:["+q.getConfidenceScore()+"]@,";
+				tempqualityunontologized =((CompositeQuality)q).getUnOntologized().replaceAll("(#)$", "");
+				if(q.isOntologized()==true)
+				{
+					qualitylabel+=((CompositeQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				}else
+				{
+					qualitylabel+=((CompositeQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
+				}
 
 			}
 			else if((q instanceof NegatedQuality))
 			{
 				quality+=((NegatedQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
 				qualityid+=((NegatedQuality)q).getFullId()+" Score:["+q.getConfidenceScore()+"]@,";
-				qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				tempqualityunontologized=((NegatedQuality)q).getUnOntologized().replaceAll("(#)$", "");
+				if(((NegatedQuality)q).isOntologized()==true)
+				{
+					qualitylabel+=((NegatedQuality)q).getFullLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				} else
+				{
+					qualitylabel+=((NegatedQuality)q).getFullString()+" Score:["+q.getConfidenceScore()+"]@,";
+				}
 			}
 			else
 			{
 				quality+=q.getString()+" Score:["+q.getConfidenceScore()+"]@,";
 				qualityid+=q.getId()+" Score:["+q.getConfidenceScore()+"]@,";
-				qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				tempqualityunontologized=q.getUnOntologized().replaceAll("(#)$", "");
+				if(q.isOntologized()==true)
+				{
+					qualitylabel+=q.getLabel()+" Score:["+q.getConfidenceScore()+"]@,";
+				}else
+				{
+					qualitylabel+=q.getString()+" Score:["+q.getConfidenceScore()+"]@,";
+				}
+				
 			}
+			if(tempqualityunontologized.equals("")==false)
+			{
+				unontologizedquality += tempqualityunontologized + "@,";
+			}
+
 		}
 
 		relatedentity = relatedentity.replaceAll("(@,)$", "");
@@ -423,6 +504,9 @@ public class XML2EQ {
 		quality = quality.replaceAll("(@,)$", "");
 		qualitylabel = qualitylabel.replaceAll("(@,)$", "");
 		qualityid = qualityid.replaceAll("(@,)$", "");
+		unontologizedquality = unontologizedquality.replaceAll("(@,)$", "");
+		unontologizedrelatedentity = unontologizedrelatedentity.replaceAll("(@,)$", "");
+
 
 		quality = sort(quality);
 		qualitylabel = sort(qualitylabel);
@@ -434,8 +518,8 @@ public class XML2EQ {
 
 
 		String sql = "insert into "+this.outputtable +" (source,characterID,characterlabel,stateID,statelabel, entity,"+
-					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid) values"+
-					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+					 "entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid,unontologizedentity,unontologizedquality,unontologizedrelatedentity) values"+
+					 "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		try {
 			PreparedStatement preparedStatement = dictionary.conn.prepareStatement(sql);
 			preparedStatement.setString(1, eQ.getSourceFile());
@@ -452,6 +536,10 @@ public class XML2EQ {
 			preparedStatement.setString(12,relatedentity);
 			preparedStatement.setString(13,relatedentitylabel);
 			preparedStatement.setString(14,relatedentityid);
+			preparedStatement.setString(15, unontologizedentity);
+			preparedStatement.setString(16, unontologizedquality);
+			preparedStatement.setString(17, unontologizedrelatedentity);
+			
 			preparedStatement.executeUpdate();
 
 		} catch (SQLException e1) {
@@ -460,6 +548,8 @@ public class XML2EQ {
 
 
 	}
+
+
 
 	private String sort(String groups) 
 	{
@@ -1516,7 +1606,7 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");

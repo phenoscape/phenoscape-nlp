@@ -68,7 +68,14 @@ public class NegatedQuality extends Quality {
 	
 	public String getFullLabel()
 	{
-		return this.parentQuality.getLabel()+" and ("+negation.getLabel()+" some "+this.label+")";
+		String parentlabel=this.parentQuality.getString(),neglabel=this.getFullString();
+		
+		if(this.parentQuality.getLabel()!=null)
+			parentlabel=this.parentQuality.getLabel();
+		if(this.label!=null)
+			neglabel=this.label;
+		
+		return parentlabel+" and ("+negation.getLabel()+" some "+neglabel+")";
 	}
 	
 	public String getFullId()
@@ -84,11 +91,20 @@ public class NegatedQuality extends Quality {
 	{
 		return this.parentQuality.getLabel()+" and ("+negation.getLabel()+" some "+this.label+")";
 	}
+	
 	/**
 	 * not waisted => shape and complement_of some waisted
 	 */
 	public String toString(){
 		return "phrase="+this.string+" quality="+parentQuality.getLabel()+" and "+negation.toString()+ " some "+ this.label+" score="+this.confidenceScore;
+	}
+	
+	// Returns unontologized string
+	public String getUnOntologized()
+	{
+		if(parentQuality.getId()==null)
+			return parentQuality.getUnOntologized();
+		return "";
 	}
 	/**
 	 * @param args
