@@ -364,7 +364,7 @@ public class ELKReasoner{
 		 
 		org.semanticweb.owlapi.model.IRI url = org.semanticweb.owlapi.model.IRI.create(IRI);
 		System.out.println(IRI);
-		return ont.containsClassInSignature(url);
+		return ont.containsEntityInSignature(url,true);
 	}
 	
 	public static String getIRI(String id) {

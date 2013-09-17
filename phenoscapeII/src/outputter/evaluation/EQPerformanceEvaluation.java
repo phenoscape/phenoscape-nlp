@@ -61,8 +61,8 @@ public class EQPerformanceEvaluation {
 	private Hashtable<String,String> existscache = new Hashtable<String,String>();// holds whether a id exists in ontology
 	private Hashtable<String,Hashtable<String,Hashtable<String,String>>> Fieldgsnotontology = new Hashtable<String,Hashtable<String,Hashtable<String,String>>>(); // Stores fieldid<stateid,<original string,modified string>>
 
-	static String relation ="inheres_in|adjacent_to|distal_to|OBO_REL_part_of|part of|inheres in|adjacent to|distal to|PHENOSCAPE_complement_of|complement of|and|some";
-	static String relationid = relation+ "BFO_0000050|BFO_0000052|BFO_0000053";
+	static String relation ="inheres_in|adjacent_to|distal_to|OBO_REL_part_of|part of|inheres in|adjacent to|distal to|PHENOSCAPE_complement_of|complement of|and|some|bearer_of|anterior_to|anteriorly_connected_to|attaches_to|extends_from|connected_to|decreased_in_magnitude_relative_to|deep_to|develops_from|distal_to|distally_connected_to|dorsal_to|encloses|extends_to|has_cross_section|has_muscle_insertion|has_muscle_origin|has_part|in_anterior_side_of|in_distal_side_of|in_lateral_side_of|in_left_side_of|in_median_plane_of|in_posterior_side_of|in_proximal_side_of|in_right_side_of|increased_in_magnitude_relative_to|located_in|overlaps|part_of|passes_through|posterior_to|posteriorly_connected_to|proximal_to|proximally connected to|similar_in_magnitude_relative_to|surrounded by|surrounds|ventral_to|vicinity_of|serves_as_attachment_site_for|inheres_in|not";
+	static String relationid = relation+ "|BFO_0000050|BFO_0000052|BFO_0000053|BFO:0000053|RO:0002220|BSPO:0000096|UBERON:anteriorly_connected_to|UBERON:attaches_to|PHENOSCAPE:extends_from|RO:0002150|PATO:decreased_in_magnitude_relative_to|BSPO:0000107|RO:0002202|BSPO:0000097|UBERON:distally_connected_to|BSPO:0000098|UBERON:encloses|PHENOSCAPE:extends_to|PATO:has_cross_section|UBERON:has_muscle_insertion|UBERON:has_muscle_origin|BFO:0000051|BSPO:0000123|BSPO:0000125|UBERON:in_lateral_side_of|BSPO:0000120|UBERON:in_median_plane_of|BSPO:0000122|BSPO:0000124|BSPO:0000121|PATO:increased_in_magnitude_relative_to|OBO_REL:located_in|RO:0002131|BFO:0000050|BSPO:passes_through|BSPO:0000099|UBERON:posteriorly_connected_to|BSPO:0000100|UBERON:proximally_connected_to|PATO:similar_in_magnitude_relative_to|RO:0002219|RO:0002221|BSPO:0000102|BSPO:0000103|PHENOSCAPE:serves_as_attachment_site_for|PHENOSCAPE:complement_of";
 	
 
 	private ArrayList<String> states = new ArrayList<String>(); 
@@ -194,7 +194,7 @@ public class EQPerformanceEvaluation {
 			//System.out.println("time spent on comare EQs was " + (stopTime4 - stopTime3)/60000f + " minutes.");
 			LOGGER.debug(System.currentTimeMillis());
 			
-			compareNonOntologizedGS();
+			//compareNonOntologizedGS();
 
 		}catch(Exception e){
 			LOGGER.error("", e);
@@ -258,8 +258,7 @@ public class EQPerformanceEvaluation {
 		    //using stateid get the string and unontologized entity string 
 		    //if unontologized string is present then use it, else parse through the string and extract the entities separately
 		           //   separate proposals by @, compare the eq with each one of the GS and arrive at mazimum score
-		
-		
+				
 		Set<String> fields = Fieldgsnotontology.keySet();
 		Hashtable<String,Hashtable<String,String>> field_states = new Hashtable<String,Hashtable<String,String>>();
 		Hashtable<String,String>  gsstates;
@@ -415,7 +414,7 @@ public class EQPerformanceEvaluation {
 					String unontologized = rs.getString("unontologized"+rootfield);
 					String rootfieldid = rs.getString(rootfield+"id");
 					
-					if(unontologized.equals("")==false)
+					if((unontologized!=null)&&(unontologized.equals("")==false))
 					{
 						final_string += unontologized +"<>";
 					} else
@@ -704,27 +703,24 @@ private String checkInOntology(String value, String field) {
 	String[] ids = extractids(value);
 	String valuecopy = value;
 	Boolean exist=false;
-
+	ELKReasoner tempelk=null;
 	for(String id:ids)
 	{
 		exist=false;
 		id=id.trim();
-		ELKReasoner tempelk=null;
-	if(field.contains("entity"))
-	{
+
 		if(id.contains("BSPO"))
 		{
 			tempelk = this.elkspatial;
-		} else
+		} else if(field.contains("quality"))
+		{
+			tempelk = this.elkquality;
+		}else
 		{
 			tempelk = this.elkentity;
 		}
 			exist=tempelk.CheckClassExistence(id);
-	} else if(field.contains("quality"))
-	{
-		tempelk = this.elkquality;
-		exist=tempelk.CheckClassExistence(id);
-	}	
+		
 	if(exist == false)
 	{
 		value=value.replaceFirst(id, "null");
@@ -1929,12 +1925,30 @@ private static String[] extractids(String value) {
 
 	private static String extractLabel(String label,int index)
 	{
-		String temp = "length and (inheres in some humerus) and (inheres in some ulna)";
-		temp= temp.replaceAll(relation, "");
-		temp= temp.replaceAll("(\\(|\\))", "");
-		temp = temp.replaceAll("(\\s)+", " ");
-		System.out.println(temp.split("\\s")[index]);
-		return "";
+/*		label= label.replaceAll(relation, "");
+		label= label.replaceAll("(\\(|\\))", "");
+		label = label.replaceAll("(\\s)+", " ");
+		System.out.println(label.split("\\s")[index]);
+		return "";*/
+		
+
+		String labels[]=null,final_labels[] = null;
+		int count=0;
+		label= label.replaceAll("(\\(|\\))", "");
+		labels = label.split(relation);
+        final_labels = new String[labels.length];	
+        
+		for(String temp:labels)
+		{
+			if(temp.equals(" ")==false)
+				{
+				final_labels[count++] = temp;
+				}
+		}
+		System.out.println(final_labels[index].trim());
+		return final_labels[index].trim();
+		
+	
 		
 	}
 	/**

@@ -8,8 +8,50 @@ public class EQHolder {
 	String qualityid;
 	String relatedentitylabel;
 	String relatedentityid;
+	String unontologizedentity;
+	String unontologizedquality;
+	String unontologizedrelatedentity;
+	String gsunontologizedentity;
+	String gsunontologizedquality;
+	String gsunontologizedrelatedentity;
 	
 	
+	public String getUnontologizedentity() {
+		return unontologizedentity;
+	}
+	public void setUnontologizedentity(String unontologizedentity) {
+		this.unontologizedentity = unontologizedentity;
+	}
+	public String getUnontologizedquality() {
+		return unontologizedquality;
+	}
+	public void setUnontologizedquality(String unontologizedquality) {
+		this.unontologizedquality = unontologizedquality;
+	}
+	public String getUnontologizedrelatedentity() {
+		return unontologizedrelatedentity;
+	}
+	public void setUnontologizedrelatedentity(String unontologizedrelatedentity) {
+		this.unontologizedrelatedentity = unontologizedrelatedentity;
+	}
+	public String getGsunontologizedentity() {
+		return gsunontologizedentity;
+	}
+	public void setGsunontologizedentity(String gsunontologizedentity) {
+		this.gsunontologizedentity = gsunontologizedentity;
+	}
+	public String getGsunontologizedquality() {
+		return gsunontologizedquality;
+	}
+	public void setGsunontologizedquality(String gsunontologizedquality) {
+		this.gsunontologizedquality = gsunontologizedquality;
+	}
+	public String getGsunontologizedrelatedentity() {
+		return gsunontologizedrelatedentity;
+	}
+	public void setGsunontologizedrelatedentity(String gsunontologizedrelatedentity) {
+		this.gsunontologizedrelatedentity = gsunontologizedrelatedentity;
+	}
 	public String getEntitylabel() {
 		return entitylabel;
 	}
