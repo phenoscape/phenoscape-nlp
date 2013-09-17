@@ -234,47 +234,112 @@ public class Dictionary {
 	}
 	//special cases for singulars and plurals
 	static{
-		//check cache
+		//singluar = plural
+		singulars.put("brit", "brit");
+		singulars.put("buttress", "buttress");
+		singulars.put("callus", "callus");
+		singulars.put("forceps", "forceps");
+		singulars.put("frons", "frons");
+		singulars.put("fry", "fry");
+		singulars.put("media", "media");
+		singulars.put("series", "series");
+		singulars.put("species", "species");
+		singulars.put("sperm", "sperm");
+		
+		//special cases
 		singulars.put("axis", "axis");
 		singulars.put("axes", "axis");
 		singulars.put("bases", "base");
 		singulars.put("boss", "boss");
-		singulars.put("buttress", "buttress");
-		singulars.put("callus", "callus");
-		singulars.put("frons", "frons");
 		singulars.put("grooves", "groove");
 		singulars.put("interstices", "interstice");
 		singulars.put("lens", "len");
-		singulars.put("media", "media");
 		singulars.put("midnerves", "midnerve");
 		singulars.put("process", "process");
-		singulars.put("series", "series");
-		singulars.put("species", "species");
 		singulars.put("teeth", "tooth");
 		singulars.put("valves", "valve");
-		singulars.put("i", "i"); //could add more roman digits
-		singulars.put("ii", "ii");
-		singulars.put("iii", "iii");
-		
-		plurals.put("axis", "axes");
-		plurals.put("base", "bases");		
-		plurals.put("groove", "grooves");
-		plurals.put("interstice", "interstices");
-		plurals.put("len", "lens");
+		singulars.put("catenabe", "catena");
+		singulars.put("fusules", "fusula");
+		singulars.put("pseudocoelomata", "pseudocoelomates");
+		singulars.put("setules", "setula");
+		singulars.put("ephyre", "ephyra");
+		singulars.put("ephyrae", "ephyra");
+		singulars.put("ephyrula", "ephyra");
+		singulars.put("fusules", "fusula");
+		singulars.put("mollusks", "mollusca");
+		singulars.put("molluscs", "mollusca");
+		singulars.put("malli", "malleus");
+		singulars.put("anthocyathia", "anthocyathus");
+		singulars.put("perradia", "perradius");
+		singulars.put("genera", "genus");
+		singulars.put("latera", "latus");
+		singulars.put("corpora", "corpus");
+		singulars.put("incudes", "incus");
+		singulars.put("parasides", "parapsis");
+		singulars.put("coremata", "corematis");
+		singulars.put("crepides", "crepis");
+		singulars.put("falces", "falx");
+		singulars.put("glochines", "glochis");
+		singulars.put("irises", "iris");
+		singulars.put("irides", "iris");
+		singulars.put("proboscises", "proboscis");
+		singulars.put("proglottides", "proglottis");
+		singulars.put("pharynges", "pharynx");
+		singulars.put("pharynxes", "pharynx");
+
+		//pl = sing
+		plurals.put("brit", "brit");
+		plurals.put("buttress", "buttress");
+		plurals.put("callus", "callus");
+		plurals.put("forceps", "forceps");
+		plurals.put("frons", "frons");
+		plurals.put("fry", "fry");
 		plurals.put("media", "media");
-		plurals.put("midnerve", "midnerves");
-		plurals.put("tooth", "teeth");
-		plurals.put("valve", "valves");
+		plurals.put("series", "series");
+		plurals.put("species", "species");
+		plurals.put("sperm", "sperm");
+		//special cases
+		plurals.put("axis", "axes");
+		plurals.put("base", "bases");	
 		plurals.put("boss", "bosses");
 		plurals.put("buttress", "buttresses");
 		plurals.put("callus", "calluses");
-		plurals.put("frons", "fronses");
+		plurals.put("groove", "grooves");
+		plurals.put("interstice", "interstices");
+		plurals.put("len", "lens");
+		plurals.put("midnerve", "midnerves");
 		plurals.put("process", "processes");
-		plurals.put("series", "series");
-		plurals.put("species", "species");
-		plurals.put("i", "i"); //could add more roman digits
-		plurals.put("ii", "ii");
-		plurals.put("iii", "iii");
+		plurals.put("tooth", "teeth");
+		plurals.put("valve", "valves");
+		plurals.put("catena","catenabe");
+		plurals.put("fusula","fusules");
+		plurals.put("pseudocoelomates","pseudocoelomata");
+		plurals.put("setula","setules");
+		//when multiple pls, take one
+		plurals.put("ephyra","ephyre");
+		plurals.put("ephyra","ephyrae");
+		plurals.put("ephyra","ephyrula");
+		plurals.put("fusula","fusules");
+		plurals.put("mollusca","mollusks");
+		plurals.put("mollusca","molluscs");
+		plurals.put("malleus","malli");
+		plurals.put("anthocyathus","anthocyathia");
+		plurals.put("perradius","perradia");
+		plurals.put("genus","genera");
+		plurals.put("latus","latera");
+		plurals.put("corpus","corpora");
+		plurals.put("incus","incudes");
+		plurals.put("parapsis","parasides");
+		plurals.put("corematis","coremata");
+		plurals.put("crepis","crepides");
+		plurals.put("falx","falces");
+		plurals.put("glochis","glochines");
+		plurals.put("iris","irises");
+		plurals.put("iris","irides");
+		plurals.put("proboscis","proboscises");
+		plurals.put("proglottis","proglottides");
+		plurals.put("pharynx","pharynges");
+		plurals.put("pharynx","pharynxes");
 	}
 	//upper level quality classes 
 	static{
@@ -444,9 +509,10 @@ public class Dictionary {
 	//this should ideally not be needed, but in reality, many equivalent classes exist cross ontologies but are not treated so
 	//the restrictedrelations for entity postcomposition sometimes have equivalent classes in PATO. PATO classes are need to create negated qualities
 	public final static Hashtable<String, String> translateToPATO = new Hashtable<String, String>(); //used for restricted relationlist
+	public static final String spatialOntoPrefix = "BSPO";
 	static{
-		translateToPATO.put("BFO:0000053","PATO:0000001"); //no better matches, match to 'quality'
-		translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to
+		    translateToPATO.put("BFO:0000053","PATO:0000001"); //bearer_of
+		    translateToPATO.put("RO:0002220","PATO:0002259"); //adjacent to
 			translateToPATO.put("BSPO:0000096","PATO:0001632");//anterior_to
 			translateToPATO.put("UBERON:anteriorly_connected_to","PATO:0000001");
 			translateToPATO.put("UBERON:attaches_to","PATO:0000001");//attaches_to
@@ -475,18 +541,18 @@ public class Dictionary {
 			translateToPATO.put("PATO:increased_in_magnitude_relative_to","PATO:increased_in_magnitude_relative_to");
 			translateToPATO.put("OBO_REL:located_in","PATO:0002261"); //located in
 			translateToPATO.put("RO:0002131","PATO:0001590"); //overlap with
-			translateToPATO.put("BFO:0000050","PATO:0000001");
-			translateToPATO.put("BSPO:passes_through","PATO:0000001");
+			translateToPATO.put("BFO:0000050","part_of");
+			translateToPATO.put("BSPO:passes_through","passes_through");
 			translateToPATO.put("BSPO:0000099","PATO:0001633"); //posterior to
 			translateToPATO.put("UBERON:posteriorly_connected_to","PATO:0000001");
 			translateToPATO.put("BSPO:0000100","PATO:0001195"); //proximal to
-			translateToPATO.put("UBERON:proximally_connected_to","PATO:0000001");
+			translateToPATO.put("UBERON:proximally_connected_to","proximally_connected_to");
 			translateToPATO.put("PATO:similar_in_magnitude_relative_to","PATO:similar_in_magnitude_relative_to");
-			translateToPATO.put("RO:0002219","PATO:0000001");
+			translateToPATO.put("RO:0002219","surrounded_by");
 			translateToPATO.put("RO:0002221","PATO:0001772"); //surrounding
 			translateToPATO.put("BSPO:0000102","PATO:0001196"); //ventral to
-			translateToPATO.put("BSPO:0000103","PATO:0000001");
-			translateToPATO.put("PHENOSCAPE:serves_as_attachment_site_for","PATO:0000001");
+			translateToPATO.put("BSPO:0000103","vicinity_of");
+			translateToPATO.put("PHENOSCAPE:serves_as_attachment_site_for","serves_as_attachment_site_for");
 			translateToPATO.put("BFO:0000052","PATO:inheres_in");
 			translateToPATO.put("PHENOSCAPE:complement_of","PATO:0000001");	
 	}

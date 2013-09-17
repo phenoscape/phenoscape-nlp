@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public class SimpleEntity extends Entity implements FormalConcept{
@@ -131,7 +131,8 @@ public class SimpleEntity extends Entity implements FormalConcept{
 	}
 
 	public String toString(){
-		return "phrase="+this.string+" entity="+this.label+ " score="+this.confidenceScore;
+		//return "phrase="+this.string+" entity="+(this.label==null? this.string: this.label)+ " score="+this.confidenceScore;
+		return "phrase="+this.string+" entity="+this.label + " score="+this.confidenceScore;
 	}
 	
 	public String content(){

@@ -229,9 +229,10 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 			}else{//has q, generate and add negated quality
 				for(Quality q: qp.getProposals()){
 					if(q instanceof RelationalQuality) //relational, generate and add negated quality
-					{
-						if(this.binaryType==1) postcomposeRelationalQuality(negempty, negativestatements, eqp, q);
-						if(this.binaryType==2) negateRelationalQuality(negempty, negativestatements,
+					{	
+						boolean postcomposed = false;
+						if(this.binaryType==1) postcomposed = postcomposeRelationalQuality(negempty, negativestatements, eqp, q);
+						if(this.binaryType==2 || !postcomposed) negateRelationalQuality(negempty, negativestatements,
 								eqp, q); // a ventral to b: yes =>
 					}else{ //not relational, generate and add the negated quality
 						negateQuality(negempty, negativestatements, eqp, q);
@@ -255,8 +256,9 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	 * post-compose Q to Entities, update eqp, and add negated to the negative EQProposals
 	 * @param negativestatements
 	 * @param q
+	 * @return postcomposition success or not
 	 */
-	private void postcomposeRelationalQuality(EQProposals negempty,
+	private boolean postcomposeRelationalQuality(EQProposals negempty,
 			ArrayList<EQProposals> negativestatements, EQProposals eqp, Quality q) {
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
 		entities.add(eqp.getEntity());
@@ -264,7 +266,8 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		QualityProposals qp = new QualityProposals();
 		qp.add(q);
 		qualities.add(qp);
-		Utilities.postcompose(entities, qualities); //postcompose
+		boolean success = Utilities.postcompose(entities, qualities); //postcompose
+		if(!success) return success;
 		//update eqp
 		eqp.setEntity(entities.get(0));
 		qp = new QualityProposals();
@@ -290,6 +293,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 		falseeq.setStateText(negempty.getStateText());
 		falseeq.setQuality(qp);
 		negativestatements.add(falseeq);
+		return success;
 	}
 
 	private void presentAbsentQuality(EQProposals negempty,

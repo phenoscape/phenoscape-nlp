@@ -161,7 +161,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				//aelocatorphrase = aelocatorphrase.replaceAll("body scale", "dermal scale");
 
 				LOGGER.debug("EntitySearcherOriginal calls EntitySearcher1");
-				ArrayList<EntityProposals> results =  new EntitySearcher1().searchEntity(root, structid, aentityphrase, aelocatorphrase, aentityphrase, prep);
+				ArrayList<EntityProposals> results =  new EntitySearcher1().searchEntity(root, structid, aentityphrase, aelocatorphrase, originalentityphrase, prep);
 
 				if(results!=null && entities==null) entities = new ArrayList<EntityProposals>();
 				if(results!=null){	

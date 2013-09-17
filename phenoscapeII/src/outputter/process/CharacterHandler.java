@@ -220,7 +220,7 @@ public class CharacterHandler {
 				//check and see if prep of the relation need to be matched: 'separated from' <> 'separated by'
 				String prep = constraint.contains(" ")? constraint.substring(0, constraint.indexOf(" ")): constraint;
 				boolean check = false;
-				if(prep.matches(this.specialprep )) check = true;
+				if(prep.matches(this.specialprep)) check = true;
 				for(Quality rq: relationalquality.getProposals()){
 					String label = rq.getLabel();
 					String labelprep = label.contains(" ")? label.substring(0, constraint.indexOf(" ")): label;
@@ -295,7 +295,7 @@ public class CharacterHandler {
 		TermSearcher ts = new TermSearcher();
 		ArrayList<FormalConcept> results = ts.searchTerm(quality, "quality");
 
-		if(results!=null){ //has a strong match
+		if(results!=null){ //has a match
 			//QualityProposals qproposals = new QualityProposals();
 			for(FormalConcept resultfc: results){
 				QualityProposals qproposals = new QualityProposals();
@@ -339,7 +339,6 @@ public class CharacterHandler {
 			//text::Caudal fin heterocercal  (heterocercal tail is a subclass of caudal fin)
 			//xml: structure: caudal fin, character:heterocercal
 			//=> heterocercal tail: present
-
 			if(this.entity!=null){
 				for(int i = 0; i<entity.size(); i++){
 					EntityProposals ep = entity.get(i);
@@ -351,6 +350,9 @@ public class CharacterHandler {
 								ep = ces.getEntity();//update
 								//this.qualities.add(ces.getQuality());
 								Utilities.addQualityProposals(qualities, ces.getQuality());
+								//int o = this.primaryentities.indexOf(entity.get(i)); //if only update qualities, no need to update primaryentities
+								//if(o>=0) this.primaryentities.set(o, ep);
+								//else this.primaryentities.add(ep);
 								this.entity.set(i, ep);
 								return;
 							}
@@ -500,7 +502,7 @@ public class CharacterHandler {
 
 		TermSearcher ts = new TermSearcher();
 		ArrayList<FormalConcept> primary_quality = ts.searchTerm(quality, "quality");
-		if((primary_quality==null) &&(flag=true))//removes the increased or decreased and check for the plain quality
+		if((primary_quality==null) &&(flag==true))//removes the increased or decreased and check for the plain quality
 		{
 			quality = quality.substring(quality.indexOf(" "));
 			primary_quality = ts.searchTerm(quality, "quality");
@@ -1115,10 +1117,6 @@ public class CharacterHandler {
 	 public ArrayList<EntityProposals> getEntity(){
 		 return this.entity;
 	 }
-
-
-
-
 
 	 public ArrayList<EntityProposals> getPrimaryentities() {
 		 return primaryentities;

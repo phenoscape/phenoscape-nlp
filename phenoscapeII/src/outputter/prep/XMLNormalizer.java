@@ -20,6 +20,7 @@ import org.jdom.xpath.XPath;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
+import outputter.knowledge.Dictionary;
 
 /**
  * @author updates
@@ -28,15 +29,16 @@ import outputter.Utilities;
 public class XMLNormalizer {
 	private static final Logger LOGGER = Logger.getLogger(XMLNormalizer.class);   
 	public Element root;
-	private static XPath pathWithHaveHasRelation;
-	private static XPath pathRangeValueCharacter;
-	private static XPath pathCountStructure;
+	public static XPath pathWithHaveHasRelation;
+	public static XPath pathRangeValueCharacter;
+	public static XPath pathCountStructure;
 	public static XPath pathCharacterStatement;
 	public static XPath pathStateStatement;
 	public static XPath pathWholeOrganismStructure;
 	public static XPath pathNonWholeOrganismStructure;
 	public static XPath pathCharacter;
 	public static XPath pathText;
+	public static XPath pathModifier; 
 	
 	
 	static{
@@ -50,6 +52,7 @@ public class XMLNormalizer {
 			pathText = XPath.newInstance(".//text");
 			pathWholeOrganismStructure = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 			pathNonWholeOrganismStructure = XPath.newInstance(".//structure[@name!='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
+			pathModifier = XPath.newInstance("//character[@is_modifier='true']");
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
@@ -79,12 +82,42 @@ public class XMLNormalizer {
 			//merge segments in the character statement
 			mergeCharacterStatement(root);
 			
+			spatialModifier(root);
 			//XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
 			//System.out.println(outputter.outputString(root));
 			
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
+	}
+
+	/**
+	 * to correct results from incorrect categorization of spatial terms: dorsal fin => dorsal should be constraint, not a feature
+	 * @param root
+	 */
+	private void spatialModifier(Element root) {
+		try{
+			List<Element> modchars = pathModifier.selectNodes(root);
+			for(int i =0; i< modchars.size(); i++){
+				Element modchar = modchars.get(i);
+				if(modchar.getAttribute("value")!=null){
+					String value = modchar.getAttributeValue("value");
+					if(value.matches(Dictionary.spatialtermptn)){
+						Element struct = modchar.getParentElement();
+						String constraint = struct.getAttributeValue("constraint")==null? " " : struct.getAttributeValue("constraint")+" ";
+						String phrase = value + constraint +struct.getAttributeValue("name_original");
+						if(struct.getParentElement().getChildText("text").toLowerCase().replaceAll("-",  " ").contains(phrase)){
+							constraint += value + " "+constraint;
+							struct.setAttribute("constraint", constraint.trim());
+							modchar.detach();
+						}
+					}
+				}
+			}
+		}catch(Exception e){
+			LOGGER.error("",e);
+		}
+		
 	}
 
 	/**

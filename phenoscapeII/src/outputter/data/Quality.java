@@ -177,6 +177,7 @@ public class Quality implements FormalConcept {
 		return "";
 	}
 	public String toString(){
+		//return "phrase="+this.string+" quality="+(this.label==null? this.string : this.label)+ " score="+this.confidenceScore;
 		return "phrase="+this.string+" quality="+this.label+ " score="+this.confidenceScore;
 	}
 	

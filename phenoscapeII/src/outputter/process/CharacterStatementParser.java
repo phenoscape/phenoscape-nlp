@@ -5,8 +5,10 @@ package outputter.process;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -28,8 +30,10 @@ import outputter.data.EQProposals;
 import outputter.data.Entity;
 import outputter.data.EntityProposals;
 import outputter.data.FormalRelation;
+import outputter.data.Quality;
 import outputter.data.QualityProposals;
 import outputter.data.REntity;
+import outputter.data.RelationalQuality;
 import outputter.data.SimpleEntity;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.TermOutputerUtilities;
@@ -62,7 +66,8 @@ public class CharacterStatementParser extends Parser {
 			LOGGER.error("", e);
 		}
 	}
-
+	ArrayList<EQProposals> EQStatements = new ArrayList<EQProposals>();
+	EQProposals empty = null;
 	
 	/**
 	 * 
@@ -105,8 +110,9 @@ public class CharacterStatementParser extends Parser {
 	 * TODO under construction
 	 */
 	@Override
-	public void parse(Element statement, Element root, EQProposals notused) {
+	public void parse(Element statement, Element root, EQProposals empty) {
 		try {
+			this.empty = empty;
 			parseForQualityClue(statement); 
 			parseForEntities(statement, root, true);
 		} catch (Exception e) {
@@ -331,9 +337,18 @@ public class CharacterStatementParser extends Parser {
 	private void resolve(/*ArrayList<EntityProposals> entities,
 			ArrayList<Structure2Quality> s2qs,*/ Element statement, Element root) {
 		
-		//TODO: remove any structureid that are part of character constraint
-		
-		
+		//process any structureid that are part of character constraint:
+		//being standing alone at this point meaning the constraint structure are not post-composable into any entity
+		//the constraint entity should form their own EQs
+		ArrayList<String> constraintentities = new ArrayList<String> (); 
+		Iterator<String> it = this.structureIDs.iterator(); //structureIDs > underscoredStructureIDs
+		while(it.hasNext()){
+			String sid = it.next();
+			if(Utilities.isConstraint(root, sid)){
+				constraintentities.add(sid); //generate EQs after other entities are resolved as some constraints may be postcomposed during the process.
+				it.remove();
+			}
+		}
 		
 		//1. 'pubis_ischium': these are the key entities
 		//TODO: what about "A_B joint": should have a entity search strategy to handle this
@@ -349,7 +364,13 @@ public class CharacterStatementParser extends Parser {
 					LOGGER.debug(".."+aep.toString());
 				}
 				LOGGER.debug("CSP: post-composed with quality...");
-				postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
+				ArrayList<String> usedids = postcomposeWithQuality(entities, structid, statement, root);//for resolved entities only; update entities in this entityHash
+				for(String usedid: usedids){
+					this.entityHash.remove(usedid);
+					this.structureIDs.remove(usedid);
+					this.qualityHash.remove(usedid);
+					constraintentities.remove(usedid);
+				}
 				Set<String> keys = this.entityHash.keySet(); //save as keyentities
 				for(String key:keys)
 				{
@@ -387,6 +408,8 @@ public class CharacterStatementParser extends Parser {
 			for(String usedid: usedids){
 				this.entityHash.remove(usedid);
 				this.structureIDs.remove(usedid);
+				this.qualityHash.remove(usedid);
+				constraintentities.remove(usedid);
 			}
 		}
 		
@@ -508,7 +531,7 @@ public class CharacterStatementParser extends Parser {
 						}
 					}*/
 					
-					if(checkForPartOfRelation(entities)){//Checks ELKReasoner whether the keyentities are part of entities
+					if(checkForPartOfRelation(entities) || Utilities.holdsSimpleSpatialEntity(this.keyentities)){//Checks ELKReasoner whether the keyentities are part of entities
 						addEntityLocators(this.keyentities, entities);
 						LOGGER.debug("CSP: add to part_of chain:");
 						for(EntityProposals aep: entities){
@@ -528,6 +551,10 @@ public class CharacterStatementParser extends Parser {
 				Collections.swap(this.keyentities, i, this.keyentities.size()-i-1);
 			}
 		}
+		
+		//5. all usedids have been removed from constraintentities, now generate EQs from constraintentities		
+		formEQForConstraintEntities(constraintentities, statement, root);
+		
 		/*if(entities.size()>1){//multiple unrelated entities  
 		
 			//1. Sereno style or the like
@@ -545,6 +572,44 @@ public class CharacterStatementParser extends Parser {
 			}
 		}*/	
 	}
+
+	private void formEQForConstraintEntities(
+			ArrayList<String> constraintentities, Element statement,
+			Element root) {
+		for(String structureid: constraintentities){
+			try{
+				Element structure = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+structureid+"'");
+				StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>(),statement.getChildText("text"));
+				//any relations
+				List<Element> relations = XPath.selectNodes(statement, ".//relation[@from='"+structureid+"']"); 
+				ArrayList<String> StructuredQualities = new ArrayList<String>();//scope of this variable?
+				for(Element relation: relations){
+					if(relation.getAttribute("to")!=null && Utilities.partofrelations.contains(relation.getAttributeValue("name"))){
+						continue; //part_of relations have already been dealt with in EntityParser
+					}
+					ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
+					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
+					ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities, null);
+					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty);
+				}
+
+				//post-compose with characters
+				List<Element> characters = structure.getChildren("character");
+				for(Element character: characters){
+					if(character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
+					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
+					ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
+					ssp.parseCharacter(character, statement, root, entities1, qualities);
+					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty);
+				}			
+			}catch(Exception e){
+				LOGGER.error("", e);
+			}	
+		}
+
+
+	}
+
 
 	/**
 	 * are keyentities part of any of the entities?
@@ -699,7 +764,7 @@ public class CharacterStatementParser extends Parser {
 	 */
 	@SuppressWarnings("unchecked")
 	private ArrayList<String> postcomposeWithQuality(ArrayList<EntityProposals> entities, String structureid, Element statement, Element root) {
-		ArrayList<String> usedids = new ArrayList<String>();
+		ArrayList<String> usedids = new ArrayList<String>(); //Ids of the related entities. 
 		try{
 			Element structure = (Element) XPath.selectSingleNode(statement, ".//structure[@id='"+structureid+"'");
 			StateStatementParser ssp = new StateStatementParser(ontoutil, null, new ArrayList<String>(),statement.getChildText("text"));
@@ -724,9 +789,27 @@ public class CharacterStatementParser extends Parser {
 			//post-compose with characters
 			List<Element> characters = structure.getChildren("character");
 			for(Element character: characters){
+				if(character.getAttribute("value")!=null && character.getAttributeValue("value").matches(Dictionary.STOP)) continue;
 				ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
 				ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
 				ssp.parseCharacter(character, statement, root, entities1, qualities);
+				//the constraint of the character may be used in the quality
+				if(character.getAttribute("constraintid")!=null){
+					String[] cids = character.getAttributeValue("constraintid").trim().split("\\s+");
+					for(String cid: cids){
+						ArrayList<EntityProposals> centities = this.entityHash.get(cid);
+						for(QualityProposals qp: qualities){
+							for(Quality q: qp.getProposals()){
+								if(q instanceof RelationalQuality){
+									EntityProposals re = ((RelationalQuality) q).getRelatedEntity();
+									if(centities.contains(re)){
+										usedids.add(cid);
+									}
+								}
+							}
+						}
+					}
+				}
 				//entities1 is redundant and not used
 				if(qualities!=null && qualities.size()!=0){
 					Utilities.postcompose(entities, qualities);
@@ -737,12 +820,6 @@ public class CharacterStatementParser extends Parser {
 		}		
 		return usedids;
 	}
-
-	
-
-
-	
-
 
 
 	/**
@@ -773,6 +850,10 @@ public class CharacterStatementParser extends Parser {
 	public ArrayList<EntityProposals> getKeyEntities(){
 		return this.keyentities;
 	}
+	
+	public Collection<? extends EQProposals> getEQStatements() {
+		return this.EQStatements;
+	}
 	/**
 	 * @param args
 	 */
@@ -780,4 +861,7 @@ public class CharacterStatementParser extends Parser {
 		// TODO Auto-generated method stub
 
 	}
+
+
+
 }

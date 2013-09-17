@@ -62,6 +62,10 @@ public class TermSearcher {
 	ArrayList<Hashtable<String, String>> candidatematches = new ArrayList<Hashtable<String, String>>();
 
 	public static ArrayList<String> nomatchCache = new ArrayList<String>();
+	
+	//for these terms, both strong and weak matches will be returned
+	//To add terms to this list: "short|term2";
+	public static String looseTerms = "short"; 
 
 	/**
 	 * Search term in the whole ontology (of a particular type) Result from each
@@ -114,7 +118,6 @@ public class TermSearcher {
 
 		// 1. search the original phrase/reg exp
 		ArrayList<Hashtable<String, String>> results = new ArrayList<Hashtable<String, String>>();
-		String temp="";
 		ArrayList<FormalConcept> strongmatch = getStrongMatch(cleanphrase, query,
 				phrasetype, results, 1f);
 		if (strongmatch != null && strongmatch.size()>0)
@@ -262,6 +265,7 @@ public class TermSearcher {
 		// keep weaker matches
 		if (candidatematches.size() == 0)
 			TermSearcher.cacheIt(phrase, null, phrasetype);
+		
 		cacheCandidateMataches(cleanphrase, query, phrasetype, .5f);
 		return getCandidateMatches(query, phrasetype);
 		//return null;
@@ -610,7 +614,7 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("caudal_fin .*? lobe",
+		ArrayList<FormalConcept> quality = ts.searchTerm("(?:metasternum)",
 				"entity");
 		if(quality!=null){
 			for (FormalConcept fc : quality)

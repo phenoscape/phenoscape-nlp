@@ -643,7 +643,8 @@ public class EntitySearcher1 extends EntitySearcher {
 				temp +=phrase.trim();//appending the original string to the tokens separated by #
 				temp = temp.trim();
 				if(debug_permutation) System.err.println("split&join: '"+phrasecp+"' =>'"+temp+"'");
-				String[] temps = temp.replaceAll("\\s+",  " ").replaceAll("(^#+|#+$)", "").split("\\s*#+\\s*");
+				temp =  temp.replaceAll("\\s+",  " ").replaceAll("(^#+|#+$)", "");
+				String[] temps =temp.split("\\s*#+\\s*");
 				if(temps.length==1){ //if the split didn't split, force split on spaces
 					ArrayList<FormalConcept> test = new TermSearcher().searchTerm(phrasecp, "entity"); 
 					if(test==null) temps = temp.split("\\s+"); 
