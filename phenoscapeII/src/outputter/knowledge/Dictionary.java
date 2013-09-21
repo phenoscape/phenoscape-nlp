@@ -95,7 +95,7 @@ public class Dictionary {
 	//synonyms of the head noun 'region'. May include a syn list for each of the head noun.
 	public static Hashtable<String, String> headnounsyns= new Hashtable<String, String> ();
 	static{
-		headnounsyns.put("region", "portion|end|segment");
+		headnounsyns.put("region", "portion|end|segment|area|component|part");
 	}
 	public static Hashtable<String,Hashtable<String, String>> relationalqualities = new Hashtable<String,Hashtable<String, String>>();
 	public static Hashtable<String,Hashtable<String, String>> restrictedrelations = new Hashtable<String,Hashtable<String, String>>();

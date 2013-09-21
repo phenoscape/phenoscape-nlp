@@ -177,7 +177,7 @@ public class StateStatementParser extends Parser {
 						ArrayList<QualityProposals> qualities = ep.getQualityStrategy().qualities;
 						ArrayList<EntityProposals> primentities = ep.getQualityStrategy().primaryentities;
 						//this.constructEQStatementProposals(qualities, primentities);	
-						Utilities.constructEQProposals(this, this.EQStatements, qualities, primentities, empty);	
+						Utilities.constructEQProposals(this, this.EQStatements, qualities, primentities, empty, null);	
 					}
 					//ArrayList<EntityProposals> ep = new EntitySearcherOriginal().searchEntity(root, sid, sname, "", sname, "");
 					//entities.addAll(ep);
@@ -211,7 +211,7 @@ public class StateStatementParser extends Parser {
 				qp.add(q);
 				qualities.add(qp);
 				//constructEQStatementProposals(qualities, entities1);
-				Utilities.constructEQProposals(this, this.EQStatements, qualities, entities1, empty);
+				Utilities.constructEQProposals(this, this.EQStatements, qualities, entities1, empty, null);
 				entities1.clear();
 			}
 		}catch(Exception e){
@@ -265,7 +265,7 @@ public class StateStatementParser extends Parser {
 
 			if(characters.size()<=0){
 				qualities = new ArrayList<QualityProposals>();//reset qualities, as they are post-compsed into entities
-				Utilities.constructEQProposals(this, this.EQStatements, qualities, thisentities, empty);
+				Utilities.constructEQProposals(this, this.EQStatements, qualities, thisentities, empty, qualityclue);
 			}else{
 				ArrayList<EntityProposals> lastentities = null;
 				for (Element character : characters) {		
@@ -283,7 +283,7 @@ public class StateStatementParser extends Parser {
 					if(qualities!=null) for(QualityProposals qp: qualities) LOGGER.debug(".."+qp.toString());
 					//constructEQStatementProposals(qualities, entities);
 					//Utilities.postcompose(entities, postcomps); //attachement site: rugose scar or pit, rugose should not be postcomp to attachment site.
-					Utilities.constructEQProposals(this, this.EQStatements, qualities, entities, empty);
+					Utilities.constructEQProposals(this, this.EQStatements, qualities, entities, empty, qualityclue);
 				}
 			}
 
@@ -547,7 +547,7 @@ public class StateStatementParser extends Parser {
 				int flag = parseRelation(relation, root, StructuredQualities, entities,  q, empty);
 				if(flag==1){
 					//constructEQStatementProposals(q, entities);
-					Utilities.constructEQProposals(this, this.EQStatements, q, entities, empty);
+					Utilities.constructEQProposals(this, this.EQStatements, q, entities, empty, qualityclue);
 				}
 			}
 		} catch (JDOMException e) {

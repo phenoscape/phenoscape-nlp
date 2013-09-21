@@ -1188,10 +1188,10 @@ private static String[] extractids(String value) {
 					} else if((c[i].matches(".*(pato|PATO).*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
 					{
 						score=(float) 0.75;
-					} else if(elk.isEquivalent(c[i], r[j]) == true)
+					} /*else if(elk.isEquivalent(c[i], r[j]) == true)
 					{
-						score=(float) 0.75;
-					}
+						score=(float) 1.0;
+					}*/
 					
 					if(score>0)
 					{

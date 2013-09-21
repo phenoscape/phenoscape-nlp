@@ -590,7 +590,7 @@ public class CharacterStatementParser extends Parser {
 					ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals>();
 					ssp.parseRelation(relation, root, StructuredQualities, entities1, qualities, null);
-					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty);
+					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty, null);
 				}
 
 				//post-compose with characters
@@ -600,7 +600,7 @@ public class CharacterStatementParser extends Parser {
 					ArrayList<EntityProposals> entities1 = new ArrayList<EntityProposals> ();
 					ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals> ();
 					ssp.parseCharacter(character, statement, root, entities1, qualities);
-					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty);
+					Utilities.constructEQProposals(this, EQStatements, qualities, entities1, empty, null);
 				}			
 			}catch(Exception e){
 				LOGGER.error("", e);

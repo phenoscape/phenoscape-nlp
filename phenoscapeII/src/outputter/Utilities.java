@@ -26,6 +26,7 @@ import outputter.data.CompositeEntity;
 import outputter.data.EQProposals;
 import outputter.data.Entity;
 import outputter.data.EntityProposals;
+import outputter.data.FormalConcept;
 import outputter.data.FormalRelation;
 import outputter.data.Quality;
 import outputter.data.QualityProposals;
@@ -37,6 +38,7 @@ import outputter.process.BinaryCharacterStatementParser;
 import outputter.process.Parser;
 import outputter.process.StateStatementParser;
 import outputter.search.SynRingVariation;
+import outputter.search.TermSearcher;
 import owlaccessor.OWLAccessorImpl;
 
 /**
@@ -827,19 +829,15 @@ public class Utilities {
 	}
 
 
-	public static void constructEQProposals(Parser parser, ArrayList<EQProposals> EQStatements, List<QualityProposals> qualities, ArrayList<EntityProposals> entities, EQProposals empty){
-		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){
+	public static void constructEQProposals(Parser parser, ArrayList<EQProposals> EQStatements, List<QualityProposals> qualities, 
+			ArrayList<EntityProposals> entities, EQProposals empty, ArrayList<String> qualityclues){
+		if(entities!=null && entities.size()>0 && qualities!=null && qualities.size()>0){//has both E and Q
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					//EQProposals eqp = new EQProposals();
 					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(qualityp);
-					//eqp.setSource(this.src);
-					//eqp.setCharacterId(this.characterid);
-					//eqp.setStateId(this.stateid);
-					//eqp.setDescription(text);
-					//eqp.setCharacterlabel(this.characterlabel);
 					if (parser instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{
@@ -854,11 +852,6 @@ public class Utilities {
 					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
-					//eqp.setSource(this.src);
-					//eqp.setCharacterId(this.characterid);
-					//eqp.setStateId(this.stateid);
-					//eqp.setDescription(text);
-					//eqp.setCharacterlabel(this.characterlabel);
 					if (parser instanceof StateStatementParser){
 						eqp.setType("state");
 					}else{
@@ -866,22 +859,40 @@ public class Utilities {
 					}
 					EQStatements.add(eqp);
 				}					
-		}else if(entities!=null && entities.size()>0){ //no qualities => "present"
+		}else if(entities!=null && entities.size()>0){ //no qualities => check quality clue or set to "present"
 			for (EntityProposals entityp : entities) {
 				//EQProposals eqp = new EQProposals();
 				EQProposals eqp = empty.clone();
 				eqp.setEntity(entityp);
-				Quality q = Dictionary.present;
-				q.setConfidenceScore(1f);
-				QualityProposals qp = new QualityProposals();
-				qp.add(q);
-				qp.setPhrase("present");
-				eqp.setQuality(qp); //this may be filled later for BinaryStateStatements
-				//eqp.setSource(this.src);
-				//eqp.setCharacterId(this.characterid);
-				//eqp.setStateId(this.stateid);
-				//eqp.setDescription(text);
-				//eqp.setCharacterlabel(this.characterlabel);
+				//make use of quality clues if there is any
+				int count = 0;
+				if(qualityclues!=null && qualityclues.size()!=0){//include all ontologizaable quality clues in, TODO may handle them in a finer manner in the future
+					QualityProposals qp = new QualityProposals();
+					String phrase = "";
+					for(String qualityclue : qualityclues){
+						phrase += qualityclue +" ";
+						ArrayList<FormalConcept> quality = new TermSearcher().searchTerm(qualityclue, "quality");
+						if(quality!=null){
+							for(FormalConcept q : quality){
+								qp.add((Quality)q);
+								count++;
+							}
+						}
+					}
+					qp.setPhrase(phrase.trim());
+					for(Quality q: qp.getProposals()){
+						q.setConfidenceScore(1f/count);
+					}
+					eqp.setQuality(qp);
+				}else{
+					Quality q = Dictionary.present;
+					q.setConfidenceScore(1f);
+					QualityProposals qp = new QualityProposals();
+					qp.add(q);
+					qp.setPhrase("present");
+					eqp.setQuality(qp); 
+				}
+
 				if (parser instanceof StateStatementParser){
 					eqp.setType("state");
 				}else{
@@ -889,7 +900,19 @@ public class Utilities {
 				}
 				EQStatements.add(eqp);
 			}					
-	}
+	}else if(qualities!=null && parser instanceof StateStatementParser){ //E = null, Q !=null from state statement. Ignore quality-only EQ from BinaryStatment. 
+		for (QualityProposals qualityp : qualities){
+				EQProposals eqp = empty.clone();
+				eqp.setEntity(null);
+				eqp.setQuality(qualityp);
+				if (parser instanceof StateStatementParser){
+					eqp.setType("state");
+				}else{
+					eqp.setType("character");
+				}
+				EQStatements.add(eqp);
+			}	
+	  }
 		
 	}
 }
