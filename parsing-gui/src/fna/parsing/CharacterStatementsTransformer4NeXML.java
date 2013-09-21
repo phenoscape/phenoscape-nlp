@@ -26,6 +26,7 @@ public class CharacterStatementsTransformer4NeXML extends
 	protected XPath xpathstates;
 	protected XPath xpathstate;
 	protected XPath xpathchar;
+	ArrayList<Treatment> treatments = new ArrayList<Treatment>();
 
 	/**
 	 * @param listener
@@ -67,21 +68,33 @@ public class CharacterStatementsTransformer4NeXML extends
 		    xpathstates.addNamespace("x", root.getNamespaceURI()); //this is how to handle default namespace
 			List<Element> allstates = xpathstates.selectNodes(doc);
 			Iterator<Element> its = allstates.iterator();
+			int count = 0;
 			while(its.hasNext()){
 				Element states = its.next();
 				String statesid = states.getAttributeValue("id");
+				
 				xpathstate.addNamespace("x", root.getNamespaceURI());
 				List<Element> stateels = xpathstate.selectNodes(states);
 				Iterator<Element> it = stateels.iterator();
 				while(it.hasNext()){
 					Element state = it.next();
+					String content;
 					String stateid = state.getAttributeValue("id");
-					String content = state.getAttributeValue("label").trim();
+					if(state.getAttributeValue("label")!=null)
+					content = state.getAttributeValue("label").trim();
+					else
+					content ="";
 					content = content.replaceFirst("[,;\\.]+$", ";");
+					//writing the statesid_stateid file contents in description folder
 					write2file(desfolder, fname+"_"+statesid+"_"+stateid+".txt", content);
+					Treatment t = new Treatment(fname+"_"+statesid+"_"+stateid+".txt", content, "state");
+					treatments.add(t);
+					//System.out.println(count+":add treatment:"+fname+"_"+statesid+"_"+stateid+".txt \t"+ content+"\tstate");
+					count++;
 				}
 			}
 			//get <character> to put in chafolder
+			
 			xpathchar.addNamespace("x", root.getNamespaceURI());
 			List<Element> chars = xpathchar.selectNodes(root);
 			Iterator<Element> it = chars.iterator();
@@ -91,6 +104,10 @@ public class CharacterStatementsTransformer4NeXML extends
 				String content = cha.getAttributeValue("label").trim();
 				content = content.replaceFirst("[,;\\.]+$", ";");
 				write2file(chafolder, fname+"_"+statesid+".txt", content);
+				Treatment t = new Treatment(fname+"_"+statesid+".txt", content, "character");
+				treatments.add(t);
+				//System.out.println(count+":add treatment:"+fname+"_"+statesid+".txt \t"+ content+"\tcharacter");
+				count++;
 			}
 			
 			root.detach();

@@ -351,38 +351,6 @@ public class CharacterStateDBAccess {
 		return true;
 	}
 
-	/**
-	 * save term/category to term_category table that is created in StateMatrix.java 
-	 * @param term
-	 * @param decision
-	 */
-	public boolean saveTermCategory(String groupID, String term, String decision) {
-		//Connection conn = null;
-		PreparedStatement pstmt = null;
-		String sql = "delete from " + MainForm.dataPrefixCombo.getText().trim() +"_term_category where term=?" ;
-		try {
-			/*Delete existing information */
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, term);
-			pstmt.execute();
-			
-			/* Insert the new decision */
-			sql = "insert into " + MainForm.dataPrefixCombo.getText().trim() +"_term_category values (?,?)";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, term);
-			pstmt.setString(2, decision);
-			pstmt.execute();
-			pstmt.close();
-			
-			/*savedecision for groupID*/
-			this.saveDecision(Integer.parseInt(groupID), "done");
-			
-		} catch (Exception exe) {
-			LOGGER.error("Couldn't execute db query in CharacterStateDBAccess:saveTermCategory", exe);
-			exe.printStackTrace();
-		} 
-		return true;
-		
-	}
+	
 
 }

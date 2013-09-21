@@ -6,6 +6,8 @@ import java.util.List;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLClass;
 
+import outputter.ApplicationUtilities;
+
 
 public class TestOWLAccessorImpl {
 	
@@ -78,7 +80,7 @@ public class TestOWLAccessorImpl {
 			
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}*/
 		
 //	}
@@ -86,7 +88,7 @@ public class TestOWLAccessorImpl {
 	@Test
 	public void testGetAnnotationProperties() throws Exception{
 		//File phenoscape = new File("C:\\Documents and Settings\\Hong Updates\\Desktop\\ATEST\\ontologies\\phenoscape-ext.owl");
-		File phenoscape = new File("C:\\Users\\Zilong Chang\\Desktop\\CHPImpr\\ontologies\\phenoscape-ext.owl");
+		File phenoscape = new File("C:/Users/Murali/Desktop/RA1/trails/Trial_13_May/ontologies/PATO.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
 		
@@ -123,13 +125,30 @@ public class TestOWLAccessorImpl {
 		//System.out.println(a.retrieveConcept("ploidy").size());
 		
 	}
-	
-	//public static void main(String[] args) {
-	//	TestOWLAccessorImpl to = new TestOWLAccessorImpl();
-	//	String path="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
-	//	to.searchOntology("aorta", path, "TAO");
+	public void fetch_relationalslim()
+	{
+	/*	File phenoscape = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
+		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
+		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
+		for(OWLClass b:a.getRelationalSlim())
+		{
+			System.out.print(a.getLabel(b));
+			System.out.println("   "+a.getID(b));
+		}*/
+
+	}
+	public static void main(String[] args) {
+		TestOWLAccessorImpl to = new TestOWLAccessorImpl();
+		//String path="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
+		//to.fetch_relationalslim();
 		
-	//}
+		try {
+			to.testGetAnnotationProperties();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
 
 }

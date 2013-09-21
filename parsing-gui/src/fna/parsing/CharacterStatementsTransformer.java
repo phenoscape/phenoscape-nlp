@@ -49,7 +49,7 @@ public abstract class CharacterStatementsTransformer extends Thread {
 		this.perlLog = perllog;
 		//this.prefix = prefix;
 		//this.glossarytable = glossarytable;
-		pm = new PhraseMarker(ApplicationUtilities.getProperty("uberonphrases.bin"));
+		pm = new PhraseMarker();
 		this.outputter = new XMLOutputter(Format.getPrettyFormat());
 		setXPaths();
 		File target = new File(Registry.TargetDirectory);

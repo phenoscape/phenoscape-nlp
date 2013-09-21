@@ -6,17 +6,25 @@ package preprocessing;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
 
+
+
+
+
+import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.Document;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+
+import outputter.search.TermSearcher;
 
 
 
@@ -35,7 +43,7 @@ public class NativeXMLSourceFileCreator {
 	private static String username="root";
 	private static String password="root";
 	private static String nonEnglish="Bockmann 1998|Di Dario 1999|Shibatta 1998";
-	
+	private static final Logger LOGGER = Logger.getLogger(NativeXMLSourceFileCreator.class);   
 
 	/**
 	 * constructor
@@ -57,7 +65,7 @@ public class NativeXMLSourceFileCreator {
 				conn = DriverManager.getConnection(URL);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -98,7 +106,7 @@ public class NativeXMLSourceFileCreator {
 			XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
 			out.output(new Document(root), new BufferedOutputStream(new FileOutputStream(new File(this.output, output.getName()+".xml"))));
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
@@ -140,7 +148,7 @@ public class NativeXMLSourceFileCreator {
 				}
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	private void insertSentence(String sentence, int sentid, String source, int charid) {
@@ -150,7 +158,7 @@ public class NativeXMLSourceFileCreator {
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+this.tableprefix+"_sentence (sentid, source, sentence, originalsent, charid) values ("+sentid+",'"+source+"','"+clean+"','"+sentence+"',"+charid+")");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -159,7 +167,7 @@ public class NativeXMLSourceFileCreator {
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+this.tableprefix+"_character (charid, source, characterr) values ("+charid+",'"+source+"','"+character+"')");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}*/
 

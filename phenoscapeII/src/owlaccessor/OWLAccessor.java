@@ -40,7 +40,7 @@ public interface OWLAccessor {
 	 * @return a list of matched or related terms (synonyms)
 	 * @throws Exception 
 	 */
-	public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception;
+	//public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception;
 	
 	/**
 	 * Retrieve a set of keywords in a term's definition.
@@ -115,6 +115,6 @@ public interface OWLAccessor {
 
 
 
-	public OWLClass getClassByIRI(String iri);
+	public OWLClass getOWLClassByIRI(String iri);
 
 }

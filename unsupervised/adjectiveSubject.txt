@@ -1,119 +1,0 @@
-ta ta...
-
-
-
-
-
-
-
-
-
-
-===========
-why middle is not type modifier?
-
- adjective subjects mark up: 101: <m><b>basal</b></m> and <m>proximal</m> <m><b>cauline</b></m> ;
-
- adjective subjects mark up: 128: <m>outer</m> <m>sterile</m> , <n>corollas</n> <b>expanded</b> , raylike , bilateral , <b>5</b> – many_lobed ; 
-
- 
-
-
-"C:\FNA-v19\benchmarks\testlc\test-0"
-
-basal
-
-capitular
-
-cauline
-
-distal
-
-inner
-
-pistillate
-
-proximal
-
-staminate
-
-sterile
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-From 
-145	214.txt-9	inner phyllaries :	Inner phyllaries:	inner phyllaries	normal	phyllary	inner	\N
-
-162	221.txt-10	inner phyllaries :	Inner phyllaries :	inner phyllaries	normal	phyllary	inner	\N
-
-Knows inner is a modifier: inner phyllaries.
-From
-388	42.txt-1	middle phyllaries acute to short_acuminate at apex with point 10 – 21 mm and spine tip 2 – 5 ( – 6 ) mm , distal margins with prominent yellowish margins 0 . 5 – 1 + mm .	Middle phyllaries acute to short-acuminate at apex with point 10–21 mm and spine tip 2–5(–6) mm, distal margins with prominent yellowish margins 0.5–1+ mm.	middle phyllaries acute	normal	phyllary	middle	\N
-knows middle is a modifer: middle phyllaries
-
-
-From (inner/middle) phyllaries, and inner florets
-716	704.txt-12	inner florets 30 – 55 ;	Inner (functionally staminate) florets 30–55;	inner florets NUMBER	normal	floret	inner	\N
-
-knows inner/middle is a type modifier.
-
-From the following pattern (type modifier-character state)
-505	511.txt-8	inner erect , elongating after flowering .	inner erect, elongating after flowering.	inner erect	normal	unknown		\N
-
-525	540.txt-11	inner lanceolate .	inner lanceolate (midveins often purple, thickened).	inner lanceolate	normal	unknown		\N
-
-984	949.txt-10	inner 0 . 7 – 1 mm , scarcely , if at all , winged , not papillate .	inner 0.7–1 mm, scarcely, if at all, winged, not papillate.	inner NUMBER	normal	unknown		\N
-
-knows inner may be used as an adjective subject.
-
-Then we can infer fertile is a character state:
-129	189.txt-13	inner fertile , corollas actinomorphic ;	inner fertile, corollas actinomorphic;	inner fertile	normal	unknown		\N
-
-
-From
-12	100.txt-12	outer and middle appressed or apices spreading , at least outer irregularly spiny_fringed , finely serrulate , spines slender , 3 – 5 mm ;	outer and middle appressed or apices spreading, at least outer irregularly spiny-fringed, finely serrulate, spines slender, 3–5 mm;	outer and middle	normal	unknown		\N
-
-Then we can infer outer can play a similar role as middle:
-From
-38	152.txt-9	outer and mid lanceolate to narrowly ovate , spines slender to stout , 1 – 5 mm ;	outer and mid lanceolate to narrowly ovate, spines slender to stout, 1–5 mm;	outer and mid	normal	unknown		\N
-
-52	157.txt-7	outer and mid lanceolate to ovate , spines 1 – 6 mm , slender and weak or broad and flat ;	outer and mid lanceolate to ovate, spines 1–6 mm, slender and weak or broad and flat;	outer and mid	normal	unknown		\N
-
-Then we can infer mid can play a similar role as outer:
-
-From893	87.txt-13	outer and middle bases appressed , apical appendages spreading to stiffly ascending , linear_lanceolate to acicular , entire , spines spreading or ascending , stout , 2 – 7 mm , often flattened ;	outer and middle bases appressed, apical appendages spreading to stiffly ascending, linear-lanceolate to acicular, entire, spines spreading or ascending, stout, 2–7 mm, often flattened;	outer and middle	normal	unknown		\N
-
-458	479.txt-11	outer ligules exserted 1 – 3 mm .	outer ligules exserted 1–3 mm.	outer ligules exserted	normal	unknown		\N
-
-483	490.txt-11	outer ligules exserted 1 – 2 mm .	outer ligules exserted 1–2 mm.	outer ligules exserted	normal	unknown		\N
-
-
-We can infer "bases" "ligules" are a structure
-
-From
-84	178.txt-7	outer usually 2 – 4 times longer than wide .	outer usually 2–4 times longer than wide.	outer usually NUMBER	normal	unknown		\N
-
-128	189.txt-12	outer sterile , corollas expanded , raylike , bilateral , 5 – many_lobed ;	outer sterile, corollas expanded, raylike, bilateral, 5–many-lobed;	outer sterile	normal	unknown		\N
-
-493	496.txt-5	outer erect or spreading , usually abaxially glabrous .	outer erect or spreading, usually abaxially glabrous (most).	outer erect or	normal	outer erect or	\N	\N
-
-504	511.txt-7	outer erect to spreading , adaxially ± tomentose ;	outer erect to spreading, adaxially ± tomentose;	outer erect to	normal	unknown		\N
-
-524	540.txt-10	outer deltate ;	outer deltate;	outer deltate	normal	unknown		\N
-
-983	949.txt-9	outer 1 . 2 – 1 . 8 mm , winged , adaxial faces papillate ;	outer 1.2–1.8 mm, winged, adaxial faces papillate;	outer NUMBER	normal	unknown		\N
-
-we can infer more boundary words.

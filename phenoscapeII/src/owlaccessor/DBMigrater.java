@@ -2,17 +2,21 @@ package owlaccessor;
 
 //import java.io.File;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.*;
 import java.util.*;
-//import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.model.OWLClass;
 
+import outputter.search.TermSearcher;
+
 /**
- * This class extracts all terms, their IDs and synonyms from PATO to database.
+ * This class extracts all terms, their IDs and synonyms from an OWL ontology to a database table.
  * 
  * 
- * @author Zilong Chang
+ * @author Zilong Chang, Hong Cui
  * 
  * */
 public class DBMigrater {
@@ -22,13 +26,14 @@ public class DBMigrater {
 	private String dburl = "jdbc:mysql://localhost:3306/";
 	private String uname = "root";
 	private String upw = "root";
+	private static final Logger LOGGER = Logger.getLogger(DBMigrater.class);   
 
 	/**
 	 * This method extracts terms, their IDs and synonyms from PATO (from web)
 	 * and stores them into a table. The table will have the structure as
 	 * follows:
 	 * 
-	 * ============================ |rid |term |termid |synonym|
+	 * |rid |term |termid |synonym|
 	 * ============================
 	 * 
 	 * rid is a auto-generated surrogate key (you don't have to worry about it)
@@ -77,7 +82,7 @@ public class DBMigrater {
 					oa = new OWLAccessorImpl(new File(url), new ArrayList<String>());
 				}
 
-				// for each pato term
+				// for each ontology term
 				for (OWLClass c : oa.getAllClasses()) {
 					String id = oa.getID(c);
 					String label = oa.getLabel(c);
@@ -101,18 +106,66 @@ public class DBMigrater {
 					}
 				}
 
-				con.close();
+				//con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
+		}
+
+		if(ontoURI.contains("/bspo.")){
+			//create and populate uniquespatialterms term
+			collectUniquespatialterms(dbName, tabName);
+		}
+		con.close();
+
+	}
+
+	/**
+	 * create and populate uniquespatialterms term
+	 * @param tableName: onto_bspo table
+	 */
+	private void collectUniquespatialterms(String dbName, String tableName) {	
+		try {
+			if(con==null){
+				Class.forName("com.mysql.jdbc.Driver");
+				con = DriverManager.getConnection(dburl + dbName, uname, upw);
+			}
+			// Drop table if exists
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("DROP TABLE IF EXISTS uniquespatialterms");
+			// Create table
+			stmt.executeUpdate("create table uniquespatialterms (term varchar(100) primary key, id varchar(50))" );
+
+			ArrayList<String> terms = new ArrayList<String>();
+			Statement insert = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select term, synonym, termid from "+tableName+ " where LEFT(termid, 4)='BSPO'");
+			while(rs.next()){
+				String t = rs.getString("term").trim();
+				if(t.indexOf(" ")>0) t = t.substring(0, t.indexOf(" "));
+				if(!terms.contains(t)){
+					terms.add(t);
+					insert.execute("insert into uniquespatialterms (term, id) values ('"+t+"','"+rs.getString("termid")+"')");
+				}
+				t = rs.getString("synonym");
+				if(t!=null){
+					t = t.trim();
+					if(t.indexOf(" ")>0) t = t.substring(0, t.indexOf(" "));
+					if(!terms.contains(t)){
+						terms.add(t);			
+						insert.execute("insert into uniquespatialterms (term, id) values ('"+t+"','"+rs.getString("termid")+"')");
+					}
+				}
+			}				
+		}catch(Exception e){
+			LOGGER.error("", e);
 		}
 
 	}
-	
+
 	public void migrateKeywords(String dbName, String tabName, String ontoURI){
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -145,7 +198,7 @@ public class DBMigrater {
 				for (OWLClass c : oa.getAllClasses()) {
 					String id = oa.getID(c);
 					String label = oa.getLabel(c);
-					
+
 					//keywords of the term itself
 					for (String k:oa.getKeywords(c)){
 						stmt.executeUpdate("INSERT INTO " + tabName
@@ -155,7 +208,7 @@ public class DBMigrater {
 								+ "','" + k.trim().replaceAll("'", "''")
 								+ "')");
 					}
-					
+
 					//add parents' keywords
 					for(OWLClass p:((OWLAccessorImpl)oa).getParents(c)){
 						for (String k:oa.getKeywords(p)){
@@ -173,14 +226,14 @@ public class DBMigrater {
 				con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
@@ -206,55 +259,55 @@ public class DBMigrater {
 			Class.forName("com.mysql.jdbc.Driver");
 			try {
 				con = DriverManager.getConnection(dburl + dbName, uname, upw);
-				
+
 				Statement s = con.createStatement();
 				ResultSet rs = s.executeQuery("select term from "+source+" where termid like '"+sourceID.toUpperCase()+":%'");
-				
+
 				Set<String> structures = new HashSet<String>();
-				
+
 				while(rs.next()){
 					String term = rs.getString("term");
 					structures.add(this.getLastWord(term));
 				}
-				
+
 				Statement s1 = con.createStatement();
 				for(String str:structures){
 					s1.executeUpdate("INSERT INTO "+destination+" values('"+str+"','','')");
 				}
-				
+
 				con.close();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("", e);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 
 	}
-	
+
 	public static void main(String[] args) {
 		DBMigrater dbm = new DBMigrater();
 		// String url = "http://purl.obolibrary.org/obo/pato.owl";
 		// String tname = "ontoPATO";
 		// String url = "http://purl.obolibrary.org/obo/tao.owl";
 		// String tname = "ontoTAO";
-		String url = "http://www.berkeleybop.org/ontologies/bspo.owl";
-		String tname = "ontoBSPO";
-//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
-//		String tname = "ontoVAO";
-//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\aa.owl";
-//		String tname = "ontoAMAO";
-//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
-//		String tname = "ontoVAO";
-	
+		String url = "http://purl.obolibrary.org/obo/bspo.owl";
+		String tname = "onto_BSPO";
+		//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
+		//		String tname = "ontoVAO";
+		//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\aa.owl";
+		//		String tname = "ontoAMAO";
+		//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
+		//		String tname = "ontoVAO";
+
 		try{
 			dbm.migrate("biocreative2012", tname, url);
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
-		
+
 		//dbm.addToStructureWords("phenoscape", "ontoamao","AMAO","learnedstructurewords_ini_onto_lastword");
 		//System.out.println("DONE!");
 

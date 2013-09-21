@@ -9,8 +9,9 @@ package conceptmapping;
  *
  */
 import java.util.*;
-
 import java.io.*;
+
+import org.apache.log4j.Logger;
 @SuppressWarnings({ "unused" })
 public
 class StreamGobbler extends Thread
@@ -23,6 +24,7 @@ class StreamGobbler extends Thread
     static int h = 0;
     static int t = 0;
     static boolean debug = false;
+    private static final Logger LOGGER = Logger.getLogger(StreamGobbler.class);  
     
     public StreamGobbler(InputStream is, String type, ArrayList<String> headings, ArrayList<String> trees)
     {
@@ -53,8 +55,8 @@ class StreamGobbler extends Thread
 				if (sb.toString().trim().length() > 0) {
 					trees.add(sb.toString());
 				}
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
+			} catch (IOException e) {
+				LOGGER.error("", e);
 			}
 		//}
 	}

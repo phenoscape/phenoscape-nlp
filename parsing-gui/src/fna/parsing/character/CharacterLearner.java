@@ -162,26 +162,7 @@ public class CharacterLearner  implements Learn2Parse{
 		b.go();
 	}
 	
-	public void markupCharState(){
-		sentences2clauses(); //break sentences into clauses at appropriate places if needed, create clause table
-		try{
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select clauseid, tag, clause, charsegment from "+this.tablePrefix+"_clause");
-			while(rs.next()){
-				int clauseid = (int)rs.getInt("clauseid");
-			//	String tag = (String)rs.getString("tag");
-				String sent = (String)rs.getString("clause");
-				String charsegment = (String)rs.getString("charsegment");
-				String attributes = generateAttributes(sent, charsegment);
-				Statement stmt1 = conn.createStatement();
-				stmt1.execute("update "+this.tablePrefix+"_clause set attributes = \""+attributes+"\" where clauseid = "+clauseid);
-			}
-
-		}catch (Exception e){
-			LOGGER.error("Exception in  CharacterLearner markupCharState" + e);
-			e.printStackTrace();
-		}
-	}
+	
 	
 	@SuppressWarnings("unused")
 	private void assembleDescription(){

@@ -2,7 +2,7 @@
 SQLyog Community v10.51 
 MySQL - 5.5.29 : Database - biocreative2012
 *********************************************************************
-*/
+*/
 
 /*!40101 SET NAMES utf8 */;
 

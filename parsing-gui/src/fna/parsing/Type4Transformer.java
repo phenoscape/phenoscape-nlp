@@ -177,8 +177,7 @@ public abstract class Type4Transformer extends Thread {
 		
 	}
 
-	protected void writeTreatment2Transformed(Element root, int fn, int count) {
-		// TODO Auto-generated method stub
+	protected void writeTreatment2Transformed(Element root, int fn, int count) {		
 		ParsingUtil.outputXML(root, new File(target+System.getProperty("file.separator")+"transformed", fn+"_"+count+".xml"), null);
 	}
 
