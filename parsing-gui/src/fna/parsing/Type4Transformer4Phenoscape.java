@@ -4,8 +4,10 @@
 package fna.parsing;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -16,7 +18,7 @@ import org.jdom.xpath.XPath;
  *transform NeXML files
  */
 public class Type4Transformer4Phenoscape extends Type4Transformer {
-
+	ArrayList<Treatment> treatments = new ArrayList<Treatment>();
 	/**
 	 * @param listener
 	 * @param dataprefix
@@ -52,7 +54,8 @@ public class Type4Transformer4Phenoscape extends Type4Transformer {
 				root.detach();
 				writeTreatment2Transformed(root, fn, 0);
 				listener.info((number++)+"", fn+"_0.xml"); // list the file on GUI here
-		        getDescriptionFrom(root,fn, 0);						
+		        getDescriptionFrom(root,fn, 0);		
+		        populateTreatments(root, files[f]);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -60,6 +63,25 @@ public class Type4Transformer4Phenoscape extends Type4Transformer {
 		}
 
 	}
+
+
+	/**
+	 * 
+	 * @param root
+	 * @param file
+	 */
+	private void populateTreatments(Element root, File file) {
+		String filename = file.getName();
+		try{
+			List<Element> descriptions = XPath.selectNodes(root,"/treatment/statement");
+			//Treatment t = new Treatment();
+		}catch(Exception e){
+			e.printStackTrace();
+			LOGGER.error("Type4Transformer : populateTreatments.", e);
+		}
+		
+	}
+
 	@SuppressWarnings("unchecked")
 	protected void getDescriptionFrom(Element root, int fn,  int count) {
 

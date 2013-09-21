@@ -4,7 +4,9 @@
  */
 package fna.charactermarkup;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
 
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 
 import fna.parsing.ApplicationUtilities;
+import fna.parsing.MainForm;
 import fna.parsing.state.StateCollector;
 import fna.parsing.state.WordNetWrapper;
 import java.util.ArrayList;
@@ -152,8 +155,17 @@ public class Utilities {
 		return false;
 	}
 	
+	/**
+	 * 	position terms from BSPO are in the glossary as of 052513		
+		relational adjectives from URBERON are considered structures (and not spatial term) and are in the glossary too	
+	 * @param term
+	 * @param conn
+	 * @param glossary
+	 * @return
+	 */
 	public static boolean isPosition(String term, Connection conn, String glossary) {
 		try{
+			//position term in gloss
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select term from "+glossary+" where category in ('position') and term='"+term+"'");		
 			if(rs.next()){
@@ -234,7 +246,7 @@ public class Utilities {
 			notnouns.add(word);
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			notnouns.add(word);
 			return false;
 		}
@@ -263,7 +275,7 @@ public class Utilities {
 		if(!word.matches(".*?[a-z]+.*")){
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			return false;
 		}
 		if(verbs.contains(word)){
@@ -311,7 +323,7 @@ public class Utilities {
 			notadverbs.add(word);
 			return false;
 		}
-		if(word.matches("\\b("+StateCollector.stop+")\\b")){
+		if(word.matches("\\b("+ChunkedSentence.stop+")\\b")){
 			notadverbs.add(word);
 			return false;
 		}
@@ -415,6 +427,18 @@ public class Utilities {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static void insert2TermCategoryTable(String term, String cat, Connection conn, String prefix) {
+		try{
+			String sql = "insert into " + prefix +"_term_category values (?,?)";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, term);
+			pstmt.setString(2, cat);
+			pstmt.execute();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -578,10 +602,50 @@ public class Utilities {
 			return str;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param text does [not] overlap 
+	 * @return '[not] overlapping' --remove does and add -ing to signal overlap is a word
+	 */
+	public static String reformAuxiliaryVerbs(String text) {	
+		String[] segments = text.split("\\b(does|do)\\b");
+		String newtext = segments[0];
+		for(int i = 1; i<segments.length; i++){
+			String segment = segments[i].trim();
+			boolean found = false;
+			while(segment.indexOf(" ")>0){
+				String word = segment.substring(0, segment.indexOf(" "));
+				segment = segment.substring(segment.indexOf(" ")).trim();
+				WordNetWrapper wnw = new WordNetWrapper(word);
+				if(wnw.isV()){
+					newtext += " "+word+"ing";
+					newtext += " "+segment;
+					found = true;
+					break;
+				}
+				newtext+=" "+word;
+			}
+			if(!found){
+				//last word in text
+				WordNetWrapper wnw = new WordNetWrapper(segment);
+				if(wnw.isV()){
+					newtext += " "+segment+"ing";
+				}
+			}
+		}
+		return newtext.trim();
+	}
+	
+
 
 	public static void main(String[] argv){
+		
+		System.out.println(reformAuxiliaryVerbs("does often overlap abc , does not usually overlap"));
 		//TermOutputerUtilities.lookupCharacter(w, conn, characterhash)
 		//System.out.println(TermOutputerUtilities.isNoun(",", new ArrayList<String>()));
 		//System.out.println(TermOutputerUtilities.isAdv("much", new ArrayList<String>()));
 	}
+
+
 }

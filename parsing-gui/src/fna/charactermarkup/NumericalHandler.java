@@ -66,13 +66,16 @@ public class NumericalHandler  {
 	 * @return true if token represents an expression of a discrete numerical value, not a range which is represented by this.numberpattern
 	 */
 	public static boolean isNumerical(String token){
-		if(token.matches(".*?\\d+\\+?%?\\??\\]?$")){
+		String t = token.replaceAll("([({\\[]|-L[RS]B-)", "(");
+		 t = t.replaceAll("([)}\\]]|-R[RS]B-)", ")");
+		if(t.matches("\\(?\\d.*?\\d+\\+?%?\\??\\)?$")){
 			return true;
 		}
-		if(token.matches(".*?\\d+.*-RRB-/-RRB-$")){
-			return true;
-		}
-		return false;
+		//if(token.matches(".*?\\d+.*-RRB-/-RRB-$")){
+		//if(token.matches(".*?\\d+.*-R[RS]B-/-R[RS]B-$")){
+		//	return true;
+		//}
+		return false;	
 	}
 	/**
 	 * 

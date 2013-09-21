@@ -1,12 +1,15 @@
 package outputter;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -22,6 +25,7 @@ public class XML2Trait {
 	private Connection conn;
 	private String username = "root";
 	private String password = "root";
+	private static final Logger LOGGER = Logger.getLogger(XML2Trait.class);   
 	/**
 	 * 
 	 */
@@ -30,6 +34,7 @@ public class XML2Trait {
 		this.outputtable = outputtable;
 		try{
 			if(conn == null){
+				
 				Class.forName("com.mysql.jdbc.Driver");
 				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
 				conn = DriverManager.getConnection(URL);
@@ -38,7 +43,7 @@ public class XML2Trait {
 				stmt.execute("create table if not exists "+outputtable+" (id int(11) not null unique auto_increment primary key, source varchar(500), description text, trait varchar(500))");
 				}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -62,7 +67,7 @@ public class XML2Trait {
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -85,7 +90,8 @@ public class XML2Trait {
 			stmt.execute(q);
 			System.out.println("trait:"+trait);
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
+			
 		}
 	}
 
@@ -95,7 +101,7 @@ public class XML2Trait {
 			if(structure==null)return "REF";
 			return ((structure.getAttribute("constraint")==null? "" : structure.getAttributeValue("constraint"))+" "+structure.getAttributeValue("name")).trim();
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		return null;
 	}
@@ -112,7 +118,7 @@ public class XML2Trait {
 				addTrait(src, text, structname+" "+charaName);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 		
 	}

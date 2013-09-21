@@ -91,7 +91,7 @@ public class WordNetWrapper {
 	}
 	
 	public static void main(String[] args) {
-		WordNetWrapper wnw = new WordNetWrapper("1-(2+)-pinnately"); 
+		WordNetWrapper wnw = new WordNetWrapper("overlaping"); 
 		System.out.println(wnw.isAdj());
 		System.out.println(wnw.isAdv());
 		System.out.println(wnw.isN());

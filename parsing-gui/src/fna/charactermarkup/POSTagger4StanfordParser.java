@@ -15,11 +15,10 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import outputter.knowledge.TermOutputerUtilities;
 import fna.parsing.ApplicationUtilities;
 import fna.parsing.state.SentenceOrganStateMarker;
 import conceptmapping.*;
-
-
 
 
 /**
@@ -40,22 +39,35 @@ public class POSTagger4StanfordParser {
 	public static String comprepstring = SentenceOrganStateMarker.compoundprep.replaceAll(" ", "-");
 	private static Pattern compreppattern = Pattern.compile("\\{?("+comprepstring+")\\}?");
 	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]+\\s+[<{]*view[}>]*)(\\s.*)"); to match in dorsal view
-	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
-	private String countp = "more|fewer|less|\\d+";
+	//private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(\\s.*)"); //to match in dorsal view and in profile
+	private Pattern viewptn = Pattern.compile( "(.*?\\b)(in\\s+[a-z_<>{} -]*\\s*[<{]*(?:view|profile)[}>]*)(.*)"); //to match in dorsal view and in profile
+	private String countp = "more|fewer|less|many|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 
 	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?!%))?)");
 	private ArrayList<String> prepphrases = new ArrayList<String>();
-	private String positions = "equal|subequal"; //initialized with two values that are not positions for convenience
+	private String positions = ""; //initialized with two values that are not positions for convenience
 	private Pattern positionptn2;
+	private String characterptn;
+	Pattern pof1 = Pattern.compile("(.*?)\\{?("+this.characterptn+")\\}? of (.*?<\\w+>.*)");
+	Pattern p1 = Pattern.compile("(.*<\\w+> )\\{?("+this.characterptn+")\\}?");
+	Pattern pof2 = Pattern.compile("\\{?("+this.characterptn+")\\}? of ((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)(.*)");
+	Pattern p2 = Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)\\{?("+this.characterptn+")\\}?(.*)");
+	Pattern pof3=Pattern.compile("((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)");
+	Pattern p3=Pattern.compile("\\{?("+this.characterptn+")\\}?");
+	String structs = "((?:<?\\{?("+this.positions+")\\}?>? |<\\w+> |of )+)";
+	private boolean printRelative=true;
+	private boolean printfromto = true;
+	
 
 	/**
 	 * 
 	 */
-	public POSTagger4StanfordParser(Connection conn, String tableprefix, String glosstable) {
+	public POSTagger4StanfordParser(Connection conn, String tableprefix, String glosstable, String characterptn) {
 		this.conn = conn;
 		this.tableprefix = tableprefix;
 		this.glosstable = glosstable;
+		this.characterptn = characterptn;
 		try{
 			Statement stmt = this.conn.createStatement();
 			ResultSet rs = stmt.executeQuery("select distinct phrase from "+tableprefix+"_prepphrases");
@@ -68,7 +80,9 @@ public class POSTagger4StanfordParser {
 				positions += rs.getString(1).replaceAll("\\(.*?\\)", "")+"|";
 			}
 			positions = positions.replaceFirst("\\|$", "");
-			positionptn2 = Pattern.compile("(.*?)([<{]?\\b(?:"+this.positions+")\\b[}>]?\\s+to)(\\b.*)");			
+			positionptn2 = Pattern.compile("(.*?)([<{]?\\b(?:"+this.positions+")\\b[}>]?\\s+to)(\\b.*)");		
+			
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -93,7 +107,9 @@ public class POSTagger4StanfordParser {
 				str = str.replaceAll("\\s+or\\s+-\\{", "-or-").replaceAll("\\s+to\\s+-\\{", "-to-").replaceAll("\\s+-\\{", "-{");
 			}*/
 
-			if(str.matches(".*?-(or|to)\\b.*") || str.matches(".*?\\b(or|to)-.*") ){//1–2-{pinnately} or-{palmately} {lobed} => {1–2-pinnately-or-palmately} {lobed}
+			//if(str.matches(".*?-(or|to)\\b.*") || str.matches(".*?\\b(or|to)-.*") ){//1–2-{pinnately} or-{palmately} {lobed} => {1–2-pinnately-or-palmately} {lobed}
+            //to avoid turning 'relative-to its {length}'  to 'relative-to-its {length}'
+			if(str.matches(".*?-(or|to)\\s+[^a-z<].*") || str.matches(".*?\\b(or|to)-.*") ){//1–2-{pinnately} or-{palmately} {lobed} => {1–2-pinnately-or-palmately} {lobed}
 				str = str.replaceAll("\\}?-or\\s+\\{?", "-or-").replaceAll("\\}?\\s+or-\\{?", "-or-").replaceAll("\\}?-to\\s+\\{?", "-to-").replaceAll("\\}?\\s+to-\\{?", "-to-").replaceAll("-or\\} \\{", "-or-").replaceAll("-to\\} \\{", "-to-");
 			}
 			//{often} 2-, 3-, or 5-{ribbed} ; =>{often} {2-,3-,or5-ribbed} ;  635.txt-16
@@ -141,9 +157,9 @@ public class POSTagger4StanfordParser {
 	        	str = normalizeSameAs(str);
 	        }
 	        
-	        if(str.matches(".*?\\bin\\b.*?\\bassociation\\W+(with|to)\\b.*")){
-	        	str = normalizeAssociationWith(str);
-	        }
+	        //if(str.matches(".*?\\bin\\b.*?\\bassociation\\W+(with|to)\\b.*")){
+	        //	str = normalizeAssociationWith(str);
+	        //}
 	        
 	        
 	        if(str.matches(".*?(?<=[a-z])/(?=[a-z]).*")){
@@ -217,6 +233,8 @@ public class POSTagger4StanfordParser {
 				}
 
 				str = handleBrackets(str);
+				str = stringCharacterComparison(str);
+				str = normalizefromto(str);
 				if(type.compareTo("character")==0){//{postorbital} , {form} of {dorsal} <surface>
 					String temp = str;
 					str = str.replaceFirst("(?<=^|,\\s)\\{?\\w+\\}? of ", "").trim(); //shape of 
@@ -270,33 +288,33 @@ public class POSTagger4StanfordParser {
 	        		Matcher mc = compreppattern.matcher(word);
 	        		if(mc.matches()){
 		        		   sb.append(word+"/IN ");
-	        		}
-	        	   //if(word.matches("in-.*?-view")){
-	        		else if(word.matches("in-.*?(-view|profile)")){
+	        		}else if(word.contains("relative~")){
+	        			 sb.append(word+"/JJ ");
+	        		}else if(word.matches("in-.*?(-view|profile)")){
 	        		   sb.append(word+"/RB ");
-	        	   }
-	        	   //if(word.matches("in-profile")){
-        		   //sb.append(word+"/RB ");
-        	   //}
-	        	   else if(word.endsWith("-PPP")){//prepphrase in_association_with
+	        	   }else if(word.matches("from~.*?~to~.*")){
+	        		   sb.append(word+"/RB ");
+	        	   }else if(word.endsWith("-PPP")){//prepphrase in_association_with
 	        		   sb.append(word.replaceFirst("-PPP", "")+"/IN ");
 	        	   }else if(word.endsWith("ly") && word.indexOf("~") <0){ //character list is not RB
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("becoming")==0 || word.compareTo("about")==0){
 	        		   sb.append(word+"/RB ");
-	        	   }else if(word.compareTo("throughout")==0 && tokens[i+1].matches("(,|or)")){
+	        	   }else if(word.compareTo("throughout")==0 && i+1 < tokens.length && tokens[i+1].matches("(\\.|;|,|or)")){
+	        		   sb.append(word+"/RB ");
+	        	   }else if(word.compareTo("throughout")==0 && i+1 >= tokens.length){
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("at-least")==0){
 	        		   sb.append(word+"/RB ");
 	        	   }else if(word.compareTo("one_another")==0){
-	        		   sb.append(word+"/NNS ");
+	        		   sb.append(word+"/NN ");
 	        	   }else if(word.compareTo("plus")==0){
 	        		   sb.append(word+"/CC ");
 	        	   }else if(word.matches("\\d+[cmd]?m\\d+[cmd]?m")){ //area turned into 32cm35mm
 	        		   //sb.append(word+"/CC ");
 	        		   sb.append(word+"/CD ");
 	        	   }else if(word.matches("("+ChunkedSentence.units+")")){
-	       			   sb.append(word+"/NNS ");
+	       			   sb.append(word+"/NN ");
 	       		   }else if(word.matches("as-\\S+")){ //as-wide-as
 	       		   	   sb.append(word+"/IN "); //changed from RB to IN 2/22/02 by Hong
 	       		   }else if(word.matches("same-\\S+")){ //same-as
@@ -305,7 +323,7 @@ public class POSTagger4StanfordParser {
 	       		   	   sb.append(word+"/IN "); //added 2/22/02 by Hong
 	       		   }else if(p.contains("op")){ //<inner> larger.
 	       				//System.out.println(rs1.getString(2));
-	       			   sb.append(word+"/NNS ");
+	       			   sb.append(word+"/NN ");
 	       		   }else if(p.contains("os") || pos.indexOf('<') >=0){
 	       			   sb.append(word+"/NN ");
 	       		   }else if(p.contains("c")|| pos.indexOf('{') >=0){
@@ -335,7 +353,127 @@ public class POSTagger4StanfordParser {
 		}
 		//return "";
 	}
-		
+	
+	private String normalizefromto(String str) {
+		String cp = str;
+		boolean changed = false;
+		if(str.matches(".*\\bfrom .*? to\\b.*")){
+			Pattern struct = Pattern.compile("(.*?)(\\bfrom (?:<?\\{?(?:"+this.positions+")\\}?>? |<\\w+> |of |the )+to (?:<?\\{?(?:"+this.positions+")\\}?>? |<\\w+> |of |the )+)(.*)");
+			Matcher m = struct.matcher(str+" "); //need the trailing space
+			while(m.matches()){
+				str = m.group(1)+m.group(2).trim().replaceAll(" ", "~")+" "+m.group(3);
+				m = struct.matcher(str);
+				changed = true;
+			}
+					
+			if(this.printfromto && changed){
+				System.out.println("normalized from-to from:"+cp);
+				System.out.println("normalized from-to to: "+str);
+			}
+		}
+		return str;
+	}
+
+	/**
+	 * {width} of <ethmoid> relative-to its {length} from <snout> <tip> to the {posterior} <{margin}> of the <parietals>
+	 * @param str [char of A|A char] [relative-to|<=|>=|=|x times] [char of B|B char]
+	 * @return {relative~{A~char}~{relation}~{B~char}}, assign JJ as its post
+	 */
+	private String stringCharacterComparison(String str) {
+		//width of A relative-to length of B
+		//width of A relative to B
+		//A width relative to length of B
+		//A width relative to B
+		//width of A relative to length
+		String cp = str;
+		Pattern relations = Pattern.compile("(.*?)\\b(relative-to|[\\w-]+equal-to|[\\w]+er\\}? than|times)\\b(.*)");
+		Matcher m = relations.matcher(str);
+		if(m.matches() && str.indexOf("<")>=0 && str.matches(".*?\\b("+this.characterptn+")\\b.*")){ //mostly like a comparison of characters
+			if(m.group(1).trim().length()>0 && m.group(3).trim().length()>0){
+				String[] part1 = pullCharacterInfo(m.group(1).trim(), "part1");
+				String[] part2 = pullCharacterInfo(m.group(3).trim(), "part2");
+				String relation = m.group(2);
+				if(part1[0]!=null && part2[0]!=null && part1[0].length()>0 && part2[0].length()>0){
+					str = part1[1]+" {relative~{"+part1[0]+"}~{"+relation+"}~{"+part2[0]+"}} " +part2[1];
+					if(this.printRelative){
+						System.out.println(cp);
+						System.out.println("after relative reformation:" + str);
+					}
+					return str;
+				}
+			}
+		}
+		return str;
+	}
+	
+	
+	/**
+	 * part1:
+	 * input string: {width} of <ethmoid>
+	 * output string[0]: ethmoid~width string[1]: ""
+	 * part2: 
+	 * input string: its {length} from <snout> <tip> to the {posterior} <{margin}> of the <parietals>
+	 * output string[0]: length; [1] from <snout> <tip> to the {posterior} <{margin}> of the <parietals>
+	 * @param str a string containing an organ or a character or both
+	 * @return two text segments: the first is the organ~character pair (if not found, the first element = ""), the text that to the left or right of the organ~character pair makes the second segment
+	 */
+	private String[] pullCharacterInfo(String str, String part){
+		String[] result = new String[2];
+
+		if(part.compareTo("part1")==0){
+			//find the last structure and character
+			Matcher m = pof1.matcher(str);
+			if(m.matches()){
+				result[1] = m.group(1).trim();
+				result[0] = m.group(3).replaceAll("[{<>}]", "").trim().replaceAll(" ",  "-")+"~"+m.group(2);
+				return result;
+			}
+			m = p1.matcher(str);
+			if(m.matches()){
+				String temp = m.group(1);//ends with a space
+				String ch = m.group(2);
+				result[1] = temp.replaceFirst("(<?\\{?(this.positions)\\}?>? |<\\w+> |of )+$", "").trim();
+				result[0] = temp.replace(result[1], "").trim().replaceAll("[{<>}]", "").replaceAll(" ",  "-")+"~"+ch;
+				return result;
+			}			
+		}else{
+			//find the first structure/character (may just have one of the two)
+			//contain both elements
+			Matcher m = pof2.matcher(str);
+			if(m.matches()){
+				result[1] = m.group(4).trim();
+				result[0] = m.group(2).replaceAll("[{<>}]", "").trim().replaceAll(" ",  "-")+"~"+m.group(1);
+				return result;
+			}
+			m = p2.matcher(str);
+			if(m.matches()){
+				result[1] = m.group(4).trim();
+				result[0] = m.group(1).replaceAll("[{<>}]", "").trim().replaceAll(" ",  "-")+"~"+m.group(3);
+				return result;
+			}
+			str = str+" "; //need the trailing space
+			//contain one of the two
+			m = pof3.matcher(str);
+			int starto=1000, endo=1000, startc=1000, endc=1000, start=0, end=0;
+			if(m.find()){
+				starto = m.start();
+				endo = m.end();
+			}
+			m = p3.matcher(str);
+			if(m.find()){
+				startc = m.start();
+				endc = m.end();
+			}
+			start = starto<startc? starto:startc;
+			if(start == starto) end = endo;
+			else end = endc;
+			result[0] = str.substring(start, end).replaceAll("[<{}>]", "").trim();
+			result[1] = str.substring(end).trim();
+			return result;
+		}					
+		return result;
+	}
+
 	/** 	
 	 * @param str: {upper} {pharyngeal} <tooth> <plates> 4 and 5
 	 * @return: {upper} {pharyngeal} <tooth> <plates_4_and_5>
@@ -402,7 +540,12 @@ public class POSTagger4StanfordParser {
 				int start = m.start(1);
 				int end = m.end(1);
 				String count = m.group(1).trim();
-				String rcount = "{count~list~"+count.replaceAll(" ","~").replaceAll("[{}]", "")+"}";
+				String rcount = "";
+				if(count.compareTo("more or less")==0){
+					rcount = count.replaceAll(" ","-").replaceAll("[{}]", "");
+				}else{
+					rcount = "{count~list~"+count.replaceAll(" ","~").replaceAll("[{}]", "")+"}";
+				}
 				//synchronise this.chunkedtokens
 				//split by single space to get an accurate count to elements that would be in chunkedtokens
 				int index = (str.substring(0, start).trim()+" a").trim().split("\\s").length-1; //number of tokens before the count pattern
@@ -466,7 +609,7 @@ public class POSTagger4StanfordParser {
 		/**
 		 * make  "suffused with dark blue and purple or green" one token
 		 * ch-ptn"color % color color % color @ color"
-		 * @return
+		 * @return {color~list~color1~color2}
 		 */
 	private String normalizeColorPatterns() {
 		String list = "";
@@ -650,7 +793,7 @@ public class POSTagger4StanfordParser {
 	 * color, color, or color
 	 * color or color to color
 	 * 
-	 * {color-blue-to-red}
+	 * {color~list~blue~to~red}
 	 * @return updated string
 	 */
 	private String normalizeCharacterLists(){
@@ -732,7 +875,7 @@ public class POSTagger4StanfordParser {
 	 * as wide as long
 	 * @return
 	 */	
-	private String normalizeAssociationWith(String str) {
+	/*private String normalizeAssociationWith(String str) {
 		String result = "";
 		Pattern p = Pattern.compile("(.*?\\b)(in\\b.*?\\bassociation\\W+(?:with|to))(\\b.*)");
 		Matcher m = p.matcher(str);
@@ -744,7 +887,7 @@ public class POSTagger4StanfordParser {
 		}
 		result+=str;
 		return result.replaceAll("\\{+", "{").replaceAll("\\}+", "}").trim();
-	}
+	}*/
 
 
 	/**
@@ -793,7 +936,7 @@ public class POSTagger4StanfordParser {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		/*
 		//File posedfile = new File(posedfile); 
 		//File parsedfile = new File("");
 		String database = "fnav19_benchmark";
@@ -831,7 +974,7 @@ public class POSTagger4StanfordParser {
 		System.out.println(tagger.POSTag(str, src, "description")); //type is one of "character" and "description"
 		}catch(Exception e){
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }

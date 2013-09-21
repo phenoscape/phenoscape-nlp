@@ -1,0 +1,265 @@
+#Database related data, use biocreative2012 for phenoscape project related data processing
+#fill in database.name, database.username, and database.password
+database.name=
+database.username=
+database.password=
+database.driverPath=com.mysql.jdbc.Driver
+
+#replace [] with info given above
+database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&password=[database.password]
+
+#fill in ontology.dir, uberphrases.bin, wordnet.dictionary, and the file name of uberon ontology without .owl extension
+ontology.dir=
+uberonphrases.bin=
+uberonphrases.update.bin=
+uberonphrases.p2s.bin=
+wordnet.dictionary=
+ontology.uberon=
+
+#filepath to notepad or any text viewer to view xml output
+#notepad=C:/Windows/notepad.exe
+notepad=
+####################################DO NOT EDIT THE FOLLOWING######################################
+elk.printmessage=false
+finalizer.standalone=false
+
+#XML Schema
+source.attribute.name=source_pdf
+#unknown.structure.name must be one word:
+unknown.structure.name=whole_organism
+
+# Data individual to mark up
+style.mapping=style-mapping.properties
+MARKEDUP=markedup
+FINAL=final
+UNSUPERVISED=../Unsupervised/unsupervisedClauseMarkupBenchmarked.pl 
+#PARAGRAPHBOOTSTRAP=..\\paragraphExtraction\\bootstrapDescriptionExtraction.pl
+EXTRACTED=extracted
+EXTRACTEDWORD=extractedword
+TRANSFORMED=transformed
+DESCRIPTIONS=descriptions
+CHARACTERS=characters
+HABITATS=habitats
+#DEHYPHENED=descriptions-dehyphened
+CHARACTER-STATES=co-occurrence
+POSED=posedsentences.txt
+PARSED=parsedsentences.txt
+POSTABLE=wordpos
+NONEQTERMSTABLE=noneqterms
+#aggregated list
+NONEQTABLE=noneqwordlist
+GLOSSTABLE=glossaryfixed
+WORDROLESTABLE=wordroles
+UNKNOWNWORDS=unknownwords
+#ALLWORDS=allwords
+ALLWORDS=unknownwords
+HEURISTICNOUNS=heuristicnouns
+SENTENCETABLE=sentence
+STRUCTURECATEGORIESINGLOSSARY='STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'life_style'
+STRUCTURECATEGORYPATTERNINGLOSSARY=STRUCTURE|FEATURE|SUBSTANCE|PLANT|nominative|structure|life_style
+
+# database volume description table names
+taxontable=taxon
+authortable=author
+publicationtable=publication
+
+#Type of document
+TYPE3=type3
+TYPE4=type4
+
+#Logger Configuration
+LOG=/Logs/markup.log
+LOG.APPENDER=log4j.appender.ROOT.File=
+LOG.FILE.LOCATION=/log4j.properties
+
+#Pop Up Information
+popup.header.error=Error!
+popup.header.info=Information
+popup.header.missing=Missing Information
+popup.header.warning=Warning!
+popup.header.character=Next steps for further grouping
+
+#added on March 1st
+popup.load.nodata=No data to load. Please proceed to the next tab.
+popup.error.config=Configuration Directory is not selected.\n
+popup.error.target=Target Directory is not selected.\n
+popup.error.source=Source Directory is not selected.\n
+popup.error.dataset=Dataset is not entered or selected.\n
+popup.error.info=You can't proceed further unless you've entered information in all the required fields.
+popup.error.msg=The Application encountered an internal error while processing your request.
+popup.error.tab=You can't visit this tab unless you have completed 
+popup.error.style=You need to select start style(s) or a different document type if you don't have a start style
+popup.editor.msg=Text Editor not found at C:/Windows/notepad.exe, can't open the file.
+popup.info.save=You can't save unless you've entered information in the fields.
+popup.info.saved=The configuration you have entered has been saved for future reference. You can load this configuration later.
+popup.info.prefix=You need to enter a prefix for creating a marked-up data set.
+popup.info.prefix.save=Your document will be marked up and saved in the following steps with the prefix you have chosen.
+popup.info.type1=You have identified your document type as Type 1.
+popup.info.savetype1.tag=Style Tag property file has been successfully saved at 
+popup.info.savetype3=The text you entered has been successfully saved for markup reference
+popup.info.logpath=This is the first time you are running the application. Please restart the application \
+ as it will exit after setting the message logging path to 
+popup.info.unknownremoval=All sentences are tagged and saved. System is preparing for the next step. \r\n See "Context" box for further instructions.  
+popup.charstates.info=You have completed grouping all the terms that were generated in the "unknown removal" \
+step. A group with the removed terms will now be shown for further grouping. \n\nThis step will delete the \
+removed terms from individual groups and place them in a pool on the newly generated group. So, you will not be \
+able to put the removed terms back to their original co-occurrence position in the previous groups. \n\nFollowing this step, \
+you can continue grouping the terms. \n\nDo you want to continue?
+popup.char.cont=A few terms are still not placed in any group. If you decide to continue, a new group \
+with those terms will be generated. Do you like to group them now?
+popup.char.missing=There are terms not categorized \nClick Yes if you'd like to save categorized terms and move on.\nClick No if you'd like to fill the blanks.
+popup.warning.copyfiles=Files with the same names are found in Characters and Descriptions folders. \nCopying files from Characters folder to Descriptions folder is not performed
+
+#names
+application.name=CharaParser for Phylogenetic Descriptions
+application.instructions=Start from General, go through each tab (i.e. step) to complete the parsing process of a volume of\r\nFNA. \
+Save configuration information entered on General tab so next time it can be simply loaded.\r\nTo continue work from the tab where you\
+ left last time, load configuration information and jump \r\n the tab. Repeatedly run Verification until there is no error reported\
+  before proceeding to\r\nTransformation. It's good to do so for other steps that need expert intervention.
+
+
+
+#images
+application.logo=UA_horiz_color_250_no tag.gif
+image.type1=type1.JPG
+image.type2=type2.JPG
+image.type3=type3.JPG
+image.type4=type4.JPG
+
+
+#tab names
+tab.one.name=General
+#transformation
+tab.two.name=Step 1
+#perl and term curation
+tab.three.name=Step 2
+#final
+tab.four.name=Step 3
+#tab.one.name=General
+##tab.two.name=Segmentation
+#tab.two.name=Step 1
+##tab.three.name=Verification
+#tab.three.name=Step 2
+##tab.four.name=Transformation
+#tab.four.name=Step 3
+##tab.five.name=MarkUp && Correction
+#tab.five.name=Step 4
+##tab.six.name="unknown" Removal
+#tab.six.name=Step 5
+##tab.seven.name=Finalizer
+#tab.seven.name=Step 7
+##tab.eight.name=Glossary
+##tab.character=Character States
+#tab.character=Step 6
+
+#Type 2 - Nomenclature tab
+Type1=Family
+Type2=Genus
+Type3=Species
+
+#Web Services
+GNI=http://gni.globalnames.org/name_strings.xml?search_term=
+IPNI=http://www.w3.org/2007/08/pyRdfa/extract?uri=http%3A//www.ipni.org/ipni/simplePlantNameSearch.do%3Fsource%3Dtoolbar%26find_wholeName%3D
+PLAZI=http://plazi2.cs.umb.edu:8080/OmniFAT/find_names
+HNS=http://osuc.biosci.ohio-state.edu/hymDB/tnulu?the_name=
+ZOOBANK=http://www.zoobank.org/Search.aspx?search=
+FISHBASE=http://www.fishbase.org/NomenClature/ScientificNameSearchList.php?group=summary&\
+backstep=-2&crit2_fieldname=SYNONYMS.SynSpecies&crit2_fieldtype=CHAR&crit2_operator=contains&\
+crit2_value=&crit1_fieldname=SYNONYMS.SynGenus&\
+crit1_fieldtype=CHAR&crit1_operator=EQUAL&crit1_value=
+Index-Fungorum=http://www.indexfungorum.org/IXFWeb\
+Service/Fungus.asmx/NameSearch?AnywhereInText=false&MaxNumber=100&SearchText=
+Geonames=http://ws.geonames.org/search?style=full&name_equals=
+FallingRain=http://www.fallingrain.com/world/a/
+#notepad path
+notepad=C:/Windows/notepad.exe
+
+#location for Stanford Jar file
+stanford.parser.jar=lib/stanford-parser.jar
+englishPCFG =lib/englishPCFG.ser.gz
+
+#labels
+labelSelectProject=Select an empty folder for the project :
+datasetprefix=Choose data set prefix and select a glossary :
+stepsComplete= All steps are completed.
+stepsTobeCompletedLbl=Steps to be completed :
+loadPrjLbl=Your last project is loaded. Project Folder:
+datasetLbl=with Dataset Prefix:
+glossaryLbl=and Glossary :
+file=File Links
+count=File Count
+#createNew=Create a new project :
+#save.tooltip=Save the current configuration and proceed to next step
+
+
+#instruction text
+step1DescpPart1=Step 1 segments a volume to individual treatments. Use 'File Link' to open a file for review. If segmentation errors are spotted (only happens rarely), correct segmentations in ProjectFolder/target/extracted
+step1DescpPart2=  folder (no rerun is needed). If content errors are spotted, make corrections in ProjectFolder/source/document.xml 
+step1DescpPart3= and rerun this step by clicking 'Clear & Rerun'. 
+step2DescpPart1=Step 2 verifies the results of step 1. If an error is reported here, correct it by editing the file in ProjectFolder/target/extracted
+step2DescpPart2=. Use 'File Link' to open a file for editing. Rerun this step by clicking on 'Clear & Rerun' repeatedly until no error is reported.
+step3DescpText=Loading source files. Use 'File Link' to open a file for review and edit if needed. Save corrected files to ProjectFolder/target/transformed.
+step4Descp=CharaParser is learning/discovering structure names and character descriptors. When it is completed, you will see "Done" in the message box below. Then use the sub-tabs to review and categorize terms. 
+step4Descp1=Structures = organs/parts (including "midline" of ..., the "connection" between ... ) in noun (e.g., anus) or adjective (e.g., anal) forms, taxon names, pronouns referring to any of the above. Descriptors = character state terms (including adjectives and intransitive verbs used in this sense). Neither = Character terms (e.g.,size, proportions), transitive verbs, adverbs, and other terms that doesn't describe a character directly (e.g.,"general", "ditto", "leave" the "freedom" for ...).
+step4Descp2=Structures = organs/parts (including "midline" of ..., the "connection" between ... ) in noun (e.g., anus) or adjective (e.g., anal) forms, taxon names, pronouns referring to any of the above. Descriptors = character state terms (including adjectives and intransitive verbs used in this sense). Neither = Character terms (e.g.,size, proportions), transitive verbs, adverbs, and other terms that doesn't describe a character directly (e.g.,"general", "ditto", "leave" the "freedom" for ...).
+step4Descp3=Structures = organs/parts (including "midline" of ..., the "connection" between ... ) in noun (e.g., anus) or adjective (e.g., anal) forms, taxon names, pronouns referring to any of the above. Descriptors = character state terms (including adjectives and intransitive verbs used in this sense). Neither = Character terms (e.g.,size, proportions), transitive verbs, adverbs, and other terms that doesn't describe a character directly (e.g.,"general", "ditto", "leave" the "freedom" for ...).
+step4Descp1.alt=Click on 'Load Task' to start. CharaParser categorized these terms as structure terms. Please review/edit the categorization of the terms. Please treat "ditto" and general living habit and life style terms (e.g., "annuals") as structures. 
+step4Descp2.alt=Click on 'Load Task' to start. CharaParser categorized these terms as character terms. Please review/edit the categorization of the terms. Please note transitive verbs are not characters. 
+step4Descp3.alt=Click on 'Load Task' to start. Please categorize these terms for CharaParser. 
+step4Descp1.old=Click on 'Load Task' to start. Select all non-structure terms, then click 'Mark as Bad'. Then click 'Mark Others as Good'. Then click 'Save Decisions'. Treat "ditto" and general living habit and life style terms (e.g., annuals) as structure terms.
+step4Descp2.old=Click on 'Load Task' to start. Select all non-descriptor terms, then click 'Mark as Bad'. Then click 'Mark Others as Good'. Then click 'Save Decisions'. Treat verbs as non-descriptors.
+step4Descp3.old=Click on 'Load Task' to start. Select all structure terms, then click 'Mark as Good'. Then click 'Mark Others as Bad'. Then click 'Save Decisions'. Treat "ditto" and general living habit and life style terms (e.g., annuals) as structure terms. 
+step4Descp4.old=Click on 'Load Task' to start. Select all descriptor terms, then click 'Mark as Good'. Then click 'Mark Others as Bad'. Then click 'Save Decisions'. Treat verbs as non-descriptors.   
+step5Descp=Step 5 allows you to load sentences for manual markup. Click on Load Task to start. Select a sentence and then select/enter appropriate modifier and tag for the sentence. Click 'Apply to Checked' to update the sentence table shown. Use "ignore" to tag non-morphological description sentences. 'Save Tagged Sentences' to save your work.    
+step6DescpText=Here are the terms whose category is unknown to the parser. They are presented to you by group. Please go through these groups one by one to give them a good category label. You may remove terms from a group by clicking the "x" next to a term.  
+step7DescpText=Text are being processed and annotated to generate EQ statements. Files annotated in XML will be listed below. Use 'File Link' to open a file for review and edit. Save correct files to ProjectFolder/target/final. Complete EQ output is in MySql database
+
+#buttons and tool tips
+#config=Configuration Directory
+#source=Source Directory
+#target=Target Directory
+#load=Load
+#chooseDirectoryTooltip=Choose the project directory
+browseProjectBtn=Browse
+browseProjectTTT=Browse for a folder to save project data
+saveProjectBtn=Save
+saveProjectTTT=Save the current configuration and proceed to next step
+loadLastProjectTTT=Load the last saved configuration
+loadLastProjectBtn=Load Last Project
+
+#step1RunBtn=Run Step 1
+#step1RunTTT=Run Segmentation
+#step2RunBtn=Run Step 2
+#step2RunTTT=Run Verification
+step3RunBtn=Run Step 1
+step3RunTTT=Run Transformation
+step4RunBtn=Run Step 2
+step4RunTTT=Run the perl program
+step7RunBtn=Run Step 3
+step7RunTTT=Run final annotation
+ClearRerunBtn=Clear / Rerun
+ClearRerunTTT=Clear results and redo this step
+termCurationLoad=(Re)Load Terms
+termCurationLoadTTT=Load or reload the list of terms to curate
+termCurationMarkGood=Toggle Mark as Good
+termCurationMarkGoodTTT=Mark the checked terms as good
+termCurationMarkOthersGood=Mark Others as Good
+termCurationMarkOthersGoodTTT=Mark the unchecked terms as good
+termCurationMarkBad=Toggle Mark as Bad
+termCurationMarkBadTTT=Mark the checked terms as bad
+termCurationMarkOthersBad=Mark Others as Bad
+termCurationMarkOthersBadTTT=Mark the unchecked terms as bad
+termCurationRemove=Remove
+termCurationRemoveTTT=Remove selected terms (keep all unselected terms)
+termCurationSave=Save Decisions
+termCurationSaveTTT=Save decisions made on this tab
+sentCurationLoad=Load Task
+sentCurationLoadTTT=Load or reload the list of terms to curate
+Apply2Checked=Apply to Checked
+Apply2CheckedTTT=Apply tag/modifier to the checked sentence
+SaveCategoryBtn=Save
+SaveCategoryTTT=Save category/label for this group
+step7LoadBtn=Load Previous Results
+step7LoadTTT=Load results from the last run on this collection
+step1LoadBtn=Load Previous Results
+step1LoadTTT=Load results from the last run on this collection

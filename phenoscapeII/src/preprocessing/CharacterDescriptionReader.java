@@ -8,9 +8,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+
+import org.apache.log4j.Logger;
+
+import outputter.search.TermSearcher;
 
 
 /**
@@ -29,6 +35,7 @@ public class CharacterDescriptionReader {
 	private static String statementtable = "sentence";
 	private static String charactertable = "character";
 	private static StringBuffer text = new StringBuffer();
+	private static final Logger LOGGER = Logger.getLogger(CharacterDescriptionReader.class);   
 	
 
 	/**
@@ -51,7 +58,7 @@ public class CharacterDescriptionReader {
 				stmt.close();
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -84,7 +91,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 		    wrt.flush();
 		    wrt.close();
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	
@@ -125,7 +132,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 				}
 			}			
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 	private void insertSentence(String sentence, int sentid, String source, int charid) {
@@ -135,7 +142,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+this.tableprefix+"_sentence (sentid, source, sentence, originalsent, charid) values ("+sentid+",'"+source+"','"+clean+"','"+sentence+"',"+charid+")");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 
@@ -144,7 +151,7 @@ only. (Amphiliidae; all Chiloglanis except C. macropterus
 			Statement stmt = conn.createStatement();
 			stmt.execute("insert into "+this.tableprefix+"_character (charid, source, characterr) values ("+charid+",'"+source+"','"+character+"')");
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("", e);
 		}
 	}
 

@@ -492,28 +492,9 @@ public ArrayList<String> getSavedDescriptorWords() throws SQLException {
 	}
 	
 	
-	public void insertIntoHeuristicsTerms(String term, String type){
-		try{
-			Statement stmt = conn.createStatement();
-			stmt.execute("insert into "+tablePrefix+"_"+ApplicationUtilities.getProperty("HEURISTICSTERMS")+"(term, type) values ('"+term+"','"+type+"')");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-	}
 	
-	public ArrayList<String> retrieveOriginalSentences(){
-		ArrayList<String> originals = new ArrayList<String>();
-		try{
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("select originalsent from "+tablePrefix+"_"+ApplicationUtilities.getProperty("SENTENCETABLE"));
-			while(rs.next()){
-				originals.add(rs.getString("originalsent"));
-			}
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		return originals;
-	}
+	
+	
 	
     public static void main(String[] args)throws Exception {
 		// TODO Auto-generated method stub

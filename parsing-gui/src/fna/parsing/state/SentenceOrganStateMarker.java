@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 
+import outputter.knowledge.TermOutputerUtilities;
 import fna.charactermarkup.ChunkedSentence;
 import fna.charactermarkup.Utilities;
 import fna.parsing.ApplicationUtilities;
-
 import conceptmapping.*;
 
 /**
@@ -37,7 +37,7 @@ public class SentenceOrganStateMarker {
 	private boolean marked = false;
 	private boolean fixadjnn = false;
 	private int fixedcount  =0;
-	
+
 	private Hashtable<String, String> adjnounsent = null;
 	private String adjnounslist = "";
 	private String organnames = null;
@@ -45,21 +45,20 @@ public class SentenceOrganStateMarker {
 	private String tableprefix = null;
 	private String glosstable = null;
 	private String colors = null;
-	public static String compoundprep = "according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|forward of|further to|in addition to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|save for|thanks to|together with|up against|up until|vis-a-vis|with reference to|with regard to";
+	//public static String compoundprep = "adaxial to|abaxial to|axial to|herniated into|ipsilateral to|displaced to|herniated out of|specificity to|broken into two pieces|altered number of|quality of a substance|deviation towards the lateral side|deviation towards the medial side|misaligned towards|misaligned away from|present in normal numbers in organism|down|up|has extra parts of type|lacks all parts of type|has fewer parts of type|sensitivity to irradiation|decreased sensitivity to irradiation|increased sensitivity to irradiation|proportionality to|sensitivity to oxygen|lack of fertility in offspring|detached from|susceptibility toward|resistance to|reflex angle to|obtuse angle to|convex angle to|degree of pigmentation|adjacent to|located in|insoluble in|soluble in|parallel to|articulated with|increased sensitivity toward|quality of a liquid|tightly articulated with|quality of a gas|quality of a solid|broadly articulated with|decreased sensitivity toward|separated from|responsive to|unresponsive to|present in greater numbers in organism|far from|opposite|variability of shape|susceptible toward|insusceptible toward|anterodorsal to|posterodorsal to|anteroventral to|posteroventral to|absent|has normal numbers of parts of type|concentration of|sensitivity toward|response to|lacks parts or has fewer parts of type|present in fewer numbers in organism|resistant to|has number of|overlap with|in contact with|variability of rate|increased variability of rate|decreased variability of rate|increased variability of size|decreased variability of size|variability of size|proximal to|ventral to|lateral to|hyporesponsive to|medial to|hyperresponsive to|increased tolerance to|diagonal to|decreased tolerance to|basal to|cauline to|sensitive toward|insensitive toward|tolerant to|dorsal to|decreased variability of color|increased variability of color|variability of color|decreased resistance to|increased resistance to|protruding into|protruding out of|anterior to|posterior to|decreased susceptibility toward|attached to|associated with|increased susceptibility toward|distal to|misaligned with|aligned with|decreased variability of temperature|variability of temperature|increased variability of temperature|posteromedial to|oriented towards|multifocal to coalescing|divergent from|perpendicular to|interlocked with|level with|unfused from|fused with|inserted into|activity (of a radionuclide)|right angle to|dissociated from|h minus|h plus|F minus mating type|a mating type (yeast)|left side of|right side of|according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|equal to|forward of|further to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regard to";
+	//don't introduce () in compoundprep as it is used in a reg exp
+	public static String compoundprep = "adaxial to|abaxial to|axial to|herniat(?:ed|ing|es|e) into|ipsilateral to|displaced to|herniat(?:ed|ing|es|e) out of|specificity to|altered number of|deviation towards?|deviation towards?|misalign(?:ed|ing|s)? towards?|misalign(?:ed|ing|s)? away from|ha(?:s|ve|ving) extra parts of|lack(?:s|ing)? all parts of|ha(?:s|ve|ving) fewer parts of|decreased sensitivity to|increased sensitivity to|sensitivity to|proportionality to|lack(?:s|ing)? of|detach(?:es|ed|ing)? from|susceptibility toward|reflex angle to|obtuse angle to|convex angle to|adjacent to|locat(?:ed|es|ing) in|insoluble in|soluble in|parallel to|articulat(?:ed|es|ing|e) with|increased sensitivity towards?|broadly articulat(?:ed|es|ing|e) with|tightly articulat(?:ed|es|ing|e) with|articulat(?:ed|es|ing|e) with|decreased sensitivity towards?|separat(?:ed|ing|es|e) from|responsive to|unresponsive to|far from|susceptible towards?|insusceptible towards?|anterodorsal to|posterodorsal to|anteroventral to|posteroventral to|concentration of|sensitivity towards?|respons(?:ing|es|e) to|resistant(?:ing|ed|s)? to|ha(?:s|ve|ving) number of|overlap(?:ped|ping|s)? with|in contact with|proximal to|ventral to|lateral to|hyporesponsive to|medial to|hyperresponsive to|increased tolerance to|diagonal to|decreased tolerance to|basal to|cauline to|sensitive towards?|insensitive towards?|tolerant to|dorsal to|decreased resistance to|increased resistance to|resistance to|protrud(?:ing|ed|es|e) into|protrud(?:ing|ed|es|e) out of|anterior to|posterior to|decreased susceptibility toward|attach(?:ed|ing|es) to|increased susceptibility toward|distal to|misalign(?:ed|ing|s)? with|align(?:ed|ing|s)? with|decreased variability of|increased variability of|variability of|posteromedial to|orient(?:ed|ing|s)? towards|multifocal to|divergent from|perpendicular to|interlock(?:ed|ing|s)? with|level(?:ing|ed|s)? with|unfus(?:ing|ed|es|e) from|fus(?:ing|ed|es|e) with|insert(?:ing|ed|s)? into|right angle to|dissociat(?:ing|ed|es|e) from|left side of|right side of|according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|composed of|consist(?:s|ed)? of|contrary to|depending on|due to|except for|equal to|forward of|further to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regards? to";
 	public static Pattern compreppattern = Pattern.compile("(.*?)\\b("+compoundprep+")\\b(.*)");
 	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
 	private StyledText charLog;
 	private String termprefix = "basi|hypo";
-	
-	
+
+
 	private Connection con;
 	private String url;
-	private String dburl = "jdbc:mysql://localhost:3306/";
-	private String uname = "root";
-	private String upw = "forda444";
-	private String dbname = "biocreative2012";
+
 	private boolean printCompoundPP=false;
 
 	/**
@@ -74,11 +73,11 @@ public class SentenceOrganStateMarker {
 		this.glosstable = glosstable;
 		this.fixadjnn = fixadjnn;
 		try{
-				Statement stmt = conn.createStatement();
-				stmt.execute("drop table if exists "+this.tableprefix+"_markedsentence");
-				stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text, type varchar(20))");
-				//stmt.execute("update "+this.tableprefix+"_sentence set charsegment =''");
-				colors = this.colorsFromGloss();
+			Statement stmt = conn.createStatement();
+			stmt.execute("drop table if exists "+this.tableprefix+"_markedsentence");
+			stmt.execute("create table if not exists "+this.tableprefix+"_markedsentence (sentid int(11)NOT NULL Primary Key, source varchar(100) , markedsent text, rmarkedsent text, type varchar(20))");
+			//stmt.execute("update "+this.tableprefix+"_sentence set charsegment =''");
+			colors = this.colorsFromGloss();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -95,18 +94,21 @@ public class SentenceOrganStateMarker {
 				String tag = rs.getString("tag");
 				String sent = rs.getString("sentence").trim();
 				if(sent.length()!=0){
-				String source = rs.getString("source");
-				String osent = rs.getString("originalsent");
-				String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-				text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-				text = text.replaceAll("&#176;", "°");
-				text = text.replaceAll("\\bca\\s*\\.", "ca");
-				text = stringCompoundPP(text);
-				text = rs.getString("modifier")+"##"+tag+"##"+text;
-		//text.matches(".*?("+termprefix+").*")
-				
-				
-				sentences.put(source, text);
+					String source = rs.getString("source");
+					String osent = rs.getString("originalsent");
+					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
+					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("\\bca\\s*\\.", "ca");
+					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.percentage+")\\b)", " ").replaceAll("\\s+", " "); //80percent =>80 percent
+					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.degree+")\\b)", " ").replaceAll("\\s+", " "); //80degree =>80 degree
+					text = text.replaceAll("height width ratio", "h/w");
+					text = Utilities.reformAuxiliaryVerbs (text); 
+					text = text.replaceAll("(?<=\\d\\s)x(?=\\s\\w)", "times"); // 2 x longer => 2 times longer, won't match 2x=24 
+					text = stringCompoundPP(text);
+					text = rs.getString("modifier")+"##"+tag+"##"+text;
+					//text.matches(".*?("+termprefix+").*")
+					sentences.put(source, text);
 				}
 			}
 			//merge ditto sentences with previous sentences: this had the drawback of attaching nearest organ as the subject of the ditto sentence
@@ -161,60 +163,63 @@ public class SentenceOrganStateMarker {
 		this.organnames = collectOrganNames();
 		this.statenames = collectStateNames();
 	}
-	
-	/*
+
+
+
+	/**
 	 * The normalize prefix method is used to expand the prefix of a sentence.
 	 * Example : {basi}- and <hypobranchial> <ossifications> will be expanded to 
-	 * 			<basibranchial> and <hypobranchial> <ossifications>
+	 * 			<basibranchial> and <hypobranchial> <ossifications>	 * 
+	 * @param text
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
 	 */
-	
-	
-	
-	String normalizePrefix(String text) throws ClassNotFoundException, SQLException
+	private String normalizePrefix(String text) throws ClassNotFoundException, SQLException
 	{
-String[] splittext = text.split("\\s");
-		
+		String[] splittext = text.split("\\s");
+
 		for(int i=0;i<splittext.length;i++)
 		{
 			if(splittext[i].matches("\\{?("+termprefix+")\\}?-.*"))
-					{
-					if(((i+2)<=splittext.length) && ((splittext[i+1].equals("and")||(splittext[i+1].equals("or")))))
-						 {
-						String termprefix1[] = termprefix.split("\\|");
-						
-						for(int z=0;z<termprefix1.length;z++)
-							 if(splittext[i+2].contains(termprefix1[z]))
-								 {
-								 splittext[i] ="<"+splittext[i].substring(1, splittext[i].lastIndexOf("-")-1)+splittext[i+2].substring(termprefix1[z].length()+1, splittext[i+2].length());
-								 inserttotable(splittext[i]);
-								 break;
-								 }
-						break;
-						 }
-					}
+			{
+				if(((i+2)<=splittext.length) && ((splittext[i+1].equals("and")||(splittext[i+1].equals("or")))))
+				{
+					String termprefix1[] = termprefix.split("\\|");
+
+					for(int z=0;z<termprefix1.length;z++)
+						if(splittext[i+2].contains(termprefix1[z]))
+						{
+							splittext[i] ="<"+splittext[i].substring(1, splittext[i].lastIndexOf("-")-1)+splittext[i+2].substring(termprefix1[z].length()+1, splittext[i+2].length());
+							inserttotable(splittext[i]);
+							break;
+						}
+					break;
+				}
+			}
 		}
 		// combine splittext to form a single text.
-		 text="";
+		text="";
 		for(int i=0,j=0;i<splittext.length;i++,j++)	
-			{
+		{
 			text+=splittext[i];
-		    if(j<splittext.length-1)
-		    	text+=' ';
-			}	
-	return text;
+			if(j<splittext.length-1)
+				text+=' ';
+		}	
+		return text;
 	}
-	
+
 	// The normalized prefix is inserterted into term category table as a structure term
 	void inserttotable(String term) throws ClassNotFoundException, SQLException
 	{
 
-			Class.forName("com.mysql.jdbc.Driver");
-			con = DriverManager.getConnection(dburl + dbname, uname, upw);
+		Class.forName("com.mysql.jdbc.Driver");
+		con = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 
-				// Drop table if exists
-				Statement stmt0 = con.createStatement();
-				System.out.println("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
-				stmt0.executeUpdate("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+		// Drop table if exists
+		Statement stmt0 = con.createStatement();
+		System.out.println("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
+		stmt0.executeUpdate("Insert into "+this.tableprefix+"_term_category(term,category)"+" values(\""+term.trim()+"\",\"structure\")");
 	}
 	/**
 	 * turn reddish purple to reddish-purple
@@ -249,14 +254,14 @@ String[] splittext = text.split("\\s");
 				String sent = (String)sentences.get(source);
 				String taggedsent = "";
 				//if(sent.trim().length()>0){
-					String[] splits = sent.split("##");
-					String modifier = splits[0];
-					String tag = splits[1];
-					sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
-					taggedsent = markASentence(source, modifier, tag.trim(), sent);
+				String[] splits = sent.split("##");
+				String modifier = splits[0];
+				String tag = splits[1];
+				sent = splits[2].trim().replaceAll("\\b("+this.ignoredstrings+") ", "");//must use space at the end for "i . e ." to match
+				taggedsent = markASentence(source, modifier, tag.trim(), sent);
 				//}
-				
-			//	System.out.println(taggedsent);
+
+				//	System.out.println(taggedsent);
 				sentences.put(source, taggedsent);
 				try{
 					Statement stmt1 = conn.createStatement();
@@ -269,7 +274,7 @@ String[] splittext = text.split("\\s");
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-				
+
 			}
 		}
 		return sentences;
@@ -288,10 +293,10 @@ String[] splittext = text.split("\\s");
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String markASentence(String source, String modifier, String tag, String sent) throws ClassNotFoundException, SQLException {
-		
-		
+
+
 		String taggedsent = markthis(source, sent, organnames, "<", ">");
 		taggedsent = markthis(source, taggedsent, statenames, "{", "}");
 		taggedsent = taggedsent.replaceAll("[<{]or[}>]", "or"); //make sure to/or are left untagged
@@ -310,12 +315,12 @@ String[] splittext = text.split("\\s");
 			//	taggedsent = fixInner(source, taggedsent, modifier, true);//@TODO: debug: need to put tag in after the modifier inner
 			//}
 		}
-		
-		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>
-		if(taggedsent.contains("} and ")){
+
+		//fix cases such as {dorsal} and <{anal}> <fins> => <dorsal> <fins> and <anal> <fins>: "dorsal and anal fins"
+		if(taggedsent.matches(".*?\\}>? and .*")){
 			String sentcopy = taggedsent;
 			boolean changed = false;
-			Pattern p = Pattern.compile("(.*?)\\{(\\w+)\\} and ([^\\d]*) (<\\w+> *)+(.*)");
+			Pattern p = Pattern.compile("(.*?)<?\\{(\\w+)\\}>? and ([^\\d]*) (<\\w+> *)+(.*)");
 			Matcher m = p.matcher(taggedsent);
 			while(m.matches()){
 				String lead = m.group(1).trim()+ " ";
@@ -335,19 +340,19 @@ String[] splittext = text.split("\\s");
 			taggedsent = taggedsent.replaceAll("\\}###", "}");
 			if(changed){
 				System.out.println("before inserting organ: "+sentcopy);
-				System.out.println("after  inserting organ: "+taggedsent);
+				System.out.println("after inserting organ: "+taggedsent);
 			}
 		}
-		
+
 		//fix cases such as basi_ and hypobranchial => basibranchial and hypobranchial
 
 		if(taggedsent.matches("\\{?("+termprefix+")\\}?-.*")){
 			taggedsent = normalizePrefix(taggedsent); //basi_ and hypobranchial => basibranchial and hypobranchial
 		}
-		
- 		return taggedsent;
+
+		return taggedsent;
 	}
-	
+
 	/**
 	 * mark Inner as organ for sent such as inner red.
 	 * @param adjnouns
@@ -382,7 +387,7 @@ String[] splittext = text.split("\\s");
 					}
 					organ = organ.replaceFirst("\\s*of\\s*$", "").replaceAll("\\W", "");
 					if(TermOutputerUtilities.toSingular(organ).compareTo(tag)==0 || 
-						(organ.matches("(apex|apices)") && tag.compareTo("base")==0)){
+							(organ.matches("(apex|apices)") && tag.compareTo("base")==0)){
 						String b = source.substring(0, source.indexOf("-")+1);
 						String nsource = b +(Integer.parseInt(source.substring(source.indexOf("-")+1))-1);
 						tag = getParentTag(nsource);
@@ -446,7 +451,7 @@ String[] splittext = text.split("\\s");
 						tag = (String)rs.getString("tag").replaceAll("\\W", ""); 	
 					}
 				}while(tag.compareTo("ditto")==0);
-				
+
 			}
 			rs.close();
 			stmt.close();
@@ -474,11 +479,11 @@ String[] splittext = text.split("\\s");
 		//sent = sent.replaceAll("\\(.*?\\)", "");
 		//remove (text)
 		//sent = sent.replaceAll("\\(\\s+(?![\\d\\–\\-\\—]).*?(?<![\\d\\–\\-\\—])\\s+\\)", "");
-		
+
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
 		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
-		
+
 		Pattern tagsp = Pattern.compile("(.*?)\\b("+parts+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 		//System.out.println(parts);
 		String taggedsent = "";
@@ -489,7 +494,7 @@ String[] splittext = text.split("\\s");
 			m = tagsp.matcher(sent);
 		}
 		taggedsent +=sent;
-		
+
 		String tsent = "";
 		Pattern p = Pattern.compile("(.*\\}-)(\\w+)(.*)");
 		m = p.matcher(taggedsent);
@@ -517,7 +522,7 @@ String[] splittext = text.split("\\s");
 		tsent = tsent.replaceAll("\\s+", " ").trim();		
 		return tsent;
 	}
-	
+
 	protected String collectStateNames(){
 		String statestring = "";
 		try{
@@ -532,38 +537,38 @@ String[] splittext = text.split("\\s");
 					statestring += "|"+ w; 
 				}
 			}
-			
+
 			/*wordroles only holds word not in glossary, so need to use glossary to mark a sentence as well.*/
 			rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category not in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'life_style')");
 			while(rs.next()){
 				String term = rs.getString("term").trim();
 				if(term == null){continue;}
 				term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
-				if(!statestring.matches(".*\\b"+term+"\\b.*"))
+				if(!statestring.matches(".*\\b"+term+"\\b.*") &&  !term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")"))
 					statestring+=("|"+ term);
 			}
 		}catch (Exception e){
-				e.printStackTrace();
+			e.printStackTrace();
 		}
-		return statestring.replaceAll("_", "|").replaceAll("\\b(and|or|to)\\b", "").replaceAll("\\\\d\\+", "").trim().replaceFirst("^\\|", "").replaceFirst("\\|$", "").replaceAll("\\|+", "|");
+		return statestring.replaceAll("\\b(and|or|to)\\b", "").replaceAll("\\\\d\\+", "").trim().replaceFirst("^\\|", "").replaceFirst("\\|$", "").replaceAll("\\|+", "|");
 	}
-	
+
 	protected String collectOrganNames(){
 		StringBuffer tags = new StringBuffer();
 		try{
-		Statement stmt = conn.createStatement();
-		organNameFromGloss(tags, stmt);
-		organNameFromSentences(tags, stmt);
-		organNameFromPlNouns(tags, stmt);
-	
-		tags = tags.replace(tags.lastIndexOf("|"), tags.lastIndexOf("|")+1, "");
-		
+			Statement stmt = conn.createStatement();
+			organNameFromGloss(tags, stmt);
+			organNameFromSentences(tags, stmt);
+			organNameFromPlNouns(tags, stmt);
+
+			tags = tags.replace(tags.lastIndexOf("|"), tags.lastIndexOf("|")+1, "");
+
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return tags.toString().replaceAll("\\b\\d+\\b", "").replaceAll("\\|+", "|");
 	}
-	
+
 
 	protected void organNameFromPlNouns(StringBuffer tags, Statement stmt)
 			throws SQLException {
@@ -571,7 +576,9 @@ String[] splittext = text.split("\\s");
 		String wordroletable = this.tableprefix + "_"+ApplicationUtilities.getProperty("WORDROLESTABLE");
 		rs = stmt.executeQuery("select word from "+wordroletable+" where semanticrole in ('op', 'os')");
 		while(rs.next()){
-			tags.append(rs.getString("word").trim()+"|");
+			String w = rs.getString("word").trim();
+			if(!w.matches("("+ChunkedSentence.stop+")") &&!w.matches("("+ChunkedSentence.prepositions+")"))
+				tags.append(w+"|");
 		}
 		/*
 		String postable = this.tableprefix + "_"+ApplicationUtilities.getProperty("POSTABLE");
@@ -589,7 +596,7 @@ String[] splittext = text.split("\\s");
 	protected void organNameFromSentences(StringBuffer tags, Statement stmt)
 			throws SQLException {
 		ResultSet rs;
-		
+
 		/*tag terms are already in WORDROLES
 		 * rs = stmt.executeQuery("select distinct tag from sentence where tag not like '% %'");
 		while(rs.next()){
@@ -597,7 +604,7 @@ String[] splittext = text.split("\\s");
 			if(tag == null || tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0){continue;}
 			tags.append(tag+"|");
 		}*/
-		
+
 		rs = stmt.executeQuery("select modifier, tag from "+this.tableprefix+"_sentence where tag  like '[%]'"); //inner [tepal]
 		while(rs.next()){
 			String m = rs.getString("modifier");
@@ -609,12 +616,12 @@ String[] splittext = text.split("\\s");
 				}else{
 					tag = m.substring(m.lastIndexOf(" ")+1); //last word from modifier
 				}
-				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+StateCollector.stop+").*")){continue;}
+				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+ChunkedSentence.stop+"|"+ChunkedSentence.prepositions+").*")){continue;}
 				tags.append(tag+"|");
 			}
 		}
 	}
-	
+
 	protected void organNameFromGloss(StringBuffer tags, Statement stmt)
 			throws SQLException {
 		ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure')");
@@ -622,10 +629,11 @@ String[] splittext = text.split("\\s");
 			String term = rs.getString("term").trim();
 			if(term == null){continue;}
 			term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
-			tags.append(term+"|");
+			if(!term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")"))
+				tags.append(term+"|");
 		}
 	}
-	
+
 	protected String colorsFromGloss()
 			throws SQLException {
 		StringBuffer colors = new StringBuffer();
@@ -639,7 +647,7 @@ String[] splittext = text.split("\\s");
 		}
 		return colors.toString().replaceFirst("\\|$", "");
 	}
-	
+
 	private void resetOutputMessage() {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
@@ -648,7 +656,7 @@ String[] splittext = text.split("\\s");
 			}
 		});
 	}
-    
+
 	private void showOutputMessage(final String message) {
 		if(display==null)return;
 		display.syncExec(new Runnable() {
@@ -657,25 +665,25 @@ String[] splittext = text.split("\\s");
 			}
 		});
 	}
-	
+
 	/*
 	 * Handles the compound prepositions
 	 */
-	 private String stringCompoundPP(String text) {
-	        boolean did = false;
-	        String result = "";
-	        Matcher m = compreppattern.matcher(text);
-	        while(m.matches()){
-	            String linked = m.group(2).replaceAll("\\s+", "-");
-	            result += m.group(1)+ linked;
-	            text = m.group(3);
-	            m = compreppattern.matcher(text);
-	            did = true;
-	        }
-	        result += text;
-	        if(did && printCompoundPP ) System.out.println("[result]:"+result);
-	        return result;
-	    }
+	private String stringCompoundPP(String text) {
+		boolean did = false;
+		String result = "";
+		Matcher m = compreppattern.matcher(text);
+		while(m.matches()){
+			String linked = m.group(2).replaceAll("\\s+", "-");
+			result += m.group(1)+ linked;
+			text = m.group(3);
+			m = compreppattern.matcher(text);
+			did = true;
+		}
+		result += text;
+		if(did && printCompoundPP ) System.out.println("[result]:"+result);
+		return result;
+	}
 
 	/**
 	 * @param args
@@ -687,26 +695,26 @@ String[] splittext = text.split("\\s");
 		//String database="plaziants_benchmark";//TODO
 		//String database="annotationevaluation";
 		//String database ="phenoscape";
-		String database="biocreative2012";
-		String username="biocreative";
-		String password="biocreative";
+		
+
 		try{
 			if(conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
-				String URL = "jdbc:mysql://localhost/"+database+"?user="+username+"&password="+password;
-				conn = DriverManager.getConnection(URL);
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-		SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "swartz", "fishglossaryfixed", true, null, null);
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
-		//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
-		//sosm.markSentences();
 
-	}
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
+			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "fishglossaryfixed", true, null, null);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
+			sosm.markSentences();
+			
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		
+		}
 
 }

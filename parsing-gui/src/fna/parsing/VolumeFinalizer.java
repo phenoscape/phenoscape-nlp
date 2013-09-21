@@ -34,8 +34,8 @@ public class VolumeFinalizer extends Thread {
     private Connection conn = null;
     private String glossaryPrefix;
     private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
-    private static boolean standalone = false;//set to true when running only StanfordParser; false when running with GUI. 
-    private static String standalonefolder = "C:/Users/updates/CharaParserTest/swartz2012";
+    private static boolean standalone = Boolean.valueOf(ApplicationUtilities.getProperty("finalizer.standalone"));//set to true when running only StanfordParser; false when running with GUI. 
+    private static String standalonefolder = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss";
     private Text finalLog;
     private Display display;
     
@@ -131,13 +131,7 @@ public class VolumeFinalizer extends Thread {
 	}
 
 
-    protected void resetOutputMessage() {
-		display.syncExec(new Runnable() {
-			public void run() {
-				finalLog.setText("");
-			}
-		});
-	}
+    
     
 	protected void showOutputMessage(final String message) {
 		display.syncExec(new Runnable() {
@@ -147,13 +141,7 @@ public class VolumeFinalizer extends Thread {
 		});
 	}
 	 
-	protected void popupMessage(final String message){
-		display.syncExec(new Runnable() {
-			public void run() {
-				ApplicationUtilities.showPopUpWindow(message, "Error",SWT.ERROR);
-			}
-		});
-	}
+	
 	/**
 	 * create an XML file named with thisCharaID
 	 * @param thisCharaID:Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6

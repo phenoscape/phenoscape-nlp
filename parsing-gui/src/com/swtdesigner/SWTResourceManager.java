@@ -13,13 +13,8 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -40,17 +35,7 @@ import org.eclipse.swt.widgets.Display;
  */
 public class SWTResourceManager {
 
-    /**
-     * Dispose of cached objects and their underlying OS resources. This should
-     * only be called when the cached objects are no longer needed (e.g. on
-     * application shutdown)
-     */
-    public static void dispose() {
-        disposeColors();
-        disposeFonts();
-        disposeImages();
-        disposeCursors();
-    }
+    
 
     //////////////////////////////
     // Color support
@@ -71,16 +56,7 @@ public class SWTResourceManager {
         return display.getSystemColor(systemColorID);
     }
 
-    /**
-     * Returns a color given its red, green and blue component values
-     * @param r int The red component of the color
-     * @param g int The green component of the color
-     * @param b int The blue component of the color
-     * @return Color The color matching the given red, green and blue componet values
-     */
-    public static Color getColor(int r, int g, int b) {
-        return getColor(new RGB(r, g, b));
-    }
+    
 
     /**
      * Returns a color given its RGB value
@@ -133,14 +109,7 @@ public class SWTResourceManager {
         return new Image(display, data);
     }
 
-    /**
-     * Returns an image stored in the file at the specified path
-     * @param path String The path to the image file
-     * @return Image The image stored in the file at the specified path
-     */
-    public static Image getImage(String path) {
-    	return getImage("default", path); //$NON-NLS-1$
-    }
+    
 
     /**
      * Returns an image stored in the file at the specified path
@@ -220,15 +189,7 @@ public class SWTResourceManager {
      */
     public static final int BOTTOM_RIGHT = 4;
     
-    /**
-     * Returns an image composed of a base image decorated by another image
-     * @param baseImage Image The base image that should be decorated
-     * @param decorator Image The image to decorate the base image
-     * @return Image The resulting decorated image
-     */
-    public static Image decorateImage(Image baseImage, Image decorator) {
-    	return decorateImage(baseImage, decorator, BOTTOM_RIGHT);
-    }
+    
     
     /**
 	 * Returns an image composed of a base image decorated by another image
@@ -284,20 +245,7 @@ public class SWTResourceManager {
 		}
     }
 
-    /**
-	 * Dispose cached images in specified section
-	 * @param section the section do dispose
-	 */
-	public static void disposeImages(String section) {
-		for (Iterator<String> I = m_ClassImageMap.keySet().iterator(); I.hasNext();) {
-			String key = I.next();
-			if (!key.startsWith(section + '|'))
-				continue;
-			Image image = m_ClassImageMap.get(key);
-			image.dispose();
-			I.remove();
-		}
-	}
+    
 
     //////////////////////////////
     // Font support
@@ -364,21 +312,7 @@ public class SWTResourceManager {
 	}
     
 
-    /**
-     * Return a bold version of the give font
-     * @param baseFont Font The font for whoch a bold version is desired
-     * @return Font The bold version of the give font
-     */
-    public static Font getBoldFont(Font baseFont) {
-        Font font = m_FontToBoldFontMap.get(baseFont);
-        if (font == null) {
-            FontData fontDatas[] = baseFont.getFontData();
-            FontData data = fontDatas[0];
-            font = new Font(Display.getCurrent(), data.getName(), data.getHeight(), SWT.BOLD);
-            m_FontToBoldFontMap.put(baseFont, font);
-        }
-        return font;
-    }
+    
 
     /**
      * Dispose all of the cached fonts
@@ -393,32 +327,7 @@ public class SWTResourceManager {
     // CoolBar support
     //////////////////////////////
 
-    /**
-     * Fix the layout of the specified CoolBar
-     * @param bar CoolBar The CoolBar that shgoud be fixed
-     */
-    public static void fixCoolBarSize(CoolBar bar) {
-        CoolItem[] items = bar.getItems();
-        // ensure that each item has control (at least empty one)
-        for (int i = 0; i < items.length; i++) {
-            CoolItem item = items[i];
-            if (item.getControl() == null)
-                item.setControl(new Canvas(bar, SWT.NONE) {
-                @Override
-				public Point computeSize(int wHint, int hHint, boolean changed) {
-                    return new Point(20, 20);
-                }
-            });
-        }
-        // compute size for each item
-        for (int i = 0; i < items.length; i++) {
-            CoolItem item = items[i];
-            Control control = item.getControl();
-            control.pack();
-            Point size = control.getSize();
-            item.setSize(item.computeSize(size.x, size.y));
-        }
-    }
+    
 
     //////////////////////////////
     // Cursor support
@@ -429,20 +338,7 @@ public class SWTResourceManager {
      */
     private static HashMap<Integer, Cursor> m_IdToCursorMap = new HashMap<Integer, Cursor>();
  
-    /**
-     * Returns the system cursor matching the specific ID
-     * @param id int The ID value for the cursor
-     * @return Cursor The system cursor matching the specific ID
-     */
-    public static Cursor getCursor(int id) {
-        Integer key = new Integer(id);
-        Cursor cursor = m_IdToCursorMap.get(key);
-        if (cursor == null) {
-            cursor = new Cursor(Display.getDefault(), id);
-            m_IdToCursorMap.put(key, cursor);
-        }
-        return cursor;
-    }
+    
  
     /**
      * Dispose all of the cached cursors

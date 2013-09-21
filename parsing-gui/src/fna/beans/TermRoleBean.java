@@ -25,11 +25,7 @@ public class TermRoleBean {
 	public void setRoleCombo(Button roleCombo) {
 		this.roleCombo = roleCombo;
 	}
-	public TermRoleBean(Label termLabel, Button roleCombo) {
-		super();
-		this.termLabel = termLabel;
-		this.roleCombo = roleCombo;
-	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */

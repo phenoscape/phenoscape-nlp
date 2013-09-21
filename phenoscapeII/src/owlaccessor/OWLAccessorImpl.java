@@ -1,6 +1,12 @@
 package owlaccessor;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -11,10 +17,16 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.io.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
+
+import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
+import outputter.knowledge.Dictionary;
+import outputter.search.TermSearcher;
 
 // TODO: Auto-generated Javadoc
 //import org.semanticweb.owlapi.util.SimpleIRIMapper;
@@ -34,7 +46,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
  */
 @SuppressWarnings("unused")
 public class OWLAccessorImpl implements OWLAccessor {
-
+	private static final Logger LOGGER = Logger.getLogger(OWLAccessorImpl.class);   
 	/** The manager. */
 	private OWLOntologyManager manager;
 
@@ -45,10 +57,15 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private Set<OWLOntology> onts;
 
 	/** The allclasses. */
-	private Set<OWLClass> allclasses=new HashSet<OWLClass>();
+	public Set<OWLClass> allclasses=new HashSet<OWLClass>();
 	
-	/** The relational slim. */
+	/** The PATO relational slim. */
 	private Set<OWLClass> relationalSlim = new HashSet<OWLClass>();
+	
+	
+
+	/** The PATO attribute slim. */
+	private Set<OWLClass> attributeSlim = new HashSet<OWLClass>();
 	
 	/** The obsolete. */
 	private Set<OWLClass> obsolete = new HashSet<OWLClass>();
@@ -59,13 +76,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 	/** The search cache. */
 	
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> ontologyHash = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>();; //syn type => {term => classes}
-	public static Hashtable<String,Hashtable<String, String>> adjectiveorgans = new Hashtable<String, Hashtable<String, String>>(); //adj => {classID => label}
 	
+
+	public static Hashtable<String,Hashtable<String,String>> adjectiveorgans = new Hashtable<String,Hashtable<String,String>>(); //adj => {classID => label}
+	
+	public static Hashtable<String,ArrayList<String>> organadjectives = new Hashtable<String,ArrayList<String>> (); //organ => adjective
 	/** The source. */
 	private String source;
 	private OWLOntology rootOnt;
 
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
+	public final static String temp = "TEMP";
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -89,6 +110,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 	}
 
+	public OWLOntology getOntology(){
+		return rootOnt;
+	}
 		
 	/**
 	 * Instantiates a new oWL accessor impl.
@@ -109,7 +133,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			this.retrieveAllConcept();
 		}catch(Exception e){
 			System.out.println("can't load ontology:"+file.getPath());
-			e.printStackTrace();
+			LOGGER.error("", e);
 			System.exit(1);
 		}
 	}
@@ -131,15 +155,19 @@ public class OWLAccessorImpl implements OWLAccessor {
 		for (OWLOntology ont:onts){
 			allclasses.addAll(ont.getClassesInSignature(true));
 		}
-		
-		//eliminate branches
+		//"Process Quality" IRI value is added to be excluded
+		excludedclassIRIs.add("http://purl.obolibrary.org/obo/PATO_0001236");
+			//eliminate branches
 		allclasses.removeAll(this.classesToExclude(excludedclassIRIs));
-		
+
 		//add all relational slim terms to a list
 		//also add all obsolete terms to a list
 		for (OWLClass c: allclasses){
-			if(isRelationalSlim(c, rootOnt)){
+			if(inRelationalSlim(c, rootOnt)){
 				this.relationalSlim.add(c);
+			}
+			if(inAttributeSlim(c, rootOnt)){
+				this.attributeSlim.add(c);
 			}
 			if(this.isObsolete(c, rootOnt)){
 				this.obsolete.add(c);
@@ -148,10 +176,26 @@ public class OWLAccessorImpl implements OWLAccessor {
 		
 		//remove all obosolete classes
 		relationalSlim.removeAll(obsolete);
+		attributeSlim.removeAll(obsolete);
 		allclasses.removeAll(obsolete);
 		
 	}
-	
+
+	/**
+	 * Checks if is relational slim.
+	 *
+	 * @param c the c
+	 * @return true, if is relational slim
+	 */
+	public boolean inAttributeSlim(OWLClass c, OWLOntology ontology){		
+		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
+			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#attribute_slim"))
+				return true;
+		}
+		return false;
+	}
+
+
 	/**
 	 * Gets the source.
 	 *
@@ -160,7 +204,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public String getSource(){
 		return source;
 	}
-
+	
+	public Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> getOntologyHash() {
+		return ontologyHash;
+	}
 	/**
 	 * Gets the keywords.
 	 * 
@@ -226,7 +273,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}
 
 
-		private void collectAdjectiveOrgans(OWLClass c) {
+		/*private void collectAdjectiveOrgans(OWLClass c) {
 			onts=rootOnt.getImportsClosure();
 			ArrayList<OWLAnnotation> annotations = new ArrayList<OWLAnnotation>();
 			for (OWLOntology ont:onts){
@@ -243,11 +290,39 @@ public class OWLAccessorImpl implements OWLAccessor {
 						organs = new Hashtable<String, String>();
 					}
 					organs.put(this.getID(c), this.getLabel(c));
+					this.adjectiveorgans.put(adj,organs);					
+				}
+			}			
+		}*/
+//Two caches one to hold organ => adjective pairs and the other to hold adjective => {organid,organlabel}
+		private void collectAdjectiveOrgans(OWLClass c) {
+			onts=rootOnt.getImportsClosure();
+			ArrayList<OWLAnnotation> annotations = new ArrayList<OWLAnnotation>();
+			for (OWLOntology ont:onts){
+			 annotations.addAll(c.getAnnotations(ont));
+			}
+			for(OWLAnnotation anno : annotations){
+				//System.out.println(anno.toString());
+				//adjectiveorgans//adj => classID#label
+				if(anno.toString().contains("UBPROP_0000007") ){//has_relational_adjective
+					String adj = anno.getValue().toString();//"zeugopodial"^^xsd:string
+					adj = adj.substring(0, adj.indexOf("^^")).replace("\"", "");
+					ArrayList<String> adjectives = this.organadjectives.get(this.getLabel(c));
+					if(adjectives ==null){
+						adjectives = new ArrayList<String>();
+					}
+					adjectives.add(adj);
+					this.organadjectives.put(this.getLabel(c),adjectives);
+					
+					Hashtable<String, String> organs = this.adjectiveorgans.get(adj);
+					if(organs ==null){
+						organs = new Hashtable<String, String>();
+					}
+					organs.put(this.getID(c), this.getLabel(c));
 					this.adjectiveorgans.put(adj,organs);
 				}
 			}			
 		}
-
 
 		private Hashtable<String, ArrayList<OWLClass>> initTypedClasses(){
 			ArrayList<OWLClass> classes = new ArrayList<OWLClass>();
@@ -343,7 +418,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			Hashtable<String, ArrayList<OWLClass>> result = this.searchCache.get(con);
 			if(result != null) return result;
 			
-			if(con.indexOf("*")<0){//exact match
+			if(con.indexOf("*")<0 && con.indexOf("(")<0 &&con.indexOf("|")<0  ){//exact match
 					return this.ontologyHash.get(con);
 			}else{//reg exp
 				Hashtable<String, ArrayList<OWLClass>> output =new Hashtable<String, ArrayList<OWLClass>> ();
@@ -405,13 +480,15 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * 
 	 * TODO make the return type the same as retrieveConcept(String con)
 	 */
-	@Override
-	public List<OWLClass> retrieveConcept(String con, int subgroup) throws Exception {
+	//@Override
+	/*public List<OWLClass> retrieveConcept(String con, int slim) throws Exception {
 		con = con.trim();
 		List<OWLClass> result = new ArrayList<OWLClass>();
 		Set<OWLClass> classes = null;
-		if(subgroup==outputter.XML2EQ.RELATIONAL_SLIM){
+		if(slim==outputter.XML2EQ.RELATIONAL_SLIM){
 			classes=this.relationalSlim;
+		}else if(slim==outputter.XML2EQ.ATTRIBUTE_SLIM){
+			classes=this.attributeSlim;
 		}else{
 			classes=this.allclasses;
 		}
@@ -426,8 +503,59 @@ public class OWLAccessorImpl implements OWLAccessor {
 			}
 		}
 		return result;
+	}*/
+	
+		/**
+		 * construct a regular exp pattern out of attribute classes (such as those in attribute slim in PATO)
+		 * 
+		 * @return an empty string when no attribute in in ontology, or string like "color|shape"
+		 */
+	public String getLowerCaseAttributeSlimStringPattern(){
+		StringBuffer sb = new StringBuffer();
+		for(OWLClass c: this.attributeSlim){
+			//add labels to the pattern string
+			String label = this.getLabel(c).replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim();
+			if(structureCheck(label)==false)
+			{
+			sb.append(label);
+			sb.append("|");
+			//add syns to the pattern string
+			List<String> syns = this.getSynonymLabels(c);
+			for(String syn: syns){
+				sb.append(syn.replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim());
+				sb.append("|");
+			}
+			}
+		}
+		return sb.toString().replaceAll("\\|+", "|").replace("\\|$", "").trim();
 	}
 	
+	//returns false, if the label is not a structure in fishglossaryfixed table
+	
+	private boolean structureCheck(String label) {
+		Connection conn;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			Statement stmt = conn.createStatement();
+			//fetches result if the label is associated with a structure
+			ResultSet rs = stmt.executeQuery("select * from fishglossaryfixed where category = \"structure\" and term = \""+label+"\"");
+			
+			if(rs.next()==false)
+			{
+				conn.close();
+				return false;
+			} else
+			{
+				conn.close();
+				return true;
+			}
+		} catch (Exception e) {
+			LOGGER.error("", e);
+		}
+		return true;
+}
+
 	/**
 	 * Match syn.
 	 * 
@@ -453,16 +581,16 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 
 	/**
-	 * Gets the words to eliminate.
+	 * Gets the IRI to eliminate.
 	 *
 	 * @param excludedclassIRIs the eliminate
-	 * @return the words to eliminate
+	 * @return the IRI's(including all subclasses) to eliminate
 	 */
 	public Set<OWLClass> classesToExclude(List<String> excludedclassIRIs) {
 		Set<OWLClass> er = new HashSet<OWLClass>();
 
 		for (String s:excludedclassIRIs){
-			OWLClass c = this.getClassByIRI(s);
+			OWLClass c = this.getOWLClassByIRI(s);
 			er.add(c);//add itself to the set first
 			er.addAll(this.getAllOffsprings(c));//add all its offsprings
 		}
@@ -595,12 +723,30 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 	
 	/**
+	 * 		is class a subclass of the things that has part part
+		for example, could 'caudal fin' has_part 'epichordal lepidotrichium'?
+	 * @param classIRI
+	 * @param partIRI
+	 * @return
+	 */
+	public boolean isSubclassOfWithPart(String classIRI, String partIRI){	
+		
+		OWLClass part= df.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
+		OWLClass claz= df.getOWLClass(IRI.create(classIRI)); //'caudal fin' 4000164
+		//find all classes that have 'part' 
+		Set<OWLAnnotationAssertionAxiom> properties = part.getAnnotationAssertionAxioms(this.rootOnt);
+		for(OWLAnnotationAssertionAxiom p: properties){
+			p.toString();
+		}
+		return false;
+	}
+	/**
 	 * Checks if is relational slim.
 	 *
 	 * @param c the c
 	 * @return true, if is relational slim
 	 */
-	public boolean isRelationalSlim(OWLClass c, OWLOntology ontology){
+	public boolean inRelationalSlim(OWLClass c, OWLOntology ontology){
 		
 		for(OWLAnnotation a: getAnnotationByIRI(c, "http://www.geneontology.org/formats/oboInOwl#inSubset")){
 			if(a.getValue().toString().equals("http://purl.obolibrary.org/obo/pato#relational_slim"))
@@ -669,6 +815,9 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return labels;
 	}
 	
+	public Set<OWLClass> getRelationalSlim() {
+		return relationalSlim;
+	}
 	/**
 	 * Gets the broad synonyms.
 	 *
@@ -741,6 +890,30 @@ public class OWLAccessorImpl implements OWLAccessor {
 		return labels;
 	}
 
+
+
+	//Get all the exact and original synonyms of a particular entity or spatial entity
+		//word denotes the term from the entity phrase
+		//onto denotes whether to search in entity cache or BSPO cache
+		public ArrayList<String> getSynonymLabelsbyPhrase(String word, String onto)
+		{
+			String type;
+			ArrayList<String> synonyms = new ArrayList<String>();
+				
+			Hashtable<String, ArrayList<OWLClass>> matches = this.getOntologyHash().get(word);
+			if(matches!=null)
+			{
+			ArrayList<OWLClass> exactsynonyms = matches.get("exact");
+			for(OWLClass synonym:exactsynonyms)
+			synonyms.add(this.getLabel(synonym));
+			ArrayList<OWLClass> originalsynonyms = matches.get("original");
+			for(OWLClass synonym:originalsynonyms)
+			synonyms.add(this.getLabel(synonym));
+			}
+			return synonyms;
+		}
+
+	
 	/**
 	 * Gets the all classes.
 	 * 
@@ -801,12 +974,13 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * TODO: deprecate this method, use retrieveconcept(string con) instead
 	 */
 	@Override
-	public OWLClass getClassByIRI(String iri) {
-		
-		for (OWLClass c : this.getAllClasses()) {
-			if(c.getIRI().toString().compareTo(iri)==0) return c;
-		}
-		return null;
+	public OWLClass getOWLClassByIRI(String iri) {
+		//isn't this more efficient?
+		return df.getOWLClass(IRI.create(iri));
+		//for (OWLClass c : this.getAllClasses()) {
+		//	if(c.getIRI().toString().compareTo(iri)==0) return c;
+		//}
+		//return null;
 	}
 
 	/**
@@ -820,7 +994,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 	public String getID(OWLClass c) {
 
 		String id = c.getIRI().toString();//<http://purl.obolibrary.org/obo/UBERON_4000163>
-		return id.substring(id.lastIndexOf('/')+1).replace('_', ':');
+		if(id.contains("/provisional/")){//http://purl.bioontology.org/ontology/provisional/00c13bdf-061f-4734-a72f-d5702ee17d73
+			return temp +":"+id.substring(id.lastIndexOf('/')+1);
+		}else{
+			return id.substring(id.lastIndexOf('/')+1).replace('_', ':');
+		}
 		/*Set<OWLAnnotation> ids = new HashSet<OWLAnnotation>();
 		for (OWLOntology ont:onts){		
 			ids.addAll(c.getAnnotations(ont, df.getOWLAnnotationProperty(IRI.create("http://www.geneontology.org/formats/oboInOwl#id"))));
@@ -836,10 +1014,26 @@ public class OWLAccessorImpl implements OWLAccessor {
 		}*/
 	}
 	
+	/**
+	 * form the IRI using the shorthand id
+	 * assuming all IRIs come from the baseiri and provisionaliri
+	 * @param id: provisiona id may be "PATOTEMP:UUID"
+	 * @return
+	 */
+	public static String getIRI(String id) {
+		if(id.startsWith(OWLAccessorImpl.temp)){
+			return Dictionary.provisionaliri+id.substring(id.indexOf(":")+1);
+		}else{
+			return Dictionary.baseiri+id.replace(':', '_');
+		}
+	}
+	
 	//added by Hariharan to return Manager that was created by constructor Task1
 		public OWLOntologyManager getManager() {
 			return manager;
 		}
+
+		
 
 		
 }

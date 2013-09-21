@@ -7,7 +7,7 @@ package fna.parsing;
 
 
 /**
- * @author prasad
+ * @authors prasad, hong cui,
  *
  */
 import java.io.BufferedReader;
@@ -912,17 +912,25 @@ public class MainForm {
 		startTransformationButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				transformationTable.removeAll();
-				if(type.equals("")) {
+				ProcessListener listener = 
+						new ProcessListener(transformationTable, transformationProgressBar, 
+								shell.getDisplay());
+
+					CharacterStatementsTransformer preMarkUp = 
+							new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
+									null, new ArrayList<String>());
+					preMarkUp.start();
+				/*if(type.equals("")) {
 					startTransformation(); // start the transformation process
 				} 
 				else if (type.equals("type2")) {
-					startType2Transformation(); // When the doc selected is type 4
+					startType2Transformation(); // When the doc selected is type 2
 				}				
 				else if (type.equals("type3")) {
 					startType3Transformation(); // start pre-mark up process
 				} else if (type.equals("type4")) {
 					startType4Transformation(); // When the doc selected is type 4
-				}
+				}*/
 				
 				try {
 					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), true);
@@ -956,7 +964,15 @@ public class MainForm {
 				//commented above code to make it re-run
 
 				transformationTable.removeAll();
-				if(type.equals("")) {
+				ProcessListener listener = 
+						new ProcessListener(transformationTable, transformationProgressBar, 
+								shell.getDisplay());
+
+					CharacterStatementsTransformer preMarkUp = 
+							new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
+									null, new ArrayList<String>());
+					preMarkUp.start();
+				/*if(type.equals("")) {
 					startTransformation(); // start the transformation process
 				} 
 				else if (type.equals("type2")) {
@@ -966,7 +982,7 @@ public class MainForm {
 					startType3Transformation(); // start pre-mark up process
 				} else if (type.equals("type4")) {
 					startType4Transformation(); // When the doc selected is type 4
-				}
+				}*/
 				try {					
 					mainDb.saveStatus(ApplicationUtilities.getProperty("tab.two.name"), combo.getText(), true);
 					statusOfMarkUp[1] = true;
@@ -2911,41 +2927,33 @@ public class MainForm {
 		verificationTable.removeAll();
 	}
 	
-	private void startTransformation() {
+	/*private void startTransformation() {
 		ProcessListener listener = new ProcessListener(transformationTable, transformationProgressBar, shell.getDisplay());
 		VolumeTransformer vt = new VolumeTransformer(listener, dataPrefixCombo.getText().replaceAll("-", "_").trim());
 		vt.start();
-	}
+	}*/
 	
-	private void startType3Transformation() {
+	/*private void startType3Transformation() {
 		ProcessListener listener = 
 			new ProcessListener(transformationTable, transformationProgressBar, 
 					shell.getDisplay());
-		/* Need to clarify perlLog, and seeds new arraylist from Dr Hong*/ 
-		//CharacterStatementsTransformer preMarkUp = 
-		//	new CharacterStatementsTransformer(listener, shell.getDisplay(), 
-		//			null, dataPrefixCombo.getText().replaceAll("-", "_").trim(),MainForm.glossaryPrefixCombo.getText().trim(), new ArrayList());
-		
-		//CharacterStatementsTransformer preMarkUp = 
-		//	new CharacterStatementsTransformer4NativeXML(listener, shell.getDisplay(), 
-		//			null, new ArrayList());
-		
+
 		CharacterStatementsTransformer preMarkUp = 
 				new CharacterStatementsTransformer4NeXML(listener, shell.getDisplay(), 
 						null, new ArrayList<String>());
 		preMarkUp.start();
-	}
+	}*/
 	
-	private void startType2Transformation () {
+	/*private void startType2Transformation () {
 		ProcessListener listener = 
 			new ProcessListener(transformationTable, transformationProgressBar, 
 					shell.getDisplay());
 		Type2Transformer transformer = new Type2Transformer(listener, dataPrefixCombo.getText().replaceAll("-", "_").trim());
 		transformer.start();
-	}
+	}*/
 	
 	
-	private void startType4Transformation () {
+	/*private void startType4Transformation () {
 		ProcessListener listener = 
 			new ProcessListener(transformationTable, transformationProgressBar, 
 					shell.getDisplay());
@@ -2956,7 +2964,7 @@ public class MainForm {
 			transformer = new Type4Transformer4Phenoscape(listener, dataPrefixCombo.getText().replaceAll("-", "_").trim());
 		}
 		transformer.start();
-	}
+	}*/
 
 	private void clearTransformation() {
 		transformationTable.removeAll();

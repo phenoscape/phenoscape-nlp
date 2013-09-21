@@ -256,7 +256,7 @@ public class SimpleHierarchyExample {
             simpleHierarchy.printHierarchy(ontology, clazz );
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("", e);
         }*/
     }
 }

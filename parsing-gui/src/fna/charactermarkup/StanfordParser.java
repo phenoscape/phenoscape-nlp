@@ -53,7 +53,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	private String tableprefix = null;
 	private String glosstable = null;
 	static public Hashtable<String, String> characterRstates = new Hashtable<String, String>();
-	private String characters;
+	private String characters="";
 	private Pattern charptn = Pattern.compile("\\{(\\S+?)\\} of");
 	//private boolean debug = true;
 	private boolean printSent = true;
@@ -82,6 +82,8 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 	static public XPath path21;
 	static public XPath path22;
 	static public XPath path23;
+	static public XPath path24;
+	static public XPath rb;
 	static{
 		try{
 			path1 = XPath.newInstance(".//character[@value='none']");
@@ -89,7 +91,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path3 = XPath.newInstance(".//character[@name='presence'][@value='present']");
 			path4 = XPath.newInstance(".//relation[starts-with(@name, 'present']");
 			path5 = XPath.newInstance(".//character[@name='character']");
-			path6 = XPath.newInstance(".//structure[@name='whole_organism']");
+			path6 = XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']");
 			path7 = XPath.newInstance(".//structure");
 			path8 = XPath.newInstance(".//character[@name='count']");
 
@@ -109,6 +111,10 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 			path21 = XPath.newInstance(".//PP");
 			path22 = XPath.newInstance(".//PP/CC");
 			path23 = XPath.newInstance(".//NN|.//NNS");
+			
+			path24 = XPath.newInstance(".//text");
+			
+			rb = XPath.newInstance(".//ADVP/RB");
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -148,7 +154,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		tagger = new POSTagger4StanfordParser(conn, this.tableprefix, glosstable);
+		tagger = new POSTagger4StanfordParser(conn, this.tableprefix, glosstable, this.characters);
 	}
 	
 	public void POSTagging() throws Exception{
@@ -169,7 +175,17 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 				String str = rs.getString(2);
 				String type = rs.getString(3);
 				//TODO: may need to fix "_"
-				//if(src.compareTo("Sereno_2009.xml_8999df54-5901-456e-9250-06c795e0b1bc_85751e91-7e17-4adf-b8b1-84236d41c2f0.txt-0")!=0) continue;
+				//patterns.xml_s64085ffe-ba2c-4584-90b6-185c8af262b1.txt-0
+				//patterns.xml_s413c5e3e-7941-44e3-8be6-b17e6193752e.txt-0
+				//patterns.xml_sc8b5f5b8-d85e-4435-abca-517efbe1e64f.txt-0
+				//patterns.xml_se1638ae4-f35b-4ba9-8d33-ab3adf4e3a6f.txt-0
+				//patterns.xml_s900f4608-aaf7-45a0-b5fb-153a0db1c748_s330b823c-6a5e-4385-b91b-3deabd36cc1b.txt-0
+				//patterns.xml_s9be8f099-c030-4c5f-b192-1b07986cb1ff_s499c31ff-5d0f-407a-aa28-f4b6377bfc8e.txt-0
+				//Swartz 2012.xml_states635.txt-0
+				//Swartz 2012.xml_states409_state411.txt-0
+				//Swartz 2012.xml_states635.txt-0
+				//Swartz 2012.xml_states640.txt-0
+				//if(src.compareTo("Swartz 2012.xml_states640.txt-0")!=0) continue;
 				str = tagger.POSTag(str, src, type);
 	       		stmt2.execute("insert into "+this.tableprefix+"_"+this.POSTaggedSentence+" values('"+rs.getString(1)+"','"+str+"')");
 	       		out.println(str);
@@ -338,11 +354,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 							sent = sent.replaceAll("<\\{?diams\\}?>", "diams");
 							ex = new SentenceChunker4StanfordParser(i, doc, sent, src, type, this.tableprefix, conn, glosstable, characters);
 							cs = ex.chunkIt();
-							if(this.printSent){
-								System.out.println();
-								System.out.println(i+"["+src+"]: "+cs.toString());
-							}
-							statement = cac.annotate(src, src, cs); 
+							
 							
 							//2. collect character and associated character states/descriptions annotations for EQ generation
 							//character src: Buckup_1998.xml_088683b8-4718-48de-ad0e-eb1de9c58eb6.txt-0
@@ -369,6 +381,13 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 									description = new Element("description");									
 								}
 							}
+							
+							if(this.printSent){
+								System.out.println();
+								System.out.println(i+"["+src+"]: "+cs.toString());
+							}
+							
+							statement = cac.annotate(src, src, cs); 
 							
 							description.addContent(statement);
 							pCharaID = thisCharaID;
@@ -621,12 +640,16 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenoscape-fish-source\\target\\test_parsedsentences.txt";
 
-		String posedfile="C:/Users/updates/CharaParserTest/swartz2012/target/swartz_posedsentences.txt";
-		String parsedfile="C:/Users/updates/CharaParserTest/swartz2012/target/swartz_parsedsentences.txt";
+		//String posedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_posedsentences.txt";
+		//String parsedfile="C:/Users/updates/CharaParserTest/EQ-swartz12MP/target/swartz_after_parsedsentences.txt";
+		
+		String prefix = ApplicationUtilities.getProperty("table.prefix");
+		String posedfile=ApplicationUtilities.getProperty("target.dir")+ApplicationUtilities.getProperty("table.prefix")+"_posedsentences.txt";
+		String parsedfile=ApplicationUtilities.getProperty("target.dir")+ApplicationUtilities.getProperty("table.prefix")+"_parsedsentences.txt";
 
 		//String posedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_posedsentences.txt";
 		//String parsedfile="C:\\Documents and Settings\\Hong Updates\\Desktop\\Australia\\phenotype\\target\\phenotype_test_parsedsentences.txt";
-		String database = "biocreative2012";
+		String database = ApplicationUtilities.getProperty("database.name");
 		
 
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "fnav4", "fnaglossaryfixed", false);
@@ -634,11 +657,9 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "swartz", "fishglossaryfixed", false);
-
-		
-		sp.POSTagging();
-		sp.parsing();
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, prefix, "fishglossaryfixed", false);
+		//sp.POSTagging();
+		//sp.parsing();
 		sp.extracting();
 		//System.out.println("total chunks: "+StanfordParser.allchunks);
 		//System.out.println("discovered chunks: "+StanfordParser.discoveredchunks);
