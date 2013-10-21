@@ -99,7 +99,6 @@ public class AddIds2PatternsGoldstandard {
 		String machine = "pattern_xml2eq";
 		AddIds2PatternsGoldstandard apg = new AddIds2PatternsGoldstandard(gold, machine);
 		apg.fillInIDs();
-
 	}
 
 }

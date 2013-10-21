@@ -23,6 +23,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
 import owlaccessor.OWLAccessorImpl;
 
 import org.atteo.evo.inflector.English;
@@ -38,7 +39,6 @@ public class TermOutputerUtilities {
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
-	private static String ontologyfolder = ApplicationUtilities.getProperty("ontology.dir");
 	private static String[] entityontologies;
 	private static String[] qualityontologies;
 	//private String database;
@@ -54,13 +54,8 @@ public class TermOutputerUtilities {
 	//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
 	static{
 		//TODO:add GO:bioprocess
-		entityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl",
-				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
-		};
-		qualityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
-		};
+		entityontologies = new String[]{XML2EQ.uberon, XML2EQ.bspo};
+		qualityontologies = new String[]{XML2EQ.pato};
 		//get organ adjectives from Dictionary
 		Enumeration<String> organs = Dictionary.organadjectives.keys();
 		while(organs.hasMoreElements()){
@@ -777,7 +772,7 @@ public class TermOutputerUtilities {
 			if(s != null){
 				if(debug) System.out.println("["+word+"]'s singular is "+s);
 				Dictionary.singulars.put(word, s);
-				if(wordcopy.compareTo(word)!=0) Dictionary.plurals.put(s, word);
+				if(word.compareTo(s)!=0) Dictionary.plurals.put(s, word);
 				return s;
 			}
 		}

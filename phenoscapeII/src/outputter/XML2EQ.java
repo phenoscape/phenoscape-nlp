@@ -75,8 +75,6 @@ public class XML2EQ {
 	private File source;
 	public static int unknownid = 0;
 	private String outputtable;
-	private String tableprefix;
-	private String glosstable;
 	private int count = 0;
 	// private String keyentity = null;
 	private ArrayList<EntityProposals> keyentities;
@@ -95,23 +93,19 @@ public class XML2EQ {
 	private XPath pathStructure2;
 	private XPath pathCharacterText;
 
-	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
+	public static TermOutputerUtilities ontoutil;
 	public static ELKReasoner elk; 
 	private static boolean recordperformance = true;
-	static{
+	/*static{
 		try{
 			//TODO: figure out why the two calls give different results?
 			//elk = new ELKReasoner(TermOutputerUtilities.uberon);
-			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), true);
-			/*OWLOntology elkonto = elk.getOntology();
-			System.out.println(elkonto.getAxiomCount());
-			System.out.println(TermOutputerUtilities.uberon.getAxiomCount());
-			System.out.println(elkonto.equals(TermOutputerUtilities.uberon));*/
+			elk = new ELKReasoner(new File(XML2EQ.uberon), true);
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
-	}
-	private Dictionary dictionary = new Dictionary();
+	}*/
+	private Dictionary dictionary;
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
 	//private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
@@ -120,6 +114,10 @@ public class XML2EQ {
 
 	public static final int RELATIONAL_SLIM=1;
 	public static final int ATTRIBUTE_SLIM=2;
+	
+	public static String uberon;
+	public static String bspo;
+	public static String pato;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
@@ -131,11 +129,18 @@ public class XML2EQ {
 	}*/
 
 
-	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) throws Exception {
+
+	public XML2EQ(String sourcedir, String database, String outputtable, String uberon, String bspo, String pato) throws Exception {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
-		this.tableprefix = prefix;
-		this.glosstable = glosstable;
+		XML2EQ.uberon = uberon;
+		XML2EQ.pato = pato;
+		XML2EQ.bspo = bspo;
+		
+		XML2EQ.ontoutil = new TermOutputerUtilities();
+		this.dictionary = new Dictionary();
+		XML2EQ.elk = new ELKReasoner(new File(XML2EQ.uberon), true);
+		
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
 		if(isRecordperformance()){
@@ -292,7 +297,6 @@ public class XML2EQ {
 			HTMLOutput output = new HTMLOutput();
 			output.outputHTML(this.outputtable,"curator",0);
 		}
-
 
 		elk.dispose();
 	}
@@ -1614,21 +1618,123 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//evaluation runs
+		/*
+		String database =ApplicationUtilities.getProperty("database.name");
+		String prefix =ApplicationUtilities.getProperty("table.prefix");
+
+		String srcdir = ApplicationUtilities.getProperty("source.dir");
+		ArrayList<String> srcdirs = new ArrayList<String>();
+		srcdirs.add(srcdir);
+		srcdirs.add(srcdir+"_38484/"+"final/");
+		srcdirs.add(srcdir+"_40674/"+"final/");
+		srcdirs.add(srcdir+"_40676/"+"final/");
+		srcdirs.add(srcdir+"_40716/"+"final/");
+		srcdirs.add(srcdir+"_40717/"+"final/");
+		srcdirs.add(srcdir+"_40718/"+"final/");
+		srcdirs.add(srcdir+"_best/"+"final/");
+		
+		String outputtable=ApplicationUtilities.getProperty("table.output");
+		ArrayList<String> outputtables = new ArrayList<String>();
+		outputtables.add(outputtable);
+		outputtables.add(outputtable+"_38484");
+		outputtables.add(outputtable+"_40674");
+		outputtables.add(outputtable+"_40676");
+		outputtables.add(outputtable+"_40716");
+		outputtables.add(outputtable+"_40717");
+		outputtables.add(outputtable+"_40718");
+		outputtables.add(outputtable+"_best");
+		
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon");
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo");
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato");
+		ArrayList<String> uberons = new ArrayList<String> ();
+		ArrayList<String> bspos = new ArrayList<String> ();
+		ArrayList<String> patos = new ArrayList<String> ();
+		uberons.add(uberon+".owl");
+		uberons.add(uberon+"_38484"+".owl");
+		uberons.add(uberon+"_40674"+".owl");
+		uberons.add(uberon+"_40676"+".owl");
+		uberons.add(uberon+"_40716"+".owl");
+		uberons.add(uberon+"_40717"+".owl");
+		uberons.add(uberon+"_40718"+".owl");
+		uberons.add(uberon+"_best.owl");
+
+		
+		bspos.add(bspo+".owl");
+		bspos.add(bspo+"_38484"+".owl");
+		bspos.add(bspo+"_40674"+".owl");
+		bspos.add(bspo+"_40676"+".owl");
+		bspos.add(bspo+"_40716"+".owl");
+		bspos.add(bspo+"_40717"+".owl");
+		bspos.add(bspo+"_40718"+".owl");
+		bspos.add(bspo+"_best.owl");
+	
+		patos.add(pato+".owl");
+		patos.add(pato+"_38484"+".owl");
+		patos.add(pato+"_40674"+".owl");
+		patos.add(pato+"_40676"+".owl");
+		patos.add(pato+"_40716"+".owl");
+		patos.add(pato+"_40717"+".owl");
+		patos.add(pato+"_40718"+".owl");
+		patos.add(pato+"_best.owl");
+
+		for(int i = 0; i <8; i++){
+			try {
+				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i));
+				x2e.outputEQs();
+			}catch(Exception e){
+				LOGGER.error("", e);
+			}
+		}
+
+		ArrayList<String> goldstandards = new ArrayList<String> ();
+		goldstandards.add("naive_38484");
+		goldstandards.add("naive_40674");
+		goldstandards.add("naive_40676");
+		goldstandards.add("knowledge_40716");
+		goldstandards.add("knowledge_40717");
+		goldstandards.add("knowledge_40718");
+		
+		//original onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		
+		//curator enhanced onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		//best onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		*/
+		
+		
 		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");
-		String prefix =ApplicationUtilities.getProperty("table.prefix");
-		String glosstable = "fishglossaryfixed";
-
+		//String prefix =ApplicationUtilities.getProperty("table.prefix");
+		//String glosstable = "fishglossaryfixed";
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
+		String runsetting = "";
 		try {
-			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);
+			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato);
 			x2e.outputEQs();
 			if(srcdir.indexOf("/final/")>0){
 				String resulttable = ApplicationUtilities.getProperty("table.output");
 				String goldstandard = "goldstandard";
 				//long startTime = System.currentTimeMillis();
-				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords");		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", runsetting);		
 				pe.evaluate();
 			}
 		} catch (Exception e) {

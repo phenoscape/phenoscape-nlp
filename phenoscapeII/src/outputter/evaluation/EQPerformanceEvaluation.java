@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.ELKReasoner;
 import owlaccessor.OWLAccessorImpl;
@@ -71,25 +72,26 @@ public class EQPerformanceEvaluation {
 	Hashtable<String, String> counts;
 	ArrayList<String> fields = new ArrayList<String>();
 	private boolean nowislabel=false;
+	private String runsetting;
 
 	/**
+	 * @param runsetting 
 	 * 
 	 */
-	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable) {
+	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable, String runsetting) {
 		this.testtable = testtable;
 		this.answertable = answertable;
 		this.prtableEQs = prtable+"_EQs";
-		this.prtablefields = prtable+"_fields";
-		this.prtablestates = prtable+"_states";
+		this.prtablefields = prtable+"_fields_"+runsetting;
+		this.prtablestates = prtable+"_states_"+runsetting;
 		this.substringcache= new Hashtable<String, Hashtable<String, Float>>();
 		this.equivalencecache = new Hashtable<String,Hashtable<String,String>>();
+		this.runsetting = runsetting;
 		//long startTime = System.currentTimeMillis();
-		
 		try {
-			this.elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), false);
-			this.elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"pato.owl"), false);
-			this.elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"bspo.owl"), false);
-			
+			this.elkentity = new ELKReasoner(new File(XML2EQ.uberon), false);
+			this.elkquality = new ELKReasoner(new File(XML2EQ.pato), false);
+			this.elkspatial = new ELKReasoner(new File(XML2EQ.bspo), false);
 		} catch (OWLOntologyCreationException e1) {
 			LOGGER.debug("", e1);
 		}
@@ -114,6 +116,7 @@ public class EQPerformanceEvaluation {
 				stmt.execute(sql);
 				//Holds the table level EQ Precision and recall values
 				stmt.execute("create table if not exists "+prtableEQs+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
+						"runsetting varchar(100),"+
 						"exactp float(4,2), exactr float(4,2)" +
 						")");
 				
@@ -1026,10 +1029,10 @@ private static String[] extractids(String value) {
 			
 			
 		}
-		fieldstring = "exactp, exactr";
+		fieldstring = "runsetting, exactp, exactr";
 		float precision = totalgenerated==0? 0 : (float)totalscore/totalgenerated;
 		float recall = totalinanswer==0? 0 : (float)totalscore/totalinanswer;
-		prstring  = precision +","+ recall +"";
+		prstring  = "'"+this.runsetting+"',"+ precision +","+ recall +"";
 
 
 		this.insertInto(this.prtableEQs, fieldstring, prstring);
@@ -1962,7 +1965,7 @@ private static String[] extractids(String value) {
 		String resulttable = ApplicationUtilities.getProperty("table.output");
 		String goldstandard = "goldstandard";
 		//long startTime = System.currentTimeMillis();
-		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords");		
+		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", "test");		
 		pe.evaluate();
 		//long stopTime = System.currentTimeMillis();
 		//System.out.println("Elapsed time was " + (stopTime - startTime)/60000f + " minutes.");

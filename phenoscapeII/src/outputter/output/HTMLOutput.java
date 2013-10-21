@@ -304,9 +304,12 @@ public class HTMLOutput {
 		ArrayList<String> character_state = new ArrayList<String>();
 		
 		try {
-			elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), false);
-			elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"pato.owl"), false);
-			elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"bspo.owl"), false);
+			//elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl"), false);
+			//elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl"), false);
+			//elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl"), false);
+			elkentity = new ELKReasoner(new File(XML2EQ.uberon), false);
+			elkquality = new ELKReasoner(new File(XML2EQ.pato), false);
+			elkspatial = new ELKReasoner(new File(XML2EQ.bspo), false);
 		} catch (OWLOntologyCreationException e1) {
 			e1.printStackTrace();
 		}

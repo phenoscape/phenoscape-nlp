@@ -17,6 +17,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
+import outputter.XML2EQ;
 import outputter.data.Entity;
 import outputter.data.FormalRelation;
 import outputter.data.Quality;
@@ -560,7 +561,7 @@ public class Dictionary {
 	static{
 		//THis code populates the relationalqualities from Pato - Hariharan	
 		//relations in resrelationQ take a higher priority than the relations from the relationalslim for equivalent relations.
-		File pato_file = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
+		File pato_file = new File(XML2EQ.pato);
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());		
 		for(OWLClass b:a.getRelationalSlim())

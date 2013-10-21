@@ -125,8 +125,8 @@ public class TestOWLAccessorImpl {
 		//System.out.println(a.retrieveConcept("ploidy").size());
 		
 	}
-	public void fetch_relationalslim()
-	{
+	//public void fetch_relationalslim()
+	//{
 	/*	File phenoscape = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(phenoscape, new ArrayList<String>());
@@ -136,7 +136,7 @@ public class TestOWLAccessorImpl {
 			System.out.println("   "+a.getID(b));
 		}*/
 
-	}
+	//}
 	public static void main(String[] args) {
 		TestOWLAccessorImpl to = new TestOWLAccessorImpl();
 		//String path="C:/Documents and Settings/Hong Updates/Desktop/Australia/phenoscape-fish-source/tao.owl";
