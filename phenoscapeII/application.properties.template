@@ -16,6 +16,8 @@ database.url=jdbc:mysql://localhost/[database.name]?user=[database.username]&pas
 #uberonphrases.p2s.bin=C:/Users/updates/CharaParserTest/Ontologies/ext_terms_p2s.bin
 #ontology.uberon=ext
 #ontology.bspo=bspo
+#database table holding unique terms from bspo
+#uniquespatialterms=uniquespatialterms
 
 ontology.dir=
 wordnet.dictionary=
@@ -24,6 +26,8 @@ uberonphrases.update.bin=
 uberonphrases.p2s.bin=
 ontology.uberon=
 ontology.bspo=
+#database table holding unique terms from bspo
+uniquespatialterms=
 
 ##XML2EQ table, source, and output
 #table.prefix=pattern_fixedsource

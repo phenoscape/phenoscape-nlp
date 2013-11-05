@@ -118,6 +118,8 @@ public class XML2EQ {
 	public static String uberon;
 	public static String bspo;
 	public static String pato;
+	public static String uniquespatialterms;
+	public static String glossary;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
@@ -130,12 +132,14 @@ public class XML2EQ {
 
 
 
-	public XML2EQ(String sourcedir, String database, String outputtable, String uberon, String bspo, String pato) throws Exception {
+	public XML2EQ(String sourcedir, String database, String outputtable, String uberon, String bspo, String pato, String spatialtermtable, String glossary) throws Exception {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
 		XML2EQ.uberon = uberon;
 		XML2EQ.pato = pato;
 		XML2EQ.bspo = bspo;
+		XML2EQ.uniquespatialterms = spatialtermtable;
+		XML2EQ.glossary = glossary;
 		
 		XML2EQ.ontoutil = new TermOutputerUtilities();
 		this.dictionary = new Dictionary();
@@ -1619,8 +1623,8 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		//evaluation runs
-		/*
-		String database =ApplicationUtilities.getProperty("database.name");
+		
+		/*String database =ApplicationUtilities.getProperty("database.name");
 		String prefix =ApplicationUtilities.getProperty("table.prefix");
 
 		String srcdir = ApplicationUtilities.getProperty("source.dir");
@@ -1632,7 +1636,7 @@ public class XML2EQ {
 		srcdirs.add(srcdir+"_40716/"+"final/");
 		srcdirs.add(srcdir+"_40717/"+"final/");
 		srcdirs.add(srcdir+"_40718/"+"final/");
-		srcdirs.add(srcdir+"_best/"+"final/");
+		srcdirs.add(srcdir+"_all/"+"final/");
 		
 		String outputtable=ApplicationUtilities.getProperty("table.output");
 		ArrayList<String> outputtables = new ArrayList<String>();
@@ -1643,15 +1647,18 @@ public class XML2EQ {
 		outputtables.add(outputtable+"_40716");
 		outputtables.add(outputtable+"_40717");
 		outputtables.add(outputtable+"_40718");
-		outputtables.add(outputtable+"_best");
+		outputtables.add(outputtable+"_all");
 		
 		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
 		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon");
 		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo");
 		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato");
+		String spatialtermtable = "uniquespatialterms";
 		ArrayList<String> uberons = new ArrayList<String> ();
 		ArrayList<String> bspos = new ArrayList<String> ();
 		ArrayList<String> patos = new ArrayList<String> ();
+		ArrayList<String> spatials = new ArrayList<String> ();
+		
 		uberons.add(uberon+".owl");
 		uberons.add(uberon+"_38484"+".owl");
 		uberons.add(uberon+"_40674"+".owl");
@@ -1659,7 +1666,7 @@ public class XML2EQ {
 		uberons.add(uberon+"_40716"+".owl");
 		uberons.add(uberon+"_40717"+".owl");
 		uberons.add(uberon+"_40718"+".owl");
-		uberons.add(uberon+"_best.owl");
+		uberons.add(uberon+"_all.owl");
 
 		
 		bspos.add(bspo+".owl");
@@ -1669,7 +1676,7 @@ public class XML2EQ {
 		bspos.add(bspo+"_40716"+".owl");
 		bspos.add(bspo+"_40717"+".owl");
 		bspos.add(bspo+"_40718"+".owl");
-		bspos.add(bspo+"_best.owl");
+		bspos.add(bspo+"_all.owl");
 	
 		patos.add(pato+".owl");
 		patos.add(pato+"_38484"+".owl");
@@ -1678,11 +1685,21 @@ public class XML2EQ {
 		patos.add(pato+"_40716"+".owl");
 		patos.add(pato+"_40717"+".owl");
 		patos.add(pato+"_40718"+".owl");
-		patos.add(pato+"_best.owl");
+		patos.add(pato+"_all.owl");
+		
+		spatials.add(spatialtermtable);
+		spatials.add(spatialtermtable+"_38484");
+		spatials.add(spatialtermtable+"_40674");
+		spatials.add(spatialtermtable+"_40676");
+		spatials.add(spatialtermtable+"_40716");
+		spatials.add(spatialtermtable+"_40717");
+		spatials.add(spatialtermtable+"_40718");
+		spatials.add(spatialtermtable+"_all");
+		
 
 		for(int i = 0; i <8; i++){
 			try {
-				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i));
+				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i), spatials.get(i));
 				x2e.outputEQs();
 			}catch(Exception e){
 				LOGGER.error("", e);
@@ -1697,6 +1714,7 @@ public class XML2EQ {
 		goldstandards.add("knowledge_40717");
 		goldstandards.add("knowledge_40718");
 		
+		add glossary
 		//original onto
 		for(int i=0; i<6; i++){
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
@@ -1727,12 +1745,14 @@ public class XML2EQ {
 		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
 		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
 		String runsetting = "";
+		String glossary = "orig_fishglossaryfixed";
 		try {
-			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato);
+			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato, "uniquespatialterms", glossary);
 			x2e.outputEQs();
 			if(srcdir.indexOf("/final/")>0){
 				String resulttable = ApplicationUtilities.getProperty("table.output");
-				String goldstandard = "goldstandard";
+				//String goldstandard = "goldstandard";
+				String goldstandard = "naive_38484";
 				//long startTime = System.currentTimeMillis();
 				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", runsetting);		
 				pe.evaluate();

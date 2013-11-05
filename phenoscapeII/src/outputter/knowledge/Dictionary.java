@@ -382,7 +382,8 @@ public class Dictionary {
 			Statement stmt = conn.createStatement();
 			
 			//load spatial terms
-			ResultSet rs = stmt.executeQuery("select distinct term from uniquespatialterms");
+			String table = XML2EQ.uniquespatialterms==null? ApplicationUtilities.getProperty("uniquespatialterms"): XML2EQ.uniquespatialterms;
+		    ResultSet rs = stmt.executeQuery("select distinct term from "+table);
 			while(rs.next()){
 				String term = rs.getString("term");
 				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
@@ -561,7 +562,7 @@ public class Dictionary {
 	static{
 		//THis code populates the relationalqualities from Pato - Hariharan	
 		//relations in resrelationQ take a higher priority than the relations from the relationalslim for equivalent relations.
-		File pato_file = new File(XML2EQ.pato);
+		File pato_file = new File(XML2EQ.pato==null? ApplicationUtilities.getProperty("ontology.dir")+"/"+ApplicationUtilities.getProperty("ontology.pato")+".owl": XML2EQ.pato);
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());		
 		for(OWLClass b:a.getRelationalSlim())

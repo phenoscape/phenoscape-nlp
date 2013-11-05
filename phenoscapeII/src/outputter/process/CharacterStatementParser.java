@@ -546,6 +546,10 @@ public class CharacterStatementParser extends Parser {
 					}*/
 				}
 			}
+			
+			
+			
+			
 			//reverse the order back to original-like
 			for(int i = 0; i<this.keyentities.size()/2; i++){
 				Collections.swap(this.keyentities, i, this.keyentities.size()-i-1);
@@ -628,7 +632,7 @@ public class CharacterStatementParser extends Parser {
 					{
 						if((e1.getClassIRI()!=null)&&(e2.getClassIRI()!=null))
 						{
-						if(XML2EQ.elk.isPartOf(e1.getClassIRI(),e2.getClassIRI()))
+						if(XML2EQ.elk.isPartOf(e1.getClassIRI(),e2.getClassIRI()) || XML2EQ.elk.isSubclassOfWithPart(e2.getClassIRI(),e1.getClassIRI()))
 						{
 							return true /*this.keyentities*/;
 						}
