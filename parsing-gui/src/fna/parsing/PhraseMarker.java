@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,11 +43,12 @@ public class PhraseMarker {
 	@SuppressWarnings("unchecked")
 	public PhraseMarker(/*String termsourcepath*/) {
 		try {
-			File file = new File(ApplicationUtilities.getProperty("uberonphrases.bin"));
+			File file = new File(ApplicationUtilities.getProperty("ontology.dir"),ApplicationUtilities.getProperty("ontology.uberon")+"_"+ApplicationUtilities.getProperty("uberonphrases.bin"));
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(
 					file));
 			// Deserialize the object
-		    phrases = (ArrayList<String>) in.readObject(); //phrases are words connected with " "
+		    phrases = new ArrayList();
+		    phrases.addAll((HashSet<String>) in.readObject()); //phrases are words connected with " "
 			in.close();			
 			Collections.sort(phrases, new PhraseComparable()); //longest phrases first
 			phrasestr = "";
@@ -61,15 +63,16 @@ public class PhraseMarker {
 			}
 			//phrasestr="";
 			phrasestr = phrasestr.replaceFirst("\\|$", ""); //space separated words in phrases
+			System.out.println(phrasestr);
 			this.phrasepattern =Pattern.compile("(.*?\\b)("+phrasestr+")(\\b.*)", Pattern.CASE_INSENSITIVE);
 			//serialize the updated phrases
 			phrases.addAll(newphrases.keySet()); //add plurals
 			ObjectOutput out = new ObjectOutputStream(
-					new FileOutputStream(new File(ApplicationUtilities.getProperty("uberonphrases.update.bin")))); //avoid increase the size of the original
+					new FileOutputStream(new File(ApplicationUtilities.getProperty("ontology.dir"),ApplicationUtilities.getProperty("ontology.uberon")+"_"+ApplicationUtilities.getProperty("uberonphrases.update.bin")))); //avoid increase the size of the original
 			out.writeObject(phrases);
 			out.close();
 			//serialize the plural-singular mapping
-			file = new File(ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
+			file = new File(ApplicationUtilities.getProperty("ontology.dir"),ApplicationUtilities.getProperty("ontology.uberon")+"_"+ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
 			out = new ObjectOutputStream(
 					new FileOutputStream(file));
 			out.writeObject(newphrases);

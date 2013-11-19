@@ -636,7 +636,34 @@ public class Utilities {
 		}
 		return newtext.trim();
 	}
-	
+	/**
+	 * clean off [;\\]\\[{}(),+\\.&%@<>=`:] from string
+	 * @param str
+	 * @return
+	 */
+	public static String cleanup(String str){
+		while(str.matches(".*?\\[.*?\\].*")){
+			str = str.replaceAll("\\[.*?\\]", "").trim();
+		}
+		while(str.matches(".*?<.*?>.*")){
+			str = str.replaceAll("<.*?>", "").trim();
+		}
+		while(str.matches(".*?\\(.*?\\).*")){
+			str = str.replaceAll("\\(.*?\\)", "").trim();
+		}
+		while(str.matches(".*?\\{.*?\\}.*")){
+			str = str.replaceAll("\\{.*?\\}", "").trim();
+		}
+		str = str.replaceAll("`", "'");
+		if(str.contains("%")) str = ""; //%2cxyz%67
+		
+		str = str.replaceFirst("[@=+;,.&:<>\\]\\[\\(\\)\\{\\}].*", ""); //@fr, x=y, x+y+z
+		str = str.replaceFirst("[_-]$", "");
+		//if(str.matches(".*?[;\\]\\[,+\\.&%@<>=`:].*")){
+		//	System.out.print(str+ " ");
+	    //	}
+		return str;
+	}
 
 
 	public static void main(String[] argv){

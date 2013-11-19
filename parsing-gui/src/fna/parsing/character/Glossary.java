@@ -292,7 +292,7 @@ public class Glossary {
 		StringBuffer chs = new StringBuffer();
 		try{
 			Statement stmt = conn.createStatement();
-			String query = "select distinct term from "+tablename +" where category not in ('STRUCTURE / SUBSTANCE','STRUCTURE', 'CHARACTER', 'FEATURE', 'SUBSTANCE', 'PLANT')";
+			String query = "select distinct term from "+tablename +" where category not in ('STRUCTURE / SUBSTANCE','STRUCTURE', 'CHARACTER', 'SUBSTANCE', 'PLANT')";
 			ResultSet rs = stmt.executeQuery(query);
 			while(rs.next()){
 				chs.append(rs.getString("term").trim()+"|");

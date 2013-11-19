@@ -6,16 +6,20 @@ package fna.parsing;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.jdom.Comment;
 import org.jdom.Element;
+
+import outputter.ApplicationUtilities;
 //import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
+
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -102,8 +106,14 @@ public class VolumeFinalizer extends Thread {
 		String outputtable = this.dataPrefix+"_xml2eq";
 		//String benchmarktable = "internalworkbench";
 		if(!standalone) this.showOutputMessage("System is transforming EQ statements...");
-		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, /*benchmarktable,*/ dataPrefix, glosstable);
-		x2e.outputEQs();
+		
+		
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
+		//XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, uberon, bspo, pato);
+		//x2e.outputEQs();
 
 		//Appending new date to the csv and txt output - Hariharan task1
 		Date d = new Date();
