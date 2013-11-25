@@ -249,14 +249,14 @@ public class XML2EQ {
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
 					//if do not allow EQ to be generated from character statement alone, comment out the following lines.
 					EQProposals empty = new EQProposals();
-					/*empty.setSourceFile(src);
+					empty.setSourceFile(src);
 					empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
 					empty.setCharacterText(characterstatement.getChildText("text"));
 					empty.setStateId(characterstatement.getAttributeValue("state_id"));
 					empty.setStateText(characterstatement.getChildText("text"));
 					empty.setType("character");
 					csp.parse(characterstatement, root, empty);
-					allEQs.addAll(csp.getEQStatements());*/
+					//allEQs.addAll(csp.getEQStatements()); //disallow EQs solely from character statement.
 					keyentities = csp.getKeyEntities();
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
