@@ -128,7 +128,7 @@ public class EntityEntityLocatorStrategy implements SearchStrategy {
 								//check elk: can sentity be part of entityl? 'intermedium (fore)' is part of 'manus'
 								//if true for any proposal, return it
 								//otherwise, return all
-								if(XML2EQ.elk.isPartOf(sentity.getClassIRI(),entityl.getClassIRI())){
+								if(XML2EQ.elk.isPartOf(sentity.getClassIRI(),entityl.getClassIRI()) || XML2EQ.elk.isSubclassOfWithPart(entityl.getClassIRI(),sentity.getClassIRI())){
 									confirmed = true;
 								}
 								//composite entity

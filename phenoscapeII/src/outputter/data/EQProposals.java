@@ -104,9 +104,9 @@ public class EQProposals{
 	public String toString(){
 		
 		return System.getProperty("line.separator")+
-				"E proposals:"+this.entity.toString()+
+				"E proposals:"+(this.entity==null? "null" : this.entity.toString())+
 				System.getProperty("line.separator")+
-				"Q proposals:"+this.quality.toString();
+				"Q proposals:"+(this.quality==null? "null" : this.quality.toString());
 		
 	}
 	

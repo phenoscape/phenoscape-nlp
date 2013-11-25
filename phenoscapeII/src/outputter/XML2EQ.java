@@ -247,15 +247,16 @@ public class XML2EQ {
 					}
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
+					//if do not allow EQ to be generated from character statement alone, comment out the following lines.
 					EQProposals empty = new EQProposals();
-					empty.setSourceFile(src);
+					/*empty.setSourceFile(src);
 					empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
 					empty.setCharacterText(characterstatement.getChildText("text"));
 					empty.setStateId(characterstatement.getAttributeValue("state_id"));
 					empty.setStateText(characterstatement.getChildText("text"));
 					empty.setType("character");
 					csp.parse(characterstatement, root, empty);
-					allEQs.addAll(csp.getEQStatements());
+					allEQs.addAll(csp.getEQStatements());*/
 					keyentities = csp.getKeyEntities();
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
@@ -368,7 +369,15 @@ public class XML2EQ {
 		String tempstring ="",tempid="",tempunontologized="",tempqualityunontologized=""; 
 		String unontologizedentity ="";
 		String unontologizedquality ="";
-		String unontologizedrelatedentity="";		
+		String unontologizedrelatedentity="";	
+		
+		//fill in empty E/Q for E=null and/or Q=null cases
+		if(eQ.getEntity()==null){
+			eQ.setEntity(new EntityProposals());
+		}
+		if(eQ.getQuality()==null){
+			eQ.setQuality(new QualityProposals());
+		}
 		
 		//Read all Entity Proposals and store as comma separated values
 		for(Entity e: eQ.getEntity().getProposals())
@@ -1138,6 +1147,7 @@ public class XML2EQ {
 				for(int n =1; n <= (tokens.length>=4?4:tokens.length); n++){
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
+						ngram = ngram.replaceAll("[()\\[\\]{}?+]", "");
 						//TODO consider negation
 						ArrayList<FormalConcept> qs =  new TermSearcher().searchTerm(ngram, "quality"); 
 						if(qs!=null){
@@ -1310,7 +1320,7 @@ public class XML2EQ {
 	private ArrayList<EQProposals> getEQsforState(String stateid) {
 		ArrayList<EQProposals> EQs = new ArrayList<EQProposals>();
 		for(EQProposals EQp: allEQs){
-			if(EQp.getStateId().compareTo(stateid)==0){
+			if(EQp.getStateId()!=null && EQp.getStateId().compareTo(stateid)==0){ //characters do n
 				EQs.add(EQp);
 				continue;
 			}				
@@ -1390,32 +1400,36 @@ public class XML2EQ {
 					//need to examine the effectiveness of this method in the context of the proposals
 					//should only highconfidence score EQs be considered?
 					//if any E is good?
-					for(Entity E: aEQp.getEntity().getProposals()){
-						String e = null;
-						if(E instanceof SimpleEntity)
-						{
-							e = ((SimpleEntity)E).getLabel();
-							if(((SimpleEntity)E).isOntologized()==true)
+					if(aEQp.getEntity()==null){
+						hasentity = false;
+						haskeyentity = false;
+					}else{
+						for(Entity E: aEQp.getEntity().getProposals()){
+							String e = null;
+							if(E instanceof SimpleEntity)
 							{
-								if(e.length()>0) hasentity = true; 
-								if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; //haskeyentity is true if any of the proposal meets the condition
+								e = ((SimpleEntity)E).getLabel();
+								if(((SimpleEntity)E).isOntologized()==true)
+								{
+									if(e.length()>0) hasentity = true; 
+									if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; //haskeyentity is true if any of the proposal meets the condition
+								}
 							}
+							else
+							{
+								e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
+								if(((CompositeEntity)E).isOntologized()==true)
+								{
+									if(e.length()>0) hasentity = true; 
+									if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+								}
+							}	
 						}
-						else
-						{
-							e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
-							if(((CompositeEntity)E).isOntologized()==true)
-							{
-								if(e.length()>0) hasentity = true; 
-								if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
-							}
-						}	
 					}
-
 					//if any Q is good?
 					if(aEQp.getQuality()!=null){
 						for(Quality Q: aEQp.getQuality().getProposals()){
-							String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
+							String q = Q!=null &&Q.isOntologized()? Q.getLabel():""; //ternary operator added => Hariharan
 
 							if(q==null) q="";
 

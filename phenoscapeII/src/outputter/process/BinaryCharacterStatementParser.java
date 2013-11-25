@@ -231,6 +231,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 					if(q instanceof RelationalQuality) //relational, generate and add negated quality
 					{	
 						boolean postcomposed = false;
+						// 1: present/absent; 2: yes/no
 						if(this.binaryType==1) postcomposed = postcomposeRelationalQuality(negempty, negativestatements, eqp, q);
 						if(this.binaryType==2 || !postcomposed) negateRelationalQuality(negempty, negativestatements,
 								eqp, q); // a ventral to b: yes =>
@@ -261,6 +262,7 @@ public class BinaryCharacterStatementParser extends StateStatementParser {
 	private boolean postcomposeRelationalQuality(EQProposals negempty,
 			ArrayList<EQProposals> negativestatements, EQProposals eqp, Quality q) {
 		ArrayList<EntityProposals> entities = new ArrayList<EntityProposals>();
+		if(eqp.getEntity()==null) return false;
 		entities.add(eqp.getEntity());
 		ArrayList<QualityProposals> qualities = new ArrayList<QualityProposals>();
 		QualityProposals qp = new QualityProposals();

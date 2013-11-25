@@ -182,15 +182,16 @@ public class RelationHandler {
 		tostructname = tostructname.replaceFirst(",$", "").trim();
 		if(relationalquality !=null){ //yes, the relation is a relational quality
 			ArrayList<EntityProposals> relatedentities = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname+"+", relation);
-			/*if(relatedentities==null){ //form un-ontologized e (because relational quality is a strong, positive indicator the RE should be an entity (not a quality)
+			if(relatedentities==null){ //form un-ontologized e (because relational quality is a strong, positive indicator the RE should be an entity (not a quality)
 				SimpleEntity relatedentity = new SimpleEntity();
 				relatedentity.setString(tostructname);
+				relatedentity.setSearchString(tostructname);
 				EntityProposals ep = new EntityProposals();
 				ep.setPhrase(tostructname);
 				ep.add(relatedentity);
 				relatedentities = new ArrayList<EntityProposals>();
 				relatedentities.add(ep);
-			}*/			
+			}			
 			for(EntityProposals relatedentity: relatedentities){
 				RelationalQuality rq = new RelationalQuality(relationalquality, relatedentity);
 				if(this.quality==null) this.quality = new ArrayList<QualityProposals>();

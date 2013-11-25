@@ -247,6 +247,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isPartOf(String part, String whole) {
+		if(part==null || whole==null) return false;
 		if(partofcache.get(part+" "+whole)!=null) return partofcache.get(part+" "+whole).booleanValue();
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
 		OWLClassExpression partofwhole = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
@@ -277,7 +278,8 @@ public class ELKReasoner{
 	 * @param partIRI
 	 * @return
 	 */
-	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
+	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){
+		if(subclassIRI==null || partIRI==null) return false;
 		//cache
 		if(this.isSubclassOfWithPartCache.get(subclassIRI+":"+partIRI)!=null) return Boolean.valueOf(this.isSubclassOfWithPartCache.get(subclassIRI+":"+partIRI));
 		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); 

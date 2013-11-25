@@ -243,7 +243,7 @@ public class Structure2Quality implements AnnotationStrategy{
 						structurewithstructid1 = XPath.newInstance(".//structure[@id='"+ tostructid.trim() + "']");
 						Element tostruct = (Element) structurewithstructid1.selectSingleNode(this.root);
 						String tostructname = Utilities.getStructureName(root, tostructid);
-						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructname, tostructname, "", tostructname,"");	
+						Relatedentity = new EntitySearcherOriginal().searchEntity(root, tostructid, tostructname, "", tostructname,"");	
 						if(Relatedentity!=null)
 						{
 							for(EntityProposals relatedentity: Relatedentity){
@@ -404,6 +404,7 @@ public class Structure2Quality implements AnnotationStrategy{
 		if (results != null) {
 			if (negated) {
 				for(Quality result: results){ 
+					String t;
 					String[] parentinfo = TermOutputerUtilities.retreiveParentInfoFromPATO(result.getId());
 					Quality parentquality = new Quality();
 					parentquality.setSearchString("");
