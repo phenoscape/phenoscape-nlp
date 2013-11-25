@@ -293,7 +293,8 @@ public class DBMigrater {
 		// String tname = "ontoPATO";
 		// String url = "http://purl.obolibrary.org/obo/tao.owl";
 		// String tname = "ontoTAO";
-		String url = "http://purl.obolibrary.org/obo/bspo.owl";
+		//String url = "http://purl.obolibrary.org/obo/bspo.owl";
+		String url="C:/Users/updates/CharaParserTest/Ontologies/charaparser_eval/bspo.owl";
 		String tname = "onto_BSPO";
 		//		String url = "C:\\Users\\Zilong Chang\\Documents\\WORK\\Ontology\\vao.owl";
 		//		String tname = "ontoVAO";
@@ -303,7 +304,8 @@ public class DBMigrater {
 		//		String tname = "ontoVAO";
 
 		try{
-			dbm.migrate("biocreative2012", tname, url);
+			//dbm.migrate("biocreative2012", tname, url);
+			dbm.migrate("charaparsereval2013", tname, url);
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}

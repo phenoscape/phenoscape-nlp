@@ -47,19 +47,20 @@ public class SentenceOrganStateMarker {
 	private String colors = null;
 	//public static String compoundprep = "adaxial to|abaxial to|axial to|herniated into|ipsilateral to|displaced to|herniated out of|specificity to|broken into two pieces|altered number of|quality of a substance|deviation towards the lateral side|deviation towards the medial side|misaligned towards|misaligned away from|present in normal numbers in organism|down|up|has extra parts of type|lacks all parts of type|has fewer parts of type|sensitivity to irradiation|decreased sensitivity to irradiation|increased sensitivity to irradiation|proportionality to|sensitivity to oxygen|lack of fertility in offspring|detached from|susceptibility toward|resistance to|reflex angle to|obtuse angle to|convex angle to|degree of pigmentation|adjacent to|located in|insoluble in|soluble in|parallel to|articulated with|increased sensitivity toward|quality of a liquid|tightly articulated with|quality of a gas|quality of a solid|broadly articulated with|decreased sensitivity toward|separated from|responsive to|unresponsive to|present in greater numbers in organism|far from|opposite|variability of shape|susceptible toward|insusceptible toward|anterodorsal to|posterodorsal to|anteroventral to|posteroventral to|absent|has normal numbers of parts of type|concentration of|sensitivity toward|response to|lacks parts or has fewer parts of type|present in fewer numbers in organism|resistant to|has number of|overlap with|in contact with|variability of rate|increased variability of rate|decreased variability of rate|increased variability of size|decreased variability of size|variability of size|proximal to|ventral to|lateral to|hyporesponsive to|medial to|hyperresponsive to|increased tolerance to|diagonal to|decreased tolerance to|basal to|cauline to|sensitive toward|insensitive toward|tolerant to|dorsal to|decreased variability of color|increased variability of color|variability of color|decreased resistance to|increased resistance to|protruding into|protruding out of|anterior to|posterior to|decreased susceptibility toward|attached to|associated with|increased susceptibility toward|distal to|misaligned with|aligned with|decreased variability of temperature|variability of temperature|increased variability of temperature|posteromedial to|oriented towards|multifocal to coalescing|divergent from|perpendicular to|interlocked with|level with|unfused from|fused with|inserted into|activity (of a radionuclide)|right angle to|dissociated from|h minus|h plus|F minus mating type|a mating type (yeast)|left side of|right side of|according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|contrary to|depending on|due to|except for|equal to|forward of|further to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regard to";
 	//don't introduce () in compoundprep as it is used in a reg exp
-	public static String compoundprep = "adaxial to|abaxial to|axial to|herniat(?:ed|ing|es|e) into|ipsilateral to|displaced to|herniat(?:ed|ing|es|e) out of|specificity to|altered number of|deviation towards?|deviation towards?|misalign(?:ed|ing|s)? towards?|misalign(?:ed|ing|s)? away from|ha(?:s|ve|ving) extra parts of|lack(?:s|ing)? all parts of|ha(?:s|ve|ving) fewer parts of|decreased sensitivity to|increased sensitivity to|sensitivity to|proportionality to|lack(?:s|ing)? of|detach(?:es|ed|ing)? from|susceptibility toward|reflex angle to|obtuse angle to|convex angle to|adjacent to|locat(?:ed|es|ing) in|insoluble in|soluble in|parallel to|articulat(?:ed|es|ing|e) with|increased sensitivity towards?|broadly articulat(?:ed|es|ing|e) with|tightly articulat(?:ed|es|ing|e) with|articulat(?:ed|es|ing|e) with|decreased sensitivity towards?|separat(?:ed|ing|es|e) from|responsive to|unresponsive to|far from|susceptible towards?|insusceptible towards?|anterodorsal to|posterodorsal to|anteroventral to|posteroventral to|concentration of|sensitivity towards?|respons(?:ing|es|e) to|resistant(?:ing|ed|s)? to|ha(?:s|ve|ving) number of|overlap(?:ped|ping|s)? with|in contact with|proximal to|ventral to|lateral to|hyporesponsive to|medial to|hyperresponsive to|increased tolerance to|diagonal to|decreased tolerance to|basal to|cauline to|sensitive towards?|insensitive towards?|tolerant to|dorsal to|decreased resistance to|increased resistance to|resistance to|protrud(?:ing|ed|es|e) into|protrud(?:ing|ed|es|e) out of|anterior to|posterior to|decreased susceptibility toward|attach(?:ed|ing|es) to|increased susceptibility toward|distal to|misalign(?:ed|ing|s)? with|align(?:ed|ing|s)? with|decreased variability of|increased variability of|variability of|posteromedial to|orient(?:ed|ing|s)? towards|multifocal to|divergent from|perpendicular to|interlock(?:ed|ing|s)? with|level(?:ing|ed|s)? with|unfus(?:ing|ed|es|e) from|fus(?:ing|ed|es|e) with|insert(?:ing|ed|s)? into|right angle to|dissociat(?:ing|ed|es|e) from|left side of|right side of|according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|composed of|consist(?:s|ed)? of|contrary to|depending on|due to|except for|equal to|forward of|further to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regards? to";
+	public static String compoundprep = "adaxial to|abaxial to|axial to|herniat(?:ed|ing|es|e) into|ipsilateral to|displaced to|herniat(?:ed|ing|es|e) out of|specificity to|altered number of|deviation towards?|deviation towards?|misalign(?:ed|ing|s)? towards?|misalign(?:ed|ing|s)? away from|ha(?:s|ve|ving) extra parts of|lack(?:s|ing)? all parts of|ha(?:s|ve|ving) fewer parts of|decreased sensitivity to|increased sensitivity to|sensitivity to|proportionality to|lack(?:s|ing)? of|detach(?:es|ed|ing)? from|susceptibility toward|reflex angle to|obtuse angle to|convex angle to|adjacent to|locat(?:ed|es|ing) in|insoluble in|soluble in|parallel to|articulat(?:ed|es|ing|e) with|increased sensitivity towards?|broadly articulat(?:ed|es|ing|e) with|tightly articulat(?:ed|es|ing|e) with|articulat(?:ed|es|ing|e) with|decreased sensitivity towards?|separat(?:ed|ing|es|e) from|responsive to|unresponsive to|far from|susceptible towards?|insusceptible towards?|anterodorsal to|posterodorsal to|anteroventral to|posteroventral to|concentration of|sensitivity towards?|respons(?:ing|es|e) to|resistant(?:ing|ed|s)? to|ha(?:s|ve|ving) number of|overlap(?:ped|ping|s)? with|in contact with|proximal to|ventral to|lateral to|hyporesponsive to|medial to|hyperresponsive to|increased tolerance to|diagonal to|decreased tolerance to|basal to|cauline to|sensitive towards?|insensitive towards?|tolerant to|dorsal to|decreased resistance to|increased resistance to|resistance to|protrud(?:ing|ed|es|e) into|protrud(?:ing|ed|es|e) out of|anterior to|posterior to|decreased susceptibility toward|attach(?:ed|ing|es) to|increased susceptibility toward|distal to|misalign(?:ed|ing|s)? with|align(?:ed|ing|s)? with|decreased variability of|increased variability of|variability of|posteromedial to|orient(?:ed|ing|s)? towards|multifocal to|divergent from|perpendicular to|interlock(?:ed|ing|s)? with|level(?:ing|ed|s)? with|unfus(?:ing|ed|es|e) from|fus(?:ing|ed|es|e) with|insert(?:ing|ed|s)? into|right angle to|dissociat(?:ing|ed|es|e) from|left side of|right side of|according to|ahead of|along with|apart from|as for|aside from|as per|as to as well as|away from|because of|but for|by means of|close to|composed of|consist(?:s|ed)? of|contrary to|depending on|due to|except for|equal to|forward of|further to|in addition to|in association to|in association with|in between|in case of|in combination with|in face of|in favour of|in front of|in lieu of|in spite of|instead of|in view of|near to|next to|on account of|on behalf of|on board|on to|on top of|opposite to|other than|out of|outside of|owing to|preparatory to|prior to|regardless of|relative to|save for|subequal to|together with|unequal to|up against|up until|vis-a-vis|with reference to|with regards? to|in left side of|in right side of|connect(?:ing|ed|s)? to|extend(?:ing|ed|s)? to|deep to|develop(?:ing|ed|s)? from|enclos(?:ing|es|e)|extend(?:ing|ed|s)? from|in anterior side of|in distal side of|in lateral side of|in median plane of|in posterior side of|in proximal side of|locat(?:ed|ing|e) in|overlap(?:s)?|part of|pass(?:ing|es)? through|surrounded by|surround(?:s|ing)?|vicinity of";
 	public static Pattern compreppattern = Pattern.compile("(.*?)\\b("+compoundprep+")\\b(.*)");
 	private String ignoredstrings = "if at all|at all|as well (?!as)|i\\s*\\.\\s*e\\s*\\.|means of";
 	//private ArrayList<String> order = new ArrayList<String>();
 	private Display display;
 	private StyledText charLog;
 	private String termprefix = "basi|hypo";
-
-
+	
 	private Connection con;
 	private String url;
 
 	private boolean printCompoundPP=false;
+	private Pattern organp;
+	private Pattern statep;
 
 	/**
 	 * 
@@ -162,6 +163,8 @@ public class SentenceOrganStateMarker {
 		this.adjnounslist = this.adjnounslist.trim().length()==0? null : "[<{]*"+this.adjnounslist.replaceFirst("\\|$", "").replaceAll("\\|+", "|").replaceAll("\\|", "[}>]*|[<{]*").replaceAll(" ", "[}>]* [<{]*")+"[}>]*";
 		this.organnames = collectOrganNames();
 		this.statenames = collectStateNames();
+		this.organp = Pattern.compile("(.*?)\\b("+organnames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
+		this.statep = Pattern.compile("(.*?)\\b("+statenames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 	}
 
 
@@ -297,8 +300,8 @@ public class SentenceOrganStateMarker {
 	public String markASentence(String source, String modifier, String tag, String sent) throws ClassNotFoundException, SQLException {
 
 
-		String taggedsent = markthis(source, sent, organnames, "<", ">");
-		taggedsent = markthis(source, taggedsent, statenames, "{", "}");
+		String taggedsent = markthis(source, sent, organp, "<", ">");
+		taggedsent = markthis(source, taggedsent, statep, "{", "}");
 		taggedsent = taggedsent.replaceAll("[<{]or[}>]", "or"); //make sure to/or are left untagged
 		taggedsent = taggedsent.replaceAll("[<{]to[}>]", "to");
 		//remove "<>" for <{spine}>-{tipped}  =>spine-{tipped} or {spine}-{tipped}
@@ -473,7 +476,7 @@ public class SentenceOrganStateMarker {
 		return taggedsent;
 	}
 
-	public static String markthis(String source, String sent, String parts, String leftmark, String rightmark) {
+	public static String markthis(String source, String sent, Pattern tagsp, String leftmark, String rightmark) {
 		//no need if select sentence (vs. originalsent)
 		//remove ()
 		//sent = sent.replaceAll("\\(.*?\\)", "");
@@ -483,9 +486,9 @@ public class SentenceOrganStateMarker {
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
 		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
-
-		Pattern tagsp = Pattern.compile("(.*?)\\b("+parts+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 		//System.out.println(parts);
+
+		
 		String taggedsent = "";
 		Matcher m = tagsp.matcher(sent);
 		while(m.matches()){
@@ -539,7 +542,7 @@ public class SentenceOrganStateMarker {
 			}
 
 			/*wordroles only holds word not in glossary, so need to use glossary to mark a sentence as well.*/
-			rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category not in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'life_style')");
+			rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category not in ('STRUCTURE', 'SUBSTANCE', 'PLANT', 'nominative', 'life_style')");
 			while(rs.next()){
 				String term = rs.getString("term").trim();
 				if(term == null){continue;}
@@ -577,8 +580,10 @@ public class SentenceOrganStateMarker {
 		rs = stmt.executeQuery("select word from "+wordroletable+" where semanticrole in ('op', 'os')");
 		while(rs.next()){
 			String w = rs.getString("word").trim();
-			if(!w.matches("("+ChunkedSentence.stop+")") &&!w.matches("("+ChunkedSentence.prepositions+")"))
+			if(!w.matches("("+ChunkedSentence.stop+")") &&!w.matches("("+ChunkedSentence.prepositions+")")){
+				w = Utilities.cleanup(w);
 				tags.append(w+"|");
+			}
 		}
 		/*
 		String postable = this.tableprefix + "_"+ApplicationUtilities.getProperty("POSTABLE");
@@ -617,6 +622,7 @@ public class SentenceOrganStateMarker {
 					tag = m.substring(m.lastIndexOf(" ")+1); //last word from modifier
 				}
 				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+ChunkedSentence.stop+"|"+ChunkedSentence.prepositions+").*")){continue;}
+				tag = Utilities.cleanup(tag);
 				tags.append(tag+"|");
 			}
 		}
@@ -624,13 +630,15 @@ public class SentenceOrganStateMarker {
 
 	protected void organNameFromGloss(StringBuffer tags, Statement stmt)
 			throws SQLException {
-		ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure')");
+		ResultSet rs = stmt.executeQuery("select distinct term from "+this.glosstable+" where category in ('STRUCTURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure')");
 		while(rs.next()){
 			String term = rs.getString("term").trim();
 			if(term == null){continue;}
 			term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
-			if(!term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")"))
+			if(!term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")")){
+				term = Utilities.cleanup(term);
 				tags.append(term+"|");
+			}
 		}
 	}
 
@@ -643,6 +651,7 @@ public class SentenceOrganStateMarker {
 			String term = rs.getString("term").trim();
 			if(term == null){continue;}
 			term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
+			term = Utilities.cleanup(term);
 			colors.append(term+"|");
 		}
 		return colors.toString().replaceFirst("\\|$", "");
@@ -706,7 +715,7 @@ public class SentenceOrganStateMarker {
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "fishglossaryfixed", true, null, null);
+			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "orig_fishglossaryfixed", true, null, null);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 			sosm.markSentences();

@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 //import org.semanticweb.owlapi.io.*;
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.util.OWLClassExpressionVisitorAdapter;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 import outputter.ApplicationUtilities;
@@ -86,7 +87,20 @@ public class OWLAccessorImpl implements OWLAccessor {
 	private OWLOntology rootOnt;
 
 	private Hashtable<String, Hashtable<String, ArrayList<OWLClass>>> searchCache = new Hashtable<String, Hashtable<String, ArrayList<OWLClass>>>(); //con => {syn type => classes}
+
 	public final static String temp = "TEMP";
+	
+	public static Connection conn;
+	static{
+		try{
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+		}catch(Exception e){
+			System.out.println("can't create database connection:"+ApplicationUtilities.getProperty("database.url"));
+			LOGGER.error("", e);
+			System.exit(1);
+		}
+	}
 	/**
 	 * Instantiates a new oWL accessor impl.
 	 *
@@ -510,12 +524,12 @@ public class OWLAccessorImpl implements OWLAccessor {
 		 * 
 		 * @return an empty string when no attribute in in ontology, or string like "color|shape"
 		 */
-	public String getLowerCaseAttributeSlimStringPattern(){
+	public String getLowerCaseAttributeSlimStringPattern(String glossary){
 		StringBuffer sb = new StringBuffer();
 		for(OWLClass c: this.attributeSlim){
 			//add labels to the pattern string
 			String label = this.getLabel(c).replaceAll("\\([^)]*\\)", "").replaceAll("\\s+", " ").toLowerCase().trim();
-			if(structureCheck(label)==false)
+			if(structureCheck(label, glossary)==false)
 			{
 			sb.append(label);
 			sb.append("|");
@@ -532,16 +546,17 @@ public class OWLAccessorImpl implements OWLAccessor {
 	
 	//returns false, if the label is not a structure in fishglossaryfixed table
 	
-	private boolean structureCheck(String label) {
-		Connection conn;
+	private boolean structureCheck(String label, String glossary) {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			if(conn==null){
+				Class.forName("com.mysql.jdbc.Driver");
+				conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
+			}
 			Statement stmt = conn.createStatement();
 			//fetches result if the label is associated with a structure
-			ResultSet rs = stmt.executeQuery("select * from fishglossaryfixed where category = \"structure\" and term = \""+label+"\"");
-			
-			if(rs.next()==false)
+			ResultSet rs = stmt.executeQuery("select * from "+glossary+" where category = \"structure\" and term = \""+label+"\"");
+			if(rs.next()) return true;
+			/*if(rs.next()==false) //close connection somewhere else.
 			{
 				conn.close();
 				return false;
@@ -549,11 +564,11 @@ public class OWLAccessorImpl implements OWLAccessor {
 			{
 				conn.close();
 				return true;
-			}
+			}*/
 		} catch (Exception e) {
 			LOGGER.error("", e);
 		}
-		return true;
+		return false;
 }
 
 	/**
@@ -729,7 +744,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 	 * @param partIRI
 	 * @return
 	 */
-	public boolean isSubclassOfWithPart(String classIRI, String partIRI){	
+	/*public boolean isSubclassOfWithPart(String classIRI, String partIRI){	
 		
 		OWLClass part= df.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
 		OWLClass claz= df.getOWLClass(IRI.create(classIRI)); //'caudal fin' 4000164
@@ -739,7 +754,7 @@ public class OWLAccessorImpl implements OWLAccessor {
 			p.toString();
 		}
 		return false;
-	}
+	}*/
 	/**
 	 * Checks if is relational slim.
 	 *
@@ -1029,11 +1044,10 @@ public class OWLAccessorImpl implements OWLAccessor {
 	}
 	
 	//added by Hariharan to return Manager that was created by constructor Task1
-		public OWLOntologyManager getManager() {
+	public OWLOntologyManager getManager() {
 			return manager;
-		}
+	}
 
-		
 
 		
 }

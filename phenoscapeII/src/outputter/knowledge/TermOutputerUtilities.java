@@ -6,6 +6,7 @@ package outputter.knowledge;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -23,6 +24,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 
 import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
 import owlaccessor.OWLAccessorImpl;
 
 import org.atteo.evo.inflector.English;
@@ -38,7 +40,6 @@ public class TermOutputerUtilities {
 	public static ArrayList<OWLAccessorImpl> OWLentityOntoAPIs  = new ArrayList<OWLAccessorImpl>();
 	public static ArrayList<String> excluded = new ArrayList<String>();
 	@SuppressWarnings("unused")
-	private static String ontologyfolder = ApplicationUtilities.getProperty("ontology.dir");
 	private static String[] entityontologies;
 	private static String[] qualityontologies;
 	//private String database;
@@ -54,13 +55,11 @@ public class TermOutputerUtilities {
 	//(they will also be searched, but if a term match in multiple ontology, the first match is taken as the result)
 	static{
 		//TODO:add GO:bioprocess
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
 		entityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl",
-				ontologyfolder+System.getProperty("file.separator")+"bspo.owl"
-		};
-		qualityontologies = new String[]{
-				ontologyfolder+System.getProperty("file.separator")+"pato.owl"
-		};
+				XML2EQ.uberon==null? ontodir+"/"+ApplicationUtilities.getProperty("ontology.uberon")+".owl": XML2EQ.uberon, 
+				XML2EQ.bspo==null? ontodir+"/"+ApplicationUtilities.getProperty("ontology.bspo")+".owl": XML2EQ.bspo};
+		qualityontologies = new String[]{XML2EQ.pato==null? ontodir+"/"+ApplicationUtilities.getProperty("ontology.pato")+".owl": XML2EQ.pato};
 		//get organ adjectives from Dictionary
 		Enumeration<String> organs = Dictionary.organadjectives.keys();
 		while(organs.hasMoreElements()){
@@ -100,7 +99,7 @@ public class TermOutputerUtilities {
 		for(String onto: qualityontologies){
 			if(onto.endsWith(".owl")){
 				OWLAccessorImpl api = new OWLAccessorImpl(new File(onto), excluded);
-				attributes += "|"+api.getLowerCaseAttributeSlimStringPattern();
+				attributes += "|"+api.getLowerCaseAttributeSlimStringPattern(XML2EQ.glossary==null? ApplicationUtilities.getProperty("glossary"): XML2EQ.glossary);
 				attributes = attributes.replaceAll("(^\\||\\|$)", "");
 				OWLqualityOntoAPIs.add(api);
 			}/*else if(onto.endsWith(".obo")){
@@ -113,6 +112,14 @@ public class TermOutputerUtilities {
 			}*/
 		}
 		excluded.add(Dictionary.cellquality);//exclude "cellular quality"
+		if(OWLAccessorImpl.conn!=null){
+			try {
+				OWLAccessorImpl.conn.close();
+			} catch (SQLException e) {
+				LOGGER.error("", e);
+				e.printStackTrace();
+			}
+		}
 	}
 
 
@@ -777,7 +784,7 @@ public class TermOutputerUtilities {
 			if(s != null){
 				if(debug) System.out.println("["+word+"]'s singular is "+s);
 				Dictionary.singulars.put(word, s);
-				if(wordcopy.compareTo(word)!=0) Dictionary.plurals.put(s, word);
+				if(word.compareTo(s)!=0) Dictionary.plurals.put(s, word);
 				return s;
 			}
 		}

@@ -114,8 +114,8 @@ public class CharacterAnnotatorChunked {
 		//construct chptn
 		chptn = Pattern.compile("\\b("+this.characters+")\\b", Pattern.CASE_INSENSITIVE);
 		//prematched structure names:
-		File file = new File(ApplicationUtilities.getProperty("uberonphrases.update.bin"));
-		File p2sfile = new File(ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
+		File file = new File(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("ontology.uberon")+"_"+ApplicationUtilities.getProperty("uberonphrases.update.bin"));
+		File p2sfile = new File(ApplicationUtilities.getProperty("ontology.dir"), ApplicationUtilities.getProperty("ontology.uberon")+"_"+ApplicationUtilities.getProperty("uberonphrases.p2s.bin"));
 		ObjectInputStream in;
 		try {
 			in = new ObjectInputStream(new FileInputStream(

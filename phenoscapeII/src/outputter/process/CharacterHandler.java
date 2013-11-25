@@ -6,6 +6,7 @@ package outputter.process;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -512,25 +513,39 @@ public class CharacterHandler {
 		for(FormalConcept fc: primary_quality){
 			qp.add(fc);
 		}
-
-		Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
-		String structureid = structure.getAttributeValue("id");
-		String structurename = Utilities.getStructureName(root, structureid);
-		EntityParser rep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
-		structure.setAttribute("processed", "true");
 		
-		if(rep!=null && rep.getEntity()!=null){
-			for(EntityProposals ep: rep.getEntity()){
-				RelationalQuality rq = new RelationalQuality(qp,ep);
-				qp = new QualityProposals();
-				qp.add(rq);
-				if(rq!=null)
-				{
-					Utilities.addQualityProposals(qualities, qp); //correct grouping
-					//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
+		String id = this.chara.getAttributeValue("constraintid").trim();
+		ArrayList<String> ids = new ArrayList<String>();
+		if(id.contains(" ")){
+			ids.addAll(Arrays.asList(id.split("\\s+")));
+		}else{
+			ids.add(id);
+		}
+
+		for(String aid: ids){
+			//Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+this.chara.getAttributeValue("constraintid")+"']");
+			Element structure = (Element) XPath.selectSingleNode(root, ".//structure[@id='"+aid+"']");
+			String structureid = structure.getAttributeValue("id");
+			String structurename = Utilities.getStructureName(root, structureid);
+			EntityParser rep = new EntityParser(chara, root, structureid, structurename, keyentities, fromcharacterstatement);
+			structure.setAttribute("processed", "true");
+			
+			if(rep!=null && rep.getEntity()!=null){
+				for(EntityProposals ep: rep.getEntity()){
+					RelationalQuality rq = new RelationalQuality(qp,ep);
+					qp = new QualityProposals();
+					qp.add(rq);
+					if(rq!=null)
+					{
+						Utilities.addQualityProposals(qualities, qp); //correct grouping
+						//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
+					}
 				}
 			}
+		
 		}
+		
+		
 		return true;
 	}
 

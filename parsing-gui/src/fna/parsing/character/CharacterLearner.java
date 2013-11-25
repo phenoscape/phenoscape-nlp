@@ -640,7 +640,7 @@ public class CharacterLearner  implements Learn2Parse{
 		try{
 		Statement stmt = conn.createStatement();
 		//ResultSet rs = stmt.executeQuery("select distinct term from fna.fnaglossary where category in ('STRUCTURE', 'CHARACTER', 'FEATURE', 'SUBSTANCE', 'PLANT')");
-		ResultSet rs = stmt.executeQuery("select distinct term from "+this.tablePrefix+"_fnaglossary where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT')");
+		ResultSet rs = stmt.executeQuery("select distinct term from "+this.tablePrefix+"_fnaglossary where category in ('STRUCTURE', 'SUBSTANCE', 'PLANT')");
 		while(rs.next()){
 			String tag = rs.getString("term");
 			if(tag == null){continue;}

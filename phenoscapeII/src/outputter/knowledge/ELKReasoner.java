@@ -44,6 +44,7 @@ import outputter.ApplicationUtilities;
 import owlaccessor.OWLAccessorImpl;
 
 
+
 public class ELKReasoner{
 	private static final Logger LOGGER = Logger.getLogger("org.semanticweb.elk");   
 	private OWLReasoner reasoner;
@@ -59,35 +60,36 @@ public class ELKReasoner{
 	private final OWLObjectProperty partof = dataFactory.getOWLObjectProperty(IRI.create("http://purl.obolibrary.org/obo/BFO_0000050")); //part_of
 
 	public static Hashtable<String,IRI> lateralsidescache = new Hashtable<String,IRI>();//holds classes with lateral sides
+	public static Hashtable<String, String> isSubclassOfWithPartCache = new Hashtable<String, String> () ;
 	public TreeMap<String,Boolean> subclasscache = new TreeMap<String,Boolean>();//results of isSubClassOf
 	public TreeMap<String,Boolean> partofcache = new TreeMap<String,Boolean>();//results of isPartOf
 	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
 	
 	public static Hashtable<String, String> equivalent = new Hashtable<String, String>();
 	static{	
-		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002220","http_//purl.obolibrary.org/obo/PATO_0002259"); //adjacent to
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000096","http_//purl.obolibrary.org/obo/PATO_0001632");//anterior_to
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000097","http_//purl.obolibrary.org/obo/PATO_0001234"); //distal to
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000098","http_//purl.obolibrary.org/obo/PATO_0001233");//dorsal_to
-		equivalent.put("http_//purl.obolibrary.org/obo/OBO_REL_located_in","http_//purl.obolibrary.org/obo/PATO_0002261"); //located in
-		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002131","http_//purl.obolibrary.org/obo/PATO_0001590"); //overlap with
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000099","http_//purl.obolibrary.org/obo/PATO_0001633"); //posterior to
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000100","http_//purl.obolibrary.org/obo/PATO_0001195"); //proximal to
-		equivalent.put("http_//purl.obolibrary.org/obo/RO_0002221","http_//purl.obolibrary.org/obo/PATO_0001772"); //surrounding
-		equivalent.put("http_//purl.obolibrary.org/obo/BSPO_0000102","http_//purl.obolibrary.org/obo/PATO_0001196"); //ventral to
-		equivalent.put("http_//purl.obolibrary.org/obo/BFO_0000052","http_//purl.obolibrary.org/obo/PATO_inheres_in");
+		equivalent.put("http://purl.obolibrary.org/obo/ro_0002220","http://purl.obolibrary.org/obo/pato_0002259"); //adjacent to
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000096","http://purl.obolibrary.org/obo/pato_0001632");//anterior_to
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000097","http://purl.obolibrary.org/obo/pato_0001234"); //distal to
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000098","http://purl.obolibrary.org/obo/pato_0001233");//dorsal_to
+		equivalent.put("http://purl.obolibrary.org/obo/obo_rel_located_in","http://purl.obolibrary.org/obo/pato_0002261"); //located in
+		equivalent.put("http://purl.obolibrary.org/obo/ro_0002131","http://purl.obolibrary.org/obo/pato_0001590"); //overlap with
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000099","http://purl.obolibrary.org/obo/pato_0001633"); //posterior to
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000100","http://purl.obolibrary.org/obo/pato_0001195"); //proximal to
+		equivalent.put("http://purl.obolibrary.org/obo/ro_0002221","http://purl.obolibrary.org/obo/pato_0001772"); //surrounding
+		equivalent.put("http://purl.obolibrary.org/obo/bspo_0000102","http://purl.obolibrary.org/obo/pato_0001196"); //ventral to
+		equivalent.put("http://purl.obolibrary.org/obo/bfo_0000052","http://purl.obolibrary.org/obo/pato_inheres_in");
 		
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0002259","http_//purl.obolibrary.org/obo/PATO_0002259"); //adjacent to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001632","http_//purl.obolibrary.org/obo/PATO_0001632");//anterior_to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001234","http_//purl.obolibrary.org/obo/PATO_0001234"); //distal to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001233","http_//purl.obolibrary.org/obo/PATO_0001233");//dorsal_to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0002261","http_//purl.obolibrary.org/obo/PATO_0002261"); //located in
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001590","http_//purl.obolibrary.org/obo/PATO_0001590"); //overlap with
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001633","http_//purl.obolibrary.org/obo/PATO_0001633"); //posterior to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001195","http_//purl.obolibrary.org/obo/PATO_0001195"); //proximal to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001772","http_//purl.obolibrary.org/obo/PATO_0001772"); //surrounding
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_0001196","http_//purl.obolibrary.org/obo/PATO_0001196"); //ventral to
-		equivalent.put("http_//purl.obolibrary.org/obo/PATO_inheres_in","http_//purl.obolibrary.org/obo/PATO_inheres_in");
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0002259","http://purl.obolibrary.org/obo/pato_0002259"); //adjacent to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001632","http://purl.obolibrary.org/obo/pato_0001632");//anterior_to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001234","http://purl.obolibrary.org/obo/pato_0001234"); //distal to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001233","http://purl.obolibrary.org/obo/pato_0001233");//dorsal_to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0002261","http://purl.obolibrary.org/obo/pato_0002261"); //located in
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001590","http://purl.obolibrary.org/obo/pato_0001590"); //overlap with
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001633","http://purl.obolibrary.org/obo/pato_0001633"); //posterior to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001195","http://purl.obolibrary.org/obo/pato_0001195"); //proximal to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001772","http://purl.obolibrary.org/obo/pato_0001772"); //surrounding
+		equivalent.put("http://purl.obolibrary.org/obo/pato_0001196","http://purl.obolibrary.org/obo/pato_0001196"); //ventral to
+		equivalent.put("http://purl.obolibrary.org/obo/pato_inheres_in","http://purl.obolibrary.org/obo/pato_inheres_in");
 	}
 
 	public ELKReasoner(OWLOntology ont, boolean prereason) throws OWLOntologyCreationException{
@@ -211,8 +213,8 @@ public class ELKReasoner{
 
 	public boolean isEquivalent(String id1, String id2){
 		
-		String classIRI1 = getIRI(id1);//composes the IRI
-		String classIRI2 = getIRI(id2);//composes the IRI
+		String classIRI1 = getIRI(id1).toLowerCase();//composes the IRI
+		String classIRI2 = getIRI(id2).toLowerCase();//composes the IRI
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
 		
 		if(equivalent.get(classIRI1)!=null && equivalent.get(classIRI2)!=null && 
@@ -245,6 +247,7 @@ public class ELKReasoner{
 	 * @return
 	 */
 	public boolean isPartOf(String part, String whole) {
+		if(part==null || whole==null) return false;
 		if(partofcache.get(part+" "+whole)!=null) return partofcache.get(part+" "+whole).booleanValue();
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
 		OWLClassExpression partofwhole = dataFactory.getOWLObjectSomeValuesFrom(rel, dataFactory.getOWLClass(IRI.create(whole)));
@@ -264,7 +267,7 @@ public class ELKReasoner{
 		return result;
 	}
 
-	
+
 	/**
 	 * this method was largely taken from examples published on OWL API website.
 	 * but it does not gather all the restrictions ('inherited anonymous classes').
@@ -275,16 +278,122 @@ public class ELKReasoner{
 	 * @param partIRI
 	 * @return
 	 */
-	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
+	public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){
+		if(subclassIRI==null || partIRI==null) return false;
+		//cache
+		if(this.isSubclassOfWithPartCache.get(subclassIRI+":"+partIRI)!=null) return Boolean.valueOf(this.isSubclassOfWithPartCache.get(subclassIRI+":"+partIRI));
+		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); 
+		HashSet<OWLClass> classeswithpart = new HashSet<OWLClass>();
+		Set<OWLOntology> onts = this.ont.getImportsClosure();
+		RestrictionVisitor restrictionVisitor = new RestrictionVisitor(onts);
+		for(OWLOntology ont: onts){
+		for (OWLSubClassOfAxiom ax : ont
+				.getSubClassAxiomsForSubClass(part)) {
+			OWLClassExpression superCls = ax.getSuperClass();
+			superCls.accept(restrictionVisitor);
+		}
+		}
+		for(OWLClassExpression ce: restrictionVisitor.getClassInRestrictedProperties()){
+			if(ce instanceof OWLClass) classeswithpart.add((OWLClass)ce);
+		}
+		//loop though classeswithpart
+		boolean result = false;
+		for(OWLClass classwithpart: classeswithpart){
+			if(isEquivalentClass(dataFactory.getOWLClass(IRI.create(subclassIRI)), classwithpart)){
+				result = true;
+				break;
+			}
+			if(isSubClassOf(subclassIRI, classwithpart.getIRI().toString())){
+				result = true;
+				break;
+			}
+		}
+		//caching
+		this.isSubclassOfWithPartCache.put(subclassIRI+":"+partIRI, result+"");
+		return result;
+	}
+
+	/**
+     * Visits existential restrictions and collects the properties which are restricted
+     */
+    private static class RestrictionVisitor extends OWLClassExpressionVisitorAdapter {
+
+        private boolean processInherited = true;
+
+        private Set<OWLClass> processedClasses;
+
+        private Set<OWLClassExpression> classInRestrictedProperties;
+
+        private Set<OWLOntology> onts;
+
+        public RestrictionVisitor(Set<OWLOntology> onts) {
+            classInRestrictedProperties = new HashSet<OWLClassExpression>();
+            processedClasses = new HashSet<OWLClass>();
+            this.onts = onts;
+        }
+
+
+        public void setProcessInherited(boolean processInherited) {
+            this.processInherited = processInherited;
+        }
+
+
+        public Set<OWLClassExpression> getClassInRestrictedProperties() {
+            return classInRestrictedProperties;
+        }
+
+
+        public void visit(OWLClass desc) {
+            if (processInherited && !processedClasses.contains(desc)) {
+                // If we are processing inherited restrictions then
+                // we recursively visit named supers.  Note that we
+                // need to keep track of the classes that we have processed
+                // so that we don't get caught out by cycles in the taxonomy
+                processedClasses.add(desc);
+                for (OWLOntology ont : onts) {
+                    for (OWLSubClassOfAxiom ax : ont.getSubClassAxiomsForSubClass(desc)) {
+                        ax.getSuperClass().accept(this);
+                    }
+                }
+            }
+        }
+
+
+        public void reset() {
+            processedClasses.clear();
+            classInRestrictedProperties.clear();
+        }
+
+
+        public void visit(OWLObjectSomeValuesFrom desc) {
+            // This method gets called when a class expression is an
+            // existential (someValuesFrom) restriction and it asks us to visit it
+            //classInRestrictedProperties.add(desc.getProperty());
+        	if(desc.getProperty().toString().contains("http://purl.obolibrary.org/obo/BFO_0000050"))
+        		classInRestrictedProperties.add(desc.getFiller());
+        }
+    }
+		
+	/**
+	 * this method was largely taken from examples published on OWL API website.
+	 * but it does not gather all the restrictions ('inherited anonymous classes').
+	 * 
+	 * is subclassIRI a subclass of something with part partIRI, in other words, 
+	 * can this subclassIRI has part partIRI? 
+	 * @param subclassIRI
+	 * @param partIRI
+	 * @return
+	 */
+	/*public boolean isSubclassOfWithPart(String subclassIRI, String partIRI){	
 		if(this.printmessage) LOGGER.setLevel(Level.ERROR);
 		OWLClass part= dataFactory.getOWLClass(IRI.create(partIRI)); //'epichordal lepidotrichium'
 		//OWLClass subclaz= dataFactory.getOWLClass(IRI.create(subclassIRI)); //'caudal fin' 4000164
 
 		HashSet<OWLClass> classeswithpart = new HashSet<OWLClass>();
-		/*made no difference
+		//made no difference
 		reasoner.precomputeInferences(InferenceType.CLASS_HIERARCHY);
 		reasoner.precomputeInferences(InferenceType.OBJECT_PROPERTY_ASSERTIONS);
-		reasoner.precomputeInferences(InferenceType.OBJECT_PROPERTY_HIERARCHY);*/
+		reasoner.precomputeInferences(InferenceType.OBJECT_PROPERTY_HIERARCHY);
 
 		//find all classes that have 'part' 
 
@@ -299,7 +408,8 @@ public class ELKReasoner{
 				+ restrictionVisitor.getRestrictedProperties().size());
 		for (OWLObjectSomeValuesFrom prop : restrictionVisitor
 				.getRestrictedProperties()) {
-			if(prop.getProperty().toString().contains("http://purl.obolibrary.org/obo/BFO_0000050")){
+			if(prop.getProperty().toString().contains(Dictionary.partofiri)){
+			//if(prop.getProperty().toString().contains("http://purl.obolibrary.org/obo/BFO_0000050")){
 				classeswithpart.add((OWLClass) prop.getFiller());
 			}
 		}
@@ -311,7 +421,7 @@ public class ELKReasoner{
 			}
 		}
 		return false;
-	}
+	}*/
 
 
 
@@ -359,7 +469,7 @@ public class ELKReasoner{
 
 	/** Visits existential restrictions and collects the properties which are
 	 * restricted */
-	private static class RestrictionVisitor extends OWLClassExpressionVisitorAdapter {
+	/*private static class RestrictionVisitor extends OWLClassExpressionVisitorAdapter {
 		private Set<OWLClass> processedClasses;
 		private Set<OWLObjectSomeValuesFrom> restrictedProperties;
 		private Set<OWLOntology> onts;
@@ -393,7 +503,7 @@ public class ELKReasoner{
 				}
 			}
 		}
-	}
+	}*/
 
 	public Boolean CheckClassExistence(String id)
 	{
@@ -414,44 +524,49 @@ public class ELKReasoner{
 	
 	public static void main(String[] argv){
 		try {
-			ELKReasoner elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), true);
-			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:4200047"));
-			System.out.println("..........class Exists......."+elk.CheckClassExistence("TEMP:4200047"));
-			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:0011584"));
+			
+			/*ELKReasoner elk = new ELKReasoner(new File("C:\\Users\\updates\\CharaParserTest\\Ontologies\\po.owl"), true);
+			String subclass ="http://purl.obolibrary.org/obo/PO_0025332";//disk flower
+			String part = "http://purl.obolibrary.org/obo/PO_0009032"; //petal
+			System.out.println(elk.isSubclassOfWithPart(subclass, part)); //true: disk flower is subclass of flower which could have petals 
+			*/
+			ELKReasoner elk = new ELKReasoner(new File("C:/Users/updates/CharaParserTest/Ontologies", "ext.owl"), true);
+			/*System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:4200047"));//true
+			System.out.println("..........class Exists......."+elk.CheckClassExistence("TEMP:4200047")); //false
+			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:0011584"));//true
 
 
-			//elk.getClassesWithLateralSides();
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0005621",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//true
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0003098",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//false			
-			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584")); //true
-			 
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0002389", "http://purl.obolibrary.org/obo/UBERON_0002544"));
-			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0000976","http://purl.obolibrary.org/obo/BSPO_0000384"));
+			elk.getClassesWithLateralSides();
+			System.out.println("1:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0005621",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//true
+			System.out.println("2:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0003098",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//false			
+			System.out.println("3:"+elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0001028","http://purl.obolibrary.org/obo/UBERON_0011584")); //true
+			System.out.println("4:"+elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_4200050", "http://purl.obolibrary.org/obo/UBERON_0001424"));//cotyla part of ulna? false
+			System.out.println("5:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0002389", "http://purl.obolibrary.org/obo/UBERON_0002544"));//true
+			System.out.println("6:"+elk.isPartOf("http://purl.obolibrary.org/obo/UBERON_0000976","http://purl.obolibrary.org/obo/BSPO_0000384"));//false
 
 			//String class1IRI = "http://purl.obolibrary.org/obo/UBERON:0003606"; //limb long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //long bone
 			//String class2IRI = "http://purl.obolibrary.org/obo/UBERON_0002495"; //organ part, is neck part of organ part? false
-			/*String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
-			String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";*/
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));	
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));
+			//String subclass = "http://purl.obolibrary.org/obo/UBERON_4200054";
+			//String superclass = "http://purl.obolibrary.org/obo/UBERON_4000164";
+			System.out.println("7:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010545","http://purl.obolibrary.org/obo/uberon_0010546"));//false	
+			System.out.println("8:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0010546","http://purl.obolibrary.org/obo/uberon_0010545"));//false
 
-			//System.out.println(elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachment site, ischium
-			//System.out.println(elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site
-			//System.out.println(elk.isSubClassOf("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_0004765")); //ischium, skeletal element
-
+			System.out.println("9:"+elk.isPartOf("http://purl.obolibrary.org/obo/uberon_4200047","http://purl.obolibrary.org/obo/uberon_0001274")); //attachment site, ischium: false
+			System.out.println("10:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_4200047")); //ischium, attachement site:false
+			System.out.println("11:"+elk.isSubclassOfWithPart( "http://purl.obolibrary.org/obo/uberon_3000767", "http://purl.obolibrary.org/obo/uberon_0001274")); //pelvic girdle opening, ischium : true
+			System.out.println("12:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_3000767")); //ischium, pelvic girdle opening : true
+			*/
+			System.out.println("13:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424", "http://purl.obolibrary.org/obo/UBERON_4200050")); //is ulna a subclass of things with part cotyla? true 
+			 
 			/*OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
 			OWLClass joint1 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0002217")); //synovial joint
 			OWLClass joint2 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0011134")); //nonsynovial joint
 			OWLClassExpression joint1or2 = elk.dataFactory.getOWLObjectUnionOf(joint1, joint2);
 			System.out.println(elk.isEquivalentClass(joint, joint1or2));*/
-			
 		    //elk.isSubPropertyOf("http://purl.obolibrary.org/obo/in_left_side_of","http://purl.obolibrary.org/obo/in_lateral_side_of");
 			
-	
-			
 			elk.dispose();
-
 		} catch (OWLOntologyCreationException e) {
 			// TODO Auto-generated catch block
 			LOGGER.error("", e);

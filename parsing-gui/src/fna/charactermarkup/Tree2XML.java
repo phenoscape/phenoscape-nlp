@@ -82,6 +82,7 @@ public class Tree2XML {
     private String format(String parsed) throws Exception{
     	try{
     	int count = 0;
+    	String t;
     	StringBuffer xml = new StringBuffer();
     	parsed = parsed.replaceAll("\\)", ") ").replaceAll("\\s+", " ").trim();//(NP (JJ subulate) (NNS enations) )
         parsed = parsed.replaceAll("``", "JJ").replaceAll("\\(-LRB-", "(PUNCT").replaceAll("\\([^A-Z/ ]+", "(PUNCT");

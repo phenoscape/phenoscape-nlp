@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
 import outputter.knowledge.Dictionary;
 import outputter.knowledge.ELKReasoner;
 import owlaccessor.OWLAccessorImpl;
@@ -71,27 +72,35 @@ public class EQPerformanceEvaluation {
 	Hashtable<String, String> counts;
 	ArrayList<String> fields = new ArrayList<String>();
 	private boolean nowislabel=false;
+	private String runsetting;
+	private int partialcounts = 0;
 
 	/**
+	 * @param runsetting 
 	 * 
 	 */
-	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable) {
+	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable, String runsetting) {
 		this.testtable = testtable;
 		this.answertable = answertable;
 		this.prtableEQs = prtable+"_EQs";
-		this.prtablefields = prtable+"_fields";
-		this.prtablestates = prtable+"_states";
+		this.prtablefields = prtable+"_fields_"+runsetting;
+		this.prtablestates = prtable+"_states_"+runsetting;
 		this.substringcache= new Hashtable<String, Hashtable<String, Float>>();
 		this.equivalencecache = new Hashtable<String,Hashtable<String,String>>();
+		this.runsetting = runsetting;
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
 		//long startTime = System.currentTimeMillis();
-		
 		try {
-			this.elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), false);
-			this.elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"pato.owl"), false);
-			this.elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"bspo.owl"), false);
-			
+			this.elkentity = new ELKReasoner(new File(XML2EQ.uberon==null? uberon : XML2EQ.uberon), false);
+			this.elkquality = new ELKReasoner(new File(XML2EQ.pato==null? pato :XML2EQ.pato), false);
+			this.elkspatial = new ELKReasoner(new File(XML2EQ.bspo==null? bspo: XML2EQ.bspo), false);
 		} catch (OWLOntologyCreationException e1) {
 			LOGGER.debug("", e1);
+			System.out.print("can't load reasoner");
+			System.exit(1);
 		}
 		//long stopTime = System.currentTimeMillis();
 		//System.out.println("time spent on init elks was " + (stopTime - startTime)/60000f + " minutes.");
@@ -114,6 +123,7 @@ public class EQPerformanceEvaluation {
 				stmt.execute(sql);
 				//Holds the table level EQ Precision and recall values
 				stmt.execute("create table if not exists "+prtableEQs+" (id TIMESTAMP DEFAULT CURRENT_TIMESTAMP primary key, " +
+						"runsetting varchar(100),"+
 						"exactp float(4,2), exactr float(4,2)" +
 						")");
 				
@@ -195,47 +205,49 @@ public class EQPerformanceEvaluation {
 			LOGGER.debug(System.currentTimeMillis());
 			
 			//compareNonOntologizedGS();
+			
 
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
 		//long startTime = System.currentTimeMillis();
 		
-		//System.out.println("reasoning results: ");
+		/*System.out.println("reasoning results: ");
 		
-		//System.out.println("elkentity: subclass:");
+		System.out.println("elkentity: subclass:");
 		Set<String> e = elkentity.subclasscache.keySet();
 		for(String key: e){
-			//System.out.println(key+"=>"+elkentity.subclasscache.get(key));
+			System.out.println(key+"=>"+elkentity.subclasscache.get(key));
 		}
-		//System.out.println("elkquality: subclass:");
+		System.out.println("elkquality: subclass:");
 		e = elkquality.subclasscache.keySet();
 		for(String key: e){
-			//System.out.println(key+"=>"+elkquality.subclasscache.get(key));
+			System.out.println(key+"=>"+elkquality.subclasscache.get(key));
 		}
-		//System.out.println("elkspatial: subclass:");
+		System.out.println("elkspatial: subclass:");
 	    e = elkspatial.subclasscache.keySet();
 	    for(String key: e){
-			//System.out.println(key+"=>"+elkspatial.subclasscache.get(key));
+			System.out.println(key+"=>"+elkspatial.subclasscache.get(key));
 		}
-	    //System.out.println("elkentity: partof:");
+	    System.out.println("elkentity: partof:");
 		e = elkentity.partofcache.keySet();
 		 for(String key: e){
-			//System.out.println(key+"=>"+elkentity.partofcache.get(key));
+			System.out.println(key+"=>"+elkentity.partofcache.get(key));
 		}
-		 //System.out.println("elkquality: partof:");
+		System.out.println("elkquality: partof:");
 		e = elkquality.partofcache.keySet();
 		for(String key: e){
-			//System.out.println(key+"=>"+elkquality.partofcache.get(key));
+			System.out.println(key+"=>"+elkquality.partofcache.get(key));
 		}
 		
-		//System.out.println("elkspatial: partof:");
+		System.out.println("elkspatial: partof:");
 	    e = elkspatial.partofcache.keySet();
 	    for(String key: e){
-			//System.out.println(key+"=>"+elkspatial.partofcache.get(key));
+			System.out.println(key+"=>"+elkspatial.partofcache.get(key));
 		}
 		
-		//System.out.println("end of reasoning results: ");
+		System.out.println("end of reasoning results ");
+		*/
 		
 		this.elkentity.dispose();
 		this.elkquality.dispose();
@@ -243,7 +255,7 @@ public class EQPerformanceEvaluation {
 
 		//long stopTime = System.currentTimeMillis();
 		//System.out.println("time spent on disposing elks was " + (stopTime - startTime)/60000f + " minutes.");
-		
+		System.out.println("total partial counts="+this.partialcounts);
 
 	}
 
@@ -578,9 +590,9 @@ public class EQPerformanceEvaluation {
 						for(String v1 : vs){
 							if(v1.length()>0)
 							{
-								if(v1.contains("Score")==true)
+								if(v1.contains("score")==true) //lower case because of the application of .toLowerCase before
 								{
-								tvalues.add((v1.substring(0, v1.indexOf("Score")-1)).trim());//holds all the entity proposals of this EQ statement
+								tvalues.add((v1.substring(0, v1.indexOf("score")-1)).trim());//holds all the entity proposals of this EQ statement
 								}else
 								{
 								tvalues.add(v1.trim());
@@ -737,7 +749,7 @@ private static String[] extractids(String value) {
 	String id ="";
 	for(String t:temp)
 	{
-	if(t.matches("[A-Z]+[_:][0-9]+")==true)
+	if(t.matches("[A-Z]+[_:][0-9A-Z_-]+")==true)
 	{
 		id+=t+" ";
 	}
@@ -839,7 +851,7 @@ private static String[] extractids(String value) {
 		if(a.length()>0 && v.length()>0)
 		{
 			//make a call to substring function, followed by  replace substring function
-			a=format(a);
+			a= format(a);
 			v= format(v);
 			//The below cache is used to speed up the lookup process
 			if(this.substringcache.get(a.trim()+","+v.trim())==null)
@@ -1026,10 +1038,10 @@ private static String[] extractids(String value) {
 			
 			
 		}
-		fieldstring = "exactp, exactr";
+		fieldstring = "runsetting, exactp, exactr";
 		float precision = totalgenerated==0? 0 : (float)totalscore/totalgenerated;
 		float recall = totalinanswer==0? 0 : (float)totalscore/totalinanswer;
-		prstring  = precision +","+ recall +"";
+		prstring  = "'"+this.runsetting+"',"+ precision +","+ recall +"";
 
 
 		this.insertInto(this.prtableEQs, fieldstring, prstring);
@@ -1163,9 +1175,10 @@ private static String[] extractids(String value) {
 			
 			for(int i=0;i<candidate.split(" ").length;i++)
 			{
-				if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo|RO|ro).*")==true)
+				//if(c[i].matches(".*(bspo|BSPO|UBERON|uberon|BFO|bfo|RO|ro).*")==true) //entities could come from CL, GO or other imported ontologies
+				if(!c[i].matches(".*[pP][Aa][Tt][Oo].*"))
 				{
-					if(c[i].matches(".*(bspo|BSPO).*")==false)
+					if(c[i].matches(".*[Bb][Ss][Pp][Oo].*")==false)
 						elk = this.elkentity;
 					else
 						elk = this.elkspatial;
@@ -1185,13 +1198,16 @@ private static String[] extractids(String value) {
 					} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
 					{
 						score=(float) 0.75;
-					} else if((c[i].matches(".*(pato|PATO).*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
+						partialcounts++;
+					} else if((c[i].matches(".*[pP][Aa][Tt][Oo].*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
 					{
 						score=(float) 0.75;
-					} /*else if(elk.isEquivalent(c[i], r[j]) == true)
+						partialcounts++;
+					} else if(elk.isEquivalent(c[i], r[j]) == true)
 					{
 						score=(float) 1.0;
-					}*/
+						partialcounts++;
+					}
 					
 					if(score>0)
 					{
@@ -1955,15 +1971,34 @@ private static String[] extractids(String value) {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String database = "biocreative2012";
+		//String database = "biocreative2012";
 		//String candidate = "the cat sat on the mat";
 		//	String reference = "the cat was sat on the mat";
 		//LOGGER.debug(meteor(candidate,reference,1,1));
-		String resulttable = ApplicationUtilities.getProperty("table.output");
-		String goldstandard = "goldstandard";
+		//String resulttable = ApplicationUtilities.getProperty("table.output");
 		//long startTime = System.currentTimeMillis();
-		EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords");		
-		pe.evaluate();
+		
+		//String resulttable = "test_equivalent";
+		//String goldstandard = "goldstandard";
+		//EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", "test_is_equivalent");		
+		//pe.evaluate();
+		
+		
+		String database = "charaparsereval2013";
+		String[] resulttable = new String[]{"naive_38484", "naive_38484", "naive_40674",
+				"knowledge_40716", "knowledge_40716","knowledge_40717"};
+		String[] goldstandard =  new String[]{"naive_40674","naive_40676", "naive_40676",
+				"knowledge_40717", "knowledge_40718","knowledge_40718"};
+		String[] setting = new String[]{"38484_40674", "38484_40676","40674_40676",
+				"40716_40717","40716_40718","40717_40718" };
+		
+		for(int i = 1; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable[i], goldstandard[i],"evaluationrecords", setting[i]);		
+			pe.evaluate();
+		}
+		
+		
+		
 		//long stopTime = System.currentTimeMillis();
 		//System.out.println("Elapsed time was " + (stopTime - startTime)/60000f + " minutes.");
 		

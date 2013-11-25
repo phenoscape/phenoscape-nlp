@@ -75,8 +75,6 @@ public class XML2EQ {
 	private File source;
 	public static int unknownid = 0;
 	private String outputtable;
-	private String tableprefix;
-	private String glosstable;
 	private int count = 0;
 	// private String keyentity = null;
 	private ArrayList<EntityProposals> keyentities;
@@ -95,23 +93,19 @@ public class XML2EQ {
 	private XPath pathStructure2;
 	private XPath pathCharacterText;
 
-	public static TermOutputerUtilities ontoutil = new TermOutputerUtilities();
+	public static TermOutputerUtilities ontoutil;
 	public static ELKReasoner elk; 
 	private static boolean recordperformance = true;
-	static{
+	/*static{
 		try{
 			//TODO: figure out why the two calls give different results?
 			//elk = new ELKReasoner(TermOutputerUtilities.uberon);
-			elk = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+"ext.owl"), true);
-			/*OWLOntology elkonto = elk.getOntology();
-			System.out.println(elkonto.getAxiomCount());
-			System.out.println(TermOutputerUtilities.uberon.getAxiomCount());
-			System.out.println(elkonto.equals(TermOutputerUtilities.uberon));*/
+			elk = new ELKReasoner(new File(XML2EQ.uberon), true);
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
-	}
-	private Dictionary dictionary = new Dictionary();
+	}*/
+	private Dictionary dictionary;
 	//private EntitySearcherOriginal es = new EntitySearcherOriginal(dictionary);
 	//private TermSearcher ts = new TermSearcher(dictionary);
 	//private CharacterHandler ch = new CharacterHandler(ts, es, ontoutil);
@@ -120,6 +114,12 @@ public class XML2EQ {
 
 	public static final int RELATIONAL_SLIM=1;
 	public static final int ATTRIBUTE_SLIM=2;
+	
+	public static String uberon;
+	public static String bspo;
+	public static String pato;
+	public static String uniquespatialterms;
+	public static String glossary;
 
 	//a convenient way to separate Sereno style from others by listing the source file names here.
 	//TODO replace it with a more elegant approach
@@ -131,11 +131,20 @@ public class XML2EQ {
 	}*/
 
 
-	public XML2EQ(String sourcedir, String database, String outputtable, String prefix, String glosstable) throws Exception {
+
+	public XML2EQ(String sourcedir, String database, String outputtable, String uberon, String bspo, String pato, String spatialtermtable, String glossary) throws Exception {
 		this.source = new File(sourcedir);
 		this.outputtable = outputtable;
-		this.tableprefix = prefix;
-		this.glosstable = glosstable;
+		XML2EQ.uberon = uberon;
+		XML2EQ.pato = pato;
+		XML2EQ.bspo = bspo;
+		XML2EQ.uniquespatialterms = spatialtermtable;
+		XML2EQ.glossary = glossary;
+		
+		XML2EQ.ontoutil = new TermOutputerUtilities();
+		this.dictionary = new Dictionary();
+		XML2EQ.elk = new ELKReasoner(new File(XML2EQ.uberon), true);
+		
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
 		if(isRecordperformance()){
@@ -238,15 +247,16 @@ public class XML2EQ {
 					}
 				}else{
 					CharacterStatementParser csp = new CharacterStatementParser(ontoutil);
+					//if do not allow EQ to be generated from character statement alone, comment out the following lines.
 					EQProposals empty = new EQProposals();
-					empty.setSourceFile(src);
+					/*empty.setSourceFile(src);
 					empty.setCharacterId(characterstatement.getAttributeValue("character_id"));
 					empty.setCharacterText(characterstatement.getChildText("text"));
 					empty.setStateId(characterstatement.getAttributeValue("state_id"));
 					empty.setStateText(characterstatement.getChildText("text"));
 					empty.setType("character");
 					csp.parse(characterstatement, root, empty);
-					allEQs.addAll(csp.getEQStatements());
+					allEQs.addAll(csp.getEQStatements());*/
 					keyentities = csp.getKeyEntities();
 					LOGGER.debug("XML2EQ: received keyentities");
 					for(EntityProposals ep: keyentities) LOGGER.debug(".."+ep.toString());
@@ -292,7 +302,6 @@ public class XML2EQ {
 			HTMLOutput output = new HTMLOutput();
 			output.outputHTML(this.outputtable,"curator",0);
 		}
-
 
 		elk.dispose();
 	}
@@ -360,7 +369,15 @@ public class XML2EQ {
 		String tempstring ="",tempid="",tempunontologized="",tempqualityunontologized=""; 
 		String unontologizedentity ="";
 		String unontologizedquality ="";
-		String unontologizedrelatedentity="";		
+		String unontologizedrelatedentity="";	
+		
+		//fill in empty E/Q for E=null and/or Q=null cases
+		if(eQ.getEntity()==null){
+			eQ.setEntity(new EntityProposals());
+		}
+		if(eQ.getQuality()==null){
+			eQ.setQuality(new QualityProposals());
+		}
 		
 		//Read all Entity Proposals and store as comma separated values
 		for(Entity e: eQ.getEntity().getProposals())
@@ -1130,6 +1147,7 @@ public class XML2EQ {
 				for(int n =1; n <= (tokens.length>=4?4:tokens.length); n++){
 					for(int b = 0; b < tokens.length-n+1; b++){
 						String ngram = Utilities.join(tokens, b, b+n-1, " ");
+						ngram = ngram.replaceAll("[()\\[\\]{}?+]", "");
 						//TODO consider negation
 						ArrayList<FormalConcept> qs =  new TermSearcher().searchTerm(ngram, "quality"); 
 						if(qs!=null){
@@ -1302,7 +1320,7 @@ public class XML2EQ {
 	private ArrayList<EQProposals> getEQsforState(String stateid) {
 		ArrayList<EQProposals> EQs = new ArrayList<EQProposals>();
 		for(EQProposals EQp: allEQs){
-			if(EQp.getStateId().compareTo(stateid)==0){
+			if(EQp.getStateId()!=null && EQp.getStateId().compareTo(stateid)==0){ //characters do n
 				EQs.add(EQp);
 				continue;
 			}				
@@ -1382,32 +1400,36 @@ public class XML2EQ {
 					//need to examine the effectiveness of this method in the context of the proposals
 					//should only highconfidence score EQs be considered?
 					//if any E is good?
-					for(Entity E: aEQp.getEntity().getProposals()){
-						String e = null;
-						if(E instanceof SimpleEntity)
-						{
-							e = ((SimpleEntity)E).getLabel();
-							if(((SimpleEntity)E).isOntologized()==true)
+					if(aEQp.getEntity()==null){
+						hasentity = false;
+						haskeyentity = false;
+					}else{
+						for(Entity E: aEQp.getEntity().getProposals()){
+							String e = null;
+							if(E instanceof SimpleEntity)
 							{
-								if(e.length()>0) hasentity = true; 
-								if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; //haskeyentity is true if any of the proposal meets the condition
+								e = ((SimpleEntity)E).getLabel();
+								if(((SimpleEntity)E).isOntologized()==true)
+								{
+									if(e.length()>0) hasentity = true; 
+									if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; //haskeyentity is true if any of the proposal meets the condition
+								}
 							}
+							else
+							{
+								e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
+								if(((CompositeEntity)E).isOntologized()==true)
+								{
+									if(e.length()>0) hasentity = true; 
+									if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
+								}
+							}	
 						}
-						else
-						{
-							e= ((CompositeEntity)E).getTheSimpleEntity().getLabel();
-							if(((CompositeEntity)E).isOntologized()==true)
-							{
-								if(e.length()>0) hasentity = true; 
-								if(hasentity && matchWithKeyEntities(e)) haskeyentity = true; 
-							}
-						}	
 					}
-
 					//if any Q is good?
 					if(aEQp.getQuality()!=null){
 						for(Quality Q: aEQp.getQuality().getProposals()){
-							String q = Q!=null?Q.getLabel():""; //ternary operator added => Hariharan
+							String q = Q!=null &&Q.isOntologized()? Q.getLabel():""; //ternary operator added => Hariharan
 
 							if(q==null) q="";
 
@@ -1614,21 +1636,139 @@ public class XML2EQ {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		//evaluation runs
+		
+		/*String database =ApplicationUtilities.getProperty("database.name");
+		String prefix =ApplicationUtilities.getProperty("table.prefix");
+
+		String srcdir = ApplicationUtilities.getProperty("source.dir");
+		ArrayList<String> srcdirs = new ArrayList<String>();
+		srcdirs.add(srcdir);
+		srcdirs.add(srcdir+"_38484/"+"final/");
+		srcdirs.add(srcdir+"_40674/"+"final/");
+		srcdirs.add(srcdir+"_40676/"+"final/");
+		srcdirs.add(srcdir+"_40716/"+"final/");
+		srcdirs.add(srcdir+"_40717/"+"final/");
+		srcdirs.add(srcdir+"_40718/"+"final/");
+		srcdirs.add(srcdir+"_all/"+"final/");
+		
+		String outputtable=ApplicationUtilities.getProperty("table.output");
+		ArrayList<String> outputtables = new ArrayList<String>();
+		outputtables.add(outputtable);
+		outputtables.add(outputtable+"_38484");
+		outputtables.add(outputtable+"_40674");
+		outputtables.add(outputtable+"_40676");
+		outputtables.add(outputtable+"_40716");
+		outputtables.add(outputtable+"_40717");
+		outputtables.add(outputtable+"_40718");
+		outputtables.add(outputtable+"_all");
+		
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon");
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo");
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato");
+		String spatialtermtable = "uniquespatialterms";
+		ArrayList<String> uberons = new ArrayList<String> ();
+		ArrayList<String> bspos = new ArrayList<String> ();
+		ArrayList<String> patos = new ArrayList<String> ();
+		ArrayList<String> spatials = new ArrayList<String> ();
+		
+		uberons.add(uberon+".owl");
+		uberons.add(uberon+"_38484"+".owl");
+		uberons.add(uberon+"_40674"+".owl");
+		uberons.add(uberon+"_40676"+".owl");
+		uberons.add(uberon+"_40716"+".owl");
+		uberons.add(uberon+"_40717"+".owl");
+		uberons.add(uberon+"_40718"+".owl");
+		uberons.add(uberon+"_all.owl");
+
+		
+		bspos.add(bspo+".owl");
+		bspos.add(bspo+"_38484"+".owl");
+		bspos.add(bspo+"_40674"+".owl");
+		bspos.add(bspo+"_40676"+".owl");
+		bspos.add(bspo+"_40716"+".owl");
+		bspos.add(bspo+"_40717"+".owl");
+		bspos.add(bspo+"_40718"+".owl");
+		bspos.add(bspo+"_all.owl");
+	
+		patos.add(pato+".owl");
+		patos.add(pato+"_38484"+".owl");
+		patos.add(pato+"_40674"+".owl");
+		patos.add(pato+"_40676"+".owl");
+		patos.add(pato+"_40716"+".owl");
+		patos.add(pato+"_40717"+".owl");
+		patos.add(pato+"_40718"+".owl");
+		patos.add(pato+"_all.owl");
+		
+		spatials.add(spatialtermtable);
+		spatials.add(spatialtermtable+"_38484");
+		spatials.add(spatialtermtable+"_40674");
+		spatials.add(spatialtermtable+"_40676");
+		spatials.add(spatialtermtable+"_40716");
+		spatials.add(spatialtermtable+"_40717");
+		spatials.add(spatialtermtable+"_40718");
+		spatials.add(spatialtermtable+"_all");
+		
+
+		for(int i = 0; i <8; i++){
+			try {
+				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i), spatials.get(i));
+				x2e.outputEQs();
+			}catch(Exception e){
+				LOGGER.error("", e);
+			}
+		}
+
+		ArrayList<String> goldstandards = new ArrayList<String> ();
+		goldstandards.add("naive_38484");
+		goldstandards.add("naive_40674");
+		goldstandards.add("naive_40676");
+		goldstandards.add("knowledge_40716");
+		goldstandards.add("knowledge_40717");
+		goldstandards.add("knowledge_40718");
+		
+		add glossary
+		//original onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		
+		//curator enhanced onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		//best onto
+		for(int i=0; i<6; i++){
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
+			pe.evaluate();
+		}
+		*/
+		
+		
 		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");
-		String prefix =ApplicationUtilities.getProperty("table.prefix");
-		String glosstable = "fishglossaryfixed";
-
+		//String prefix =ApplicationUtilities.getProperty("table.prefix");
+		//String glosstable = "fishglossaryfixed";
+		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
+		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
+		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
+		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
+		String runsetting = "";
+		String glossary = "orig_fishglossaryfixed";
 		try {
-			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, /* benchmarktable, */prefix, glosstable);
+			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato, "uniquespatialterms", glossary);
 			x2e.outputEQs();
 			if(srcdir.indexOf("/final/")>0){
 				String resulttable = ApplicationUtilities.getProperty("table.output");
-				String goldstandard = "goldstandard";
+				//String goldstandard = "goldstandard";
+				String goldstandard = "naive_38484";
 				//long startTime = System.currentTimeMillis();
-				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords");		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", runsetting);		
 				pe.evaluate();
 			}
 		} catch (Exception e) {

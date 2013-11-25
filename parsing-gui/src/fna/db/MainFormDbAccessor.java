@@ -1010,7 +1010,7 @@ public class MainFormDbAccessor {
 			}*/
 			//simply add "c" terms as "feature" in term_category table
 			String q = "select distinct word from "+prefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where semanticrole in ('c') and " +
-					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category not in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
+					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category not in ('STRUCTURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
 			ResultSet rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String t = rs.getString(1);
@@ -1018,7 +1018,7 @@ public class MainFormDbAccessor {
 			}
 			//insert structure terms
 			q = "select distinct word from "+prefix+"_"+ApplicationUtilities.getProperty("WORDROLESTABLE")+" where semanticrole in ('op', 'os') and " +
-					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category in ('STRUCTURE', 'FEATURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
+					" word not in (select distinct term from "+MainForm.glossaryPrefixCombo.getText()+" where category in ('STRUCTURE', 'SUBSTANCE', 'PLANT', 'nominative', 'structure'))";
 			rs = stmt.executeQuery(q);
 			while(rs.next()){
 				String t = rs.getString(1);

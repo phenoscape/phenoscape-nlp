@@ -133,6 +133,10 @@ tab.one.name=General
 tab.two.name=Step 1
 #perl and term curation
 tab.three.name=Step 2
+tab.three.perl.name=Run Perl Program
+tab.three.one.name=2.1 Review Structure Terms
+tab.three.two.name=2.2 Review Character Terms
+tab.three.three.name=2.3 Categorize Other Terms
 #final
 tab.four.name=Step 3
 #tab.one.name=General

@@ -63,9 +63,14 @@ public class TestCaseCopier {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String test = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/test";
+		/*String test = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/test";
 		String finall = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/final";
 		String tested = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss/target/tested";
+		*/
+		
+		String test = "C:/Users/updates/CharaParserTest/charaParserEval2013/original/target/test";
+		String finall ="C:/Users/updates/CharaParserTest/charaParserEval2013/original/target/final";
+		String tested = "C:/Users/updates/CharaParserTest/charaParserEval2013/original/target/tested";
 		TestCaseCopier tcc = new TestCaseCopier(test, finall, tested);
 
 

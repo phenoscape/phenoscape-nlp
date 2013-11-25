@@ -374,7 +374,7 @@ public class VolumeMarkupDbAccessor {
 					ResultSet rset = stmt.executeQuery("select category from "+this.glossarytable+" where term ='"+w+"'");					 
 					if(rset.next()){//in glossary
 						String cat = rset.getString(1);
-						if(cat.matches("\\b(STRUCTURE|FEATURE|SUBSTANCE|PLANT|nominative|structure)\\b")){
+						if(cat.matches("\\b(STRUCTURE|SUBSTANCE|PLANT|nominative|structure)\\b")){
 							add2WordRolesTable(wc, "os");
 						}else{
 							add2WordRolesTable(wc, "c");

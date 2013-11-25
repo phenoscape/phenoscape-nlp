@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -625,9 +626,9 @@ public class Utilities {
 	 * @param ep
 	 */
 	public static void addEntityProposals(ArrayList<EntityProposals> entities,
-			EntityProposals ep) {
-		if(ep==null) return;
-		for(EntityProposals aep: entities){
+			EntityProposals eps) {
+		if(eps==null) return;
+		/*for(EntityProposals aep: entities){
 			for(Entity ex: aep.getProposals()){
 				ArrayList<Entity> eproposals = ep.getProposals();
 				for(int i = 0; i < eproposals.size(); i++){
@@ -637,13 +638,35 @@ public class Utilities {
 					}
 				}
 			}
+		}*/
+		//deduplicate in ep
+		EntityProposals ep = eps.clone();
+		Iterator<EntityProposals> it = entities.iterator();
+		while(it.hasNext()){
+			EntityProposals aep = it.next();
+			Iterator<Entity> ite = aep.getProposals().iterator();
+			while(ite.hasNext()){
+				Entity ex = ite.next();
+				ArrayList<Entity> eproposals = ep.getProposals();
+				Iterator<Entity> itp = eproposals.iterator();
+				while(itp.hasNext()){
+					Entity in = itp.next();
+					if(ex.content()!=null && ex.content().compareTo(in.content())==0){
+						//eproposals.remove(in); //deduplicate
+						itp.remove();
+					}
+				}
+			}
 		}
+		eps = ep;
+		//grouping
 		for(EntityProposals aep: entities){
 			if(ep.getPhrase().compareTo(aep.getPhrase())==0){
 				aep.add(ep);
 				return;
 			}
 		}
+		//add new
 		entities.add(ep);
 	}
 	
@@ -821,6 +844,10 @@ public class Utilities {
 		for(EntityProposals ep : entities){
 			for(Entity e: ep.getProposals()){
 				if(e instanceof SimpleEntity){
+					if(e.getId()==null){
+						if(e.getString().matches(".*\\b("+Dictionary.spatialheadnouns+")\\b.*")) return true;
+						if(e.getString().matches(".*\\b("+Dictionary.spatialtermptn+")\\b.*")) return true;
+					}
 					if(e.getId().startsWith(Dictionary.spatialOntoPrefix)) return true;
 				}
 			}

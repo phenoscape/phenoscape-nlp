@@ -17,6 +17,7 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 import outputter.ApplicationUtilities;
 import outputter.Utilities;
+import outputter.XML2EQ;
 import outputter.data.Entity;
 import outputter.data.FormalRelation;
 import outputter.data.Quality;
@@ -39,7 +40,7 @@ public class Dictionary {
 	static final public String ADDITIONAL = "bearer|entity|bearer's|bearers'|entities|inhering|inheres|inhere|virtue|quality|having|exhibiting";
 
 	//see http://phenoscape.svn.sourceforge.net/viewvc/phenoscape/trunk/vocab/character_slims.obo from Jim
-	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
+	public static String patoupperclasses = "2-D shape|cellular quality|shape|size|position|closure|structure|count in organism|count|optical quality|composition|texture|physical quality of a process|behavioral quality|mobility|mass|quality of a solid";
 	//spatial terms form BSPO
 	public static ArrayList<String> spatialterms = new ArrayList<String>();
 	
@@ -381,7 +382,8 @@ public class Dictionary {
 			Statement stmt = conn.createStatement();
 			
 			//load spatial terms
-			ResultSet rs = stmt.executeQuery("select distinct term from uniquespatialterms");
+			String table = XML2EQ.uniquespatialterms==null? ApplicationUtilities.getProperty("uniquespatialterms"): XML2EQ.uniquespatialterms;
+		    ResultSet rs = stmt.executeQuery("select distinct term from "+table);
 			while(rs.next()){
 				String term = rs.getString("term");
 				term = term.replaceAll("\\(.*?\\)", "").trim(); //remove "(obsolete)"
@@ -560,7 +562,7 @@ public class Dictionary {
 	static{
 		//THis code populates the relationalqualities from Pato - Hariharan	
 		//relations in resrelationQ take a higher priority than the relations from the relationalslim for equivalent relations.
-		File pato_file = new File(ApplicationUtilities.getProperty("ontology.dir")+"/pato.owl");
+		File pato_file = new File(XML2EQ.pato==null? ApplicationUtilities.getProperty("ontology.dir")+"/"+ApplicationUtilities.getProperty("ontology.pato")+".owl": XML2EQ.pato);
 		//String url = "http://obo.svn.sourceforge.net/viewvc/obo/uberon/trunk/merged.owl";
 		OWLAccessorImpl a = new OWLAccessorImpl(pato_file, new ArrayList<String>());		
 		for(OWLClass b:a.getRelationalSlim())

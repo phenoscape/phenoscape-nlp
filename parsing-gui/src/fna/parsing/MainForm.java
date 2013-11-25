@@ -281,6 +281,7 @@ public class MainForm {
 	protected UUID lastSavedIdS = UUID.randomUUID();
 	protected UUID lastSavedIdC = UUID.randomUUID();
 	protected UUID lastSavedIdO = UUID.randomUUID();
+	protected Composite currentTermRoleMatrix;
 	
 	
 
@@ -1033,6 +1034,38 @@ public class MainForm {
 		//final TabFolder markupNReviewTabFolder = new TabFolder(composite_4, SWT.NONE);
 		final TabFolder markupNReviewTabFolder = new TabFolder(composite_4, SWT.NONE);
 		markupNReviewTabFolder.setBounds(0, 0, 795, 515);
+		
+		markupNReviewTabFolder.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				System.out.println();
+				
+			}
+			//Logic for subtab access goes here
+			public void widgetSelected(SelectionEvent arg0) {
+				String tabName = arg0.item.toString();
+				tabName = tabName.substring(tabName.indexOf("{")+1, tabName.indexOf("}")).trim();
+				
+				//manage termRoleMatrix
+				if(currentTermRoleMatrix!=null){
+					//dispose current
+					Control[] children = currentTermRoleMatrix.getChildren();
+					for(Control child: children) child.dispose();
+					//load termRoleMatrix for the new selection
+					if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.one.name"))==0){
+						reLoadTermArea(termRoleMatrix4structures, scrolledComposite4structures, contextText4structures, "structures");
+					}else if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.two.name"))==0){
+						reLoadTermArea(termRoleMatrix4characters, scrolledComposite4characters, contextText4characters, "characters");
+					}else if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.three.name"))==0){
+						reLoadTermArea(termRoleMatrix4others, scrolledComposite4others, contextText4characters, "others");
+					}
+					
+				}
+				if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.one.name"))==0) currentTermRoleMatrix = termRoleMatrix4structures;
+				if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.two.name"))==0) currentTermRoleMatrix = termRoleMatrix4characters;
+				if(tabName.compareTo(ApplicationUtilities.getProperty("tab.three.three.name"))==0) currentTermRoleMatrix = termRoleMatrix4others;
+
+			}
+		});
 		
 		TabItem tbtmPerlProgram = new TabItem(markupNReviewTabFolder, SWT.NONE);
 		tbtmPerlProgram.setText("Run Perl Program");
@@ -2309,13 +2342,13 @@ public class MainForm {
 		String subtabTitle ="";
 		String subtabInstruction = "";
 		if(type.compareToIgnoreCase("others")==0){
-			subtabTitle = "2.3 Categorize Other Terms";
+			subtabTitle = ApplicationUtilities.getProperty("tab.three.three.name");
 			subtabInstruction = "step4Descp3";
 		}else if(type.compareToIgnoreCase("structures")==0){
-			subtabTitle = "2.1 Review Structure Terms";
+			subtabTitle =  ApplicationUtilities.getProperty("tab.three.one.name");
 			subtabInstruction = "step4Descp1";
 		}else if(type.compareToIgnoreCase("characters")==0){
-			subtabTitle = "2.2 Review Character Terms";
+			subtabTitle =  ApplicationUtilities.getProperty("tab.three.two.name");
 			subtabInstruction = "step4Descp2";
 		}		
 		
@@ -4258,7 +4291,159 @@ public class MainForm {
 		return filteredwords;
 	}
 	
-	protected void loadTermArea(Composite termRoleMatrix, ScrolledComposite scrolledComposite, ArrayList <String> words, final StyledText contextText, String type) {
+	protected void reLoadTermArea(Composite termRoleMatrix, ScrolledComposite scrolledComposite, final StyledText contextText, final String type){
+		int count = 0;
+		try {
+			if(termRoleMatrix.isDisposed()){
+				ApplicationUtilities.showPopUpWindow(
+						"Term categorization has been saved and the process can not be redone.", 
+						ApplicationUtilities.getProperty("popup.header.info"), SWT.ICON_INFORMATION);
+				return;
+			}
+			final int y = 10; //height of a row
+			int m = 1; //vertical margin
+			Hashtable <String, String> words = null;
+			Hashtable<String, String> categorizedterms = null;
+			if(type.compareToIgnoreCase("structures") ==0){
+				words = categorizedtermsS;
+				categorizedterms = categorizedtermsS; //the global variable categorizedtermsS is populated when the local variable thiscategorizedterms is populated below
+			}
+			if(type.compareToIgnoreCase("characters") ==0){
+				words = categorizedtermsC;
+				categorizedterms = categorizedtermsC;
+			}
+			if(type.compareToIgnoreCase("others") ==0){
+				words = categorizedtermsO;
+				categorizedterms = categorizedtermsO;
+			}
+			termRoleMatrix.setSize(744, words.size()*y);
+			scrolledComposite.setContent(termRoleMatrix);
+			termRoleMatrix.setVisible(true);
+			final Hashtable<String, String> thiscategorizedterms = categorizedterms;
+			if (words != null) {
+				ArrayList<Control> tabList = new ArrayList<Control>();
+				Enumeration<String> en = words.keys();
+				while(en.hasMoreElements()){
+					String word = en.nextElement();
+					String cat = words.get(word);
+					thiscategorizedterms.put(word, type); //populate term list 
+					count++;					
+					final Composite termRoleGroup = new Composite(termRoleMatrix, SWT.NONE);
+					termRoleGroup.setLayoutData(new RowLayout(SWT.HORIZONTAL));	
+					if(count % 2 == 0){
+						termRoleGroup.setBackground(grey);
+					}
+					termRoleGroup.setBounds(0, (count-1)*y, 744, y);
+					//show context info				
+					termRoleGroup.addMouseListener(new MouseListener(){
+						@Override
+						public void mouseDoubleClick(MouseEvent e) {}
+						@Override
+						public void mouseDown(MouseEvent e) {
+							Control[] controls = termRoleGroup.getChildren();
+							if(controls[1] instanceof Label){
+								String term = ((Label)controls[1]).getText().trim();
+				  				try {
+				  					contextText.setText("");
+				  					contextText.setTopMargin(2);
+									mainDb.getContextData(term, contextText);
+								} catch (ParsingException e1) {
+									e1.printStackTrace();
+								} catch (SQLException e1) {
+									e1.printStackTrace();
+								}	
+							}
+						}
+						@Override
+						public void mouseUp(MouseEvent e) {}
+					});
+					
+					Label clabel = new Label(termRoleGroup, SWT.NONE);
+					clabel.setText(" "+count);
+					if(count%2 == 0) clabel.setBackground(grey);
+					clabel.setBounds(15, (count-1)*y+m, 93, y-2*m);
+					
+					
+					
+					Label tlabel = new Label(termRoleGroup, SWT.NONE);
+					tlabel.setText(word);
+					if(count%2 == 0) tlabel.setBackground(grey);
+					tlabel.setBounds(125, (count-1)*y+m, 150, y-2*m);
+					
+
+						
+					final Button button_1 = new Button(termRoleGroup, SWT.RADIO);
+					button_1.setBounds(325, (count-1)*y+m, 90, y-2*m);			
+					if(cat.compareToIgnoreCase("structures")==0) button_1.setSelection(true);
+					if(count%2 == 0) button_1.setBackground(grey);
+					tabList.add(button_1);
+					button_1.addListener(SWT.Selection, new Listener() {
+					      public void handleEvent(Event e) {
+					    	  Control[] controls = button_1.getParent().getChildren();
+					    	  if(controls[1] instanceof Label){
+					    		 String term = ((Label)controls[1]).getText().trim();
+					    		//String term = ((Text)controls[1]).getText().trim();
+						    	 thiscategorizedterms.put(term, "structures");
+					    	  }
+					      }						
+					});
+					
+					final Button button_2 = new Button(termRoleGroup, SWT.RADIO);
+					button_2.setBounds(425, (count-1)*y+m, 90, y-2*m);
+					//button_2.setSelection(true);//This can't be done. It will waste all the learning perl completed: For use cases where the person who runs charaparser needs another person to review the terms. Here mark all terms as "descriptor" by default so they will all be loaded to OTO for review
+					if(cat.compareToIgnoreCase("characters")==0) button_2.setSelection(true);
+					if(count%2 == 0) button_2.setBackground(grey);
+					tabList.add(button_2);
+					button_2.addListener(SWT.Selection, new Listener() {
+					      public void handleEvent(Event e) {
+					    	  Control[] controls = button_2.getParent().getChildren();
+					    	  if(controls[1] instanceof Label){
+					    		 String term = ((Label)controls[1]).getText().trim();
+					    		 // String term = ((Text)controls[1]).getText().trim();
+						    	 thiscategorizedterms.put(term, "characters");
+					    	  }
+					      }						
+					});
+					
+					final Button button_3 = new Button(termRoleGroup, SWT.RADIO);
+					button_3.setBounds(525, (count-1)*y+m, 90, y-2*m);
+					if(cat.compareToIgnoreCase("others")==0) button_3.setSelection(true);
+					if(count%2 == 0) button_3.setBackground(grey);
+					tabList.add(button_3);
+					button_3.addListener(SWT.Selection, new Listener() {
+					      public void handleEvent(Event e) {
+					    	  Control[] controls = button_3.getParent().getChildren();
+					    	  if(controls[1] instanceof Label){
+					    		 String term = ((Label)controls[1]).getText().trim();
+					    		 //String term = ((Text)controls[1]).getText().trim();
+						    	 thiscategorizedterms.put(term, "others");
+					    	  }
+					      }						
+					});
+					
+					Label invisible = new Label(termRoleGroup, SWT.NONE);
+					invisible.setBounds(720, (count-1)*y+m, 90, y-2*m);
+					invisible.setText("invisible");
+					invisible.setVisible(false);
+					
+					clabel.pack();
+					tlabel.pack();
+					button_1.pack();
+					button_2.pack();
+					button_3.pack();
+					termRoleGroup.pack();
+					termRoleGroup.redraw();
+				}
+				termRoleMatrix.pack();
+				//termRoleMatrix.setTabList(tabList.toArray(new Control[]{}));
+			}			
+		} catch (Exception exe){
+			LOGGER.error("unable to load subtab in Markup : MainForm", exe);
+			exe.printStackTrace();
+		}
+	}
+	
+	protected void loadTermArea(Composite termRoleMatrix, ScrolledComposite scrolledComposite, ArrayList <String> words, final StyledText contextText, final String type) {
 		int count = 0;
 		try {
 			if(termRoleMatrix.isDisposed()){

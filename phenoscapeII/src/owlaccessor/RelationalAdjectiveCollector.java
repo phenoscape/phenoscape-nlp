@@ -24,7 +24,9 @@ import org.semanticweb.owlapi.model.OWLClass;
 
 
 
+
 import outputter.ApplicationUtilities;
+import outputter.XML2EQ;
 import outputter.search.TermSearcher;
 
 /**
@@ -39,8 +41,7 @@ public class RelationalAdjectiveCollector {
 	 */
 	public RelationalAdjectiveCollector(String newtable, String glossarytable, String updater) {
 
-		String uberondir = ApplicationUtilities.getProperty("ontology.dir")+
-				System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
+		String uberondir = XML2EQ.uberon;
 		OWLAccessorImpl oai = new OWLAccessorImpl(new File(uberondir), new ArrayList<String>());
 		Hashtable<String,Hashtable<String, String>> adjectives = OWLAccessorImpl.adjectiveorgans;
 		Set<String> adjs = adjectives.keySet();
