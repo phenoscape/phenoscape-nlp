@@ -1910,7 +1910,7 @@ public class CharacterAnnotatorChunked {
 		 * character, ""); } return results; }
 		 */
 		object = parenthesis(object); //o[(fibula) {size}]]]	
-		object = this.normalizeSharedOrganObject(object);
+		//object = this.normalizeSharedOrganObject(object);
 		if (object.indexOf("(")>=0) {
 			object = object.substring(0,  object.lastIndexOf(")")+1)+"]";
 			ArrayList<Element> tostructures = this.processObject(object); // TODO:
@@ -3263,9 +3263,9 @@ public class CharacterAnnotatorChunked {
 	 */
 	private String normalizeSharedOrganObject(String object) {
 		// TODO Auto-generated method stub
-		 if(object.matches(".*?\\b(and|or)\\b.*")){//a conic or subcylindric
+		// if(object.matches(".*?\\b(and|or)\\b.*")){//a conic or subcylindric
 		// lateral extremity is not a case of shared object
-		//if (object.matches(".*?\\band\\b.*")) {
+		if (object.matches(".*?\\band\\b.*")) {
 			String norm = "";
 			String[] segs = object.split("\\s+");
 			String lastN = segs[segs.length - 1].replaceAll("\\]+$", "").trim();
@@ -3278,13 +3278,13 @@ public class CharacterAnnotatorChunked {
 			}
 			for (int i = segs.length - 1; i >= 0; i--) {
 				norm = segs[i] + " " + norm;
-				 if(segs[i].matches("(,|and|or)") &&
-				 !segs[i-1].contains("(")){
-				//if (segs[i].matches("(,|and)") && !segs[i - 1].contains("(")) {
+				// if(segs[i].matches("(,|and|or)") &&
+				// !segs[i-1].contains("(")){
+				if (segs[i].matches("(,|and)") && !segs[i - 1].contains("(")) {
 					norm = lastN + " " + norm;
 				}
-				 if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
-				//if (segs[i].matches("(,|and)") && segs[i - 1].contains("(")) {
+				 //if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
+				if (segs[i].matches("(,|and)") && segs[i - 1].contains("(")) {
 					lastN = segs[i - 1].trim();
 				}
 			}
