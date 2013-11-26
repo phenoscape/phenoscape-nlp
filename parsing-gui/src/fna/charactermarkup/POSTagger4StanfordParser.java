@@ -44,7 +44,7 @@ public class POSTagger4StanfordParser {
 	private String countp = "more|fewer|less|many|\\d+";
 	private Pattern countptn = Pattern.compile("((?:^| |\\{)(?:"+countp+")\\}? (?:or|to) \\{?(?:"+countp+")(?:\\}| |$))");
 	private String romandigits = "i|v|x"; 
-	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]?(?:\\d|"+romandigits+")+\\b[}>]?(?!%))?)");
+	private Pattern positionptn = Pattern.compile("(<(\\S+?)> [<{]*(?:\\d|"+romandigits+")+\\b[}>]*(?![-\\d]*%)(?:\\s*(and|-)\\s*[<{]*(?:\\d|"+romandigits+")+\\b[}>]*(?!%))?)");
 	private ArrayList<String> prepphrases = new ArrayList<String>();
 	private String positions = ""; //initialized with two values that are not positions for convenience
 	private Pattern positionptn2;
