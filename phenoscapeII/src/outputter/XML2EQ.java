@@ -1638,36 +1638,37 @@ public class XML2EQ {
 	public static void main(String[] args) {
 		//evaluation runs
 		
-		/*String database =ApplicationUtilities.getProperty("database.name");
-		String prefix =ApplicationUtilities.getProperty("table.prefix");
+		String database =ApplicationUtilities.getProperty("database.name");
+		//String prefix =ApplicationUtilities.getProperty("table.prefix");
 
 		String srcdir = ApplicationUtilities.getProperty("source.dir");
 		ArrayList<String> srcdirs = new ArrayList<String>();
-		srcdirs.add(srcdir);
-		srcdirs.add(srcdir+"_38484/"+"final/");
-		srcdirs.add(srcdir+"_40674/"+"final/");
-		srcdirs.add(srcdir+"_40676/"+"final/");
-		srcdirs.add(srcdir+"_40716/"+"final/");
-		srcdirs.add(srcdir+"_40717/"+"final/");
-		srcdirs.add(srcdir+"_40718/"+"final/");
-		srcdirs.add(srcdir+"_all/"+"final/");
+		srcdirs.add(srcdir+"original/target/final");
+		srcdirs.add(srcdir+"38484/target/final/");
+		srcdirs.add(srcdir+"40674/target/final/");
+		srcdirs.add(srcdir+"40676/target/final/");
+		srcdirs.add(srcdir+"40716/target/final/");
+		srcdirs.add(srcdir+"40717/target/final/");
+		srcdirs.add(srcdir+"40718/target/final/");
+		srcdirs.add(srcdir+"best/target/final/");
 		
 		String outputtable=ApplicationUtilities.getProperty("table.output");
 		ArrayList<String> outputtables = new ArrayList<String>();
-		outputtables.add(outputtable);
+		outputtables.add(outputtable+"_original");
 		outputtables.add(outputtable+"_38484");
 		outputtables.add(outputtable+"_40674");
 		outputtables.add(outputtable+"_40676");
 		outputtables.add(outputtable+"_40716");
 		outputtables.add(outputtable+"_40717");
 		outputtables.add(outputtable+"_40718");
-		outputtables.add(outputtable+"_all");
+		outputtables.add(outputtable+"_best");
 		
 		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
-		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon");
-		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo");
-		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato");
+		String uberon = ontodir+"/"+ApplicationUtilities.getProperty("ontology.uberon");
+		String bspo = ontodir+"/"+ApplicationUtilities.getProperty("ontology.bspo");
+		String pato = ontodir+"/"+ApplicationUtilities.getProperty("ontology.pato");
 		String spatialtermtable = "uniquespatialterms";
+		String glossary = "fishglossaryfixed";
 		ArrayList<String> uberons = new ArrayList<String> ();
 		ArrayList<String> bspos = new ArrayList<String> ();
 		ArrayList<String> patos = new ArrayList<String> ();
@@ -1680,7 +1681,7 @@ public class XML2EQ {
 		uberons.add(uberon+"_40716"+".owl");
 		uberons.add(uberon+"_40717"+".owl");
 		uberons.add(uberon+"_40718"+".owl");
-		uberons.add(uberon+"_all.owl");
+		uberons.add(uberon+"_best.owl");
 
 		
 		bspos.add(bspo+".owl");
@@ -1690,7 +1691,7 @@ public class XML2EQ {
 		bspos.add(bspo+"_40716"+".owl");
 		bspos.add(bspo+"_40717"+".owl");
 		bspos.add(bspo+"_40718"+".owl");
-		bspos.add(bspo+"_all.owl");
+		bspos.add(bspo+"_best.owl");
 	
 		patos.add(pato+".owl");
 		patos.add(pato+"_38484"+".owl");
@@ -1699,7 +1700,7 @@ public class XML2EQ {
 		patos.add(pato+"_40716"+".owl");
 		patos.add(pato+"_40717"+".owl");
 		patos.add(pato+"_40718"+".owl");
-		patos.add(pato+"_all.owl");
+		patos.add(pato+"_best.owl");
 		
 		spatials.add(spatialtermtable);
 		spatials.add(spatialtermtable+"_38484");
@@ -1710,10 +1711,20 @@ public class XML2EQ {
 		spatials.add(spatialtermtable+"_40718");
 		spatials.add(spatialtermtable+"_all");
 		
+		//add glossary
+		ArrayList<String> glossaries = new ArrayList<String>();
+		glossaries.add("orig_"+glossary);
+		glossaries.add("38484_"+glossary);
+		glossaries.add("40674_"+glossary);
+		glossaries.add("40676_"+glossary);
+		glossaries.add("40716_"+glossary);
+		glossaries.add("40717_"+glossary);
+		glossaries.add("40718_"+glossary);
+		glossaries.add("all_"+glossary);
 
 		for(int i = 0; i <8; i++){
 			try {
-				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i), spatials.get(i));
+				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i), spatials.get(i), glossaries.get(i));
 				x2e.outputEQs();
 			}catch(Exception e){
 				LOGGER.error("", e);
@@ -1728,7 +1739,7 @@ public class XML2EQ {
 		goldstandards.add("knowledge_40717");
 		goldstandards.add("knowledge_40718");
 		
-		add glossary
+		
 		//original onto
 		for(int i=0; i<6; i++){
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
@@ -1745,10 +1756,10 @@ public class XML2EQ {
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
 			pe.evaluate();
 		}
-		*/
 		
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
+		
+		/*String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");
@@ -1773,7 +1784,7 @@ public class XML2EQ {
 			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
-		}
+		}*/
 
 
 	}
