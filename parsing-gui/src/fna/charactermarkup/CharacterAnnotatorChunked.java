@@ -221,6 +221,9 @@ public class CharacterAnnotatorChunked {
 		// puncBasedPartOfRelation();
 		// }
 
+		//XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());
+		//System.out.println();
+		//System.out.println(xo.outputString(this.statement));
 		/*Normalization*/
 		normalizeModifierCharacters(sentsrc);
 		removeIsolatedCharacters();
@@ -233,9 +236,9 @@ public class CharacterAnnotatorChunked {
 
 
 		if (printAnnotation) {
-			XMLOutputter xo = new XMLOutputter(Format.getPrettyFormat());
+			XMLOutputter xo1 = new XMLOutputter(Format.getPrettyFormat());
 			System.out.println();
-			System.out.println(xo.outputString(this.statement));
+			System.out.println(xo1.outputString(this.statement));
 		}
 		return this.statement;
 	}
@@ -634,7 +637,13 @@ public class CharacterAnnotatorChunked {
 			String originalname = e.getAttributeValue("name_original");
 			String entity = e.getAttributeValue("name");
 			//organ->singular
-			String organ = TermOutputerUtilities.toSingular(entity.substring(0, entity.indexOf("_")));
+			String organ = entity.substring(0, entity.indexOf("_")).trim();
+			String before = "";
+			if(organ.indexOf(" ")>0){
+				before = organ.substring(0, organ.lastIndexOf(" "));
+				organ = organ.substring(organ.lastIndexOf(" ")).trim();
+			}
+			organ = before +" "+TermOutputerUtilities.toSingular(organ);
 			entity =entity.replaceFirst(entity.substring(0, entity.indexOf("_")), organ);
 
 			if (entity.matches(".*?_[\\divx]+-[\\divx]+")) {// abc_1-3
@@ -855,7 +864,7 @@ public class CharacterAnnotatorChunked {
 		if (cs == null)
 			return;
 		this.inbrackets = inbrackets;
-
+		String t;
 		while (cs.hasNext()) {
 			Chunk ck = cs.nextChunk();
 			if (ck instanceof ChunkOR) {
@@ -1901,6 +1910,7 @@ public class CharacterAnnotatorChunked {
 		 * character, ""); } return results; }
 		 */
 		object = parenthesis(object); //o[(fibula) {size}]]]	
+		//object = this.normalizeSharedOrganObject(object);
 		if (object.indexOf("(")>=0) {
 			object = object.substring(0,  object.lastIndexOf(")")+1)+"]";
 			ArrayList<Element> tostructures = this.processObject(object); // TODO:
@@ -3273,7 +3283,7 @@ public class CharacterAnnotatorChunked {
 				if (segs[i].matches("(,|and)") && !segs[i - 1].contains("(")) {
 					norm = lastN + " " + norm;
 				}
-				// if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
+				 //if(segs[i].matches("(,|and|or)") && segs[i-1].contains("(")){
 				if (segs[i].matches("(,|and)") && segs[i - 1].contains("(")) {
 					lastN = segs[i - 1].trim();
 				}
@@ -3360,6 +3370,7 @@ public class CharacterAnnotatorChunked {
 			e.setAttribute("id", strid);
 			// e.setAttribute("name", o.trim()); //must have.
 			o = o.trim();
+
 			if(o.indexOf("_")>0) {
 				//make sure "_" is used only before the indexes, not btw words of a phrase
 				if(o.matches("(.*?_[\\divx]+)|(.*?_[\\divx]+-[\\divx]+)")){
@@ -3484,6 +3495,7 @@ public class CharacterAnnotatorChunked {
 	private boolean isPrematched(String o) {
 		Statement stmt =null;
 		ResultSet rs =null;
+		if(o.compareTo(ApplicationUtilities.getProperty("unknown.structure.name"))==0) return false;
 		try {
 			// collect life_style terms
 			/*stmt = conn.createStatement();

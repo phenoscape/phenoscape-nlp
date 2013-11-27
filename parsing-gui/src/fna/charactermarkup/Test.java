@@ -5,6 +5,9 @@
 package fna.charactermarkup;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -12,13 +15,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import fna.parsing.ApplicationUtilities;
 /**
  * @author hongcui
  *
  */
 @SuppressWarnings({ "unused" })
 public class Test {
-	Connection conn = null;
+	static Connection conn = null;
 	ArrayList<String> chunkedtokens = new ArrayList<String>();
 	/**
 	 * 
@@ -36,9 +41,9 @@ public class Test {
 
 
 		//ad short as width of the tip 
-		this.chunkedtokens.add("{as-short-as}");
+		/*this.chunkedtokens.add("{as-short-as}");
 		this.chunkedtokens.add("{width}");
-		this.chunkedtokens.add("r[p[of] the (tip)]");
+		this.chunkedtokens.add("r[p[of] the (tip)]");*/
 
 	}
 
@@ -259,7 +264,8 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		Test t = new Test();
-		t.normalizeAsAsThan();
+		
+		//t.normalizeAsAsThan();
 		/*String object = "o[the {frontal} , the (sphenotic) ({spine}) and the (flower)]";
 		object = t.normalizeSharedOrganObject(object);
 		System.out.println(object);*/

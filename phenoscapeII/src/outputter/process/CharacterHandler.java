@@ -533,11 +533,11 @@ public class CharacterHandler {
 			if(rep!=null && rep.getEntity()!=null){
 				for(EntityProposals ep: rep.getEntity()){
 					RelationalQuality rq = new RelationalQuality(qp,ep);
-					qp = new QualityProposals();
-					qp.add(rq);
+					QualityProposals qp1 = new QualityProposals();
+					qp1.add(rq);
 					if(rq!=null)
 					{
-						Utilities.addQualityProposals(qualities, qp); //correct grouping
+						Utilities.addQualityProposals(qualities, qp1); //correct grouping
 						//this.qualities.add(qp); //incorrect, separating proposals of the same phrase
 					}
 				}
