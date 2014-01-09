@@ -1137,7 +1137,7 @@ private static String[] extractids(String value) {
 		{
 			relatedentity = (relatedentity.substring(0,relatedentity.indexOf("Score")-1)).trim();
 		}
-		if(quality.equals("")==false && quality.indexOf("Score")>=0)
+		if(quality.equals("")==false && quality.indexOf("Score")>0)
 		{
 			quality = (quality.substring(0,quality.indexOf("Score")-1)).trim();
 		}

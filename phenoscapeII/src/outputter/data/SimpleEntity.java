@@ -4,6 +4,7 @@
 package outputter.data;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 
 /**
@@ -151,13 +152,16 @@ public class SimpleEntity extends Entity implements FormalConcept{
 		return entity1;
 	}
 
-
+	@Override
 	public int compare(Entity e1, Entity e2){
 		return e1.content().compareTo(e2.content());
 	}
 	
-	public boolean equals(Entity e){
-		if(this.content().compareTo(e.content())==0) return true;
+	@Override
+	public boolean equals(Object e){
+		if(e instanceof SimpleEntity){
+			if(this.content().compareTo(((SimpleEntity)e).content())==0) return true;
+		}
 		return false;
 	}
 

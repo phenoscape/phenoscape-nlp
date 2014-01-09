@@ -51,6 +51,18 @@ public abstract class Entity implements FormalConcept, Comparator<Entity>{
 		return this.clone();
 	}
 
+	public int compare(Entity e1, Entity e2){
+		return e1.content().compareTo(e2.content());
+	}
+	
+	@Override
+	public boolean equals(Object e){
+		if(e instanceof Entity){
+			if(this.content().compareTo(((Entity)e).content())==0) return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public abstract void setSearchString(String string);
 	@Override

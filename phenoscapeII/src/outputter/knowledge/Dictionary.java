@@ -115,7 +115,7 @@ public class Dictionary {
 	public final static String baseiri="http://purl.obolibrary.org/obo/";
 	public static String cellquality = baseiri+"PATO_0001396";
 	public final static String provisionaliri = "http://purl.bioontology.org/ontology/provisional/";
-	public static String partofiri = baseiri+"BFO_000050";
+	public static String partofiri = baseiri+"BFO_0000050";
 	public static FormalRelation partof = new FormalRelation();
 	public static FormalRelation iheresin = new FormalRelation();
 	public static FormalRelation bearerof = new FormalRelation();
@@ -131,8 +131,8 @@ public class Dictionary {
 		partof.setSearchString("");
 		partof.setString("");
 		partof.setLabel("part_of");
-		partof.setId("BFO:000050");
-		partof.setClassIRI(baseiri+"BFO_000050");
+		partof.setId("BFO:0000050");
+		partof.setClassIRI(baseiri+"BFO_0000050");
 		
 		iheresin.setClassIRI(baseiri+"pato#inheres_in");
 		iheresin.setSearchString("");

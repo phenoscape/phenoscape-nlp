@@ -3,12 +3,14 @@
  */
 package outputter.data;
 
+import java.util.Comparator;
+
 
 /**
  * @author Hong Cui
  *
  */
-public class EQProposals{
+public class EQProposals /*implements Comparator*/{
 	EntityProposals entity;
 	QualityProposals quality;
 	private String sourceFile;
@@ -22,7 +24,7 @@ public class EQProposals{
 	/**
 	 * 
 	 */
-	public EQProposals() {
+	public EQProposals()  {
 	}
 	
 	public void setSource(String source){
@@ -127,11 +129,11 @@ public class EQProposals{
 	 * cross product between entity proposals and quality proposals
 	 * @return
 	 */
-	public String EQStatementsInHTML(){
+	/*public String EQStatementsInHTML(){
 		StringBuffer sb = new StringBuffer();
 		//TODO 
 		return sb.toString();
-	}
+	}*/
 	/**
 	 * @param args
 	 */
@@ -147,5 +149,19 @@ public class EQProposals{
 	public void setSourceFile(String sourceFile) {
 		this.sourceFile = sourceFile;
 	}
+
+	/*public String getContent(){
+		return this.entity.get
+	}
+	@Override
+	public int compare(Object arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	@Override 
+	public boolean equals(Object eq){
+		
+	}*/
 
 }

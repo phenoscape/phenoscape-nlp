@@ -22,11 +22,19 @@ public class EntityProposals implements Proposals, Comparator {
 
 	public boolean add(Object e){
 		if(e instanceof Entity){
-			proposals.add((Entity)e);
+			//boolean contains = false;
+			//for(Entity e1: proposals) if(e1.equals((Entity)e)) contains = true;
+			//if(!contains) proposals.add((Entity)e);
+			if(!proposals.contains((Entity)e))  proposals.add((Entity)e);
 			return true;
 		}
 		if(e instanceof EntityProposals){
-			proposals.addAll(((EntityProposals)e).getProposals());
+			for(Entity e1: ((EntityProposals)e).getProposals()){
+				//boolean contains = false;
+				//for(Entity e2: proposals) if(e2.equals((Entity)e1)) contains = true;
+				//if(!contains) proposals.add((Entity)e1);
+				if(!proposals.contains(e1)) proposals.add(e1);
+			}
 			return true;
 		}
 		return false;

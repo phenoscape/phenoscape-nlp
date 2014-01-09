@@ -209,7 +209,7 @@ public class RelationHandler {
 				//	FormalRelation rel = new FormalRelation();
 				//	rel.setString("part of");
 				//	rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				//	rel.setId("BFO:000050");
+				//	rel.setId("BFO:0000050");
 				//	rel.setConfidenceScore((float)1.0);
 				//	REntity rentity = new REntity(rel, entity);
 				//	//update this.entity with the composite entity

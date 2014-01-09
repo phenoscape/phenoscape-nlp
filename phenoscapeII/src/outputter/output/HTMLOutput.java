@@ -245,12 +245,13 @@ public class HTMLOutput {
 	 */
 	public static void version(PrintWriter output,String version) throws IOException, OWLOntologyCreationException
 	{
-		OWLOntology temp=null;
+		//OWLOntology temp=null;
 		output.println("<CENTER> <TABLE border = 2> <TR> <TH COLSPAN =\"2\">");
 		output.println("<B>Ontology Versions</B>");
 		output.println("</TH></TR>");
 		for(OWLAccessorImpl api: XML2EQ.ontoutil.OWLqualityOntoAPIs)
 		{
+			OWLOntology temp=null;
 			String S[]=api.getSource().split("[\\\\.]");
 			output.println("<TR> <TD>");
 			output.println((S[S.length-2].toUpperCase()));
@@ -262,6 +263,7 @@ public class HTMLOutput {
 		
 		for(OWLAccessorImpl api1: XML2EQ.ontoutil.OWLentityOntoAPIs)
 		{
+			OWLOntology temp=null;
 			String S[]=api1.getSource().split("[\\\\.]");
 			output.println("<TR> <TD>");
 			output.println((S[S.length-2].toUpperCase()));
@@ -269,11 +271,15 @@ public class HTMLOutput {
 			Set<OWLOntology> ontologies = api1.getManager().getOntologies();
 			for(OWLOntology ontology:ontologies)
 			{
-				if(ontology.toString().contains(S[S.length-2]))
-				{
+				if(ontology.getOntologyID().getVersionIRI()!=null){
 					temp = ontology;
 					break;
 				}
+				/*if(ontology.toString().contains(S[S.length-2]))
+				{
+					temp = ontology;
+					break;
+				}*/
 			}
 			output.println(temp!=null?(temp.getOntologyID().getVersionIRI()):"");
 			output.println("</TD> </TR>");
@@ -304,12 +310,12 @@ public class HTMLOutput {
 		ArrayList<String> character_state = new ArrayList<String>();
 		
 		try {
-			//elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl"), false);
-			//elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl"), false);
-			//elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl"), false);
-			elkentity = new ELKReasoner(new File(XML2EQ.uberon), false);
-			elkquality = new ELKReasoner(new File(XML2EQ.pato), false);
-			elkspatial = new ELKReasoner(new File(XML2EQ.bspo), false);
+			elkentity = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl"), false);
+			elkquality = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl"), false);
+			elkspatial = new ELKReasoner(new File(ApplicationUtilities.getProperty("ontology.dir")+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl"), false);
+			//elkentity = new ELKReasoner(new File(XML2EQ.uberon), false);
+			//elkquality = new ELKReasoner(new File(XML2EQ.pato), false);
+			//elkspatial = new ELKReasoner(new File(XML2EQ.bspo), false);
 		} catch (OWLOntologyCreationException e1) {
 			e1.printStackTrace();
 		}
@@ -519,8 +525,10 @@ public class HTMLOutput {
 	
 	}
 	public static void main(String[] args) {
-
-		outputHTML("algo_output","curator",1);
+		String choutput = "xml2eq_best_010914";
+		String cuoutput = "knowledge";
+		int numberofcurators = 1;
+		outputHTML(choutput,cuoutput,numberofcurators);
 	}
 	}
 
