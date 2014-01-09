@@ -559,7 +559,7 @@ public class ChunkedSentence {
 				}
 			}			
 			/*end mohan*/
-			if((t.matches("\\{[\\w-]+\\}") && !isspatial)|| t.matches("\\d+") || t.contains("~list~")){
+			if((t.matches("\\{[\\w-]+\\}") && !isspatial)|| t.matches("(\\d+)") || t.contains("~list~")){
 				chunk = t+" "+chunk;
 				foundm = true;
 			}else if(!foundm && (t.endsWith(">") ||t.endsWith(")") || isspatial )){ //if m o m o, collect two chunks
