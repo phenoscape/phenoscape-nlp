@@ -1638,7 +1638,7 @@ public class XML2EQ {
 	public static void main(String[] args) {
 		//evaluation runs
 		
-		String database =ApplicationUtilities.getProperty("database.name");
+		/*String database =ApplicationUtilities.getProperty("database.name");
 		//String prefix =ApplicationUtilities.getProperty("table.prefix");
 
 		String srcdir = ApplicationUtilities.getProperty("source.dir");
@@ -1755,36 +1755,37 @@ public class XML2EQ {
 		for(int i=0; i<6; i++){
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
 			pe.evaluate();
-		}
+		}		
+		*/
 		
-		
-		
-		/*String srcdir = ApplicationUtilities.getProperty("source.dir")+"final/";
+		String srcdir = ApplicationUtilities.getProperty("source.dir")+"test/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		String outputtable=ApplicationUtilities.getProperty("table.output");
+		//String outputtable=ApplicationUtilities.getProperty("table.output")+"_best_010914";
 		//String prefix =ApplicationUtilities.getProperty("table.prefix");
 		//String glosstable = "fishglossaryfixed";
 		String ontodir = ApplicationUtilities.getProperty("ontology.dir");
 		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
 		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
 		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
-		String runsetting = "";
-		String glossary = "orig_fishglossaryfixed";
+		String runsetting = "best_knowledge_38484";
+		String glossary = "all_fishglossaryfixed";
 		try {
-			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato, "uniquespatialterms", glossary);
+			//XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato, "uniquespatialterms", glossary);
+			XML2EQ x2e = new XML2EQ(srcdir, database, outputtable, uberon, bspo, pato, "uniquespatialterms_all", glossary);
 			x2e.outputEQs();
 			if(srcdir.indexOf("/final/")>0){
-				String resulttable = ApplicationUtilities.getProperty("table.output");
+				String resulttable = ApplicationUtilities.getProperty("table.output")+"_best_010914";
 				//String goldstandard = "goldstandard";
-				String goldstandard = "naive_38484";
+				String goldstandard = "knowledge_40716";
 				//long startTime = System.currentTimeMillis();
 				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable, goldstandard,"evaluationrecords", runsetting);		
 				pe.evaluate();
 			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
-		}*/
+		}
 
 
 	}

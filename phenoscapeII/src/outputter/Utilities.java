@@ -862,20 +862,23 @@ public class Utilities {
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					//EQProposals eqp = new EQProposals();
-					EQProposals eqp = empty.clone();
-					eqp.setEntity(entityp);
-					eqp.setQuality(qualityp);
-					if (parser instanceof StateStatementParser){
-						eqp.setType("state");
-					}else{
-						eqp.setType("character");
+					if(!EQExsit(EQStatements, entityp, qualityp)){
+						EQProposals eqp = empty.clone();
+						eqp.setEntity(entityp);
+						eqp.setQuality(qualityp);
+						if (parser instanceof StateStatementParser){
+							eqp.setType("state");
+						}else{
+							eqp.setType("character");
+						}
+						EQStatements.add(eqp);
 					}
-					EQStatements.add(eqp);
 				}
 			}			
 		} else if(entities!=null && entities.size()>0 && parser instanceof BinaryCharacterStatementParser){ //no qualities identified so far
-				for (EntityProposals entityp : entities) {
-					//EQProposals eqp = new EQProposals();
+			for (EntityProposals entityp : entities) {
+				//EQProposals eqp = new EQProposals();
+				if(!EQExsit(EQStatements, entityp, null)){
 					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
@@ -885,12 +888,14 @@ public class Utilities {
 						eqp.setType("character");
 					}
 					EQStatements.add(eqp);
-				}					
+				}
+			}					
 		}else if(entities!=null && entities.size()>0){ //no qualities => check quality clue or set to "present"
 			for (EntityProposals entityp : entities) {
 				//EQProposals eqp = new EQProposals();
 				EQProposals eqp = empty.clone();
-				eqp.setEntity(entityp);
+				QualityProposals qualityp = null;
+				//try to find qualityp
 				//make use of quality clues if there is any
 				int count = 0;
 				if(qualityclues!=null && qualityclues.size()!=0){//include all ontologizaable quality clues in, TODO may handle them in a finer manner in the future
@@ -910,25 +915,32 @@ public class Utilities {
 					for(Quality q: qp.getProposals()){
 						q.setConfidenceScore(1f/count);
 					}
-					eqp.setQuality(qp);
+					qualityp = qp;
+					//eqp.setQuality(qp);
 				}else{
 					Quality q = Dictionary.present;
 					q.setConfidenceScore(1f);
 					QualityProposals qp = new QualityProposals();
 					qp.add(q);
 					qp.setPhrase("present");
-					eqp.setQuality(qp); 
+					qualityp = qp;
+					//eqp.setQuality(qp); 
 				}
-
-				if (parser instanceof StateStatementParser){
-					eqp.setType("state");
-				}else{
-					eqp.setType("character");
+				
+				if(!EQExsit(EQStatements, entityp, qualityp)){
+					eqp.setEntity(entityp);
+					eqp.setQuality(qualityp);			
+					if (parser instanceof StateStatementParser){
+						eqp.setType("state");
+					}else{
+						eqp.setType("character");
+					}
+					EQStatements.add(eqp);
 				}
-				EQStatements.add(eqp);
 			}					
 	}else if(qualities!=null && parser instanceof StateStatementParser){ //E = null, Q !=null from state statement. Ignore quality-only EQ from BinaryStatment. 
 		for (QualityProposals qualityp : qualities){
+			if(!EQExsit(EQStatements, null, qualityp)){
 				EQProposals eqp = empty.clone();
 				eqp.setEntity(null);
 				eqp.setQuality(qualityp);
@@ -939,8 +951,32 @@ public class Utilities {
 				}
 				EQStatements.add(eqp);
 			}	
-	  }
+		}
+	}
 		
+	}
+
+	/**
+	 * 
+	 * @param EQStatements
+	 * @param entityp
+	 * @param qualityp
+	 * @return
+	 */
+	private static boolean EQExsit(ArrayList<EQProposals> EQStatements,
+			EntityProposals entityp, QualityProposals qualityp) {
+		for(EQProposals eqp: EQStatements){
+			if(entityp!=null && qualityp!=null){
+				if(eqp.getEntity().equals(entityp) && eqp.getQuality().equals(qualityp)) return true;
+			}else if(entityp ==null && qualityp!=null){
+				if(eqp.getEntity()==null && eqp.getQuality().equals(qualityp)) return true;
+			}else if(entityp!=null && qualityp==null){
+				if(eqp.getEntity().equals(entityp) && eqp.getQuality()==null) return true;
+			}else if(entityp==null && qualityp==null){
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

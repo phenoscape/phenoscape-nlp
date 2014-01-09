@@ -15,9 +15,12 @@ public class QualityProposals implements Proposals {
 	 */
 	public QualityProposals() {		
 	}
-	
-	public boolean equals(QualityProposals qp){
-		return this.content().compareTo(qp.content())==0;
+	@Override
+	public boolean equals(Object qp){
+		if(qp instanceof QualityProposals){
+		return this.content().compareTo(((QualityProposals)qp).content())==0;
+		}
+		return false;
 	}
 	/**
 	 * TODO: change Object to something more precise.

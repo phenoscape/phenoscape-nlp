@@ -276,7 +276,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				FormalRelation rel = new FormalRelation();
 				rel.setString("part of");
 				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				rel.setId("BFO:000050");
+				rel.setId("BFO:0000050");
 				rel.setConfidenceScore((float)1.0);
 				REntity rentity = new REntity(rel, entityl);
 				//composite entity
@@ -307,7 +307,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				FormalRelation rel = new FormalRelation();
 				rel.setString("part of");
 				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				rel.setId("BFO:000050");
+				rel.setId("BFO:0000050");
 				rel.setConfidenceScore((float)1.0);
 				REntity rentity = new REntity(rel, entityl);
 				//composite entity
@@ -334,7 +334,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 						FormalRelation rel = new FormalRelation();
 						rel.setString("part of");
 						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						rel.setId("BFO:0000050");
 						rel.setConfidenceScore((float)1.0);
 						REntity rentity = new REntity(rel, entityl);
 						//composite entity = entity locator for sentity
@@ -345,7 +345,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 						rel = new FormalRelation();
 						rel.setString("part of");
 						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						rel.setId("BFO:0000050");
 						rel.setConfidenceScore((float)1.0);
 						rentity = new REntity(rel, centity);
 						centity = new CompositeEntity(); //process^part_of(anterior region^part_of(maxilla))
@@ -357,7 +357,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 						FormalRelation rel = new FormalRelation();
 						rel.setString("part of");
 						rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-						rel.setId("BFO:000050");
+						rel.setId("BFO:0000050");
 						rel.setConfidenceScore((float)1.0);
 						REntity rentity = new REntity(rel, sentity1);
 						//composite entity = entity locator for sentity
@@ -462,7 +462,7 @@ public class EntitySearcherOriginal extends EntitySearcher {
 				FormalRelation rel = new FormalRelation();
 				rel.setString("part of");
 				rel.setLabel(Dictionary.resrelationQ.get("BFO:0000050"));
-				rel.setId("BFO:000050");
+				rel.setId("BFO:0000050");
 				rel.setConfidenceScore((float)1.0);
 				REntity rentity = new REntity(rel, entityl);
 				//composite entity = entity locator for sentity

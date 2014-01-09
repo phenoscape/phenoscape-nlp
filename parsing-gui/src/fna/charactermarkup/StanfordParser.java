@@ -657,7 +657,7 @@ public class StanfordParser implements Learn2Parse, SyntacticParser{
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish", "antglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "pheno_fish_NeXML", "fishglossaryfixed", false);
 		//StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, "biocreative_NeXML", "fishglossaryfixed", false);
-		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, prefix, "orig_fishglossaryfixed", false);
+		StanfordParser sp = new StanfordParser(posedfile, parsedfile, database, prefix, "all_fishglossaryfixed", false);
 		//sp.POSTagging();
 		//sp.parsing();
 		sp.extracting();
