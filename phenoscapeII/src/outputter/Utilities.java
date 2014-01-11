@@ -862,7 +862,7 @@ public class Utilities {
 			for (QualityProposals qualityp : qualities){
 				for (EntityProposals entityp : entities) {
 					//EQProposals eqp = new EQProposals();
-					if(!EQExsit(EQStatements, entityp, qualityp)){
+					//if(!EQExsit(EQStatements, entityp, qualityp)){
 						EQProposals eqp = empty.clone();
 						eqp.setEntity(entityp);
 						eqp.setQuality(qualityp);
@@ -872,13 +872,13 @@ public class Utilities {
 							eqp.setType("character");
 						}
 						EQStatements.add(eqp);
-					}
+					//}
 				}
 			}			
 		} else if(entities!=null && entities.size()>0 && parser instanceof BinaryCharacterStatementParser){ //no qualities identified so far
 			for (EntityProposals entityp : entities) {
 				//EQProposals eqp = new EQProposals();
-				if(!EQExsit(EQStatements, entityp, null)){
+				//if(!EQExsit(EQStatements, entityp, null)){
 					EQProposals eqp = empty.clone();
 					eqp.setEntity(entityp);
 					eqp.setQuality(null); //this may be filled later for BinaryStateStatements
@@ -888,7 +888,7 @@ public class Utilities {
 						eqp.setType("character");
 					}
 					EQStatements.add(eqp);
-				}
+				//}
 			}					
 		}else if(entities!=null && entities.size()>0){ //no qualities => check quality clue or set to "present"
 			for (EntityProposals entityp : entities) {
@@ -927,7 +927,7 @@ public class Utilities {
 					//eqp.setQuality(qp); 
 				}
 				
-				if(!EQExsit(EQStatements, entityp, qualityp)){
+				//if(!EQExsit(EQStatements, entityp, qualityp)){
 					eqp.setEntity(entityp);
 					eqp.setQuality(qualityp);			
 					if (parser instanceof StateStatementParser){
@@ -936,11 +936,11 @@ public class Utilities {
 						eqp.setType("character");
 					}
 					EQStatements.add(eqp);
-				}
+				//}
 			}					
 	}else if(qualities!=null && parser instanceof StateStatementParser){ //E = null, Q !=null from state statement. Ignore quality-only EQ from BinaryStatment. 
 		for (QualityProposals qualityp : qualities){
-			if(!EQExsit(EQStatements, null, qualityp)){
+			//if(!EQExsit(EQStatements, null, qualityp)){
 				EQProposals eqp = empty.clone();
 				eqp.setEntity(null);
 				eqp.setQuality(qualityp);
@@ -950,7 +950,7 @@ public class Utilities {
 					eqp.setType("character");
 				}
 				EQStatements.add(eqp);
-			}	
+			//}	
 		}
 	}
 		
@@ -963,7 +963,7 @@ public class Utilities {
 	 * @param qualityp
 	 * @return
 	 */
-	private static boolean EQExsit(ArrayList<EQProposals> EQStatements,
+	/*private static boolean EQExsit(ArrayList<EQProposals> EQStatements,
 			EntityProposals entityp, QualityProposals qualityp) {
 		for(EQProposals eqp: EQStatements){
 			if(entityp!=null && qualityp!=null){
@@ -977,7 +977,7 @@ public class Utilities {
 			}
 		}
 		return false;
-	}
+	}*/
 }
 
 
