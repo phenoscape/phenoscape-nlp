@@ -1637,7 +1637,7 @@ public class XML2EQ {
 	 */
 	public static void main(String[] args) {
 		//evaluation runs
-		/*
+		
 		String database =ApplicationUtilities.getProperty("database.name");
 		//String prefix =ApplicationUtilities.getProperty("table.prefix");
 
@@ -1722,10 +1722,10 @@ public class XML2EQ {
 		glossaries.add("40718_"+glossary);
 		glossaries.add("all_"+glossary);
 		
-		*/
+		
 		//for(int i = 0; i <8; i++){
 			/*try {
-				int i = 0;
+				int i = 7;
 				System.out.println("Run XML2EQ with "+srcdirs.get(i) + "," + database + "," + outputtables.get(i)  + "," + uberons.get(i)  + "," + bspos.get(i)  + "," + patos.get(i)  + "," + spatials.get(i)  + "," +glossaries.get(i));			
 				XML2EQ x2e = new XML2EQ(srcdirs.get(i), database, outputtables.get(i), uberons.get(i), bspos.get(i), patos.get(i), spatials.get(i), glossaries.get(i));
 				x2e.outputEQs();
@@ -1735,28 +1735,30 @@ public class XML2EQ {
 		//}
 
 		
-		/*ArrayList<String> goldstandards = new ArrayList<String> ();
+		ArrayList<String> goldstandards = new ArrayList<String> ();
 		goldstandards.add("naive_38484");
 		goldstandards.add("naive_40674");
 		goldstandards.add("naive_40676");
 		goldstandards.add("knowledge_40716");
 		goldstandards.add("knowledge_40717");
-		goldstandards.add("knowledge_40718");*/
+		goldstandards.add("knowledge_40718");
 		
 		
 		//original onto
-		/*for(int i=0; i<6; i++){
+		//for(int i=0; i<6; i++){
+		    /*int i=5;
 			System.out.println("Evaluation with "+ database + "," + outputtables.get(0) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," +outputtables.get(0)+"_"+goldstandards.get(i));		
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
-			pe.evaluate();
-		}*/
+			pe.evaluate();*/
+		//}
 		
 		//curator enhanced onto
-		/*for(int i=0; i<6; i++){
+		//for(int i=0; i<6; i++){
+		int i = 1;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(i+1) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," + outputtables.get(i+1)+"_"+goldstandards.get(i));		
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i));		
 			pe.evaluate();
-		}*/
+		//}
 		//best onto
 		//for(int i=0; i<6; i++){
 		/*int i = 3;
@@ -1766,7 +1768,7 @@ public class XML2EQ {
 		//}		
 		
 		
-		String srcdir = ApplicationUtilities.getProperty("source.dir")+"best/target/test/";
+		/*String srcdir = ApplicationUtilities.getProperty("source.dir")+"best/target/final/";
 		System.out.println(srcdir);
 		String database =ApplicationUtilities.getProperty("database.name");
 		//String outputtable=ApplicationUtilities.getProperty("table.output");
@@ -1793,7 +1795,7 @@ public class XML2EQ {
 			}
 		} catch (Exception e) {
 			LOGGER.error("", e);
-		}
+		}*/
 
 
 	}
