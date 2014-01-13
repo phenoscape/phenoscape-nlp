@@ -190,7 +190,7 @@ public class CompositeEntity extends Entity {
 			}
 			else if( e instanceof CompositeEntity)
 			{
-				label+=((CompositeEntity) e).getLabel();
+				label+=((CompositeEntity) e).getLabel()+ " and ";
 			}
 			else
 			{
@@ -222,7 +222,7 @@ public class CompositeEntity extends Entity {
 			}
 			else if( e instanceof CompositeEntity)
 			{
-				id+=((CompositeEntity) e).getFullID();
+				id+=((CompositeEntity) e).getFullID()+" and ";
 			}
 			else
 			{
@@ -246,7 +246,7 @@ public class CompositeEntity extends Entity {
 			}
 			else if( e instanceof CompositeEntity)
 			{
-				id+=((CompositeEntity) e).getFullIRI();
+				id+=((CompositeEntity) e).getFullIRI()+" and ";
 			}
 			else
 			{
@@ -271,7 +271,7 @@ public class CompositeEntity extends Entity {
 			}
 			else if(e instanceof CompositeEntity)
 			{
-				string+=((CompositeEntity) e).getFullString();
+				string+=((CompositeEntity) e).getFullString()+" and ";
 			}
 			else
 			{
