@@ -300,7 +300,7 @@ public class XML2EQ {
 
 		if(isRecordperformance()){
 			HTMLOutput output = new HTMLOutput();
-			output.outputHTML(this.outputtable,"curator",0);
+			output.outputHTML(this.outputtable,"curator",0, this.outputtable);
 		}
 
 		elk.dispose();
@@ -1754,17 +1754,17 @@ public class XML2EQ {
 		
 		//curator enhanced onto
 		//for(int i=0; i<6; i++){
-		int i = 1;
+		/*int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(i+1) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," + outputtables.get(i+1)+"_"+goldstandards.get(i));		
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i));		
-			pe.evaluate();
+			pe.evaluate();*/
 		//}
 		//best onto
 		//for(int i=0; i<6; i++){
-		/*int i = 3;
+		int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(7)+ "," + goldstandards.get(i)+ "," +"evaluationrecords" + "," + outputtables.get(7)+"_"+goldstandards.get(i));		
 			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
-			pe.evaluate();*/
+			pe.evaluate();
 		//}		
 		
 		

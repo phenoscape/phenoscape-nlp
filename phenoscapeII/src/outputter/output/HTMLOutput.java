@@ -300,7 +300,7 @@ public class HTMLOutput {
 	 * @output: Prints an HTML output with charparser and curators result for a characterid and stateid combination
 	 */
 	
-	public static void outputHTML(String outputtable,String curatortablename, int numberofcurators)
+	public static void outputHTML(String outputtable,String curatortablename, int numberofcurators, String htmloutputfilename)
 	{
 
 		String columns[] = {"CharacterID","CharacterLabel","StateID","StateLabel","Source of EQ","EntityID",
@@ -321,8 +321,8 @@ public class HTMLOutput {
 		}
 		
 		try {
-			PrintWriter output = new PrintWriter(new FileWriter(ApplicationUtilities.getProperty("output.dir")+outputtable+".html"));
-			LOGGER.debug("output saved in "+ApplicationUtilities.getProperty("output.dir")+outputtable+".html");
+			PrintWriter output = new PrintWriter(new FileWriter(ApplicationUtilities.getProperty("output.dir")+htmloutputfilename+".html"));
+			LOGGER.debug("output saved in "+ApplicationUtilities.getProperty("output.dir")+htmloutputfilename+".html");
 			output.println("<HTML>");
 			output.println("<HEAD>");
 			output.println("<TITLE>");
@@ -525,10 +525,11 @@ public class HTMLOutput {
 	
 	}
 	public static void main(String[] args) {
-		String choutput = "xml2eq_best_010914";
+		String choutput = "xml2eq_best";
 		String cuoutput = "knowledge";
-		int numberofcurators = 1;
-		outputHTML(choutput,cuoutput,numberofcurators);
+		String htmloutput = "xml2eq_best_to_3_knoweldge";
+		int numberofcurators = 3;
+		outputHTML(choutput,cuoutput,numberofcurators, htmloutput);
 	}
 	}
 
