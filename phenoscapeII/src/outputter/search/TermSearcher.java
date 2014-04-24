@@ -614,7 +614,7 @@ public class TermSearcher {
 		// System.out.println(fc.toString());
 		// }
 
-		ArrayList<FormalConcept> quality = ts.searchTerm("(?:metasternum)",
+		ArrayList<FormalConcept> quality = ts.searchTerm("(?:manual phalanx 2)",
 				"entity");
 		if(quality!=null){
 			for (FormalConcept fc : quality)

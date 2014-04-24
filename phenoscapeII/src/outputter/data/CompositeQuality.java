@@ -35,17 +35,17 @@ public class CompositeQuality extends Quality {
 	{
 		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
 		{
-			return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+"^"+this.relatedentity.getRelation().getString()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullString()+"))";
+			return this.mainquality.getString()+" and "+this.restrictedrelation+"("+this.comparedquality.getString()+" and "+this.relatedentity.getRelation().getString()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullString()+"))";
 		}
 		else
 		{
-			return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+"^"+this.relatedentity.getRelation().getString()+"("+((REntity)this.relatedentity).getEntity().getString()+"))";
+			return this.mainquality.getString()+" and "+this.restrictedrelation+"("+this.comparedquality.getString()+" and "+this.relatedentity.getRelation().getString()+"("+((REntity)this.relatedentity).getEntity().getString()+"))";
 		}
 	}
 	
 	public String getFullLabel()
 	{
-		return this.mainquality.getLabel()+"^"+this.restrictedrelation+"("+this.comparedquality.getLabel()+"^"+this.relatedentity.getRelation().getLabel()+"("+((REntity)this.relatedentity).getEntity().getLabel()+"))";
+		return this.mainquality.getLabel()+" and "+this.restrictedrelation+"("+this.comparedquality.getLabel()+" and "+this.relatedentity.getRelation().getLabel()+"("+((REntity)this.relatedentity).getEntity().getLabel()+"))";
 	}
 	
 	public String getLabel(){
@@ -56,22 +56,22 @@ public class CompositeQuality extends Quality {
 	{
 		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
 		{
-		return this.mainquality.getId()+"^"+this.restrictedrelation+"("+this.comparedquality.getId()+"^"+this.relatedentity.getRelation().getId()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullID()+"))";
+		return this.mainquality.getId()+" and "+this.restrictedrelation+"("+this.comparedquality.getId()+" and "+this.relatedentity.getRelation().getId()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullID()+"))";
 		}
 		else
 		{
-		return this.mainquality.getId()+"^"+this.restrictedrelation+"("+this.comparedquality.getId()+"^"+this.relatedentity.getRelation().getId()+"("+((REntity)this.relatedentity).getEntity().getId()+"))";
+		return this.mainquality.getId()+" and "+this.restrictedrelation+"("+this.comparedquality.getId()+" and "+this.relatedentity.getRelation().getId()+"("+((REntity)this.relatedentity).getEntity().getId()+"))";
 		}
 	}
 	
 	public String getFullIRI() {
 		if(((REntity)this.relatedentity).getEntity() instanceof CompositeEntity)
 		{
-		return this.mainquality.getClassIRI()+"^"+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+"^"+this.relatedentity.getRelation().getClassIRI()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullIRI()+"))";
+		return this.mainquality.getClassIRI()+" and "+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+" and "+this.relatedentity.getRelation().getClassIRI()+"("+((CompositeEntity)((REntity)this.relatedentity).getEntity()).getFullIRI()+"))";
 		}
 		else
 		{
-		return this.mainquality.getClassIRI()+"^"+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+"^"+this.relatedentity.getRelation().getClassIRI()+"("+((REntity)this.relatedentity).getEntity().getClassIRI()+"))";
+		return this.mainquality.getClassIRI()+" and "+this.restrictedrelation+"("+this.comparedquality.getClassIRI()+" and "+this.relatedentity.getRelation().getClassIRI()+"("+((REntity)this.relatedentity).getEntity().getClassIRI()+"))";
 		}
 	}
 	
@@ -104,7 +104,7 @@ public class CompositeQuality extends Quality {
 	
 	public String toString(){
 		
-		return this.mainquality.getString()+"^"+this.restrictedrelation+"("+this.comparedquality.getString()+this.relatedentity.toString()+")";
+		return this.mainquality.getString()+" and "+this.restrictedrelation+"("+this.comparedquality.getString()+this.relatedentity.toString()+")";
 	}
 
 	public String getUnOntologized()
@@ -123,7 +123,7 @@ public class CompositeQuality extends Quality {
 	}
 	public String content(){
 		
-		return this.mainquality.content()+"^"+this.restrictedrelation+"("+this.comparedquality.content()+this.relatedentity.content()+")";
+		return this.mainquality.content()+" and "+this.restrictedrelation+"("+this.comparedquality.content()+this.relatedentity.content()+")";
 	}
 
 
