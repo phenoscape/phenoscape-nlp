@@ -103,7 +103,7 @@ public class RelationalQuality extends Quality {
 			}
 			else
 			{
-				id+=q.getId();
+				id+=q.getId()+",";//added ',' by Hong 1/16/2014
 			}
 			
 		}
@@ -129,7 +129,7 @@ public class RelationalQuality extends Quality {
 			}
 			else
 			{
-				qstring+=q.getString();
+				qstring+=q.getString()+","; //added ',' by Hong 1/16/2014
 			}
 			
 		}
@@ -153,7 +153,7 @@ public class RelationalQuality extends Quality {
 			}
 			else
 			{
-				iri+=q.getClassIRI();
+				iri+=q.getClassIRI()+","; //added ',' by Hong 1/16/2014
 			}
 			
 		}

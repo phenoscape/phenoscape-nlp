@@ -525,9 +525,10 @@ public class HTMLOutput {
 	
 	}
 	public static void main(String[] args) {
-		String choutput = "xml2eq_best";
+		//String choutput = "xml2eq_best";
+		String choutput ="naive_40674";
 		String cuoutput = "knowledge";
-		String htmloutput = "xml2eq_best_to_3_knoweldge";
+		String htmloutput = "naive_40674_to_3_knoweldge";
 		int numberofcurators = 3;
 		outputHTML(choutput,cuoutput,numberofcurators, htmloutput);
 	}

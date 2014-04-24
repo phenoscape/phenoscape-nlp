@@ -139,6 +139,7 @@ public class EQPerformanceEvaluation {
 				stmt.execute("delete from "+prtablestates);
 
 			}
+
 		}catch(Exception e){
 			LOGGER.error("", e);
 		}
@@ -515,7 +516,8 @@ public class EQPerformanceEvaluation {
 			for(String field : this.fields){
 				counts.put("inanswer"+field, ""+0);		//Gold standard
 				counts.put("generated"+field, ""+0); 	//our charparser output
-				counts.put("matched"+field, ""+0);		// total number of matches (matching score) between our algo and gold standard
+				counts.put("matchedr"+field, ""+0);		// total number of matches (matching score) between our algo and gold standard for recall calculation
+				counts.put("matchedp"+field, ""+0);		// total number of matches (matching score) between our algo and gold standard for precision calculation
 			}
 			//put totals in
 			for(String field : this.fields){
@@ -589,7 +591,7 @@ public class EQPerformanceEvaluation {
 					ArrayList<String> tvalues = new ArrayList<String>();
 					String v = EQ.get(field).toLowerCase();
 					if(v!=null && v.length()>0){
-						String[] vs = v.split("\\s*(@,)\\s*");
+						String[] vs = v.split("\\s*(@?,)\\s*");// Added ? by Hong 1/16/2014
 						for(String v1 : vs){
 							if(v1.length()>0)
 							{
@@ -639,7 +641,7 @@ public class EQPerformanceEvaluation {
 							}
 						}
 						//apply penalty to the maximum score, since many alternatives were proposed
-						maxscore = penalty(maxscore,otherscores,otherscores.size());
+						//maxscore = penalty(maxscore,otherscores,otherscores.size()); //had no effect.
 						LOGGER.debug("gold standard GS   "+j+"Max score ==== "+maxscore);
 						groups.put("GS"+j, maxscore);// stores the best of  eq (from GS) *eqp1
 					}
@@ -667,10 +669,25 @@ public class EQPerformanceEvaluation {
 						}
 					}
 					LOGGER.debug("max====="+max);
-					counts.put("matched"+field, ""+(Float.parseFloat(counts.get("matched"+field))+max));
+					counts.put("matchedr"+field, ""+(Float.parseFloat(counts.get("matchedr"+field))+max));
 					//sum += max;
 				}
-					
+				
+				Set<String> EQS = topvalues.keySet();
+				for(String EQ:EQS)//each EQ's
+				{	
+					float max = 0f;
+					//find the greatest value for EQ row
+					Hashtable<String,Float> gsgroups = topvalues.get(EQ);//gets the group of each EQ containing GS->EQ matching scores
+					for(int g = 0; g <gscount; g++){
+						if(max < gsgroups.get("GS"+g)){
+							max = gsgroups.get("GS"+g);
+						}
+					}
+					LOGGER.debug("max====="+max);
+					counts.put("matchedp"+field, ""+(Float.parseFloat(counts.get("matchedp"+field))+max));
+					//sum += max;
+				}
 				//the code below is logically incorrect. It takes any first encountered non-zero value as the max and not checking other scores. Hong 1/13/2014
 				/*String matched ="";			
 				Set<String> EQS = topvalues.keySet();
@@ -717,12 +734,13 @@ public class EQPerformanceEvaluation {
 		String fieldstring = "";
 		for(String field : this.fields){
 			fieldstring += field+"p,"+field+"r,";
-			LOGGER.debug("\t\t\t\t matchedfield======"+counts.get("matched"+field));
+			LOGGER.debug("\t\t\t\t matchedrfield======"+counts.get("matchedr"+field));
+			LOGGER.debug("\t\t\t\t matchedpfield======"+counts.get("matchedp"+field));
 			LOGGER.debug("\t\t\t\tgeneratedfield======"+counts.get("generated"+field));
 			LOGGER.debug("\t\t\t inanswerfield======"+counts.get("inanswer"+field));
 
-			float p = Float.parseFloat(counts.get("generated"+field))==0? 0 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("generated"+field));
-			float r = Float.parseFloat(counts.get("inanswer"+field)) ==0? 0 : Float.parseFloat(counts.get("matched"+field))/Float.parseFloat(counts.get("inanswer"+field));
+			float p = Float.parseFloat(counts.get("generated"+field))==0? 0 : Float.parseFloat(counts.get("matchedp"+field))/Float.parseFloat(counts.get("generated"+field));
+			float r = Float.parseFloat(counts.get("inanswer"+field)) ==0? 0 : Float.parseFloat(counts.get("matchedr"+field))/Float.parseFloat(counts.get("inanswer"+field));
 			prstring += p+","+r+",";
 		}
 		prstring = prstring.replaceFirst(",$", "");
@@ -991,8 +1009,10 @@ public class EQPerformanceEvaluation {
 		int totalgenerated = 0;//charparser
 		int totalinanswer = 0;//gold standard
 		float eqmatchscore =0;
-		float statescore =0;
-		float totalscore =0;
+		float statescorer =0;
+		float totalscorer =0;
+		float statescorep =0;
+		float totalscorep =0;
 		String prstring = "";
 		String fieldstring = "";
 		float stateprecision=0;
@@ -1004,7 +1024,8 @@ public class EQPerformanceEvaluation {
 			totalgenerated += tstates.get(i).size();//Gives in number of EQ's in this state => our algorithm
 			Hashtable<String,Hashtable<String,Float>> eqgroups = new Hashtable<String,Hashtable<String,Float>>();
 			int counter=0;
-			statescore=0;
+			statescorer=0;
+			statescorep=0;
 			int eqcount=0;
 
 			LOGGER.debug("state"+i);
@@ -1039,9 +1060,25 @@ public class EQPerformanceEvaluation {
 						max = eqmatch.get("GS"+g);
 					}
 				}
-				statescore += max;
+				statescorer += max;
 			}
-			//TODO: this logic is incorrect. It doesn't get the global maximum.
+			
+
+			Set<String> EQS = eqgroups.keySet();
+			for(String EQ:EQS)//each EQ's
+			{
+				Hashtable<String,Float> eqmatch = eqgroups.get(EQ);//gets the group of each EQ containing GS->EQ matching scores
+				float max = 0f;
+				for(int g = 0; g <astates.get(i).size(); g++){
+					//find the greatest value for the EQ row 
+					LOGGER.debug("gs=== "+g+" match score"+eqmatch.get("GS"+g));
+					if(max < eqmatch.get("GS"+g)){
+						max = eqmatch.get("GS"+g);
+					}
+				}
+				statescorep += max;
+			}
+			//this logic is incorrect. It doesn't get the global maximum.
 			/*Set<String> keys = eqgroups.keySet();//gives all the eq's
 			String gsmatched="";
 			for(String key:keys)
@@ -1067,24 +1104,24 @@ public class EQPerformanceEvaluation {
 				//long stopTime = System.currentTimeMillis();
 				//System.out.println("time spent on EQ"+states.get(i)+" was " + (stopTime - startTime)/60000f + " minutes.");
 			}*/
-			LOGGER.debug("State score"+i+"   "+statescore);
+			LOGGER.debug("State score"+i+"   "+statescorer);
 
-			stateprecision = tstates.get(i).size()==0? 0 :(float)statescore/tstates.get(i).size();
-			staterecall = astates.get(i).size()==0? 0 :(float)statescore/astates.get(i).size();
+			stateprecision = tstates.get(i).size()==0? 0 :(float)statescorep/tstates.get(i).size();
+			staterecall = astates.get(i).size()==0? 0 :(float)statescorer/astates.get(i).size();
 
 			fieldstring = "stateid,stateprecision,staterecall";
 			prstring ="'"+astates.get(i).get(0).get("stateid")+"',"+stateprecision+","+staterecall;
 
 			this.insertInto(this.prtablestates, fieldstring, prstring);
 
-
-			totalscore+=statescore;
+			totalscorer+=statescorer;
+			totalscorep+=statescorep;
 
 
 		}
 		fieldstring = "runsetting, exactp, exactr";
-		float precision = totalgenerated==0? 0 : (float)totalscore/totalgenerated;
-		float recall = totalinanswer==0? 0 : (float)totalscore/totalinanswer;
+		float precision = totalgenerated==0? 0 : (float)totalscorep/totalgenerated;
+		float recall = totalinanswer==0? 0 : (float)totalscorer/totalinanswer;
 		prstring  = "'"+this.runsetting+"',"+ precision +","+ recall +"";
 
 
@@ -1244,7 +1281,9 @@ public class EQPerformanceEvaluation {
 				{
 					score=(float) 0.75;
 					partialcounts++;
-				} else if((c[i].matches(".*[pP][Aa][Tt][Oo].*")==false)&&((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true ||  elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
+				} else if((c[i].matches(".*[pP][Aa][Tt][Oo].*")==false)&&
+						((elk.isPartOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true 
+						|| elk.isPartOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)))
 				{
 					score=(float) 0.75;
 					partialcounts++;
@@ -2029,22 +2068,26 @@ public class EQPerformanceEvaluation {
 		//pe.evaluate();
 
 
-		/*intercurator comparison
-		String database = "charaparsereval2013";
+		//intercurator comparison
+		/*String database = "charaparsereval2013";
 		String[] resulttable = new String[]{"naive_38484", "naive_38484", "naive_40674",
-				"knowledge_40716", "knowledge_40716","knowledge_40717"};
+				"knowledge_40716", "knowledge_40716","knowledge_40717", "naive_38484", "naive_40674", "naive_40676"};
 		String[] goldstandard =  new String[]{"naive_40674","naive_40676", "naive_40676",
-				"knowledge_40717", "knowledge_40718","knowledge_40718"};
-		String[] setting = new String[]{"38484_40674", "38484_40676","40674_40676",
-				"40716_40717","40716_40718","40717_40718" };
+				"knowledge_40717", "knowledge_40718","knowledge_40718", "knowledge_40716", "knowledge_40717", "knowledge_40718"};
+		String[] setting = new String[]{"c38484_c40674", "c38484_c40676","c40674_c40676",
+				"c40716_c40717","c40716_c40718","c40717_c40718", "c38484_c40716", "c40674_c40717", "c40676_c40718" };*/
+		String database =ApplicationUtilities.getProperty("database.name");
+		String [] ids = new String[]{"naive_38484", "naive_40674", "naive_40676", "knowledge_40717", "knowledge_40718", "knowledge_40716"};
+		for(int i = 0; i<6; i++){
+			for(int j = 0; j < 6; j++){
+				System.out.println("Evaluation with "+database + "," +  ids[i]+ "," + ids[j]+ "," +"evaluationrecords" + "," + ids[i]+"_"+ids[j]);		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, ids[i], ids[j],"evaluationrecords", ids[i]+"_"+ids[j]);		
+				pe.evaluate();
+			}
+		}
 
-		for(int i = 1; i<6; i++){
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, resulttable[i], goldstandard[i],"evaluationrecords", setting[i]);		
-			pe.evaluate();
-		}*/
-
-		EQPerformanceEvaluation pe = new EQPerformanceEvaluation("charaparsereval2013", "xml2eq_best", "knowledge1","evaluationrecords", "debug");		
-		pe.evaluate();
+		//EQPerformanceEvaluation pe = new EQPerformanceEvaluation("charaparsereval2013", "knowledge1", "knowledge1","evaluationrecords", "debug");		
+		//pe.evaluate();
 
 
 
