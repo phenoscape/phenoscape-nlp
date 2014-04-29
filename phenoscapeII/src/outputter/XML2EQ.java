@@ -1746,12 +1746,12 @@ public class XML2EQ {
 		goldstandards.add("knowledge_40717");
 		goldstandards.add("knowledge_40718");
 		
-		
+		String setting = "sym";
 		//original onto
 		for(int i=0; i<6; i++){
 		    //int i=5;
 			System.out.println("Evaluation with "+ database + "," + outputtables.get(0) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," +outputtables.get(0)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i));		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i)+"_"+setting);		
 			pe.evaluate();
 		}
 		
@@ -1759,14 +1759,14 @@ public class XML2EQ {
 		for(int i=0; i<6; i++){
 		    //int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(i+1) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," + outputtables.get(i+1)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i));		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i)+"_"+setting);		
 			pe.evaluate();
 		}
 		//best onto
 		for(int i=0; i<6; i++){
 		    //int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(7)+ "," + goldstandards.get(i)+ "," +"evaluationrecords" + "," + outputtables.get(7)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i));		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i)+"_"+setting);		
 			pe.evaluate();
 		}		
 		
