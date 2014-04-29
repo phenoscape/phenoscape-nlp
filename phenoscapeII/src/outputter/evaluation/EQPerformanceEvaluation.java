@@ -911,8 +911,9 @@ public class EQPerformanceEvaluation {
 				equivalence = this.equivalencecache.get(a.trim()+","+v.trim());
 
 			}
-			count = replaceSubString(a,v,substrings,equivalence);
-			count = count/a.split(" ").length; // to reduce it to value of 0.0 - 1.0
+			float avg = (a.split(" ").length + v.split(" ").length)/2;
+			count = replaceSubString(a,v,substrings,equivalence);//count the number of LCS matches and other matches (other match count reduced to 1/2) to a, the answer.
+			count = count/avg; // to reduce it to value of 0.0 - 1.0
 
 		}
 		return count;
@@ -1703,6 +1704,8 @@ public class EQPerformanceEvaluation {
 	 * It takes the list of substrings that are common to candidate and reference strings.
 	 * Then it creates a character sequence and using LCS logic, it identifies and remove the LCS
 	 * It also calculates the closeness of two strings whose substring matching is given
+	 * 
+	 * @parameter candidate answer
 	 */
 	private static float replaceSubString(String candidate, String reference,
 			Hashtable<String, Float> substrings, Hashtable<String,String> substringmap) {
@@ -1761,8 +1764,8 @@ public class EQPerformanceEvaluation {
 			}
 		}
 		//formatting candidate and reference strings to find LCS
-		candidate = candidate.replaceAll("@@", "");
-		reference = reference.replaceAll("@@", "");
+		candidate = candidate.replaceAll("@@", "");//a
+		reference = reference.replaceAll("@@", "");//a b c
 		candidate = candidate.replaceAll(" ", "");
 		reference = reference.replaceAll(" ", "");
 
@@ -1803,7 +1806,7 @@ public class EQPerformanceEvaluation {
 				reference+=r;
 		}
 		//the final score of the LCS is added with other matching chunks but those not in LCS. Since order is mismatched a penalty of halving is applied here
-		for(char c:candidate.toCharArray())
+		for(char c:candidate.toCharArray())//<===
 		{
 			if(reference.contains(c+"")==true)
 			{
@@ -2076,17 +2079,18 @@ public class EQPerformanceEvaluation {
 				"knowledge_40717", "knowledge_40718","knowledge_40718", "knowledge_40716", "knowledge_40717", "knowledge_40718"};
 		String[] setting = new String[]{"c38484_c40674", "c38484_c40676","c40674_c40676",
 				"c40716_c40717","c40716_c40718","c40717_c40718", "c38484_c40716", "c40674_c40717", "c40676_c40718" };*/
+		
 		String database =ApplicationUtilities.getProperty("database.name");
 		String [] ids = new String[]{"naive_38484", "naive_40674", "naive_40676", "knowledge_40717", "knowledge_40718", "knowledge_40716"};
 		for(int i = 0; i<6; i++){
 			for(int j = 0; j < 6; j++){
 				System.out.println("Evaluation with "+database + "," +  ids[i]+ "," + ids[j]+ "," +"evaluationrecords" + "," + ids[i]+"_"+ids[j]);		
-				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, ids[i], ids[j],"evaluationrecords", ids[i]+"_"+ids[j]);		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, ids[i], ids[j],"evaluationrecords", ids[i]+"_"+ids[j]+"_sym");		
 				pe.evaluate();
 			}
 		}
 
-		//EQPerformanceEvaluation pe = new EQPerformanceEvaluation("charaparsereval2013", "knowledge1", "knowledge1","evaluationrecords", "debug");		
+		//EQPerformanceEvaluation pe = new EQPerformanceEvaluation("charaparsereval2013", "naive_38484", "knowledge_40717","evaluationrecords", "debug");		
 		//pe.evaluate();
 
 
