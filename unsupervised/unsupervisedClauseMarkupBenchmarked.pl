@@ -175,9 +175,15 @@ my $kb = "phenoscape";
 
 my $taglength = 150;
 
-my $host = "localhost";
-my $user = "biocreative";
-my $password = "biocreative";
+my $host = $ARGV[4];
+if(!$host){ $host = "localhost";}
+
+my $user = $ARGV[5];
+if(!$user){$user = "biocreative";}
+
+my $password = $ARGV[6];
+if(!$password){$password = "biocreative";}
+
 my $dbh = DBI->connect("DBI:mysql:host=$host", $user, $password)
 or die DBI->errstr."\n";
 
