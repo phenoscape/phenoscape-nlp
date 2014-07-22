@@ -64,7 +64,7 @@ public class ELKReasoner{
 	public TreeMap<String,Boolean> subclasscache = new TreeMap<String,Boolean>();//results of isSubClassOf
 	public TreeMap<String,Boolean> partofcache = new TreeMap<String,Boolean>();//results of isPartOf
 	boolean printmessage = Boolean.valueOf(ApplicationUtilities.getProperty("elk.printmessage"));
-	
+	//boolean printmessage = true;
 	public static Hashtable<String, String> equivalent = new Hashtable<String, String>();
 	static{	
 		equivalent.put("http://purl.obolibrary.org/obo/ro_0002220","http://purl.obolibrary.org/obo/pato_0002259"); //adjacent to
@@ -287,11 +287,11 @@ public class ELKReasoner{
 		Set<OWLOntology> onts = this.ont.getImportsClosure();
 		RestrictionVisitor restrictionVisitor = new RestrictionVisitor(onts);
 		for(OWLOntology ont: onts){
-		for (OWLSubClassOfAxiom ax : ont
-				.getSubClassAxiomsForSubClass(part)) {
-			OWLClassExpression superCls = ax.getSuperClass();
-			superCls.accept(restrictionVisitor);
-		}
+			for (OWLSubClassOfAxiom ax : ont
+					.getSubClassAxiomsForSubClass(part)) {
+				OWLClassExpression superCls = ax.getSuperClass();
+				superCls.accept(restrictionVisitor);
+			}
 		}
 		for(OWLClassExpression ce: restrictionVisitor.getClassInRestrictedProperties()){
 			if(ce instanceof OWLClass) classeswithpart.add((OWLClass)ce);
@@ -522,6 +522,44 @@ public class ELKReasoner{
 		}
 	}
 	
+
+	
+	/**
+	 * 
+	 * @param classIRI
+	 * @param relation if Null, default to subclass relation is_a.
+	 * @return the subsumers of ClassURI based on the relation.
+	 */
+	public void getSubsumer(IRI classIRI, String relation, HashSet<OWLClass> subsumers) {
+		reasoner.flush();
+		OWLClass cls= dataFactory.getOWLClass(classIRI); 
+		if(relation==null){ //class subsumption
+			Set<OWLClass> supers = reasoner.getSuperClasses(cls, false).getFlattened();
+			for(OWLClass sup: supers){
+				subsumers.add(sup);
+				getSubsumer(sup.getIRI(), relation, subsumers);
+			}
+		}else if(relation.compareTo(Dictionary.partofiri)==0){ //part_of subsumption
+			Set<OWLOntology> onts = this.ont.getImportsClosure();
+			RestrictionVisitor restrictionVisitor = new RestrictionVisitor(onts);
+			for(OWLOntology ont: onts){
+				for (OWLSubClassOfAxiom ax : ont
+						.getSubClassAxiomsForSubClass(cls)) {
+					OWLClassExpression superCls = ax.getSuperClass();
+					superCls.accept(restrictionVisitor);
+				}
+			}
+			for(OWLClassExpression hasPartClass: restrictionVisitor.getClassInRestrictedProperties()){
+				if(hasPartClass instanceof OWLClass){
+					subsumers.add((OWLClass)hasPartClass);
+					//System.out.println(((OWLClass)cls).getIRI() +" is part of "+ ((OWLClass)hasPartClass).getIRI());
+					getSubsumer(((OWLClass) hasPartClass).getIRI(), relation, subsumers);
+				}
+			}
+		}
+		return;
+	}
+
 	public static void main(String[] argv){
 		try {
 			
@@ -530,11 +568,21 @@ public class ELKReasoner{
 			String part = "http://purl.obolibrary.org/obo/PO_0009032"; //petal
 			System.out.println(elk.isSubclassOfWithPart(subclass, part)); //true: disk flower is subclass of flower which could have petals 
 			*/
-			ELKReasoner elk = new ELKReasoner(new File("C:/Users/updates/CharaParserTest/Ontologies", "ext.owl"), true);
+			//ELKReasoner elk = new ELKReasoner(new File("C:/Users/updates/CharaParserTest/Ontologies", "ext.owl"), true);
+			ELKReasoner elk = new ELKReasoner(new File("C:/Users/updates/Desktop", "ext.owl"), true);
+			
+			IRI cls = IRI.create("http://purl.obolibrary.org/obo/UBERON_0003606");
+			HashSet<OWLClass> subsumers = new HashSet<OWLClass>();
+			System.out.println("subsumers for "+ cls+" :");
+			elk.getSubsumer(cls, Dictionary.partofiri, subsumers);
+			for(OWLClass sup: subsumers){
+				System.out.println(sup.getIRI());
+			}
 			/*System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:4200047"));//true
 			System.out.println("..........class Exists......."+elk.CheckClassExistence("TEMP:4200047")); //false
 			System.out.println("..........class Exists......."+elk.CheckClassExistence("UBERON:0011584"));//true
 
+			
 
 			elk.getClassesWithLateralSides();
 			System.out.println("1:"+elk.isSubClassOf("http://purl.obolibrary.org/obo/UBERON_0005621",  "http://purl.obolibrary.org/obo/UBERON_0000062"));//true
@@ -557,7 +605,7 @@ public class ELKReasoner{
 			System.out.println("11:"+elk.isSubclassOfWithPart( "http://purl.obolibrary.org/obo/uberon_3000767", "http://purl.obolibrary.org/obo/uberon_0001274")); //pelvic girdle opening, ischium : true
 			System.out.println("12:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/uberon_0001274", "http://purl.obolibrary.org/obo/uberon_3000767")); //ischium, pelvic girdle opening : true
 			*/
-			System.out.println("13:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424", "http://purl.obolibrary.org/obo/UBERON_4200050")); //is ulna a subclass of things with part cotyla? true 
+			//System.out.println("13:"+elk.isSubclassOfWithPart("http://purl.obolibrary.org/obo/UBERON_0001424", "http://purl.obolibrary.org/obo/UBERON_4200050")); //is ulna a subclass of things with part cotyla? true 
 			 
 			/*OWLClass joint = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0000982")); //skeletal joint
 			OWLClass joint1 = elk.dataFactory.getOWLClass(IRI.create("http://purl.obolibrary.org/obo/UBERON_0002217")); //synovial joint
@@ -572,7 +620,6 @@ public class ELKReasoner{
 			LOGGER.error("", e);
 		}
 	}
-
 }
 
 

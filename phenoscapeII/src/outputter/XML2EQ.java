@@ -95,7 +95,7 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil;
 	public static ELKReasoner elk; 
-	private static boolean recordperformance = true;
+	//private static boolean recordperformance = true;
 	/*static{
 		try{
 			//TODO: figure out why the two calls give different results?
@@ -147,7 +147,7 @@ public class XML2EQ {
 		
 		//this.keyentities = new ArrayList<Hashtable<String,String>>();
 
-		if(isRecordperformance()){
+		//if(isRecordperformance()){
 			if(dictionary.conn == null){
 				Class.forName("com.mysql.jdbc.Driver");
 				dictionary.conn = DriverManager.getConnection(ApplicationUtilities.getProperty("database.url"));
@@ -172,7 +172,7 @@ public class XML2EQ {
 					+ " (id int(11) not null unique auto_increment primary key, source varchar(500), characterID varchar(100), characterlabel varchar(1000), stateID varchar(100), statelabel text, "
 					+ " entity text,entitylabel text, entityid text, " + "quality text,qualitylabel text, qualityid text,"+"relatedentity text,relatedentitylabel text, relatedentityid text, unontologizedentity text,unontologizedquality text,unontologizedrelatedentity text)" );
 
-		}
+		//}
 		pathStructure = XPath.newInstance(".//structure");
 		pathWholeOrgStrucChar= XPath.newInstance(".//structure[@name='"+ApplicationUtilities.getProperty("unknown.structure.name")+"']/character");
 		pathCharacter = XPath.newInstance(".//character");
@@ -298,10 +298,11 @@ public class XML2EQ {
 			}
 		}
 
-		if(isRecordperformance()){
+		/*if(isRecordperformance()){
 			HTMLOutput output = new HTMLOutput();
+			String [] curatortablenames = new String[]{"curator"};
 			output.outputHTML(this.outputtable,"curator",0, this.outputtable);
-		}
+		}*/
 
 		elk.dispose();
 	}
@@ -346,7 +347,8 @@ public class XML2EQ {
 
 		//for (EQStatementProposals EQ : allEQs) {
 		for (EQProposals EQ : allEQs) {			
-			if(isRecordperformance()) this.insertEQs2Table(EQ);
+			//if(isRecordperformance()) 
+			this.insertEQs2Table(EQ);
 			System.out.println(EQ.toString());
 		}
 
@@ -1746,12 +1748,12 @@ public class XML2EQ {
 		goldstandards.add("knowledge_40717");
 		goldstandards.add("knowledge_40718");
 		
-		String setting = "sym";
+		String setting = "simj_a"; //debug-no-penalty
 		//original onto
 		for(int i=0; i<6; i++){
 		    //int i=5;
 			System.out.println("Evaluation with "+ database + "," + outputtables.get(0) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," +outputtables.get(0)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i)+"_"+setting);		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(0), goldstandards.get(i),"evaluationrecords", outputtables.get(0)+"_"+goldstandards.get(i)+"_"+setting, true);		
 			pe.evaluate();
 		}
 		
@@ -1759,14 +1761,14 @@ public class XML2EQ {
 		for(int i=0; i<6; i++){
 		    //int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(i+1) + "," + goldstandards.get(i) + "," +"evaluationrecords" + "," + outputtables.get(i+1)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i)+"_"+setting);		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(i+1), goldstandards.get(i),"evaluationrecords", outputtables.get(i+1)+"_"+goldstandards.get(i)+"_"+setting, true);		
 			pe.evaluate();
 		}
 		//best onto
 		for(int i=0; i<6; i++){
 		    //int i = 5;
 			System.out.println("Evaluation with "+database + "," + outputtables.get(7)+ "," + goldstandards.get(i)+ "," +"evaluationrecords" + "," + outputtables.get(7)+"_"+goldstandards.get(i));		
-			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i)+"_"+setting);		
+			EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, outputtables.get(7), goldstandards.get(i),"evaluationrecords", outputtables.get(7)+"_"+goldstandards.get(i)+"_"+setting, true);		
 			pe.evaluate();
 		}		
 		
@@ -1804,12 +1806,12 @@ public class XML2EQ {
 
 	}
 
-	public static boolean isRecordperformance() {
+	/*public static boolean isRecordperformance() {
 		return recordperformance;
 	}
 
 	public static void setRecordperformance(boolean recordperformance) {
 		XML2EQ.recordperformance = recordperformance;
-	}
+	}*/
 
 }

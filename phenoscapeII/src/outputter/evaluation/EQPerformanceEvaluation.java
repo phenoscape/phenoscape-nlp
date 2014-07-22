@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -74,12 +75,17 @@ public class EQPerformanceEvaluation {
 	private boolean nowislabel=false;
 	private String runsetting;
 	private int partialcounts = 0;
+	private String scorel = "score";
+	private String scoreu = "Score";
+	private boolean partial = true; //include partial score
+	//private String scorel = "score:[1.0]";
+	//private String scoreu = "Score:[1.0]";
 
 	/**
 	 * @param runsetting 
 	 * 
 	 */
-	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable, String runsetting) {
+	public EQPerformanceEvaluation(String database, String testtable, String answertable, String prtable, String runsetting, boolean partial) {
 		this.testtable = testtable;
 		this.answertable = answertable;
 		this.prtableEQs = prtable+"_EQs";
@@ -595,9 +601,9 @@ public class EQPerformanceEvaluation {
 						for(String v1 : vs){
 							if(v1.length()>0)
 							{
-								if(v1.contains("score")==true) //lower case because of the application of .toLowerCase before
+								if(v1.contains("score")==true) //lower case because of the application of .toLowerCase before: dentition score:[1.0]
 								{
-									tvalues.add((v1.substring(0, v1.indexOf("score")-1)).trim());//holds all the entity proposals of this EQ statement
+									if(v1.contains(this.scorel)==true) tvalues.add((v1.substring(0, v1.indexOf("score")-1)).trim());//holds all the entity proposals of this EQ statement
 								}else
 								{
 									tvalues.add(v1.trim());
@@ -641,7 +647,7 @@ public class EQPerformanceEvaluation {
 							}
 						}
 						//apply penalty to the maximum score, since many alternatives were proposed
-						//maxscore = penalty(maxscore,otherscores,otherscores.size()); //had no effect.
+						maxscore = penalty(maxscore,otherscores,otherscores.size()); 
 						LOGGER.debug("gold standard GS   "+j+"Max score ==== "+maxscore);
 						groups.put("GS"+j, maxscore);// stores the best of  eq (from GS) *eqp1
 					}
@@ -1037,7 +1043,7 @@ public class EQPerformanceEvaluation {
 				String relatedentitylabel = tEQ.get("relatedentityid");//ditto
 				String quality = tEQ.get("qualityid");//ditto
 
-				quality=quality.replaceAll("\\[.*\\]", "").trim();//replacing anything inside bracket[] with space
+				quality=quality.replaceAll("\\[.*\\]", "").trim();//replacing anything inside bracket[] with space ==why?
 				eqgroups.put("EQ"+counter++,matchAstates(entity, relatedentitylabel, quality, astates.get(i), ""));//   EQ,(gs,scores)
 			}
 			//change the hash table to be GS -> EQ to maximize the score
@@ -1211,15 +1217,18 @@ public class EQPerformanceEvaluation {
 	{
 		//LOGGER.debug("inside match in state");
 		float totalscore=0;
-		if(entity.equals("")==false && entity.indexOf("Score")>=0)
+		//if(entity.equals("")==false && entity.indexOf("Score")>=0)
+		if(entity.equals("")==false && entity.indexOf(this.scoreu)>=0)	
 		{
 			entity = (entity.substring(0,entity.indexOf("Score")-1)).trim();
 		}
-		if(relatedentity.equals("")==false && relatedentity.indexOf("Score")>=0)
+		//if(relatedentity.equals("")==false && relatedentity.indexOf("Score")>=0)
+		if(relatedentity.equals("")==false && relatedentity.indexOf(this.scoreu)>=0)	
 		{
 			relatedentity = (relatedentity.substring(0,relatedentity.indexOf("Score")-1)).trim();
 		}
-		if(quality.equals("")==false && quality.indexOf("Score")>0)
+		//if(quality.equals("")==false && quality.indexOf("Score")>0)
+		if(quality.equals("")==false && quality.indexOf(this.scoreu)>0)	
 		{
 			quality = (quality.substring(0,quality.indexOf("Score")-1)).trim();
 		}
@@ -1278,7 +1287,7 @@ public class EQPerformanceEvaluation {
 				if(c[i].equals(r[j]))
 				{
 					score=1;
-				} else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
+				} /*else if(elk.isSubClassOf("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase())==true || elk.isSubClassOf("http://purl.obolibrary.org/obo/"+r[j].toUpperCase(),"http://purl.obolibrary.org/obo/"+c[i].toUpperCase())==true)
 				{
 					score=(float) 0.75;
 					partialcounts++;
@@ -1288,10 +1297,16 @@ public class EQPerformanceEvaluation {
 				{
 					score=(float) 0.75;
 					partialcounts++;
-				} else if(elk.isEquivalent(c[i], r[j]) == true)
+				}*/
+				else if(partial){
+					score = partialScore("http://purl.obolibrary.org/obo/"+c[i].toUpperCase(),"http://purl.obolibrary.org/obo/"+r[j].toUpperCase(), elk);
+					if(score>0f) partialcounts++;
+				}
+				
+				else if(elk.isEquivalent(c[i], r[j]) == true)
 				{
 					score=(float) 1.0;
-					partialcounts++;
+					//partialcounts++;
 				}
 
 				if(score>0)
@@ -1319,6 +1334,43 @@ public class EQPerformanceEvaluation {
 		getNonOverlappingSubstrings(match,matchingstring,scores,candidate.split(" "),reference.split(" "),substrings, equivalence);
 
 	}
+	
+	
+	/**
+	 * 
+	 * @param URI1
+	 * @param URI2
+	 * @return
+	 */
+	private float partialScore(String IRI1, String IRI2, ELKReasoner elk) {
+		//if(elk.isSubClassOf(IRI1,IRI2) || elk.isSubClassOf(IRI2, IRI1) 
+		//		|| elk.isPartOf(IRI1, IRI2) || elk.isPartOf(IRI2, IRI1)){
+			HashSet<OWLClass> subsumer1 = new HashSet<OWLClass> (); 
+			elk.getSubsumer(IRI.create(IRI1), null, subsumer1); //subclass
+
+
+			HashSet<OWLClass> subsumer2 = new HashSet<OWLClass> ();
+			elk.getSubsumer(IRI.create(IRI2), Dictionary.partofiri, subsumer2); //part_of
+
+			HashSet<OWLClass> union = new HashSet<OWLClass>();
+			union.addAll(subsumer1);
+			union.addAll(subsumer2);
+
+
+			HashSet<OWLClass> intersection = new HashSet<OWLClass>();
+			for(OWLClass c: union){
+				if(subsumer1.contains(c) && subsumer2.contains(c))
+					intersection.add(c);
+			}
+			if(intersection.size()>1){
+				float s = ((float)intersection.size())/union.size();
+				LOGGER.debug("partial score="+s+ " for "+IRI1+ " and "+IRI2);
+				return s;
+			}
+		//}
+		return 0f;
+	}
+
 	/*
 	 * 
 	 * Gets all the non overlapping substring
@@ -2080,16 +2132,28 @@ public class EQPerformanceEvaluation {
 		String[] setting = new String[]{"c38484_c40674", "c38484_c40676","c40674_c40676",
 				"c40716_c40717","c40716_c40718","c40717_c40718", "c38484_c40716", "c40674_c40717", "c40676_c40718" };*/
 		
-		String database =ApplicationUtilities.getProperty("database.name");
+		/*String database =ApplicationUtilities.getProperty("database.name");
 		String [] ids = new String[]{"naive_38484", "naive_40674", "naive_40676", "knowledge_40717", "knowledge_40718", "knowledge_40716"};
 		for(int i = 0; i<6; i++){
 			for(int j = 0; j < 6; j++){
 				System.out.println("Evaluation with "+database + "," +  ids[i]+ "," + ids[j]+ "," +"evaluationrecords" + "," + ids[i]+"_"+ids[j]);		
-				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, ids[i], ids[j],"evaluationrecords", ids[i]+"_"+ids[j]+"_sym");		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, ids[i], ids[j],"evaluationrecords", ids[i]+"_"+ids[j]+"_simj_a", true);		
+				pe.evaluate();
+			}
+		}*/
+
+		//bc2012rerun_xml2eq_result_best_sent_newformat
+		String database =ApplicationUtilities.getProperty("database.name");
+		String [] ids = new String[]{"naive_38484", "naive_40674", "naive_40676", "knowledge_40717", "knowledge_40718", "knowledge_40716"};
+		for(int i = 0; i<6; i++){
+				System.out.println("Evaluation with "+database + ", bc2012rerun," + ids[i]+ ", evaluationrecords," + "bc2012rerun_"+ids[i]);		
+				EQPerformanceEvaluation pe = new EQPerformanceEvaluation(database, "bc2012rerun", ids[i],"evaluationrecords", "bc2012rerun_"+ids[i]+"_simj", true);		
 				pe.evaluate();
 			}
 		}
-
+		
+		
+		
 		//EQPerformanceEvaluation pe = new EQPerformanceEvaluation("charaparsereval2013", "naive_38484", "knowledge_40717","evaluationrecords", "debug");		
 		//pe.evaluate();
 
@@ -2127,4 +2191,4 @@ public class EQPerformanceEvaluation {
 
 
 
-}
+
