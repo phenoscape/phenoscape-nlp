@@ -6,7 +6,7 @@ package fna.parsing;
 import java.util.Comparator;
 
 /**
- * @author updates
+ * @author Hong Cui
  *
  */
 public class PhraseComparable implements Comparator<String> {
