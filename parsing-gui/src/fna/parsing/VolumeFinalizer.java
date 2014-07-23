@@ -44,7 +44,7 @@ public class VolumeFinalizer extends Thread {
     private static final Logger LOGGER = Logger.getLogger(VolumeFinalizer.class);
     private Connection conn = null;
     private String glossaryPrefix;
-    private static String version="SemanticCharaParser v-alpha-0.1";
+    private static String version="SemanticCharaParser v0.1-alpha";
     private static boolean standalone = Boolean.valueOf(ApplicationUtilities.getProperty("finalizer.standalone"));//set to true when running only StanfordParser; false when running with GUI. 
     private static String standalonefolder = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss";
     private Text finalLog;
