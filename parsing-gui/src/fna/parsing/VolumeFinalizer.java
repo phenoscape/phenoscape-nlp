@@ -3,9 +3,13 @@
  */
 package fna.parsing;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 import org.eclipse.swt.SWT;
@@ -13,15 +17,18 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.jdom.Comment;
 import org.jdom.Element;
+import org.semanticweb.owlapi.model.OWLOntology;
 
 import outputter.ApplicationUtilities;
 //import outputter.TermEQ2IDEQ;
 import outputter.XML2EQ;
+import owlaccessor.OWLAccessorImpl;
 import fna.charactermarkup.StanfordParser;
 import fna.parsing.state.SentenceOrganStateMarker;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Set;
 
 
 /**
@@ -37,7 +44,7 @@ public class VolumeFinalizer extends Thread {
     private static final Logger LOGGER = Logger.getLogger(VolumeFinalizer.class);
     private Connection conn = null;
     private String glossaryPrefix;
-    private static String version="$Id: VolumeFinalizer.java 996 2011-10-07 01:13:47Z hong1.cui $";
+    private static String version="SemanticCharaParser v-alpha-0.1";
     private static boolean standalone = Boolean.valueOf(ApplicationUtilities.getProperty("finalizer.standalone"));//set to true when running only StanfordParser; false when running with GUI. 
     private static String standalonefolder = "C:/Users/updates/CharaParserTest/EQ-patterns_FixedGloss";
     private Text finalLog;
@@ -101,7 +108,6 @@ public class VolumeFinalizer extends Thread {
 		sp.parsing();
 		if(!standalone) this.showOutputMessage("System is annotating sentences...");
 		sp.extracting();
-		if(!standalone) this.showOutputMessage("System is generating term-based EQ statements...");
 		String xmldir = Registry.TargetDirectory+System.getProperty("file.separator")+"final"+System.getProperty("file.separator");
 		String outputtable = this.dataPrefix+"_xml2eq";
 		//String benchmarktable = "internalworkbench";
@@ -112,21 +118,116 @@ public class VolumeFinalizer extends Thread {
 		String uberon = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.uberon")+".owl";
 		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
 		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
-		//XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, uberon, bspo, pato);
-		//x2e.outputEQs();
+		String spatialtermtable = ApplicationUtilities.getProperty("uniquespatialterms");
+		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, uberon, bspo, pato, spatialtermtable, glosstable);
+		x2e.outputEQs();
 
 		//Appending new date to the csv and txt output - Hariharan task1
 		Date d = new Date();
 		String time = new Timestamp(d.getTime())+"";
 		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_EQ.csv").replaceAll("\\\\+", "/");
-		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");
+		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_versions.txt").replaceAll("\\\\+", "/");
+		writeCSVandVersionFiles(outputtable, csv, txt);
+
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
-			this.showOutputMessage("Check result file in "+csv);
+			this.showOutputMessage("Check result file in the database table: "+outputtable+" and in the files: "+csv+" and "+txt);
+			LOGGER.debug("Check result file in the database table: "+outputtable+" and in the files: "+csv+" and "+txt);
 		}
-		//String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
-		//TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);
+	}
 
+
+
+	private void writeCSVandVersionFiles(String outputtable, String csv,
+			String txt) throws SQLException {
+		//output a csv file
+		File csvfile = new File(csv);
+		if(csvfile.exists()) csvfile.delete();
+		String fieldlist ="source, characterID, characterlabel, stateID, statelabel, entity, entitylabel, entityid, " +
+				"quality, qualitylabel, qualityid, relatedentity, relatedentitylabel, relatedentityid, " +
+				"unontologizedentity, unontologizedquality, unontologizedrelatedentity";
+		String header = "'"+fieldlist.replaceAll("\\s*,\\s*", "','")+"'";
+		String export = "(SELECT "+header+ ") UNION (SELECT "+fieldlist+ " From "+ outputtable+
+				" INTO OUTFILE '"+csv+"' FIELDS TERMINATED BY ',' "+
+				" OPTIONALLY ENCLOSED BY '\\\"' "+
+				" ESCAPED BY '\\\\' LINES TERMINATED BY '\\n')";
+		/*String export = "SELECT * "+
+				" INTO OUTFILE '"+csv+"' FIELDS TERMINATED BY ',' "+
+				" OPTIONALLY ENCLOSED BY '\\\"' "+
+				" ESCAPED BY '\\\\' LINES TERMINATED BY '\\n' FROM ("+
+				" SELECT "+header+ " UNION SELECT "+fieldlist+ " From "+ outputtable+") a";	*/
+		
+		/*(SELECT 'source','characterID','characterlabel','stateID','statelabel','entity','entitylabel','entityid','quality','qualitylabel','qualityid','relatedentity','relatedentitylabel','relatedentityid','unontologizedentity','unontologizedquality','unontologizedrelatedentity')
+		UNION 
+		(SELECT source,characterID,characterlabel,stateID,statelabel,entity,entitylabel,entityid,quality,qualitylabel,qualityid,relatedentity,relatedentitylabel,relatedentityid,unontologizedentity,unontologizedquality,unontologizedrelatedentity 
+		FROM test_xml2eq
+		INTO OUTFILE 'C:/Users/updates/Desktop/SemanticCharaParser/testdataset/target/eq.csv' 
+		FIELDS TERMINATED BY ',' 
+		OPTIONALLY ENCLOSED BY '"' 
+		ESCAPED BY '\\' 
+		LINES TERMINATED BY '\r\n'); */
+		Statement stmt = null;
+		try{
+			stmt = conn.createStatement();
+			stmt.execute(export);
+		}catch(Exception e){
+			e.printStackTrace();
+			LOGGER.error("Error: Export EQ to csv format failed "+ export);
+			LOGGER.error("MySQL exception ", e);
+		}finally{
+			if(stmt!=null) stmt.close();
+			if(conn!=null) conn.close();
+		}
+		
+		//output the version file with charaparser and ontology versions
+		StringBuffer versions = new StringBuffer();
+
+		for(OWLAccessorImpl api: XML2EQ.ontoutil.OWLqualityOntoAPIs)
+		{
+			OWLOntology temp=null;
+			String S[]=api.getSource().split("[\\\\.]");
+			versions.append((S[S.length-2].toUpperCase())+" version:");
+			temp = api.getManager().getOntologies().iterator().next();
+			versions.append((temp.getOntologyID().getVersionIRI())+System.getProperty("line.separator"));
+		}
+
+		for(OWLAccessorImpl api1: XML2EQ.ontoutil.OWLentityOntoAPIs)
+		{
+			OWLOntology temp=null;
+			String S[]=api1.getSource().split("[\\\\.]");
+			versions.append((S[S.length-2].toUpperCase())+" version:");
+			Set<OWLOntology> ontologies = api1.getManager().getOntologies();
+			for(OWLOntology ontology:ontologies)
+			{
+				if(ontology.getOntologyID().getVersionIRI()!=null){
+					temp = ontology;
+					break;
+				}
+				/*if(ontology.toString().contains(S[S.length-2]))
+						{
+							temp = ontology;
+							break;
+						}*/
+			}
+			versions.append(temp!=null?(temp.getOntologyID().getVersionIRI()):"");
+			versions.append(System.getProperty("line.separator"));
+		}
+		versions.append("Semantic CharaParser version:"+ version+System.getProperty("line.separator"));
+		//write versions to the txt file
+		try {
+			File file = new File(txt);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+ 
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(versions.toString());
+			bw.close(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.error("IO exception ", e);
+		}
 	}
 
 	public static void outputFinalXML(Element root, String fileindex, String targetstring) {
