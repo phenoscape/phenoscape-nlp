@@ -398,7 +398,7 @@ public class Structure2Quality implements AnnotationStrategy{
 			ArrayList<FormalConcept> results2 =new TermSearcher().searchTerm(chara.getAttributeValue("value"), "quality");
 			if(results2!=null){
 				if(results==null) results = new ArrayList<Quality>();
-				results.addAll((Collection<? extends Quality>) results2);
+				results.addAll((Collection<? extends Quality>) ((ArrayList) results2));
 			}
 		}
 		if (results != null) {
