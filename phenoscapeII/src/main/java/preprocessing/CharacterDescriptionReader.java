@@ -72,12 +72,12 @@ public class CharacterDescriptionReader {
 rior chambers.
 1: Gas bladder somewhat reduced, with large anterior
 chamber and small posterior chambers. (Chiloglanis sp.
-‘kalungwishi’; Chiloglanis sp. ‘burundi’; Atopochilus;
+Ã«kalungwishiÃ­; Chiloglanis sp. Ã«burundiÃ­; Atopochilus;
 Euchilichthys)
 2: Gas bladder greatly reduced, with small anterior chamber
 only. (Amphiliidae; all Chiloglanis except C. macropterus
-[0], Chiloglanis sp. ‘kalungwishi’ [1] and Chiloglanis sp.
-‘burundi’ [1]; Atopodontus)
+[0], Chiloglanis sp. Ã«kalungwishiÃ­ [1] and Chiloglanis sp.
+Ã«burundiÃ­ [1]; Atopodontus)
 
 	 */
 	public void read(){
