@@ -640,7 +640,7 @@ public class MainForm {
 				}
 				String messageHeader = ApplicationUtilities.getProperty("popup.header.info");
 				String message = ApplicationUtilities.getProperty("popup.info.saved");				
-				ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION);	
+				ApplicationUtilities.showPopUpWindow(message, messageHeader, SWT.ICON_INFORMATION); 	
 				//saveFlag = false;
 				saveFlag = true;
 				statusOfMarkUp[0] = true;
@@ -3063,20 +3063,22 @@ public class MainForm {
 		
 		File project =null;
 		try{
-			System.out.println(type.equalsIgnoreCase(""));
+			//System.out.println(type.equalsIgnoreCase(""));
 			if(type.trim().equals(""))//that means fna is selected.. so save it to fnaproject.conf
 				project = new File(System.getProperty("user.dir")+"\\fnaproject.conf");
 				else
 					if(type.trim().equals("type2"))
 						project = new File(System.getProperty("user.dir")+"\\treatiseproject.conf");
+						//project = new File(Registry.ConfigurationDirectory+"\\treatiseproject.conf");
 						
 				else
 					if(type.trim().equals("type3"))
-						
 						project = new File(System.getProperty("user.dir")+"\\bhlproject.conf");
+						//project = new File(Registry.ConfigurationDirectory+"\\bhlproject.conf");
 				else 
 					if(type.trim().equals("type4"))
 						project = new File(System.getProperty("user.dir")+"\\taxonproject.conf");
+						//project = new File(Registry.ConfigurationDirectory+"\\taxonproject.conf");
 						
 				
 				

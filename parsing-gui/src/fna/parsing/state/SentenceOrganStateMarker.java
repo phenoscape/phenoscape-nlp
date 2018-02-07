@@ -98,8 +98,8 @@ public class SentenceOrganStateMarker {
 					String source = rs.getString("source");
 					String osent = rs.getString("originalsent");
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)ï¿½\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "ï¿½");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.percentage+")\\b)", " ").replaceAll("\\s+", " "); //80percent =>80 percent
 					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.degree+")\\b)", " ").replaceAll("\\s+", " "); //80degree =>80 degree
@@ -127,8 +127,8 @@ public class SentenceOrganStateMarker {
 					if(osent.indexOf(dittos.trim())<0) osent =osent.trim() +" "+ dittos.trim(); //put a check here so dittos are not added multiple times when the user runs the Parser mutiple times on one document collection
 					dittos = "";
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)ï¿½\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "ï¿½");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = rs.getString("modifier")+"##"+tag+"##"+text;
 					sentences.put(source, text);
@@ -160,10 +160,13 @@ public class SentenceOrganStateMarker {
 		for(int i = adjnouns.size()-1; i>=0; i--){
 			this.adjnounslist +=adjnouns.get(i)+"|";
 		}
+		
 		this.adjnounslist = this.adjnounslist.trim().length()==0? null : "[<{]*"+this.adjnounslist.replaceFirst("\\|$", "").replaceAll("\\|+", "|").replaceAll("\\|", "[}>]*|[<{]*").replaceAll(" ", "[}>]* [<{]*")+"[}>]*";
 		this.organnames = collectOrganNames();
+		System.out.println(organnames);
 		this.statenames = collectStateNames();
 		this.organp = Pattern.compile("(.*?)\\b("+organnames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
+		System.out.println(organp.toString());
 		this.statep = Pattern.compile("(.*?)\\b("+statenames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 	}
 
@@ -481,8 +484,8 @@ public class SentenceOrganStateMarker {
 		//remove ()
 		//sent = sent.replaceAll("\\(.*?\\)", "");
 		//remove (text)
-		//sent = sent.replaceAll("\\(\\s+(?![\\d\\–\\-\\—]).*?(?<![\\d\\–\\-\\—])\\s+\\)", "");
-
+		//sent = sent.replaceAll("\\(\\s+(?![\\d\\ï¿½\\-\\ï¿½]).*?(?<![\\d\\ï¿½\\-\\ï¿½])\\s+\\)", "");
+        
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
 		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
