@@ -566,7 +566,7 @@ sub setupdatabase{
 #}
 
 my $test = $dbh->prepare('create database if not exists '.$db.' CHARACTER SET utf8')
-or die "Program terminates unexpected due to: ".$dbh->errstr."\n";
+or die "Program terminates unexpectedly due to: ".$dbh->errstr."\n";
 $test->execute() or die $test->errstr."\n";
 
 $test = $dbh->prepare('use '.$db)
