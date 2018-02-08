@@ -95,7 +95,7 @@ public class XML2EQ {
 
 	public static TermOutputerUtilities ontoutil;
 	public static ELKReasoner elk; 
-	private static boolean recordperformance = true;
+	private static boolean recordperformance = false;
 	/*static{
 		try{
 			//TODO: figure out why the two calls give different results?

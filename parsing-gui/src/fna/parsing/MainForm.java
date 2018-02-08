@@ -42,6 +42,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
@@ -599,15 +600,15 @@ public class MainForm {
 		}
 		
 		CLabel lblSelectA = new CLabel(composite, SWT.NONE);
-		lblSelectA.setBounds(20, 37, 208, 21);
+		lblSelectA.setBounds(23, 47, 400, 30);
 		lblSelectA.setText(ApplicationUtilities.getProperty("labelSelectProject"));
 		
 		projectDirectory = new Text(composite, SWT.BORDER);
 		projectDirectory.setToolTipText(ApplicationUtilities.getProperty("chooseDirectoryTooltip"));
-		projectDirectory.setBounds(238, 37, 386, 21);
+		projectDirectory.setBounds(238, 80, 386, 30);
 		
 		final Button browseConfigurationButton = new Button(composite, SWT.NONE);
-		browseConfigurationButton.setBounds(654, 35, 100, 23);
+		browseConfigurationButton.setBounds(654, 80, 100, 23);
 		browseConfigurationButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				browseConfigurationDirectory(); // browse the configuration directory
@@ -618,10 +619,10 @@ public class MainForm {
 				
 		Group grpCreateANew = new Group(composite, SWT.NONE);
 		grpCreateANew.setText("Create a new project :");
-		grpCreateANew.setBounds(10, 10, 773, 215);
+		grpCreateANew.setBounds(10, 10, 773, 315);
 				
 		final Button saveProjectButton = new Button(grpCreateANew, SWT.NONE);
-		saveProjectButton.setBounds(635, 182, 100, 23);
+		saveProjectButton.setBounds(635, 222, 100, 23);
 		saveProjectButton.setText(ApplicationUtilities.getProperty("saveProjectBtn"));
 		saveProjectButton.setToolTipText(ApplicationUtilities.getProperty("saveProjectTTT"));
 		saveProjectButton.addSelectionListener(new SelectionAdapter() {
@@ -660,7 +661,7 @@ public class MainForm {
 		glossaryPrefixCombo = glossaryCombo;
 														
 		CLabel label = new CLabel(grpCreateANew, SWT.NONE);
-		label.setBounds(23, 82, 344, 21);
+		label.setBounds(23, 100, 544, 30);
 		label.setText(ApplicationUtilities.getProperty("datasetprefix"));
 		combo.addModifyListener(new ModifyListener() {
 			public void modifyText(final ModifyEvent me) {
@@ -1077,7 +1078,7 @@ public class MainForm {
 		tab5desc.setToolTipText(ApplicationUtilities.getProperty("step4Descp"));
 		tab5desc.setText(ApplicationUtilities.getProperty("step4Descp"));
 		tab5desc.setEditable(false);
-		tab5desc.setBounds(10, 10, 744, 39);
+		tab5desc.setBounds(10, 10, 744, 80);
 		
 		/*"run perl" subtab*/
 		markUpPerlLog = new Text(composite_9, SWT.WRAP | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
@@ -2189,6 +2190,7 @@ public class MainForm {
 
 		txtThisLastStep = new Text(composite_5, SWT.READ_ONLY | SWT.WRAP);
 		txtThisLastStep.setText(ApplicationUtilities.getProperty("step7DescpText"));
+		txtThisLastStep.setFont(SWTResourceManager.getFont("Segoe UI", 7, SWT.NORMAL));
 		txtThisLastStep.setBounds(10, 10, 744, 38);
 	
 		finalizerTable = new Table(composite_5, SWT.FULL_SELECTION | SWT.BORDER);
@@ -2360,11 +2362,12 @@ public class MainForm {
 
 		//subtab instruction
 		Text text_1 = new Text(composite_1, SWT.READ_ONLY | SWT.WRAP);
+		text_1.setFont(SWTResourceManager.getFont("Segoe UI", 6, SWT.NORMAL));
 		text_1.setToolTipText(ApplicationUtilities.getProperty(subtabInstruction));
 		text_1.setText(ApplicationUtilities.getProperty(subtabInstruction));
 		text_1.setEditable(false);
 		//text_1.setBounds(10, 17, 744, 39);
-		text_1.setBounds(10, 2, 744, 68);
+		text_1.setBounds(10, 2, 744, 100);
 		
 		//final Group group = new Group(composite_1, SWT.NONE);
 		//group.setBounds(10, 62, 744, 250);
@@ -2373,23 +2376,28 @@ public class MainForm {
 		//"table" header
 		Label lblCount = new Label(group, SWT.NONE);
 		lblCount.setText("Count");
-		lblCount.setBounds(15, 10, 93, 15);
+		lblCount.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblCount.setBounds(15, 10, 93, 22);
 		
 		Label lblTerm = new Label(group, SWT.NONE);
 		lblTerm.setText("Term");
-		lblTerm.setBounds(125, 10, 93, 15);
+		lblTerm.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblTerm.setBounds(125, 10, 93, 22);
 
 		Label lblRole1 = new Label(group, SWT.NONE);
 		lblRole1.setText("Is Structure?");
-		lblRole1.setBounds(325, 10, 93, 15);
+		lblRole1.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblRole1.setBounds(325, 10, 100, 22);
 		
 		Label lblRole2 = new Label(group, SWT.NONE);
 		lblRole2.setText("Is Descriptor?");
-		lblRole2.setBounds(425, 10, 93, 15);
+		lblRole2.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblRole2.setBounds(425, 10, 100, 22);
 
 		Label lblRole3 = new Label(group, SWT.NONE);
 		lblRole3.setText("Neither");
-		lblRole3.setBounds(525, 10, 93, 15);
+		lblRole3.setFont(SWTResourceManager.getFont("Segoe UI", 8, SWT.NORMAL));
+		lblRole3.setBounds(525, 10, 100, 22);
 		
 		//final ScrolledComposite scrolledComposite = new ScrolledComposite(group, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComposite.setBounds(0, 30,744, 200);
