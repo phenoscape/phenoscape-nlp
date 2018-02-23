@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.phenoscape</groupId>
-  <artifactId>phenoscape-nlp</artifactId>
+  <artifactId>phenoscapeII</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>phenoscape-nlp</name>
+  <version>0.1.0-SNAPSHOT</version>
+  <name>phenoscapeII</name>
   <url>http://maven.apache.org</url>
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -48,4 +48,15 @@
       <version>4.12</version>
     </dependency>
   </dependencies>
+  <build>
+    <resources>
+      <resource>
+          <directory>src/main/java</directory>
+          <includes>
+              <include>**/*.properties</include>
+              <include>XMLschemas/**</include>
+          </includes>
+      </resource>
+    </resources>
+  </build>
 </project>
