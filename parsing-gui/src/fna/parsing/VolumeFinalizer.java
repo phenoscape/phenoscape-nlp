@@ -113,16 +113,18 @@ public class VolumeFinalizer extends Thread {
 		String bspo = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.bspo")+".owl";
 		String pato = ontodir+System.getProperty("file.separator")+ApplicationUtilities.getProperty("ontology.pato")+".owl";
 		//XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, uberon, bspo, pato);
-		//x2e.outputEQs();
+		XML2EQ x2e = new XML2EQ(xmldir, database, outputtable, uberon, bspo, pato, "uniquespatialterms", this.glossaryPrefix);
+		x2e.outputEQs();
 
 		//Appending new date to the csv and txt output - Hariharan task1
-		Date d = new Date();
+		/*Date d = new Date();
 		String time = new Timestamp(d.getTime())+"";
 		String csv = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_EQ.csv").replaceAll("\\\\+", "/");
-		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");
+		String txt = (Registry.TargetDirectory+System.getProperty("file.separator")+dataPrefix+"_"+time.replaceAll("[:-]","_")+"_version.txt").replaceAll("\\\\+", "/");*/
 		if(!standalone){
 			this.showOutputMessage("Operations completed.");
-			this.showOutputMessage("Check result file in "+csv);
+			//this.showOutputMessage("Check result file in "+csv);
+			this.showOutputMessage("Check EQ results in database table "+outputtable);
 		}
 		//String ontologyfolder =new File(new File(Registry.TargetDirectory).getParent(), "ontologies").getAbsolutePath();
 		//TermEQ2IDEQ t2id = new TermEQ2IDEQ(database, outputtable, dataPrefix, ontologyfolder, csv,txt,version);

@@ -98,8 +98,8 @@ public class SentenceOrganStateMarker {
 					String source = rs.getString("source");
 					String osent = rs.getString("originalsent");
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("[_-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)ï¿½\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "ï¿½");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.percentage+")\\b)", " ").replaceAll("\\s+", " "); //80percent =>80 percent
 					text = text.replaceAll("(?<=\\d)\\s*(?=("+ChunkedSentence.degree+")\\b)", " ").replaceAll("\\s+", " "); //80degree =>80 degree
@@ -127,8 +127,8 @@ public class SentenceOrganStateMarker {
 					if(osent.indexOf(dittos.trim())<0) osent =osent.trim() +" "+ dittos.trim(); //put a check here so dittos are not added multiple times when the user runs the Parser mutiple times on one document collection
 					dittos = "";
 					String text = stringColors(sent.replaceAll("</?[BNOM]>", ""));
-					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)µ\\s+m\\b", "um");
-					text = text.replaceAll("&#176;", "°");
+					text = text.replaceAll("[ _-]+\\s*shaped", "-shaped").replaceAll("(?<=\\s)ï¿½\\s+m\\b", "um");
+					text = text.replaceAll("&#176;", "ï¿½");
 					text = text.replaceAll("\\bca\\s*\\.", "ca");
 					text = rs.getString("modifier")+"##"+tag+"##"+text;
 					sentences.put(source, text);
@@ -160,9 +160,10 @@ public class SentenceOrganStateMarker {
 		for(int i = adjnouns.size()-1; i>=0; i--){
 			this.adjnounslist +=adjnouns.get(i)+"|";
 		}
+		
 		this.adjnounslist = this.adjnounslist.trim().length()==0? null : "[<{]*"+this.adjnounslist.replaceFirst("\\|$", "").replaceAll("\\|+", "|").replaceAll("\\|", "[}>]*|[<{]*").replaceAll(" ", "[}>]* [<{]*")+"[}>]*";
 		this.organnames = collectOrganNames();
-		this.statenames = collectStateNames();
+		this.statenames = collectStateNames(); 
 		this.organp = Pattern.compile("(.*?)\\b("+organnames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 		this.statep = Pattern.compile("(.*?)\\b("+statenames+")\\b(.*)", Pattern.CASE_INSENSITIVE);
 	}
@@ -481,8 +482,8 @@ public class SentenceOrganStateMarker {
 		//remove ()
 		//sent = sent.replaceAll("\\(.*?\\)", "");
 		//remove (text)
-		//sent = sent.replaceAll("\\(\\s+(?![\\d\\–\\-\\—]).*?(?<![\\d\\–\\-\\—])\\s+\\)", "");
-
+		//sent = sent.replaceAll("\\(\\s+(?![\\d\\ï¿½\\-\\ï¿½]).*?(?<![\\d\\ï¿½\\-\\ï¿½])\\s+\\)", "");
+        
 		sent = sent.replaceAll("(?<=\\w)\\s+(?=[,\\.;:])", "");
 
 		//sent = sent.replaceAll("_", "-"); //keep _ so phrases are treated as one word
@@ -491,7 +492,7 @@ public class SentenceOrganStateMarker {
 		
 		String taggedsent = "";
 		Matcher m = tagsp.matcher(sent);
-		while(m.matches()){
+		while(m.matches() && m.group(2).length()>0){
 			taggedsent += m.group(1)+leftmark+m.group(2)+rightmark;
 			sent = m.group(3);
 			m = tagsp.matcher(sent);
@@ -532,7 +533,7 @@ public class SentenceOrganStateMarker {
 			Statement stmt = conn.createStatement();
 
 			//ResultSet rs = stmt.executeQuery("select word from "+this.tableprefix+"_wordpos where pos ='b'");
-			ResultSet rs = stmt.executeQuery("select word from "+this.tableprefix+"_wordroles where semanticrole ='c' ");
+			ResultSet rs = stmt.executeQuery("select distinct word from "+this.tableprefix+"_wordroles where semanticrole ='c' ");
 
 			while(rs.next()){
 				String w = rs.getString("word");
@@ -577,11 +578,12 @@ public class SentenceOrganStateMarker {
 			throws SQLException {
 		ResultSet rs;
 		String wordroletable = this.tableprefix + "_"+ApplicationUtilities.getProperty("WORDROLESTABLE");
-		rs = stmt.executeQuery("select word from "+wordroletable+" where semanticrole in ('op', 'os')");
+		rs = stmt.executeQuery("select distinct word from "+wordroletable+" where semanticrole in ('op', 'os')");
 		while(rs.next()){
 			String w = rs.getString("word").trim();
 			if(!w.matches("("+ChunkedSentence.stop+")") &&!w.matches("("+ChunkedSentence.prepositions+")")){
 				w = Utilities.cleanup(w);
+				if (!w.matches("\\w+")) System.out.println("non-word in wordrole table: "+w);
 				tags.append(w+"|");
 			}
 		}
@@ -610,7 +612,7 @@ public class SentenceOrganStateMarker {
 			tags.append(tag+"|");
 		}*/
 
-		rs = stmt.executeQuery("select modifier, tag from "+this.tableprefix+"_sentence where tag  like '[%]'"); //inner [tepal]
+		rs = stmt.executeQuery("select distinct modifier, tag from "+this.tableprefix+"_sentence where tag  like '[%]'"); //inner [tepal]
 		while(rs.next()){
 			String m = rs.getString("modifier");
 			m = m.replaceAll("\\[^\\[*\\]", ""); 
@@ -623,6 +625,7 @@ public class SentenceOrganStateMarker {
 				}
 				if(tag == null ||tag.indexOf("[")>=0|| tags.indexOf("|"+tag+"|") >= 0 || tag.indexOf("[")>=0 || tag.matches(".*?(\\d|"+ChunkedSentence.stop+"|"+ChunkedSentence.prepositions+").*")){continue;}
 				tag = Utilities.cleanup(tag);
+				if (!tag.matches("\\w+")) System.out.println("non-word in sentence: "+tag);
 				tags.append(tag+"|");
 			}
 		}
@@ -637,6 +640,7 @@ public class SentenceOrganStateMarker {
 			term = term.indexOf(" ")> 0? term.substring(term.lastIndexOf(' ')+1) : term;
 			if(!term.matches("("+ChunkedSentence.stop+")") &&!term.matches("("+ChunkedSentence.prepositions+")")){
 				term = Utilities.cleanup(term);
+				if (!term.matches("\\w+")) System.out.println("non-word from gloss: "+term);
 				tags.append(term+"|");
 			}
 		}
@@ -715,7 +719,9 @@ public class SentenceOrganStateMarker {
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "pltest", "antglossaryfixed", false);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "fnav19", "fnaglossaryfixed", true);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "treatiseh", "treatisehglossaryfixed", false);
-			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "orig_fishglossaryfixed", true, null, null);
+			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, ApplicationUtilities.getProperty("table.prefix"), "orig_fishglossaryfixed", true, null, null);
+
+			SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "prerlz", "orig_fishglossaryfixed", true, null, null);
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "plazi_ants_clause_rn", "antglossary");
 			//SentenceOrganStateMarker sosm = new SentenceOrganStateMarker(conn, "bhl_clean", "fnabhlglossaryfixed");
 			sosm.markSentences();
