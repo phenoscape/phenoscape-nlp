@@ -20,6 +20,11 @@ Some algorithms used in CharaParser are reported in:
 
 2. Cui, H. (2012). CharaParser for fine-grained semantic annotation of organism morphological descriptions. Journal of American Society of Information Science and Technology. 63(4) [doi:10.1002/asi.22618]
 
+How to build and run
+--------------------
+
+CharaParser is a GUI application written in Java. Please see the file INSTALL.md for instructions on building and running he application.
+
 License
 -------
 

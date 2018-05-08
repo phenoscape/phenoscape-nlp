@@ -66,7 +66,8 @@ public class VolumeMarkup {
 		String savefoldername = ApplicationUtilities.getProperty("MARKEDUP");
 		String databasenameprefix = ApplicationUtilities.getProperty("database.name");
 		String com = "perl " + ApplicationUtilities.getProperty("UNSUPERVISED") +"\""+workdir
-		+ System.getProperty("file.separator")+todofoldername + "\" "+ databasenameprefix+" "+this.markupMode +" "+dataPrefix.trim();
+		+ System.getProperty("file.separator")+todofoldername + "\" "+ databasenameprefix+" "+this.markupMode +" "+dataPrefix.trim()+ " localhost "+
+				ApplicationUtilities.getProperty("database.username") +" "+ApplicationUtilities.getProperty("database.password");
 		
 		//this command will not output marked-up descriptions to the file system. it only holds the results in mySQL database
 		
